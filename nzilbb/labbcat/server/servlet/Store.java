@@ -222,6 +222,10 @@ public class Store
                {
                   json = getAvailableMedia(request, response, store);
                }
+               else if (pathInfo.endsWith("getgraph"))
+               {
+                  json = getGraph(request, response, store);
+               }
                else
                {
                   response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -398,6 +402,10 @@ public class Store
 
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getId()}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getId(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -408,6 +416,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayerIds()}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getLayerIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -418,6 +430,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayers()}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getLayers(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -431,6 +447,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getSchema()}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getSchema(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -441,6 +461,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayer(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getLayer(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -453,6 +477,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getCorpusIds()}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getCorpusIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -463,6 +491,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getParticipantIds()}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -473,6 +505,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getParticipant(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getParticipant(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -491,6 +527,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingParticipantIds(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject countMatchingParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -503,6 +543,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingParticipantIds(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getMatchingParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -542,6 +586,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIds()}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getGraphIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -552,6 +600,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIdsInCorpus(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getGraphIdsInCorpus(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -564,6 +616,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIdsWithParticipant(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getGraphIdsWithParticipant(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -576,6 +632,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingGraphIds(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject countMatchingGraphIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -588,6 +648,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingGraphIds(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getMatchingGraphIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -627,6 +691,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countAnnotations(String,String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject countAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -644,6 +712,10 @@ public class Store
    /**
     * Implementation of
     * {@link nzilbb.ag.IGraphStoreQuery#getAnnotations(String,String,Integer,Integer)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -684,6 +756,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAnchors(String,String[])}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getAnchors(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -700,6 +776,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMediaTracks()}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getMediaTracks(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -710,6 +790,10 @@ public class Store
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAvailableMedia(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
     */
    protected JSONObject getAvailableMedia(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
@@ -724,6 +808,26 @@ public class Store
       for (MediaFile file : media) file.setFile(null);
       
       return successResult(media, null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraph(String,String[])}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject getGraph(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add("No id specified.");
+      String[] layerIds = request.getParameterValues("layerIds");
+      if (layerIds == null) layerIds = new String[0];
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(store.getGraph(id, layerIds), null);
    }      
    
    private static final long serialVersionUID = 1;
