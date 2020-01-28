@@ -73,7 +73,7 @@
              noqualifier="all"
              bottom="&lt;i&gt;&amp;copy; NZILBB - ${TODAY}&lt;/i&gt;"
              >
-      <fileset dir="${src}" includes="${srcfiles}" />
+      <fileset dir="${src}" includes="${srcfiles}" excludes="${testsrcfiles}" />
     </javadoc>
   </target>
 
