@@ -21,24 +21,28 @@
 //
 package nzilbb.labbcat.server.servlet;
 
-import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.DriverManager;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
-import javax.servlet.annotation.WebServlet;
+import java.util.Collection;
+import java.util.Vector;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
+import nzilbb.ag.*;
+import nzilbb.labbcat.server.db.*;
 import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
-import nzilbb.ag.*;
-import nzilbb.labbcat.server.db.*;
 
 /**
  * Controller that handles IGraphStore requests.
@@ -88,19 +92,14 @@ public class Store
             connectionURL = xpath.evaluate("//Realm/@connectionURL", doc);
             connectionName = xpath.evaluate("//Realm/@connectionName", doc);
             connectionPassword = xpath.evaluate("//Realm/@connectionPassword", doc);
-            
-            log("Controller connectionURL from context.xml: " + connectionURL);
+
+            // ensure it's registered with the driver manager
+            Class.forName(driverName).getConstructor().newInstance();
          } // get database connection configuration from context.xml
-         if (connectionURL == null || connectionURL.length() == 0)
-         { // use old web.xml configuration
-            driverName = "com.mysql.cj.jdbc.Driver";
-            connectionURL = getServletContext().getInitParameter("dbConnectString");
-            connectionName = getServletContext().getInitParameter("dbUser");
-            connectionPassword = getServletContext().getInitParameter("dbPassword");
-            log("Controller dbConnectString from web.xml: " + connectionURL);
-         } // use old web.xml configuration
-         
-         Class.forName(driverName).newInstance();
+         else
+         {
+            log("Configuration file not found: " + contextXml.getPath());
+         }
       }
       catch (Exception x)
       {
@@ -133,8 +132,7 @@ public class Store
             else
             { // no store yet, so create one
                store = new SqlGraphStoreAdministration(
-                  request.getSession().getAttribute("baseUrl").toString(), 
-                  connection, request.getRemoteUser());
+                  baseUrl(request), connection, request.getRemoteUser());
 
                if (title == null)
                {
@@ -148,17 +146,86 @@ public class Store
                {
                   json = getId(request, response, store);
                }
+               else if (pathInfo.endsWith("getschema"))
+               {
+                  json = getSchema(request, response, store);
+               }
+               else if (pathInfo.endsWith("getlayerids"))
+               {
+                  json = getLayerIds(request, response, store);
+               }
+               else if (pathInfo.endsWith("getlayers"))
+               {
+                  json = getLayers(request, response, store);
+               }
+               else if (pathInfo.endsWith("getlayer"))
+               {
+                  json = getLayer(request, response, store);
+               }
+               else if (pathInfo.endsWith("getcorpusids"))
+               {
+                  json = getCorpusIds(request, response, store);
+               }
+               else if (pathInfo.endsWith("getparticipantids"))
+               {
+                  json = getParticipantIds(request, response, store);
+               }
+               else if (pathInfo.endsWith("getparticipant"))
+               {
+                  json = getParticipant(request, response, store);
+               }
+               else if (pathInfo.endsWith("countmatchingparticipantids"))
+               {
+                  json = countMatchingParticipantIds(request, response, store);
+               }
+               else if (pathInfo.endsWith("getmatchingparticipantids"))
+               {
+                  json = getMatchingParticipantIds(request, response, store);
+               }
+               else if (pathInfo.endsWith("getgraphids"))
+               {
+                  json = getGraphIds(request, response, store);
+               }
+               else if (pathInfo.endsWith("getgraphidsincorpus"))
+               {
+                  json = getGraphIdsInCorpus(request, response, store);
+               }
+               else if (pathInfo.endsWith("getgraphidswithparticipant"))
+               {
+                  json = getGraphIdsWithParticipant(request, response, store);
+               }
+               else if (pathInfo.endsWith("countmatchinggraphids"))
+               {
+                  json = countMatchingGraphIds(request, response, store);
+               }
+               else if (pathInfo.endsWith("getmatchinggraphids"))
+               {
+                  json = getMatchingGraphIds(request, response, store);
+               }
+               else if (pathInfo.endsWith("countannotations"))
+               {
+                  json = countAnnotations(request, response, store);
+               }
+               else if (pathInfo.endsWith("getannotations"))
+               {
+                  json = getAnnotations(request, response, store);
+               }
+               else if (pathInfo.endsWith("getanchors"))
+               {
+                  json = getAnchors(request, response, store);
+               }
+               else if (pathInfo.endsWith("getmediatracks"))
+               {
+                  json = getMediaTracks(request, response, store);
+               }
+               else if (pathInfo.endsWith("getavailablemedia"))
+               {
+                  json = getAvailableMedia(request, response, store);
+               }
                else
                {
                   response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                  json = failureResult(null, "Invalid path: " + request.getPathInfo());
-               }
-               if (json != null)
-               {
-                  response.setContentType("application/json");
-                  response.setCharacterEncoding("UTF-8");
-                  json.write(response.getWriter());
-                  response.getWriter().flush();
+                  json = failureResult("Invalid path: " + request.getPathInfo());
                }
             }
             finally
@@ -172,17 +239,32 @@ public class Store
             connection.close();
          }
       }
+      catch (GraphNotFoundException x)
+      {         
+         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+         json = failureResult(x.getMessage());
+      }
       catch (PermissionException x)
       {
-         response.setStatus(HttpServletResponse.SC_FORBIDDEN); // TODO JSON
+         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+         json = failureResult(x.getMessage());
       }
       catch (StoreException x)
       {
-         throw new ServletException(x); // TODO JSON response
+         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+         json = failureResult(x.getMessage());
       }
       catch (SQLException x)
       {
-         throw new ServletException("Cannot connect to database.", x); // TODO JSON response
+         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+         json = failureResult("Cannot connect to database." + x.getMessage());
+      }
+      if (json != null)
+      {
+         response.setContentType("application/json");
+         response.setCharacterEncoding("UTF-8");
+         json.write(response.getWriter());
+         response.getWriter().flush();
       }
    }
 
@@ -198,36 +280,103 @@ public class Store
    } // end of newDatabaseConnection()
    
    /**
+    * Determine the baseUrl for the server.
+    * @param request The request.
+    * @return The baseUrl.
+    */
+   public String baseUrl(HttpServletRequest request)
+   {
+      if (request.getSession() != null && request.getSession().getAttribute("baseUrl") != null)
+      { // get it from the session
+         return request.getSession().getAttribute("baseUrl").toString();
+      }
+      else if (getServletContext().getInitParameter("baseUrl") != null
+               && getServletContext().getInitParameter("baseUrl").length() > 0)
+      { // get it from the webapp configuration
+         return getServletContext().getInitParameter("baseUrl");
+      }
+      else
+      { // infer it from the request itself
+         try
+         {
+            URL url = new URL(request.getRequestURL().toString());
+            return url.getProtocol() + "://"
+               + url.getHost() + (url.getPort() < 0?"":":"+url.getPort())
+               + ("/".equals(
+                     getServletContext().getContextPath())?""
+                  :getServletContext().getContextPath());
+         }
+         catch(MalformedURLException exception)
+         {
+            return request.getRequestURI().replaceAll("/api/store/.*","");
+         }
+      }
+
+   } // end of baseUrl()
+   
+   /**
     * Creates a JSON object representing a success result, with the given model.
-    * @param model
-    * @param message
+    * @param result The result object.
+    * @param message An optional message to include in the response envelope.
     * @return An object for returning as the request result.
     */
-   public JSONObject successResult(JSONObject model, String message)
+   public JSONObject successResult(Object result, String message)
    {
-      JSONObject result = new JSONObject();
-      result.put("title", title);
-      result.put("code", 0); // TODO deprecate?
-      result.put("errors", new JSONArray());
+      JSONObject response = new JSONObject();
+      response.put("title", title);
+      response.put("code", 0); // TODO deprecate?
+      response.put("errors", new JSONArray());
       if (message == null)
       {
-         result.put("messages", new JSONArray());
+         response.put("messages", new JSONArray());
       }
       else
       {
-         result.append("messages", message);
+         response.append("messages", message);
       }
-      result.put("model", model);
-      return result;
+      if (result != null)
+      {
+         if (result instanceof IJSONableBean)
+         {
+            response.put("model", new JSONObject((IJSONableBean)result));
+         }
+         else
+         {
+            response.put("model", result);
+         }
+      }
+      return response;
    } // end of successResult()
 
    /**
-    * Creates a JSON object representing a success result, with the given model.
-    * @param model
-    * @param message
+    * Creates a JSON object representing a failure result.
+    * @param messages The error messages to return.
     * @return An object for returning as the request result.
     */
-   public JSONObject failureResult(JSONObject model, String message)
+   public JSONObject failureResult(Collection<String> messages)
+   {
+      JSONObject result = new JSONObject();
+      result.put("title", title);
+      result.put("code", 1); // TODO deprecate?
+      if (messages == null)
+      {
+         result.put("errors", new JSONArray());
+      }
+      else
+      {
+         result.put("errors", messages);
+      }
+      result.put("messages", new JSONArray());
+      result.put("model", JSONObject.NULL);
+      return result;
+   } // end of failureResult()
+
+   /**
+    * Creates a JSON object representing a failure result.
+    * @param message The error message to return.
+    * @return An object for returning as the request result.
+    */
+   public JSONObject failureResult(String message)
    {
       JSONObject result = new JSONObject();
       result.put("title", title);
@@ -241,17 +390,340 @@ public class Store
          result.append("errors", message);
       }
       result.put("messages", new JSONArray());
-      result.put("model", model);
+      result.put("model", JSONObject.NULL);
       return result;
    } // end of failureResult()
 
    // IGraphStore method handlers
 
-   protected JSONObject getId(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getId()}
+    */
+   protected JSONObject getId(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException
    {
-      String id = store.getId();
-      return successResult(new JSONObject().put("result", id), null);
+      return successResult(store.getId(), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayerIds()}
+    */
+   protected JSONObject getLayerIds(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      return successResult(store.getLayerIds(), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayers()}
+    */
+   protected JSONObject getLayers(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      Layer[] layers = store.getLayers();
+      // unset children so that JSON serialization doesn't double-up layers
+      for (Layer layer : layers) layer.setChildren(null);
+     return successResult(layers, null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getSchema()}
+    */
+   protected JSONObject getSchema(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      return successResult(store.getSchema(), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayer(String)}
+    */
+   protected JSONObject getLayer(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      String id = request.getParameter("id");
+      if (id == null) return failureResult("No id specified.");
+      return successResult(store.getLayer(id), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getCorpusIds()}
+    */
+   protected JSONObject getCorpusIds(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      return successResult(store.getCorpusIds(), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getParticipantIds()}
+    */
+   protected JSONObject getParticipantIds(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      return successResult(store.getParticipantIds(), null);
+   }
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getParticipant(String)}
+    */
+   protected JSONObject getParticipant(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      String id = request.getParameter("id");
+      if (id == null) return failureResult("No id specified.");
+      Annotation participant = store.getParticipant(id);
+      if (participant == null)
+      {
+         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+         return failureResult("Participant not found: " + id);
+      }
+      return successResult(participant, null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingParticipantIds(String)}
+    */
+   protected JSONObject countMatchingParticipantIds(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      String expression = request.getParameter("expression");
+      if (expression == null) return failureResult("No expression specified.");
+      return successResult(store.countMatchingParticipantIds(expression), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingParticipantIds(String)}
+    */
+   protected JSONObject getMatchingParticipantIds(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      Vector<String> errors = new Vector<String>();
+      String expression = request.getParameter("expression");
+      if (expression == null) errors.add("No expression specified.");
+      Integer pageLength = null;
+      if (request.getParameter("pageLength") != null)
+      {
+         try
+         {
+            pageLength = Integer.valueOf(request.getParameter("pageLength"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid pageLength: " + x.getMessage());
+         }
+      }
+      Integer pageNumber = null;
+      if (request.getParameter("pageNumber") != null)
+      {
+         try
+         {
+            pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid pageNumber: " + x.getMessage());
+         }
+      }
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(
+         store.getMatchingParticipantIdsPage(expression, pageLength, pageNumber), null);
+   }         
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIds()}
+    */
+   protected JSONObject getGraphIds(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      return successResult(store.getGraphIds(), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIdsInCorpus(String)}
+    */
+   protected JSONObject getGraphIdsInCorpus(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      String id = request.getParameter("id");
+      if (id == null) return failureResult("No id specified.");
+      return successResult(store.getGraphIdsInCorpus(id), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIdsWithParticipant(String)}
+    */
+   protected JSONObject getGraphIdsWithParticipant(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      String id = request.getParameter("id");
+      if (id == null) return failureResult("No id specified.");
+      return successResult(store.getGraphIdsWithParticipant(id), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingGraphIds(String)}
+    */
+   protected JSONObject countMatchingGraphIds(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      String expression = request.getParameter("expression");
+      if (expression == null) return failureResult("No expression specified.");
+      return successResult(store.countMatchingGraphIds(expression), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingGraphIds(String)}
+    */
+   protected JSONObject getMatchingGraphIds(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      Vector<String> errors = new Vector<String>();
+      String expression = request.getParameter("expression");
+      if (expression == null) errors.add("No expression specified.");
+      Integer pageLength = null;
+      if (request.getParameter("pageLength") != null)
+      {
+         try
+         {
+            pageLength = Integer.valueOf(request.getParameter("pageLength"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid pageLength: " + x.getMessage());
+         }
+      }
+      Integer pageNumber = null;
+      if (request.getParameter("pageNumber") != null)
+      {
+         try
+         {
+            pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid pageNumber: " + x.getMessage());
+         }
+      }
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(
+         store.getMatchingGraphIdsPage(expression, pageLength, pageNumber), null);
+   }         
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countAnnotations(String,String)}
+    */
+   protected JSONObject countAnnotations(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add("No id specified.");
+      String layerId = request.getParameter("layerId");
+      if (layerId == null) errors.add("No layerId specified.");
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(store.countAnnotations(id, layerId), null);
+   }
+   
+   /**
+    * Implementation of
+    * {@link nzilbb.ag.IGraphStoreQuery#getAnnotations(String,String,Integer,Integer)}
+    */
+   protected JSONObject getAnnotations(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add("No id specified.");
+      String layerId = request.getParameter("layerId");
+      if (layerId == null) errors.add("No layerId specified.");
+      Integer pageLength = null;
+      if (request.getParameter("pageLength") != null)
+      {
+         try
+         {
+            pageLength = Integer.valueOf(request.getParameter("pageLength"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid pageLength: " + x.getMessage());
+         }
+      }
+      Integer pageNumber = null;
+      if (request.getParameter("pageNumber") != null)
+      {
+         try
+         {
+            pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid pageNumber: " + x.getMessage());
+         }
+      }
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(store.getAnnotations(id, layerId, pageLength, pageNumber), null);
+   }
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAnchors(String,String[])}
+    */
+   protected JSONObject getAnchors(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add("No id specified.");
+      String[] anchorIds = request.getParameterValues("anchorIds");
+      if (anchorIds == null) errors.add("No anchorIds specified.");
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(store.getAnchors(id, anchorIds), null);
+   }
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMediaTracks()}
+    */
+   protected JSONObject getMediaTracks(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      return successResult(store.getMediaTracks(), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAvailableMedia(String)}
+    */
+   protected JSONObject getAvailableMedia(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      String id = request.getParameter("id");
+      if (id == null) return failureResult("No id specified.");
+
+      MediaFile[] media = store.getAvailableMedia(id);
+      
+      // strip out local file paths
+      for (MediaFile file : media) file.setFile(null);
+      
+      return successResult(media, null);
    }      
    
    private static final long serialVersionUID = 1;
