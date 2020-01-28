@@ -4084,13 +4084,13 @@ public class SqlGraphStore
     * @param graphId The ID of the graph.
     * @param start The start offset of the fragment.
     * @param end The end offset of the fragment.
-    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
     * @return The identified graph fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the graph was not found in the store.
     */
-   public Graph getFragment(String graphId, double start, double end, String[] layerId) 
+   public Graph getFragment(String graphId, double start, double end, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       try
@@ -4297,13 +4297,13 @@ public class SqlGraphStore
     * <p>This implementation expects <var>seriesId</var> to be a current <tt>result.search_id</tt>.
     * <p>The fragments are created lazily as required, so this method should return quickly.
     * @param seriesId The ID of the series.
-    * @param layerId The IDs of the layers to load, or null if only graph data is required.
+    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
     * @return An enumerable series of fragments.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     * @throws GraphNotFoundException If the series identified by <var>seriesId</var> was not found in the store.
     */
-   public MonitorableSeries<Graph> getFragmentSeries(String seriesId, String[] layerId) 
+   public MonitorableSeries<Graph> getFragmentSeries(String seriesId, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       try
