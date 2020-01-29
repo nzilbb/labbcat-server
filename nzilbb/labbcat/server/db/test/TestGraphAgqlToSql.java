@@ -29,7 +29,7 @@ import nzilbb.ag.Constants;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.ql.AGQLException;
-import nzilbb.ag.sql.GraphAgqlToSql;
+import nzilbb.labbcat.server.db.GraphAgqlToSql;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
