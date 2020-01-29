@@ -62,7 +62,7 @@
     <delete dir="${build}"/>
   </target>
 
-  <target name="javadoc" depends="init,compile"
+  <target name="javadoc" depends="init,dist"
           description="Document the source" >
     <javadoc destdir="${javadoc}"
              classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/nzilbb.ag.jar"
