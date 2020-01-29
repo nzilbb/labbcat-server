@@ -794,6 +794,8 @@ public class StoreQuery
       if (errors.size() > 0) return failureResult(errors);
       return successResult(store.getAnnotations(id, layerId, pageLength, pageNumber), null);
    }
+
+   // TODO getMatchAnnotations
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAnchors(String,String[])}
@@ -814,6 +816,29 @@ public class StoreQuery
       if (errors.size() > 0) return failureResult(errors);
       return successResult(store.getAnchors(id, anchorIds), null);
    }
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraph(String,String[])}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject getGraph(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add("No id specified.");
+      String[] layerIds = request.getParameterValues("layerIds");
+      if (layerIds == null) layerIds = new String[0];
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(store.getGraph(id, layerIds), null);
+   }
+
+   // TODO getFragment
+   // TODO getFragmentSeries
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMediaTracks()}
@@ -849,27 +874,10 @@ public class StoreQuery
       for (MediaFile file : media) file.setFile(null);
       
       return successResult(media, null);
-   }      
-   
-   /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraph(String,String[])}
-    * @param request The HTTP request.
-    * @param request The HTTP response.
-    * @param store A graph store object.
-    * @return A JSON response for returning to the caller.
-    */
-   protected JSONObject getGraph(
-      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
-      Vector<String> errors = new Vector<String>();
-      String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
-      String[] layerIds = request.getParameterValues("layerIds");
-      if (layerIds == null) layerIds = new String[0];
-      if (errors.size() > 0) return failureResult(errors);
-      return successResult(store.getGraph(id, layerIds), null);
-   }      
+   }
+
+   // TODO getMedia
+   // TODO getEpisodeDocuments
    
    private static final long serialVersionUID = 1;
 } // end of class StoreQuery

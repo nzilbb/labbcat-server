@@ -90,7 +90,15 @@ public class Store
    {
       JSONObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
-      if (pathInfo.endsWith("deletegraph"))
+      if (pathInfo.endsWith("createannotation"))
+      {
+         json = createAnnotation(request, response, store);
+      }
+      else if (pathInfo.endsWith("destroyannotation"))
+      {
+         json = destroyAnnotation(request, response, store);
+      }
+      else if (pathInfo.endsWith("deletegraph"))
       {
          json = deleteGraph(request, response, store);
       }
@@ -103,8 +111,80 @@ public class Store
 
    // IGraphStore method handlers
 
+   // TODO saveGraph
+   
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraph(String,String[])}
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#createAnnotation(String,String,String,String,String,Integer,String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject createAnnotation(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add("No id specified.");
+      String fromId = request.getParameter("fromId");
+      if (fromId == null) errors.add("No fromId specified.");
+      String toId = request.getParameter("toId");
+      if (toId == null) errors.add("No toId specified.");
+      String layerId = request.getParameter("layerId");
+      if (layerId == null) errors.add("No layerId specified.");
+      String label = request.getParameter("label");
+      if (label == null) errors.add("No label specified.");
+      Integer confidence = null;
+      if (request.getParameter("confidence") == null)
+      {
+         errors.add("No confidence specified.");
+      }
+      else
+      {
+         try
+         {
+            confidence = Integer.valueOf(request.getParameter("confidence"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid confidence: " + x.getMessage());
+         }
+      }
+      String parentId = request.getParameter("parentId");
+      if (parentId == null) errors.add("No parentId specified.");
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(
+         store.createAnnotation(id, fromId, toId, layerId, label, confidence, parentId), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#destroyAnnotation(String,String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject destroyAnnotation(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add("No id specified.");
+      String annotationId = request.getParameter("annotationId");
+      if (annotationId == null) errors.add("No annotationId specified.");
+      if (errors.size() > 0) return failureResult(errors);
+      store.destroyAnnotation(id, annotationId);
+      return successResult(null, "Annotation deleted: " + id);
+   }      
+   // TODO saveParticipant
+   // TODO saveMedia
+   // TODO saveSource
+   // TODO saveEpisodeDocument
+
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#deleteGraph(String)}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
