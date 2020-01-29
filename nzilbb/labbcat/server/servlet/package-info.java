@@ -470,7 +470,7 @@
     <li class="blockList"><a id="method.detail">
         <!--   -->
       </a>
-      <h3>/api/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
+      <h3>/edit/api/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
       <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
         <!--   -->
       </a>

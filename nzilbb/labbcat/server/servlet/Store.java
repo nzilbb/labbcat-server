@@ -50,7 +50,7 @@ import org.xml.sax.*;
  * requests. This includes all requests supported by {@link StoreQuery}.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet("/api/edit/store/*")
+@WebServlet("/edit/api/store/*")
 public class Store
    extends StoreQuery
 {
