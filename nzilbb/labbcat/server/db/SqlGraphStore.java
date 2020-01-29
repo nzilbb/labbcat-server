@@ -181,8 +181,12 @@ public class SqlGraphStore
     * Setter for {@link #id}: The store's ID.
     * @param newId The store's ID.
     */
-   public SqlGraphStore setId(String newId) { id = newId; return this; }
-
+   public SqlGraphStore setId(String newId)
+   {
+      id = newId;
+      if (id != null && !id.endsWith("/")) id += "/";
+      return this;
+   }
 
    /**
     * ID of the user querying the store.
@@ -2538,20 +2542,6 @@ public class SqlGraphStore
       return countMatchingAnnotations(
          "graph.id = '" + id.replaceAll("'","\\'") + "'"
          +" AND layer.id = '" + layerId.replaceAll("'","\\'") + "'");
-   }
-   /**
-    * Gets the annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
-    * @param layerId The ID of the layer.
-    * @return A (possibly empty) array of annotations.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
-    */
-   public Annotation[] getAnnotations(String id, String layerId)
-      throws StoreException, PermissionException, GraphNotFoundException
-   {
-      return getAnnotations(id, layerId, null, null);
    }
    /**
     * Gets the annotations on the given layer of the given graph.
