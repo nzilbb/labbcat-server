@@ -1276,7 +1276,7 @@ public class SqlGraphStore
    public String[] getMatchingParticipantIds(String expression)
       throws StoreException, PermissionException
    {
-      return getMatchingParticipantIdsPage(expression, null, null);
+      return getMatchingParticipantIds(expression, null, null);
    }
 
    /**
@@ -1301,7 +1301,7 @@ public class SqlGraphStore
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingParticipantIdsPage(String expression, Integer pageLength, Integer pageNumber)
+   public String[] getMatchingParticipantIds(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException
    {
       try
@@ -1447,73 +1447,6 @@ public class SqlGraphStore
     *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
     * labels('who')</code></li>
     * </ul>
-    * @return A list of graph IDs.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public String[] getMatchingGraphIds(String expression)
-      throws StoreException, PermissionException
-   {
-      return getMatchingGraphIdsPage(expression, null, null, null);
-   }
-
-   /**
-    * Gets a list of IDs of graphs that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
-    * <p> The expression language is currently not well defined, but expressions such as
-    * the following can be used:
-    * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'Robert' IN labels('who')</code></li>
-    *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
-    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label = 'en'</code></li>
-    *  <li><code>my('noise').label = 'bell'</code></li>
-    *  <li><code>'en' IN labels('transcript_languages')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'bell' IN labels('noise')</code></li>
-    *  <li><code>list('transcript_languages').length gt; 1</code></li>
-    *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('transcript').length gt; 100</code></li>
-    *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-    * labels('who')</code></li>
-    * </ul>
-    * @param pageLength The maximum number of IDs to return, or null to return all.
-    * @param pageNumber The zero-based page number to return, or null to return the first page.
-    * @return A list of graph IDs.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber)
-      throws StoreException, PermissionException
-   {
-      return getMatchingGraphIdsPage(expression, pageLength, pageNumber, null);
-   }
-   /**
-    * Gets a list of IDs of graphs that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
-    * <p> The expression language is currently not well defined, but expressions such as
-    * the following can be used:
-    * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'Robert' IN labels('who')</code></li>
-    *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
-    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label = 'en'</code></li>
-    *  <li><code>my('noise').label = 'bell'</code></li>
-    *  <li><code>'en' IN labels('transcript_languages')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'bell' IN labels('noise')</code></li>
-    *  <li><code>list('transcript_languages').length gt; 1</code></li>
-    *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('transcript').length gt; 100</code></li>
-    *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-    * labels('who')</code></li>
-    * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The zero-based page number to return, or null to return the first page.
     * @param order The ordering for the list of IDs, a string containing a comma-separated
@@ -1523,7 +1456,7 @@ public class SqlGraphStore
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingGraphIdsPage(String expression, Integer pageLength, Integer pageNumber, String order)
+   public String[] getMatchingGraphIds(String expression, Integer pageLength, Integer pageNumber, String order)
       throws StoreException, PermissionException
    {
       try
@@ -2634,7 +2567,7 @@ public class SqlGraphStore
    public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException, GraphNotFoundException
    {
-      return getMatchingAnnotationsPage("graph.id = '" + id.replaceAll("'","\\'") + "' AND layer.id = '" + layerId.replaceAll("'","\\'") + "'", pageLength, pageNumber);
+      return getMatchingAnnotations("graph.id = '" + id.replaceAll("'","\\'") + "' AND layer.id = '" + layerId.replaceAll("'","\\'") + "'", pageLength, pageNumber);
    }
    
    /**
@@ -2671,26 +2604,13 @@ public class SqlGraphStore
    /**
     * Gets a list of annotations that match a particular pattern.
     * @param expression An expression that determines which graphs match.
-    * @return A list of matching {@link Annotation}s.
-    * @throws StoreException If an error occurs.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public Annotation[] getMatchingAnnotations(String expression)
-      throws StoreException, PermissionException
-   {
-      return getMatchingAnnotationsPage(expression, null, null);
-   }
-
-   /**
-    * Gets a list of annotations that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
     * @param pageLength The maximum number of annotations to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.
     * @return A list of matching {@link Annotation}s.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public Annotation[] getMatchingAnnotationsPage(String expression, Integer pageLength, Integer pageNumber)
+   public Annotation[] getMatchingAnnotations(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException
    {
       try
@@ -2726,7 +2646,7 @@ public class SqlGraphStore
                   }
                   catch(GraphNotFoundException exception)
                   {
-                     System.err.println("getMatchingAnnotationsPage: " + expression + " : " + exception);
+                     System.err.println("getMatchingAnnotations: " + expression + " : " + exception);
                      continue;
                   }
                } // need graph
@@ -4123,7 +4043,7 @@ public class SqlGraphStore
          sqlAnnotationsByOffset.setDouble(3, start);
          sqlAnnotationsByOffset.setDouble(4, end);
 
-         final HashSet<String> layersToLoad = new HashSet<String>(Arrays.asList(layerId));
+         final HashSet<String> layersToLoad = new HashSet<String>(Arrays.asList(layerIds));
          // traverse top-down through the schema, looking for layers to add
          final HashSet<String> loadedLayers = new HashSet<String>();
          new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, schema)
@@ -4308,7 +4228,7 @@ public class SqlGraphStore
    {
       try
       {
-         return new ResultSeries(Long.parseLong(seriesId), this, layerId);
+         return new ResultSeries(Long.parseLong(seriesId), this, layerIds);
       }
       catch(Exception exception)
       {
