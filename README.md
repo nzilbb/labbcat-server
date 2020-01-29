@@ -13,3 +13,7 @@ implemented by the [NZILBB](http://www.nzilbb.canterbury.ac.nz).
 - `ant` - builds bin/nzilbb.labbcat.server.jar
 - `ant test` - also runs unit tests
 - `ant javadoc` - also produces JavaDoc API documentation.
+
+## Documentation
+
+More documentation is available [here](https://nzilbb.github.io/labbcat-server/)
