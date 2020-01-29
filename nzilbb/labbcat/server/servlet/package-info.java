@@ -471,6 +471,41 @@
         <!--   -->
       </a>
       <h3>/api/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
+      <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/edit/store/createAnnotation</h4>
+          <div class="block">Creates an annotation starting at <var>from</var> and ending at <var>to</var>.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the graph.</dd>
+            <dd><code>fromId</code> - The start anchor's ID.</dd>
+            <dd><code>toId</code> - The end anchor's ID.</dd>
+            <dd><code>layerId</code> - The layer ID of the resulting annotation.</dd>
+            <dd><code>label</code> - The label of the resulting annotation.</dd>
+            <dd><code>confidence</code> - The confidence rating.</dd>
+            <dd><code>parentId</code> - The new annotation's parent's ID.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The ID of the new annotation.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="destroyAnnotation(java.lang.String,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>destroyAnnotation</h4>
+          <div class="block">Destroys the annotation with the given ID.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the graph.</dd>
+            <dd><code>annotationId</code> - The annotation's ID.</dd>
+          </dl>
+        </li>
+      </ul>
       <a id="deleteGraph(java.lang.String)">
         <!--   -->
       </a>
