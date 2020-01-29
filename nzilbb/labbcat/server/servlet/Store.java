@@ -45,7 +45,9 @@ import org.w3c.dom.*;
 import org.xml.sax.*;
 
 /**
- * Controller that handles {@link nzilbb.ag.IGraphStore} requests.
+ * Controller that handles
+ * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a>
+ * requests. This includes all requests supported by {@link StoreQuery}.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet("/api/edit/store/*")
