@@ -25,14 +25,14 @@ import java.sql.*;
 import java.util.List;
 import java.util.Vector;
 import java.util.function.UnaryOperator;
+import nzilbb.ag.Layer;
+import nzilbb.ag.Schema;
+import nzilbb.ag.ql.*;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import nzilbb.ag.Schema;
-import nzilbb.ag.Layer;
-import nzilbb.ag.ql.*;
 
 /**
  * Converts AGQL expressions into SQL queries for matching participants.
