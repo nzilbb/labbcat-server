@@ -70,6 +70,8 @@
              access="public"
 	     Author="yes"
              Windowtitle="nzilbb.labbcat.server"
+             Overview="nzilbb/labbcat/server/overview.html"
+             stylesheetfile="doc-files/style.css"
              noqualifier="all"
              bottom="&lt;i&gt;&amp;copy; NZILBB - ${TODAY}&lt;/i&gt;"
              >
