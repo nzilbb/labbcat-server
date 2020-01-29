@@ -71,7 +71,7 @@ public class StoreQuery
    } // end of constructor
 
    /** 
-    * Initialise the servlet
+    * Initialise the servlet by loading the database connection settings.
     */
    public void init()
    {
