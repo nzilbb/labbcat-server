@@ -287,6 +287,10 @@ public class StoreQuery
       {
          json = getGraph(request, response, store);
       }
+      else if (pathInfo.endsWith("getmedia"))
+      {
+         json = getMedia(request, response, store);
+      }
       return json;
    } // end of invokeFunction()
 
@@ -876,7 +880,62 @@ public class StoreQuery
       return successResult(media, null);
    }
 
-   // TODO getMedia
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAvailableMedia(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject getMedia(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add("No id specified.");
+      String trackSuffix = request.getParameter("trackSuffix"); // optional
+      String mimeType = request.getParameter("mimeType");
+      if (mimeType == null) errors.add("No mimeType specified.");
+      Double startOffset = null;
+      if (request.getParameter("startOffset") != null)
+      {
+         try
+         {
+            startOffset = Double.valueOf(request.getParameter("startOffset"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid startOffset: " + x.getMessage());
+         }
+      }
+      Double endOffset = null;
+      if (request.getParameter("endOffset") != null)
+      {
+         try
+         {
+            endOffset = Double.valueOf(request.getParameter("endOffset"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid endOffset: " + x.getMessage());
+         }
+      }
+      if (startOffset == null && endOffset == null)
+      {
+         if (errors.size() > 0) return failureResult(errors);
+         return successResult(store.getMedia(id, trackSuffix, mimeType), null);
+      }
+      else
+      {
+         if (startOffset == null) errors.add("startOffset not specified");
+         if (endOffset == null) errors.add("endOffset not specified");
+         if (endOffset <= startOffset)
+            errors.add("startOffset ("+startOffset+") must be before endOffset ("+endOffset+")");
+         if (errors.size() > 0) return failureResult(errors);
+         return successResult(store.getMedia(id, trackSuffix, mimeType, startOffset, endOffset), null);
+      }
+   }
    // TODO getEpisodeDocuments
    
    private static final long serialVersionUID = 1;

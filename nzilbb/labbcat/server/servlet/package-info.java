@@ -459,6 +459,29 @@
           </dl>
         </li>
       </ul>
+      <a id="getMedia(java.lang.String,java.lang.String,java.lang.String,java.lang.Double,java.lang.Double)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getMedia</h4>
+          <div class="block">Gets a given media track for a given graph.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The graph ID.</dd>
+            <dd><code>trackSuffix</code> (Optional) - The track suffix of the media - see <a href="MediaTrackDefinition.html#suffix"><code>MediaTrackDefinition.suffix</code></a>.</dd>
+            <dd><code>mimeType</code> - The MIME type of the media, which may include parameters for type
+              conversion, e.g. "text/wav; samplerate=16000"</dd>
+            <dd><code>startOffset</code> (Optional) - The start offset of the media sample, or null for the start of the whole
+              recording.</dd>
+            <dd><code>endOffset</code> (Optional) - The end offset of the media sample, or null for the end of the whole
+              recording.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A URL to the given media for the given graph, or null if the given media doesn't
+              exist.</dd>
+          </dl>
+        </li>
+      </ul>
     </li>
   </ul>
 </section>
