@@ -263,6 +263,14 @@ public class StoreQuery
       {
          json = getMatchingGraphIds(request, response, store);
       }
+      else if (pathInfo.endsWith("countmatchingannotations"))
+      {
+         json = countMatchingAnnotations(request, response, store);
+      }
+      else if (pathInfo.endsWith("getmatchingannotations"))
+      {
+         json = getMatchingAnnotations(request, response, store);
+      }
       else if (pathInfo.endsWith("countannotations"))
       {
          json = countAnnotations(request, response, store);
@@ -290,6 +298,10 @@ public class StoreQuery
       else if (pathInfo.endsWith("getmedia"))
       {
          json = getMedia(request, response, store);
+      }
+      else if (pathInfo.endsWith("getepisodedocuments"))
+      {
+         json = getEpisodeDocuments(request, response, store);
       }
       return json;
    } // end of invokeFunction()
@@ -531,7 +543,8 @@ public class StoreQuery
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException
    {
-      return successResult(store.getCorpusIds(), null);
+      String[] ids = store.getCorpusIds();
+      return successResult(ids, ids.length == 0?"There are no corpora.":null);
    }      
    
    /**
@@ -545,7 +558,8 @@ public class StoreQuery
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException
    {
-      return successResult(store.getParticipantIds(), null);
+      String[] ids = store.getParticipantIds();
+      return successResult(ids, ids.length == 0?"There are no participants.":null);
    }
    
    /**
@@ -625,8 +639,8 @@ public class StoreQuery
          }
       }
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(
-         store.getMatchingParticipantIds(expression, pageLength, pageNumber), null);
+      String[] ids = store.getMatchingParticipantIds(expression, pageLength, pageNumber);
+      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
    }         
    
    /**
@@ -656,7 +670,8 @@ public class StoreQuery
    {
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
-      return successResult(store.getGraphIdsInCorpus(id), null);
+      String[] ids = store.getGraphIdsInCorpus(id);
+      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
    }      
    
    /**
@@ -672,7 +687,8 @@ public class StoreQuery
    {
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
-      return successResult(store.getGraphIdsWithParticipant(id), null);
+      String[] ids = store.getGraphIdsWithParticipant(id);
+      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
    }      
    
    /**
@@ -730,10 +746,69 @@ public class StoreQuery
          }
       }
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(
-         store.getMatchingGraphIds(expression, pageLength, pageNumber), null);
+      String[] ids = store.getMatchingGraphIds(expression, pageLength, pageNumber);
+      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
    }         
    
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingAnnotations(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject countMatchingAnnotations(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      String expression = request.getParameter("expression");
+      if (expression == null) return failureResult("No expression specified.");
+      return successResult(store.countMatchingAnnotations(expression), null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingAnnotations(String,Integer,Integer)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject getMatchingAnnotations(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException
+   {
+      Vector<String> errors = new Vector<String>();
+      String expression = request.getParameter("expression");
+      if (expression == null) errors.add("No expression specified.");
+      Integer pageLength = null;
+      if (request.getParameter("pageLength") != null)
+      {
+         try
+         {
+            pageLength = Integer.valueOf(request.getParameter("pageLength"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid pageLength: " + x.getMessage());
+         }
+      }
+      Integer pageNumber = null;
+      if (request.getParameter("pageNumber") != null)
+      {
+         try
+         {
+            pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+         }
+         catch(NumberFormatException x)
+         {
+            errors.add("Invalid pageNumber: " + x.getMessage());
+         }
+      }
+      if (errors.size() > 0) return failureResult(errors);
+      Annotation[] annotations = store.getMatchingAnnotations(expression, pageLength, pageNumber);
+      return successResult(annotations, annotations.length == 0?"There are no annotations.":null);
+   }         
+
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countAnnotations(String,String)}
     * @param request The HTTP request.
@@ -796,7 +871,8 @@ public class StoreQuery
          }
       }
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(store.getAnnotations(id, layerId, pageLength, pageNumber), null);
+      Annotation[] annotations = store.getAnnotations(id, layerId, pageLength, pageNumber);
+      return successResult(annotations, annotations.length == 0?"There are no annotations.":null);
    }
 
    // TODO getMatchAnnotations
@@ -877,7 +953,7 @@ public class StoreQuery
       // strip out local file paths
       for (MediaFile file : media) file.setFile(null);
       
-      return successResult(media, null);
+      return successResult(media, media.length == 0?"There is no media.":null);
    }
 
    /**
@@ -936,7 +1012,28 @@ public class StoreQuery
          return successResult(store.getMedia(id, trackSuffix, mimeType, startOffset, endOffset), null);
       }
    }
-   // TODO getEpisodeDocuments
-   
+
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getEpisodeDocuments(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject getEpisodeDocuments(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
+   {
+      String id = request.getParameter("id");
+      if (id == null) return failureResult("No id specified.");
+
+      MediaFile[] media = store.getEpisodeDocuments(id);
+      
+      // strip out local file paths
+      for (MediaFile file : media) file.setFile(null);
+      
+      return successResult(media, media.length == 0?"There are no documents.":null);
+   }
+
    private static final long serialVersionUID = 1;
 } // end of class StoreQuery

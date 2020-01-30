@@ -20,7 +20,17 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 /**
- * Graph store implementations include:
+ * <p>All LaBB-CAT request for which the the <q>Accept</q> HTTP header is set to
+ * <q>application/json</q> return a JSON response with the same structure:
+ * <dl>
+ *  <dt>title</dt> <dd>(string) The title of the LaBB-CAT instance.</dd>
+ *  <dt>code</dt> <dd>(int) 0 if the request was successful, 1 if there was a problem</dd>
+ *  <dt>messages</dt> <dd>An array of message strings.</dd>
+ *  <dt>errors</dt> <dd>An array of error message strings.</dd>
+ *  <dt>model</dt> <dd>The result of the request, which may be a JSON object, JSON array,
+ *   or a simple type.</dd>
+ * </dl>
+ * <p>Graph store implementations include:
 <!-- Based on IGraphStoreQuery javadoc -->
 <section role="region">
   <ul class="blockList">
@@ -479,6 +489,74 @@
             <dt><span class="returnLabel">Returns:</span></dt>
             <dd>A URL to the given media for the given graph, or null if the given media doesn't
               exist.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="countMatchingAnnotations(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>countMatchingAnnotations</h4>
+          <div class="block">Counts the number of annotations that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which participants match.
+              <p> The expression language is currently not well defined, but expressions such as the following can be used:
+                <ul>
+                  <li><code>id = 'ew_0_456'</code></li>
+                  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+                  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
+                      my('utterances').start.offset = 12.345</code></li> 
+                  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+                      &gt; 10.5</code></li> 
+                </ul>
+              <p><em>NB</em> all expressions must match by either id or layer.id.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The number of matching annotations.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getMatchingAnnotations(java.lang.String,java.lang.Integer,java.lang.Integer)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>getMatchingAnnotations</h4>
+          <div class="block">Gets a list of annotations that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which graphs match.
+              <p> The expression language is currently not well defined, but expressions such as the
+                following can be used: 
+                <ul>
+                  <li><code>id = 'ew_0_456'</code></li>
+                  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+                  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
+                  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+                      &gt; 10.5</code></li> 
+                  <li><code>previous.id = 'ew_0_456'</code></li>
+                </ul>
+              <p><em>NB</em> all expressions must match by either id or layer.id.</dd>
+            <dd><code>pageLength</code> - The maximum number of annotations to return, or null to return all.</dd>
+            <dd><code>pageNumber</code> - The zero-based page number to return, or null to return the first page.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of matching <a href="Annotation.html" title="class in nzilbb.ag"><code>Annotation</code></a>s.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getEpisodeDocuments(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>getEpisodeDocuments</h4>
+          <div class="block">Get a list of documents associated with the episode of the given graph.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The graph ID.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>List of URLs to documents.</dd>
           </dl>
         </li>
       </ul>
