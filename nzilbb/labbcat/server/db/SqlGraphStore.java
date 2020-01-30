@@ -7559,26 +7559,29 @@ public class SqlGraphStore
       File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
       File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
       File docDir = new File(episodeDir, "doc");
-      for (File f : docDir.listFiles())
+      if (docDir.exists())
       {
-         MediaFile mediaFile = new MediaFile(f, "");
-         if (getBaseUrl() == null) // TODO check this isn't a security risk
+         for (File f : docDir.listFiles())
          {
-            mediaFile.setUrl(f.toURI().toString());
-         }
-         else
-         {
-            StringBuffer url = new StringBuffer(getBaseUrl());
-            url.append("/files/");
-            url.append(graph.my("corpus").getLabel());
-            url.append("/");
-            url.append(graph.my("episode").getLabel());
-            url.append("/doc/");
-            url.append(f.getName());
-            mediaFile.setUrl(url.toString());
-         }
-         files.add(mediaFile);
-      } // next doc file
+            MediaFile mediaFile = new MediaFile(f, "");
+            if (getBaseUrl() == null) // TODO check this isn't a security risk
+            {
+               mediaFile.setUrl(f.toURI().toString());
+            }
+            else
+            {
+               StringBuffer url = new StringBuffer(getBaseUrl());
+               url.append("/files/");
+               url.append(graph.my("corpus").getLabel());
+               url.append("/");
+               url.append(graph.my("episode").getLabel());
+               url.append("/doc/");
+               url.append(f.getName());
+               mediaFile.setUrl(url.toString());
+            }
+            files.add(mediaFile);
+         } // next doc file
+      } // the doc dir exists
       return files.toArray(new MediaFile[0]);      
    }
    
