@@ -34,7 +34,7 @@
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}"
 	   includes="${srcfiles}"
-	   excludes="${testsrcfiles}"
+	   excludes="${testsrcfiles} **/package-info.java"
 	   classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/nzilbb.ag.jar"
 	   listfiles="yes"
 	   target="${config.classversion}"
