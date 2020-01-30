@@ -79,6 +79,7 @@ public class Store
     * Interprets the URL path, and executes the corresponding function on the store. This
     * method is an override of 
     * {@link StoreQuery#invokeFunction(HttpServletRequest,HttpServletResponse,SqlGraphStoreAdministration)}.
+    * <p> This implementation only allows POST HTTP requests.
     * @param request The request.
     * @param response The response.
     * @param store The connected graph store.
@@ -90,20 +91,25 @@ public class Store
    {
       JSONObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
-      if (pathInfo.endsWith("createannotation"))
+      // only allow POST requests
+      if (request.getMethod().equals("POST"))
       {
-         json = createAnnotation(request, response, store);
-      }
-      else if (pathInfo.endsWith("destroyannotation"))
-      {
-         json = destroyAnnotation(request, response, store);
-      }
-      else if (pathInfo.endsWith("deletegraph"))
-      {
-         json = deleteGraph(request, response, store);
-      }
-      else
-      {
+         if (pathInfo.endsWith("createannotation"))
+         {
+            json = createAnnotation(request, response, store);
+         }
+         else if (pathInfo.endsWith("destroyannotation"))
+         {
+            json = destroyAnnotation(request, response, store);
+         }
+         else if (pathInfo.endsWith("deletegraph"))
+         {
+            json = deleteGraph(request, response, store);
+         }
+      } // only if it's a POST request
+      
+      if (json == null)
+      { // either not POST or not a recognized function
          json = super.invokeFunction(request, response, store);
       }
       return json;

@@ -189,7 +189,19 @@ public class StoreQuery
          response.getWriter().flush();
       }
    }
-   
+
+   /**
+    * POST handler simply invokes the GET handler. Any functions that can only execute
+    * with GET but not POST must themselves validate the request method.
+    * @see #doGet(HttpServletRequest,HttpServletResponse)
+    */
+   @Override
+   protected void doPost(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException
+   {
+      doGet(request, response);
+   }
+
    /**
     * Interprets the URL path, and executes the corresponding function on the store. This
     * method should be overridden by subclasses to interpret their own functions.
