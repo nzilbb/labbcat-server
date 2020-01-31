@@ -40,6 +40,7 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
 import nzilbb.labbcat.server.db.*;
+import nzilbb.util.IO;
 import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
@@ -50,7 +51,7 @@ import org.xml.sax.*;
  * requests.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet("/api/store/*")
+@WebServlet({"/api/store/*", "/store/*"} )
 public class StoreQuery
    extends HttpServlet
 {
@@ -62,6 +63,7 @@ public class StoreQuery
    protected String connectionPassword;
 
    protected String title;
+   protected String version;
    
    // Methods:
    
@@ -79,8 +81,22 @@ public class StoreQuery
    {
       try
       {
-         log("StoreQuery.init...");
-         
+         log("init...");
+
+         // get version info
+         File versionTxt = new File(getServletContext().getRealPath("version.txt"));
+         if (versionTxt.exists())
+         {
+            try
+            {
+               version = IO.InputStreamToString(new FileInputStream(versionTxt));
+            }
+            catch(IOException exception)
+            {
+               log("Can't read version.txt: " + exception);
+            }
+         }
+
          // get database connection info
          File contextXml = new File(getServletContext().getRealPath("META-INF/context.xml"));
          if (contextXml.exists())
@@ -105,7 +121,7 @@ public class StoreQuery
       }
       catch (Exception x)
       {
-         log("StoreQuery.init() failed", x);
+         log("failed", x);
       } 
    }
 
@@ -214,106 +230,121 @@ public class StoreQuery
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
    {
       JSONObject json = null;
-      String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
-      if (pathInfo.endsWith("getid"))
-      {
-         json = getId(request, response, store);
+      if (request.getPathInfo() == null)
+      { // no path component
+         json = successResult(null, null);
+         // redirect /store?call=getXXX to /store/getXXX
+         if (request.getMethod().equals("GET") && request.getParameter("call") != null)
+         {
+            response.sendRedirect(
+               request.getRequestURI()
+               + "/" + request.getParameter("call")
+               + "?" + request.getQueryString());
+         }
       }
-      else if (pathInfo.endsWith("getschema"))
+      else
       {
-         json = getSchema(request, response, store);
-      }
-      else if (pathInfo.endsWith("getlayerids"))
-      {
-         json = getLayerIds(request, response, store);
-      }
-      else if (pathInfo.endsWith("getlayers"))
-      {
-         json = getLayers(request, response, store);
-      }
-      else if (pathInfo.endsWith("getlayer"))
-      {
-         json = getLayer(request, response, store);
-      }
-      else if (pathInfo.endsWith("getcorpusids"))
-      {
-         json = getCorpusIds(request, response, store);
-      }
-      else if (pathInfo.endsWith("getparticipantids"))
-      {
-         json = getParticipantIds(request, response, store);
-      }
-      else if (pathInfo.endsWith("getparticipant"))
-      {
-         json = getParticipant(request, response, store);
-      }
-      else if (pathInfo.endsWith("countmatchingparticipantids"))
-      {
-         json = countMatchingParticipantIds(request, response, store);
-      }
-      else if (pathInfo.endsWith("getmatchingparticipantids"))
-      {
-         json = getMatchingParticipantIds(request, response, store);
-      }
-      else if (pathInfo.endsWith("getgraphids"))
-      {
-         json = getGraphIds(request, response, store);
-      }
-      else if (pathInfo.endsWith("getgraphidsincorpus"))
-      {
-         json = getGraphIdsInCorpus(request, response, store);
-      }
-      else if (pathInfo.endsWith("getgraphidswithparticipant"))
-      {
-         json = getGraphIdsWithParticipant(request, response, store);
-      }
-      else if (pathInfo.endsWith("countmatchinggraphids"))
-      {
-         json = countMatchingGraphIds(request, response, store);
-      }
-      else if (pathInfo.endsWith("getmatchinggraphids"))
-      {
-         json = getMatchingGraphIds(request, response, store);
-      }
-      else if (pathInfo.endsWith("countmatchingannotations"))
-      {
-         json = countMatchingAnnotations(request, response, store);
-      }
-      else if (pathInfo.endsWith("getmatchingannotations"))
-      {
-         json = getMatchingAnnotations(request, response, store);
-      }
-      else if (pathInfo.endsWith("countannotations"))
-      {
-         json = countAnnotations(request, response, store);
-      }
-      else if (pathInfo.endsWith("getannotations"))
-      {
-         json = getAnnotations(request, response, store);
-      }
-      else if (pathInfo.endsWith("getanchors"))
-      {
-         json = getAnchors(request, response, store);
-      }
-      else if (pathInfo.endsWith("getmediatracks"))
-      {
-         json = getMediaTracks(request, response, store);
-      }
-      else if (pathInfo.endsWith("getavailablemedia"))
-      {
-         json = getAvailableMedia(request, response, store);
-      }
-      else if (pathInfo.endsWith("getgraph"))
-      {
-         json = getGraph(request, response, store);
-      }
-      else if (pathInfo.endsWith("getmedia"))
-      {
-         json = getMedia(request, response, store);
-      }
-      else if (pathInfo.endsWith("getepisodedocuments"))
-      {
-         json = getEpisodeDocuments(request, response, store);
+         String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
+         if (pathInfo.endsWith("getid"))
+         {
+            json = getId(request, response, store);
+         }
+         else if (pathInfo.endsWith("getschema"))
+         {
+            json = getSchema(request, response, store);
+         }
+         else if (pathInfo.endsWith("getlayerids"))
+         {
+            json = getLayerIds(request, response, store);
+         }
+         else if (pathInfo.endsWith("getlayers"))
+         {
+            json = getLayers(request, response, store);
+         }
+         else if (pathInfo.endsWith("getlayer"))
+         {
+            json = getLayer(request, response, store);
+         }
+         else if (pathInfo.endsWith("getcorpusids"))
+         {
+            json = getCorpusIds(request, response, store);
+         }
+         else if (pathInfo.endsWith("getparticipantids"))
+         {
+            json = getParticipantIds(request, response, store);
+         }
+         else if (pathInfo.endsWith("getparticipant"))
+         {
+            json = getParticipant(request, response, store);
+         }
+         else if (pathInfo.endsWith("countmatchingparticipantids"))
+         {
+            json = countMatchingParticipantIds(request, response, store);
+         }
+         else if (pathInfo.endsWith("getmatchingparticipantids"))
+         {
+            json = getMatchingParticipantIds(request, response, store);
+         }
+         else if (pathInfo.endsWith("getgraphids"))
+         {
+            json = getGraphIds(request, response, store);
+         }
+         else if (pathInfo.endsWith("getgraphidsincorpus"))
+         {
+            json = getGraphIdsInCorpus(request, response, store);
+         }
+         else if (pathInfo.endsWith("getgraphidswithparticipant"))
+         {
+            json = getGraphIdsWithParticipant(request, response, store);
+         }
+         else if (pathInfo.endsWith("countmatchinggraphids"))
+         {
+            json = countMatchingGraphIds(request, response, store);
+         }
+         else if (pathInfo.endsWith("getmatchinggraphids"))
+         {
+            json = getMatchingGraphIds(request, response, store);
+         }
+         else if (pathInfo.endsWith("countmatchingannotations"))
+         {
+            json = countMatchingAnnotations(request, response, store);
+         }
+         else if (pathInfo.endsWith("getmatchingannotations"))
+         {
+            json = getMatchingAnnotations(request, response, store);
+         }
+         else if (pathInfo.endsWith("countannotations"))
+         {
+            json = countAnnotations(request, response, store);
+         }
+         else if (pathInfo.endsWith("getannotations"))
+         {
+            json = getAnnotations(request, response, store);
+         }
+         else if (pathInfo.endsWith("getanchors"))
+         {
+            json = getAnchors(request, response, store);
+         }
+         else if (pathInfo.endsWith("getmediatracks"))
+         {
+            json = getMediaTracks(request, response, store);
+         }
+         else if (pathInfo.endsWith("getavailablemedia"))
+         {
+            json = getAvailableMedia(request, response, store);
+         }
+         else if (pathInfo.endsWith("getgraph"))
+         {
+            json = getGraph(request, response, store);
+         }
+         else if (pathInfo.endsWith("getmedia"))
+         {
+            json = getMedia(request, response, store);
+         }
+         else if (pathInfo.endsWith("getepisodedocuments"))
+         {
+            json = getEpisodeDocuments(request, response, store);
+         }
       }
       return json;
    } // end of invokeFunction()
@@ -374,6 +405,7 @@ public class StoreQuery
    {
       JSONObject response = new JSONObject();
       response.put("title", title);
+      response.put("version", version);
       response.put("code", 0); // TODO deprecate?
       response.put("errors", new JSONArray());
       if (message == null)
@@ -411,6 +443,7 @@ public class StoreQuery
    {
       JSONObject result = new JSONObject();
       result.put("title", title);
+      result.put("version", version);
       result.put("code", 1); // TODO deprecate?
       if (messages == null)
       {
@@ -434,6 +467,7 @@ public class StoreQuery
    {
       JSONObject result = new JSONObject();
       result.put("title", title);
+      result.put("version", version);
       result.put("code", 1); // TODO deprecate?
       if (message == null)
       {
@@ -457,6 +491,7 @@ public class StoreQuery
    {
       JSONObject result = new JSONObject();
       result.put("title", title);
+      result.put("version", version);
       result.put("code", 1); // TODO deprecate?
       result.append("errors", t.getMessage());
       result.put("exception", new JSONObject()
