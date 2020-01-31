@@ -151,11 +151,10 @@ public class StoreQuery
             { // no store yet, so create one
                store = new SqlGraphStoreAdministration(
                   baseUrl(request), connection, request.getRemoteUser());
-
-               if (title == null)
-               {
-                  title = store.getSystemAttribute("title");
-               }
+            }
+            if (title == null)
+            {
+               title = store.getSystemAttribute("title");
             }
             try
             {
@@ -230,7 +229,7 @@ public class StoreQuery
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
    {
       JSONObject json = null;
-      if (request.getPathInfo() == null)
+      if (request.getPathInfo() == null || request.getPathInfo().equals("/"))
       { // no path component
          json = successResult(null, null);
          // redirect /store?call=getXXX to /store/getXXX
