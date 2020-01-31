@@ -67,7 +67,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getId</h4>
+          <h4>/store/getId</h4>
           <div class="block">Gets the store's ID.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -80,7 +80,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getLayerIds</h4>
+          <h4>/store/getLayerIds</h4>
           <div class="block">Gets a list of layer IDs (annotation 'types').</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -93,7 +93,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getLayers</h4>
+          <h4>/store/getLayers</h4>
           <div class="block">Gets a list of layer definitions.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -106,7 +106,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getSchema</h4>
+          <h4>/store/getSchema</h4>
           <div class="block">Gets the layer schema.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -119,7 +119,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getLayer</h4>
+          <h4>/store/getLayer</h4>
           <div class="block">Gets a layer definition.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -134,7 +134,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getCorpusIds</h4>
+          <h4>/store/getCorpusIds</h4>
           <div class="block">Gets a list of corpus IDs.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -147,7 +147,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getParticipantIds</h4>
+          <h4>/store/getParticipantIds</h4>
           <div class="block">Gets a list of participant IDs.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -160,7 +160,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getParticipant</h4>
+          <h4>/store/getParticipant</h4>
           <div class="block">Gets the participant record specified by the given identifier.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -176,7 +176,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/countMatchingParticipantIds</h4>
+          <h4>/store/countMatchingParticipantIds</h4>
           <div class="block">Counts the number of participants that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -204,7 +204,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getMatchingParticipantIds</h4>
+          <h4>/store/getMatchingParticipantIds</h4>
           <div class="block">Gets a list of IDs of participants that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -234,7 +234,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getGraphIds</h4>
+          <h4>/store/getGraphIds</h4>
           <div class="block">Gets a list of graph IDs.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -247,7 +247,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getGraphIdsInCorpus</h4>
+          <h4>/store/getGraphIdsInCorpus</h4>
           <div class="block">Gets a list of graph IDs in the given corpus.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -262,7 +262,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getGraphIdsWithParticipant</h4>
+          <h4>/store/getGraphIdsWithParticipant</h4>
           <div class="block">Gets a list of IDs of graphs that include the given participant.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -277,7 +277,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/countMatchingGraphIds</h4>
+          <h4>/store/countMatchingGraphIds</h4>
           <div class="block">Counts the number of graphs that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -310,7 +310,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getMatchingGraphIds</h4>
+          <h4>/store/getMatchingGraphIds</h4>
           <div class="block"><p>Gets a list of IDs of graphs that match a particular pattern.</p>
             <p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
               can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
@@ -351,7 +351,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/countMatchingAnnotations</h4>
+          <h4>/store/countMatchingAnnotations</h4>
           <div class="block">Counts the number of annotations that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -376,7 +376,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getMatchingAnnotations</h4>
+          <h4>/store/getMatchingAnnotations</h4>
           <div class="block">Gets a list of annotations that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -404,7 +404,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/countAnnotations</h4>
+          <h4>/store/countAnnotations</h4>
           <div class="block">Gets the number of annotations on the given layer of the given graph.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -420,7 +420,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getAnnotations</h4>
+          <h4>/store/getAnnotations</h4>
           <div class="block">Gets the annotations on the given layer of the given graph.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -438,7 +438,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getAnchors</h4>
+          <h4>/store/getAnchors</h4>
           <div class="block">Gets the given anchors in the given graph.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -454,7 +454,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getGraph</h4>
+          <h4>/store/getGraph</h4>
           <div class="block">Gets a graph given its ID, containing only the given layers.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -470,7 +470,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getMediaTracks</h4>
+          <h4>/store/getMediaTracks</h4>
           <div class="block">List the predefined media tracks available for transcripts.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -483,7 +483,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getAvailableMedia</h4>
+          <h4>/store/getAvailableMedia</h4>
           <div class="block">List the media available for the given graph.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -498,7 +498,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/store/getMedia</h4>
+          <h4>/store/getMedia</h4>
           <div class="block">Gets a given media track for a given graph.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -546,7 +546,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>getMatchingAnnotations</h4>
+          <h4>/store/getMatchingAnnotations</h4>
           <div class="block">Gets a list of annotations that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -574,7 +574,7 @@
       </a>
       <ul class="blockListLast">
         <li class="blockList">
-          <h4>getEpisodeDocuments</h4>
+          <h4>/store/getEpisodeDocuments</h4>
           <div class="block">Get a list of documents associated with the episode of the given graph.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -595,13 +595,13 @@
     <li class="blockList"><a id="method.detail">
         <!--   -->
       </a>
-      <h3>/edit/api/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
+      <h3>/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
       <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
         <!--   -->
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/edit/store/createAnnotation</h4>
+          <h4>/edit/store/createAnnotation</h4>
           <div class="block">Creates an annotation starting at <var>from</var> and ending at <var>to</var>.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -622,7 +622,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>destroyAnnotation</h4>
+          <h4>/edit/store/destroyAnnotation</h4>
           <div class="block">Destroys the annotation with the given ID.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -636,7 +636,7 @@
       </a>
       <ul class="blockListLast">
         <li class="blockList">
-          <h4>deleteGraph</h4>
+          <h4>/edit/store/deleteGraph</h4>
           <pre class="methodSignature">void&nbsp;deleteGraph&#8203;(String&nbsp;id)
             throws <a href="StoreException.html" title="class in nzilbb.ag">StoreException</a>,
             <a href="PermissionException.html" title="class in nzilbb.ag">PermissionException</a>,
