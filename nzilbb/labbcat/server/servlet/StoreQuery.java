@@ -231,9 +231,12 @@ public class StoreQuery
       JSONObject json = null;
       if (request.getPathInfo() == null || request.getPathInfo().equals("/"))
       { // no path component
-         json = successResult(null, null);
+         json = successResult(
+            // send the version in the model for backwards compatibility with labbcat-R <= 0.4-2
+            new JSONObject().put("version", version), null);
          // redirect /store?call=getXXX to /store/getXXX
-         if (request.getMethod().equals("GET") && request.getParameter("call") != null)
+         if (request.getMethod().equals("GET")
+             && request.getParameter("call") != null && request.getParameter("call").length() > 0)
          {
             response.sendRedirect(
                request.getRequestURI()
