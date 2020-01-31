@@ -24,13 +24,37 @@
  * <q>application/json</q> return a JSON response with the same structure:
  * <dl>
  *  <dt>title</dt> <dd>(string) The title of the LaBB-CAT instance.</dd>
+ *  <dt>version</dt> <dd>(string) The version of the LaBB-CAT instance</dd>
  *  <dt>code</dt> <dd>(int) 0 if the request was successful, 1 if there was a problem</dd>
  *  <dt>messages</dt> <dd>An array of message strings.</dd>
  *  <dt>errors</dt> <dd>An array of error message strings.</dd>
  *  <dt>model</dt> <dd>The result of the request, which may be a JSON object, JSON array,
  *   or a simple type.</dd>
  * </dl>
- * <p>Graph store implementations include:
+ * <p>e.g. the response to 
+ * <tt>http://localhost:8080/labbcat/api/store/getLayer?id=transcript</tt>
+ * might be:
+ * <pre>{
+ *    "title":"LaBB-CAT",
+ *    "version":"20200129.1901",
+ *    "code":0,
+ *    "errors":[],
+ *    "messages":[],
+ *    "model":{
+ *        "id":"transcript",
+ *        "parentId":"turns",
+ *        "description":"Original transcription",
+ *        "alignment":2,
+ *        "peers":true,
+ *        "peersOverlap":false,
+ *        "parentIncludes":true,
+ *        "saturated":false,
+ *        "type":"string",
+ *        "validLabels":{},
+ *        "category":null
+ *    }
+ *}</pre>
+ * <p>Graph store functions include:
 <!-- Based on IGraphStoreQuery javadoc -->
 <section role="region">
   <ul class="blockList">
