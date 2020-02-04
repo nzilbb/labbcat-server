@@ -2787,6 +2787,7 @@ public class SqlGraphStore
          for (String layerId : layerIds)
          {
             Layer layer = schema.getLayer(layerId);
+            assert layer != null : "layer != null - layerId: " + layerId;
             layers.add(layer);
             if (targetLayer.containsKey("@layer_id") // target is segment
                 && targetLayer.get("@layer_id").equals(Integer.valueOf(SqlConstants.LAYER_SEGMENT))
