@@ -26,8 +26,8 @@ package nzilbb.labbcat.server.db;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class SqlConstants
-{
+public class SqlConstants {
+   
    /** Database Layer ID for raw transcription layer - i.e. how the transcript was typed
     * in Transcriber */
    public static final int LAYER_TRANSCRIPTION = 0;

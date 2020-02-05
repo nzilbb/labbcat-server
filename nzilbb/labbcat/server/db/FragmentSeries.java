@@ -35,9 +35,8 @@ import nzilbb.util.MonitorableSeries;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class FragmentSeries
-   implements MonitorableSeries<Graph>
-{
+public class FragmentSeries implements MonitorableSeries<Graph> {
+   
    // Attributes:
 
    private long nextRow = 0;
@@ -110,8 +109,8 @@ public class FragmentSeries
     * @throws SQLException If an error occurs retrieving results.
     */
    public FragmentSeries(Collection<String> fragmentIds, SqlGraphStore store, String[] layers)
-      throws SQLException
-   {
+      throws SQLException {
+      
       setFragmentIds(fragmentIds);
       setStore(store);
       setLayers(layers);
@@ -121,8 +120,8 @@ public class FragmentSeries
 
    // Spliterator implementations
    
-   public int characteristics()
-   {
+   public int characteristics() {
+      
       return ORDERED | DISTINCT | IMMUTABLE | NONNULL | SUBSIZED | SIZED;
    }
    
@@ -130,22 +129,19 @@ public class FragmentSeries
     * Returns the next element of this enumeration if this enumeration object has at least
     * one more element to provide.
     */
-   public boolean tryAdvance(Consumer<? super Graph> action)
-   {
+   public boolean tryAdvance(Consumer<? super Graph> action) {
+      
       if (cancelling) return false;
       if (!iterator.hasNext()) return false;
       String spec = iterator.next();
-      try
-      {
+      try {
 	 nextRow++;
          String[] parts = spec.split(";");
 	 String graphId = parts[0];
          if (graphId.startsWith("g_")) graphId = graphId.substring(2);
          String intervalPart = null;
-         for (int p = 1; p < parts.length; p++)
-         {
-            if (parts[p].indexOf("-") > 0)
-            {
+         for (int p = 1; p < parts.length; p++) {
+            if (parts[p].indexOf("-") > 0) {
                intervalPart = parts[p];
                break;
             }
@@ -153,30 +149,24 @@ public class FragmentSeries
 	 String[] interval = intervalPart.split("-");
 	 double start = 0.0;
 	 double end = 0.0;
-         if (interval[0].startsWith("n_"))
-         { // anchor IDs
+         if (interval[0].startsWith("n_")) { // anchor IDs
             Anchor[] anchors = store.getAnchors(graphId, interval);
             start = anchors[0].getOffset();
             end = anchors[1].getOffset();
-         }
-         else
-         { // offsets
+         } else { // offsets
             start = Double.parseDouble(interval[0]);
             end = Double.parseDouble(interval[1]);
          }
 	 String prefix = "";
 	 String filterId = "";
-         for (int p = 1; p < parts.length; p++)
-         {
-            if (parts[p].startsWith("prefix="))
-            {
+         for (int p = 1; p < parts.length; p++) {
+            if (parts[p].startsWith("prefix=")) {
                prefix = parts[p].substring("prefix=".length());
             }
             if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))
                 // don't filter by utterance - it usuall has no descendants, so just makes things
                 // slower without actually discarding anything
-                && !parts[p].startsWith("em_12_"))
-            {
+                && !parts[p].startsWith("em_12_")) {
                filterId = parts[p];
             }
          }
@@ -184,18 +174,14 @@ public class FragmentSeries
          Graph fragment = store.getFragment(graphId, start, end, layers);
          fragment.shiftAnchors(-start);
          if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());
-         if (filterId.length() > 0)
-         { // filter annotation is specified
+         if (filterId.length() > 0) { // filter annotation is specified
             // remove annotations that don't belong to the specified filter annotation
             Annotation targetAncestor = fragment.getAnnotationsById().get(filterId);
-            if (targetAncestor != null)
-            { // target is in the graph
-               for (Annotation a : fragment.getAnnotationsById().values())
-               {
-                  if (a.getLayer().isAncestor(targetAncestor.getLayerId()))
-                  { // annotation is a descendent of the participant layer
-                     if (a.my(targetAncestor.getLayerId()) != targetAncestor)
-                     {
+            if (targetAncestor != null) { // target is in the graph
+               for (Annotation a : fragment.getAnnotationsById().values()) {
+                  if (a.getLayer().isAncestor(targetAncestor.getLayerId())) {
+                     // annotation is a descendent of the participant layer
+                     if (a.my(targetAncestor.getLayerId()) != targetAncestor) {
                         a.destroy();
                      } // annotation has a different ancestor on the same layer
                   } // annotation is a descendent of the target layer
@@ -205,9 +191,7 @@ public class FragmentSeries
          fragment.commit();
 	 action.accept(fragment);
          return true;
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
          System.err.println("FragmentSeries: Could not get fragment from spec \""+spec+"\": "
                             + exception);
 	 return false;
@@ -218,14 +202,14 @@ public class FragmentSeries
     * Counts the elements in the series, if possible.
     * @return The number of elements in the series, or null if the number is unknown.
     */
-   public long estimateSize()
-   {
+   public long estimateSize() {
+      
       if (rowCount >= 0) return rowCount;
       return Long.MAX_VALUE;
    }
 
-   public Spliterator<Graph> trySplit()
-   {
+   public Spliterator<Graph> trySplit() {
+      
       return null;
    }
 
@@ -235,10 +219,9 @@ public class FragmentSeries
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer getPercentComplete()
-   {
-      if (rowCount > 0)
-      {
+   public Integer getPercentComplete() {
+      
+      if (rowCount > 0) {
 	 return (int)((nextRow * 100) / rowCount);
       }
       return null;
@@ -247,8 +230,8 @@ public class FragmentSeries
    /**
     * Cancels spliteration; the next call to tryAdvance will return false.
     */
-   public void cancel()
-   {
+   public void cancel() {
+      
       cancelling = true;
    }
 } // end of class FragmentSeries

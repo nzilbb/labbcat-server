@@ -52,9 +52,7 @@ import org.xml.sax.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/api/store/*", "/store/*"} )
-public class StoreQuery
-   extends HttpServlet
-{
+public class StoreQuery extends HttpServlet {
    // Attributes:
 
    protected String driverName;
@@ -70,37 +68,29 @@ public class StoreQuery
    /**
     * Default constructor.
     */
-   public StoreQuery()
-   {
+   public StoreQuery() {
    } // end of constructor
 
    /** 
     * Initialise the servlet by loading the database connection settings.
     */
-   public void init()
-   {
-      try
-      {
+   public void init() {
+      try {
          log("init...");
 
          // get version info
          File versionTxt = new File(getServletContext().getRealPath("version.txt"));
-         if (versionTxt.exists())
-         {
-            try
-            {
+         if (versionTxt.exists()) {
+            try {
                version = IO.InputStreamToString(new FileInputStream(versionTxt));
-            }
-            catch(IOException exception)
-            {
+            } catch(IOException exception) {
                log("Can't read version.txt: " + exception);
             }
          }
 
          // get database connection info
          File contextXml = new File(getServletContext().getRealPath("META-INF/context.xml"));
-         if (contextXml.exists())
-         { // get database connection configuration from context.xml
+         if (contextXml.exists()) { // get database connection configuration from context.xml
             Document doc = DocumentBuilderFactory.newInstance()
                .newDocumentBuilder().parse(new InputSource(new FileInputStream(contextXml)));
             
@@ -113,14 +103,10 @@ public class StoreQuery
 
             // ensure it's registered with the driver manager
             Class.forName(driverName).getConstructor().newInstance();
-         } // get database connection configuration from context.xml
-         else
-         {
+         } else {
             log("Configuration file not found: " + contextXml.getPath());
          }
-      }
-      catch (Exception x)
-      {
+      } catch (Exception x) {
          log("failed", x);
       } 
    }
@@ -130,74 +116,53 @@ public class StoreQuery
     */
    @Override
    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException
-   {
+      throws ServletException, IOException {
+      
       JSONObject json = null;
-      try
-      {
+      try {
          Connection connection = newConnection();
-         try
-         {
+         try {
             SqlGraphStoreAdministration store = (SqlGraphStoreAdministration)
                request.getSession().getAttribute("store");
-            if (store != null)
-            { // use this request's connection
+            if (store != null) { // use this request's connection
                store.setConnection(connection);
                
                // stop other requests from using this store at the same time
                request.getSession().setAttribute("store", null);
-            }
-            else
-            { // no store yet, so create one
+            } else { // no store yet, so create one
                store = new SqlGraphStoreAdministration(
                   baseUrl(request), connection, request.getRemoteUser());
             }
-            if (title == null)
-            {
+            if (title == null) {
                title = store.getSystemAttribute("title");
             }
-            try
-            {
+            try {
                json = invokeFunction(request, response, store);
-               if (json == null)
-               {
+               if (json == null) {
                   response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                   json = failureResult("Invalid path: " + request.getPathInfo());
                }
-            }
-            finally
-            {
+            } finally {
                // allow other requests in the session to use this store, to allow re-use of cached objects
                request.getSession().setAttribute("store", store);
             }
-         }
-         finally
-         {
+         } finally {
             connection.close();
          }
-      }
-      catch (GraphNotFoundException x)
-      {         
+      } catch (GraphNotFoundException x) {         
          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
          json = failureResult(x);
-      }
-      catch (PermissionException x)
-      {
+      } catch (PermissionException x) {
          response.setStatus(HttpServletResponse.SC_FORBIDDEN);
          json = failureResult(x);
-      }
-      catch (StoreException x)
-      {
+      } catch (StoreException x) {
          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
          json = failureResult(x);
-      }
-      catch (SQLException x)
-      {
+      } catch (SQLException x) {
          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
          json = failureResult("Cannot connect to database." + x.getMessage());
       }
-      if (json != null)
-      {
+      if (json != null) {
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
          json.write(response.getWriter());
@@ -212,8 +177,8 @@ public class StoreQuery
     */
    @Override
    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException
-   {
+      throws ServletException, IOException {
+      
       doGet(request, response);
    }
 
@@ -226,125 +191,74 @@ public class StoreQuery
     * @return The response to send to the caller, or null if the request could not be interpreted.
     */
    protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      
       JSONObject json = null;
-      if (request.getPathInfo() == null || request.getPathInfo().equals("/"))
-      { // no path component
+      if (request.getPathInfo() == null || request.getPathInfo().equals("/")) {
+         // no path component
          json = successResult(
             // send the version in the model for backwards compatibility with labbcat-R <= 0.4-2
             new JSONObject().put("version", version), null);
          // redirect /store?call=getXXX to /store/getXXX
          if (request.getMethod().equals("GET")
-             && request.getParameter("call") != null && request.getParameter("call").length() > 0)
-         {
+             && request.getParameter("call") != null
+             && request.getParameter("call").length() > 0) {
             response.sendRedirect(
                request.getRequestURI()
                + "/" + request.getParameter("call")
                + "?" + request.getQueryString());
          }
-      }
-      else
-      {
+      } else {
          String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
-         if (pathInfo.endsWith("getid"))
-         {
+         if (pathInfo.endsWith("getid")) {
             json = getId(request, response, store);
-         }
-         else if (pathInfo.endsWith("getschema"))
-         {
+         } else if (pathInfo.endsWith("getschema")) {
             json = getSchema(request, response, store);
-         }
-         else if (pathInfo.endsWith("getlayerids"))
-         {
+         } else if (pathInfo.endsWith("getlayerids")) {
             json = getLayerIds(request, response, store);
-         }
-         else if (pathInfo.endsWith("getlayers"))
-         {
+         } else if (pathInfo.endsWith("getlayers")) {
             json = getLayers(request, response, store);
-         }
-         else if (pathInfo.endsWith("getlayer"))
-         {
+         } else if (pathInfo.endsWith("getlayer")) {
             json = getLayer(request, response, store);
-         }
-         else if (pathInfo.endsWith("getcorpusids"))
-         {
+         } else if (pathInfo.endsWith("getcorpusids")) {
             json = getCorpusIds(request, response, store);
-         }
-         else if (pathInfo.endsWith("getparticipantids"))
-         {
+         } else if (pathInfo.endsWith("getparticipantids")) {
             json = getParticipantIds(request, response, store);
-         }
-         else if (pathInfo.endsWith("getparticipant"))
-         {
+         } else if (pathInfo.endsWith("getparticipant")) {
             json = getParticipant(request, response, store);
-         }
-         else if (pathInfo.endsWith("countmatchingparticipantids"))
-         {
+         } else if (pathInfo.endsWith("countmatchingparticipantids")) {
             json = countMatchingParticipantIds(request, response, store);
-         }
-         else if (pathInfo.endsWith("getmatchingparticipantids"))
-         {
+         } else if (pathInfo.endsWith("getmatchingparticipantids")) {
             json = getMatchingParticipantIds(request, response, store);
-         }
-         else if (pathInfo.endsWith("getgraphids"))
-         {
+         } else if (pathInfo.endsWith("getgraphids")) {
             json = getGraphIds(request, response, store);
-         }
-         else if (pathInfo.endsWith("getgraphidsincorpus"))
-         {
+         } else if (pathInfo.endsWith("getgraphidsincorpus")) {
             json = getGraphIdsInCorpus(request, response, store);
-         }
-         else if (pathInfo.endsWith("getgraphidswithparticipant"))
-         {
+         } else if (pathInfo.endsWith("getgraphidswithparticipant")) {
             json = getGraphIdsWithParticipant(request, response, store);
-         }
-         else if (pathInfo.endsWith("countmatchinggraphids"))
-         {
+         } else if (pathInfo.endsWith("countmatchinggraphids")) {
             json = countMatchingGraphIds(request, response, store);
-         }
-         else if (pathInfo.endsWith("getmatchinggraphids"))
-         {
+         } else if (pathInfo.endsWith("getmatchinggraphids")) {
             json = getMatchingGraphIds(request, response, store);
-         }
-         else if (pathInfo.endsWith("countmatchingannotations"))
-         {
+         } else if (pathInfo.endsWith("countmatchingannotations")) {
             json = countMatchingAnnotations(request, response, store);
-         }
-         else if (pathInfo.endsWith("getmatchingannotations"))
-         {
+         } else if (pathInfo.endsWith("getmatchingannotations")) {
             json = getMatchingAnnotations(request, response, store);
-         }
-         else if (pathInfo.endsWith("countannotations"))
-         {
+         } else if (pathInfo.endsWith("countannotations")) {
             json = countAnnotations(request, response, store);
-         }
-         else if (pathInfo.endsWith("getannotations"))
-         {
+         } else if (pathInfo.endsWith("getannotations")) {
             json = getAnnotations(request, response, store);
-         }
-         else if (pathInfo.endsWith("getanchors"))
-         {
+         } else if (pathInfo.endsWith("getanchors")) {
             json = getAnchors(request, response, store);
-         }
-         else if (pathInfo.endsWith("getmediatracks"))
-         {
+         } else if (pathInfo.endsWith("getmediatracks")) {
             json = getMediaTracks(request, response, store);
-         }
-         else if (pathInfo.endsWith("getavailablemedia"))
-         {
+         } else if (pathInfo.endsWith("getavailablemedia")) {
             json = getAvailableMedia(request, response, store);
-         }
-         else if (pathInfo.endsWith("getgraph"))
-         {
+         } else if (pathInfo.endsWith("getgraph")) {
             json = getGraph(request, response, store);
-         }
-         else if (pathInfo.endsWith("getmedia"))
-         {
+         } else if (pathInfo.endsWith("getmedia")) {
             json = getMedia(request, response, store);
-         }
-         else if (pathInfo.endsWith("getepisodedocuments"))
-         {
+         } else if (pathInfo.endsWith("getepisodedocuments")) {
             json = getEpisodeDocuments(request, response, store);
          }
       }
@@ -357,8 +271,7 @@ public class StoreQuery
     * @throws Exception
     */
    protected Connection newConnection()
-      throws SQLException
-   { 
+      throws SQLException { 
       return DriverManager.getConnection(connectionURL, connectionName, connectionPassword);
    } // end of newDatabaseConnection()
    
@@ -367,34 +280,26 @@ public class StoreQuery
     * @param request The request.
     * @return The baseUrl.
     */
-   protected String baseUrl(HttpServletRequest request)
-   {
-      if (request.getSession() != null && request.getSession().getAttribute("baseUrl") != null)
-      { // get it from the session
+   protected String baseUrl(HttpServletRequest request) {
+      if (request.getSession() != null && request.getSession().getAttribute("baseUrl") != null) {
+         // get it from the session
          return request.getSession().getAttribute("baseUrl").toString();
-      }
-      else if (getServletContext().getInitParameter("baseUrl") != null
-               && getServletContext().getInitParameter("baseUrl").length() > 0)
-      { // get it from the webapp configuration
+      } else if (getServletContext().getInitParameter("baseUrl") != null
+               && getServletContext().getInitParameter("baseUrl").length() > 0) {
+         // get it from the webapp configuration
          return getServletContext().getInitParameter("baseUrl");
-      }
-      else
-      { // infer it from the request itself
-         try
-         {
+      } else { // infer it from the request itself
+         try {
             URL url = new URL(request.getRequestURL().toString());
             return url.getProtocol() + "://"
                + url.getHost() + (url.getPort() < 0?"":":"+url.getPort())
                + ("/".equals(
                      getServletContext().getContextPath())?""
                   :getServletContext().getContextPath());
-         }
-         catch(MalformedURLException exception)
-         {
+         } catch(MalformedURLException exception) {
             return request.getRequestURI().replaceAll("/api/store/.*","");
          }
       }
-
    } // end of baseUrl()
    
    /**
@@ -403,34 +308,24 @@ public class StoreQuery
     * @param message An optional message to include in the response envelope.
     * @return An object for returning as the request result.
     */
-   protected JSONObject successResult(Object result, String message)
-   {
+   protected JSONObject successResult(Object result, String message) {
       JSONObject response = new JSONObject();
       response.put("title", title);
       response.put("version", version);
       response.put("code", 0); // TODO deprecate?
       response.put("errors", new JSONArray());
-      if (message == null)
-      {
+      if (message == null) {
          response.put("messages", new JSONArray());
-      }
-      else
-      {
+      } else {
          response.append("messages", message);
       }
-      if (result != null)
-      {
-         if (result instanceof IJSONableBean)
-         {
+      if (result != null) {
+         if (result instanceof IJSONableBean) {
             response.put("model", new JSONObject((IJSONableBean)result));
-         }
-         else
-         {
+         } else {
             response.put("model", result);
          }
-      }
-      else
-      {
+      } else {
          response.put("model", JSONObject.NULL);
       }
       return response;
@@ -441,18 +336,14 @@ public class StoreQuery
     * @param messages The error messages to return.
     * @return An object for returning as the request result.
     */
-   protected JSONObject failureResult(Collection<String> messages)
-   {
+   protected JSONObject failureResult(Collection<String> messages) {
       JSONObject result = new JSONObject();
       result.put("title", title);
       result.put("version", version);
       result.put("code", 1); // TODO deprecate?
-      if (messages == null)
-      {
+      if (messages == null) {
          result.put("errors", new JSONArray());
-      }
-      else
-      {
+      } else {
          result.put("errors", messages);
       }
       result.put("messages", new JSONArray());
@@ -465,18 +356,14 @@ public class StoreQuery
     * @param message The error message to return.
     * @return An object for returning as the request result.
     */
-   protected JSONObject failureResult(String message)
-   {
+   protected JSONObject failureResult(String message) {
       JSONObject result = new JSONObject();
       result.put("title", title);
       result.put("version", version);
       result.put("code", 1); // TODO deprecate?
-      if (message == null)
-      {
+      if (message == null) {
          result.put("errors", new JSONArray());
-      }
-      else
-      {
+      } else {
          result.append("errors", message);
       }
       result.put("messages", new JSONArray());
@@ -489,8 +376,7 @@ public class StoreQuery
     * @param message The error message to return.
     * @return An object for returning as the request result.
     */
-   protected JSONObject failureResult(Throwable t)
-   {
+   protected JSONObject failureResult(Throwable t) {
       JSONObject result = new JSONObject();
       result.put("title", title);
       result.put("version", version);
@@ -515,8 +401,7 @@ public class StoreQuery
     */
    protected JSONObject getId(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
       return successResult(store.getId(), null);
    }      
    
@@ -529,8 +414,8 @@ public class StoreQuery
     */
    protected JSONObject getLayerIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       return successResult(store.getLayerIds(), null);
    }      
    
@@ -543,8 +428,8 @@ public class StoreQuery
     */
    protected JSONObject getLayers(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       Layer[] layers = store.getLayers();
       // unset children so that JSON serialization doesn't double-up layers
       for (Layer layer : layers) layer.setChildren(null);
@@ -560,8 +445,8 @@ public class StoreQuery
     */
    protected JSONObject getSchema(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       return successResult(store.getSchema(), null);
    }      
    
@@ -574,8 +459,8 @@ public class StoreQuery
     */
    protected JSONObject getLayer(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
       return successResult(store.getLayer(id), null);
@@ -590,8 +475,8 @@ public class StoreQuery
     */
    protected JSONObject getCorpusIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String[] ids = store.getCorpusIds();
       return successResult(ids, ids.length == 0?"There are no corpora.":null);
    }      
@@ -605,8 +490,8 @@ public class StoreQuery
     */
    protected JSONObject getParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String[] ids = store.getParticipantIds();
       return successResult(ids, ids.length == 0?"There are no participants.":null);
    }
@@ -620,8 +505,8 @@ public class StoreQuery
     */
    protected JSONObject getParticipant(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
       Annotation participant = store.getParticipant(id);
@@ -642,8 +527,8 @@ public class StoreQuery
     */
    protected JSONObject countMatchingParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String expression = request.getParameter("expression");
       if (expression == null) return failureResult("No expression specified.");
       return successResult(store.countMatchingParticipantIds(expression), null);
@@ -658,32 +543,24 @@ public class StoreQuery
     */
    protected JSONObject getMatchingParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       Vector<String> errors = new Vector<String>();
       String expression = request.getParameter("expression");
       if (expression == null) errors.add("No expression specified.");
       Integer pageLength = null;
-      if (request.getParameter("pageLength") != null)
-      {
-         try
-         {
+      if (request.getParameter("pageLength") != null) {
+         try {
             pageLength = Integer.valueOf(request.getParameter("pageLength"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid pageLength: " + x.getMessage());
          }
       }
       Integer pageNumber = null;
-      if (request.getParameter("pageNumber") != null)
-      {
-         try
-         {
+      if (request.getParameter("pageNumber") != null) {
+         try {
             pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid pageNumber: " + x.getMessage());
          }
       }
@@ -701,8 +578,8 @@ public class StoreQuery
     */
    protected JSONObject getGraphIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       return successResult(store.getGraphIds(), null);
    }      
    
@@ -715,8 +592,8 @@ public class StoreQuery
     */
    protected JSONObject getGraphIdsInCorpus(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
       String[] ids = store.getGraphIdsInCorpus(id);
@@ -732,8 +609,8 @@ public class StoreQuery
     */
    protected JSONObject getGraphIdsWithParticipant(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
       String[] ids = store.getGraphIdsWithParticipant(id);
@@ -749,8 +626,8 @@ public class StoreQuery
     */
    protected JSONObject countMatchingGraphIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String expression = request.getParameter("expression");
       if (expression == null) return failureResult("No expression specified.");
       return successResult(store.countMatchingGraphIds(expression), null);
@@ -765,32 +642,24 @@ public class StoreQuery
     */
    protected JSONObject getMatchingGraphIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       Vector<String> errors = new Vector<String>();
       String expression = request.getParameter("expression");
       if (expression == null) errors.add("No expression specified.");
       Integer pageLength = null;
-      if (request.getParameter("pageLength") != null)
-      {
-         try
-         {
+      if (request.getParameter("pageLength") != null) {
+         try {
             pageLength = Integer.valueOf(request.getParameter("pageLength"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid pageLength: " + x.getMessage());
          }
       }
       Integer pageNumber = null;
-      if (request.getParameter("pageNumber") != null)
-      {
-         try
-         {
+      if (request.getParameter("pageNumber") != null) {
+         try {
             pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid pageNumber: " + x.getMessage());
          }
       }
@@ -808,15 +677,16 @@ public class StoreQuery
     */
    protected JSONObject countMatchingAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       String expression = request.getParameter("expression");
       if (expression == null) return failureResult("No expression specified.");
       return successResult(store.countMatchingAnnotations(expression), null);
    }      
    
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingAnnotations(String,Integer,Integer)}
+    * Implementation of
+    * {@link nzilbb.ag.IGraphStoreQuery#getMatchingAnnotations(String,Integer,Integer)}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
@@ -824,32 +694,24 @@ public class StoreQuery
     */
    protected JSONObject getMatchingAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       Vector<String> errors = new Vector<String>();
       String expression = request.getParameter("expression");
       if (expression == null) errors.add("No expression specified.");
       Integer pageLength = null;
-      if (request.getParameter("pageLength") != null)
-      {
-         try
-         {
+      if (request.getParameter("pageLength") != null) {
+         try {
             pageLength = Integer.valueOf(request.getParameter("pageLength"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid pageLength: " + x.getMessage());
          }
       }
       Integer pageNumber = null;
-      if (request.getParameter("pageNumber") != null)
-      {
-         try
-         {
+      if (request.getParameter("pageNumber") != null) {
+         try {
             pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid pageNumber: " + x.getMessage());
          }
       }
@@ -867,8 +729,8 @@ public class StoreQuery
     */
    protected JSONObject countAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");
@@ -888,34 +750,26 @@ public class StoreQuery
     */
    protected JSONObject getAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");
       String layerId = request.getParameter("layerId");
       if (layerId == null) errors.add("No layerId specified.");
       Integer pageLength = null;
-      if (request.getParameter("pageLength") != null)
-      {
-         try
-         {
+      if (request.getParameter("pageLength") != null) {
+         try {
             pageLength = Integer.valueOf(request.getParameter("pageLength"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid pageLength: " + x.getMessage());
          }
       }
       Integer pageNumber = null;
-      if (request.getParameter("pageNumber") != null)
-      {
-         try
-         {
+      if (request.getParameter("pageNumber") != null) {
+         try {
             pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid pageNumber: " + x.getMessage());
          }
       }
@@ -935,8 +789,8 @@ public class StoreQuery
     */
    protected JSONObject getAnchors(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");
@@ -955,8 +809,8 @@ public class StoreQuery
     */
    protected JSONObject getGraph(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");
@@ -978,8 +832,8 @@ public class StoreQuery
     */
    protected JSONObject getMediaTracks(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException
-   {
+      throws ServletException, IOException, StoreException, PermissionException {
+      
       return successResult(store.getMediaTracks(), null);
    }      
    
@@ -992,8 +846,8 @@ public class StoreQuery
     */
    protected JSONObject getAvailableMedia(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
 
@@ -1014,8 +868,8 @@ public class StoreQuery
     */
    protected JSONObject getMedia(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");
@@ -1023,36 +877,25 @@ public class StoreQuery
       String mimeType = request.getParameter("mimeType");
       if (mimeType == null) errors.add("No mimeType specified.");
       Double startOffset = null;
-      if (request.getParameter("startOffset") != null)
-      {
-         try
-         {
+      if (request.getParameter("startOffset") != null) {
+         try {
             startOffset = Double.valueOf(request.getParameter("startOffset"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid startOffset: " + x.getMessage());
          }
       }
       Double endOffset = null;
-      if (request.getParameter("endOffset") != null)
-      {
-         try
-         {
+      if (request.getParameter("endOffset") != null) {
+         try {
             endOffset = Double.valueOf(request.getParameter("endOffset"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid endOffset: " + x.getMessage());
          }
       }
-      if (startOffset == null && endOffset == null)
-      {
+      if (startOffset == null && endOffset == null) {
          if (errors.size() > 0) return failureResult(errors);
          return successResult(store.getMedia(id, trackSuffix, mimeType), null);
-      }
-      else
-      {
+      } else {
          if (startOffset == null) errors.add("startOffset not specified");
          if (endOffset == null) errors.add("endOffset not specified");
          if (endOffset <= startOffset)
@@ -1071,8 +914,8 @@ public class StoreQuery
     */
    protected JSONObject getEpisodeDocuments(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
 

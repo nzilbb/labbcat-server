@@ -51,9 +51,7 @@ import org.xml.sax.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/edit/store/*", "/api/edit/store/*"})
-public class Store
-   extends StoreQuery
-{
+public class Store extends StoreQuery {
    // Attributes:
 
    // Methods:
@@ -61,15 +59,13 @@ public class Store
    /**
     * Default constructor.
     */
-   public Store()
-   {
+   public Store() {
    } // end of constructor
 
    /** 
     * Initialise the servlet
     */
-   public void init()
-   {
+   public void init() {
       super.init();
    }
 
@@ -87,29 +83,21 @@ public class Store
     */
    @Override
    protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       JSONObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
       // only allow POST requests
-      if (request.getMethod().equals("POST"))
-      {
-         if (pathInfo.endsWith("createannotation"))
-         {
+      if (request.getMethod().equals("POST")) {
+         if (pathInfo.endsWith("createannotation")) {
             json = createAnnotation(request, response, store);
-         }
-         else if (pathInfo.endsWith("destroyannotation"))
-         {
+         } else if (pathInfo.endsWith("destroyannotation")) {
             json = destroyAnnotation(request, response, store);
-         }
-         else if (pathInfo.endsWith("deletegraph"))
-         {
+         } else if (pathInfo.endsWith("deletegraph")) {
             json = deleteGraph(request, response, store);
          }
       } // only if it's a POST request
       
-      if (json == null)
-      { // either not POST or not a recognized function
+      if (json == null) { // either not POST or not a recognized function
          json = super.invokeFunction(request, response, store);
       }
       return json;
@@ -128,8 +116,7 @@ public class Store
     */
    protected JSONObject createAnnotation(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");
@@ -142,18 +129,12 @@ public class Store
       String label = request.getParameter("label");
       if (label == null) errors.add("No label specified.");
       Integer confidence = null;
-      if (request.getParameter("confidence") == null)
-      {
+      if (request.getParameter("confidence") == null) {
          errors.add("No confidence specified.");
-      }
-      else
-      {
-         try
-         {
+      } else {
+         try {
             confidence = Integer.valueOf(request.getParameter("confidence"));
-         }
-         catch(NumberFormatException x)
-         {
+         } catch(NumberFormatException x) {
             errors.add("Invalid confidence: " + x.getMessage());
          }
       }
@@ -173,8 +154,7 @@ public class Store
     */
    protected JSONObject destroyAnnotation(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");
@@ -198,8 +178,7 @@ public class Store
     */
    protected JSONObject deleteGraph(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");

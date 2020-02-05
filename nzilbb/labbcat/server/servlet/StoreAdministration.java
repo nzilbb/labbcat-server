@@ -51,9 +51,7 @@ import org.xml.sax.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/admin/store/*", "/api/admin/store/*"})
-public class StoreAdministration
-   extends Store
-{
+public class StoreAdministration extends Store {
    // Attributes:
 
    // Methods:
@@ -61,15 +59,13 @@ public class StoreAdministration
    /**
     * Default constructor.
     */
-   public StoreAdministration()
-   {
+   public StoreAdministration() {
    } // end of constructor
 
    /** 
     * Initialise the servlet
     */
-   public void init()
-   {
+   public void init() {
       super.init();
    }
 
@@ -87,13 +83,11 @@ public class StoreAdministration
     */
    @Override
    protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException
-   {
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       JSONObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
       // only allow POST requests
-      if (request.getMethod().equals("POST"))
-      {
+      if (request.getMethod().equals("POST")) {
          // TODO
          // if (pathInfo.endsWith("createannotation"))
          // {
@@ -109,8 +103,7 @@ public class StoreAdministration
          // }
       } // only if it's a POST request
       
-      if (json == null)
-      { // either not POST or not a recognized function
+      if (json == null) { // either not POST or not a recognized function
          json = super.invokeFunction(request, response, store);
       }
       return json;

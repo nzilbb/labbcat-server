@@ -35,8 +35,8 @@ import nzilbb.util.MonitorableSeries;
  */
 
 public class ResultSeries
-   implements MonitorableSeries<Graph>
-{
+   implements MonitorableSeries<Graph> {
+   
    // Attributes:
 
    private PreparedStatement sql;
@@ -123,8 +123,8 @@ public class ResultSeries
     * @throws SQLException If an error occurs retrieving results.
     */
    public ResultSeries(long search_id, SqlGraphStore store, String[] layers)
-      throws SQLException
-   {
+      throws SQLException {
+      
       setSearchId(search_id);
       setStore(store);
       setLayers(layers);
@@ -160,27 +160,25 @@ public class ResultSeries
     * <p> This implementation ensures SQL resources are disposed of.
     */
    @SuppressWarnings("deprecation")
-   public void finalize()
-   {
+   public void finalize() {
+      
       if (rs != null) try { rs.close(); } catch(Throwable t) {}
       if (sql != null) try { sql.close(); } catch(Throwable t) {}
    } // end of finalize()
 
    // Spliterator implementations
 
-   public int characteristics()
-   {
+   public int characteristics() {
       return ORDERED | DISTINCT | IMMUTABLE | NONNULL | SUBSIZED | SIZED;
    }
 
    /**
     * Tests if this enumeration contains more elements.
     */
-   public boolean hasMoreElements()
-   {
+   public boolean hasMoreElements() {
+      
       if (rs == null) return false;
-      if (nextRow >= rowCount)
-      {
+      if (nextRow >= rowCount) {
 	 if (rs != null) try { rs.close(); } catch(Throwable t) {}
 	 rs = null;
 	 if (sql != null) try { sql.close(); } catch(Throwable t) {}
@@ -194,12 +192,11 @@ public class ResultSeries
     * Returns the next element of this enumeration if this enumeration object has at least
     * one more element to provide.
     */
-   public boolean tryAdvance(Consumer<? super Graph> action)
-   {
+   public boolean tryAdvance(Consumer<? super Graph> action) {
+      
       if (cancelling) return false;
       if (!hasMoreElements()) return false;
-      try
-      {
+      try {
 	 rs.next();
 	 nextRow++;
          Graph fragment = store.getFragment(
@@ -212,9 +209,7 @@ public class ResultSeries
          }
 	 action.accept(fragment);
          return true;
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
 	 return false;
       }
    }
@@ -223,14 +218,12 @@ public class ResultSeries
     * Counts the elements in the series, if possible.
     * @return The number of elements in the series, or null if the number is unknown.
     */
-   public long estimateSize()
-   {
+   public long estimateSize() {
       if (rowCount >= 0) return rowCount;
       return Long.MAX_VALUE;
    }
 
-   public Spliterator<Graph> trySplit()
-   {
+   public Spliterator<Graph> trySplit() {
       return null;
    }
    
@@ -240,8 +233,7 @@ public class ResultSeries
     * Determines how far through the serialization is.
     * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
     */
-   public Integer getPercentComplete()
-   {
+   public Integer getPercentComplete() {
       if (rowCount > 0)
       {
 	 return (int)((nextRow * 100) / rowCount);
@@ -252,8 +244,7 @@ public class ResultSeries
    /**
     * Cancels spliteration; the next call to tryAdvance will return false.
     */
-   public void cancel()
-   {
+   public void cancel() {
       cancelling = true;
    }
 } // end of class ResultSeries

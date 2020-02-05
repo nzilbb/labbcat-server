@@ -39,8 +39,8 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
-public class ParticipantAgqlToSql
-{
+public class ParticipantAgqlToSql {
+   
    // Attributes:
   
    /**
@@ -66,15 +66,13 @@ public class ParticipantAgqlToSql
    /**
     * Default constructor.
     */
-   public ParticipantAgqlToSql()
-   {
+   public ParticipantAgqlToSql() {
    } // end of constructor
   
    /**
     * Attribute constructor.
     */
-   public ParticipantAgqlToSql(Schema schema)
-   {
+   public ParticipantAgqlToSql(Schema schema) {
       setSchema(schema);
    } // end of constructor
   
@@ -101,43 +99,35 @@ public class ParticipantAgqlToSql
     * @throws AGQLException If the expression is invalid.
     */
    public Query sqlFor(String expression, String sqlSelectClause, String userWhereClause, String sqlOrderClause)
-      throws AGQLException
-   {
+      throws AGQLException {
+      
       final Query q = new Query();
       final StringBuilder conditions = new StringBuilder();
       final Vector<String> errors = new Vector<String>();
       AGQLBaseListener listener = new AGQLBaseListener() {
-            private void space()
-            {
-               if (conditions.length() > 0 && conditions.charAt(conditions.length() - 1) != ' ')
-               {
+            private void space() {
+               if (conditions.length() > 0 && conditions.charAt(conditions.length() - 1) != ' ') {
                   conditions.append(" ");
                }
             }
-            private String unquote(String s)
-            {
+            private String unquote(String s) {
                return s.substring(1, s.length() - 1);
             }
-            private String attribute(String s)
-            {
+            private String attribute(String s) {
                return s.replaceAll("^(participant|transcript)_","");
             }
-            private String escape(String s)
-            {
+            private String escape(String s) {
                return s.replaceAll("\\'", "\\\\'");
             }
-            @Override public void exitThisIdExpression(AGQLParser.ThisIdExpressionContext ctx)
-            {
+            @Override public void exitThisIdExpression(AGQLParser.ThisIdExpressionContext ctx) {
                space();
                conditions.append("speaker.name");
             }
-            @Override public void exitThisLabelExpression(AGQLParser.ThisLabelExpressionContext ctx)
-            {
+            @Override public void exitThisLabelExpression(AGQLParser.ThisLabelExpressionContext ctx) {
                space();
                conditions.append("speaker.name");
             }
-            @Override public void exitCorpusLabelOperand(AGQLParser.CorpusLabelOperandContext ctx)
-            {
+            @Override public void exitCorpusLabelOperand(AGQLParser.CorpusLabelOperandContext ctx) {
                space();
                conditions.append(
                   // TODO technically, a participant can be in more than one corpus
@@ -147,8 +137,7 @@ public class ParticipantAgqlToSql
                   +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
                   +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)");
             }
-            @Override public void enterCorpusLabelsExpression(AGQLParser.CorpusLabelsExpressionContext ctx)
-            {
+            @Override public void enterCorpusLabelsExpression(AGQLParser.CorpusLabelsExpressionContext ctx) {
                space();
                conditions.append(
                   "(SELECT corpus.corpus_name"
@@ -156,20 +145,15 @@ public class ParticipantAgqlToSql
                   +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
                   +" WHERE speaker_corpus.speaker_number = speaker.speaker_number)");
             }
-            @Override public void enterLabelsExpression(AGQLParser.LabelsExpressionContext ctx)
-            {
+            @Override public void enterLabelsExpression(AGQLParser.LabelsExpressionContext ctx) {
                space();
                String layerId = unquote(ctx.stringLiteral().quotedString.getText());
                Layer layer = getSchema().getLayer(layerId);
-               if (layer == null)
-               {
+               if (layer == null) {
                   errors.add("Invalid layer: " + ctx.getText());
-               }
-               else
-               {
+               } else {
                   String attribute = attribute(layerId);
-                  if ("transcript".equals(layer.get("@class_id")))
-                  {
+                  if ("transcript".equals(layer.get("@class_id"))) {
                      conditions.append(
                         "(SELECT DISTINCT label"
                         +" FROM annotation_transcript"
@@ -178,36 +162,27 @@ public class ParticipantAgqlToSql
                         +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                         +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                         +")");
-                  } // transcript attribute
-                  else if ("speaker".equals(layer.get("@class_id")))
-                  {
+                  } else if ("speaker".equals(layer.get("@class_id"))) {
                      conditions.append(
                         "(SELECT DISTINCT label"
                         +" FROM annotation_participant"
                         +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
                         +" AND annotation_participant.speaker_number = speaker.speaker_number"
                         +")");
-                  } // participant attribute
-                  else
-                  {
+                  } else {
                      errors.add("Can only get labels list for participant or transcript attributes: "
                                 + ctx.getText());
                   }
                } // valid layer
             }
-            @Override public void enterOtherLabelExpression(AGQLParser.OtherLabelExpressionContext ctx)
-            {
+            @Override public void enterOtherLabelExpression(AGQLParser.OtherLabelExpressionContext ctx) {
                space();
                String layerId = unquote(ctx.stringLiteral().quotedString.getText());
                Layer layer = getSchema().getLayer(layerId);
-               if (layer == null)
-               {
+               if (layer == null) {
                   errors.add("Invalid layer: " + ctx.getText());
-               }
-               else
-               {
-                  if (!"speaker".equals(layer.get("@class_id")))
-                  {
+               } else {
+                  if (!"speaker".equals(layer.get("@class_id"))) {
                      errors.add("Can only get labels for participant attributes: " + ctx.getText());
                   }
                   String attribute = attribute(layerId);
@@ -219,17 +194,13 @@ public class ParticipantAgqlToSql
                      +" LIMIT 1)");
                } // valid layer
             }
-            @Override public void exitListLengthExpression(AGQLParser.ListLengthExpressionContext ctx)
-            {
+            @Override public void exitListLengthExpression(AGQLParser.ListLengthExpressionContext ctx) {
                space();
                String layerId = unquote(ctx.stringLiteral().quotedString.getText());
                Layer layer = getSchema().getLayer(layerId);
-               if (layer == null)
-               {
+               if (layer == null) {
                   errors.add("Invalid layer: " + ctx.getText());
-               }
-               else
-               {
+               } else {
                   String attribute = attribute(layerId);
                   if ("transcript".equals(layer.get("@class_id")))
                   {
@@ -241,37 +212,28 @@ public class ParticipantAgqlToSql
                         +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                         +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                         +")");
-                  } // transcript attribute
-                  else if ("speaker".equals(layer.get("@class_id")))
-                  {
+                  } else if ("speaker".equals(layer.get("@class_id"))) {
                      conditions.append(
                         "(SELECT COUNT(*)"
                         +" FROM annotation_participant"
                         +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
                         +" AND annotation_participant.speaker_number = speaker.speaker_number"
                         +")");
-                  } // participant attribute
-                  else
-                  {
+                  } else {
                      errors.add("Can only get list length for participant or transcript attributes: "
                                 + ctx.getText());
                   }
                } // valid layer
             }
-            @Override public void enterAnnotatorsExpression(AGQLParser.AnnotatorsExpressionContext ctx)
-            {
+            @Override public void enterAnnotatorsExpression(AGQLParser.AnnotatorsExpressionContext ctx) {
                space();
                String layerId = unquote(ctx.stringLiteral().quotedString.getText());
                Layer layer = getSchema().getLayer(layerId);
-               if (layer == null)
-               {
+               if (layer == null) {
                   errors.add("Invalid layer: " + ctx.getText());
-               }
-               else
-               {
+               } else {
                   String attribute = attribute(layerId);
-                  if ("transcript".equals(layer.get("@class_id")))
-                  {
+                  if ("transcript".equals(layer.get("@class_id"))) {
                      conditions.append(
                         "(SELECT annotated_by"
                         +" FROM annotation_transcript"
@@ -280,83 +242,64 @@ public class ParticipantAgqlToSql
                         +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                         +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                         +")");
-                  } // transcript attribute
-                  else if ("speaker".equals(layer.get("@class_id")))
-                  {
+                  } else if ("speaker".equals(layer.get("@class_id"))) {
                      conditions.append(
                         "(SELECT annotated_by"
                         +" FROM annotation_participant"
                         +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
                         +" AND annotation_participant.speaker_number = speaker.speaker_number"
                         +")");
-                  } // participant attribute
-                  else
-                  {
+                  } else {
                      errors.add("Can only get annotators for participant or transcript attributes: "
                                 + ctx.getText());
                   }
                } // valid layer
             }
-            @Override public void exitWhoLiteralAtom(AGQLParser.WhoLiteralAtomContext ctx)
-            {
+            @Override public void exitWhoLiteralAtom(AGQLParser.WhoLiteralAtomContext ctx) {
                conditions.append(" 'who'");
             }
-            @Override public void exitGraphLiteralAtom(AGQLParser.GraphLiteralAtomContext ctx)
-            {
+            @Override public void exitGraphLiteralAtom(AGQLParser.GraphLiteralAtomContext ctx) {
                conditions.append(" 'graph'");
             }
-            @Override public void exitCorpusLiteralAtom(AGQLParser.CorpusLiteralAtomContext ctx)
-            {
+            @Override public void exitCorpusLiteralAtom(AGQLParser.CorpusLiteralAtomContext ctx) {
                conditions.append(" 'corpus'");
             }
-            @Override public void exitEpisodeLiteralAtom(AGQLParser.EpisodeLiteralAtomContext ctx)
-            {
+            @Override public void exitEpisodeLiteralAtom(AGQLParser.EpisodeLiteralAtomContext ctx) {
                conditions.append(" 'episode'");
             }
-            @Override public void enterAtomListOperand(AGQLParser.AtomListOperandContext ctx)
-            {
+            @Override public void enterAtomListOperand(AGQLParser.AtomListOperandContext ctx) {
                conditions.append(" (");
             }
-            @Override public void enterSubsequentAtom(AGQLParser.SubsequentAtomContext ctx)
-            {
+            @Override public void enterSubsequentAtom(AGQLParser.SubsequentAtomContext ctx) {
                conditions.append(",");
             }
-            @Override public void exitAtomListOperand(AGQLParser.AtomListOperandContext ctx)
-            {
+            @Override public void exitAtomListOperand(AGQLParser.AtomListOperandContext ctx) {
                conditions.append(")");
             }
-            @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx)
-            {
+            @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx) {
                space();
                String operator = ctx.operator.getText().trim();
                if (operator.equals("MATCHES")) operator = "REGEXP";
                if (operator.equals("NOT MATCHES")) operator = "NOT REGEXP";
                conditions.append(operator);
             }
-            @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx)
-            {
+            @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx) {
                space();
                conditions.append(ctx.operator.getText().trim());
             }
-            @Override public void exitLiteralAtom(AGQLParser.LiteralAtomContext ctx)
-            {
+            @Override public void exitLiteralAtom(AGQLParser.LiteralAtomContext ctx) {
                space();
-               try
-               { // ensure string literals use single, not double, quotes
+               try { // ensure string literals use single, not double, quotes
                   conditions.append("'"+unquote(ctx.literal().stringLiteral().getText())+"'");
-               }
-               catch(Exception exception)
-               { // not a string literal
+               } catch(Exception exception) { // not a string literal
                   conditions.append(ctx.getText());
                }
             }
-            @Override public void exitIdentifierAtom(AGQLParser.IdentifierAtomContext ctx)
-            {
+            @Override public void exitIdentifierAtom(AGQLParser.IdentifierAtomContext ctx) {
                space();
                conditions.append(ctx.getText());
             }
-            @Override public void visitErrorNode(ErrorNode node)
-            {
+            @Override public void visitErrorNode(ErrorNode node) {
                errors.add(node.getText());
             }
          };
@@ -366,21 +309,18 @@ public class ParticipantAgqlToSql
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
       ParseTreeWalker.DEFAULT.walk(listener, tree);
 
-      if (errors.size() > 0)
-      {
+      if (errors.size() > 0) {
          throw new AGQLException(expression, errors);
       }
       StringBuilder sql = new StringBuilder();
       sql.append("SELECT ");
       sql.append(sqlSelectClause);
       sql.append(" FROM speaker");
-      if (conditions.length() > 0)
-      {
+      if (conditions.length() > 0) {
          sql.append(" WHERE ");
          sql.append(conditions);
       }
-      if (userWhereClause != null && userWhereClause.trim().length() > 0)
-      {
+      if (userWhereClause != null && userWhereClause.trim().length() > 0) {
          sql.append(conditions.length() > 0?" AND ":" WHERE ");
          sql.append(userWhereClause);
       }
@@ -401,8 +341,7 @@ public class ParticipantAgqlToSql
       //   order.append(conditions);
       // } // next orderClause part
       // sql.append(order);
-      if (sqlOrderClause.length() > 0)
-      {
+      if (sqlOrderClause.length() > 0) {
          sql.append(" ");
          sql.append(sqlOrderClause);
       }
@@ -415,8 +354,8 @@ public class ParticipantAgqlToSql
     * Encapsulates the results of {@link #sqlFor(String,String,String,String)} including the SQL.
     * string and the parameters to set.
     */
-   public static class Query
-   {
+   public static class Query {
+      
       public String sql;
       public List<Object> parameters = new Vector<Object>();
     
@@ -427,12 +366,11 @@ public class ParticipantAgqlToSql
        * @throws SqlException
        */
       public PreparedStatement prepareStatement(Connection db)
-         throws SQLException
-      {
+         throws SQLException {
+         
          PreparedStatement query = db.prepareStatement(sql);
          int p = 1;
-         for (Object parameter : parameters)
-         {
+         for (Object parameter : parameters) {
             if (parameter instanceof Integer) query.setInt(p++, (Integer)parameter);
             else if (parameter instanceof Double) query.setDouble(p++, (Double)parameter);
             else query.setString(p++, parameter.toString());
