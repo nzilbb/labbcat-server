@@ -164,7 +164,7 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
                prefix = parts[p].substring("prefix=".length());
             }
             if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))
-                // don't filter by utterance - it usuall has no descendants, so just makes things
+                // don't filter by utterance - it usually has no descendants, so just makes things
                 // slower without actually discarding anything
                 && !parts[p].startsWith("em_12_")) {
                filterId = parts[p];
