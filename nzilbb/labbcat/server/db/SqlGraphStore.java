@@ -1180,18 +1180,18 @@ public class SqlGraphStore
    /**
     * Converts a participant-matching expression into a resultset (SELECT selectedClause
     * FROM... WHERE... orderClause).
-    * <p> The expression language is currently not well defined, but expressions such as
+    * <p> The expression language is loosely based on JavaScript; expressions such as
     * the following can be used:
     * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'CC' IN labels('corpus')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'en' IN labels('transcript_language')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('corpus').includes('CC')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('transcript_language').includes('en')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
     *  <li><code>list('transcript_rating').length &gt; 2</code></li>
     *  <li><code>list('participant_rating').length = 0</code></li>
-    *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
-    *  <li><code>my('participant_gender').label = 'NA'</code></li>
+    *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
+    *  <li><code>my('participant_gender').label == 'NA'</code></li>
     * </ul>
     * @param expression The graph-matching expression.
     * @param sqlSelectClause The expression that is to go between SELECT and FROM.
@@ -1216,18 +1216,18 @@ public class SqlGraphStore
    /**
     * Counts the number of participants that match a particular pattern.
     * @param expression An expression that determines which participants match.
-    * <p> The expression language is currently not well defined, but expressions such as the
+    * <p> The expression language is loosely based on JavaScript; expressions such as the
     * following can be used: 
     * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'CC' IN labels('corpus')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'en' IN labels('transcript_language')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('corpus').includes('CC')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('transcript_language').includes('en')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
     *  <li><code>list('transcript_rating').length &gt; 2</code></li>
     *  <li><code>list('participant_rating').length = 0</code></li>
-    *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
-    *  <li><code>my('participant_gender').label = 'NA'</code></li>
+    *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
+    *  <li><code>my('participant_gender').label == 'NA'</code></li>
     * </ul>
     * @return The number of matching participants.
     * @throws StoreException If an error occurs.
@@ -1260,18 +1260,18 @@ public class SqlGraphStore
    /**
     * Gets a list of IDs of participants that match a particular pattern.
     * @param expression An expression that determines which participants match.
-    * <p> The expression language is currently not well defined, but expressions such as the
+    * <p> The expression language is loosely based on JavaScript; expressions such as the
     * following can be used: 
     * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'CC' IN labels('corpus')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'en' IN labels('transcript_language')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('corpus').includes('CC')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('transcript_language').includes('en')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
     *  <li><code>list('transcript_rating').length &gt; 2</code></li>
     *  <li><code>list('participant_rating').length = 0</code></li>
-    *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
-    *  <li><code>my('participant_gender').label = 'NA'</code></li>
+    *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
+    *  <li><code>my('participant_gender').label == 'NA'</code></li>
     * </ul>
     * @return A list of participant IDs.
     * @throws StoreException If an error occurs.
@@ -1286,18 +1286,18 @@ public class SqlGraphStore
    /**
     * Gets a list of IDs of participants that match a particular pattern.
     * @param expression An expression that determines which participants match.
-    * <p> The expression language is currently not well defined, but expressions such as the
+    * <p> The expression language is loosely based on JavaScript; expressions such as the
     * following can be used: 
     * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'CC' IN labels('corpus')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'en' IN labels('transcript_language')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('corpus').includes('CC')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('transcript_language').includes('en')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
     *  <li><code>list('transcript_rating').length &gt; 2</code></li>
     *  <li><code>list('participant_rating').length = 0</code></li>
-    *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
-    *  <li><code>my('participant_gender').label = 'NA'</code></li>
+    *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
+    *  <li><code>my('participant_gender').label == 'NA'</code></li>
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.
@@ -1337,24 +1337,25 @@ public class SqlGraphStore
    /**
     * Converts a graph-matching expression into a resultset (SELECT selectedClause
     * FROM... WHERE... orderClause).
-    * <p> The expression language is currently not well defined, but expressions such as
+    * <p> The expression language is loosely based on JavaScript; expressions such as
     * the following can be used:
     * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'Robert' IN labels('who')</code></li>
-    *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
-    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label = 'en'</code></li>
-    *  <li><code>my('noise').label = 'bell'</code></li>
-    *  <li><code>'en' IN labels('transcript_languages')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'bell' IN labels('noise')</code></li>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('who').includes('Robert')</code></li>
+    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+    *  <li><code>my('participant_languages').label == 'en'</code></li>
+    *  <li><code>my('noise').label == 'bell'</code></li>
+    *  <li><code>labels('transcript_languages').includes('en')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('noise').includes('bell')</code></li>
     *  <li><code>list('transcript_languages').length gt; 1</code></li>
     *  <li><code>list('participant_languages').length gt; 1</code></li>
     *  <li><code>list('transcript').length gt; 100</code></li>
-    *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+    *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+    * labels('who').includes('Robert')</code></li> 
     * </ul>
     * @param expression The graph-matching expression.
     * @param selectClause The expression that is to go between SELECT and FROM.
@@ -1380,25 +1381,25 @@ public class SqlGraphStore
    /**
     * Counts the number of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
-    * <p> The expression language is currently not well defined, but expressions such as
+    * <p> The expression language is loosely based on JavaScript; expressions such as
     * the following can be used:
     * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'Robert' IN labels('who')</code></li>
-    *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
-    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label = 'en'</code></li>
-    *  <li><code>my('noise').label = 'bell'</code></li>
-    *  <li><code>'en' IN labels('transcript_languages')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'bell' IN labels('noise')</code></li>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('who').includes('Robert')</code></li>
+    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+    *  <li><code>my('participant_languages').label == 'en'</code></li>
+    *  <li><code>my('noise').label == 'bell'</code></li>
+    *  <li><code>labels('transcript_languages').includes('en')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('noise').includes('bell')</code></li>
     *  <li><code>list('transcript_languages').length gt; 1</code></li>
     *  <li><code>list('participant_languages').length gt; 1</code></li>
     *  <li><code>list('transcript').length gt; 100</code></li>
-    *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-    * labels('who')</code></li>
+    *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+    * labels('who').includes('Robert')</code></li> 
     * </ul>
     * @return The number of matching graphs.
     * @throws StoreException If an error occurs.
@@ -1431,25 +1432,25 @@ public class SqlGraphStore
    /**
     * Gets a list of IDs of graphs that match a particular pattern.
     * @param expression An expression that determines which graphs match.
-    * <p> The expression language is currently not well defined, but expressions such as
+    * <p> The expression language is loosely based on JavaScript; expressions such as
     * the following can be used:
     * <ul>
-    *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'Robert' IN labels('who')</code></li>
-    *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
-    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label = 'en'</code></li>
-    *  <li><code>my('noise').label = 'bell'</code></li>
-    *  <li><code>'en' IN labels('transcript_languages')</code></li>
-    *  <li><code>'en' IN labels('participant_languages')</code></li>
-    *  <li><code>'bell' IN labels('noise')</code></li>
+    *  <li><code>/Ada.+/.test(id)</code></li>
+    *  <li><code>labels('who').includes('Robert')</code></li>
+    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+    *  <li><code>my('participant_languages').label == 'en'</code></li>
+    *  <li><code>my('noise').label == 'bell'</code></li>
+    *  <li><code>labels('transcript_languages').includes('en')</code></li>
+    *  <li><code>labels('participant_languages').includes('en')</code></li>
+    *  <li><code>labels('noise').includes('bell')</code></li>
     *  <li><code>list('transcript_languages').length gt; 1</code></li>
     *  <li><code>list('participant_languages').length gt; 1</code></li>
     *  <li><code>list('transcript').length gt; 100</code></li>
-    *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-    * labels('who')</code></li>
+    *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+    * labels('who').includes('Robert')</code></li> 
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The zero-based page number to return, or null to return the first page.
