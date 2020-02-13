@@ -23,6 +23,7 @@ package nzilbb.labbcat.server.db;
 
 import java.sql.*;
 import java.util.List;
+import java.util.Stack;
 import java.util.Vector;
 import java.util.function.UnaryOperator;
 import nzilbb.ag.Layer;
@@ -102,12 +103,13 @@ public class ParticipantAgqlToSql {
       throws AGQLException {
       
       final Query q = new Query();
-      final StringBuilder conditions = new StringBuilder();
+      final Stack<String> conditions = new Stack<String>();
       final Vector<String> errors = new Vector<String>();
       AGQLBaseListener listener = new AGQLBaseListener() {
             private void space() {
-               if (conditions.length() > 0 && conditions.charAt(conditions.length() - 1) != ' ') {
-                  conditions.append(" ");
+               if (conditions.size() > 0
+                   && conditions.peek().charAt(conditions.peek().length() - 1) != ' ') {
+                  conditions.push(conditions.pop() + " ");
                }
             }
             private String unquote(String s) {
@@ -121,15 +123,15 @@ public class ParticipantAgqlToSql {
             }
             @Override public void exitThisIdExpression(AGQLParser.ThisIdExpressionContext ctx) {
                space();
-               conditions.append("speaker.name");
+               conditions.push("speaker.name");
             }
             @Override public void exitThisLabelExpression(AGQLParser.ThisLabelExpressionContext ctx) {
                space();
-               conditions.append("speaker.name");
+               conditions.push("speaker.name");
             }
             @Override public void exitCorpusLabelOperand(AGQLParser.CorpusLabelOperandContext ctx) {
                space();
-               conditions.append(
+               conditions.push(
                   // TODO technically, a participant can be in more than one corpus
                   // TODO - this matches only the first one
                   "(SELECT corpus.corpus_name"
@@ -139,7 +141,7 @@ public class ParticipantAgqlToSql {
             }
             @Override public void enterCorpusLabelsExpression(AGQLParser.CorpusLabelsExpressionContext ctx) {
                space();
-               conditions.append(
+               conditions.push(
                   "(SELECT corpus.corpus_name"
                   +" FROM speaker_corpus"
                   +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
@@ -154,7 +156,7 @@ public class ParticipantAgqlToSql {
                } else {
                   String attribute = attribute(layerId);
                   if ("transcript".equals(layer.get("@class_id"))) {
-                     conditions.append(
+                     conditions.push(
                         "(SELECT DISTINCT label"
                         +" FROM annotation_transcript"
                         +" INNER JOIN transcript_speaker"
@@ -163,7 +165,7 @@ public class ParticipantAgqlToSql {
                         +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                         +")");
                   } else if ("speaker".equals(layer.get("@class_id"))) {
-                     conditions.append(
+                     conditions.push(
                         "(SELECT DISTINCT label"
                         +" FROM annotation_participant"
                         +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
@@ -186,7 +188,7 @@ public class ParticipantAgqlToSql {
                      errors.add("Can only get labels for participant attributes: " + ctx.getText());
                   }
                   String attribute = attribute(layerId);
-                  conditions.append(
+                  conditions.push(
                      "(SELECT label"
                      +" FROM annotation_participant"
                      +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
@@ -204,7 +206,7 @@ public class ParticipantAgqlToSql {
                   String attribute = attribute(layerId);
                   if ("transcript".equals(layer.get("@class_id")))
                   {
-                     conditions.append(
+                     conditions.push(
                         "(SELECT COUNT(*)"
                         +" FROM annotation_transcript"
                         +" INNER JOIN transcript_speaker"
@@ -213,7 +215,7 @@ public class ParticipantAgqlToSql {
                         +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                         +")");
                   } else if ("speaker".equals(layer.get("@class_id"))) {
-                     conditions.append(
+                     conditions.push(
                         "(SELECT COUNT(*)"
                         +" FROM annotation_participant"
                         +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
@@ -234,7 +236,7 @@ public class ParticipantAgqlToSql {
                } else {
                   String attribute = attribute(layerId);
                   if ("transcript".equals(layer.get("@class_id"))) {
-                     conditions.append(
+                     conditions.push(
                         "(SELECT annotated_by"
                         +" FROM annotation_transcript"
                         +" INNER JOIN transcript_speaker"
@@ -243,7 +245,7 @@ public class ParticipantAgqlToSql {
                         +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                         +")");
                   } else if ("speaker".equals(layer.get("@class_id"))) {
-                     conditions.append(
+                     conditions.push(
                         "(SELECT annotated_by"
                         +" FROM annotation_participant"
                         +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
@@ -256,48 +258,87 @@ public class ParticipantAgqlToSql {
                } // valid layer
             }
             @Override public void exitWhoLiteralAtom(AGQLParser.WhoLiteralAtomContext ctx) {
-               conditions.append(" 'who'");
+               conditions.push(" 'who'");
             }
             @Override public void exitGraphLiteralAtom(AGQLParser.GraphLiteralAtomContext ctx) {
-               conditions.append(" 'graph'");
+               conditions.push(" 'graph'");
             }
             @Override public void exitCorpusLiteralAtom(AGQLParser.CorpusLiteralAtomContext ctx) {
-               conditions.append(" 'corpus'");
+               conditions.push(" 'corpus'");
             }
             @Override public void exitEpisodeLiteralAtom(AGQLParser.EpisodeLiteralAtomContext ctx) {
-               conditions.append(" 'episode'");
+               conditions.push(" 'episode'");
             }
-            @Override public void enterAtomListOperand(AGQLParser.AtomListOperandContext ctx) {
-               conditions.append(" (");
-            }
-            @Override public void enterSubsequentAtom(AGQLParser.SubsequentAtomContext ctx) {
-               conditions.append(",");
-            }
-            @Override public void exitAtomListOperand(AGQLParser.AtomListOperandContext ctx) {
-               conditions.append(")");
+            @Override public void exitAtomList(AGQLParser.AtomListContext ctx) {
+               // pop all the elements off the stack
+               Stack<String> atoms = new Stack<String>();
+               for (int i = 0; i < ctx.subsequentAtom().size(); i++) {
+                  atoms.push(conditions.pop().trim()); // subsequentAtom
+               }
+               atoms.push(conditions.pop().trim()); // firstAtom
+
+               // create a single element with all of them
+               StringBuilder element = new StringBuilder();
+               element.append("(");
+               element.append(atoms.pop()); // firstAtom
+               while (!atoms.empty()) {
+                  element.append(",");
+                  element.append(atoms.pop()); // subsequentAtom
+               } // next atom
+               element.append(")");
+
+               // and add the whole list to conditions
+               conditions.push(element.toString());
             }
             @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx) {
                space();
-               String operator = ctx.operator.getText().trim();
-               if (operator.equals("MATCHES")) operator = "REGEXP";
-               if (operator.equals("NOT MATCHES")) operator = "NOT REGEXP";
-               conditions.append(operator);
+               conditions.push(ctx.operator.getText().trim());
             }
+            @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx) {
+               if (ctx.negation != null) {
+                  conditions.push(" NOT REGEXP ");
+               } else {
+                  conditions.push(" REGEXP ");
+               }
+               try
+               { // ensure string literals use single, not double, quotes
+                  conditions.push("'"+unquote(ctx.patternOperand.getText())+"'");
+               }
+               catch(Exception exception)
+               { // not a string literal
+                  conditions.push(ctx.patternOperand.getText());
+               }
+            }
+            @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx) {
+               // infix it - i.e. pop the last operand...
+               String listOperand = conditions.pop();
+               // ... insert the operator
+               if (ctx.negation != null) {
+                  conditions.push("NOT IN ");
+               } else {
+                  conditions.push("IN ");
+               }
+               // ... and push the operand back
+               conditions.push(listOperand);
+               // parse.append(ctx.singletonOperand.getText()
+               //              + (ctx.negation!=null?" NOT IN ":" IN ")
+               //              + ctx.listOperand.getText());
+             }
             @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx) {
                space();
-               conditions.append(ctx.operator.getText().trim());
+               conditions.push(ctx.operator.getText().trim());
             }
             @Override public void exitLiteralAtom(AGQLParser.LiteralAtomContext ctx) {
                space();
                try { // ensure string literals use single, not double, quotes
-                  conditions.append("'"+unquote(ctx.literal().stringLiteral().getText())+"'");
+                  conditions.push("'"+unquote(ctx.literal().stringLiteral().getText())+"'");
                } catch(Exception exception) { // not a string literal
-                  conditions.append(ctx.getText());
+                  conditions.push(ctx.getText());
                }
             }
             @Override public void exitIdentifierAtom(AGQLParser.IdentifierAtomContext ctx) {
                space();
-               conditions.append(ctx.getText());
+               conditions.push(ctx.getText());
             }
             @Override public void visitErrorNode(ErrorNode node) {
                errors.add(node.getText());
@@ -307,7 +348,10 @@ public class ParticipantAgqlToSql {
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       AGQLParser parser = new AGQLParser(tokens);
       AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
-      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      if (expression != null && expression.trim().length() > 0)
+      {
+         ParseTreeWalker.DEFAULT.walk(listener, tree);
+      }
 
       if (errors.size() > 0) {
          throw new AGQLException(expression, errors);
@@ -316,12 +360,12 @@ public class ParticipantAgqlToSql {
       sql.append("SELECT ");
       sql.append(sqlSelectClause);
       sql.append(" FROM speaker");
-      if (conditions.length() > 0) {
+      if (conditions.size() > 0) {
          sql.append(" WHERE ");
-         sql.append(conditions);
+         for (String condition : conditions) sql.append(condition);
       }
       if (userWhereClause != null && userWhereClause.trim().length() > 0) {
-         sql.append(conditions.length() > 0?" AND ":" WHERE ");
+         sql.append(conditions.size() > 0?" AND ":" WHERE ");
          sql.append(userWhereClause);
       }
 

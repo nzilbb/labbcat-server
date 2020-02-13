@@ -228,7 +228,7 @@ public class TestGraphAgqlToSql
          "transcript.transcript_id", null, null, null);
       assertEquals("SQL",
                    "SELECT transcript.transcript_id FROM transcript"
-                   +" WHERE transcript.corpus_name IN ( 'CC', 'IA', 'MU', 'corpus', 'episode')"
+                   +" WHERE transcript.corpus_name IN ('CC','IA','MU','corpus','episode')"
                    +" ORDER BY transcript.transcript_id",
                    q.sql);
       assertEquals("Parameter count", 0, q.parameters.size());

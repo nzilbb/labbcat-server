@@ -194,7 +194,7 @@ public class TestParticipantAgqlToSql
                    +" FROM speaker_corpus"
                    +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
                    +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)"
-                   +" IN ( 'CC', 'IA', 'MU', 'graph', 'who')"
+                   +" IN ('CC','IA','MU','graph','who')"
                    +" ORDER BY speaker.name",
                    q.sql);
       assertEquals("Parameter count", 0, q.parameters.size());
