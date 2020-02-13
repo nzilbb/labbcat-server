@@ -292,7 +292,9 @@ public class ParticipantAgqlToSql {
             }
             @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx) {
                space();
-               conditions.push(ctx.operator.getText().trim());
+               String operator = ctx.operator.getText().trim();
+               if (operator.equals("==")) operator = "="; // from JS to SQL equality operator
+               conditions.push(operator);
             }
             @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx) {
                if (ctx.negation != null) {
@@ -310,19 +312,33 @@ public class ParticipantAgqlToSql {
                }
             }
             @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx) {
-               // infix it - i.e. pop the last operand...
-               String listOperand = conditions.pop();
-               // ... insert the operator
-               if (ctx.negation != null) {
-                  conditions.push("NOT IN ");
-               } else {
-                  conditions.push("IN ");
+               if (ctx.IN() != null) {
+                  // infix it - i.e. pop the last operand...
+                  String listOperand = conditions.pop();
+                  // ... insert the operator
+                  if (ctx.negation != null) {
+                     conditions.push("NOT IN ");
+                  } else {
+                     conditions.push("IN ");
+                  }
+                  // ... and push the operand back
+                  conditions.push(listOperand);
+               } else { // a.includes(b)
+                  // need to swap the order of the operands as well
+                  String singletonOperand = conditions.pop().trim();
+                  String listOperand = conditions.pop().trim();
+
+                  // first singletonOperand
+                  conditions.push(singletonOperand);
+                  // then operator
+                  if (ctx.negation != null) {
+                     conditions.push(" NOT IN ");
+                  } else {
+                     conditions.push(" IN ");
+                  }
+                  // finally push listOperand
+                  conditions.push(listOperand);
                }
-               // ... and push the operand back
-               conditions.push(listOperand);
-               // parse.append(ctx.singletonOperand.getText()
-               //              + (ctx.negation!=null?" NOT IN ":" IN ")
-               //              + ctx.listOperand.getText());
              }
             @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx) {
                space();
