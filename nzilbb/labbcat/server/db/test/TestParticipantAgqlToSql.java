@@ -36,15 +36,13 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-public class TestParticipantAgqlToSql
-{
+public class TestParticipantAgqlToSql {
   
    /**
     * Return a plausible schema, including SQL attributes.
     * @return A test schema.
     */
-   public Schema getSchema()
-   {
+   public Schema getSchema() {
       return new Schema(
          "who", "turn", "utterance", "transcript",
             
@@ -126,8 +124,7 @@ public class TestParticipantAgqlToSql
          .setCorpusLayerId("corpus");
    } // end of getSchema()
 
-   @Test public void idMatch() throws AGQLException
-   {
+   @Test public void idMatch() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "label MATCHES \"Ada.+\"", "speaker_number, name", null, "ORDER BY speaker.name");
@@ -146,8 +143,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count - id", 0, q.parameters.size());
    }
 
-   @Test public void emptyExpression() throws AGQLException
-   {
+   @Test public void emptyExpression() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "", "speaker_number, name", null, "ORDER BY speaker.name");
@@ -165,8 +161,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count - id", 0, q.parameters.size());
    }
 
-   @Test public void corpusLabel() throws AGQLException
-   {
+   @Test public void corpusLabel() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "my(\"corpus\").label = \"CC\"", "speaker_number, name", null, "ORDER BY speaker.name");
@@ -182,8 +177,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void literalList() throws AGQLException
-   {
+   @Test public void literalList() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "my(\"corpus\").label IN (\"CC\", 'IA', 'MU', \"graph\", 'who')",
@@ -200,8 +194,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void corpusLabels() throws AGQLException
-   {
+   @Test public void corpusLabels() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "'CC' IN labels('corpus')", "speaker_number, name", null, "ORDER BY speaker.name");
@@ -216,8 +209,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void listLength() throws AGQLException
-   {
+   @Test public void listLength() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "list('transcript_rating').length > 2", "speaker_number, name", null, "ORDER BY speaker.name");
@@ -276,8 +268,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void labels() throws AGQLException
-   {
+   @Test public void labels() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "'en' IN labels('transcript_language')", "speaker_number, name", null, "ORDER BY speaker.name");
@@ -306,8 +297,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void participantAttributeLabel() throws AGQLException
-   {
+   @Test public void participantAttributeLabel() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "my('participant_gender').label = 'NA'", "speaker_number, name", null, "ORDER BY speaker.name");
@@ -323,8 +313,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void annotators() throws AGQLException
-   {
+   @Test public void annotators() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "'labbcat' NOT IN annotators('transcript_rating')", "speaker_number, name", null, "ORDER BY speaker.name");
@@ -353,11 +342,9 @@ public class TestParticipantAgqlToSql
       assertEquals("Participant Attribute - Parameter count", 0, q.parameters.size());
    }
   
-   @Test public void invalidLayers() throws AGQLException
-   {
+   @Test public void invalidLayers() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
-      try
-      {
+      try {
          ParticipantAgqlToSql.Query q = transformer.sqlFor(
             "my('invalid layer 1').label = 'NA'"
             + " AND list('invalid layer 2').length > 2"
@@ -365,15 +352,12 @@ public class TestParticipantAgqlToSql
             + " AND 'labbcat' NOT IN annotators('invalid layer 4')",
             "speaker_number, name", null, "ORDER BY speaker.name");
          fail("sqlFor fails: " + q.sql);
-      }
-      catch(AGQLException exception)
-      {
+      } catch(AGQLException exception) {
          assertEquals("Number of errors: " + exception.getErrors(), 4, exception.getErrors().size());
       }
    }
 
-   @Test public void userWhereClause() throws AGQLException
-   {
+   @Test public void userWhereClause() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "label MATCHES \"Ada.+\"", "speaker_number, name",
@@ -433,8 +417,7 @@ public class TestParticipantAgqlToSql
       assertEquals("Parameter count - label", 0, q.parameters.size());
    }
 
-   public static void main(String args[]) 
-   {
+   public static void main(String args[])  {
       org.junit.runner.JUnitCore.main("nzilbb.ag.sql.test.TestParticipantAgqlToSql");
    }
 

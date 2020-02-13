@@ -36,15 +36,13 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-public class TestGraphAgqlToSql
-{
+public class TestGraphAgqlToSql {
   
    /**
     * Return a plausible schema, including SQL attributes.
     * @return A test schema.
     */
-   public Schema getSchema()
-   {
+   public Schema getSchema() {
       return new Schema(
          "who", "turn", "utterance", "transcript",
             
@@ -133,8 +131,7 @@ public class TestGraphAgqlToSql
          .setCorpusLayerId("corpus");
    } // end of getSchema()
 
-   @Test public void idMatch() throws AGQLException
-   {
+   @Test public void idMatch() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "label MATCHES \"Ada.+\"",
@@ -167,8 +164,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count - id", 0, q.parameters.size());
    }
 
-   @Test public void emptyExpression() throws AGQLException
-   {
+   @Test public void emptyExpression() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "", "transcript.transcript_id, transcript.ag_id", null, null, null);
@@ -188,8 +184,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count - id", 0, q.parameters.size());
    }
 
-   @Test public void orderBy() throws AGQLException
-   {
+   @Test public void orderBy() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "", "transcript.transcript_id, transcript.ag_id", null,
@@ -206,8 +201,7 @@ public class TestGraphAgqlToSql
 
    }
 
-   @Test public void corpusLabel() throws AGQLException
-   {
+   @Test public void corpusLabel() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "my(\"corpus\").label = \"CC\"",
@@ -220,8 +214,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void literalList() throws AGQLException
-   {
+   @Test public void literalList() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "my(\"corpus\").label IN (\"CC\", 'IA', 'MU', 'corpus', \"episode\")",
@@ -234,8 +227,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void corpusLabels() throws AGQLException
-   {
+   @Test public void corpusLabels() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "'CC' IN labels('corpus')",
@@ -248,8 +240,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void episodeLabel() throws AGQLException
-   {
+   @Test public void episodeLabel() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "my(\"episode\").label = 'some-episode'",
@@ -264,8 +255,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void transcriptTypeLabel() throws AGQLException
-   {
+   @Test public void transcriptTypeLabel() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "my(\"transcript_type\").label = 'interview'",
@@ -280,8 +270,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void whoLabels() throws AGQLException
-   {
+   @Test public void whoLabels() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "'someone' IN labels('who')",
@@ -315,8 +304,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void labels() throws AGQLException
-   {
+   @Test public void labels() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "'10' IN labels('transcript_rating')",
@@ -374,8 +362,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void attributeLabel() throws AGQLException
-   {
+   @Test public void attributeLabel() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "my('transcript_scribe').label = 'someone'",
@@ -439,8 +426,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void listLength() throws AGQLException
-   {
+   @Test public void listLength() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "list('transcript_rating').length > 10",
@@ -496,8 +482,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void annotators() throws AGQLException
-   {
+   @Test public void annotators() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "'someone' IN annotators('transcript_rating')",
@@ -554,11 +539,9 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count", 0, q.parameters.size());
    }
   
-   @Test public void invalidLayers() throws AGQLException
-   {
+   @Test public void invalidLayers() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
-      try
-      {
+      try {
          GraphAgqlToSql.Query q = transformer.sqlFor(
             "my('invalid layer 1').label = 'NA'"
             + " AND list('invalid layer 2').length > 2"
@@ -566,15 +549,12 @@ public class TestGraphAgqlToSql
             + " AND 'labbcat' NOT IN annotators('invalid layer 4')",
             "transcript.transcript_id", null, null, null);
          fail("sqlFor fails: " + q.sql);
-      }
-      catch(AGQLException exception)
-      {
+      } catch(AGQLException exception) {
          assertEquals("Number of errors: " + exception.getErrors(), 4, exception.getErrors().size());
       }
    }
 
-   @Test public void userWhereClause() throws AGQLException
-   {
+   @Test public void userWhereClause() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
          "label MATCHES \"Ada.+\"",
@@ -619,8 +599,7 @@ public class TestGraphAgqlToSql
       assertEquals("Parameter count - label", 0, q.parameters.size());
    }
 
-   public static void main(String args[]) 
-   {
+   public static void main(String args[])  {
       org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.db.test.TestGraphAgqlToSql");
    }
 
