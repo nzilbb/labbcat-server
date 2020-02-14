@@ -414,7 +414,10 @@ public class GraphAgqlToSql {
             }
             @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx) {
                space();
-               conditions.push(ctx.operator.getText().trim());
+               String operator = ctx.operator.getText().trim();
+               if (operator.equals("&&")) operator = "AND";
+               else if (operator.equals("||")) operator = "OR";
+               conditions.push(operator);
             }
             @Override public void exitLiteralAtom(AGQLParser.LiteralAtomContext ctx) {
                space();
