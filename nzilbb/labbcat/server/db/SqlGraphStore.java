@@ -2036,16 +2036,19 @@ public class SqlGraphStore
    }
 
    /**
-    * Converts a graph-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
+    * Converts an annotionat-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
     * <ul>
-    *  <li><code>id = 'ew_0_456'</code></li>
-    *  <li><code>layer.id = 'orthography' AND label NOT MATCHES 'th[aeiou].*'</code></li>
+    *  <li><code>id == 'ew_0_456'</code></li>
+    *  <li><code>['ew_2_456', 'ew_2_789', 'ew_2_101112'].includes(id)</code></li>
+    *  <li><code>layerId == 'orthography' &amp;&amp; !/th[aeiou].+/.test(label)</code></li>
     *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
-    * my('utterances').start.offset = 12.345</code></li> 
-    *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND
+    * my('utterances').start.offset = 12.345</code> - TODO</li> 
+    *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography' &amp;&amp;
     * start.offset &gt; 10.5</code></li> 
-    *  <li><code>layer.id = 'utterances' AND 'ew_0_456' IN list('transcript')</code></li>
-    *  <li><code>previous.id = 'ew_0_456'</code></li>
+    *  <li><code>layer.id == 'utterance' &amp;&amp; list('transcript').includes('ew_0_456')</code></li>
+    *  <li><code>previous.id = 'ew_0_456'</code> - TODO</li>
+    *  <li><code>layerId = 'utterance' &amp;&amp; labels('orthography').includes('foo')</code></li>
+    *  <li><code>layerId = 'utterance' &amp;&amp; labels('who').includes('Ada')</code></li>
     * </ul>
     * <p><em>NB</em> all expressions must match by either id or layer.id.
     * @param expression The annotation-matching expression.
@@ -2061,12 +2064,12 @@ public class SqlGraphStore
       String sSql = null;
       Layer layer = null;
       Pattern wordBasedQueryPattern = Pattern.compile(
-         "my\\('transcript'\\)\\.id = 'ew_0_(\\d+)' AND layer\\.id = '([^']+)'");
+         "my\\('transcript'\\)\\.id ==? 'ew_0_(\\d+)' (AND|&&) layer\\.id ==? '([^']+)'");
       Matcher wordBasedQueryMatcher = wordBasedQueryPattern.matcher(expression);
       if (wordBasedQueryMatcher.matches())
-      { // optimization for common word_annotation_id-nased queries may be possible
+      { // optimization for common word_annotation_id-based queries may be possible
          String word_annotation_id = wordBasedQueryMatcher.group(1);
-         String layerId = wordBasedQueryMatcher.group(2);
+         String layerId = wordBasedQueryMatcher.group(3);
          layer = schema.getLayer(layerId);
          if (layer.getParentId().equals(schema.getWordLayerId()) // word layer
              || (layer.getParent() != null
@@ -2138,393 +2141,23 @@ public class SqlGraphStore
 
       if (sSql == null)
       { // no optimization found
-         String[] subexpressions = expression.split(" AND ");
-         // first figure out what layer we're looking at
-         for (String subexpression : subexpressions)
-         {
-            subexpression = subexpression.trim();
-            if (subexpression.length() == 0) continue;
-            String operator = null;
-            String[] operators = {" = "," <> "," <= "," >= "," < "," > ", " NOT MATCHES "," MATCHES ", " NOT IN ", " IN "};
-            String[] operands = null;
-            for (String op : operators)
-            {
-               operands = subexpression.split(op);
-               if (operands.length == 2)
-               {
-                  operator = op.trim();
-                  break;
-               } // match
-            } // next operator
-            if (operator == null) throw new StoreException("Not valid operator found in: " + expression);
-            if (operands == null) throw new StoreException("No operands found in: " + expression);
-            if (operands.length != 2) throw new StoreException("Wrong number of operands ("+operands.length+") found in: " + expression);
-	 
-            // LHS = "id"?
-            if (operands[0].trim().equals("id"))
-            {
-               // strip quotes
-               // extract text between first pair of quotes: works for "id = 'xyz'" and "id IN ('xyy, 'abc')"
-               int firstQuotePos = operands[1].indexOf('\'');
-               int secondQuotePos = operands[1].indexOf('\'', firstQuotePos + 1);
-               if (firstQuotePos >= 0 && secondQuotePos >= 0)
-               {
-                  operands[1] = operands[1].substring(firstQuotePos + 1, secondQuotePos);
-               }
-               // parse ID
-               try
-               {
-                  Object[] o = fmtAnnotationId.parse(operands[1]);
-                  int layer_id = ((Long)o[1]).intValue();
-                  PreparedStatement sqlLayer = getConnection().prepareStatement(
-                     "SELECT short_description FROM layer WHERE layer_id = ?");
-                  sqlLayer.setInt(1, layer_id);
-                  ResultSet rsLayer = sqlLayer.executeQuery();
-                  try
-                  {
-                     if (!rsLayer.next()) throw new StoreException("Invalid layer_id for " + operands[1] + ": " + layer_id);
-                     layer = schema.getLayer(rsLayer.getString("short_description"));
-                  }
-                  finally
-                  {
-                     rsLayer.close();
-                     sqlLayer.close();
-                  }
-               }
-               catch(ParseException exception)
-               {
-                  throw new StoreException("Invalid annotation ID: " + operands[1]);
-               }
-            }
-            // LHS = "layer.id" or "layerId"?
-            if (operands[0].trim().equals("layer.id") || operands[0].trim().equals("layerId"))
-            {
-               // strip quotes
-               if (operands[1].startsWith("'")) operands[1] = operands[1].substring(1);
-               if (operands[1].endsWith("'")) operands[1] = operands[1].substring(0,operands[1].length() - 1);
-               // unescape any remaining quotes
-               operands[1] = operands[1].replaceAll("\\\\'","'");
-               layer = schema.getLayer(operands[1]);
-               break;
-            }
-         } // next subexpression
 
-         if (layer == null)
-         {
-            throw new StoreException("Could not determine principal layer from query: " + expression);
-         }
-         if (layer.get("@scope") == null)
-         {
-            throw new StoreException("Only temporal layers are supported: " + layer.getId());
-         }
-
-         boolean transcriptJoin = false;
-         boolean anchorsJoin = false;
-         // now rewrite the operands of the expression
-         StringBuffer extraJoins = new StringBuffer();
-         int xj = 0; // extra join count, for suffixing table names uniquely
-         StringBuffer conditions = new StringBuffer();
-         for (String subexpression : subexpressions)
-         {
-            subexpression = subexpression.trim();
-            if (subexpression.length() == 0) continue;
-            String operator = null;
-            String[] operators = {" = "," <> "," <= "," >= "," < "," > ", " NOT MATCHES "," MATCHES ", " NOT IN ", " IN "};
-            String[] operands = null;
-            for (String op : operators)
-            {
-               operands = subexpression.split(op);
-               if (operands.length == 2)
-               {
-                  operator = op.trim();
-                  break;
-               } // match
-            } // next operator
-            if (operator == null) throw new StoreException("Not valid operator found in: " + expression);
-            if (operands == null) throw new StoreException("No operands found in: " + expression);
-
-            String sqlLhs = null;
-            String sqlOperator = operator.replace("MATCHES","REGEXP");
-            String sqlRhs = null;
-            for (String operand : operands)
-            {
-               operand = operand.trim();
-               String sqlOperand = null;
-               if (operand.equals("id"))
-               {
-                  String scope = ((String)layer.get("@scope")).toLowerCase();
-                  if (scope.equals("f")) scope = "";
-                  sqlOperand = "CONCAT('e"+scope+"_"+layer.get("@layer_id")+"_', annotation.annotation_id)";
-               }
-               else if (operand.equals("layer.id") || operand.equals("layerId"))
-               { // we've already matched the layer ID, but to ensure the SQL is valid...
-                  sqlOperand = "'"+layer.getId().replaceAll("'","\\'")+"'";
-               }
-               else if (operand.equals("parent.id") || operand.equals("parentId"))
-               {
-                  Layer parentLayer = schema.getLayer(layer.getParentId());
-                  String parentScope = ((String)parentLayer.get("@scope")).toLowerCase();
-                  if (parentScope.equals("f")) parentScope = "";
-                  sqlOperand = "CONCAT('e"+parentScope+"_"+parentLayer.get("@layer_id")+"_', annotation.parent_id)";
-               }
-               else if (operand.equals("graph.id") || operand.equals("graph.label")
-                        || operand.equals("my('graph').label") || operand.equals("my('graph').id"))
-               {
-                  sqlOperand = "graph.transcript_id";
-                  transcriptJoin = true;
-               }
-               else if (operand.equals("my('corpus').label"))
-               {
-                  sqlOperand = "graph.corpus_name";
-                  transcriptJoin = true;
-               }
-               else if (operand.equals("my('episode').label"))
-               {
-                  sqlOperand = "(SELECT name"
-                     +" FROM transcript_family"
-                     +" WHERE transcript_family.family_id = graph.family_id)";
-                  transcriptJoin = true;
-               }
-               else if (operand.equals("start.id"))
-               {
-                  sqlOperand = "CONCAT('n_',annotation.start_anchor_id)";
-               }
-               else if (operand.equals("end.id"))
-               {
-                  sqlOperand = "CONCAT('n_',annotation.end_anchor_id)";
-               }
-               else if (operand.equals("start.offset"))
-               {
-                  sqlOperand = "start.offset";
-                  anchorsJoin = true;
-               }
-               else if (operand.equals("end.offset"))
-               {
-                  sqlOperand = "end.offset";
-                  anchorsJoin = true;
-               }
-               else if (operand.equals("annotator"))
-               {
-                  sqlOperand = "annotation.annotated_by";
-               }
-               else if (operand.equals("when"))
-               {
-                  sqlOperand = "annotation.annotated_when";
-               }
-               else if (operand.equals("labels('who')") || operand.equals("my('who').label"))
-               {
-                  if (layer.get("@scope").equals("F"))
-                  { // turn based on anchor offsets
-                     sqlOperand = "(SELECT speaker.name"
-                        +" FROM speaker"
-                        +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
-                        +" INNER JOIN anchor turn_start_anchor ON turn.start_anchor_id = turn_start_anchor.id"
-                        +" INNER JOIN anchor turn_end_anchor ON turn.end_anchor_id = turn_end_anchor.id"
-                        +" WHERE turn.ag_id = graph.ag_id"
-                        // any overlap with the turn
-                        +" AND turn_start_anchor.offset <= end.offset"
-                        +" AND start.offset <= turn_end_anchor.offset"
-                        +" ORDER BY turn_start_anchor.offset, turn_end_anchor.offset DESC"
-                        +(operand.equals("my('who')")?" LIMIT 1":"")
-                        +")";
-                     anchorsJoin = true;
-                  } // turn based on anchor offsets
-                  else
-                  { // turn based on turn_annotation_id
-                     // (no need to distinguish between my() and list() because there can be only one turn)
-                     sqlOperand = "(SELECT speaker.name"
-                        +" FROM speaker"
-                        +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
-                        // match turn_annotation_id
-                        +" WHERE turn.annotation_id = annotation.turn_annotation_id"
-                        +")";
-                  } // turn based on turn_annotation_id
-               }
-               else if (operand.startsWith("my('") && (operand.endsWith("').label") || operand.endsWith("').id")))
-               { // my
-                  String layerId = operand.replaceFirst("my\\('","").replaceFirst("'\\)\\.(label|id)$","");
-                  Layer operandLayer = schema.getLayer(layerId);
-                  if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
-                  // join by the finest-grain compatible with both layers
-                  String scope = (String)layer.get("@scope");
-                  String operandScope = (String)operandLayer.get("@scope");
-                  if (operandScope == null) throw new StoreException("Cannot query by non-temporal annotation layer: " + layerId);
-                  String[] joinFields = {
-                     null,
-                     "turn_annotation_id",
-                     "word_annotation_id",
-                     "segment_annotation_id" };
-                  int joinFieldIndex = 3;
-                  xj++;
-                  String selectedValue = "otherLayer_"+xj+".label";
-                  if (scope.equals("W")) joinFieldIndex = Math.min(joinFieldIndex, 2);
-                  if (operandScope.equals("W") && joinFieldIndex > 2) joinFieldIndex = Math.min(joinFieldIndex, 2);
-                  if (scope.equals("M")) joinFieldIndex = Math.min(joinFieldIndex, 1);
-                  if (operandScope.equals("M") && joinFieldIndex > 2) joinFieldIndex = Math.min(joinFieldIndex, 1);
-                  if (scope.equals("F")) joinFieldIndex = Math.min(joinFieldIndex, 0);
-                  if (operandScope.equals("F") && joinFieldIndex > 2) joinFieldIndex = Math.min(joinFieldIndex, 0);
-                  if (operand.endsWith("').id")) // getting id, not label
-                  { // construct id from scope, layer_id, and annotation_id
-                     String scopePrefix = operandScope.toLowerCase();
-                     if (operandScope.equals("F")) scopePrefix = "";
-                     selectedValue = "CONCAT('e"+scopePrefix+"_"+operandLayer.get("@layer_id")+"_', otherLayer_"+xj+".annotation_id)";
-                  }
-                  // if both layers are the same scope, we don't need to compare anchors
-                  boolean temporalJoin = !scope.equals(operandScope);
-                  String order = "otherLayer_start_"+xj+".offset, otherLayer_end_"+xj+".offset DESC";
-                  if (!temporalJoin)
-                  {
-                     order = "otherLayer_"+xj+".ordinal";
-                  }
-          
-                  String joinField = joinFields[joinFieldIndex];
-                  extraJoins.append(
-                     " INNER JOIN"
-                     +" annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer_"+xj
-                     +" ON otherLayer_"+xj+".ag_id = annotation.ag_id"
-                     +(joinField==null?"":" AND otherLayer_"+xj+"."+joinField+" = annotation."+joinField)
-                     +(!temporalJoin?"":
-                       " INNER JOIN anchor otherLayer_start_"+xj
-                       +" ON otherLayer_"+xj+".start_anchor_id = otherLayer_start_"+xj+".anchor_id"
-                       +" AND otherLayer_start_"+xj+".offset <= end.offset"
-                       +" INNER JOIN anchor otherLayer_end_"+xj
-                       +" ON otherLayer_"+xj+".end_anchor_id = otherLayer_end_"+xj+".anchor_id"
-                       +" AND start.offset <= otherLayer_end_"+xj+".offset"));
-                  sqlOperand = selectedValue;
-                  if (temporalJoin) anchorsJoin = true;
-               } // my
-               else if (operand.startsWith("list('") && operand.endsWith("')"))
-               { // list()
-                  String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)$","");
-                  Layer operandLayer = schema.getLayer(layerId);
-                  if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
-                  // join by the finest-grain compatible with both layers
-                  String scope = (String)layer.get("@scope");
-                  String operandScope = (String)operandLayer.get("@scope");
-                  if (operandScope == null) throw new StoreException("Cannot query by non-temporal annotation layer: " + layerId);
-                  String[] joinFields = {
-                     null,
-                     "turn_annotation_id",
-                     "word_annotation_id",
-                     "segment_annotation_id" };
-                  int joinFieldIndex = 3;
-                  if (scope.equals("W")) joinFieldIndex = Math.min(joinFieldIndex, 2);
-                  if (operandScope.equals("W") && joinFieldIndex > 2) Math.min(joinFieldIndex, 2);
-                  if (scope.equals("M")) joinFieldIndex = Math.min(joinFieldIndex, 1);
-                  if (operandScope.equals("M") && joinFieldIndex > 2) Math.min(joinFieldIndex, 1);
-                  if (scope.equals("F")) joinFieldIndex = Math.min(joinFieldIndex, 0);
-                  if (operandScope.equals("F") && joinFieldIndex > 2) Math.min(joinFieldIndex, 0);
-                  String joinField = joinFields[joinFieldIndex];
-                  if (operandScope.equals("F")) operandScope = "";
-                  sqlOperand = "(SELECT CONCAT('e"
-                     +operandScope.toLowerCase()+"_"
-                     +operandLayer.get("@layer_id")+"_', otherLayer.annotation_id)"
-                     +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
-                     +" INNER JOIN anchor otherLayer_start ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
-                     +" INNER JOIN anchor otherLayer_end ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
-                     +" WHERE otherLayer.ag_id = annotation.ag_id"
-                     +(joinField==null?"":" AND otherLayer."+joinField+" = annotation."+joinField)
-                     // any overlap
-                     +" AND otherLayer_start.offset <= end.offset"
-                     +" AND start.offset <= otherLayer_end.offset"
-                     +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
-                     +")";
-                  anchorsJoin = true;
-               } // list()
-               else if (operand.startsWith("list('") && operand.endsWith("').length"))
-               { // list().length
-                  String layerId = operand.replaceFirst("list\\('","").replaceFirst("'\\)\\.length$","");
-                  Layer operandLayer = schema.getLayer(layerId);
-                  if (operandLayer == null) throw new StoreException("Invalid layer: " + layerId);
-                  // join by the finest-grain compatible with both layers
-                  String scope = (String)layer.get("@scope");
-                  String operandScope = (String)operandLayer.get("@scope");
-                  if (operandScope == null) throw new StoreException("Cannot query by non-temporal annotation layer: " + layerId);
-                  String[] joinFields = {
-                     null,
-                     "turn_annotation_id",
-                     "word_annotation_id",
-                     "segment_annotation_id" };
-                  int joinFieldIndex = 3;
-                  if (scope.equals("W")) joinFieldIndex = Math.min(joinFieldIndex, 2);
-                  if (operandScope.equals("W") && joinFieldIndex > 2) Math.min(joinFieldIndex, 2);
-                  if (scope.equals("M")) joinFieldIndex = Math.min(joinFieldIndex, 1);
-                  if (operandScope.equals("M") && joinFieldIndex > 2) Math.min(joinFieldIndex, 1);
-                  if (scope.equals("F")) joinFieldIndex = Math.min(joinFieldIndex, 0);
-                  if (operandScope.equals("F") && joinFieldIndex > 2) Math.min(joinFieldIndex, 0);
-                  String joinField = joinFields[joinFieldIndex];
-                  sqlOperand = "(SELECT COUNT(*)"
-                     +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
-                     +" INNER JOIN anchor otherLayer_start ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
-                     +" INNER JOIN anchor otherLayer_end ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
-                     +" WHERE otherLayer.ag_id = annotation.ag_id"
-                     +(joinField==null?"":" AND otherLayer."+joinField+" = annotation."+joinField)
-                     // any overlap
-                     +" AND otherLayer_start.offset <= end.offset"
-                     +" AND start.offset <= otherLayer_end.offset"
-                     +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
-                     +")";
-                  anchorsJoin = true;
-               } // list().length
-               else
-               {
-                  sqlOperand = operand;
-               }
-               if (sqlLhs == null)
-               {
-                  sqlLhs = sqlOperand;
-               }
-               else
-               {
-                  sqlRhs = sqlOperand;
-               }
-            } // next operand
-            conditions.append(conditions.length() == 0?" WHERE ":" AND ");
-            conditions.append(sqlLhs);
-            conditions.append(" ");
-            conditions.append(sqlOperator);
-            conditions.append(" ");
-            conditions.append(sqlRhs);
-         } // next subexpression
          if (limit == null) limit = "";
-         String select = "DISTINCT annotation.*, ? AS layer, graph.transcript_id AS graph";
+         String select = "DISTINCT annotation.*, graph.transcript_id AS graph";
          if (limit.equals("COUNT(*)"))
          {
-            select = "COUNT(*), ? AS layer";
+            select = "COUNT(*)";
             limit = "";
          }
-         else
-         {
-            transcriptJoin = true;
-         }
-         sSql = "SELECT " + select
-            +(anchorsJoin?", start.offset, end.offset":"") // need to SELECT for ORDER BY
-            +" FROM annotation_layer_? annotation"
-            +(transcriptJoin?" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id":"")
-            +(anchorsJoin?" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
-              +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id":"")
-            + extraJoins.toString()
-            + conditions.toString()
-            + userWhereClauseGraph(conditions.length() > 0, "graph")
-            +" ORDER BY "
-            +(transcriptJoin?"graph.transcript_id":"ag_id") + ", "
-            +(anchorsJoin?"start.offset, end.offset, ":"")
-            +"parent_id, annotation_id"
-            + " " + limit;
+         AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+         AnnotationAgqlToSql.Query query = transformer.sqlFor(
+            expression, select, userWhereClauseGraph(true, "graph"), limit);
+         sSql = query.sql;
       } // no optimization found
       
       System.out.println("QL: " + expression);
       System.out.println("SQL: " + sSql);
       PreparedStatement sql = getConnection().prepareStatement(sSql);
-      sql.setString(1, layer.getId());
-      if (layer.containsKey("@layer_id"))
-      {
-         sql.setInt(2, ((Integer)layer.get("@layer_id")).intValue());
-      }
-      else if (layer.containsKey("@attribute"))
-      {
-         sql.setString(2, (String)layer.get("@attribute"));
-      }
       return sql;
    } // end of annotationMatchSql()
 
