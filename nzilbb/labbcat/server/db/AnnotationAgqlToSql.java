@@ -158,422 +158,476 @@ public class AnnotationAgqlToSql {
             private String escape(String s) {
                return s.replaceAll("\\'", "\\\\'");
             }
-            @Override public void exitThisIdExpression(AGQLParser.ThisIdExpressionContext ctx) {
+            @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
                space();
-               String scope = (String)layer.get("@scope");
-               if (scope == null || scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)){
-                  scope = "";
-               }
-               scope = scope.toLowerCase();
-               conditions.push(
-                  "CONCAT('e"+scope+"_"+layer.get("@layer_id")+"_', annotation.annotation_id)");
+               if (ctx.other == null) {
+                  String scope = (String)layer.get("@scope");
+                  if (scope == null || scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)){
+                     scope = "";
+                  }
+                  scope = scope.toLowerCase();
+                  conditions.push(
+                     "CONCAT('e"+scope+"_"+layer.get("@layer_id")+"_', annotation.annotation_id)");
+               } else { // other.id
+                  if (ctx.other.myMethodCall() == null) {
+                     errors.add("Invalid construction, only my('layer').id is supported: "
+                                + ctx.getText());
+                  } else {
+                     String layerId = unquote(
+                        ctx.other.myMethodCall().layer.quotedString.getText());
+                     Layer operandLayer = getSchema().getLayer(layerId);
+                     if (operandLayer == null) {
+                        errors.add("Invalid layer: " + ctx.getText());
+                     } else {
+                        String attribute = attribute(layerId);
+                        if ("transcript".equals(operandLayer.get("@class_id"))) {
+                           conditions.push(
+                              "(SELECT label"
+                              +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                              +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                              +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1)");
+                        } else if ("speaker".equals(operandLayer.get("@class_id"))) {
+                           errors.add("Cannot get participant attribute labels: " + ctx.getText()); // TODO
+                           return;
+                        } else if (operandLayer.getId().equals("transcript_type")) { // transcript type
+                           conditions.push("graph.type_id");
+                           flags.transcriptJoin = true;
+                        } else if (schema.getEpisodeLayerId().equals(operandLayer.getParentId())) {
+                           // episode attribute
+                           conditions.push(
+                              "(SELECT label"
+                              +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                              +" WHERE annotation.family_id = graph.family_id) LIMIT 1");
+                           flags.transcriptJoin = true;
+                        } else { // regular temporal layer
+                           // join by the finest-grain compatible with both layers
+                           String scope = ((String)layer.get("@scope")).toLowerCase();
+                           String operandScope = (String)operandLayer.get("@scope");
+                           operandScope = operandScope.toLowerCase();
+                           String[] joinFields = {
+                              null,
+                              "turn_annotation_id",
+                              "word_annotation_id",
+                              "segment_annotation_id" };
+                           int joinFieldIndex = 3;
+                           int joinIndex = extraJoins.size();
+                           if (scope.equals(SqlConstants.SCOPE_WORD)) {
+                              joinFieldIndex = Math.min(joinFieldIndex, 2);
+                           }
+                           if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
+                              joinFieldIndex = Math.min(joinFieldIndex, 2);
+                           }
+                           if (scope.equals(SqlConstants.SCOPE_META)) {
+                              joinFieldIndex = Math.min(joinFieldIndex, 1);
+                           }
+                           if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                              joinFieldIndex = Math.min(joinFieldIndex, 1);
+                           }
+                           if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
+                              joinFieldIndex = Math.min(joinFieldIndex, 0);
+                           }
+                           if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                              joinFieldIndex = Math.min(joinFieldIndex, 0);
+                           }
+                           // if both layers are the same scope, we don't need to compare anchors
+                           boolean temporalJoin = !scope.equals(operandScope);
+                           String order = "otherLayer_start_"+joinIndex+".offset,"
+                              +" otherLayer_end_"+joinIndex+".offset DESC";
+                           if (!temporalJoin) {
+                              order = "otherLayer_"+joinIndex+".ordinal";
+                           }
+                           
+                           String joinField = joinFields[joinFieldIndex];
+                           extraJoins.add(
+                              " INNER JOIN"
+                              +" annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer_"+joinIndex
+                              +" ON otherLayer_"+joinIndex+".ag_id = annotation.ag_id"
+                              +(joinField==null?""
+                                :" AND otherLayer_"+joinIndex+"."+joinField+" = annotation."+joinField)
+                              +(!temporalJoin?"":
+                                " INNER JOIN anchor otherLayer_start_"+joinIndex
+                                +" ON otherLayer_"+joinIndex+".start_anchor_id"
+                                +" = otherLayer_start_"+joinIndex+".anchor_id"
+                                +" AND otherLayer_start_"+joinIndex+".offset <= end.offset"
+                                +" INNER JOIN anchor otherLayer_end_"+joinIndex
+                                +" ON otherLayer_"+joinIndex+".end_anchor_id"
+                                +" = otherLayer_end_"+joinIndex+".anchor_id"
+                                +" AND start.offset <= otherLayer_end_"+joinIndex+".offset"));
+                           String scopePrefix = operandScope.toLowerCase();
+                           if (operandScope.equals(SqlConstants.SCOPE_FREEFORM)) scopePrefix = "";
+                           conditions.push(
+                              "CONCAT('e"+scopePrefix+"_"+operandLayer.get("@layer_id")+"_',"
+                              +" otherLayer_"+joinIndex+".annotation_id)");
+                           if (temporalJoin) flags.anchorsJoin = true;
+                        } // temporal layer
+                     } // valid layer
+                  } // my(...).id construction
+               } // other annotation
             }
-            @Override public void exitThisLabelExpression(AGQLParser.ThisLabelExpressionContext ctx) {
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) {
                space();
-               conditions.push("annotation.label");
+               if (ctx.other == null) {
+                  conditions.push("annotation.label");
+               } else { // other.label
+                  if (ctx.other.myMethodCall() == null) {
+                     errors.add("Invalid construction, only my('layer').label is supported: "
+                                + ctx.getText());
+                  } else {
+                     String layerId = unquote(
+                        ctx.other.myMethodCall().layer.quotedString.getText());
+                     if (layerId.equals(schema.getCorpusLayerId())) { // corpus
+                        conditions.push("graph.corpus_name");
+                        flags.transcriptJoin = true;
+                     } else if (layerId.equals(schema.getEpisodeLayerId())) { // episode
+                        conditions.push(
+                           "(SELECT name"
+                           +" FROM transcript_family"
+                           +" WHERE transcript_family.family_id = graph.family_id)");
+                        flags.transcriptJoin = true;
+                     } else if (layerId.equals(schema.getParticipantLayerId())) { // who
+                        if (layer.get("@scope").toString().equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) {
+                           // turn based on anchor offsets
+                           conditions.push(
+                              "(SELECT speaker.name"
+                              +" FROM speaker"
+                              +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
+                              +" INNER JOIN anchor turn_start_anchor ON turn.start_anchor_id = turn_start_anchor.id"
+                              +" INNER JOIN anchor turn_end_anchor ON turn.end_anchor_id = turn_end_anchor.id"
+                              +" WHERE turn.ag_id = graph.ag_id"
+                              // any overlap with the turn
+                              +" AND turn_start_anchor.offset <= end.offset"
+                              +" AND start.offset <= turn_end_anchor.offset"
+                              +" ORDER BY turn_start_anchor.offset, turn_end_anchor.offset DESC"
+                              +((ctx != null)?" LIMIT 1":"")
+                              +")");
+                           flags.anchorsJoin = true;
+                        } else { // turn based on turn_annotation_id
+                           // (no need to distinguish between my() and list() because there can be only one turn)
+                           conditions.push(
+                              "(SELECT speaker.name"
+                              +" FROM speaker"
+                              +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
+                              // match turn_annotation_id
+                              +" WHERE turn.annotation_id = annotation.turn_annotation_id"
+                              +")");
+                        } // turn based on turn_annotation_id
+                     } else { // other layer
+                        Layer operandLayer = getSchema().getLayer(layerId);
+                        if (operandLayer == null) {
+                           errors.add("Invalid layer: " + ctx.getText());
+                        } else {
+                           String attribute = attribute(layerId);
+                           if ("transcript".equals(operandLayer.get("@class_id"))) {
+                              conditions.push(
+                                 "(SELECT label"
+                                 +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                                 +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                                 +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1)");
+                           } else if ("speaker".equals(operandLayer.get("@class_id"))) {
+                              errors.add("Cannot get participant attribute labels: " + ctx.getText()); // TODO
+                              return;
+                           } else if (operandLayer.getId().equals("transcript_type")) { // transcript type
+                              conditions.push(
+                                 "(SELECT type"
+                                 +" FROM transcript_type"
+                                 +" WHERE transcript_type.type_id = graph.type_id LIMIT 1)");
+                              flags.transcriptJoin = true;
+                           } else { // regular temporal layer
+                              // join by the finest-grain compatible with both layers
+                              String scope = ((String)layer.get("@scope")).toLowerCase();
+                              String operandScope = (String)operandLayer.get("@scope");
+                              operandScope = operandScope.toLowerCase();
+                              String[] joinFields = {
+                                 null,
+                                 "turn_annotation_id",
+                                 "word_annotation_id",
+                                 "segment_annotation_id" };
+                              int joinFieldIndex = 3;
+                              int joinIndex = extraJoins.size();
+                              if (scope.equals(SqlConstants.SCOPE_WORD)) {
+                                 joinFieldIndex = Math.min(joinFieldIndex, 2);
+                              }
+                              if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
+                                 joinFieldIndex = Math.min(joinFieldIndex, 2);
+                              }
+                              if (scope.equals(SqlConstants.SCOPE_META)) {
+                                 joinFieldIndex = Math.min(joinFieldIndex, 1);
+                              }
+                              if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                                 joinFieldIndex = Math.min(joinFieldIndex, 1);
+                              }
+                              if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
+                                 joinFieldIndex = Math.min(joinFieldIndex, 0);
+                              }
+                              if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                                 joinFieldIndex = Math.min(joinFieldIndex, 0);
+                              }
+                              // if both layers are the same scope, we don't need to compare anchors
+                              boolean temporalJoin = !scope.equals(operandScope);
+                              String order = "otherLayer_start_"+joinIndex+".offset,"
+                                 +" otherLayer_end_"+joinIndex+".offset DESC";
+                              if (!temporalJoin) {
+                                 order = "otherLayer_"+joinIndex+".ordinal";
+                              }
+                              
+                              String joinField = joinFields[joinFieldIndex];
+                              extraJoins.add(
+                                 " INNER JOIN"
+                                 +" annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer_"+joinIndex
+                                 +" ON otherLayer_"+joinIndex+".ag_id = annotation.ag_id"
+                                 +(joinField==null?""
+                                   :" AND otherLayer_"+joinIndex+"."+joinField+" = annotation."+joinField)
+                                 +(!temporalJoin?"":
+                                   " INNER JOIN anchor otherLayer_start_"+joinIndex
+                                   +" ON otherLayer_"+joinIndex+".start_anchor_id"
+                                   +" = otherLayer_start_"+joinIndex+".anchor_id"
+                                   +" AND otherLayer_start_"+joinIndex+".offset <= end.offset"
+                                   +" INNER JOIN anchor otherLayer_end_"+joinIndex
+                                   +" ON otherLayer_"+joinIndex+".end_anchor_id"
+                                   +" = otherLayer_end_"+joinIndex+".anchor_id"
+                                   +" AND start.offset <= otherLayer_end_"+joinIndex+".offset"));
+                              conditions.push("otherLayer_"+joinIndex+".label");
+                              if (temporalJoin) flags.anchorsJoin = true;
+                           } // temporal layer
+                        } // valid layer
+                     } // other layer
+                  } // my(...).label
+               } // other.label
             }
             @Override public void exitGraphIdExpression(AGQLParser.GraphIdExpressionContext ctx) {
                space();
                conditions.push("graph.transcript_id");
                flags.transcriptJoin = true;
             }
-            @Override public void exitCorpusLabelOperand(AGQLParser.CorpusLabelOperandContext ctx) {
+            @Override public void exitLabelsMethodCall(AGQLParser.LabelsMethodCallContext ctx) { 
+               if (flags.inListLength) return; // exitListLengthExpression will handle this
                space();
-               conditions.push("graph.corpus_name");
-               flags.transcriptJoin = true;
-            }
-            @Override public void enterCorpusLabelsExpression(AGQLParser.CorpusLabelsExpressionContext ctx) {
-               space();
-               conditions.push("(SELECT graph.corpus_name)");
-               flags.transcriptJoin = true;
-            }
-            @Override public void exitEpisodeLabelOperand(AGQLParser.EpisodeLabelOperandContext ctx) {
-               space();
-               conditions.push(
-                  "(SELECT name"
-                  +" FROM transcript_family"
-                  +" WHERE transcript_family.family_id = graph.family_id)");
-               flags.transcriptJoin = true;
-            }
-            @Override public void enterWhoLabelsExpression(AGQLParser.WhoLabelsExpressionContext ctx) {
-               enterWhoLabelExpression(null); // below
-            }
-            @Override public void enterWhoLabelExpression(AGQLParser.WhoLabelExpressionContext ctx) {
-               space();
-               if (layer.get("@scope").toString().equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) {
-                  // turn based on anchor offsets
+               String layerId = unquote(ctx.layer.quotedString.getText());
+               if (layerId.equals(schema.getCorpusLayerId())) { // corpus                  
+                  conditions.push("(SELECT graph.corpus_name)");
+                  flags.transcriptJoin = true;
+               } else if (layerId.equals(schema.getEpisodeLayerId())) { // episode
                   conditions.push(
-                     "(SELECT speaker.name"
-                     +" FROM speaker"
-                     +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
-                     +" INNER JOIN anchor turn_start_anchor ON turn.start_anchor_id = turn_start_anchor.id"
-                     +" INNER JOIN anchor turn_end_anchor ON turn.end_anchor_id = turn_end_anchor.id"
-                     +" WHERE turn.ag_id = graph.ag_id"
-                     // any overlap with the turn
-                     +" AND turn_start_anchor.offset <= end.offset"
-                     +" AND start.offset <= turn_end_anchor.offset"
-                     +" ORDER BY turn_start_anchor.offset, turn_end_anchor.offset DESC"
-                     +((ctx != null)?" LIMIT 1":"")
-                     +")");
-                  flags.anchorsJoin = true;
-               } else { // turn based on turn_annotation_id
-                  // (no need to distinguish between my() and list() because there can be only one turn)
-                  conditions.push(
-                     "(SELECT speaker.name"
-                     +" FROM speaker"
-                     +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
-                     // match turn_annotation_id
-                     +" WHERE turn.annotation_id = annotation.turn_annotation_id"
-                     +")");
-               } // turn based on turn_annotation_id
-            }
-            @Override public void enterLabelsExpression(AGQLParser.LabelsExpressionContext ctx) {
-               space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
-               Layer operandLayer = getSchema().getLayer(layerId);
-               if (operandLayer == null) {
-                  errors.add("Invalid layer: " + ctx.getText());
-               } else { // valid layer
-                  String attribute = attribute(layerId);
-                  if ("transcript".equals(operandLayer.get("@class_id"))) {
+                     "(SELECT name"
+                     +" FROM transcript_family"
+                     +" WHERE transcript_family.family_id = graph.family_id)");
+                  flags.transcriptJoin = true;
+               } else if (layerId.equals(schema.getParticipantLayerId())) { // who
+                  if (layer.get("@scope").toString().equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) {
+                     // turn based on anchor offsets
                      conditions.push(
-                        "(SELECT label"
-                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                        +" AND annotation_transcript.ag_id = annotation.ag_id)");
-                  } else if ("speaker".equals(operandLayer.get("@class_id"))) {
-                     errors.add("Cannot get participant attribute annotators: " + ctx.getText()); // TODO
-                     return;
-                  } else if (operandLayer.getId().equals("transcript_type")) { // transcript type
-                     errors.add("Cannot get transcript type annotator: " + ctx.getText()); // TODO
-                     return;
-                  } else if (schema.getEpisodeLayerId().equals(operandLayer.getParentId())) {
-                     // episode attribute
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
-                        +" WHERE annotation.family_id = graph.family_id)");
-                     flags.transcriptJoin = true;
-                  } else { // regular temporal layer
-                     // join by the finest-grain compatible with both layers
-                     String scope = ((String)layer.get("@scope")).toLowerCase();
-                     String operandScope = (String)operandLayer.get("@scope");
-                     operandScope = operandScope.toLowerCase();
-                     String[] joinFields = {
-                        null,
-                        "turn_annotation_id",
-                        "word_annotation_id",
-                        "segment_annotation_id" };
-                     int joinFieldIndex = 3;
-                     int joinIndex = extraJoins.size();
-                     String selectedValue = "otherLayer_"+joinIndex+".label";
-                     if (scope.equals(SqlConstants.SCOPE_WORD)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 2);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 2);
-                     }
-                     if (scope.equals(SqlConstants.SCOPE_META)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 1);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 1);
-                     }
-                     if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 0);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 0);
-                     }
-                     // if both layers are the same scope, we don't need to compare anchors
-                     boolean temporalJoin = !scope.equals(operandScope);
-                     String order = "otherLayer_start_"+joinIndex+".offset,"
-                        +" otherLayer_end_"+joinIndex+".offset DESC";
-                     if (!temporalJoin) {
-                        order = "otherLayer_"+joinIndex+".ordinal";
-                     }
-                     
-                     String joinField = joinFields[joinFieldIndex];
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
-                        +(!temporalJoin?"":
-                          " INNER JOIN anchor otherLayer_start"
-                          +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
-                          +" AND otherLayer_start.offset <= end.offset"
-                          +" INNER JOIN anchor otherLayer_end"
-                          +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
-                          +" AND start.offset <= otherLayer_end.offset")
-                        +" WHERE otherLayer.ag_id = annotation.ag_id"
-                        +(joinField==null?""
-                          :" AND otherLayer."+joinField+" = annotation."+joinField)
+                        "(SELECT speaker.name"
+                        +" FROM speaker"
+                        +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
+                        +" INNER JOIN anchor turn_start_anchor ON turn.start_anchor_id = turn_start_anchor.id"
+                        +" INNER JOIN anchor turn_end_anchor ON turn.end_anchor_id = turn_end_anchor.id"
+                        +" WHERE turn.ag_id = graph.ag_id"
+                        // any overlap with the turn
+                        +" AND turn_start_anchor.offset <= end.offset"
+                        +" AND start.offset <= turn_end_anchor.offset"
+                        +" ORDER BY turn_start_anchor.offset, turn_end_anchor.offset DESC"
+                        +((ctx != null)?" LIMIT 1":"")
                         +")");
-                     if (temporalJoin) flags.anchorsJoin = true;
-                  } // temporal layer
-               } // valid layer
+                     flags.anchorsJoin = true;
+                  } else { // turn based on turn_annotation_id
+                     // (no need to distinguish between my() and list() because there can be only one turn)
+                     conditions.push(
+                        "(SELECT speaker.name"
+                        +" FROM speaker"
+                        +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
+                        // match turn_annotation_id
+                        +" WHERE turn.annotation_id = annotation.turn_annotation_id"
+                        +")");
+                  } // turn based on turn_annotation_id
+               } else { // other layer
+                  Layer operandLayer = getSchema().getLayer(layerId);
+                  if (operandLayer == null) {
+                     errors.add("Invalid layer: " + ctx.getText());
+                  } else { // valid layer
+                     String attribute = attribute(layerId);
+                     if ("transcript".equals(operandLayer.get("@class_id"))) {
+                        conditions.push(
+                           "(SELECT label"
+                           +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                           +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                           +" AND annotation_transcript.ag_id = annotation.ag_id)");
+                     } else if ("speaker".equals(operandLayer.get("@class_id"))) {
+                        errors.add("Cannot get participant attribute annotators: " + ctx.getText()); // TODO
+                        return;
+                     } else if (operandLayer.getId().equals("transcript_type")) { // transcript type
+                        errors.add("Cannot get transcript type annotator: " + ctx.getText()); // TODO
+                        return;
+                     } else if (schema.getEpisodeLayerId().equals(operandLayer.getParentId())) {
+                        // episode attribute
+                        conditions.push(
+                           "(SELECT label"
+                           +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                           +" WHERE annotation.family_id = graph.family_id)");
+                        flags.transcriptJoin = true;
+                     } else { // regular temporal layer
+                        // join by the finest-grain compatible with both layers
+                        String scope = ((String)layer.get("@scope")).toLowerCase();
+                        String operandScope = (String)operandLayer.get("@scope");
+                        operandScope = operandScope.toLowerCase();
+                        String[] joinFields = {
+                           null,
+                           "turn_annotation_id",
+                           "word_annotation_id",
+                           "segment_annotation_id" };
+                        int joinFieldIndex = 3;
+                        int joinIndex = extraJoins.size();
+                        String selectedValue = "otherLayer_"+joinIndex+".label";
+                        if (scope.equals(SqlConstants.SCOPE_WORD)) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 2);
+                        }
+                        if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 2);
+                        }
+                        if (scope.equals(SqlConstants.SCOPE_META)) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 1);
+                        }
+                        if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 1);
+                        }
+                        if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 0);
+                        }
+                        if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 0);
+                        }
+                        // if both layers are the same scope, we don't need to compare anchors
+                        boolean temporalJoin = !scope.equals(operandScope);
+                        String order = "otherLayer_start_"+joinIndex+".offset,"
+                           +" otherLayer_end_"+joinIndex+".offset DESC";
+                        if (!temporalJoin) {
+                           order = "otherLayer_"+joinIndex+".ordinal";
+                        }
+                        
+                        String joinField = joinFields[joinFieldIndex];
+                        conditions.push(
+                           "(SELECT label"
+                           +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
+                           +(!temporalJoin?"":
+                             " INNER JOIN anchor otherLayer_start"
+                             +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+                             +" AND otherLayer_start.offset <= end.offset"
+                             +" INNER JOIN anchor otherLayer_end"
+                             +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
+                             +" AND start.offset <= otherLayer_end.offset")
+                           +" WHERE otherLayer.ag_id = annotation.ag_id"
+                           +(joinField==null?""
+                             :" AND otherLayer."+joinField+" = annotation."+joinField)
+                           +")");
+                        if (temporalJoin) flags.anchorsJoin = true;
+                     } // temporal layer
+                  } // valid layer
+               } // other layer
             }
-            @Override public void enterOtherLabelExpression(AGQLParser.OtherLabelExpressionContext ctx) {
-               space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
-               Layer operandLayer = getSchema().getLayer(layerId);
-               if (operandLayer == null) {
-                  errors.add("Invalid layer: " + ctx.getText());
-               } else {
-                  String attribute = attribute(layerId);
-                  if ("transcript".equals(operandLayer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                        +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1)");
-                  } else if ("speaker".equals(operandLayer.get("@class_id"))) {
-                     errors.add("Cannot get participant attribute labels: " + ctx.getText()); // TODO
-                     return;
-                  } else if (operandLayer.getId().equals("transcript_type")) { // transcript type
-                     conditions.push(
-                        "(SELECT type"
-                        +" FROM transcript_type"
-                        +" WHERE transcript_type.type_id = graph.type_id LIMIT 1)");
-                     flags.transcriptJoin = true;
-                  } else if (schema.getEpisodeLayerId().equals(operandLayer.getParentId())) {
-                     // episode attribute
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
-                        +" WHERE annotation.family_id = graph.family_id) LIMIT 1");
-                     flags.transcriptJoin = true;
-                  } else { // regular temporal layer
-                     // join by the finest-grain compatible with both layers
-                     String scope = ((String)layer.get("@scope")).toLowerCase();
-                     String operandScope = (String)operandLayer.get("@scope");
-                     operandScope = operandScope.toLowerCase();
-                     String[] joinFields = {
-                        null,
-                        "turn_annotation_id",
-                        "word_annotation_id",
-                        "segment_annotation_id" };
-                     int joinFieldIndex = 3;
-                     int joinIndex = extraJoins.size();
-                     if (scope.equals(SqlConstants.SCOPE_WORD)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 2);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 2);
-                     }
-                     if (scope.equals(SqlConstants.SCOPE_META)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 1);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 1);
-                     }
-                     if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 0);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 0);
-                     }
-                     // if both layers are the same scope, we don't need to compare anchors
-                     boolean temporalJoin = !scope.equals(operandScope);
-                     String order = "otherLayer_start_"+joinIndex+".offset,"
-                        +" otherLayer_end_"+joinIndex+".offset DESC";
-                     if (!temporalJoin) {
-                        order = "otherLayer_"+joinIndex+".ordinal";
-                     }
-                     
-                     String joinField = joinFields[joinFieldIndex];
-                     extraJoins.add(
-                        " INNER JOIN"
-                        +" annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer_"+joinIndex
-                        +" ON otherLayer_"+joinIndex+".ag_id = annotation.ag_id"
-                        +(joinField==null?""
-                          :" AND otherLayer_"+joinIndex+"."+joinField+" = annotation."+joinField)
-                        +(!temporalJoin?"":
-                          " INNER JOIN anchor otherLayer_start_"+joinIndex
-                          +" ON otherLayer_"+joinIndex+".start_anchor_id"
-                          +" = otherLayer_start_"+joinIndex+".anchor_id"
-                          +" AND otherLayer_start_"+joinIndex+".offset <= end.offset"
-                          +" INNER JOIN anchor otherLayer_end_"+joinIndex
-                          +" ON otherLayer_"+joinIndex+".end_anchor_id"
-                          +" = otherLayer_end_"+joinIndex+".anchor_id"
-                          +" AND start.offset <= otherLayer_end_"+joinIndex+".offset"));
-                     conditions.push("otherLayer_"+joinIndex+".label");
-                     if (temporalJoin) flags.anchorsJoin = true;
-                  } // temporal layer
-               } // valid layer
-            }
-            @Override public void enterOtherIdExpression(AGQLParser.OtherIdExpressionContext ctx) {
-               space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
-               Layer operandLayer = getSchema().getLayer(layerId);
-               if (operandLayer == null) {
-                  errors.add("Invalid layer: " + ctx.getText());
-               } else {
-                  String attribute = attribute(layerId);
-                  if ("transcript".equals(operandLayer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                        +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1)");
-                  } else if ("speaker".equals(operandLayer.get("@class_id"))) {
-                     errors.add("Cannot get participant attribute labels: " + ctx.getText()); // TODO
-                     return;
-                  } else if (operandLayer.getId().equals("transcript_type")) { // transcript type
-                     conditions.push("graph.type_id");
-                     flags.transcriptJoin = true;
-                  } else if (schema.getEpisodeLayerId().equals(operandLayer.getParentId())) {
-                     // episode attribute
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
-                        +" WHERE annotation.family_id = graph.family_id) LIMIT 1");
-                     flags.transcriptJoin = true;
-                  } else { // regular temporal layer
-                     // join by the finest-grain compatible with both layers
-                     String scope = ((String)layer.get("@scope")).toLowerCase();
-                     String operandScope = (String)operandLayer.get("@scope");
-                     operandScope = operandScope.toLowerCase();
-                     String[] joinFields = {
-                        null,
-                        "turn_annotation_id",
-                        "word_annotation_id",
-                        "segment_annotation_id" };
-                     int joinFieldIndex = 3;
-                     int joinIndex = extraJoins.size();
-                     if (scope.equals(SqlConstants.SCOPE_WORD)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 2);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 2);
-                     }
-                     if (scope.equals(SqlConstants.SCOPE_META)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 1);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 1);
-                     }
-                     if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 0);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 0);
-                     }
-                     // if both layers are the same scope, we don't need to compare anchors
-                     boolean temporalJoin = !scope.equals(operandScope);
-                     String order = "otherLayer_start_"+joinIndex+".offset,"
-                        +" otherLayer_end_"+joinIndex+".offset DESC";
-                     if (!temporalJoin) {
-                        order = "otherLayer_"+joinIndex+".ordinal";
-                     }
-                     
-                     String joinField = joinFields[joinFieldIndex];
-                     extraJoins.add(
-                        " INNER JOIN"
-                        +" annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer_"+joinIndex
-                        +" ON otherLayer_"+joinIndex+".ag_id = annotation.ag_id"
-                        +(joinField==null?""
-                          :" AND otherLayer_"+joinIndex+"."+joinField+" = annotation."+joinField)
-                        +(!temporalJoin?"":
-                          " INNER JOIN anchor otherLayer_start_"+joinIndex
-                          +" ON otherLayer_"+joinIndex+".start_anchor_id"
-                          +" = otherLayer_start_"+joinIndex+".anchor_id"
-                          +" AND otherLayer_start_"+joinIndex+".offset <= end.offset"
-                          +" INNER JOIN anchor otherLayer_end_"+joinIndex
-                          +" ON otherLayer_"+joinIndex+".end_anchor_id"
-                          +" = otherLayer_end_"+joinIndex+".anchor_id"
-                          +" AND start.offset <= otherLayer_end_"+joinIndex+".offset"));
-                     String scopePrefix = operandScope.toLowerCase();
-                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM)) scopePrefix = "";
-                     conditions.push(
-                        "CONCAT('e"+scopePrefix+"_"+operandLayer.get("@layer_id")+"_',"
-                        +" otherLayer_"+joinIndex+".annotation_id)");
-                     if (temporalJoin) flags.anchorsJoin = true;
-                  } // temporal layer
-               } // valid layer
+            @Override public void enterListLengthExpression(AGQLParser.ListLengthExpressionContext ctx) {
+               flags.inListLength = true;
             }
             @Override public void exitListLengthExpression(AGQLParser.ListLengthExpressionContext ctx) {
                space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
-               Layer operandLayer = getSchema().getLayer(layerId);
-               if (operandLayer == null) {
-                  errors.add("Invalid layer: " + ctx.getText());
+               String layerId = null;
+               if (ctx.listExpression().valueListExpression() != null) {
+                  if (ctx.listExpression().valueListExpression().labelsMethodCall() != null) {
+                     layerId = ctx.listExpression().valueListExpression().labelsMethodCall()
+                        .layer.quotedString.getText();
+                  } else if (ctx.listExpression().valueListExpression().annotatorsMethodCall() != null) {
+                     layerId = ctx.listExpression().valueListExpression().annotatorsMethodCall()
+                        .layer.quotedString.getText();
+                  }
+               } else if (ctx.listExpression().annotationListExpression() != null) {
+                  layerId = ctx.listExpression().annotationListExpression().listMethodCall()
+                     .layer.quotedString.getText();
+               }
+               if (layerId == null) {
+                  errors.add("Could not identify layer: " + ctx.getText());
                } else {
-                  String attribute = attribute(layerId);
-                  if ("transcript".equals(operandLayer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT COUNT(*)"
-                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                        +" AND annotation_transcript.ag_id = annotation.ag_id)");
-                  } else if ("speaker".equals(operandLayer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT COUNT(*)"
-                        +" FROM annotation_participant"
-                        +" INNER JOIN transcript_speaker"
-                        +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
-                        +" AND annotation_participant.layer = '"+escape(attribute)+"'"
-                        +" WHERE transcript_speaker.ag_id = annotation.ag_id)");
-                  } else if (operandLayer.getId().equals("transcript_type")) { // transcript type
-                     conditions.push("1");
-                  } else if (schema.getEpisodeLayerId().equals(operandLayer.getParentId())) {
-                     // episode attribute
-                     conditions.push(
-                        "(SELECT COUNT(*)"
-                        +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
-                        +" WHERE annotation.family_id = graph.family_id)");
-                     flags.transcriptJoin = true;
-                  } else { // regular temporal layer
-                     // join by the finest-grain compatible with both layers
-                     String scope = ((String)layer.get("@scope")).toLowerCase();
-                     String operandScope = (String)operandLayer.get("@scope");
-                     operandScope = operandScope.toLowerCase();
-                     String[] joinFields = {
-                        null,
-                        "turn_annotation_id",
-                        "word_annotation_id",
-                        "segment_annotation_id" };
-                     int joinFieldIndex = 3;
-                     if (scope.equals(SqlConstants.SCOPE_WORD)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 2);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
-                        Math.min(joinFieldIndex, 2);
-                     }
-                     if (scope.equals(SqlConstants.SCOPE_META)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 1);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
-                        Math.min(joinFieldIndex, 1);
-                     }
-                     if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
-                        joinFieldIndex = Math.min(joinFieldIndex, 0);
-                     }
-                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
-                        Math.min(joinFieldIndex, 0);
-                     }
-                     String joinField = joinFields[joinFieldIndex];
-                     conditions.push(
-                        "(SELECT COUNT(*)"
-                        +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
-                        +" INNER JOIN anchor otherLayer_start"
-                        +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
-                        +" INNER JOIN anchor otherLayer_end"
-                        +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
-                        +" WHERE otherLayer.ag_id = annotation.ag_id"
-                        +(joinField==null?""
-                          :" AND otherLayer."+joinField+" = annotation."+joinField)
-                        // any overlap
-                        +" AND otherLayer_start.offset <= end.offset"
-                        +" AND start.offset <= otherLayer_end.offset"
-                        +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
-                        +")");
-                     flags.anchorsJoin = true;
-                  } // regular temporal layer
-               } // valid layer
+                  layerId = unquote(layerId);
+                  Layer operandLayer = getSchema().getLayer(layerId);
+                  if (operandLayer == null) {
+                     errors.add("Invalid layer: " + ctx.getText());
+                  } else {
+                     String attribute = attribute(layerId);
+                     if ("transcript".equals(operandLayer.get("@class_id"))) {
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                           +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                           +" AND annotation_transcript.ag_id = annotation.ag_id)");
+                     } else if ("speaker".equals(operandLayer.get("@class_id"))) {
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM annotation_participant"
+                           +" INNER JOIN transcript_speaker"
+                           +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
+                           +" AND annotation_participant.layer = '"+escape(attribute)+"'"
+                           +" WHERE transcript_speaker.ag_id = annotation.ag_id)");
+                     } else if (operandLayer.getId().equals("transcript_type")) { // transcript type
+                        conditions.push("1");
+                     } else if (schema.getEpisodeLayerId().equals(operandLayer.getParentId())) {
+                        // episode attribute
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                           +" WHERE annotation.family_id = graph.family_id)");
+                        flags.transcriptJoin = true;
+                     } else { // regular temporal layer
+                        // join by the finest-grain compatible with both layers
+                        String scope = ((String)layer.get("@scope")).toLowerCase();
+                        String operandScope = (String)operandLayer.get("@scope");
+                        operandScope = operandScope.toLowerCase();
+                        String[] joinFields = {
+                           null,
+                           "turn_annotation_id",
+                           "word_annotation_id",
+                           "segment_annotation_id" };
+                        int joinFieldIndex = 3;
+                        if (scope.equals(SqlConstants.SCOPE_WORD)) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 2);
+                        }
+                        if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
+                           Math.min(joinFieldIndex, 2);
+                        }
+                        if (scope.equals(SqlConstants.SCOPE_META)) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 1);
+                        }
+                        if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                           Math.min(joinFieldIndex, 1);
+                        }
+                        if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
+                           joinFieldIndex = Math.min(joinFieldIndex, 0);
+                        }
+                        if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                           Math.min(joinFieldIndex, 0);
+                        }
+                        String joinField = joinFields[joinFieldIndex];
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM annotation_layer_"+operandLayer.get("@layer_id")+" otherLayer"
+                           +" INNER JOIN anchor otherLayer_start"
+                           +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+                           +" INNER JOIN anchor otherLayer_end"
+                           +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
+                           +" WHERE otherLayer.ag_id = annotation.ag_id"
+                           +(joinField==null?""
+                             :" AND otherLayer."+joinField+" = annotation."+joinField)
+                           // any overlap
+                           +" AND otherLayer_start.offset <= end.offset"
+                           +" AND start.offset <= otherLayer_end.offset"
+                           +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
+                           +")");
+                        flags.anchorsJoin = true;
+                     } // regular temporal layer
+                  } // valid layer
+               } // layer identified
+               flags.inListLength = false;
             }
-            @Override public void enterListExpression(AGQLParser.ListExpressionContext ctx) {
+            @Override public void exitListMethodCall(AGQLParser.ListMethodCallContext ctx) {
+               if (flags.inListLength) return; // exitListLengthExpression will handle this
                space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
+               String layerId = unquote(ctx.layer.getText());
                Layer operandLayer = getSchema().getLayer(layerId);
                if (operandLayer == null) {
                   errors.add("Invalid layer: " + ctx.getText());
@@ -655,9 +709,10 @@ public class AnnotationAgqlToSql {
                   } // temporal layer
                } // valid layer
             }
-            @Override public void enterAnnotatorsExpression(AGQLParser.AnnotatorsExpressionContext ctx) {
+            @Override public void exitAnnotatorsMethodCall(AGQLParser.AnnotatorsMethodCallContext ctx) { 
+               if (flags.inListLength) return; // exitListLengthExpression will handle this
                space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
+               String layerId = unquote(ctx.layer.quotedString.getText());
                Layer operandLayer = getSchema().getLayer(layerId);
                if (operandLayer == null) {
                   errors.add("Invalid layer: " + ctx.getText());
@@ -749,7 +804,7 @@ public class AnnotationAgqlToSql {
                space();
                conditions.push("annotation.ordinal");
             }
-            @Override public void exitAtomList(AGQLParser.AtomListContext ctx) {
+            @Override public void exitAtomListExpression(AGQLParser.AtomListExpressionContext ctx) {
                // pop all the elements off the stack
                Stack<String> atoms = new Stack<String>();
                for (int i = 0; i < ctx.subsequentAtom().size(); i++) {
@@ -838,39 +893,32 @@ public class AnnotationAgqlToSql {
                   conditions.push(ctx.getText());
                }
             }
-            @Override public void exitWhoLiteralAtom(AGQLParser.WhoLiteralAtomContext ctx) {
-               conditions.push(" 'who'");
-            }
-            @Override public void exitGraphLiteralAtom(AGQLParser.GraphLiteralAtomContext ctx) {
-               conditions.push(" 'graph'");
-            }
-            @Override public void exitCorpusLiteralAtom(AGQLParser.CorpusLiteralAtomContext ctx) {
-               conditions.push(" 'corpus'");
-            }
-            @Override public void exitEpisodeLiteralAtom(AGQLParser.EpisodeLiteralAtomContext ctx) {
-               conditions.push(" 'episode'");
-            }
             @Override public void exitIdentifierAtom(AGQLParser.IdentifierAtomContext ctx) {
                space();
                conditions.push(ctx.getText());
             }
-            @Override public void exitStartIdExpression(AGQLParser.StartIdExpressionContext ctx) { 
+            @Override public void exitAnchorIdExpression(AGQLParser.AnchorIdExpressionContext ctx) {
                space();
-               conditions.push("CONCAT('n_',annotation.start_anchor_id)");
+               if (ctx.other != null
+                   || (ctx.anchorExpression() != null && ctx.anchorExpression().other != null)) {
+                  errors.add("Can only reference this annotation's anchor offsets: " + ctx.getText());
+               } else if (ctx.getText().contains("end")) {
+                  conditions.push("CONCAT('n_',annotation.end_anchor_id)");
+               } else {
+                  conditions.push("CONCAT('n_',annotation.start_anchor_id)");
+               }
             }
-            @Override public void exitEndIdExpression(AGQLParser.EndIdExpressionContext ctx) { 
+            @Override public void exitAnchorOffsetExpression(AGQLParser.AnchorOffsetExpressionContext ctx) {
                space();
-               conditions.push("CONCAT('n_',annotation.end_anchor_id)");
-            }
-            @Override public void exitStartOffsetExpression(AGQLParser.StartOffsetExpressionContext ctx) {
-               space();
-               conditions.push("start.offset");
-               flags.anchorsJoin = true;
-            }
-            @Override public void exitEndOffsetExpression(AGQLParser.EndOffsetExpressionContext ctx) {
-               space();
-               conditions.push("end.offset");
-               flags.anchorsJoin = true;
+               if (ctx.anchorExpression().other != null) {
+                  errors.add("Can only reference this annotation's anchor offsets: " + ctx.getText());
+               } else if (ctx.getText().contains("end")) {
+                  conditions.push("end.offset");
+                  flags.anchorsJoin = true;
+               } else {
+                  conditions.push("start.offset");
+                  flags.anchorsJoin = true;
+               }
             }
             @Override public void exitAnnotatorOperand(AGQLParser.AnnotatorOperandContext ctx) {
                space();
@@ -880,9 +928,13 @@ public class AnnotationAgqlToSql {
                space();
                conditions.push("annotation.annotated_when");
             }
-            @Override public void exitLayerIdExpression(AGQLParser.LayerIdExpressionContext ctx) {
+            @Override public void exitLayerExpression(AGQLParser.LayerExpressionContext ctx) { 
                space();
-               conditions.push("'"+layer.getId().replaceAll("'","\\'")+"'");
+               if (ctx.other != null) {
+                  errors.add("Can only reference this annotation's layer: " + ctx.getText());
+               } else {
+                  conditions.push("'"+layer.getId().replaceAll("'","\\'")+"'");
+               }
             }
             @Override public void exitParentIdExpression(AGQLParser.ParentIdExpressionContext ctx) {
                space();
@@ -969,7 +1021,7 @@ public class AnnotationAgqlToSql {
                   AGQLParser.OperandContext rhs = ctx.operand(1);
                   // is LHS id?
                   if (lhs instanceof AGQLParser.IdOperandContext // "id == ..."
-                      || lhs instanceof AGQLParser.LayerIdOperandContext) { // "layer.id == ..."
+                      || lhs instanceof AGQLParser.LayerOperandContext) { // "layer.id == ..."
 
                      // is RHS a string literal?
                      if (rhs instanceof AGQLParser.AtomOperandContext) {
@@ -1006,11 +1058,10 @@ public class AnnotationAgqlToSql {
                } // EQ
             }
             @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx) {
-               if (ctx.listOperand instanceof AGQLParser.AtomListOperandContext) {
+               if (ctx.listOperand.atomListExpression() != null) {
                   // something like "['ew_0_123','ew_0_123'].includes(id)"
-                  AGQLParser.AtomListOperandContext listOperand
-                     = (AGQLParser.AtomListOperandContext)ctx.listOperand;
-                  AGQLParser.FirstAtomContext firstAtom = listOperand.atomList().firstAtom();
+                  AGQLParser.FirstAtomContext firstAtom
+                     = ctx.listOperand.atomListExpression().firstAtom();
                   if (firstAtom.atom() instanceof AGQLParser.LiteralAtomContext) {
                      AGQLParser.LiteralAtomContext literalAtom
                         = (AGQLParser.LiteralAtomContext)firstAtom.atom();
@@ -1052,10 +1103,10 @@ public class AnnotationAgqlToSql {
       }
    } // end of deducePrimaryLayer()
 
-
    class Flags {
       boolean transcriptJoin = false;
       boolean anchorsJoin = false; // TODO split into startAnchorJoin and endAnchorJoin
+      boolean inListLength = false;
    }
 
    /** 

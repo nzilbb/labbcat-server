@@ -113,6 +113,7 @@ public class GraphAgqlToSql {
       if (orderClause == null || orderClause.trim().length() == 0) orderClause = "id ASC";
       final Query q = new Query();
       final Stack<String> conditions = new Stack<String>();
+      final Flags flags = new Flags();      
       final Vector<String> errors = new Vector<String>();
 
       AGQLBaseListener listener = new AGQLBaseListener() {
@@ -131,179 +132,214 @@ public class GraphAgqlToSql {
             private String escape(String s) {
                return s.replaceAll("\\'", "\\\\'");
             }
-            @Override public void exitThisIdExpression(AGQLParser.ThisIdExpressionContext ctx) {
+            @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) {
                space();
-               conditions.push("transcript.transcript_id");
+               if (ctx.other != null) {
+                  errors.add("Invalid construction, only \"id\" is supported: "
+                             + ctx.getText());
+               } else {
+                  conditions.push("transcript.transcript_id");
+               }
             }
-            @Override public void exitThisLabelExpression(AGQLParser.ThisLabelExpressionContext ctx) {
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) {
                space();
-               conditions.push("transcript.transcript_id");
+               if (ctx.other == null) {
+                  conditions.push("transcript.transcript_id");
+               } else {
+                  if (ctx.other.myMethodCall() == null) {
+                     errors.add("Invalid construction, only my('layer').label is supported: "
+                                + ctx.getText());
+                  } else {
+                     String layerId = unquote(
+                        ctx.other.myMethodCall().layer.quotedString.getText());
+                     if (layerId.equals(schema.getCorpusLayerId())) { // corpus
+                        conditions.push("transcript.corpus_name");
+                     } else if (layerId.equals(schema.getEpisodeLayerId())) { // episode
+                        conditions.push(
+                           "(SELECT name"
+                           +" FROM transcript_family"
+                           +" WHERE transcript_family.family_id = transcript.family_id)");
+                     } else if (layerId.equals(schema.getParticipantLayerId())) { // who
+                        conditions.push(
+                           "(SELECT speaker.name"
+                           +" FROM transcript_speaker"
+                           +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
+                           +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+                           // the first one
+                           +" ORDER BY speaker.name LIMIT 1)");
+                     } else if (layerId.equals(schema.getRoot().getId())) { // graph
+                        conditions.push("transcript.transcript_id");
+                     } else { // other layer
+                        Layer layer = getSchema().getLayer(layerId);
+                        if (layer == null) {
+                           errors.add("Invalid layer: " + ctx.getText());
+                        } else {
+                           String attribute = attribute(layerId);
+                           if ("transcript".equals(layer.get("@class_id"))) {
+                              conditions.push(
+                                 "(SELECT label"
+                                 +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                                 +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                                 +" AND annotation_transcript.ag_id = transcript.ag_id"
+                                 +" ORDER BY annotation_id LIMIT 1)");
+                           } else if ("speaker".equals(layer.get("@class_id"))) { // participant attribute
+                              conditions.push(
+                                 "(SELECT label"
+                                 +" FROM annotation_participant"
+                                 +" INNER JOIN transcript_speaker"
+                                 +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
+                                 +" AND annotation_participant.layer = '"+escape(attribute)+"'"
+                                 +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+                                 +" ORDER BY annotation_id LIMIT 1)");
+                           } else if (layer.getId().equals("transcript_type")) {
+                              // transcript type TODO this should be a join
+                              conditions.push(
+                                 "(SELECT transcript_type AS label"
+                                 +" FROM transcript_type"
+                                 +" WHERE transcript_type.type_id = transcript.type_id)");
+                           } else if (schema.getEpisodeLayerId().equals(layer.getParentId())) {
+                              // episode attribute
+                              conditions.push(
+                                 "(SELECT label"
+                                 +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                                 +" WHERE annotation.family_id = transcript.family_id"
+                                 +" ORDER BY annotation.ordinal LIMIT 1)");
+                           } else { // regular temporal layer
+                              conditions.push(
+                                 "(SELECT label"
+                                 +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
+                                 +" INNER JOIN anchor ON annotation.start_anchor_id = anchor.anchor_id"
+                                 +" WHERE annotation.ag_id = transcript.ag_id"
+                                 +" ORDER BY anchor.offset, annotation.annotation_id LIMIT 1)");
+                           } // regular temporal layer
+                        } // valid label
+                     } // other layer
+                  } // my(...).label
+               } // something.label
             }
             @Override public void exitGraphIdExpression(AGQLParser.GraphIdExpressionContext ctx) {
                space();
                conditions.push("transcript.transcript_id");
             }
-            @Override public void exitCorpusLabelOperand(AGQLParser.CorpusLabelOperandContext ctx) {
+            @Override public void enterLabelsMethodCall(AGQLParser.LabelsMethodCallContext ctx) {
+               if (flags.inListLength) return; // exitListLengthExpression will handle this
                space();
-               conditions.push("transcript.corpus_name");
+               String layerId = unquote(ctx.layer.quotedString.getText());
+               if (layerId.equals(schema.getCorpusLayerId())) { // corpus                  
+                  conditions.push("(SELECT transcript.corpus_name)");
+               } else if (layerId.equals(schema.getEpisodeLayerId())) { // episode
+                  conditions.push(
+                     "(SELECT name"
+                     +" FROM transcript_family"
+                     +" WHERE transcript_family.family_id = graph.family_id)");
+               } else if (layerId.equals(schema.getParticipantLayerId())) { // who
+                  conditions.push(
+                     "(SELECT speaker.name"
+                     +" FROM transcript_speaker"
+                     +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
+                     +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
+               } else { // other layer
+                  Layer layer = getSchema().getLayer(layerId);
+                  if (layer == null) {
+                     errors.add("Invalid layer: " + ctx.getText());
+                  } else {
+                     String attribute = attribute(layerId);
+                     if ("transcript".equals(layer.get("@class_id"))) {
+                        conditions.push(
+                           "(SELECT DISTINCT label"
+                           +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                           +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                           +" AND annotation_transcript.ag_id = transcript.ag_id)");
+                     } else if ("speaker".equals(layer.get("@class_id"))) {
+                        conditions.push(
+                           "(SELECT DISTINCT label"
+                           +" FROM annotation_participant"
+                           +" INNER JOIN transcript_speaker"
+                           +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
+                           +" AND annotation_participant.layer = '"+escape(attribute)+"'"
+                           +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
+                     } else if (layer.getId().equals("transcript_type")) { // transcript type TODO this should be a join
+                        conditions.push(
+                           "(SELECT transcript_type AS label"
+                           +" FROM transcript_type"
+                           +" WHERE transcript_type.type_id = transcript.type_id)");
+                     } else if (schema.getEpisodeLayerId().equals(layer.getParentId())) { // episode attribute
+                        conditions.push(
+                           "(SELECT label"
+                           +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                           +" WHERE annotation.family_id = transcript.family_id)");
+                     } else { // regular temporal layer
+                        conditions.push(
+                           "(SELECT label"
+                           +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
+                           +" WHERE annotation.ag_id = transcript.ag_id)");
+                     } // regular temporal layer
+                  } // valid layer
+               } // other layer
             }
-            @Override public void enterCorpusLabelsExpression(AGQLParser.CorpusLabelsExpressionContext ctx) {
-               space();
-               conditions.push("(SELECT transcript.corpus_name)");
-            }
-            @Override public void exitEpisodeLabelOperand(AGQLParser.EpisodeLabelOperandContext ctx) {
-               space();
-               conditions.push(
-                  "(SELECT name"
-                  +" FROM transcript_family"
-                  +" WHERE transcript_family.family_id = transcript.family_id)");
-            }
-            @Override public void enterWhoLabelsExpression(AGQLParser.WhoLabelsExpressionContext ctx) {
-               space();
-               conditions.push(
-                  "(SELECT speaker.name"
-                  +" FROM transcript_speaker"
-                  +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
-                  +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
-            }
-            @Override public void enterWhoLabelExpression(AGQLParser.WhoLabelExpressionContext ctx) {
-               space();
-               conditions.push(
-                  "(SELECT speaker.name"
-                  +" FROM transcript_speaker"
-                  +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
-                  +" WHERE transcript_speaker.ag_id = transcript.ag_id"
-                  // the first one
-                  +" ORDER BY speaker.name LIMIT 1)");
-            }
-            @Override public void enterLabelsExpression(AGQLParser.LabelsExpressionContext ctx) {
-               space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
-               Layer layer = getSchema().getLayer(layerId);
-               if (layer == null) {
-                  errors.add("Invalid layer: " + ctx.getText());
-               } else {
-                  String attribute = attribute(layerId);
-                  if ("transcript".equals(layer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT DISTINCT label"
-                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                        +" AND annotation_transcript.ag_id = transcript.ag_id)");
-                  } else if ("speaker".equals(layer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT DISTINCT label"
-                        +" FROM annotation_participant"
-                        +" INNER JOIN transcript_speaker"
-                        +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
-                        +" AND annotation_participant.layer = '"+escape(attribute)+"'"
-                        +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
-                  } else if (layer.getId().equals("transcript_type")) { // transcript type TODO this should be a join
-                     conditions.push(
-                        "(SELECT transcript_type AS label"
-                        +" FROM transcript_type"
-                        +" WHERE transcript_type.type_id = transcript.type_id)");
-                  } else if (schema.getEpisodeLayerId().equals(layer.getParentId())) { // episode attribute
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
-                        +" WHERE annotation.family_id = transcript.family_id)");
-                  } else { // regular temporal layer
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
-                        +" WHERE annotation.ag_id = transcript.ag_id)");
-                  } // regular temporal layer
-               } // valid layer
-            }
-            @Override public void enterOtherLabelExpression(AGQLParser.OtherLabelExpressionContext ctx) {
-               space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
-               Layer layer = getSchema().getLayer(layerId);
-               if (layer == null) {
-                  errors.add("Invalid layer: " + ctx.getText());
-               } else {
-                  String attribute = attribute(layerId);
-                  if ("transcript".equals(layer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                        +" AND annotation_transcript.ag_id = transcript.ag_id"
-                        +" ORDER BY annotation_id LIMIT 1)");
-                  } else if ("speaker".equals(layer.get("@class_id"))) { // participant attribute
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM annotation_participant"
-                        +" INNER JOIN transcript_speaker"
-                        +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
-                        +" AND annotation_participant.layer = '"+escape(attribute)+"'"
-                        +" WHERE transcript_speaker.ag_id = transcript.ag_id"
-                        +" ORDER BY annotation_id LIMIT 1)");
-                  } else if (layer.getId().equals("transcript_type")) {
-                     // transcript type TODO this should be a join
-                     conditions.push(
-                        "(SELECT transcript_type AS label"
-                        +" FROM transcript_type"
-                        +" WHERE transcript_type.type_id = transcript.type_id)");
-                  } else if (schema.getEpisodeLayerId().equals(layer.getParentId())) {
-                     // episode attribute
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
-                        +" WHERE annotation.family_id = transcript.family_id"
-                        +" ORDER BY annotation.ordinal LIMIT 1)");
-                  } else { // regular temporal layer
-                     conditions.push(
-                        "(SELECT label"
-                        +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
-                        +" INNER JOIN anchor ON annotation.start_anchor_id = anchor.anchor_id"
-                        +" WHERE annotation.ag_id = transcript.ag_id"
-                        +" ORDER BY anchor.offset, annotation.annotation_id LIMIT 1)");
-                  } // regular temporal layer
-               } // valid layer
+            @Override public void enterListLengthExpression(AGQLParser.ListLengthExpressionContext ctx) {
+               flags.inListLength = true;
             }
             @Override public void exitListLengthExpression(AGQLParser.ListLengthExpressionContext ctx) {
                space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
-               Layer layer = getSchema().getLayer(layerId);
-               if (layer == null) {
-                  errors.add("Invalid layer: " + ctx.getText());
+               String layerId = null;
+               if (ctx.listExpression().valueListExpression() != null) {
+                  if (ctx.listExpression().valueListExpression().labelsMethodCall() != null) {
+                     layerId = ctx.listExpression().valueListExpression().labelsMethodCall()
+                        .layer.quotedString.getText();
+                  } else if (ctx.listExpression().valueListExpression().annotatorsMethodCall() != null) {
+                     layerId = ctx.listExpression().valueListExpression().annotatorsMethodCall()
+                        .layer.quotedString.getText();
+                  }
+               } else if (ctx.listExpression().annotationListExpression() != null) {
+                  layerId = ctx.listExpression().annotationListExpression().listMethodCall()
+                     .layer.quotedString.getText();
+               }
+               if (layerId == null) {
+                  errors.add("Could not identify layer: " + ctx.getText());
                } else {
-                  String attribute = attribute(layerId);
-                  if ("transcript".equals(layer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT COUNT(*)"
-                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                        +" AND annotation_transcript.ag_id = transcript.ag_id)");
-                  } else if ("speaker".equals(layer.get("@class_id"))) {
-                     conditions.push(
-                        "(SELECT COUNT(*)"
-                        +" FROM annotation_participant"
-                        +" INNER JOIN transcript_speaker"
-                        +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
-                        +" AND annotation_participant.layer = '"+escape(attribute)+"'"
-                        +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
-                  } else if (layer.getId().equals("transcript_type")) { // transcript type
-                     conditions.push("1");
-                  } else if (schema.getEpisodeLayerId().equals(layer.getParentId())) {
-                     // episode attribute
-                     conditions.push(
-                        "(SELECT COUNT(*)"
-                        +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
-                        +" WHERE annotation.family_id = transcript.family_id)");
-                  } else { // regular temporal layer
-                     conditions.push(
-                        "(SELECT COUNT(*)"
-                        +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
-                        +" WHERE annotation.ag_id = transcript.ag_id)");
-                  } // regular temporal layer
-               } // valid layer
+                  layerId = unquote(layerId);
+                  Layer layer = getSchema().getLayer(layerId);
+                  if (layer == null) {
+                     errors.add("Invalid layer: " + ctx.getText());
+                  } else {
+                     String attribute = attribute(layerId);
+                     if ("transcript".equals(layer.get("@class_id"))) {
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                           +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                           +" AND annotation_transcript.ag_id = transcript.ag_id)");
+                     } else if ("speaker".equals(layer.get("@class_id"))) {
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM annotation_participant"
+                           +" INNER JOIN transcript_speaker"
+                           +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
+                           +" AND annotation_participant.layer = '"+escape(attribute)+"'"
+                           +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
+                     } else if (layer.getId().equals("transcript_type")) { // transcript type
+                        conditions.push("1");
+                     } else if (schema.getEpisodeLayerId().equals(layer.getParentId())) {
+                        // episode attribute
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                           +" WHERE annotation.family_id = transcript.family_id)");
+                     } else { // regular temporal layer
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
+                           +" WHERE annotation.ag_id = transcript.ag_id)");
+                     } // regular temporal layer
+                  } // valid layer
+               } // layerId identified
+               flags.inListLength = false;
             }
-            @Override public void enterAnnotatorsExpression(AGQLParser.AnnotatorsExpressionContext ctx) {
+            @Override public void enterAnnotatorsMethodCall(AGQLParser.AnnotatorsMethodCallContext ctx) {
+               if (flags.inListLength) return; // exitListLengthExpression will handle this
                space();
-               String layerId = unquote(ctx.stringLiteral().quotedString.getText());
+               String layerId = unquote(ctx.layer.quotedString.getText());
                Layer layer = getSchema().getLayer(layerId);
                if (layer == null) {
                   errors.add("Invalid layer: " + ctx.getText());
@@ -341,7 +377,7 @@ public class GraphAgqlToSql {
                space();
                conditions.push("transcript.family_sequence");
             }
-            @Override public void exitAtomList(AGQLParser.AtomListContext ctx) {
+            @Override public void exitAtomListExpression(AGQLParser.AtomListExpressionContext ctx) {
                // pop all the elements off the stack
                Stack<String> atoms = new Stack<String>();
                for (int i = 0; i < ctx.subsequentAtom().size(); i++) {
@@ -430,18 +466,6 @@ public class GraphAgqlToSql {
                   conditions.push(ctx.getText());
                }
             }
-            @Override public void exitWhoLiteralAtom(AGQLParser.WhoLiteralAtomContext ctx) {
-               conditions.push(" 'who'");
-            }
-            @Override public void exitGraphLiteralAtom(AGQLParser.GraphLiteralAtomContext ctx) {
-               conditions.push(" 'graph'");
-            }
-            @Override public void exitCorpusLiteralAtom(AGQLParser.CorpusLiteralAtomContext ctx) {
-               conditions.push(" 'corpus'");
-            }
-            @Override public void exitEpisodeLiteralAtom(AGQLParser.EpisodeLiteralAtomContext ctx) {
-               conditions.push(" 'episode'");
-            }
             @Override public void exitIdentifierAtom(AGQLParser.IdentifierAtomContext ctx) {
                space();
                conditions.push(ctx.getText());
@@ -508,6 +532,10 @@ public class GraphAgqlToSql {
       return q;
    } // end of sqlFor()
 
+   class Flags {
+      boolean inListLength = false;
+   }
+   
    /** 
     * Encapsulates the results of {@link #sqlFor(String,String,String,String,String)}
     * including the SQL.
