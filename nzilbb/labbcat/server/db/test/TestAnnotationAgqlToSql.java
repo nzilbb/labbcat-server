@@ -107,6 +107,11 @@ public class TestAnnotationAgqlToSql {
                  .setParentId("turn").setParentIncludes(true))
          .with("@layer_id", 12).with("@scope", "M"),
       
+         (Layer)(new Layer("language", "Other Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("turn").setParentIncludes(true))
+         .with("@layer_id", 20).with("@scope", "M"),
+      
          (Layer)(new Layer("transcript", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
                  .setParentId("turn").setParentIncludes(true))
@@ -400,230 +405,213 @@ public class TestAnnotationAgqlToSql {
                    q.sql);
        }
 
-   // // @Test public void attributeLabel() throws AGQLException {
-   // //    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
-   // //    AnnotationAgqlToSql.Query q = transformer.sqlFor(
-   // //       "my('transcript_scribe').label == 'someone'",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Transcript attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE"
-   // //                 +" (SELECT label"
-   // //                 +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-   // //                 +" WHERE annotation_transcript.layer = 'scribe'"
-   // //                 +" AND annotation_transcript.ag_id = transcript.ag_id ORDER BY annotation_id"
-   // //                 +" LIMIT 1) = 'someone'"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
+   @Test public void attributeLabel() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query q = transformer.sqlFor(
+         "layerId = 'utterance' && my('transcript_scribe').label == 'someone'",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("Transcript attribute - SQL",
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   +" FROM annotation_layer_12 annotation"
+                   +" WHERE 'utterance' = 'utterance'"
+                   +" AND (SELECT label FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                   +" WHERE annotation_transcript.layer = 'scribe'"
+                   +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1) = 'someone'"
+                   +" ORDER BY ag_id, parent_id, annotation_id",
+                   q.sql);
 
-   // //    q = transformer.sqlFor(
-   // //       "my('participant_gender').label == 'NA'",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Participant attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE"
-   // //                 +" (SELECT label"
-   // //                 +" FROM annotation_participant"
-   // //                 +" INNER JOIN transcript_speaker"
-   // //                 +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
-   // //                 +" AND annotation_participant.layer = 'gender'"
-   // //                 +" WHERE transcript_speaker.ag_id = transcript.ag_id"
-   // //                 +" ORDER BY annotation_id LIMIT 1) = 'NA'"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
+      // TODO add support for participant attributs
+      // q = transformer.sqlFor(
+      //    "layerId = 'utterance' && my('participant_gender').label == 'NA'",
+      //    "DISTINCT annotation.*", null, null);
+      // assertEquals("Participant attribute - SQL",
+      //              "SELECT DISTINCT annotation.* FROM transcript"
+      //              +" WHERE"
+      //              +" (SELECT label"
+      //              +" FROM annotation_participant"
+      //              +" INNER JOIN transcript_speaker"
+      //              +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
+      //              +" AND annotation_participant.layer = 'gender'"
+      //              +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+      //              +" ORDER BY annotation_id LIMIT 1) = 'NA'"
+      //              +" ORDER BY DISTINCT annotation.*",
+      //              q.sql);
+   }
 
-   // //    q = transformer.sqlFor(
-   // //       "my('recording_date').label > '2019-06-17'",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Episode attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE"
-   // //                 +" (SELECT label"
-   // //                 +" FROM `annotation_layer_-200` annotation"
-   // //                 +" WHERE annotation.family_id = transcript.family_id"
-   // //                 +" ORDER BY annotation.ordinal LIMIT 1) > '2019-06-17'"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
+   @Test public void listLength() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query q = transformer.sqlFor(
+         "layerId = 'utterance' && list('transcript_rating').length > 10",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("Transcript attribute - SQL",
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   +" FROM annotation_layer_12 annotation"
+                   +" WHERE 'utterance' = 'utterance' AND"
+                   +" (SELECT COUNT(*) FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                   +" WHERE annotation_transcript.layer = 'rating'"
+                   +" AND annotation_transcript.ag_id = annotation.ag_id) > 10"
+                   +" ORDER BY ag_id, parent_id, annotation_id",
+                   q.sql);
+      
+      q = transformer.sqlFor(
+         "layerId = 'utterance' && list('transcript').length > 100",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("Annotation - SQL",
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   +" FROM annotation_layer_12 annotation"
+                   +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+                   +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+                   +" WHERE 'utterance' = 'utterance'"
+                   +" AND (SELECT COUNT(*) FROM annotation_layer_0 otherLayer"
+                   +" INNER JOIN anchor otherLayer_start"
+                   +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+                   +" INNER JOIN anchor otherLayer_end"
+                   +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
+                   +" WHERE otherLayer.ag_id = annotation.ag_id"
+                   +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id"
+                   +" AND otherLayer_start.offset <= end.offset"
+                   +" AND start.offset <= otherLayer_end.offset) > 100"
+                   +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                   q.sql);
+   }
 
-   // //    q = transformer.sqlFor(
-   // //       "/.*bell.*/.test(my('noise').label)",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Annotation - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE"
-   // //                 +" (SELECT label"
-   // //                 +" FROM annotation_layer_32 annotation"
-   // //                 +" INNER JOIN anchor ON annotation.start_anchor_id = anchor.anchor_id"
-   // //                 +" WHERE annotation.ag_id = transcript.ag_id"
-   // //                 +" ORDER BY anchor.offset, annotation.annotation_id LIMIT 1) REGEXP '.*bell.*'"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
-   // // }
+   @Test public void annotators() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query q = transformer.sqlFor(
+         "layerId = 'utterance' && annotators('transcript_rating').includes('someone')",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("Transcript attribute - SQL",
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   +" FROM annotation_layer_12 annotation"
+                   +" WHERE 'utterance' = 'utterance'"
+                   +" AND 'someone' IN (SELECT annotated_by"
+                   +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                   +" WHERE annotation_transcript.layer = 'rating'"
+                   +" AND annotation_transcript.ag_id = annotation.ag_id)"
+                   +" ORDER BY ag_id, parent_id, annotation_id",
+                   q.sql);
 
-   // // @Test public void listLength() throws AGQLException {
-   // //    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
-   // //    AnnotationAgqlToSql.Query q = transformer.sqlFor(
-   // //       "list('transcript_rating').length > 10",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Transcript attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE (SELECT COUNT(*)"
-   // //                 +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-   // //                 +" WHERE annotation_transcript.layer = 'rating'"
-   // //                 +" AND annotation_transcript.ag_id = transcript.ag_id) > 10"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
-
-   // //    q = transformer.sqlFor(
-   // //       "list('participant_gender').length < 1",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Transcript attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE (SELECT COUNT(*)"
-   // //                 +" FROM annotation_participant"
-   // //                 +" INNER JOIN transcript_speaker"
-   // //                 +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
-   // //                 +" AND annotation_participant.layer = 'gender'"
-   // //                 +" WHERE transcript_speaker.ag_id = transcript.ag_id) < 1"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
+   //    q = transformer.sqlFor(
+   //       "annotators('participant_gender').includes('someone')",
+   //       "DISTINCT annotation.*", null, null, null);
+   //    assertEquals("Transcript attribute - SQL",
+   //                 "SELECT DISTINCT annotation.* FROM transcript"
+   //                 +" WHERE 'someone' IN"
+   //                 +" (SELECT DISTINCT annotated_by"
+   //                 +" FROM annotation_participant"
+   //                 +" INNER JOIN transcript_speaker"
+   //                 +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
+   //                 +" AND annotation_participant.layer = 'gender'"
+   //                 +" WHERE transcript_speaker.ag_id = transcript.ag_id)"
+   //                 +" ORDER BY DISTINCT annotation.*",
+   //                 q.sql);
     
-   // //    q = transformer.sqlFor(
-   // //       "list('recording_date').length > 0",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Episode attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE"
-   // //                 +" (SELECT COUNT(*)"
-   // //                 +" FROM `annotation_layer_-200` annotation"
-   // //                 +" WHERE annotation.family_id = transcript.family_id) > 0"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
+      q = transformer.sqlFor(
+         "layerId = 'utterance' && annotators('noise').includes('someone')",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("Annotation - SQL",
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   +" FROM annotation_layer_12 annotation"
+                   +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+                   +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+                   +" WHERE 'utterance' = 'utterance'"
+                   +" AND 'someone' IN (SELECT annotated_by"
+                   +" FROM annotation_layer_32 otherLayer"
+                   +" INNER JOIN anchor otherLayer_start"
+                   +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+                   +" AND otherLayer_start.offset <= end.offset"
+                   +" INNER JOIN anchor otherLayer_end"
+                   +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
+                   +" AND start.offset <= otherLayer_end.offset"
+                   +" WHERE otherLayer.ag_id = annotation.ag_id)"
+                   +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                   q.sql);
 
-   // //    q = transformer.sqlFor(
-   // //       "list('transcript').length > 100",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Annotation - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE (SELECT COUNT(*)"
-   // //                 +" FROM annotation_layer_0 annotation"
-   // //                 +" WHERE annotation.ag_id = transcript.ag_id) > 100"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
-   // // }
+         q = transformer.sqlFor(
+         "layerId = 'transcript' && annotators('language').includes('someone')",
+         "DISTINCT annotation.*", null, null);
+         assertEquals("Annotation - SQL",
+                      "SELECT DISTINCT annotation.*, 'transcript' AS layer"
+                      +" FROM annotation_layer_0 annotation"
+                      +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+                      +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+                      +" WHERE 'transcript' = 'transcript'"
+                      +" AND 'someone' IN (SELECT annotated_by"
+                      +" FROM annotation_layer_20 otherLayer"
+                      +" INNER JOIN anchor otherLayer_start"
+                      +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+                      +" AND otherLayer_start.offset <= end.offset"
+                      +" INNER JOIN anchor otherLayer_end"
+                      +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
+                      +" AND start.offset <= otherLayer_end.offset"
+                      +" WHERE otherLayer.ag_id = annotation.ag_id"
+                      +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id)"
+                      +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                      q.sql);
+   }
+   
+   @Test public void invalidLayers() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      try {
+         AnnotationAgqlToSql.Query q = transformer.sqlFor(
+            "layerId = 'utterance' && my('invalid layer 1').label == 'NA'"
+            + " AND list('invalid layer 2').length > 2"
+            + " AND my('invalid layer 3').label = 'NA'"
+            + " AND 'labbcat' NOT IN annotators('invalid layer 4')",
+            "DISTINCT annotation.*", null, null);
+         fail("sqlFor fails: " + q.sql);
+      } catch(AGQLException exception) {
+         assertEquals("Number of errors: " + exception.getErrors(), 4, exception.getErrors().size());
+      }
+   }
 
-   // // @Test public void annotators() throws AGQLException {
-   // //    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
-   // //    AnnotationAgqlToSql.Query q = transformer.sqlFor(
-   // //       "annotators('transcript_rating').includes('someone')",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Transcript attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE 'someone' IN"
-   // //                 +" (SELECT DISTINCT annotated_by"
-   // //                 +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-   // //                 +" WHERE annotation_transcript.layer = 'rating'"
-   // //                 +" AND annotation_transcript.ag_id = transcript.ag_id)"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
-
-   // //    q = transformer.sqlFor(
-   // //       "annotators('participant_gender').includes('someone')",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Transcript attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE 'someone' IN"
-   // //                 +" (SELECT DISTINCT annotated_by"
-   // //                 +" FROM annotation_participant"
-   // //                 +" INNER JOIN transcript_speaker"
-   // //                 +" ON annotation_participant.speaker_number = transcript_speaker.speaker_number"
-   // //                 +" AND annotation_participant.layer = 'gender'"
-   // //                 +" WHERE transcript_speaker.ag_id = transcript.ag_id)"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
-    
-   // //    q = transformer.sqlFor(
-   // //       "annotators('recording_date').includes('someone')",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Episode attribute - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE 'someone' IN (SELECT DISTINCT annotated_by"
-   // //                 +" FROM `annotation_layer_-200` annotation"
-   // //                 +" WHERE annotation.family_id = transcript.family_id)"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
-
-   // //    q = transformer.sqlFor(
-   // //       "annotators('noise').includes('someone')",
-   // //       "DISTINCT annotation.*", null, null, null);
-   // //    assertEquals("Annotation - SQL",
-   // //                 "SELECT DISTINCT annotation.* FROM transcript"
-   // //                 +" WHERE 'someone' IN (SELECT DISTINCT annotated_by"
-   // //                 +" FROM annotation_layer_32 annotation"
-   // //                 +" WHERE annotation.ag_id = transcript.ag_id)"
-   // //                 +" ORDER BY DISTINCT annotation.*",
-   // //                 q.sql);
-   // // }
-  
-   // // @Test public void invalidLayers() throws AGQLException {
-   // //    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
-   // //    try {
-   // //       AnnotationAgqlToSql.Query q = transformer.sqlFor(
-   // //          "my('invalid layer 1').label == 'NA'"
-   // //          + " AND list('invalid layer 2').length > 2"
-   // //          + " AND my('invalid layer 3').label = 'NA'"
-   // //          + " AND 'labbcat' NOT IN annotators('invalid layer 4')",
-   // //          "DISTINCT annotation.*", null, null, null);
-   // //       fail("sqlFor fails: " + q.sql);
-   // //    } catch(AGQLException exception) {
-   // //       assertEquals("Number of errors: " + exception.getErrors(), 4, exception.getErrors().size());
-   // //    }
-   // // }
-
-   // // @Test public void userWhereClause() throws AGQLException {
-   // //    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
-   // //    AnnotationAgqlToSql.Query q = transformer.sqlFor(
-   // //       "/Ada.+/.test(label)",
-   // //       "DISTINCT annotation.*, transcript.ag_id",
-   // //       "(EXISTS (SELECT * FROM role"
-   // //       + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
-   // //       + " INNER JOIN annotation_transcript access_attribute" 
-   // //       + " ON access_attribute.layer = role_permission.attribute_name" 
-   // //       + " AND access_attribute.label REGEXP role_permission.value_pattern"
-   // //       + " AND role_permission.entity REGEXP '.*t.*'"
-   // //       + " WHERE user_id = 'test'"
-   // //       + " AND access_attribute.ag_id = transcript.ag_id)"
-   // //       + " OR EXISTS (SELECT * FROM role"
-   // //       + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
-   // //       + " AND role_permission.attribute_name = 'corpus'" 
-   // //       + " AND role_permission.entity REGEXP '.*t.*'"
-   // //       + " WHERE transcript.corpus_name REGEXP role_permission.value_pattern"
-   // //       + " AND user_id = 'test')"
-   // //       + " OR NOT EXISTS (SELECT * FROM role_permission))",
-   // //       null, null);
-   // //    assertEquals(
-   // //       "SQL - label",
-   // //       "SELECT DISTINCT annotation.*, transcript.ag_id FROM transcript"
-   // //       + " WHERE DISTINCT annotation.* REGEXP 'Ada.+'"
-   // //       + " AND (EXISTS (SELECT * FROM role"
-   // //       + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
-   // //       + " INNER JOIN annotation_transcript access_attribute" 
-   // //       + " ON access_attribute.layer = role_permission.attribute_name" 
-   // //       + " AND access_attribute.label REGEXP role_permission.value_pattern"
-   // //       + " AND role_permission.entity REGEXP '.*t.*'"
-   // //       + " WHERE user_id = 'test'"
-   // //       + " AND access_attribute.ag_id = transcript.ag_id)"
-   // //       + " OR EXISTS (SELECT * FROM role"
-   // //       + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
-   // //       + " AND role_permission.attribute_name = 'corpus'" 
-   // //       + " AND role_permission.entity REGEXP '.*t.*'"
-   // //       + " WHERE transcript.corpus_name REGEXP role_permission.value_pattern"
-   // //       + " AND user_id = 'test')"
-   // //       + " OR NOT EXISTS (SELECT * FROM role_permission))"
-   // //       + " ORDER BY DISTINCT annotation.*",
-   // //       q.sql);
-   // //    assertEquals("Parameter count - label", 0, q.parameters.size());
-   // // }
+   @Test public void userWhereClause() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query q = transformer.sqlFor(
+         "id == 'ew_0_456'",
+         "DISTINCT annotation.*, graph.ag_id",
+         "(EXISTS (SELECT * FROM role"
+         + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+         + " INNER JOIN annotation_transcript access_attribute" 
+         + " ON access_attribute.layer = role_permission.attribute_name" 
+         + " AND access_attribute.label REGEXP role_permission.value_pattern"
+         + " AND role_permission.entity REGEXP '.*t.*'"
+         + " WHERE user_id = 'test'"
+         + " AND access_attribute.ag_id = graph.ag_id)"
+         + " OR EXISTS (SELECT * FROM role"
+         + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+         + " AND role_permission.attribute_name = 'corpus'" 
+         + " AND role_permission.entity REGEXP '.*t.*'"
+         + " WHERE graph.corpus_name REGEXP role_permission.value_pattern"
+         + " AND user_id = 'test')"
+         + " OR NOT EXISTS (SELECT * FROM role_permission))",
+         null);
+      assertEquals(
+         "SQL - label",
+         "SELECT DISTINCT annotation.*, graph.ag_id, 'transcript' AS layer"
+         +" FROM annotation_layer_0 annotation"
+         +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+         +" WHERE CONCAT('ew_0_', annotation.annotation_id) = 'ew_0_456'"
+         +" AND ("
+         +"EXISTS (SELECT * FROM role"
+         +" INNER JOIN role_permission ON role.role_id = role_permission.role_id"
+         +" INNER JOIN annotation_transcript access_attribute"
+         +" ON access_attribute.layer = role_permission.attribute_name"
+         +" AND access_attribute.label REGEXP role_permission.value_pattern"
+         +" AND role_permission.entity REGEXP '.*t.*'"
+         +" WHERE user_id = 'test'"
+         +" AND access_attribute.ag_id = graph.ag_id)"
+         +" OR EXISTS (SELECT * FROM role"
+         +" INNER JOIN role_permission ON role.role_id = role_permission.role_id"
+         +" AND role_permission.attribute_name = 'corpus'"
+         +" AND role_permission.entity REGEXP '.*t.*'"
+         +" WHERE graph.corpus_name REGEXP role_permission.value_pattern"
+         +" AND user_id = 'test')"
+         +" OR NOT EXISTS (SELECT * FROM role_permission))"
+         +" ORDER BY graph.transcript_id, parent_id, annotation_id",
+         q.sql);
+      assertEquals("Parameter count - label", 0, q.parameters.size());
+   }
 
    public static void main(String args[])  {
       org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.db.test.TestAnnotationAgqlToSql");
