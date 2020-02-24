@@ -220,13 +220,13 @@ public class AnnotationAgqlToSql {
                            if (scope.equals(SqlConstants.SCOPE_META)) {
                               joinFieldIndex = Math.min(joinFieldIndex, 1);
                            }
-                           if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                           if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 1) {
                               joinFieldIndex = Math.min(joinFieldIndex, 1);
                            }
                            if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
                               joinFieldIndex = Math.min(joinFieldIndex, 0);
                            }
-                           if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                           if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 0) {
                               joinFieldIndex = Math.min(joinFieldIndex, 0);
                            }
                            // if both layers are the same scope, we don't need to compare anchors
@@ -353,13 +353,13 @@ public class AnnotationAgqlToSql {
                               if (scope.equals(SqlConstants.SCOPE_META)) {
                                  joinFieldIndex = Math.min(joinFieldIndex, 1);
                               }
-                              if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                              if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 1) {
                                  joinFieldIndex = Math.min(joinFieldIndex, 1);
                               }
                               if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
                                  joinFieldIndex = Math.min(joinFieldIndex, 0);
                               }
-                              if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                              if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 0) {
                                  joinFieldIndex = Math.min(joinFieldIndex, 0);
                               }
                               // if both layers are the same scope, we don't need to compare anchors
@@ -486,13 +486,13 @@ public class AnnotationAgqlToSql {
                         if (scope.equals(SqlConstants.SCOPE_META)) {
                            joinFieldIndex = Math.min(joinFieldIndex, 1);
                         }
-                        if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                        if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 1) {
                            joinFieldIndex = Math.min(joinFieldIndex, 1);
                         }
                         if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
                            joinFieldIndex = Math.min(joinFieldIndex, 0);
                         }
-                        if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                        if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 0) {
                            joinFieldIndex = Math.min(joinFieldIndex, 0);
                         }
                         // if both layers are the same scope, we don't need to compare anchors
@@ -593,13 +593,13 @@ public class AnnotationAgqlToSql {
                         if (scope.equals(SqlConstants.SCOPE_META)) {
                            joinFieldIndex = Math.min(joinFieldIndex, 1);
                         }
-                        if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                        if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 1) {
                            Math.min(joinFieldIndex, 1);
                         }
                         if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
                            joinFieldIndex = Math.min(joinFieldIndex, 0);
                         }
-                        if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                        if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 0) {
                            Math.min(joinFieldIndex, 0);
                         }
                         String joinField = joinFields[joinFieldIndex];
@@ -616,7 +616,6 @@ public class AnnotationAgqlToSql {
                            // any overlap
                            +" AND otherLayer_start.offset <= end.offset"
                            +" AND start.offset <= otherLayer_end.offset"
-                           +" ORDER BY otherLayer_start.offset, otherLayer_end.offset DESC"
                            +")");
                         flags.anchorsJoin = true;
                      } // regular temporal layer
@@ -671,13 +670,13 @@ public class AnnotationAgqlToSql {
                      if (scope.equals(SqlConstants.SCOPE_META)) {
                         joinFieldIndex = Math.min(joinFieldIndex, 1);
                      }
-                     if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                     if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 1) {
                         joinFieldIndex = Math.min(joinFieldIndex, 1);
                      }
                      if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
                         joinFieldIndex = Math.min(joinFieldIndex, 0);
                      }
-                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 0) {
                         joinFieldIndex = Math.min(joinFieldIndex, 0);
                      }
                      boolean temporalJoin = !scope.equals(operandScope);
@@ -759,13 +758,13 @@ public class AnnotationAgqlToSql {
                      if (scope.equals(SqlConstants.SCOPE_META)) {
                         joinFieldIndex = Math.min(joinFieldIndex, 1);
                      }
-                     if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 2) {
+                     if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 1) {
                         joinFieldIndex = Math.min(joinFieldIndex, 1);
                      }
                      if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
                         joinFieldIndex = Math.min(joinFieldIndex, 0);
                      }
-                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 2) {
+                     if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 0) {
                         joinFieldIndex = Math.min(joinFieldIndex, 0);
                      }
                      // TODO if (operand.endsWith("').id")) // getting id, not label
@@ -795,7 +794,8 @@ public class AnnotationAgqlToSql {
                           +" AND start.offset <= otherLayer_end.offset")
                         +" WHERE otherLayer.ag_id = annotation.ag_id"
                         +(joinField==null?""
-                          :" AND otherLayer."+joinField+" = annotation."+joinField));
+                          :" AND otherLayer."+joinField+" = annotation."+joinField)
+                        +")");
                      if (temporalJoin) flags.anchorsJoin = true;
                   } // temporal layer
                } // valid layer
