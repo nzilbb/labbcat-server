@@ -784,7 +784,7 @@ public class SqlGraphStore
                + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
                + " AND role_permission.attribute_name = 'corpus'" 
                + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
-               + " WHERE user_id = '"+getUser().replaceAll("'","\\'")+"'");
+               + " WHERE user_id = '"+esc(getUser())+"'");
             ResultSet rsValuePattern = sqlValuePattern.executeQuery();
             if (rsValuePattern.next())
             {
@@ -1071,14 +1071,14 @@ public class SqlGraphStore
             + " ON access_attribute.layer = role_permission.attribute_name" 
             + " AND access_attribute.label REGEXP role_permission.value_pattern"
             + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
-            + " WHERE user_id = '"+getUser().replaceAll("'","\\'")+"'"
+            + " WHERE user_id = '"+esc(getUser())+"'"
             + " AND access_attribute.ag_id = "+transcriptTableAlias+".ag_id)"
             +" OR EXISTS (SELECT * FROM role"
             + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
             + " AND role_permission.attribute_name = 'corpus'" 
             + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
             + " WHERE "+transcriptTableAlias+".corpus_name REGEXP role_permission.value_pattern"
-            + " AND user_id = '"+getUser().replaceAll("'","\\'")+"')"
+            + " AND user_id = '"+esc(getUser())+"')"
             +" OR NOT EXISTS (SELECT * FROM role_permission)) "; // permissions are being used in general
       }
       return "";
@@ -1160,7 +1160,7 @@ public class SqlGraphStore
     */
    public String[] getGraphIdsInCorpus(String id) throws StoreException, PermissionException
    {
-      return getMatchingGraphIds("my('corpus').label = '"+id.replaceAll("\\\\","\\\\\\\\").replaceAll("'","\\\\'")+"'");
+      return getMatchingGraphIds("my('corpus').label = '"+esc(id)+"'");
    }
 
 
@@ -1173,7 +1173,7 @@ public class SqlGraphStore
     */
    public String[] getGraphIdsWithParticipant(String id) throws StoreException, PermissionException
    {
-      return getMatchingGraphIds("'"+id.replaceAll("\\\\","\\\\\\\\").replaceAll("'","\\\\'")+"' IN labels('who')");
+      return getMatchingGraphIds("'"+esc(id)+"' IN labels('who')");
    }
 
    
@@ -2174,8 +2174,8 @@ public class SqlGraphStore
       throws StoreException, PermissionException, GraphNotFoundException
    {
       return countMatchingAnnotations(
-         "graph.id = '" + id.replaceAll("'","\\'") + "'"
-         +" AND layer.id = '" + layerId.replaceAll("'","\\'") + "'");
+         "graph.id = '" + esc(id) + "'"
+         +" AND layer.id = '" + esc(layerId) + "'");
    }
    /**
     * Gets the annotations on the given layer of the given graph.
@@ -2191,7 +2191,7 @@ public class SqlGraphStore
    public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException, GraphNotFoundException
    {
-      return getMatchingAnnotations("graph.id = '" + id.replaceAll("'","\\'") + "' AND layer.id = '" + layerId.replaceAll("'","\\'") + "'", pageLength, pageNumber);
+      return getMatchingAnnotations("graph.id = '" + esc(id) + "' AND layer.id = '" + esc(layerId) + "'", pageLength, pageNumber);
    }
    
    /**
@@ -2237,6 +2237,9 @@ public class SqlGraphStore
    public Annotation[] getMatchingAnnotations(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException
    {
+      Timers timers = new Timers();
+      timers.start("getMatchingAnnotations");
+      Schema schema = getSchema();
       try
       {
          String limit = "";
@@ -2247,26 +2250,34 @@ public class SqlGraphStore
          }
          PreparedStatement sql = annotationMatchSql(expression, limit);
 
+         timers.start("executeQuery");
          ResultSet rsAnnotation = sql.executeQuery();
+         timers.end("executeQuery");
          Layer layer = null;
          Graph graph = null;
          Vector<Annotation> annotations = new Vector<Annotation>();
+         timers.start("loop");
          while (rsAnnotation.next())
          {
             if (layer == null)
             { // they'll all be on the same layer
-               layer = getSchema().getLayer(rsAnnotation.getString("layer"));
+               timers.start("getLayer");
+               layer = schema.getLayer(rsAnnotation.getString("layer"));
+               timers.end("getLayer");
             }
+            timers.start("needGraph");
             if ("F".equals(layer.get("@scope")) // freeform layer
-                || layer.getId().equals(getSchema().getUtteranceLayerId())
-                || layer.getId().equals(getSchema().getTurnLayerId())
+                || layer.getId().equals(schema.getUtteranceLayerId())
+                || layer.getId().equals(schema.getTurnLayerId())
                 || "transcript".equals(layer.get("@class_id"))) // transcript attribute
             { // we need graph for annotationFromResult	       
                if (graph == null || !graph.getId().equals(rsAnnotation.getInt("graph")))
                { // graph can change
                   try
                   {
+                     timers.start("getGraph");
                      graph = getGraph(rsAnnotation.getString("graph"), null);
+                     timers.end("getGraph");
                   }
                   catch(GraphNotFoundException exception)
                   {
@@ -2275,20 +2286,32 @@ public class SqlGraphStore
                   }
                } // need graph
             } // freeform/turn/utterance
+            timers.end("needGraph");
+            timers.start("annotationFromResult");
             Annotation annotation = annotationFromResult(rsAnnotation, layer, graph);
-            if (layer.getId().equals(getSchema().getUtteranceLayerId())
-                || layer.getId().equals(getSchema().getTurnLayerId()))
+            timers.end("annotationFromResult");
+            timers.start("needParticipant");
+            if (layer.getId().equals(schema.getUtteranceLayerId())
+                || layer.getId().equals(schema.getTurnLayerId()))
             {
                // label is speaker.speaker_number but should be speaker.name
                String id = "m_-2_" + annotation.getLabel();
+               timers.start("getParticipant");
                Annotation participant = getParticipant(id);
+               timers.end("getParticipant");
                if (participant != null) annotation.setLabel(participant.getLabel());
             }
+            timers.end("needParticipant");
+            timers.start("add");
             annotations.add(annotation);
+            timers.end("add");
          } // next annotation
+         timers.end("loop");
          rsAnnotation.close();
          sql.close();
 	 
+         timers.end("getMatchingAnnotations");
+         System.out.println(""+timers);
          return annotations.toArray(new Annotation[0]);	 
       }
       catch(SQLException exception)
@@ -3240,7 +3263,7 @@ public class SqlGraphStore
          sqlLayer.setInt(1, layer_id);
          ResultSet rsLayer = sqlLayer.executeQuery();
          if (!rsLayer.next()) throw new StoreException("Invalid layer_id for " + annotationId + ": " + layer_id);
-         final Layer definingLayer = getSchema().getLayer(rsLayer.getString("short_description"));
+         final Layer definingLayer = schema.getLayer(rsLayer.getString("short_description"));
          rsLayer.close();
          sqlLayer.close();
          fragment.addLayer(definingLayer);
@@ -6382,13 +6405,14 @@ public class SqlGraphStore
    public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
       throws StoreException, PermissionException, GraphNotFoundException
    {
-      Layer layer = getSchema().getLayer(layerId);
+      Schema schema = getSchema();
+      Layer layer = schema.getLayer(layerId);
       if (layer.get("@scope") == null) throw new StoreException("Only temporal layers are supported: " + layerId);
       Annotation[] annotations = getMatchingAnnotations("id = '"+parentId+"'");
       if (annotations.length < 1) throw new StoreException("Invalid parent: " + parentId);
       Annotation parent = annotations[0];
       if (!layer.getParentId().equals(parent.getLayerId())) throw new StoreException("Layer "+layerId+" is not a child of " + parent.getLayerId());
-      Layer parentLayer = getSchema().getLayer(parent.getLayerId());
+      Layer parentLayer = schema.getLayer(parent.getLayerId());
       if (layer.getAlignment() == Constants.ALIGNMENT_NONE)
       { // tag layer - ignore given anchors, and use the parent's instead
          fromId = parent.getStartId();
@@ -7487,5 +7511,18 @@ public class SqlGraphStore
       }
       return value;
    } // end of getSystemAttribute()
+
+   
+   /**
+    * Escapes quotes in the given string for inclusion in QL or SQL queries.
+    * @param s The string to escape.
+    * @return The given string, with quotes escapeed.
+    */
+   private String esc(String s)
+   {
+      if (s == null) return "";
+      return s.replaceAll("\\\\","\\\\\\\\").replaceAll("'","\\'");
+   } // end of esc()
+
 
 } // end of class SqlGraphStore
