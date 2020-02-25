@@ -2237,8 +2237,6 @@ public class SqlGraphStore
    public Annotation[] getMatchingAnnotations(String expression, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException
    {
-      Timers timers = new Timers();
-      timers.start("getMatchingAnnotations");
       Schema schema = getSchema();
       try
       {
@@ -2250,22 +2248,16 @@ public class SqlGraphStore
          }
          PreparedStatement sql = annotationMatchSql(expression, limit);
 
-         timers.start("executeQuery");
          ResultSet rsAnnotation = sql.executeQuery();
-         timers.end("executeQuery");
          Layer layer = null;
          Graph graph = null;
          Vector<Annotation> annotations = new Vector<Annotation>();
-         timers.start("loop");
          while (rsAnnotation.next())
          {
             if (layer == null)
             { // they'll all be on the same layer
-               timers.start("getLayer");
                layer = schema.getLayer(rsAnnotation.getString("layer"));
-               timers.end("getLayer");
             }
-            timers.start("needGraph");
             if ("F".equals(layer.get("@scope")) // freeform layer
                 || layer.getId().equals(schema.getUtteranceLayerId())
                 || layer.getId().equals(schema.getTurnLayerId())
@@ -2275,9 +2267,7 @@ public class SqlGraphStore
                { // graph can change
                   try
                   {
-                     timers.start("getGraph");
                      graph = getGraph(rsAnnotation.getString("graph"), null);
-                     timers.end("getGraph");
                   }
                   catch(GraphNotFoundException exception)
                   {
@@ -2286,32 +2276,20 @@ public class SqlGraphStore
                   }
                } // need graph
             } // freeform/turn/utterance
-            timers.end("needGraph");
-            timers.start("annotationFromResult");
             Annotation annotation = annotationFromResult(rsAnnotation, layer, graph);
-            timers.end("annotationFromResult");
-            timers.start("needParticipant");
             if (layer.getId().equals(schema.getUtteranceLayerId())
                 || layer.getId().equals(schema.getTurnLayerId()))
             {
                // label is speaker.speaker_number but should be speaker.name
                String id = "m_-2_" + annotation.getLabel();
-               timers.start("getParticipant");
                Annotation participant = getParticipant(id);
-               timers.end("getParticipant");
                if (participant != null) annotation.setLabel(participant.getLabel());
             }
-            timers.end("needParticipant");
-            timers.start("add");
             annotations.add(annotation);
-            timers.end("add");
          } // next annotation
-         timers.end("loop");
          rsAnnotation.close();
          sql.close();
 	 
-         timers.end("getMatchingAnnotations");
-         System.out.println(""+timers);
          return annotations.toArray(new Annotation[0]);	 
       }
       catch(SQLException exception)
