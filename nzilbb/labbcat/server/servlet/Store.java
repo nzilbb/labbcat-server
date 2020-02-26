@@ -92,8 +92,10 @@ public class Store extends StoreQuery {
             json = createAnnotation(request, response, store);
          } else if (pathInfo.endsWith("destroyannotation")) {
             json = destroyAnnotation(request, response, store);
-         } else if (pathInfo.endsWith("deletegraph")) {
-            json = deleteGraph(request, response, store);
+         } else if (pathInfo.endsWith("deletetranscript")
+                    // support deprecated name
+                    || pathInfo.endsWith("deletegraph")) {
+            json = deleteTranscript(request, response, store);
          }
       } // only if it's a POST request
       
@@ -105,7 +107,7 @@ public class Store extends StoreQuery {
 
    // IGraphStore method handlers
 
-   // TODO saveGraph
+   // TODO saveTranscript
    
    /**
     * Implementation of {@link nzilbb.ag.IGraphStoreQuery#createAnnotation(String,String,String,String,String,Integer,String)}
@@ -176,15 +178,15 @@ public class Store extends StoreQuery {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject deleteGraph(
+   protected JSONObject deleteTranscript(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
       if (id == null) errors.add("No id specified.");
       if (errors.size() > 0) return failureResult(errors);
-      store.deleteGraph(id);
-      return successResult(null, "Graph deleted: " + id);
+      store.deleteTranscript(id);
+      return successResult(null, "Transcript deleted: " + id);
    }      
    
    private static final long serialVersionUID = 1;

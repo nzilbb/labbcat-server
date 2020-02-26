@@ -230,16 +230,26 @@ public class StoreQuery extends HttpServlet {
             json = countMatchingParticipantIds(request, response, store);
          } else if (pathInfo.endsWith("getmatchingparticipantids")) {
             json = getMatchingParticipantIds(request, response, store);
-         } else if (pathInfo.endsWith("getgraphids")) {
-            json = getGraphIds(request, response, store);
-         } else if (pathInfo.endsWith("getgraphidsincorpus")) {
-            json = getGraphIdsInCorpus(request, response, store);
-         } else if (pathInfo.endsWith("getgraphidswithparticipant")) {
-            json = getGraphIdsWithParticipant(request, response, store);
-         } else if (pathInfo.endsWith("countmatchinggraphids")) {
-            json = countMatchingGraphIds(request, response, store);
-         } else if (pathInfo.endsWith("getmatchinggraphids")) {
-            json = getMatchingGraphIds(request, response, store);
+         } else if (pathInfo.endsWith("gettranscriptids")
+                    // support deprecated name
+                    || pathInfo.endsWith("getgraphids")) {
+            json = getTranscriptIds(request, response, store);
+         } else if (pathInfo.endsWith("gettranscriptidsincorpus")
+                    // support deprecated name
+                    || pathInfo.endsWith("getgraphidsincorpus")) {
+            json = getTranscriptIdsInCorpus(request, response, store);
+         } else if (pathInfo.endsWith("gettranscriptidswithparticipant")
+                    // support deprecated name
+                    || pathInfo.endsWith("getgraphidswithparticipant")) {
+            json = getTranscriptIdsWithParticipant(request, response, store);
+         } else if (pathInfo.endsWith("countmatchingtranscriptids")
+                    // support deprecated name
+                    || pathInfo.endsWith("countmatchinggraphids")) {
+            json = countMatchingTranscriptIds(request, response, store);
+         } else if (pathInfo.endsWith("getmatchingtranscriptids")
+                    // support deprecated name
+                    || pathInfo.endsWith("getmatchinggraphids")) {
+            json = getMatchingTranscriptIds(request, response, store);
          } else if (pathInfo.endsWith("countmatchingannotations")) {
             json = countMatchingAnnotations(request, response, store);
          } else if (pathInfo.endsWith("getmatchingannotations")) {
@@ -254,8 +264,10 @@ public class StoreQuery extends HttpServlet {
             json = getMediaTracks(request, response, store);
          } else if (pathInfo.endsWith("getavailablemedia")) {
             json = getAvailableMedia(request, response, store);
-         } else if (pathInfo.endsWith("getgraph")) {
-            json = getGraph(request, response, store);
+         } else if (pathInfo.endsWith("gettranscript")
+                    // support deprecated name
+                    || pathInfo.endsWith("getgraph")) {
+            json = getTranscript(request, response, store);
          } else if (pathInfo.endsWith("getmedia")) {
             json = getMedia(request, response, store);
          } else if (pathInfo.endsWith("getepisodedocuments")) {
@@ -570,77 +582,77 @@ public class StoreQuery extends HttpServlet {
    }         
    
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIds()}
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getTranscriptIds()}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getGraphIds(
+   protected JSONObject getTranscriptIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
-      return successResult(store.getGraphIds(), null);
+      return successResult(store.getTranscriptIds(), null);
    }      
    
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIdsInCorpus(String)}
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getTranscriptIdsInCorpus(String)}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getGraphIdsInCorpus(
-      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException {
-      
-      String id = request.getParameter("id");
-      if (id == null) return failureResult("No id specified.");
-      String[] ids = store.getGraphIdsInCorpus(id);
-      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
-   }      
-   
-   /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraphIdsWithParticipant(String)}
-    * @param request The HTTP request.
-    * @param request The HTTP response.
-    * @param store A graph store object.
-    * @return A JSON response for returning to the caller.
-    */
-   protected JSONObject getGraphIdsWithParticipant(
+   protected JSONObject getTranscriptIdsInCorpus(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
       String id = request.getParameter("id");
       if (id == null) return failureResult("No id specified.");
-      String[] ids = store.getGraphIdsWithParticipant(id);
+      String[] ids = store.getTranscriptIdsInCorpus(id);
       return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
    }      
    
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingGraphIds(String)}
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getTranscriptIdsWithParticipant(String)}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject countMatchingGraphIds(
+   protected JSONObject getTranscriptIdsWithParticipant(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException {
+      
+      String id = request.getParameter("id");
+      if (id == null) return failureResult("No id specified.");
+      String[] ids = store.getTranscriptIdsWithParticipant(id);
+      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
+   }      
+   
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingTranscriptIds(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject countMatchingTranscriptIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
       String expression = request.getParameter("expression");
       if (expression == null) return failureResult("No expression specified.");
-      return successResult(store.countMatchingGraphIds(expression), null);
+      return successResult(store.countMatchingTranscriptIds(expression), null);
    }      
    
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingGraphIds(String)}
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingTranscriptIds(String)}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getMatchingGraphIds(
+   protected JSONObject getMatchingTranscriptIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -664,7 +676,7 @@ public class StoreQuery extends HttpServlet {
          }
       }
       if (errors.size() > 0) return failureResult(errors);
-      String[] ids = store.getMatchingGraphIds(expression, pageLength, pageNumber);
+      String[] ids = store.getMatchingTranscriptIds(expression, pageLength, pageNumber);
       return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
    }         
    
@@ -801,13 +813,13 @@ public class StoreQuery extends HttpServlet {
    }
    
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getGraph(String,String[])}
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getTranscript(String,String[])}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getGraph(
+   protected JSONObject getTranscript(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
@@ -817,7 +829,7 @@ public class StoreQuery extends HttpServlet {
       String[] layerIds = request.getParameterValues("layerIds");
       if (layerIds == null) layerIds = new String[0];
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(store.getGraph(id, layerIds), null);
+      return successResult(store.getTranscript(id, layerIds), null);
    }
 
    // TODO getFragment

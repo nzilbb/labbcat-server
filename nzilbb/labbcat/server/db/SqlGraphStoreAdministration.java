@@ -270,10 +270,10 @@ public class SqlGraphStoreAdministration
    } // end of loadSerializers()
 
    /**
-    * Registers a graph deserializer.
+    * Registers a transcript deserializer.
     * @param deserializer The deserializer to register.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the deserializer from being registered.
+    * @throws PermissionException If registering the deserializer is not permitted.
     */
    public void registerDeserializer(IDeserializer deserializer)
       throws StoreException, PermissionException {
@@ -312,10 +312,10 @@ public class SqlGraphStoreAdministration
    }
 
    /**
-    * De-registers a graph deserializer.
+    * De-registers a transcript deserializer.
     * @param deserializer The deserializer to de-register.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the deserializer from being deregistered.
+    * @throws PermissionException If deregistering the deserializer is not permitted.
     */
    public void deregisterDeserializer(IDeserializer deserializer)
       throws StoreException, PermissionException {
@@ -340,8 +340,8 @@ public class SqlGraphStoreAdministration
    /**
     * Lists the descriptors of all registered deserializers.
     * @return A list of the descriptors of all registered deserializers.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the descriptors from being listed.
+    * @throws PermissionException If listing the deserializers is not permitted.
     */
    public SerializationDescriptor[] getDeserializerDescriptors()
       throws StoreException, PermissionException {
@@ -366,8 +366,8 @@ public class SqlGraphStoreAdministration
     * Gets the deserializer for the given MIME type.
     * @param mimeType The MIME type.
     * @return The deserializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
     */
    public IDeserializer deserializerForMimeType(String mimeType)
       throws StoreException, PermissionException {
@@ -386,8 +386,8 @@ public class SqlGraphStoreAdministration
     * Gets the deserializer for the given file suffix (extension).
     * @param suffix The file extension.
     * @return The deserializer for the given suffix, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
     */
    public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
       
@@ -402,10 +402,10 @@ public class SqlGraphStoreAdministration
    }
 
    /**
-    * Registers a graph serializer.
+    * Registers a transcript serializer.
     * @param serializer The serializer to register.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
     */
    public void registerSerializer(ISerializer serializer)
       throws StoreException, PermissionException {
@@ -444,10 +444,10 @@ public class SqlGraphStoreAdministration
    }
 
    /**
-    * De-registers a graph serializer.
+    * De-registers a transcript serializer.
     * @param serializer The serializer to de-register.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
     */
    public void deregisterSerializer(ISerializer serializer)
       throws StoreException, PermissionException {
@@ -472,8 +472,8 @@ public class SqlGraphStoreAdministration
    /**
     * Lists the descriptors of all registered serializers.
     * @return A list of the descriptors of all registered serializers.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
     */
    public SerializationDescriptor[] getSerializerDescriptors()
       throws StoreException, PermissionException {
@@ -497,8 +497,8 @@ public class SqlGraphStoreAdministration
     * Gets the serializer for the given MIME type.
     * @param mimeType The MIME type.
     * @return The serializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
     */
    public ISerializer serializerForMimeType(String mimeType)
       throws StoreException, PermissionException {
@@ -517,8 +517,8 @@ public class SqlGraphStoreAdministration
     * Gets the serializer for the given file suffix (extension).
     * @param suffix The file extension.
     * @return The serializer for the given suffix, or null if none is registered.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
     */
    public ISerializer serializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
       

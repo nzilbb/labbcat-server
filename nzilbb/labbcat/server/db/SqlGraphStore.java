@@ -1123,12 +1123,12 @@ public class SqlGraphStore
    } // end of userWhereClauseParticipant()
 
    /**
-    * Gets a list of graph IDs.
-    * @return A list of graph IDs.
+    * Gets a list of transcript IDs.
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIds() throws StoreException, PermissionException
+   public String[] getTranscriptIds() throws StoreException, PermissionException
    {
       try
       {
@@ -1152,28 +1152,28 @@ public class SqlGraphStore
    }
 
    /**
-    * Gets a list of graph IDs in the given corpus.
+    * Gets a list of transcript IDs in the given corpus.
     * @param id A corpus ID.
-    * @return A list of graph IDs.
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsInCorpus(String id) throws StoreException, PermissionException
+   public String[] getTranscriptIdsInCorpus(String id) throws StoreException, PermissionException
    {
-      return getMatchingGraphIds("my('corpus').label = '"+esc(id)+"'");
+      return getMatchingTranscriptIds("my('corpus').label = '"+esc(id)+"'");
    }
 
 
    /**
-    * Gets a list of IDs of graphs that include the given participant.
+    * Gets a list of IDs of transcripts that include the given participant.
     * @param id A participant ID.
-    * @return A list of graph IDs.
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getGraphIdsWithParticipant(String id) throws StoreException, PermissionException
+   public String[] getTranscriptIdsWithParticipant(String id) throws StoreException, PermissionException
    {
-      return getMatchingGraphIds("'"+esc(id)+"' IN labels('who')");
+      return getMatchingTranscriptIds("'"+esc(id)+"' IN labels('who')");
    }
 
    
@@ -1193,7 +1193,7 @@ public class SqlGraphStore
     *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
     *  <li><code>my('participant_gender').label == 'NA'</code></li>
     * </ul>
-    * @param expression The graph-matching expression.
+    * @param expression The participant-matching expression.
     * @param sqlSelectClause The expression that is to go between SELECT and FROM.
     * @param sqlOrderClause The expression that appended to the end of the SQL query.
     * @return A PreparedStatement for the given expression, with parameters already set.
@@ -1379,8 +1379,8 @@ public class SqlGraphStore
    } // end of graphMatchSql()
 
    /**
-    * Counts the number of graphs that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
+    * Counts the number of transcript IDs that match a particular pattern.
+    * @param expression An expression that determines which transcripts match.
     * <p> The expression language is loosely based on JavaScript; expressions such as
     * the following can be used:
     * <ul>
@@ -1401,11 +1401,11 @@ public class SqlGraphStore
     *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
     * labels('who').includes('Robert')</code></li> 
     * </ul>
-    * @return The number of matching graphs.
+    * @return The number of matching transcripts.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public int countMatchingGraphIds(String expression)
+   public int countMatchingTranscriptIds(String expression)
       throws StoreException, PermissionException
    {
       try
@@ -1430,8 +1430,8 @@ public class SqlGraphStore
    }
    
    /**
-    * Gets a list of IDs of graphs that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
+    * Gets a list of IDs of transcripts that match a particular pattern.
+    * @param expression An expression that determines which transcripts match.
     * <p> The expression language is loosely based on JavaScript; expressions such as
     * the following can be used:
     * <ul>
@@ -1455,13 +1455,13 @@ public class SqlGraphStore
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The zero-based page number to return, or null to return the first page.
     * @param order The ordering for the list of IDs, a string containing a comma-separated
-    * list of epxressions, which may be appended by " ASC" or " DESC", or null for graph
+    * list of epxressions, which may be appended by " ASC" or " DESC", or null for transcript
     * ID order.
-    * @return A list of graph IDs.
+    * @return A list of transcript IDs.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
     */
-   public String[] getMatchingGraphIds(String expression, Integer pageLength, Integer pageNumber, String order)
+   public String[] getMatchingTranscriptIds(String expression, Integer pageLength, Integer pageNumber, String order)
       throws StoreException, PermissionException
    {
       try
@@ -1492,29 +1492,29 @@ public class SqlGraphStore
    }
    
    /**
-    * Gets a graph given its ID.
-    * @param id The given graph ID.
-    * @return The identified graph.
+    * Gets a transcript given its ID.
+    * @param id The given transcript ID.
+    * @return The identified transcript.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getGraph(String id) throws StoreException, PermissionException, GraphNotFoundException
+   public Graph getTranscript(String id) throws StoreException, PermissionException, GraphNotFoundException
 
    {
-      return getGraph(id, getLayerIds());
+      return getTranscript(id, getLayerIds());
    }
 
    /**
-    * Gets a graph given its ID, containing only the given layers.
-    * @param id The given graph ID.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
-    * @return The identified graph.
+    * Gets a transcript given its ID, containing only the given layers.
+    * @param id The given transcript ID.
+    * @param layerIds The IDs of the layers to load, or null if only transcript data is required.
+    * @return The identified transcript.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getGraph(String id, String[] layerIds) throws StoreException, PermissionException, GraphNotFoundException
+   public Graph getTranscript(String id, String[] layerIds) throws StoreException, PermissionException, GraphNotFoundException
    {
       try
       {
@@ -2006,8 +2006,8 @@ public class SqlGraphStore
    }
 
    /**
-    * Gets a fragment of a graph, given its ID and the ID of an annotation in it that defines the 
-    * desired fragment.
+    * Gets a fragment of a transcript, given its ID and the ID of an annotation in it that
+    * defines the  desired fragment.
     * <p>The given annotation defines both the start and end anchors of the fragment, and also 
     * which annotations on descendant layers will be included. 
     * So the resulting fragment will include:
@@ -2022,17 +2022,17 @@ public class SqlGraphStore
     *      utterance will be included, not words spoken by other speakers.
     *      </li>
     * </ul>
-    * @param graphId The ID of the graph.
+    * @param transcriptId The ID of the transcript.
     * @param annotationId The ID of an annotation that defines the bounds of the fragment.
-    * @return The identified graph fragment.
+    * @return The identified transcript fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getFragment(String graphId, String annotationId) 
+   public Graph getFragment(String transcriptId, String annotationId) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
-      return getFragment(graphId, annotationId, getLayerIds());
+      return getFragment(transcriptId, annotationId, getLayerIds());
    }
 
    /**
@@ -2162,13 +2162,13 @@ public class SqlGraphStore
    } // end of annotationMatchSql()
 
    /**
-    * Gets the number of annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
+    * Gets the number of annotations on the given layer of the given transcript.
+    * @param id The ID of the transcript.
     * @param layerId The ID of the layer.
     * @return A (possibly empty) array of annotations.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public long countAnnotations(String id, String layerId)
       throws StoreException, PermissionException, GraphNotFoundException
@@ -2178,15 +2178,15 @@ public class SqlGraphStore
          +" AND layer.id = '" + esc(layerId) + "'");
    }
    /**
-    * Gets the annotations on the given layer of the given graph.
-    * @param id The ID of the graph.
+    * Gets the annotations on the given layer of the given transcript.
+    * @param id The ID of the transcript.
     * @param layerId The ID of the layer.
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.
     * @return A (possibly empty) array of annotations.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public Annotation[] getAnnotations(String id, String layerId, Integer pageLength, Integer pageNumber)
       throws StoreException, PermissionException, GraphNotFoundException
@@ -2227,7 +2227,7 @@ public class SqlGraphStore
 
    /**
     * Gets a list of annotations that match a particular pattern.
-    * @param expression An expression that determines which graphs match.
+    * @param expression An expression that determines which transcripts match.
     * @param pageLength The maximum number of annotations to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.
     * @return A list of matching {@link Annotation}s.
@@ -2267,7 +2267,7 @@ public class SqlGraphStore
                { // graph can change
                   try
                   {
-                     graph = getGraph(rsAnnotation.getString("graph"), null);
+                     graph = getTranscript(rsAnnotation.getString("graph"), null);
                   }
                   catch(GraphNotFoundException exception)
                   {
@@ -3108,13 +3108,13 @@ public class SqlGraphStore
    } // getMatchAnnotations
    
    /**
-    * Gets the given anchors in the given graph.
-    * @param id The ID of the graph.
+    * Gets the given anchors in the given transcript.
+    * @param id The ID of the transcript.
     * @param anchorIds An array of anchor IDs.
     * @return A (possibly empty) array of anchors.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public Anchor[] getAnchors(String id, String[] anchorIds)
       throws StoreException, PermissionException, GraphNotFoundException
@@ -3174,8 +3174,8 @@ public class SqlGraphStore
    }
    
    /**
-    * Gets a fragment of a graph, given its ID and the ID of an annotation in it that defines the 
-    * desired fragment, and containing only the given layers.
+    * Gets a fragment of a transcript, given its ID and the ID of an annotation in it that
+    * defines the desired fragment, and containing only the given layers.
     * <p>The given annotation defines both the start and end anchors of the fragment, and also 
     * which annotations on descendant layers will be included. 
     * So the resulting fragment will include:
@@ -3191,21 +3191,21 @@ public class SqlGraphStore
     *      </li>
     * </ul>
     * All annotations included in the fragment also have their {@link Layer} definition appear in 
-    * graph's {@link Schema}, whether or not they're mentioned in the <var>layerId</var> list.
-    * @param graphId The ID of the graph.
+    * transcript's {@link Schema}, whether or not they're mentioned in the <var>layerId</var> list.
+    * @param transcriptId The ID of the transcript.
     * @param annotationId The ID of an annotation that defines the bounds of the fragment.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
-    * @return The identified graph fragment.
+    * @param layerIds The IDs of the layers to load, or null if only transcript data is required.
+    * @return The identified transcript fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getFragment(String graphId, String annotationId, String[] layerIds) 
+   public Graph getFragment(String transcriptId, String annotationId, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       try
       {
-         final Graph graph = getGraph(graphId, null); // load just basic information
+         final Graph graph = getTranscript(transcriptId, null); // load just basic information
          final int ag_id = (Integer)graph.get("@ag_id");
          Schema schema = getSchema();
 
@@ -3625,23 +3625,23 @@ public class SqlGraphStore
    }   
 
    /**
-    * Gets a fragment of a graph, given its ID and the start/end offsets that define the 
+    * Gets a fragment of a transcript, given its ID and the start/end offsets that define the 
     * desired fragment, and containing only the given layers.
-    * @param graphId The ID of the graph.
+    * @param transcriptId The ID of the transcript.
     * @param start The start offset of the fragment.
     * @param end The end offset of the fragment.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
-    * @return The identified graph fragment.
+    * @param layerIds The IDs of the layers to load, or null if only transcript data is required.
+    * @return The identified transcript fragment.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public Graph getFragment(String graphId, double start, double end, String[] layerIds) 
+   public Graph getFragment(String transcriptId, double start, double end, String[] layerIds) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       try
       {
-         final Graph graph = getGraph(graphId, null); // load just basic information
+         final Graph graph = getTranscript(transcriptId, null); // load just basic information
          final int ag_id = (Integer)graph.get("@ag_id");
          Schema schema = getSchema();
 
@@ -3843,7 +3843,7 @@ public class SqlGraphStore
     * <p>This implementation expects <var>seriesId</var> to be a current <tt>result.search_id</tt>.
     * <p>The fragments are created lazily as required, so this method should return quickly.
     * @param seriesId The ID of the series.
-    * @param layerIds The IDs of the layers to load, or null if only graph data is required.
+    * @param layerIds The IDs of the layers to load, or null if only transcript data is required.
     * @return An enumerable series of fragments.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -3863,9 +3863,9 @@ public class SqlGraphStore
    }
   
    /**
-    * Saves the given graph. The graph can be partial e.g. include only some of the layers
-    * that the stored version of the graph contains, or be a fragment.
-    * <p>The graph deltas are assumed to be set correctly, so if this is a new graph, then
+    * Saves the given transcript. The graph can be partial e.g. include only some of the layers
+    * that the stored version of the transcript contains, or be a fragment.
+    * <p>The graph deltas are assumed to be set correctly, so if this is a new transcript, then
     * {@link Graph#getChange()} should return Change.Operation.Create, if it's an update,
     * Change.Operation.Update, and to delete, Change.Operation.Delete.  Correspondingly,
     * all {@link Anchor}s and {@link Annotation}s should have their changes set also.  If
@@ -3873,17 +3873,18 @@ public class SqlGraphStore
     * method returns false.
     * <p>After this method has executed, {@link Graph#commit()} is <em>not</em> called -
     * this must be done by the caller, if they want changes to be committed.
-    * @param graph The graph to save.
+    * @param transcript The transcript to save.
     * @return true if changes were saved, false if there were no changes to save.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
-   public boolean saveGraph(Graph graph) 
+   public boolean saveTranscript(Graph transcript) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       Timers timers = new Timers();
       timers.start("saveGraph");
+      Graph graph = transcript;
       try
       {
          // validate the graph before saving it
@@ -5732,7 +5733,7 @@ public class SqlGraphStore
     * @throws SQLException If a database error occurs.
     * @throws StoreException If some other error occurs.
     */
-   public void saveSpecialAnnotationChanges(Annotation annotation, HashMap<String,String> participantNameToNumber)
+   protected void saveSpecialAnnotationChanges(Annotation annotation, HashMap<String,String> participantNameToNumber)
       throws PermissionException, StoreException, SQLException
    {
       try
@@ -5999,7 +6000,7 @@ public class SqlGraphStore
     * @throws SQLException If a database error occurs.
     * @throws StoreException If some other error occurs.
     */
-   public void saveEpisodeAnnotationChanges(Annotation annotation, PreparedStatement sqlLastId)
+   protected void saveEpisodeAnnotationChanges(Annotation annotation, PreparedStatement sqlLastId)
       throws PermissionException, StoreException, SQLException
    {
       try
@@ -6191,7 +6192,7 @@ public class SqlGraphStore
     * @throws StoreException If an ID cannot be parsed.
     * @throws SQLException If a database error occurs.
     */
-   public void saveTranscriptAttributeChanges(Annotation annotation, PreparedStatement sqlInsertTranscriptAttribute, PreparedStatement sqlUpdateTranscriptAttribute, PreparedStatement sqlDeleteTranscriptAttribute) throws SQLException, StoreException
+   protected void saveTranscriptAttributeChanges(Annotation annotation, PreparedStatement sqlInsertTranscriptAttribute, PreparedStatement sqlUpdateTranscriptAttribute, PreparedStatement sqlDeleteTranscriptAttribute) throws SQLException, StoreException
    {
       try
       {
@@ -6277,7 +6278,7 @@ public class SqlGraphStore
     * @throws StoreException If an ID can't be parsed.
     * @throws SQLException If a database error occurs.
     */
-   public void saveParticipantAttributeChanges(Annotation annotation, PreparedStatement sqlInsertParticipantAttribute, PreparedStatement sqlUpdateParticipantAttribute, PreparedStatement sqlDeleteParticipantAttribute, PreparedStatement sqlDeleteAllParticipantAttributesOnLayer) throws SQLException, StoreException, PermissionException
+   protected void saveParticipantAttributeChanges(Annotation annotation, PreparedStatement sqlInsertParticipantAttribute, PreparedStatement sqlUpdateParticipantAttribute, PreparedStatement sqlDeleteParticipantAttribute, PreparedStatement sqlDeleteAllParticipantAttributesOnLayer) throws SQLException, StoreException, PermissionException
    {
       try
       {
@@ -6480,7 +6481,7 @@ public class SqlGraphStore
 
    /**
     * Destroys the annotation with the given ID.
-    * @param id The ID of the graph.
+    * @param id The ID of the transcript.
     * @param annotationId The annotation's ID.
     */
    public void destroyAnnotation(String id, String annotationId)
@@ -6554,19 +6555,19 @@ public class SqlGraphStore
    }
 
    /**
-    * List the media available for the given graph.
-    * @param id The graph ID.
-    * @return List of media files available for the given graph.
+    * List the media available for the given transcript.
+    * @param id The transcript ID.
+    * @return List of media files available for the given transcript.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public MediaFile[] getAvailableMedia(String id) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       Vector<MediaFile> files = new Vector<MediaFile>();
       String[] layers = { "corpus", "episode" };
-      Graph graph = getGraph(id, layers);
+      Graph graph = getTranscript(id, layers);
       if (graph.my("corpus") == null || graph.my("episode") == null)
       { // corpus/episode not correctly set
          return new MediaFile[0];
@@ -6623,16 +6624,16 @@ public class SqlGraphStore
    }
  
    /**
-    * Gets a given media track for a given graph.
-    * @param id The graph ID.
+    * Gets a given media track for a given transcript.
+    * @param id The transcript ID.
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media, which may include parameters for type
     * conversion, e.g. "text/wav; samplerate=16000".
-    * @return A URL to the given media for the given graph, or null if the given media
+    * @return A URL to the given media for the given transcript, or null if the given media
     * doesn't exist.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public String getMedia(String id, String trackSuffix, String mimeType) 
       throws StoreException, PermissionException, GraphNotFoundException
@@ -6640,8 +6641,8 @@ public class SqlGraphStore
       return getMedia(id, trackSuffix, mimeType, null, null);
    }
    /**
-    * Gets a given media track for a given graph.
-    * @param id The graph ID.
+    * Gets a given media track for a given  was not found in the store..
+    * @param id The transcript ID.
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media, which may include parameters for type
     * conversion, e.g. "text/wav; samplerate=16000"
@@ -6649,17 +6650,17 @@ public class SqlGraphStore
     * recording. 
     * @param endOffset The end offset of the media sample, or null for the end of the
     * whole recording. 
-    * @return A URL to the given media for the given graph, or null if the given media doesn't
+    * @return A URL to the given media for the given transcript, or null if the given media doesn't
     * exist. 
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public String getMedia(String id, String trackSuffix, String mimeType, Double startOffset, Double endOffset) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
       String[] layers = { "corpus", "episode" };
-      Graph graph = getGraph(id, layers);
+      Graph graph = getTranscript(id, layers);
       File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
       File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
       String[] mimeTypeParts = mimeType.split(";"); // e.g. "audio/wav; samplerate=16000"
@@ -6781,13 +6782,13 @@ public class SqlGraphStore
    }
 
    /**
-    * Saves the given media for the given graph.
-    * @param id The graph ID
+    * Saves the given media for the given transcript.
+    * @param id The transcript ID
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mediaUrl A URL to the media content.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
    public void saveMedia(String id, String trackSuffix, String mediaUrl)
       throws StoreException, PermissionException, GraphNotFoundException
@@ -6796,7 +6797,7 @@ public class SqlGraphStore
       try
       {
          String[] layers = { "corpus", "episode" };
-         Graph graph = getGraph(id, layers);
+         Graph graph = getTranscript(id, layers);
          File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
          if (!corpusDir.exists()) corpusDir.mkdir();
          File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
@@ -6929,7 +6930,7 @@ public class SqlGraphStore
                schema.getTurnLayerId(),
                schema.getUtteranceLayerId(),
                censorshipLayer };
-            graph = getGraph(id, censorshipLayers);
+            graph = getTranscript(id, censorshipLayers);
 	    
             // get censorship boundaries
             Vector<Double> boundaries = new Vector<Double>();
@@ -7030,13 +7031,14 @@ public class SqlGraphStore
          for (File f : toDelete) f.delete();
       }
    }
+   
    /**
-    * Saves the given source file (transcript) for the given graph
-    * @param id The graph ID
+    * Saves the given source file for the given transcript.
+    * @param id The transcript ID
     * @param url A URL to the transcript.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
    public void saveSource(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException
@@ -7044,7 +7046,7 @@ public class SqlGraphStore
       try
       {
          String[] layers = { "corpus", "episode" };
-         Graph graph = getGraph(id, layers);
+         Graph graph = getTranscript(id, layers);
          File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
          if (!corpusDir.exists()) corpusDir.mkdir();
          File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
@@ -7103,12 +7105,12 @@ public class SqlGraphStore
    }
 
    /**
-    * Saves the given document for the episode of the given graph.
-    * @param id The graph ID
+    * Saves the given document for the episode of the given transcript.
+    * @param id The transcript ID
     * @param url A URL to the document.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
    public void saveEpisodeDocument(String id, String url)
       throws StoreException, PermissionException, GraphNotFoundException
@@ -7116,7 +7118,7 @@ public class SqlGraphStore
       try
       {
          String[] layers = { "corpus", "episode" };
-         Graph graph = getGraph(id, layers);
+         Graph graph = getTranscript(id, layers);
          File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
          if (!corpusDir.exists()) corpusDir.mkdir();
          File episodeDir = new File(corpusDir, graph.my("episode").getLabel());	
@@ -7180,19 +7182,19 @@ public class SqlGraphStore
    }
 
    /**
-    * Get a list of documents associated with the episode of the given graph.
-    * @param id The graph ID.
+    * Get a list of documents associated with the episode of the given transcript.
+    * @param id The transcript ID.
     * @return List of document files/URLs.
     * @throws StoreException If an error prevents the media from being saved.
     * @throws PermissionException If saving the media is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
    public MediaFile[] getEpisodeDocuments(String id)
       throws StoreException, PermissionException, GraphNotFoundException
    {
       Vector<MediaFile> files = new Vector<MediaFile>();
       String[] layers = { "corpus", "episode" };
-      Graph graph = getGraph(id, layers);
+      Graph graph = getTranscript(id, layers);
       File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
       File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
       File docDir = new File(episodeDir, "doc");
@@ -7228,10 +7230,10 @@ public class SqlGraphStore
     * available conversions.
     * <p>This implementation starts conversion processes, and returns immediately, so new
     * files may not exist immediately after the method returns.
-    * @param id The graph ID.
+    * @param id The transcript ID.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
-    * @throws GraphNotFoundException If the graph was not found in the store.
+    * @throws GraphNotFoundException If the transcript was not found in the store.
     */
    public void generateMissingMedia(String id)
       throws StoreException, PermissionException, GraphNotFoundException
@@ -7299,7 +7301,7 @@ public class SqlGraphStore
 	    
             // need some info about the graph...
             String[] layers = { "corpus", "episode" };
-            Graph graph = getGraph(id, layers);
+            Graph graph = getTranscript(id, layers);
             File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
             File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
 
@@ -7368,19 +7370,19 @@ public class SqlGraphStore
    } // end of generateMissingMedia()
 
    /**
-    * Deletes the given graph, and all associated files.
-    * @param id The ID graph to save.
-    * @throws StoreException If an error prevents the graph from being saved.
-    * @throws PermissionException If saving the graph is not permitted.
-    * @throws GraphNotFoundException If the graph doesn't exist.
+    * Deletes the given transcript, and all associated files.
+    * @param id The ID transcript to delete.
+    * @throws StoreException If an error prevents the transcript from being saved.
+    * @throws PermissionException If saving the transcript is not permitted.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
     */
-   public void deleteGraph(String id)
+   public void deleteTranscript(String id)
       throws StoreException, PermissionException, GraphNotFoundException
    {
       try
       {
          String[] layers = { "corpus", "episode" };
-         Graph graph = getGraph(id, layers);
+         Graph graph = getTranscript(id, layers);
          int iAgId = ((Integer)graph.get("@ag_id")).intValue();
 
          // media
