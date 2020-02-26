@@ -106,8 +106,6 @@ public class AnnotationAgqlToSql {
     * @param sqlSelectClause The SQL expression that is to go between SELECT and FROM.
     * @param userWhereClause The expression to add to the WHERE clause to ensure the user doesn't
     * get access to data to which they're not entitled, or null.
-    * @param orderClause A comma-separated list of AGQL expressions to determine the order of
-    * results; e.g. "my('corpus').label, id", or null. 
     * @param sqlLimitClause The SQL LIMIT clause to append, or null for no LIMIT clause. 
     * @throws AGQLException If the expression is invalid.
     */
@@ -1110,7 +1108,7 @@ public class AnnotationAgqlToSql {
    }
 
    /** 
-    * Encapsulates the results of {@link #sqlFor(String,String,String,String,String)}
+    * Encapsulates the results of {@link #sqlFor(String,String,String,String)}
     * including the SQL.
     * string and the parameters to set.
     */
