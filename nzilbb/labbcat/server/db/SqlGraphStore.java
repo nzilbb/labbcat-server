@@ -2141,19 +2141,24 @@ public class SqlGraphStore
       } // optimization for common word_annotation_id-nased queries may be possible 
 
       Pattern participantQueryPattern = Pattern.compile(
-         "graph.id ==? '(.+)' (AND|&&) layer\\.id ==? 'participant'");
+         "graph.id ==? '(.+)' (AND|&&) layer\\.id ==? '(main_)?participant'");
       Matcher participantQueryMatcher = participantQueryPattern.matcher(expression);
       if (participantQueryMatcher.matches())
       { // optimization for getAnnotations() pattern for listing participants
+         // is it 'participant' or 'main_participant' ?
+         boolean mainParticipant = participantQueryMatcher.group(3) != null;
          if (!limit.equals("COUNT(*)"))
          { // list participants
-            sSql = "SELECT speaker.*, 'participant' AS layer, graph.ag_id AS graph"
+            sSql = "SELECT speaker.*,"
+               +" '"+(mainParticipant?"main_participant":"participant")+"' AS layer,"
+               +" graph.ag_id AS graph"
                +" FROM transcript_speaker"
                +" INNER JOIN transcript graph"
                +" ON transcript_speaker.ag_id = graph.ag_id"
                +" INNER JOIN speaker"
                +" ON transcript_speaker.speaker_number = speaker.speaker_number"
                +" WHERE graph.transcript_id = '"+participantQueryMatcher.group(1)+"'"
+               +(mainParticipant?" AND transcript_speaker.main_speaker > 0":"")
                + userWhereClauseGraph(true, "graph")
                +" ORDER BY speaker.name"
                +" " + limit;
@@ -2167,6 +2172,7 @@ public class SqlGraphStore
                +" INNER JOIN speaker"
                +" ON transcript_speaker.speaker_number = speaker.speaker_number"
                +" WHERE graph.transcript_id = '"+participantQueryMatcher.group(1)+"'"
+               +(mainParticipant?" AND transcript_speaker.main_speaker > 0":"")
                + userWhereClauseGraph(true, "graph");
          }
       } // optimization for getAnnotations() pattern for listing participants
@@ -4665,11 +4671,17 @@ public class SqlGraphStore
                   annotation.setId("m_-2_" + rsAnnotation.getString("speaker_number"));
                   annotation.setLabel(rsAnnotation.getString("name"));
                   annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
-                  if (graph != null) annotation.setParentId(graph.getId());
-                  
+                  if (graph != null) annotation.setParentId(graph.getId());                  
+                  break;
+               case SqlConstants.LAYER_MAIN_PARTICIPANT: 
+                  Object[] annotationIdParts = {
+                     layer.get("@layer_id"), rsAnnotation.getString("speaker_number")};
+                  annotation.setId(fmtMetaAnnotationId.format(annotationIdParts));
+                  annotation.setLabel(rsAnnotation.getString("name"));
+                  annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
+                  if (graph != null) annotation.setParentId(graph.getId());                  
                   break;
                   // TODO case SqlConstants.LAYER_GRAPH: break; 
-                  // TODO case SqlConstants.LAYER_MAIN_PARTICIPANT: break;
                   // TODO case SqlConstants.LAYER_SERIES: break;
                   // TODO case SqlConstants.LAYER_CORPUS: break;
                default:
