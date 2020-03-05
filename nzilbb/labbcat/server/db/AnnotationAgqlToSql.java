@@ -117,7 +117,7 @@ public class AnnotationAgqlToSql {
          throw new AGQLException("No expression specified");
       }
 
-      final Layer layer = deducePrimaryLayer(expression);
+      Layer layer = deducePrimaryLayer(expression);
       if (layer == null) {
          throw new AGQLException("Could not identify primary layer")
             .setExpression(expression);
@@ -126,6 +126,57 @@ public class AnnotationAgqlToSql {
          throw new AGQLException("Primary layer is not a temporal layer: " + layer.getId())
             .setExpression(expression);
       }
+      int iLayerId = ((Integer)layer.get("@layer_id")).intValue();
+      switch (iLayerId)
+      {
+         case SqlConstants.LAYER_PARTICIPANT:
+         case SqlConstants.LAYER_MAIN_PARTICIPANT: 
+            return sqlForParticipantLayer(
+               expression, sqlSelectClause, userWhereClause, sqlLimitClause, layer);
+         case SqlConstants.LAYER_GRAPH: 
+         case SqlConstants.LAYER_SERIES: 
+         case SqlConstants.LAYER_CORPUS: 
+            throw new AGQLException("Primary layer is an unsupported structural layer: " + layer.getId())
+               .setExpression(expression);
+         default:
+            return sqlForTemporalLayer(
+               expression, sqlSelectClause, userWhereClause, sqlLimitClause, layer);
+      }
+   } // sqlFor
+
+   /**
+    * Transforms the given AGQL query for a normal temporal layer into an SQL query.
+    * @param expression The graph-matching expression, for example:
+    * <ul>
+    *  <li><code>id == 'ew_0_456'</code></li>
+    *  <li><code>layer.id == 'orthography' &amp;&amp; /th[aeiou].+/.test(label)</code></li>
+    *  <li><code>layer.id == 'orthography' &amp;&amp; my('participant').label == 'Robert' &amp;&amp;
+    * my('utterances').start.offset == 12.345</code></li> 
+    *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography' &amp;&amp;
+    * start.offset &gt; 10.5</code></li> 
+    *  <li><code>layer.id == 'utterances' &amp;&amp; list('transcript').includes('ew_0_456')</code></li>
+    *  <li><code>previous.id == 'ew_0_456'</code></li>
+    * </ul>
+    * Also currently supported are the legacy SQL-style expressions:
+    * <ul>
+    *  <li><code>id = 'ew_0_456'</code></li>
+    *  <li><code>layer.id = 'orthography' AND label NOT MATCHES 'th[aeiou].*'</code></li>
+    *  <li><code>layer.id = 'orthography' AND my('participant').label = 'Robert' AND
+    * my('utterances').start.offset = 12.345</code></li> 
+    *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND
+    * start.offset &gt; 10.5</code></li> 
+    *  <li><code>layer.id = 'utterances' AND 'ew_0_456' IN list('transcript')</code></li>
+    *  <li><code>previous.id = 'ew_0_456'</code></li>
+    * </ul>
+    * @param sqlSelectClause The SQL expression that is to go between SELECT and FROM.
+    * @param userWhereClause The expression to add to the WHERE clause to ensure the user doesn't
+    * get access to data to which they're not entitled, or null.
+    * @param sqlLimitClause The SQL LIMIT clause to append, or null for no LIMIT clause. 
+    * @param layer The primary layer, which is a normal temporal layer.
+    * @throws AGQLException If the expression is invalid.
+    */
+   protected Query sqlForTemporalLayer(String expression, String sqlSelectClause, String userWhereClause, String sqlLimitClause, final Layer layer)
+      throws AGQLException {
 
       final Query q = new Query();
       final Stack<String> conditions = new Stack<String>();
@@ -991,8 +1042,244 @@ public class AnnotationAgqlToSql {
 
       q.sql = sql.toString();
       return q;
-   } // end of sqlFor()
+   } // end of sqlForTemporalLayer()
 
+   /**
+    * Transforms the given AGQL query for a participant-table layer into an SQL query.
+    * @param expression The graph-matching expression, for example:
+    * <ul>
+    *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'participant'</code></li> 
+    *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'main_participant'</code></li> 
+    * </ul>
+    * @param sqlSelectClause The SQL expression that is to go between SELECT and FROM.
+    * @param userWhereClause The expression to add to the WHERE clause to ensure the user doesn't
+    * get access to data to which they're not entitled, or null.
+    * @param sqlLimitClause The SQL LIMIT clause to append, or null for no LIMIT clause. 
+    * @param layer The primary layer, which is a normal temporal layer.
+    * @throws AGQLException If the expression is invalid.
+    */
+   protected Query sqlForParticipantLayer(String expression, String sqlSelectClause, String userWhereClause, String sqlLimitClause, final Layer layer)
+      throws AGQLException {
+
+      final Query q = new Query();
+      final Stack<String> conditions = new Stack<String>();
+      final Flags flags = new Flags();      
+      final Vector<String> extraJoins = new Vector<String>();
+      final Vector<String> errors = new Vector<String>();
+
+      if (sqlSelectClause.contains("graph.")
+          || (userWhereClause != null && userWhereClause.contains("graph."))) {
+         flags.transcriptJoin = true;
+      }
+      
+      AGQLBaseListener listener = new AGQLBaseListener() {
+            private void space() {
+               if (conditions.size() > 0
+                   && conditions.peek().charAt(conditions.peek().length() - 1) != ' ') {
+                  conditions.push(conditions.pop() + " ");
+               }
+            }
+            private String unquote(String s) {
+               return s.substring(1, s.length() - 1)
+                  // unescape any remaining quotes
+                  .replace("\\'","'").replace("\\\"","\"").replace("\\/","/");
+            }
+            private String escape(String s) {
+               return s.replaceAll("\\'", "\\\\'");
+            }
+            @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
+               space();
+               if (ctx.other == null) {
+                  String scope = (String)layer.get("@scope");
+                  if (scope == null || scope.equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)){
+                     scope = "";
+                  }
+                  scope = scope.toLowerCase();
+                  conditions.push(
+                     "CONCAT('m_"+layer.get("@layer_id")+"_', annotation.speaker_number)");
+               } else { // other.id
+                  errors.add("Invalid idExpression, only id is supported: " + ctx.getText());
+               } // other annotation
+            }
+            @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) {
+               space();
+               if (ctx.other == null) {
+                  conditions.push("annotation.name");
+               } else { // other.label TODO add support for participant attributes
+                  errors.add("Invalid labelExpression, only label is supported: " + ctx.getText());
+               } // other.label
+            }
+            @Override public void exitGraphIdExpression(AGQLParser.GraphIdExpressionContext ctx) {
+               space();
+               conditions.push("graph.transcript_id");
+               flags.transcriptJoin = true;
+            }
+            @Override public void exitOrdinalOperand(AGQLParser.OrdinalOperandContext ctx) {
+               space();
+               conditions.push("0");
+            }
+            @Override public void exitAtomListExpression(AGQLParser.AtomListExpressionContext ctx) {
+               // pop all the elements off the stack
+               Stack<String> atoms = new Stack<String>();
+               for (int i = 0; i < ctx.subsequentAtom().size(); i++) {
+                  atoms.push(conditions.pop().trim()); // subsequentAtom
+               }
+               atoms.push(conditions.pop().trim()); // firstAtom
+
+               // create a single element with all of them
+               StringBuilder element = new StringBuilder();
+               element.append("(");
+               element.append(atoms.pop()); // firstAtom
+               while (!atoms.empty()) {
+                  element.append(",");
+                  element.append(atoms.pop()); // subsequentAtom
+               } // next atom
+               element.append(")");
+
+               // and add the whole list to conditions
+               conditions.push(element.toString());
+            }
+            @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx) {
+               space();
+               String operator = ctx.operator.getText().trim();
+               if (operator.equals("==")) operator = "="; // from JS to SQL equality operator
+               conditions.push(operator);
+            }
+            @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx) {
+               if (ctx.negation != null) {
+                  conditions.push(" NOT REGEXP ");
+               } else {
+                  conditions.push(" REGEXP ");
+               }
+               try
+               { // ensure string literals use single, not double, quotes
+                  conditions.push("'"+unquote(ctx.patternOperand.getText())+"'");
+               }
+               catch(Exception exception)
+               { // not a string literal
+                  conditions.push(ctx.patternOperand.getText());
+               }
+            }
+            @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx) {
+               if (ctx.IN() != null) {
+                  // infix it - i.e. pop the last operand...
+                  String listOperand = conditions.pop();
+                  // ... insert the operator
+                  if (ctx.negation != null) {
+                     conditions.push("NOT IN ");
+                  } else {
+                     conditions.push("IN ");
+                  }
+                  // ... and push the operand back
+                  conditions.push(listOperand);
+               } else { // a.includes(b)
+                  // need to swap the order of the operands as well
+                  String singletonOperand = conditions.pop().trim();
+                  String listOperand = conditions.pop().trim();
+
+                  // first singletonOperand
+                  conditions.push(singletonOperand);
+                  // then operator
+                  if (ctx.negation != null) {
+                     conditions.push(" NOT IN ");
+                  } else {
+                     conditions.push(" IN ");
+                  }
+                  // finally push listOperand
+                  conditions.push(listOperand);
+               }
+            }
+            @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx) {
+               space();
+               String operator = ctx.operator.getText().trim();
+               if (operator.equals("&&")) operator = "AND";
+               else if (operator.equals("||")) operator = "OR";
+               conditions.push(operator);
+            }
+            @Override public void exitLiteralAtom(AGQLParser.LiteralAtomContext ctx) {
+               space();
+               try
+               { // ensure string literals use single, not double, quotes
+                  conditions.push("'"+unquote(ctx.literal().stringLiteral().getText())+"'");
+               }
+               catch(Exception exception)
+               { // not a string literal
+                  conditions.push(ctx.getText());
+               }
+            }
+            @Override public void exitIdentifierAtom(AGQLParser.IdentifierAtomContext ctx) {
+               space();
+               conditions.push(ctx.getText());
+            }
+            @Override public void exitLayerExpression(AGQLParser.LayerExpressionContext ctx) { 
+               space();
+               if (ctx.other != null) {
+                  errors.add("Can only reference this annotation's layer: " + ctx.getText());
+               } else {
+                  conditions.push("'"+layer.getId().replaceAll("'","\\'")+"'");
+               }
+            }
+            @Override public void exitParentIdExpression(AGQLParser.ParentIdExpressionContext ctx) {
+               space();
+               Layer parentLayer = schema.getLayer(layer.getParentId());
+               if (parentLayer.equals(schema.getRoot().getId())) {
+                  conditions.push("graph.transcript_id");
+               } else {
+                  conditions.push(
+                     "CONCAT('m_"+parentLayer.get("@layer_id")+"_', annotation.parent_id)");
+               }
+            }
+            @Override public void visitErrorNode(ErrorNode node) {
+               errors.add(node.getText());
+            }
+         };
+      AGQLLexer lexer = new AGQLLexer(CharStreams.fromString(expression));
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      AGQLParser parser = new AGQLParser(tokens);
+      AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+
+      if (errors.size() > 0) {
+         throw new AGQLException(expression, errors);
+      }
+      StringBuilder sql = new StringBuilder();
+      sql.append("SELECT ");
+      sql.append(sqlSelectClause
+                 .replace("annotation.*",
+                          "annotation.name AS label, annotation.speaker_number AS annotation_id,"
+                          +" 100 AS label_status, 0 AS ordinal,"
+                          +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                          +" NULL AS annotated_by, NULL AS annotated_when"));
+      sql.append(", '");
+      sql.append(layer.getId().replaceAll("\\'", "\\\\'"));
+      sql.append("' AS layer");
+      sql.append(" FROM transcript_speaker");
+      sql.append(" INNER JOIN transcript graph ON transcript_speaker.ag_id = graph.ag_id");
+      sql.append(" INNER JOIN speaker annotation ON transcript_speaker.speaker_number = annotation.speaker_number");
+      for (String extraJoin : extraJoins) sql.append(extraJoin);
+      if (conditions.size() > 0) {
+         sql.append(" WHERE "); // TODO ?
+         for (String condition : conditions) sql.append(condition);
+      }
+      if (SqlConstants.LAYER_MAIN_PARTICIPANT == ((Integer)layer.get("@layer_id")).intValue()) {
+         sql.append(conditions.size() > 0?" AND ":" WHERE ");
+         sql.append("main_speaker <> 0");
+      }
+      if (userWhereClause != null && userWhereClause.trim().length() > 0) {
+         sql.append(conditions.size() > 0?" AND ":" WHERE ");
+         sql.append(userWhereClause);
+      }
+
+
+      if (!sqlSelectClause.equals("COUNT(*)")) {
+         sql.append(" ORDER BY ");
+         sql.append("graph.transcript_id, annotation.name");
+         if (sqlLimitClause != null) sql.append(" " + sqlLimitClause);
+      }
+      
+      q.sql = sql.toString();
+      return q;
+   } // end of sqlForParticipantLayer()
    
    /**
     * Deduces the primary layer of the given expression.

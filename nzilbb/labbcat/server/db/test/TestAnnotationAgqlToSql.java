@@ -366,6 +366,51 @@ public class TestAnnotationAgqlToSql {
                    +" ORDER BY graph.transcript_id, parent_id, annotation_id",
                    q.sql);
    }
+
+   @Test public void graphAnnotationsByLayer() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query q = transformer.sqlFor(
+         "graph.id == 'AdaAicheson-01.trs' && layer.id == 'who'",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("Participant ",
+                   "SELECT DISTINCT"
+                   +" annotation.name AS label, annotation.speaker_number AS annotation_id,"
+                   +" 100 AS label_status, 0 AS ordinal,"
+                   +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                   +" NULL AS annotated_by, NULL AS annotated_when,"
+                   +" 'who' AS layer"
+                   +" FROM transcript_speaker"
+                   +" INNER JOIN transcript graph"
+                   +" ON transcript_speaker.ag_id = graph.ag_id"
+                   +" INNER JOIN speaker annotation"
+                   +" ON transcript_speaker.speaker_number = annotation.speaker_number"
+                   +" WHERE graph.transcript_id = 'AdaAicheson-01.trs'"
+                   +" AND 'who' = 'who'"
+                   +" ORDER BY graph.transcript_id, annotation.name",
+                   q.sql);
+
+      q = transformer.sqlFor(
+         "graph.id == 'AdaAicheson-01.trs' && layer.id == 'main_participant'",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("Participant ",
+                   "SELECT DISTINCT"
+                   +" annotation.name AS label, annotation.speaker_number AS annotation_id,"
+                   +" 100 AS label_status, 0 AS ordinal,"
+                   +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                   +" NULL AS annotated_by, NULL AS annotated_when,"
+                   +" 'main_participant' AS layer"
+                   +" FROM transcript_speaker"
+                   +" INNER JOIN transcript graph"
+                   +" ON transcript_speaker.ag_id = graph.ag_id"
+                   +" INNER JOIN speaker annotation"
+                   +" ON transcript_speaker.speaker_number = annotation.speaker_number"
+                   +" WHERE graph.transcript_id = 'AdaAicheson-01.trs'"
+                   +" AND 'main_participant' = 'main_participant'"
+                   +" AND main_speaker <> 0"
+                   +" ORDER BY graph.transcript_id, annotation.name",
+                   q.sql);
+   }
+
    @Test public void labels() throws AGQLException {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query q = transformer.sqlFor(
