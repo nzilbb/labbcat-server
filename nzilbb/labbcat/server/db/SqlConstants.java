@@ -48,6 +48,21 @@ public class SqlConstants {
     * originally time aligned before upload (in Transcriber, the words between Sync
     * points) */
    public static final int LAYER_UTTERANCE = 12;
+
+   /** Database Layer ID for graphs/transcripts */
+   public static final int LAYER_GRAPH = -1;
+   
+   /** Database Layer ID for participants */
+   public static final int LAYER_PARTICIPANT = -2;
+   
+   /** Database Layer ID for marking main participants in a transcript */
+   public static final int LAYER_MAIN_PARTICIPANT = -3;
+   
+   /** Database Layer ID for series */
+   public static final int LAYER_SERIES = -50;
+   
+   /** Database Layer ID for corpora */
+   public static final int LAYER_CORPUS = -100;
    
    /** Scope for Episode layer - value is "e" */
    public static final String SCOPE_EPISODE = "e"; 

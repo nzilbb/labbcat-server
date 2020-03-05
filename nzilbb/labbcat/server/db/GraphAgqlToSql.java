@@ -82,7 +82,7 @@ public class GraphAgqlToSql {
     * @param expression The graph-matching expression, for example:
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
-    *  <li><code>'Robert' IN labels('who')</code></li>
+    *  <li><code>'Robert' IN labels('participant')</code></li>
     *  <li><code>my('corpus').label = 'CC'</code></li>
     *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
     *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
@@ -96,7 +96,7 @@ public class GraphAgqlToSql {
     *  <li><code>list('transcript').length gt; 100</code></li>
     *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
     *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-    *   labels('who')</code></li> 
+    *   labels('participant')</code></li> 
     * </ul>
     * </ul>
     * @param sqlSelectClause The SQL expression that is to go between SELECT and FROM.
@@ -159,7 +159,7 @@ public class GraphAgqlToSql {
                            "(SELECT name"
                            +" FROM transcript_family"
                            +" WHERE transcript_family.family_id = transcript.family_id)");
-                     } else if (layerId.equals(schema.getParticipantLayerId())) { // who
+                     } else if (layerId.equals(schema.getParticipantLayerId())) { // participant
                         conditions.push(
                            "(SELECT speaker.name"
                            +" FROM transcript_speaker"
@@ -232,7 +232,7 @@ public class GraphAgqlToSql {
                      "(SELECT name"
                      +" FROM transcript_family"
                      +" WHERE transcript_family.family_id = graph.family_id)");
-               } else if (layerId.equals(schema.getParticipantLayerId())) { // who
+               } else if (layerId.equals(schema.getParticipantLayerId())) { // participant
                   conditions.push(
                      "(SELECT speaker.name"
                      +" FROM transcript_speaker"

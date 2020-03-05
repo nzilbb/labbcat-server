@@ -85,7 +85,7 @@ public class AnnotationAgqlToSql {
     * <ul>
     *  <li><code>id == 'ew_0_456'</code></li>
     *  <li><code>layer.id == 'orthography' &amp;&amp; /th[aeiou].+/.test(label)</code></li>
-    *  <li><code>layer.id == 'orthography' &amp;&amp; my('who').label == 'Robert' &amp;&amp;
+    *  <li><code>layer.id == 'orthography' &amp;&amp; my('participant').label == 'Robert' &amp;&amp;
     * my('utterances').start.offset == 12.345</code></li> 
     *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography' &amp;&amp;
     * start.offset &gt; 10.5</code></li> 
@@ -96,7 +96,7 @@ public class AnnotationAgqlToSql {
     * <ul>
     *  <li><code>id = 'ew_0_456'</code></li>
     *  <li><code>layer.id = 'orthography' AND label NOT MATCHES 'th[aeiou].*'</code></li>
-    *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
+    *  <li><code>layer.id = 'orthography' AND my('participant').label = 'Robert' AND
     * my('utterances').start.offset = 12.345</code></li> 
     *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND
     * start.offset &gt; 10.5</code></li> 
@@ -282,7 +282,7 @@ public class AnnotationAgqlToSql {
                            +" FROM transcript_family"
                            +" WHERE transcript_family.family_id = graph.family_id)");
                         flags.transcriptJoin = true;
-                     } else if (layerId.equals(schema.getParticipantLayerId())) { // who
+                     } else if (layerId.equals(schema.getParticipantLayerId())) { // participant
                         if (layer.get("@scope").toString().equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) {
                            // turn based on anchor offsets
                            conditions.push(
@@ -410,7 +410,7 @@ public class AnnotationAgqlToSql {
                      +" FROM transcript_family"
                      +" WHERE transcript_family.family_id = graph.family_id)");
                   flags.transcriptJoin = true;
-               } else if (layerId.equals(schema.getParticipantLayerId())) { // who
+               } else if (layerId.equals(schema.getParticipantLayerId())) { // participant
                   if (layer.get("@scope").toString().equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) {
                      // turn based on anchor offsets
                      conditions.push(
