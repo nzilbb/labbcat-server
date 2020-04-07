@@ -2454,6 +2454,67 @@ public class SqlGraphStore
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
             }
+            else if (targetLayer.containsKey("@layer_id") // target is segment
+                     && targetLayer.get("@layer_id").equals(Integer.valueOf(SqlConstants.LAYER_SEGMENT))
+                     && (layer.getParentId().equals(targetLayer.getParentId()))) // word child
+            { // target is segment layer and layer is segment child
+               Integer layer_id = (Integer)layer.get("@layer_id");
+               String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
+                  // these required for ORDER BY
+                  +" annotation_start.offset AS annotation_start_offset,"
+                  +" annotation_end.offset - annotation_start.offset AS annotation_length"
+                  +" FROM annotation_layer_"+layer_id+" annotation"
+                  +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                  +" ON annotation.word_annotation_id = target.word_annotation_id"
+                  // annotation anchors
+                  +" INNER JOIN anchor annotation_start"
+                  +" ON annotation.start_anchor_id = annotation_start.anchor_id"
+                  +" INNER JOIN anchor annotation_end"
+                  +" ON annotation.end_anchor_id = annotation_end.anchor_id"
+                  // target anchors
+                  +" INNER JOIN anchor target_start"
+                  +" ON target.start_anchor_id = target_start.anchor_id"
+                  // annotation includes target start time
+                  +" AND annotation_start.offset <= target_start.offset"
+                  +" AND target_start.offset < annotation_end.offset"
+                  +" WHERE target.annotation_id = ?"
+                  +" ORDER BY annotation_start.offset," // earliest first
+                  +" annotation_end.offset - annotation_start.offset," // then shortest first
+                  +" annotation.annotation_id"
+                  +" LIMIT 0, " + annotationsPerLayer;
+               if (targetOffset != 0)
+               {
+                  sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
+                     // these required for ORDER BY
+                     +" annotation_start.offset AS annotation_start_offset,"
+                     +" annotation_end.offset - annotation_start.offset AS annotation_length"
+                     +" FROM annotation_layer_"+layer_id+" annotation"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON annotation.segment_annotation_id = target.annotation_id"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" token"
+                     +" ON target.word_annotation_id = token.word_annotation_id"
+                     +" AND target.ordinal_in_word = token.ordinal_in_word + "+targetOffset
+                     // annotation anchors
+                     +" INNER JOIN anchor annotation_start"
+                     +" ON annotation.start_anchor_id = annotation_start.anchor_id"
+                     +" INNER JOIN anchor annotation_end"
+                     +" ON annotation.end_anchor_id = annotation_end.anchor_id"
+                     // target anchors
+                     +" INNER JOIN anchor target_start"
+                     +" ON target.start_anchor_id = target_start.anchor_id"
+                     // annotation includes target start time
+                     +" AND annotation_start.offset <= target_start.offset"
+                     +" AND target_start.offset < annotation_end.offset"
+                     +" WHERE token.annotation_id = ?"
+                     +" ORDER BY annotation_start.offset," // earliest first
+                     +" annotation_end.offset - annotation_start.offset," // then shortest first
+                     +" annotation.annotation_id"
+                     +" LIMIT 0, " + annotationsPerLayer;
+               }
+               Object[] groups = { layer.getId(), target_annotation_id_group };
+               queries.add(getConnection().prepareStatement(sql));
+               parameterGroups.add(groups);
+            }
             else if (layer.isAncestor(schema.getWordLayerId())
                      || layer.getId().equals(schema.getWordLayerId())) // the transcript layer itself
             { // layer table has word_annotation_id            
