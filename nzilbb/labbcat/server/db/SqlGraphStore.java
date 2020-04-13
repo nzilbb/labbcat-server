@@ -2428,7 +2428,8 @@ public class SqlGraphStore
             layers.add(layer);
             if (targetLayer.containsKey("@layer_id") // target is segment
                 && targetLayer.get("@layer_id").equals(Integer.valueOf(SqlConstants.LAYER_SEGMENT))
-                && (layer.getParentId().equals(targetLayer.getId()) // segment child
+                // segment child:
+                && (layer.getParentId() != null && layer.getParentId().equals(targetLayer.getId()) 
                     || layer.getId().equals(targetLayer.getId())))  // or the segment layer itself
             { // target is segment layer and layer is segment child
                Integer layer_id = (Integer)layer.get("@layer_id");
@@ -2456,7 +2457,8 @@ public class SqlGraphStore
             }
             else if (targetLayer.containsKey("@layer_id") // target is segment
                      && targetLayer.get("@layer_id").equals(Integer.valueOf(SqlConstants.LAYER_SEGMENT))
-                     && (layer.getParentId().equals(targetLayer.getParentId()))) // word child
+                     && (layer.getParentId() != null
+                         && layer.getParentId().equals(targetLayer.getParentId()))) // word child
             { // target is segment layer and layer is segment child
                Integer layer_id = (Integer)layer.get("@layer_id");
                String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
@@ -2515,6 +2517,40 @@ public class SqlGraphStore
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
             }
+            else if (layer.equals(schema.getRoot()))
+            { // graph itself
+               if (ag_id_group != null)
+               { // the MatchId includes to ag_id
+                  String sql = "SELECT graph.transcript_id AS label,"
+                     +" graph.ag_id AS annotation_id,"
+                     +" 0 AS ordinal, 100 AS label_status,"
+                     +" NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, graph.transcript_id AS graph, graph.ag_id"
+                     +" FROM transcript graph"
+                     +" WHERE graph.ag_id = ?";
+                  Object[] groups = { layer.getId(), ag_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId includes to ag_id
+               else
+               { // the MatchId doesn't include to ag_id
+                  // get the ag_id from the target
+                  String sql = "SELECT graph.transcript_id AS label,"
+                     +" graph.ag_id AS annotation_id,"
+                     +" 0 AS ordinal, 100 AS label_status,"
+                     +" NULL AS annotated_by, NULL AS annotated_when,"
+                     +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                     +" ? AS layer, graph.transcript_id AS graph, graph.ag_id"
+                     +" FROM transcript graph"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("@layer_id")+" target"
+                     +" ON graph.ag_id = target.ag_id"
+                     +" WHERE target.annotation_id = ?";
+                  Object[] groups = { layer.getId(), target_annotation_id_group };
+                  queries.add(getConnection().prepareStatement(sql));
+                  parameterGroups.add(groups);
+               } // the MatchId doesn't include to ag_id
+            } // transcript
             else if (layer.isAncestor(schema.getWordLayerId())
                      || layer.getId().equals(schema.getWordLayerId())) // the transcript layer itself
             { // layer table has word_annotation_id            
@@ -2890,7 +2926,8 @@ public class SqlGraphStore
                   parameterGroups.add(reason);
                }
             } // utterance
-            else if (layer.getParentId().equals(schema.getTurnLayerId()))
+            else if (layer.getParentId() != null
+                     && layer.getParentId().equals(schema.getTurnLayerId()))
             { // meta layer
                Integer layer_id = (Integer)layer.get("@layer_id");
                if (targetLayer.isAncestor(schema.getTurnLayerId()))
@@ -2968,8 +3005,8 @@ public class SqlGraphStore
                   parameterGroups.add(reason);
                }
             } // meta layer
-            else if ((layer.getParentId().equals(schema.getRoot().getId())
-                      || layer.getParentId() == null)
+            else if ((layer.getParentId() == null
+                      || layer.getParentId().equals(schema.getRoot().getId()))
                      && layer.getAlignment() != Constants.ALIGNMENT_NONE)
             { // freeform layer
                Integer layer_id = (Integer)layer.get("@layer_id");
@@ -4735,6 +4772,16 @@ public class SqlGraphStore
             fmtTranscriptAttributeId.format(annotationIdParts), 
             rsAnnotation.getString("label"), layer.getId());
          return type;
+      }
+      else if (layer.getParentId() == null)
+      { // root layer - i.e. the graph itself
+         if (graph == null)
+         {
+            graph = new Graph();
+            graph.setId(rsAnnotation.getString("label"));
+            graph.setLabel(rsAnnotation.getString("label"));
+         }
+         return graph;
       }
       
       return null; // could not identify the annotation type
