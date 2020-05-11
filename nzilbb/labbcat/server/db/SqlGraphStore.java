@@ -2140,6 +2140,38 @@ public class SqlGraphStore
          } // participant attribute
       } // optimization for common word_annotation_id-nased queries may be possible 
 
+      Pattern transcriptAttributeQueryPattern = Pattern.compile(
+         "graph\\.id ==? '(.+)' (AND|&&) layer\\.id ==? '(transcript_[^']+)'");
+      Matcher transcriptAttributeQueryMatcher = transcriptAttributeQueryPattern.matcher(expression);
+      if (transcriptAttributeQueryMatcher.matches())
+      { // optimization for common id/attribute-based queries may be possible
+         String transcriptId = transcriptAttributeQueryMatcher.group(1);
+         String layerId = transcriptAttributeQueryMatcher.group(3);
+         layer = schema.getLayer(layerId);
+         if ("transcript".equals(layer.get("@class_id"))) // transcript attribute
+         {
+            String select = "DISTINCT annotation.annotation_id, annotation.ag_id,"
+               +" annotation.label, annotation.label_status,"
+               +" annotation.annotated_by, annotation.annotated_when,"
+               +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+               +" '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph";
+            if (limit.equals("COUNT(*)"))
+            {
+               select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+               limit = "";
+            }
+            
+            sSql = "SELECT " + select
+               +" FROM annotation_transcript annotation"
+               +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+               +" WHERE graph.transcript_id = '" + esc(transcriptId) + "'"
+               +" AND layer = '"+esc(""+layer.get("@attribute"))+"'"
+               + userWhereClauseGraph(true, "graph")
+               +" ORDER BY annotation_id"
+               + " " + limit;
+         } // table has word_annotation_id, so use it and save a JOIN
+      } // optimization for common id/attribute-based queries may be possible
+      
       if (sSql == null)
       { // no optimization found
 
