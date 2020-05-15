@@ -84,10 +84,21 @@ public class Store extends StoreQuery {
    @Override
    protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      try { // check they have edit permission
+         if (!isUserInRole("edit", request, store.getConnection())) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return failureResult("User has no edit permission");
+         }
+      } catch(SQLException x) {
+         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+         return failureResult(x);
+      }
+      
       JSONObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
       // only allow POST requests
       if (request.getMethod().equals("POST")) {
+         
          if (pathInfo.endsWith("createannotation")) {
             json = createAnnotation(request, response, store);
          } else if (pathInfo.endsWith("destroyannotation")) {

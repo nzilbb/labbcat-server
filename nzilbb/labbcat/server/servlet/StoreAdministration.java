@@ -84,6 +84,15 @@ public class StoreAdministration extends Store {
    @Override
    protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      try {
+         if (!isUserInRole("admin", request, store.getConnection())) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return failureResult("User has no admin permission");         
+         }
+      } catch(SQLException x) {
+         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+         return failureResult(x);
+      }
       JSONObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
       // only allow POST requests
