@@ -205,14 +205,13 @@ public class SqlGraphStore
     */
    public SqlGraphStore setUser(String newUser)
    {
-      user = newUser;
-      if (user != null)
-      {
+      if (newUser != null && !newUser.equals(user))
+      { // user is changing, get their group membership
          try
          {
             PreparedStatement sqlUserGroups = getConnection().prepareStatement(
                "SELECT role_id FROM role WHERE user_id = ?");
-            sqlUserGroups.setString(1, user);
+            sqlUserGroups.setString(1, newUser);
             ResultSet rstUserGroups = sqlUserGroups.executeQuery();
             while (rstUserGroups.next())
             {
@@ -224,6 +223,7 @@ public class SqlGraphStore
          catch(Exception exception)
          {}
       }
+      user = newUser;
       return this;
    }
 
@@ -1063,7 +1063,7 @@ public class SqlGraphStore
    private String userWhereClauseGraph(boolean prefixWithAnd, String transcriptTableAlias)
    {
       if (getUser() != null && !getUserRoles().contains("admin"))
-      {
+      { // TODO if (SELECT COUNT(*) FROM role_permission) == 0, don't bother
          return (prefixWithAnd?" AND":" WHERE")
             +" (EXISTS (SELECT * FROM role"
             + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
