@@ -53,6 +53,7 @@ import org.xml.sax.*;
  */
 @WebServlet({"/api/store/*", "/store/*"} )
 public class StoreQuery extends LabbcatServlet {
+   
    // Attributes:
 
    // Methods:
@@ -72,34 +73,18 @@ public class StoreQuery extends LabbcatServlet {
       
       JSONObject json = null;
       try {
-         Connection connection = newConnection();
+         SqlGraphStoreAdministration store = getStore(request);
          try {
-            SqlGraphStoreAdministration store = (SqlGraphStoreAdministration)
-               request.getSession().getAttribute("store");
-            if (store != null) { // use this request's connection
-               store.setConnection(connection);
-               
-               // stop other requests from using this store at the same time
-               request.getSession().setAttribute("store", null);
-            } else { // no store yet, so create one
-               store = new SqlGraphStoreAdministration(
-                  baseUrl(request), connection, request.getRemoteUser());
-            }
             if (title == null) {
                title = store.getSystemAttribute("title");
             }
-            try {
-               json = invokeFunction(request, response, store);
-               if (json == null) {
-                  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                  json = failureResult("Invalid path: " + request.getPathInfo());
-               }
-            } finally {
-               // allow other requests in the session to use this store, to allow re-use of cached objects
-               request.getSession().setAttribute("store", store);
+            json = invokeFunction(request, response, store);
+            if (json == null) {
+               response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+               json = failureResult("Invalid path: " + request.getPathInfo());
             }
          } finally {
-            connection.close();
+            cacheStore(store);
          }
       } catch (GraphNotFoundException x) {         
          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -132,7 +117,6 @@ public class StoreQuery extends LabbcatServlet {
     */
    protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
-      
       JSONObject json = null;
       if (request.getPathInfo() == null || request.getPathInfo().equals("/")) {
          // no path component
@@ -216,7 +200,7 @@ public class StoreQuery extends LabbcatServlet {
       }
       return json;
    } // end of invokeFunction()
-
+   
    // IGraphStoreQuery method handlers
 
    /**
@@ -470,7 +454,7 @@ public class StoreQuery extends LabbcatServlet {
    protected JSONObject getMatchingTranscriptIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
-      
+
       Vector<String> errors = new Vector<String>();
       String expression = request.getParameter("expression");
       if (expression == null) errors.add("No expression specified.");

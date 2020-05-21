@@ -136,86 +136,76 @@ public class SerializeGraphs extends LabbcatServlet {
       }
       
       File zipFile = null;
-      Connection connection = null;
       try {
-         connection = newConnection();
-
-         SqlGraphStoreAdministration store = (SqlGraphStoreAdministration)
-            request.getSession().getAttribute("store");
-         if (store != null) { // use this request's connection
-            store.setConnection(connection);
+         
+         SqlGraphStoreAdministration store = getStore(request);
+         try {
             
-            // stop other requests from using this store at the same time
-            request.getSession().setAttribute("store", null);
-         } else { // no store yet, so create one
-            store = new SqlGraphStoreAdministration(
-               baseUrl(request), connection, request.getRemoteUser());
-         }
-         
-         LinkedHashSet<String> layers = new LinkedHashSet<String>();
-         for (String l : layerId) layers.add(l);
-         
-         Vector<NamedStream> files = serializeGraphs(name, id, layers, mimeType, store);
-         
-         // did we actually find any files?
-         if (files.size() == 0) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No files were generated");
-         }
-         else if (files.size() == 1) { // one file only
-            // don't zip a single file, just return the file
-            response.setContentType(mimeType);
-            NamedStream stream = files.firstElement();
-            response.addHeader("Content-Disposition", "attachment; filename=" + stream.getName());
-
-            IO.Pump(stream.getStream(), response.getOutputStream());
-         } else { /// multiple files
-            response.addHeader(
-               "Content-Disposition", "attachment; filename=" + IO.SafeFileNameUrl(name) + ".zip");
+            LinkedHashSet<String> layers = new LinkedHashSet<String>();
+            for (String l : layerId) layers.add(l);
             
-            // create a stream to pump from
-            PipedInputStream inStream = new PipedInputStream();
-            final PipedOutputStream outStream = new PipedOutputStream(inStream);
-	    
-            // start a new thread to extract the data and stream it back
-            new Thread(new Runnable() {
-                  public void run() {
-                     try {
-                        ZipOutputStream zipOut = new ZipOutputStream(outStream);
-			
-                        // for each file
-                        for (NamedStream stream : files) {
-                           try {
-                              // create the zip entry
-                              zipOut.putNextEntry(
-                                 new ZipEntry(IO.SafeFileNameUrl(stream.getName())));
-                              
-                              IO.Pump(stream.getStream(), zipOut, false);
-                           } catch (ZipException zx) {
-                           } finally {
-                              stream.getStream().close();
-                           }
-                        } // next file
+            Vector<NamedStream> files = serializeGraphs(name, id, layers, mimeType, store);
+            
+            // did we actually find any files?
+            if (files.size() == 0) {
+               response.sendError(HttpServletResponse.SC_NOT_FOUND, "No files were generated");
+            }
+            else if (files.size() == 1) { // one file only
+               // don't zip a single file, just return the file
+               response.setContentType(mimeType);
+               NamedStream stream = files.firstElement();
+               response.addHeader("Content-Disposition", "attachment; filename=" + stream.getName());
+               
+               IO.Pump(stream.getStream(), response.getOutputStream());
+            } else { /// multiple files
+               response.addHeader(
+                  "Content-Disposition", "attachment; filename=" + IO.SafeFileNameUrl(name) + ".zip");
+               
+               // create a stream to pump from
+               PipedInputStream inStream = new PipedInputStream();
+               final PipedOutputStream outStream = new PipedOutputStream(inStream);
+               
+               // start a new thread to extract the data and stream it back
+               new Thread(new Runnable() {
+                     public void run() {
                         try {
-                           zipOut.close();
+                           ZipOutputStream zipOut = new ZipOutputStream(outStream);
+                           
+                           // for each file
+                           for (NamedStream stream : files) {
+                              try {
+                                 // create the zip entry
+                                 zipOut.putNextEntry(
+                                    new ZipEntry(IO.SafeFileNameUrl(stream.getName())));
+                                 
+                                 IO.Pump(stream.getStream(), zipOut, false);
+                              } catch (ZipException zx) {
+                              } finally {
+                                 stream.getStream().close();
+                              }
+                           } // next file
+                           try {
+                              zipOut.close();
+                           } catch(Exception exception) {
+                              System.err.println(
+                                 "SerializeGraphs: Cannot close ZIP file: " + exception);
+                           }
                         } catch(Exception exception) {
-                           System.err.println(
-                              "SerializeGraphs: Cannot close ZIP file: " + exception);
+                           System.err.println("SerializeGraphs: open zip stream: " + exception);
                         }
-                     } catch(Exception exception) {
-                        System.err.println("SerializeGraphs: open zip stream: " + exception);
                      }
-                  }
-               }).start();
-	    
-            // send headers immediately, so that the browser shows the 'save' prompt
-            response.getOutputStream().flush();
-            
-            IO.Pump(inStream, response.getOutputStream());
-         } // multiple files
+                  }).start();
+               
+               // send headers immediately, so that the browser shows the 'save' prompt
+               response.getOutputStream().flush();
+               
+               IO.Pump(inStream, response.getOutputStream());
+            } // multiple files
+         } finally {
+            cacheStore(store);
+         }
       } catch(Exception ex) {
          throw new ServletException(ex);
-      } finally {
-         try { connection.close(); } catch(Exception eClose) {}
       }
    }
 

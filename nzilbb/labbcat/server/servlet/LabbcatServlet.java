@@ -48,13 +48,13 @@ import org.w3c.dom.*;
 import org.xml.sax.*;
 
 /**
- * Controller that handles
- * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphLabbcatServlet.html">nzilbb.ag.IGraphLabbcatServlet</a>
- * requests.
+ * Base class for other servlets.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class LabbcatServlet extends HttpServlet {
-   // Attributes:
+   
+   // Attributes:   
+   private Vector<SqlGraphStoreAdministration> storeCache = new Vector<SqlGraphStoreAdministration>();
 
    protected String driverName;
    protected String connectionURL;
@@ -111,6 +111,35 @@ public class LabbcatServlet extends HttpServlet {
          log("failed", x);
       } 
    }
+
+   /**
+    * Gets a graph store, creating a new one if required.
+    * @return A connected store.
+    */
+   protected synchronized SqlGraphStoreAdministration getStore(HttpServletRequest request)
+      throws SQLException, PermissionException {
+      Connection connection = newConnection();
+      if (storeCache.size() > 0) {
+         return (SqlGraphStoreAdministration)storeCache.remove(0)
+            .setConnection(connection)
+            .setUser(request.getRemoteUser());
+      } else {
+         return new SqlGraphStoreAdministration(
+            baseUrl(request), connection, request.getRemoteUser());
+      }
+   } // end of getStore()
+
+   /**
+    * Saves a store for later use.
+    * @param store
+    */
+   protected synchronized void cacheStore(SqlGraphStoreAdministration store) {
+      // disconnect database connection
+      try {
+         store.getConnection().close();
+      } catch(SQLException exception) {}
+      storeCache.add(store);
+   } // end of cacheStore()
 
    /**
     * POST handler simply invokes the GET handler. Any functions that can only execute
