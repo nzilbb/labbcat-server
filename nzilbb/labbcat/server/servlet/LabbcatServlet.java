@@ -54,7 +54,6 @@ import org.xml.sax.*;
 public class LabbcatServlet extends HttpServlet {
    
    // Attributes:   
-   private Vector<SqlGraphStoreAdministration> storeCache = new Vector<SqlGraphStoreAdministration>();
 
    protected String driverName;
    protected String connectionURL;
@@ -119,14 +118,8 @@ public class LabbcatServlet extends HttpServlet {
    protected synchronized SqlGraphStoreAdministration getStore(HttpServletRequest request)
       throws SQLException, PermissionException {
       Connection connection = newConnection();
-      if (storeCache.size() > 0) {
-         return (SqlGraphStoreAdministration)storeCache.remove(0)
-            .setConnection(connection)
-            .setUser(request.getRemoteUser());
-      } else {
-         return new SqlGraphStoreAdministration(
-            baseUrl(request), connection, request.getRemoteUser());
-      }
+      return new SqlGraphStoreAdministration(
+         baseUrl(request), connection, request.getRemoteUser());
    } // end of getStore()
 
    /**
@@ -138,7 +131,6 @@ public class LabbcatServlet extends HttpServlet {
       try {
          store.getConnection().close();
       } catch(SQLException exception) {}
-      storeCache.add(store);
    } // end of cacheStore()
 
    /**
