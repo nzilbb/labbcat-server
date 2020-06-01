@@ -399,11 +399,73 @@ public class SqlGraphStore
    public Layer[] getLayers() throws StoreException, PermissionException
    {
       LinkedHashMap<String,Layer> layerLookup = new LinkedHashMap<String,Layer>();
-      for (String layerId : getLayerIds())
+      try
       {
-         Layer layer = getLayer(layerId);
-         layerLookup.put(layerId, layer);
+         PreparedStatement sql = getConnection().prepareStatement(
+            "SELECT layer.*, project.project, parent_layer.short_description AS parent_name"
+            +" FROM layer"
+            +" LEFT OUTER JOIN project ON layer.project_id = project.project_id"
+            +" LEFT OUTER JOIN layer parent_layer ON layer.parent_id = parent_layer.layer_id"
+            +" ORDER BY layer.layer_id");
+         ResultSet rs = sql.executeQuery();
+         try
+         {
+            while (rs.next())
+            {
+               Layer layer = getTemporalLayer(rs);
+               layerLookup.put(layer.getId(), layer);
+            } // next temporal layer
+         }
+         finally
+         {
+            rs.close();
+            sql.close();               
+         }
+         
+         // transcript attributes
+         layerLookup.put("transcript_type", getLayer("transcript_type"));
+         sql = getConnection().prepareStatement(
+            "SELECT * FROM attribute_definition"
+            +" WHERE class_id = 'transcript' ORDER BY display_order");
+         rs = sql.executeQuery();
+         try
+         {
+            while (rs.next())
+            {
+               Layer layer = getTranscriptAttributeLayer(rs);
+               layerLookup.put(layer.getId(), layer);
+            }
+         }
+         finally
+         {
+            rs.close();
+            sql.close();               
+         }
+         
+         // participant attributes
+         sql = getConnection().prepareStatement(
+            "SELECT * FROM attribute_definition"
+            +" WHERE class_id = 'speaker' ORDER BY display_order");
+         rs = sql.executeQuery();
+         try
+         {
+            while (rs.next())
+            {
+               Layer layer = getParticipantAttributeLayer(rs);
+               layerLookup.put(layer.getId(), layer);
+            }
+         }
+         finally
+         {
+            rs.close();
+            sql.close();               
+         }
       }
+      catch(SQLException exception)
+      {
+         throw new StoreException(exception);
+      }
+   
       // set parents
       for (Layer layer : layerLookup.values()) 
       {
@@ -412,9 +474,6 @@ public class SqlGraphStore
       return layerLookup.values().toArray(new Layer[0]);
    }
 
-   /** Schema is only retrieved/built once */
-   protected Schema schema = null;
-  
    /**
     * Gets the layer schema. For performance reasons, this implementation only retrieves/builds
     * the schema once, and always returns a clone of that original object.
@@ -424,56 +483,275 @@ public class SqlGraphStore
     */
    public Schema getSchema() throws StoreException, PermissionException
    {
-      if (schema == null)
+      Schema schema = new Schema();
+      for (Layer layer : getLayers())
       {
-         schema = new Schema();
-         for (String layerId : getLayerIds())
+         schema.addLayer(layer);
+         if (Integer.valueOf(11).equals(layer.get("@layer_id")))
          {
-            Layer layer = getLayer(layerId);
-            schema.addLayer(layer);
-            if (Integer.valueOf(11).equals(layer.get("@layer_id")))
-            {
-               schema.setTurnLayerId(layer.getId());
-            }
-            else if (Integer.valueOf(12).equals(layer.get("@layer_id")))
-            {
-               schema.setUtteranceLayerId(layer.getId());
-            } 
-            else if (Integer.valueOf(0).equals(layer.get("@layer_id")))
-            {
-               schema.setWordLayerId(layer.getId());
-            } 
-            else if (Integer.valueOf(-50).equals(layer.get("@layer_id")))
-            {
-               schema.setEpisodeLayerId(layer.getId());
-            } 
-            else if (Integer.valueOf(-100).equals(layer.get("@layer_id")))
-            {
-               schema.setCorpusLayerId(layer.getId());
-            } 
-         } // next layer
-         schema.setParticipantLayerId("participant");
-      }
-
-      Schema clone = (Schema)schema.clone();
-      for (Layer layer : schema.getLayers().values())
-      {
-         Layer layerCopy = clone.getLayer(layer.getId());
-         if (layerCopy == null) continue;
-         // clone the temporary attributes too
-         for (String key : layer.keySet())
+            schema.setTurnLayerId(layer.getId());
+         }
+         else if (Integer.valueOf(12).equals(layer.get("@layer_id")))
          {
-            if (key.startsWith("@") && layer.get(key) != null)
-            {
-               layerCopy.put(key, layer.get(key));
-            }
-         } // next attribute
+            schema.setUtteranceLayerId(layer.getId());
+         } 
+         else if (Integer.valueOf(0).equals(layer.get("@layer_id")))
+         {
+            schema.setWordLayerId(layer.getId());
+         } 
+         else if (Integer.valueOf(-50).equals(layer.get("@layer_id")))
+         {
+            schema.setEpisodeLayerId(layer.getId());
+         } 
+         else if (Integer.valueOf(-100).equals(layer.get("@layer_id")))
+         {
+            schema.setCorpusLayerId(layer.getId());
+         }
       } // next layer
-
-      return clone;
+      schema.setParticipantLayerId("participant");
+      
+      return schema;
    }
 
+   /**
+    * Gets a layer definition for a temporal layer.
+    * @param rs A row from the <tt>layer</tt> table.
+    * @return The definition of the given layer.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    * @throws SQException If a database retrieval error occurs.
+    */
+   protected Layer getTemporalLayer(ResultSet rs)
+      throws StoreException, PermissionException, SQLException
+   {
+      Layer layer = new Layer();
+      layer.setId(rs.getString("short_description"));
+      layer.setDescription(rs.getString("description"));
+      layer.setAlignment(rs.getInt("alignment"));
+      layer.setParentId(rs.getString("parent_name"));
+      layer.setParentIncludes(rs.getInt("parent_includes") == 1);
+      layer.setPeers(rs.getInt("peers") == 1);
+      layer.setPeersOverlap(rs.getInt("peers_overlap") == 1);
+      layer.setSaturated(rs.getInt("saturated") == 1);
+      
+      if (rs.getString("type").equals("N")
+          || rs.getString("type").equals("number")
+          || rs.getString("type").equals("integer"))
+      {
+         layer.setType(Constants.TYPE_NUMBER);
+      }
+      else if (rs.getString("type").equals("D"))
+      {
+         layer.setType(Constants.TYPE_IPA);
+      }
+      else if (rs.getString("type").equals("boolean"))
+      {
+         layer.setType(Constants.TYPE_BOOLEAN);
+      }
+      else
+      {
+         layer.setType(Constants.TYPE_STRING);
+      }
+      if (rs.getString("project") != null)
+      {
+         layer.setCategory(rs.getString("project"));
+      }
+      
+      // other attributes
+      layer.put("@layer_id", Integer.valueOf(rs.getInt("layer_id")));
+      layer.put("@type", rs.getString("type"));
+      layer.put("@user_id", rs.getString("user_id"));
+      layer.put("@layer_manager_id", rs.getString("layer_manager_id"));
+      layer.put("@extra", rs.getString("extra"));
+      layer.put("@scope", rs.getString("scope"));
+      layer.put("@enabled", rs.getString("enabled"));
+      layer.put("@notes", rs.getString("notes"));
+      layer.put("@project_id", rs.getString("project_id"));
+      layer.put("@data_mime_type", rs.getString("data_mime_type"));
+      layer.put("@alignment", rs.getString("alignment"));
+      layer.put("@style", rs.getString("style"));
+      layer.put("@peers", rs.getString("peers"));
+      
+      if (layer.getId().equals("corpus"))
+      {
+         LinkedHashMap<String,String> corpora = new LinkedHashMap<String,String>();
+         for (String corpus : getCorpusIds())
+         {
+            corpora.put(corpus, corpus);
+         }
+         layer.setValidLabels(corpora);
+      }
+      return layer;
+   }
 
+   /**
+    * Gets a layer definition for a transcript attribute layer.
+    * @param rs A row from the <tt>attribute_definition</tt> table.
+    * @return The definition of the given layer.
+    * @throws SQException If a database retrieval error occurs.
+    */
+   protected Layer getTranscriptAttributeLayer(ResultSet rs)
+      throws SQLException
+   {
+      Layer layer = new Layer();
+      layer.setId("transcript_" + rs.getString("attribute"));
+      layer.setDescription(rs.getString("label"));
+      layer.setAlignment(Constants.ALIGNMENT_NONE);
+      layer.setParentId("graph");
+      layer.setParentIncludes(true);
+      layer.setPeers(rs.getInt("peers") == 1
+                     || rs.getString("style").matches(".*multiple.*"));
+      layer.setPeersOverlap(true);
+      layer.setSaturated(true);
+      
+      if (rs.getString("type").equals("N")
+          || rs.getString("type").equals("number")
+          || rs.getString("type").equals("integer"))
+      {
+         layer.setType(Constants.TYPE_NUMBER);
+      }
+      else if (rs.getString("type").equals("D"))
+      {
+         layer.setType(Constants.TYPE_IPA);
+      }
+      else if (rs.getString("type").equals("boolean"))
+      {
+         layer.setType(Constants.TYPE_BOOLEAN);
+      }
+      else
+      {
+         layer.setType(Constants.TYPE_STRING);
+      }
+      layer.setCategory(rs.getString("category"));
+      
+      // other attributes
+      layer.put("@class_id", rs.getString("class_id"));
+      layer.put("@attribute", rs.getString("attribute"));
+      layer.put("@type", rs.getString("type"));
+      layer.put("@style", rs.getString("style"));
+      layer.put("@peers", rs.getString("peers"));
+      layer.put("@label", rs.getString("label"));
+      layer.put("@description", rs.getString("description"));
+      layer.put("@display_order", rs.getInt("display_order"));
+      layer.put("@searchable", rs.getString("searchable"));
+      layer.put("@access", rs.getString("access"));
+      
+      if (layer.get("@type").equals("select"))
+      {
+         // possible values
+         PreparedStatement sql = getConnection().prepareStatement(
+            "SELECT value, description FROM attribute_option"
+            +" WHERE class_id = 'transcript' AND attribute = ?"
+            +" ORDER BY description");
+         sql.setString(1, layer.get("@attribute").toString());
+         ResultSet rsValues = sql.executeQuery();
+         try
+         {
+            if (rsValues.next())
+            {
+               layer.setValidLabels(new LinkedHashMap<String,String>());
+               do
+               {
+                  layer.getValidLabels().put(
+                     rsValues.getString("value"), rsValues.getString("description"));
+               }	 
+               while (rsValues.next());
+            }
+         }
+         finally
+         {
+            rsValues.close();
+            sql.close();
+         }
+      }
+      
+      return layer;
+   }
+   
+   /**
+    * Gets a layer definition for a participant attribute layer.
+    * @param rs A row from the <tt>attribute_definition</tt> table.
+    * @return The definition of the given layer.
+    * @throws SQException If a database retrieval error occurs.
+    */
+   protected Layer getParticipantAttributeLayer(ResultSet rs)
+      throws SQLException
+   {
+      Layer layer = new Layer();
+      layer.setId("participant_" + rs.getString("attribute"));
+      layer.setDescription(rs.getString("label"));
+      layer.setAlignment(Constants.ALIGNMENT_NONE);
+      layer.setParentId("participant");
+      layer.setParentIncludes(true);
+      layer.setPeers(rs.getInt("peers") == 1
+                     || rs.getString("style").matches(".*multiple.*"));
+      layer.setPeersOverlap(false);
+      layer.setSaturated(true);
+      
+      if (rs.getString("type").equals("N")
+          || rs.getString("type").equals("number")
+          || rs.getString("type").equals("integer"))
+      {
+         layer.setType(Constants.TYPE_NUMBER);
+      }
+      else if (rs.getString("type").equals("D"))
+      {
+         layer.setType(Constants.TYPE_IPA);
+      }
+      else if (rs.getString("type").equals("boolean"))
+      {
+         layer.setType(Constants.TYPE_BOOLEAN);
+      }
+      else
+      {
+         layer.setType(Constants.TYPE_STRING);
+      }
+      layer.setCategory(rs.getString("category"));
+      
+      // other attributes
+      layer.put("@class_id", rs.getString("class_id"));
+      layer.put("@attribute", rs.getString("attribute"));
+      layer.put("@type", rs.getString("type"));
+      layer.put("@style", rs.getString("style"));
+      layer.put("@peers", rs.getString("peers"));
+      layer.put("@label", rs.getString("label"));
+      layer.put("@description", rs.getString("description"));
+      layer.put("@display_order", rs.getInt("display_order"));
+      layer.put("@searchable", rs.getString("searchable"));
+      layer.put("@access", rs.getString("access"));
+      
+      if (layer.get("@type").equals("select"))
+      {
+         // possible values
+         PreparedStatement sql = getConnection().prepareStatement(
+            "SELECT value, description FROM attribute_option"
+            +" WHERE class_id = 'speaker' AND attribute = ?"
+            +" ORDER BY description");
+         sql.setString(1, layer.get("@attribute").toString());
+         ResultSet rsValues = sql.executeQuery();
+         try
+         {
+            if (rsValues.next())
+            {
+               layer.setValidLabels(new LinkedHashMap<String,String>());
+               do
+               {
+                  layer.getValidLabels().put(
+                     rsValues.getString("value"), rsValues.getString("description"));
+               }	 
+               while (rsValues.next());
+            }
+         }
+         finally
+         {
+            rsValues.close();
+            sql.close();
+         }
+      }
+      
+      return layer;
+   }
+   
    /**
     * Gets a layer definition.
     * @param id ID of the layer to get the definition for.
@@ -487,105 +765,56 @@ public class SqlGraphStore
       {
          if (id.equals("transcript_type"))
          { // special case that's not (yet) in the database
-            Layer layer = new Layer(id, "Transcript type", Constants.ALIGNMENT_NONE, false, false, true, "graph", true);
+            Layer layer = new Layer(id, "Transcript type")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("graph")
+               .setParentIncludes(true);
             layer.setValidLabels(new LinkedHashMap<String,String>());
             PreparedStatement sql = getConnection().prepareStatement(
                "SELECT transcript_type FROM transcript_type ORDER BY type_id");
             ResultSet rs = sql.executeQuery();
-            while (rs.next())
+            try
             {
-               layer.getValidLabels().put(rs.getString("transcript_type"), rs.getString("transcript_type"));
-            }	 
-            rs.close();
-            sql.close();
+               while (rs.next())
+               {
+                  layer.getValidLabels().put(rs.getString("transcript_type"), rs.getString("transcript_type"));
+               }
+            }
+            finally
+            {
+               rs.close();
+               sql.close();
+            }
             return layer;
          }
 
-         PreparedStatement sqlParentId = getConnection().prepareStatement(
-            "SELECT short_description FROM layer WHERE layer_id = ?");
          PreparedStatement sql = getConnection().prepareStatement(
-            "SELECT layer.*, project.project"
+            "SELECT layer.*, project.project, parent_layer.short_description AS parent_name"
             +" FROM layer"
             +" LEFT OUTER JOIN project ON layer.project_id = project.project_id"
-            +" WHERE short_description = ?");
+            +" LEFT OUTER JOIN layer parent_layer ON layer.parent_id = parent_layer.layer_id"
+            +" WHERE layer.short_description = ?");
          sql.setString(1, id);
          ResultSet rs = sql.executeQuery();
          if (rs.next())
          {
-            Layer layer = new Layer();
-            layer.setId(rs.getString("short_description"));
-            layer.setDescription(rs.getString("description"));
-            layer.setAlignment(rs.getInt("alignment"));
-            sqlParentId.setInt(1, rs.getInt("parent_id"));
-            ResultSet rsParentId = sqlParentId.executeQuery();
-            if (rsParentId.next())
+            try
             {
-               layer.setParentId(rsParentId.getString("short_description"));
+               return getTemporalLayer(rs);
             }
-            rsParentId.close();
-            layer.setParentIncludes(rs.getInt("parent_includes") == 1);
-            layer.setPeers(rs.getInt("peers") == 1);
-            layer.setPeersOverlap(rs.getInt("peers_overlap") == 1);
-            layer.setSaturated(rs.getInt("saturated") == 1);
-
-            if (rs.getString("type").equals("N")
-                || rs.getString("type").equals("number")
-                || rs.getString("type").equals("integer"))
+            finally
             {
-               layer.setType(Constants.TYPE_NUMBER);
+               rs.close();
+               sql.close();               
             }
-            else if (rs.getString("type").equals("D"))
-            {
-               layer.setType(Constants.TYPE_IPA);
-            }
-            else if (rs.getString("type").equals("boolean"))
-            {
-               layer.setType(Constants.TYPE_BOOLEAN);
-            }
-            else
-            {
-               layer.setType(Constants.TYPE_STRING);
-            }
-            if (rs.getString("project") != null)
-            {
-               layer.setCategory(rs.getString("project"));
-            }
-
-            // other attributes
-            layer.put("@layer_id", Integer.valueOf(rs.getInt("layer_id")));
-            layer.put("@type", rs.getString("type"));
-            layer.put("@user_id", rs.getString("user_id"));
-            layer.put("@layer_manager_id", rs.getString("layer_manager_id"));
-            layer.put("@extra", rs.getString("extra"));
-            layer.put("@scope", rs.getString("scope"));
-            layer.put("@enabled", rs.getString("enabled"));
-            layer.put("@notes", rs.getString("notes"));
-            layer.put("@project_id", rs.getString("project_id"));
-            layer.put("@data_mime_type", rs.getString("data_mime_type"));
-            layer.put("@alignment", rs.getString("alignment"));
-            layer.put("@style", rs.getString("style"));
-            layer.put("@peers", rs.getString("peers"));
-	    
-            rs.close();
-            sql.close();
-            sqlParentId.close();
-            if (layer.getId().equals("corpus"))
-            {
-               LinkedHashMap<String,String> corpora = new LinkedHashMap<String,String>();
-               for (String corpus : getCorpusIds())
-               {
-                  corpora.put(corpus, corpus);
-               }
-               layer.setValidLabels(corpora);
-            }
-
-            return layer;
          }
          else
          {
             rs.close();
             sql.close();
-            sqlParentId.close();
 	    
             // maybe a transcript attribute
             sql = getConnection().prepareStatement(
@@ -595,82 +824,20 @@ public class SqlGraphStore
             rs = sql.executeQuery();
             if (rs.next())
             {
-               Layer layer = new Layer();
-               layer.setId("transcript_" + rs.getString("attribute"));
-               layer.setDescription(rs.getString("label"));
-               layer.setAlignment(Constants.ALIGNMENT_NONE);
-               layer.setParentId("graph");
-               layer.setParentIncludes(true);
-               layer.setPeers(rs.getInt("peers") == 1
-                              || rs.getString("style").matches(".*multiple.*"));
-               layer.setPeersOverlap(true);
-               layer.setSaturated(true);
-	       
-               if (rs.getString("type").equals("N")
-                   || rs.getString("type").equals("number")
-                   || rs.getString("type").equals("integer"))
+               try
                {
-                  layer.setType(Constants.TYPE_NUMBER);
+                  return getTranscriptAttributeLayer(rs);
                }
-               else if (rs.getString("type").equals("D"))
+               finally
                {
-                  layer.setType(Constants.TYPE_IPA);
-               }
-               else if (rs.getString("type").equals("boolean"))
-               {
-                  layer.setType(Constants.TYPE_BOOLEAN);
-               }
-               else
-               {
-                  layer.setType(Constants.TYPE_STRING);
-               }
-               layer.setCategory(rs.getString("category"));
-
-               // other attributes
-               layer.put("@class_id", rs.getString("class_id"));
-               layer.put("@attribute", rs.getString("attribute"));
-               layer.put("@type", rs.getString("type"));
-               layer.put("@style", rs.getString("style"));
-               layer.put("@peers", rs.getString("peers"));
-               layer.put("@label", rs.getString("label"));
-               layer.put("@description", rs.getString("description"));
-               layer.put("@display_order", rs.getInt("display_order"));
-               layer.put("@searchable", rs.getString("searchable"));
-               layer.put("@access", rs.getString("access"));
-	    
-               rs.close();
-               sql.close();
-               sqlParentId.close();
-
-               if (layer.get("@type").equals("select"))
-               {
-                  // possible values
-                  sql = getConnection().prepareStatement(
-                     "SELECT value, description FROM attribute_option"
-                     +" WHERE class_id = 'transcript' AND attribute = ?"
-                     +" ORDER BY description");
-                  sql.setString(1, layer.get("@attribute").toString());
-                  rs = sql.executeQuery();
-                  if (rs.next())
-                  {
-                     layer.setValidLabels(new LinkedHashMap<String,String>());
-                     do
-                     {
-                        layer.getValidLabels().put(rs.getString("value"), rs.getString("description"));
-                     }	 
-                     while (rs.next());
-                  }
                   rs.close();
-                  sql.close();
+                  sql.close();               
                }
-	       
-               return layer;
             }
             else
             {
                rs.close();
                sql.close();
-               sqlParentId.close();
 	       
                // maybe a participant attribute
                sql = getConnection().prepareStatement(
@@ -680,76 +847,15 @@ public class SqlGraphStore
                rs = sql.executeQuery();
                if (rs.next())
                {
-                  Layer layer = new Layer();
-                  layer.setId("participant_" + rs.getString("attribute"));
-                  layer.setDescription(rs.getString("label"));
-                  layer.setAlignment(Constants.ALIGNMENT_NONE);
-                  layer.setParentId("participant");
-                  layer.setParentIncludes(true);
-                  layer.setPeers(rs.getInt("peers") == 1
-                                 || rs.getString("style").matches(".*multiple.*"));
-                  layer.setPeersOverlap(false);
-                  layer.setSaturated(true);
-		  
-                  if (rs.getString("type").equals("N")
-                      || rs.getString("type").equals("number")
-                      || rs.getString("type").equals("integer"))
+                  try
                   {
-                     layer.setType(Constants.TYPE_NUMBER);
+                     return getParticipantAttributeLayer(rs);
                   }
-                  else if (rs.getString("type").equals("D"))
+                  finally
                   {
-                     layer.setType(Constants.TYPE_IPA);
-                  }
-                  else if (rs.getString("type").equals("boolean"))
-                  {
-                     layer.setType(Constants.TYPE_BOOLEAN);
-                  }
-                  else
-                  {
-                     layer.setType(Constants.TYPE_STRING);
-                  }
-                  layer.setCategory(rs.getString("category"));
-
-                  // other attributes
-                  layer.put("@class_id", rs.getString("class_id"));
-                  layer.put("@attribute", rs.getString("attribute"));
-                  layer.put("@type", rs.getString("type"));
-                  layer.put("@style", rs.getString("style"));
-                  layer.put("@peers", rs.getString("peers"));
-                  layer.put("@label", rs.getString("label"));
-                  layer.put("@description", rs.getString("description"));
-                  layer.put("@display_order", rs.getInt("display_order"));
-                  layer.put("@searchable", rs.getString("searchable"));
-                  layer.put("@access", rs.getString("access"));
-		  
-                  rs.close();
-                  sql.close();
-                  sqlParentId.close();
-
-                  if (layer.get("@type").equals("select"))
-                  {
-                     // possible values
-                     sql = getConnection().prepareStatement(
-                        "SELECT value, description FROM attribute_option"
-                        +" WHERE class_id = 'speaker' AND attribute = ?"
-                        +" ORDER BY description");
-                     sql.setString(1, layer.get("@attribute").toString());
-                     rs = sql.executeQuery();
-                     if (rs.next())
-                     {
-                        layer.setValidLabels(new LinkedHashMap<String,String>());
-                        do
-                        {
-                           layer.getValidLabels().put(rs.getString("value"), rs.getString("description"));
-                        }	 
-                        while (rs.next());
-                     }
                      rs.close();
-                     sql.close();
+                     sql.close();               
                   }
-		  
-                  return layer;
                }
                else
                {
