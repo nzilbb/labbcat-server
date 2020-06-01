@@ -474,6 +474,8 @@ public class SqlGraphStore
       return layerLookup.values().toArray(new Layer[0]);
    }
 
+   private Schema schema = null;
+
    /**
     * Gets the layer schema. For performance reasons, this implementation only retrieves/builds
     * the schema once, and always returns a clone of that original object.
@@ -483,33 +485,35 @@ public class SqlGraphStore
     */
    public Schema getSchema() throws StoreException, PermissionException
    {
-      Schema schema = new Schema();
-      for (Layer layer : getLayers())
+      if (schema == null)
       {
-         schema.addLayer(layer);
-         if (Integer.valueOf(11).equals(layer.get("@layer_id")))
+         schema = new Schema();
+         for (Layer layer : getLayers())
          {
-            schema.setTurnLayerId(layer.getId());
-         }
-         else if (Integer.valueOf(12).equals(layer.get("@layer_id")))
-         {
-            schema.setUtteranceLayerId(layer.getId());
-         } 
-         else if (Integer.valueOf(0).equals(layer.get("@layer_id")))
-         {
-            schema.setWordLayerId(layer.getId());
-         } 
-         else if (Integer.valueOf(-50).equals(layer.get("@layer_id")))
-         {
-            schema.setEpisodeLayerId(layer.getId());
-         } 
-         else if (Integer.valueOf(-100).equals(layer.get("@layer_id")))
-         {
-            schema.setCorpusLayerId(layer.getId());
-         }
-      } // next layer
-      schema.setParticipantLayerId("participant");
-      
+            schema.addLayer(layer);
+            if (Integer.valueOf(11).equals(layer.get("@layer_id")))
+            {
+               schema.setTurnLayerId(layer.getId());
+            }
+            else if (Integer.valueOf(12).equals(layer.get("@layer_id")))
+            {
+               schema.setUtteranceLayerId(layer.getId());
+            } 
+            else if (Integer.valueOf(0).equals(layer.get("@layer_id")))
+            {
+               schema.setWordLayerId(layer.getId());
+            } 
+            else if (Integer.valueOf(-50).equals(layer.get("@layer_id")))
+            {
+               schema.setEpisodeLayerId(layer.getId());
+            } 
+            else if (Integer.valueOf(-100).equals(layer.get("@layer_id")))
+            {
+               schema.setCorpusLayerId(layer.getId());
+            }
+         } // next layer
+         schema.setParticipantLayerId("participant");
+      }
       return schema;
    }
 
