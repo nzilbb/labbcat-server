@@ -219,8 +219,18 @@ public class AnnotationAgqlToSql {
                      "CONCAT('e"+scope+"_"+layer.get("@layer_id")+"_', annotation.annotation_id)");
                } else { // other.id
                   if (ctx.other.myMethodCall() == null) {
-                     errors.add("Invalid construction, only my('layer').id is supported: "
-                                + ctx.getText());
+                     // it might be parent.id...
+                     if (ctx.other.parentExpression() != null) {
+                        Layer parentLayer = schema.getLayer(layer.getParentId());
+                        String parentScope = ((String)parentLayer.get("@scope")).toLowerCase();
+                        if (parentScope.equals(SqlConstants.SCOPE_FREEFORM)) parentScope = "";
+                        conditions.push(
+                           "CONCAT('e"+parentScope+"_"+parentLayer.get("@layer_id")+"_',"
+                           +" annotation.parent_id)");
+                     } else {                     
+                        errors.add("Invalid construction, only my('layer').id is supported: "
+                                   + ctx.getText());
+                     }
                   } else {
                      String layerId = unquote(
                         ctx.other.myMethodCall().layer.quotedString.getText());

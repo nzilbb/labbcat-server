@@ -119,17 +119,17 @@ public class TestAnnotationAgqlToSql {
       
          (Layer)(new Layer("orthography", "Orthography").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(false)
-                 .setParentId("word").setParentIncludes(true))
+                 .setParentId("transcript").setParentIncludes(true))
          .with("@layer_id", 2).with("@scope", "W"),
       
          (Layer)(new Layer("segments", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
-                 .setParentId("word").setParentIncludes(true))
+                 .setParentId("transcript").setParentIncludes(true))
          .with("@layer_id", 1).with("@scope", "S"),
       
          (Layer)(new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true)
-                 .setParentId("word").setParentIncludes(true))
+                 .setParentId("transcript").setParentIncludes(true))
          .with("@layer_id", 23).with("@scope", "W"))
 
          .setEpisodeLayerId("episode")
@@ -213,6 +213,35 @@ public class TestAnnotationAgqlToSql {
                    +" AND 'orthography' = 'orthography'"
                    +" ORDER BY graph.transcript_id, parent_id, annotation_id LIMIT 1,1",
                    q.sql);
+   }
+
+   @Test public void parentId() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query q = transformer.sqlFor(
+         "layer.id == 'orthography' AND parent.id = 'ew_0_123'",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("SQL - layer.id ==",
+                   "SELECT DISTINCT annotation.*,"
+                   +" 'orthography' AS layer"
+                   +" FROM annotation_layer_2 annotation"
+                   +" WHERE 'orthography' = 'orthography'"
+                   +" AND CONCAT('ew_0_', annotation.parent_id) = 'ew_0_123'"
+                   +" ORDER BY ag_id, parent_id, annotation_id",
+                   q.sql);
+      
+      q = transformer.sqlFor(
+         "layerId == 'orthography' && parentId = 'ew_0_123'",
+         "DISTINCT annotation.*, graph.transcript_id AS graph", null, "LIMIT 1,1");
+      assertEquals("SQL - layer.id ==",
+                   "SELECT DISTINCT annotation.*, graph.transcript_id AS graph,"
+                   +" 'orthography' AS layer"
+                   +" FROM annotation_layer_2 annotation"
+                   +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+                   +" WHERE 'orthography' = 'orthography'"
+                   +" AND CONCAT('ew_0_', annotation.parent_id) = 'ew_0_123'"
+                   +" ORDER BY graph.transcript_id, parent_id, annotation_id"
+                   +" LIMIT 1,1",
+                   q.sql);      
    }
 
    @Test public void emptyExpression() throws AGQLException {
