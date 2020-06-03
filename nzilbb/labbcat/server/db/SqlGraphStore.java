@@ -144,6 +144,43 @@ public class SqlGraphStore
     * @param newConnection Database connection.
     */
    public SqlGraphStore setConnection(Connection newConnection) { connection = newConnection; return this; }
+   
+   /**
+    * Whether transcript-access permissions are specified (i.e. there are rows in role_permission).
+    * @see #getPermissionsSpecified()
+    * @see #setPermissionsSpecified(Boolean)
+    */
+   protected Boolean permissionsSpecified;
+   /**
+    * Getter for {@link #permissionsSpecified}: Whether transcript-access permissions are
+    * specified (i.e. there are rows in role_permission). 
+    * @return Whether transcript-access permissions are specified (i.e. there are rows in
+    * role_permission). 
+    */
+   public Boolean getPermissionsSpecified() {
+      if (permissionsSpecified == null && connection != null)
+      {
+         try
+         {
+            PreparedStatement sql = getConnection().prepareStatement(
+               "SELECT COUNT(*) FROM role_permission");
+            ResultSet rs = sql.executeQuery();
+            try
+            {
+               rs.next();
+               permissionsSpecified = rs.getInt(1) > 0;
+            }
+            finally
+            {
+               rs.close();
+               sql.close();
+            }
+         }
+         catch(Exception exception)
+         {}
+      }
+      return permissionsSpecified;
+   }
 
    /**
     * Whether to disconnect the connection when garbage collected.
@@ -886,7 +923,7 @@ public class SqlGraphStore
       {
          PreparedStatement sql = getConnection().prepareStatement(
             "SELECT corpus_name FROM corpus ORDER BY corpus_name");
-         if (getUser() != null && !getUserRoles().contains("admin"))
+         if (getUser() != null && !getUserRoles().contains("admin") && getPermissionsSpecified())
          {
             PreparedStatement sqlValuePattern = getConnection().prepareStatement(
                "SELECT value_pattern"
@@ -1172,10 +1209,11 @@ public class SqlGraphStore
     */
    private String userWhereClauseGraph(boolean prefixWithAnd, String transcriptTableAlias)
    {
-      if (getUser() != null && !getUserRoles().contains("admin"))
-      { // TODO if (SELECT COUNT(*) FROM role_permission) == 0, don't bother
+      if (getUser() != null && !getUserRoles().contains("admin") && getPermissionsSpecified())
+      {
          return (prefixWithAnd?" AND":" WHERE")
-            +" (EXISTS (SELECT * FROM role"
+            +" (("+transcriptTableAlias+".create_user = '"+esc(getUser())+"')"
+            +" OR EXISTS (SELECT * FROM role"
             + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
             + " INNER JOIN annotation_transcript access_attribute" 
             + " ON access_attribute.layer = role_permission.attribute_name" 
@@ -1188,12 +1226,10 @@ public class SqlGraphStore
             + " AND role_permission.attribute_name = 'corpus'" 
             + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
             + " WHERE "+transcriptTableAlias+".corpus_name REGEXP role_permission.value_pattern"
-            + " AND user_id = '"+esc(getUser())+"')"
-            +" OR NOT EXISTS (SELECT * FROM role_permission)) "; // permissions are being used in general
+            + " AND user_id = '"+esc(getUser())+"')) ";
       }
       return "";
    } // end of userWhereClauseGraph()
-
 
    /**
     * Returns an SQL WHERE clauser for restricting access by userID, if the user is set.
@@ -1211,6 +1247,12 @@ public class SqlGraphStore
          // insert links to speaker table
          userWhereClauseSpeaker = userWhereClause
             .replace(
+               "(transcript.create_user = ",
+               "EXISTS (SELECT * FROM transcript"
+               + " INNER JOIN transcript_speaker ON transcript.ag_id = transcript_speaker.ag_id"
+               + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+               + " AND transcript.create_user = ")
+            .replace(
                " WHERE user_id",
                " INNER JOIN transcript_speaker ON access_attribute.ag_id = transcript_speaker.ag_id"
                + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
@@ -1223,11 +1265,11 @@ public class SqlGraphStore
                + " WHERE transcript_speaker.speaker_number = speaker.speaker_number"
                + " AND transcript.corpus_name")
             .replace(
-               "FROM role_permission)",
-               "FROM role_permission)"
+               "))",
+               ")"
                // include those with no transcripts too
                + " OR NOT EXISTS (SELECT * FROM transcript_speaker"
-               + " WHERE transcript_speaker.speaker_number = speaker.speaker_number)");
+               + " WHERE transcript_speaker.speaker_number = speaker.speaker_number))");
       }
       return userWhereClauseSpeaker;
    } // end of userWhereClauseParticipant()
@@ -4242,9 +4284,11 @@ public class SqlGraphStore
          {
             // create the graph, to generate the ag_id
             PreparedStatement sql = getConnection().prepareStatement(
-               "INSERT INTO transcript (transcript_id, offset_units) VALUES (?,?)");
+               "INSERT INTO transcript (transcript_id, offset_units, create_user, create_date)"
+               +" VALUES (?,?,?,Now())");
             sql.setString(1, graph.getId());
             sql.setString(2, graph.getOffsetUnits());
+            sql.setString(3, user);
             sql.executeUpdate();
             sql.close();
             sql = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
