@@ -2229,15 +2229,15 @@ public class SqlGraphStore
                  && layer.getParent().getParentId() != null
                  && layer.getParent().getParentId().equals(schema.getWordLayerId()))) // segment child
          { // table has word_annotation_id
-            String select = "DISTINCT annotation.*, ? AS layer, graph.transcript_id AS graph";
+            String select = "DISTINCT annotation.*, '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph";
             if (limit.equals("COUNT(*)"))
             {
-               select = "COUNT(*), ? AS layer";
+               select = "COUNT(*), '"+esc(layerId)+"' AS layer";
                limit = "";
             }
             
             sSql = "SELECT " + select
-               +" FROM annotation_layer_? annotation"
+               +" FROM annotation_layer_"+layer.get("@layer_id")+" annotation"
                +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                +" WHERE word_annotation_id = " + word_annotation_id
                + userWhereClauseGraph(true, "graph")
@@ -2250,10 +2250,10 @@ public class SqlGraphStore
                +" annotation.label, annotation.label_status,"
                +" annotation.annotated_by, annotation.annotated_when,"
                +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-               +" ? AS layer, graph.transcript_id AS graph";
+               +" '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph";
             if (limit.equals("COUNT(*)"))
             {
-               select = "COUNT(*), ? AS layer";
+               select = "COUNT(*), '"+esc(layerId)+"' AS layer";
                limit = "";
             }
             
@@ -2262,7 +2262,7 @@ public class SqlGraphStore
                +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                +" INNER JOIN annotation_layer_0 word ON word.ag_id = graph.ag_id"
                +" WHERE word.annotation_id = " + word_annotation_id
-               +" AND layer = ?"
+               +" AND layer = '"+esc(""+layer.get("@attribute"))+"'"
                + userWhereClauseGraph(true, "graph")
                +" ORDER BY annotation_id"
                + " " + limit;
@@ -2273,10 +2273,10 @@ public class SqlGraphStore
                +" annotation.label, annotation.label_status,"
                +" annotation.annotated_by, annotation.annotated_when,"
                +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-               +" ? AS layer, NULL AS graph";
+               +" '"+esc(layerId)+"' AS layer, NULL AS graph";
             if (limit.equals("COUNT(*)"))
             {
-               select = "COUNT(*), ? AS layer";
+               select = "COUNT(*), '"+esc(layerId)+"' AS layer";
                limit = "";
             }
             
@@ -2285,12 +2285,46 @@ public class SqlGraphStore
                +" INNER JOIN annotation_layer_11 turn ON turn.annotation_id = word.turn_annotation_id"
                +" INNER JOIN annotation_participant annotation ON turn.label = annotation.speaker_number"
                +" WHERE word.annotation_id = " + word_annotation_id
-               +" AND layer = ?"
+               +" AND layer = '"+esc(""+layer.get("@attribute"))+"'"
                + userWhereClauseGraph(true, "graph")
                +" ORDER BY annotation_id"
                + " " + limit;
          } // participant attribute
-      } // optimization for common word_annotation_id-nased queries may be possible 
+         else if (layer.getParentId().equals(schema.getRoot().getId())
+                  && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
+         { // freeform layer
+            String select =
+               "DISTINCT annotation.*, '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph,"
+               // these required because they're in the order clause:
+               +" start.offset, end.offset, parent_id, annotation_id";
+            String order = " ORDER BY start.offset, end.offset DESC, parent_id, annotation_id";
+            if (limit.equals("COUNT(*)"))
+            {
+               select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+               limit = "";
+               order = "";
+            }
+            
+            sSql = "SELECT " + select
+               +" FROM annotation_layer_"+layer.get("@layer_id")+" annotation"
+               +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+               +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+               +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+               +" WHERE " + word_annotation_id + " IN"
+               +" (SELECT word.annotation_id"
+               +" FROM annotation_layer_0 word"
+               +" INNER JOIN anchor word_start"
+               +" ON word.start_anchor_id = word_start.anchor_id"
+               +" INNER JOIN anchor word_end"
+               +" ON word.end_anchor_id = word_end.anchor_id"
+               +" WHERE word.ag_id = annotation.ag_id"
+               +" AND word_start.offset <= end.offset"
+               +" AND start.offset <= word_end.offset)"
+               + userWhereClauseGraph(true, "graph")
+               + order
+               + " " + limit;
+         } // freeform layer
+      } // optimization for common word_annotation_id-based queries may be possible 
 
       Pattern transcriptAttributeQueryPattern = Pattern.compile(
          "graph\\.id ==? '(.+)' (AND|&&) layer\\.id ==? '(transcript_[^']+)'");
