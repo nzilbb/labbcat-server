@@ -158,6 +158,7 @@ public class SerializeGraphs extends LabbcatServlet {
                
                IO.Pump(stream.getStream(), response.getOutputStream());
             } else { /// multiple files
+               response.setContentType("application/zip");
                response.addHeader(
                   "Content-Disposition", "attachment; filename=" + IO.SafeFileNameUrl(name) + ".zip");
                
