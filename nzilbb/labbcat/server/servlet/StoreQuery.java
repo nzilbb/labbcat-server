@@ -51,7 +51,7 @@ import org.xml.sax.*;
  * requests.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet({"/api/store/*", "/store/*"} )
+@WebServlet({"/api/store/*"} )
 public class StoreQuery extends LabbcatServlet {
    
    // Attributes:
@@ -93,7 +93,7 @@ public class StoreQuery extends LabbcatServlet {
          response.setStatus(HttpServletResponse.SC_FORBIDDEN);
          json = failureResult(x);
       } catch (StoreException x) {
-         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
          json = failureResult(x);
       } catch (SQLException x) {
          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
