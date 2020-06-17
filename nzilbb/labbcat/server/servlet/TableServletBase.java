@@ -31,6 +31,7 @@ import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Types;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -89,26 +90,50 @@ public class TableServletBase extends LabbcatServlet {
     * generates the new key itself) */
    protected String autoKeyQuery = null;
 
-   /** A query used to check each row to determine if it can be deleted.
+   /** 
+    * A query used to check each row to determine if there's a reason it can't be deleted.
     * <var>deleteQuery</var> should be a query that
     * <ul>
     *  <li> Accepts all the specified fields as parameters </li>
-    *  <li> Returns a single numeric column, which is 0 when the row can be deleted. </li>
+    *  <li> Returns a numeric column, which is 0 when the row can be deleted. </li>
+    *  <li> Optionally returns a second column for informational purposes. </li>
     * </ul>
     * e.g. <code>
-    * new DeleteCheck("SELECT COUNT(*) FROM transcript WHERE corpus_name = ?",
-    *                 "Could not delete - transcripts exist for this corpus.")
+    * new DeleteCheck("SELECT COUNT(*), MIN(transcript_id) FROM transcript WHERE corpus_name = ?",
+    *                 "corpus_name",
+    *                 "{0} {0,choice,1#transcript|1&lt;transcripts} use this corpus, e.g. {1}")
     * </code>
     */
    class DeleteCheck {
       String query;
       List<String> fields;
-      String error;
-      public DeleteCheck(String query, List<String> fields, String error) {
+      String reason;
+      public DeleteCheck(String query, String field, String reason) {
+         this(query, new Vector<String>(){{ add(field); }}, reason);
+      }
+      public DeleteCheck(String query, List<String> fields, String reason) {
          this.query = query;
          this.fields = fields;
-         this.error = error;
+         this.reason = reason;
       }
+      
+      /**
+       * Formats the reason by including the returned count if included in the error.
+       * @param rs
+       * @return The formatted message.
+       */
+      public String formatReason(ResultSet rs) {
+         if (!reason.contains("{")) return reason;
+         MessageFormat format = new MessageFormat(reason);
+         try {
+            Object[] args = {
+               rs.getLong(1), // the number returned
+               reason.contains("{1")?rs.getString(2):null }; // the optional second column
+            return format.format(args);
+         } catch (Throwable anything) {
+            return reason;
+         }
+      } // end of formatMessage()
    }
 
    /** An ordered list of key field names */
@@ -375,33 +400,56 @@ public class TableServletBase extends LabbcatServlet {
                }                           
             } // no null
          } // next column
-         boolean canDelete = true;
-         if (deleteChecks != null) { // need to run delete checks
-            for (DeleteCheck check : deleteChecks) {
-               // TODO prepare delete checks once instead of once for every row
-               PreparedStatement sqlCheck = connection.prepareStatement(check.query);
-               // set parameter values
-               int p = 1;
-               for (String field : check.fields) {
-                  sqlCheck.setString(p++, rs.getString(field));
-               } // next field
-               ResultSet rsCheck = sqlCheck.executeQuery();
-               try {
-                  if (rsCheck.next() && rsCheck.getLong(1) != 0) {
-                     canDelete = false;
-                  }
-               } finally {
-                  rsCheck.close();
-                  sqlCheck.close();
-               }
-            } // next check
-         } // need to run delete checks
-         jsonOut.key("_canDelete").value(canDelete);
+         String cantDelete = checkCanDelete(rs, null, connection);
+         if (cantDelete != null) jsonOut.key("_cantDelete").value(cantDelete);
       } finally {
          jsonOut.endObject();
       }
       return true;
    } // end of outputRow()
+   
+   /**
+    * Checks whether the given row can be deleted, and returns a reason if not.
+    * @param rs The ResultSet with the row values, or null if <var>json</var> should be
+    * used to determine field values.
+    * @param json An object with row values, or null if <var>rs</var> should be used to
+    * determine field values. If a reason is found, a side-effect is that this object has
+    * a new attribute named <q>_cantDelete</q> with the reason as the value.
+    * @param connection A connection to the database for running any necessary check queries.
+    * @return The reason, if the row can't be deleted, or null if it is deletable.
+    */
+   protected String checkCanDelete(ResultSet rs, JSONObject json, Connection connection)
+      throws SQLException{
+      if (deleteChecks != null) { // need to run delete checks
+         for (DeleteCheck check : deleteChecks) {
+            PreparedStatement sqlCheck = connection.prepareStatement(check.query);
+            // set parameter values
+            int p = 1;
+            if (rs != null) {
+               for (String field : check.fields) {
+                  sqlCheck.setString(p++, rs.getString(field));
+               } // next field
+            } else {
+               for (String field : check.fields) {
+                  sqlCheck.setString(p++, json.getString(field));
+               } // next field
+            }
+            ResultSet rsCheck = sqlCheck.executeQuery();
+            try {
+               if (rsCheck.next() && rsCheck.getLong(1) != 0) {
+                  String reason = check.formatReason(rsCheck);
+                  if (json != null) json.put("_cantDelete", reason);
+                  return reason;
+               }
+            } finally {
+               rsCheck.close();
+               sqlCheck.close();
+            }
+         } // next check
+      } // need to run delete checks
+      // got this far, no reason not to delete
+      return null;
+   } // end of checkCanDelete()
    
    /**
     * Outputs a single row as JSON.
@@ -565,7 +613,9 @@ public class TableServletBase extends LabbcatServlet {
                               sqlLastId.close();
                            }
                         }
-                  
+                        
+                        checkCanDelete(null, json, connection);
+   
                         // record added, so return it
                         successResult(json, "Record added.")
                            .write(response.getWriter());
@@ -670,6 +720,8 @@ public class TableServletBase extends LabbcatServlet {
                            .write(response.getWriter());
                      } else {
                   
+                        checkCanDelete(null, json, connection);
+
                         // record update, so return it
                         successResult(json, "Record updated.")
                            .write(response.getWriter());
@@ -811,7 +863,7 @@ public class TableServletBase extends LabbcatServlet {
                         try {
                            if (rsCheck.next() && rsCheck.getLong(1) != 0) {
                               response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                              failureResult(check.error)
+                              failureResult(check.formatReason(rsCheck))
                                  .write(response.getWriter());
                               return;
                            }

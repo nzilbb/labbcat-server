@@ -51,12 +51,18 @@ public class AdminCorpora extends TableServletBase {
       autoKey = "corpus_id";
       autoKeyQuery = "SELECT COALESCE(max(corpus_id) + 1, 1) FROM corpus";
       deleteChecks = new Vector<DeleteCheck>() {{
-            add(new DeleteCheck("SELECT COUNT(*) FROM transcript WHERE corpus_name = ?",
-                                new Vector<String>() {{ add("corpus_name"); }},
-                                "There are still transcripts using this corpus"));
-            add(new DeleteCheck("SELECT count(*) FROM speaker_corpus WHERE corpus_id = ?",
-                                new Vector<String>() {{ add("corpus_id"); }},
-                                "There are still participants using this corpus"));
+            add(new DeleteCheck(
+                   "SELECT COUNT(*), MIN(transcript_id) FROM transcript WHERE corpus_name = ?",
+                   "corpus_name",
+                   "{0,choice,1#There is still a transcript using this corpus: {1}"
+                   +"|1<There are still {0} transcripts using this corpus, including {1}}"));
+            add(new DeleteCheck(
+                   "SELECT COUNT(*), MIN(speaker.name) FROM speaker_corpus"
+                   +" INNER JOIN speaker ON speaker_corpus.speaker_number = speaker.speaker_number"
+                   +" WHERE speaker_corpus.corpus_id = ?",
+                   "corpus_id",
+                   "{0,choice,1#There is still a participant using this corpus: {1}"
+                   +"|1<There are still {0} participants using this corpus, including {1}}"));
          }};
    }
 
