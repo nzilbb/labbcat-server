@@ -183,6 +183,38 @@ public class LabbcatServlet extends HttpServlet {
    } // end of baseUrl()
    
    /**
+    * Determines whether the request can continue. If the servlet is annotated with {@link
+    * RequiredRole}, whether the user is in that role.
+    * <p> If this method returns false, a side-effect is that response.setStatus() has been
+    * called with an appropriate status code.
+    * @param request The request for identifying the user.
+    * @param response The response for possibly setting the status.
+    * @param db A connected database connection.
+    * @return true if the request is allowed, false otherwise.
+    * @throws SQLException If a database error occurs.
+    */
+   protected boolean hasAccess(HttpServletRequest request, HttpServletResponse response, Connection db)
+      throws ServletException, IOException {
+      RequiredRole requiredRole = getClass().getAnnotation(RequiredRole.class);
+      if (requiredRole != null) {
+         try {
+            if (!isUserInRole(requiredRole.value(), request, db)) {
+               response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+               return false;
+            } else {
+               return true;
+            }
+         } catch(SQLException exception) {
+            log("hasAccess: ERROR: " + exception);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return false;
+         }
+      } else { // no particular role required
+         return true;
+      }
+   }
+
+   /**
     * Determines whether the logged-in user is in the given role.
     * <p> Side effects:
     * <ul>
