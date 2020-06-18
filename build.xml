@@ -35,7 +35,7 @@
     <javac srcdir="${src}" destdir="${build}"
 	   includes="${srcfiles}"
 	   excludes="${testsrcfiles} **/package-info.java"
-	   classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/nzilbb.ag.jar"
+	   classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar"
 	   listfiles="yes"
 	   target="${config.classversion}"
 	   source="${config.classversion}"
@@ -66,7 +66,7 @@
   <target name="javadoc" depends="init,dist"
           description="Document the source" >
     <javadoc destdir="${javadoc}"
-             classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/nzilbb.ag.jar"
+             classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar"
              packagenames="nzilbb.labbcat.server.servlet nzilbb.labbcat.server.db"
              access="public"
 	     Author="yes"
@@ -83,7 +83,7 @@
   <target name="test" depends="dist" description="Run nzilbb.labbcat.server unit tests">
     <javac srcdir="${src}" destdir="."
 	   includes="${testsrcfiles}"
-	   classpath=".;${config.junitjar};${dist}/${ant.project.name}.jar;${lib}/nzilbb.ag.jar;${lib}/antlr-runtime-4.7.2.jar"
+	   classpath=".;${config.junitjar};${dist}/${ant.project.name}.jar;${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar;${lib}/antlr-runtime-4.7.2.jar"
 	   listfiles="yes"
 	   target="8"
 	   source="8"
@@ -97,7 +97,7 @@
 	fork="true"
 	>
       <classpath>
-	<pathelement path=".;${dist}/${ant.project.name}.jar;${config.junitjar};${lib}/nzilbb.ag.jar;${lib}/antlr-runtime-4.7.2.jar"/>
+	<pathelement path=".;${dist}/${ant.project.name}.jar;${config.junitjar};${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar;${lib}/antlr-runtime-4.7.2.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
@@ -105,6 +105,17 @@
         <fileset dir="${src}" includes="${testsrcfiles}"/>
       </batchtest>
     </junit>
+  </target>
+
+  <target name="user-interface"
+          description="Build the user-interface app">
+    <exec executable="ng"
+          dir="user-interface"
+          failonerror="true">
+      <arg value="build"/>
+      <arg value="--prod"/>
+      <arg value="--outputPath=${config.local-labbcat-path}/js/user-interface"/>
+    </exec>
   </target>
 
   <target name="clean"

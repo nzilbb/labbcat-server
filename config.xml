@@ -3,4 +3,5 @@
   <tomcatgroup>tomcat</tomcatgroup>
   <junitjar>/usr/share/java/junit4.jar</junitjar>
   <classversion>8</classversion>
+  <local-labbcat-path>/var/lib/tomcat9/webapps/labbcat</local-labbcat-path>
 </config>

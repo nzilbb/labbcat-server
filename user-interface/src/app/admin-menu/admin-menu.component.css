@@ -1,0 +1,23 @@
+
+ul {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding-left: 0px;
+    width: 100%;
+    margin-top: 0px;
+}
+li {
+    padding: 5px;    
+    flex-grow: 1;
+    text-align: center;
+}
+li a {
+    text-decoration: none;
+    display: block;
+}
+/* Layout on wider screens - 3 columns */
+@media all and (min-width: 640px) {
+    ul { flex-direction: column; }
+    li { text-align: left; }
+}

@@ -1,0 +1,12 @@
+<header>
+  <h1 *ngIf="!production">{{ title }}</h1>
+  <app-messages></app-messages>
+</header>
+<div id="main">
+  <nav><app-admin-menu></app-admin-menu></nav>
+  <article>
+    <router-outlet></router-outlet>
+  </article>
+  <aside><!-- user info --></aside>
+</div>
+<footer *ngIf="!production"><a [routerLink]="['/about']">Copyright &copy; 2020 NZILBB</a></footer>

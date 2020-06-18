@@ -1,0 +1,32 @@
+<h2>Corpora</h2>
+<div class="list corpus-list">
+  <app-wait *ngIf="!rows"></app-wait>
+  <div class="item" *ngFor="let corpus of rows">
+    <span class="corpus-name" title="Name"><legend>Name</legend>
+      {{corpus.corpus_name}}</span>
+    <span class="corpus-language" title="Language"><legend>Language</legend>
+      <input #language
+             type="text"
+             [(ngModel)]="corpus.corpus_language"
+             (input)="onChange(corpus)"
+             placeholder="Language">
+    </span>
+    <span class="corpus-description" title="Description"><legend>Description</legend>
+      <textarea #description
+             [(ngModel)]="corpus.corpus_description"
+             (input)="onChange(corpus)"
+             placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <button *ngIf="!corpus._cantDelete"
+              (click)="deleteRow(corpus);"
+              title="Delete this corpus">➖</button>
+    </span>
+
+  </div>
+</div>
+<div class="buttons">
+  <button (click)="updateChangedRows();"
+          *ngIf="changed"
+          title="Save all changed corpora">💾</button>
+</div>

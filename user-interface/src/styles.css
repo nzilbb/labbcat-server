@@ -1,0 +1,120 @@
+/* TODO once the classic UI is totally replaced, remove the app-root... selectors below */
+
+/* general look and feel */
+h1 { font-size: 17pt; color: black; }
+h2 { font-size: 16pt; color: black; }
+h3 { font-size: 15pt; color: #859044; font-style:italic; }
+h4 { font-size: 14pt; color: #859044; }
+h5 { font-size: 13pt; color: #859044; }
+h6 { font-size: 12pt; color: #859044; }
+
+app-admin-menu a { color: #859044; }
+app-admin-menu li {
+    border-bottom: 1px solid #859044;
+    border-right: 1px solid #859044;
+    white-space: nowrap;
+}
+app-admin-menu li:first-child { border-left: 1px solid #859044; }
+
+app-root footer { color: #859044; }
+app-root footer a { color: #859044; text-decoration: none; }
+
+/* Layout */
+app-root, #main { display: flex; flex-direction: column; }
+app-root article, app-root nav, app-root aside { order: 0; }
+app-root article { flex: 3 1 60%; min-height: 100px; }
+app-root nav { flex: 1 6 20%; }
+app-root aside { flex: 1 6 10%; min-height: 100px; }
+app-root header, app-root footer { min-height: 50px; }
+/* Layout on wider screens - 3 columns */
+@media all and (min-width: 640px) {
+    #main { flex-direction: row; }
+    article { order: 2; }
+    nav { order: 1; }
+    aside { order: 3; }
+    header, footer { min-height: 100px; }
+}
+app-root article {
+    margin: 4px;
+    padding: 5px;
+}
+
+app-root header {
+    text-align: center;
+}
+app-root footer {
+    text-align: center;
+    font-size: 10pt;
+}
+
+div.messages div.error { color: red; font-weight: bold; }
+.message { color: black; }
+
+app-wait {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+/* lists of things */
+
+.list {
+    width: 100%;
+}
+
+.list .item {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+.list .header {
+    font-weight: bold;
+}
+.list .item:not(:first-child) {
+    border-top: 1px dashed silver;
+}
+.list .item span {
+    display: block;
+    vertical-align: top;
+    padding-left: 10px;
+    white-space: nowrap;
+}
+.list > .item > span > legend {
+    font-size: 10pt;
+}
+.list > .item > span.number {
+    text-align: right;
+}
+.list > .item > span.center {
+    text-align: center;
+}
+.list .item .buttons button {
+    margin-left: 5px;
+}
+.list .item span:first-child {
+    padding-left: 5px;
+}
+.list .item span input {
+    width: 90%;
+}
+.list .item .display-order input{
+    width: 40px;
+}
+.list > .item > label { display: none; }
+
+.list + div.buttons { min-height: 30px; }
+
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    app-root nav { min-height: 100px; max-width: 120px; }
+    app-root aside { max-width: 120px; }
+    app-admin-menu li:first-child { border-top: 1px solid #859044; border-left: none; }
+    .list { display: table; }
+    .list .item {
+        display: table-row;
+        padding-bottom: 0px;
+    }
+    .list .item span { display: table-cell; }
+    .list > .item > span > legend { display: none; }
+    .list > .item > label { display: block; }
+}
