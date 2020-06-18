@@ -165,6 +165,8 @@ public class TableServletBase extends LabbcatServlet {
       this.read = read;
       this.update = update;
       this.delete = delete;
+
+      this.title = this.table;
    }
    
    /** 
@@ -193,6 +195,8 @@ public class TableServletBase extends LabbcatServlet {
       this.read = read;
       this.update = update;
       this.delete = delete;
+
+      this.title = this.table;
    }
    
    /**
@@ -310,8 +314,11 @@ public class TableServletBase extends LabbcatServlet {
                   JSONWriter jsonOut = csv
                      ?null:
                      new JSONWriter(response.getWriter());
-                  if (jsonOut != null && (keyValues == null || partialKey)) {
-                     jsonOut.array(); // all rows, start an array
+                  if (jsonOut != null) {
+                     startResult(jsonOut);
+                     if (keyValues == null || partialKey) {
+                        jsonOut.array(); // all rows, start an array
+                     }
                   }
                   int rowCount = 0;
                   try {
@@ -339,6 +346,9 @@ public class TableServletBase extends LabbcatServlet {
                      
                      rs.close();
                      sql.close();
+                  }
+                  if (jsonOut != null) {
+                     endSuccessResult(jsonOut, null);
                   }
                } catch(SQLException exception) {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -431,7 +441,7 @@ public class TableServletBase extends LabbcatServlet {
                } // next field
             } else {
                for (String field : check.fields) {
-                  sqlCheck.setString(p++, json.getString(field));
+                  sqlCheck.setString(p++, ""+json.get(field));
                } // next field
             }
             ResultSet rsCheck = sqlCheck.executeQuery();
@@ -580,14 +590,16 @@ public class TableServletBase extends LabbcatServlet {
                            }
                         }
                      } else {
-                        String value = json.getString(column);
+                        String value = ""+json.get(column);
+                        if (json.isNull(column)) value = null;
                         sql.setString(c++, value); 
                         key.append("/");
                         key.append(value);
                      }
                   } // next key
                   for (String column : columns) {
-                     String value = json.getString(column);
+                     String value = ""+json.get(column);
+                     if (json.isNull(column)) value = null;
                      sql.setString(c++, value);
                   } // next column
                   try {
@@ -702,12 +714,13 @@ public class TableServletBase extends LabbcatServlet {
                      JSONObject json = new JSONObject(reader);
                      int c = 1;
                      StringBuffer key = new StringBuffer();
-                     for (String column : columns) {
-                        String value = json.getString(column);
+                     for (String column : columns) {                           
+                        String value = ""+json.get(column);
+                        if (json.isNull(column)) value = null;
                         sql.setString(c++, value);
                      } // next column
                      for (String column : keys) {
-                        String value = json.getString(column);
+                        String value = ""+json.get(column);
                         if (key.length() > 0) key.append("/");
                         key.append(value);
                         sql.setString(c++, value); 
@@ -719,8 +732,12 @@ public class TableServletBase extends LabbcatServlet {
                         failureResult("Record not found: " + key)
                            .write(response.getWriter());
                      } else {
-                  
+
+                        // set _cantDelete flag?
                         checkCanDelete(null, json, connection);
+
+                        // unset _changed flag
+                        json.remove("_changed");
 
                         // record update, so return it
                         successResult(json, "Record updated.")
@@ -821,7 +838,9 @@ public class TableServletBase extends LabbcatServlet {
                         } // field
                         checkFieldValuesQuery.append(" FROM ");
                         checkFieldValuesQuery.append(table);
+                        checkFieldValuesQuery.append(" WHERE ");
                         checkFieldValuesQuery.append(where);
+                        log("DELETE " + request.getPathInfo() + " check values : " + checkFieldValuesQuery.toString()); // TODO remove
                         PreparedStatement sql = connection.prepareStatement(
                            checkFieldValuesQuery.toString());
                         int c = 1;
@@ -830,7 +849,7 @@ public class TableServletBase extends LabbcatServlet {
                         } // next key
                         ResultSet rs = sql.executeQuery();
                         try {
-                           if (rs.next()) {
+                           if (!rs.next()) {
                               response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                               failureResult("Could not query for delete-check values")
                                  .write(response.getWriter());
@@ -853,6 +872,7 @@ public class TableServletBase extends LabbcatServlet {
                      
                      // now that we've got the field values, run each check
                      for (DeleteCheck check : deleteChecks) {
+                        log("DELETE " + request.getPathInfo() + " check query : " + check.query); // TODO remove
                         PreparedStatement sqlCheck = connection.prepareStatement(check.query);
                         // set parameter values
                         int p = 1;
@@ -887,7 +907,10 @@ public class TableServletBase extends LabbcatServlet {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                         failureResult("Record doesn't exist: " + request.getPathInfo())
                            .write(response.getWriter());
-                     } 
+                     } else {
+                        successResult(null, "Record deleted")
+                           .write(response.getWriter());
+                     }
                
                   } finally {
                      sql.close();

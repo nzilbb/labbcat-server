@@ -308,6 +308,55 @@ public class LabbcatServlet extends HttpServlet {
    } // end of successResult()
 
    /**
+    * Start writing a standard JSON result, including the model key.
+    * <p> The caller should write the model object next, and then call 
+    * {@link #endSuccessResult(JSONWriter,String} or {@link #endFailureResult(JSONWriter,String)} 
+    * @param writer The object to write to.
+    * @return The given writer.
+    */
+   protected JSONWriter startResult(JSONWriter writer) {
+      writer.object();
+      writer.key("title").value(title);
+      writer.key("version").value(version);
+      writer.key("model");
+      return writer;
+   } // end of successResult()
+   
+   /**
+    * Finish writing a standard JSON success result that was started with 
+    * {@link #startResult(JSONWriter)}
+    * @param writer The object to write to.
+    * @param message An optional message
+    * @return The given writer.
+    */
+   protected JSONWriter endSuccessResult(JSONWriter writer, String message) {
+      writer.key("messages").array();
+      if (message != null) writer.value(message);
+      writer.endArray();
+      writer.key("code").value(0); // TODO deprecate?
+      writer.key("errors").array().endArray();
+      writer.endObject();
+      return writer;
+   } // end of successResult()
+   
+   /**
+    * Finish writing a standard JSON failure result that was started with 
+    * {@link #startResult(JSONWriter)}
+    * @param writer The object to write to.
+    * @param message An error message
+    * @return The given writer.
+    */
+   protected JSONWriter endFailureResult(JSONWriter writer, String message) {
+      writer.key("errors").array();
+      if (message != null) writer.value(message);
+      writer.endArray();
+      writer.key("code").value(1); // TODO deprecate?
+      writer.key("messages").array().endArray();
+      writer.endObject();
+      return writer;
+   } // end of successResult()
+   
+   /**
     * Creates a JSON object representing a failure result.
     * @param messages The error messages to return.
     * @return An object for returning as the request result.
