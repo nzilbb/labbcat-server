@@ -24,8 +24,8 @@
       {{corpus.corpus_name}}</span>
     <span class="corpus-language" title="Language"><legend>Language</legend>
       <select #language
-             type="text"
-             [(ngModel)]="corpus.corpus_language"
+              type="text"
+              [(ngModel)]="corpus.corpus_language"
               (input)="onChange(corpus)">
         <option *ngFor="let language of languages" value="{{language.label}}">{{language.description}}</option>
       </select>
@@ -38,7 +38,7 @@
     </span>
     <span class="buttons">
       <a title="Information about this corpus"
-         href="../corpus?corpus_id={{corpus.corpus_id}}">🛈</a>
+         href="corpus?corpus_id={{corpus.corpus_id}}">🛈</a>
       <button disabled="{{corpus._cantDelete}}"
               (click)="deleteRow(corpus);"
               title="{{corpus._cantDelete||'Delete '+corpus.corpus_name}}">➖</button>
