@@ -94,11 +94,8 @@ app-wait {
 .list .item span:first-child {
     padding-left: 5px;
 }
-.list .item span input {
+.list .item span input, .list .item span select, .list .item span textarea {
     width: 90%;
-}
-.list .item .display-order input{
-    width: 40px;
 }
 .list > .item > label { display: none; }
 
@@ -117,4 +114,5 @@ app-wait {
     .list .item span { display: table-cell; }
     .list > .item > span > legend { display: none; }
     .list > .item > label { display: block; }
+    .buttons { text-align: right; }
 }

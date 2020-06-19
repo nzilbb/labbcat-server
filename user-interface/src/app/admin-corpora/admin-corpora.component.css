@@ -1,0 +1,6 @@
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    .corpus-description {
+        width: 50%;
+    }
+}
