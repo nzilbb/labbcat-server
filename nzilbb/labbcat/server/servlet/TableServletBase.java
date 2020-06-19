@@ -596,9 +596,11 @@ public class TableServletBase extends LabbcatServlet {
                                  // put it into the INSERT statement
                                  log("POST db " + c + " = " + value); // TODO remove
                                  sql.setString(c++, value);
-                                 // add it to the key (for error reporting)
-                                 key.append("/");
-                                 key.append(value);
+                                 if (dbKeys == urlKeys) {
+                                    // add it to the key (for error reporting)
+                                    key.append("/");
+                                    key.append(value);
+                                 }
                                  // add it to the JSON object, for returning to the caller
                                  json.put(column, value);
                               }
@@ -611,8 +613,11 @@ public class TableServletBase extends LabbcatServlet {
                         String value = ""+json.get(column);
                         if (json.isNull(column)) value = null;
                         sql.setString(c++, value); 
-                        key.append("/");
-                        key.append(value);
+                        if (dbKeys == urlKeys) {
+                           // add it to the key (for error reporting)
+                           key.append("/");
+                           key.append(value);
+                        }
                      }
                   } // next key
                   if (dbKeys != urlKeys) {
@@ -620,6 +625,9 @@ public class TableServletBase extends LabbcatServlet {
                         String value = ""+json.get(column);
                         if (json.isNull(column)) value = null;
                         sql.setString(c++, value);
+                        // add it to the key (for error reporting)
+                        key.append("/");
+                        key.append(value);
                      } // next column
                   }
                   for (String column : columns) {
@@ -631,7 +639,7 @@ public class TableServletBase extends LabbcatServlet {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_CONFLICT);
-                        failureResult("Record not added: " + key)
+                        failureResult("Record not added: " + key.substring(1))
                            .write(response.getWriter());
                      } else {
 
@@ -664,7 +672,7 @@ public class TableServletBase extends LabbcatServlet {
                } catch(SQLIntegrityConstraintViolationException exception) {
                   // row is already there
                   response.setStatus(HttpServletResponse.SC_CONFLICT);
-                  failureResult("Row already exists: " + key)
+                  failureResult("Row already exists: " + key.substring(1))
                      .write(response.getWriter());
                } catch(SQLException exception) {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
