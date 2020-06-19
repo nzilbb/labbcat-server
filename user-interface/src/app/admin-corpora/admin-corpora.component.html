@@ -5,11 +5,12 @@
     <span class="corpus-name" title="Name"><legend>Name</legend>
       {{corpus.corpus_name}}</span>
     <span class="corpus-language" title="Language"><legend>Language</legend>
-      <input #language
+      <select #language
              type="text"
              [(ngModel)]="corpus.corpus_language"
-             (input)="onChange(corpus)"
-             placeholder="Language">
+              (input)="onChange(corpus)">
+        <option *ngFor="let language of languages" value="{{language.label}}">{{language.description}}</option>
+      </select>
     </span>
     <span class="corpus-description" title="Description"><legend>Description</legend>
       <textarea #description
@@ -18,9 +19,9 @@
              placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <button *ngIf="!corpus._cantDelete"
+      <button disabled="{{corpus._cantDelete}}"
               (click)="deleteRow(corpus);"
-              title="Delete this corpus">➖</button>
+              title="{{corpus._cantDelete||'Delete '+corpus.corpus_name}}">➖</button>
     </span>
 
   </div>
