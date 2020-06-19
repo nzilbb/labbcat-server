@@ -38,13 +38,29 @@ export class AdminCorporaComponent implements OnInit {
         this.labbcatService.labbcat.getLayer("transcript_language", (layer, errors, messages) => {
             this.languages = [];
             for (let label in layer.validLabels) {
-                this.languages.push({ label: label, description: layer.validLabels[label]});
+                if (label) {
+                    this.languages.push({
+                        label: label,
+                        description: layer.validLabels[label]});
+                }
             }
         });
     }
 
     onChange(row: Corpus) {
         row._changed = this.changed = true;        
+    }
+    
+    createRow(name: string, language: string, description: string) {
+        this.labbcatService.labbcat.createCorpus(
+            name, language, description,
+            (row, errors, messages) => {
+                if (errors) for (let message of errors) this.messageService.error(message);
+                for (let message of messages) this.messageService.info(message);
+                // update the model with the field returned
+                if (row) this.rows.push(row as Corpus);
+                this.updateChangedFlag();
+            });
     }
     
     deleteRow(row: Corpus) {

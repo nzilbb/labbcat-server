@@ -1,5 +1,23 @@
 <h2>Corpora</h2>
 <div class="list corpus-list">
+  <div class="item add-new">
+    <span class="corpus-name" title="Name"><legend>Name</legend>
+      <input #name type="text" required placeholder="Name"></span>
+    <span class="corpus-language" title="Language"><legend>Language</legend>
+      <select #language type="text">
+        <option value="{{languages[0].label}}">Language</option>
+        <option *ngFor="let language of languages" value="{{language.label}}">{{language.description}}</option>
+      </select>
+    </span>
+    <span class="corpus-description" title="Description"><legend>Description</legend>
+      <textarea #description placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <button (click)="name.reportValidity() && createRow(name.value, language.value, description.value); name.value = description.value = ''; language.selectedIndex = 0;"
+              title="Add new record">➕</button>
+    </span>
+  </div>
+  
   <app-wait *ngIf="!rows"></app-wait>
   <div class="item" *ngFor="let corpus of rows">
     <span class="corpus-name" title="Name"><legend>Name</legend>
