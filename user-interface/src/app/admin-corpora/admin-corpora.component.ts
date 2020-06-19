@@ -49,7 +49,7 @@ export class AdminCorporaComponent implements OnInit {
     
     deleteRow(row: Corpus) {
         if (confirm(`Are you sure you want to delete ${row.corpus_name}`)) {
-            this.labbcatService.labbcat.deleteCorpus(row.corpus_id, (model, errors, messages) => {
+            this.labbcatService.labbcat.deleteCorpus(row.corpus_name, (model, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
                 for (let message of messages) this.messageService.info(message);
                 if (!errors) {
@@ -68,14 +68,14 @@ export class AdminCorporaComponent implements OnInit {
 
     updateRow(row: Corpus) {
         this.labbcatService.labbcat.updateCorpus(
-            row.corpus_id, row.corpus_name, row.corpus_language, row.corpus_description,
+            row.corpus_name, row.corpus_language, row.corpus_description,
             (corpus, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
                 for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
                 const updatedRow = corpus as Corpus;
                 const i = this.rows.findIndex(r => {
-                    return r.corpus_id == updatedRow.corpus_id; })
+                    return r.corpus_name == updatedRow.corpus_name; })
                 this.rows[i] = updatedRow;
                 this.updateChangedFlag();
             });
