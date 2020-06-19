@@ -114,7 +114,7 @@
           failonerror="true">
       <arg value="build"/>
       <arg value="--prod"/>
-      <arg value="--outputPath=${config.local-labbcat-path}/js/user-interface"/>
+      <arg value="--outputPath=${config.local-labbcat-path}/user-interface"/>
     </exec>
   </target>
 
