@@ -25,7 +25,8 @@ import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
 
 /**
- * Servlet that allows adminsitration of rows in the the corpus table.
+ * Servlet that allows administration of rows in the the <em> corpus </em> table.
+ * <p> See <a href="package-summary.html#/api/admin/corpora">API summary</a> for more details.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet(urlPatterns = "/api/admin/corpora/*", loadOnStartup = 20)

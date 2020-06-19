@@ -83,8 +83,8 @@ public class SerializeGraphs extends LabbcatServlet {
    // Servlet methods
    
    /**
-    * The GET method for the servlet - this expects an array of 
-    * graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
+    * The GET method for the servlet.
+    * <p> This expects an array of graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
     * a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
     * <p><b>Input HTTP parameters</b>:
     * <ul>
@@ -96,13 +96,13 @@ public class SerializeGraphs extends LabbcatServlet {
     * <br><b>Output</b>: A each of the transcript fragments 
     * specified by the input parameters converted to the given 
     * format.  
-    * This may be a single file or multiple files, depending on
+    * <p> This may be a single file or multiple files, depending on
     * the converter behaviour and how many fragments are specified.
     * If there is only one, the file in returned as the response to 
     * the request.  If there are more than one, the response is a
     * zipfile containing the output files. 
-    * @param req HTTP request
-    * @param res HTTP response
+    * @param request HTTP request
+    * @param response HTTP response
     */
    @Override
    public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -219,11 +219,12 @@ public class SerializeGraphs extends LabbcatServlet {
    
    /**
     * Converts the given utterances to the given format.
-    * @param id IDs of graphs to convert.
+    * @param ids IDs of graphs to convert.
     * @param layers A list of layer names.
     * @param sMimeType
     * @param store
-    * @return A Stream containing the fragments - could be a single stream with the fragments, of the given MIME type, or a ZIP file containing individual files.
+    * @return A Stream containing the fragments - could be a single stream with the
+    * fragments, of the given MIME type, or a ZIP file containing individual files. 
     * @throws Exception
     */
    public Vector<NamedStream> serializeGraphs(String name, String[] ids, Collection<String> layers, String sMimeType, SqlGraphStoreAdministration store)

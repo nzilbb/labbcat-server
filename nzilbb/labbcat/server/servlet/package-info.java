@@ -21,7 +21,7 @@
 //
 /**
  * <p>All LaBB-CAT request for which the the <q>Accept</q> HTTP header is set to
- * <q>application/json</q> return a JSON response with the same structure:
+ * <q>application/json</q> return a JSON response with the same standard envelope structure:
  * <dl>
  *  <dt>title</dt> <dd>(string) The title of the LaBB-CAT instance.</dd>
  *  <dt>version</dt> <dd>(string) The version of the LaBB-CAT instance</dd>
@@ -58,16 +58,14 @@
 <!-- Based on IGraphStoreQuery javadoc -->
 <section role="region">
   <ul class="blockList">
-    <li class="blockList"><a id="method.detail">
-        <!--   -->
-      </a>
+    <li class="blockList">
       <h3>/api/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStoreQuery.html">nzilbb.ag.IGraphStoreQuery</a> functions:</h3>
       <a id="getId()">
         <!--   -->
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getId</h4>
+          <h4>/api/store/getId</h4>
           <div class="block">Gets the store's ID.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -80,7 +78,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getLayerIds</h4>
+          <h4>/api/store/getLayerIds</h4>
           <div class="block">Gets a list of layer IDs (annotation 'types').</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -93,7 +91,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getLayers</h4>
+          <h4>/api/store/getLayers</h4>
           <div class="block">Gets a list of layer definitions.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -106,7 +104,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getSchema</h4>
+          <h4>/api/store/getSchema</h4>
           <div class="block">Gets the layer schema.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -119,7 +117,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getLayer</h4>
+          <h4>/api/store/getLayer</h4>
           <div class="block">Gets a layer definition.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -134,7 +132,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getCorpusIds</h4>
+          <h4>/api/store/getCorpusIds</h4>
           <div class="block">Gets a list of corpus IDs.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -147,7 +145,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getParticipantIds</h4>
+          <h4>/api/store/getParticipantIds</h4>
           <div class="block">Gets a list of participant IDs.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -160,7 +158,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getParticipant</h4>
+          <h4>/api/store/getParticipant</h4>
           <div class="block">Gets the participant record specified by the given identifier.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -176,7 +174,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/countMatchingParticipantIds</h4>
+          <h4>/api/store/countMatchingParticipantIds</h4>
           <div class="block">Counts the number of participants that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -204,7 +202,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getMatchingParticipantIds</h4>
+          <h4>/api/store/getMatchingParticipantIds</h4>
           <div class="block">Gets a list of IDs of participants that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -234,7 +232,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getTranscriptIds</h4>
+          <h4>/api/store/getTranscriptIds</h4>
           <div class="block">Gets a list of transcript IDs.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -247,7 +245,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getTranscriptIdsInCorpus</h4>
+          <h4>/api/store/getTranscriptIdsInCorpus</h4>
           <div class="block">Gets a list of transcript IDs in the given corpus.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -262,7 +260,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getTranscriptIdsWithParticipant</h4>
+          <h4>/api/store/getTranscriptIdsWithParticipant</h4>
           <div class="block">Gets a list of IDs of transcripts that include the given participant.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -277,7 +275,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/countMatchingTranscriptIds</h4>
+          <h4>/api/store/countMatchingTranscriptIds</h4>
           <div class="block">Counts the number of transcripts that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -310,7 +308,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getMatchingTranscriptIds</h4>
+          <h4>/api/store/getMatchingTranscriptIds</h4>
           <div class="block"><p>Gets a list of IDs of transcripts that match a particular pattern.</p>
             <p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
               can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
@@ -351,7 +349,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/countMatchingAnnotations</h4>
+          <h4>/api/store/countMatchingAnnotations</h4>
           <div class="block">Counts the number of annotations that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -376,7 +374,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getMatchingAnnotations</h4>
+          <h4>/api/store/getMatchingAnnotations</h4>
           <div class="block">Gets a list of annotations that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -404,7 +402,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/countAnnotations</h4>
+          <h4>/api/store/countAnnotations</h4>
           <div class="block">Gets the number of annotations on the given layer of the given transcript.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -420,7 +418,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getAnnotations</h4>
+          <h4>/api/store/getAnnotations</h4>
           <div class="block">Gets the annotations on the given layer of the given transcript.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -438,7 +436,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getAnchors</h4>
+          <h4>/api/store/getAnchors</h4>
           <div class="block">Gets the given anchors in the given transcript.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -454,7 +452,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getTranscript</h4>
+          <h4>/api/store/getTranscript</h4>
           <div class="block">Gets a transcript given its ID, containing only the given layers.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -470,7 +468,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getMediaTracks</h4>
+          <h4>/api/store/getMediaTracks</h4>
           <div class="block">List the predefined media tracks available for transcripts.</div>
           <dl>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -483,7 +481,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getAvailableMedia</h4>
+          <h4>/api/store/getAvailableMedia</h4>
           <div class="block">List the media available for the given transcript.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -498,7 +496,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getMedia</h4>
+          <h4>/api/store/getMedia</h4>
           <div class="block">Gets a given media track for a given transcript.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -521,7 +519,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>countMatchingAnnotations</h4>
+          <h4>/api/store/countMatchingAnnotations</h4>
           <div class="block">Counts the number of annotations that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -546,7 +544,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/store/getMatchingAnnotations</h4>
+          <h4>/api/store/getMatchingAnnotations</h4>
           <div class="block">Gets a list of annotations that match a particular pattern.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -574,7 +572,7 @@
       </a>
       <ul class="blockListLast">
         <li class="blockList">
-          <h4>/store/getEpisodeDocuments</h4>
+          <h4>/api/store/getEpisodeDocuments</h4>
           <div class="block">Get a list of documents associated with the episode of the given transcript.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -592,16 +590,14 @@
 
 <section role="region">
   <ul class="blockList">
-    <li class="blockList"><a id="method.detail">
-        <!--   -->
-      </a>
-      <h3>/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
+    <li class="blockList">
+      <h3>/api/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
       <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
         <!--   -->
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/edit/store/createAnnotation</h4>
+          <h4>/api/edit/store/createAnnotation</h4>
           <div class="block">Creates an annotation starting at <var>from</var> and ending at <var>to</var>.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -622,7 +618,7 @@
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/edit/store/destroyAnnotation</h4>
+          <h4>/api/edit/store/destroyAnnotation</h4>
           <div class="block">Destroys the annotation with the given ID.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -636,7 +632,7 @@
       </a>
       <ul class="blockListLast">
         <li class="blockList">
-          <h4>/edit/store/deleteTranscript</h4>
+          <h4>/api/edit/store/deleteTranscript</h4>
           <pre class="methodSignature">void&nbsp;deleteTranscript&#8203;(String&nbsp;id)
             throws <a href="StoreException.html" title="class in nzilbb.ag">StoreException</a>,
             <a href="PermissionException.html" title="class in nzilbb.ag">PermissionException</a>,
@@ -651,6 +647,120 @@
     </li>
   </ul>
 </section>
+ * 
+ * <section role="region"><ul class="blockList"><li class="blockList">
+ * <h3>Other functions include:</h3><ul class="blockList">
+ * 
+ * <li class="blockList"><h4 id="/api/admin/corpora">/api/admin/corpora[/<var>corpus_id</var>]</h4>
+ *  <div> Allows administration (Create/Read/Update/Delete) of corpora records via
+ *  JSON-encoded objects with the following attributes:
+ *   <ul>
+ *    <li> <q> corpus_id </q> : The database key for the record. </li>
+ *    <li> <q> corpus_name </q> : The name of the corpus. </li>
+ *    <li> <q> corpus_language </q> : The ISO 639-1 code for the default language. </li>
+ *    <li> <q> corpus_description </q> : The description of the corpus. </li>
+ *    <li> <q> _cantDelete </q> : This is not a database field, but rather is present in
+ *         records returned from the server that can not currently be deleted; 
+ *         a string representing the reason the record can't be deleted. </li>
+ *   </ul>
+ *  The following operations, specified by the HTTP method, are supported:
+ *   <ul>
+ *    <li><b> POST </b>
+ *    - Create a new record.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the new record
+ *       (excluding <var>corpus_id</var>). </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the new record (including <var>corpus_id</var>). </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully created. </li>
+ *         <li><em> 409 </em> : The record could not be added because it was already there. </li> 
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ * 
+ *    <li><b> GET </b>
+ *    - Read the records. 
+ *     <ul>
+ *      <li><em> Parameters </em>
+ *        <ul>
+ *         <li><em> p </em> (integer) : The page to return. </li>
+ *         <li><em> l </em> (integer) : How many rows per page (default is 20). </li>
+ *         <li><em> Accept </em> (string) : Equivalent of the "Accept" request header (see below). </li>
+ *        </ul>
+ *      </li>
+ *      <li><em> "Accept" request header/parameter </em> "text/csv" to return records as
+ *       Comma Separated Values. If not specified, records are returned as a JSON-encoded
+ *       array of objects.</li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as a
+ *       corresponding list of records.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The records could be listed. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *    
+ *    <li><b> PUT </b>
+ *    - Update an existing record, specified by the <var> corpus_id </var> given in the
+ *    request body.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the record. </li> 
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully updated. </li>
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *    
+ *    <li><b> DELETE </b>
+ *    - Delete an existing record.
+ *     <ul>
+ *      <li><em> Request Path </em> - /api/admin/corpora/<var>corpus_id</var> where 
+ *          <var> corpus_id </var> is the database ID of the record to delete.</li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, including a message if
+ *          the request succeeds or an error explaining the reason for failure. </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully deleted. </li>
+ *         <li><em> 400 </em> : No <var> corpus_id </var> was specified in the URL path,
+ *             or the record exists but could not be deleted. </li> 
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *   </ul>
+ *  </div>
+ * </li>
+ * 
+ * <li class="blockList"><h4 id="/api/serialize/graphs">/api/serialize/graphs</h4>
+ *  <div> Converts transcript fragments. The request method can be <b> GET </b> or <b> POST </b>
+ *  <p> This expects an array of graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
+ *  a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
+ *   <dl>
+ *     <dt><span class="paramLabel">Parameters:</span></dt>
+ *     <dd><code>mimeType</code> - Content-type of the format to serialize to.</dd>
+ *     <dd><code>layerId</code> - A list of layer IDs to include in the serialization.</dd>
+ *     <dd><code>id</code> - One or more graph IDs.</dd>
+ *     <dd><code>name</code> - Content-type of the format to serialize to.</dd>
+ *     <dd><code>mimeType</code> - Optional name of the collection.</dd>
+ *   </dl>
+ *  <p><b>Output</b>: A each of the transcript fragments 
+ *  specified by the input parameters converted to the given 
+ *  format.  
+ *  <p> This may be a single file or multiple files, depending on
+ *  the converter behaviour and how many fragments are specified.
+ *  If there is only one, the file in returned as the response to 
+ *  the request.  If there are more than one, the response is a
+ *  zipfile containing the output files. </li>
+ *  </div>
+ * </li>
+ * 
+ * </ul></li></ul></section>
  *
  */
 package nzilbb.labbcat.server.servlet;

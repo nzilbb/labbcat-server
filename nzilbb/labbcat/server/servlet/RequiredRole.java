@@ -24,7 +24,7 @@ package nzilbb.labbcat.server.servlet;
 import java.lang.annotation.*;
 
 /**
- * Annotation for a {@link ServletBase} subclass which defines the user role required to
+ * Annotation for a {@link LabbcatServlet} subclass which defines the user role required to
  * make requests to the servlet.
  * @author Robert Fromont robert@fromont.net.nz
  */
