@@ -56,8 +56,11 @@ public class TableServletBase extends LabbcatServlet {
    /** The name of the data table */
    protected String table;
 
-   /** An ordered list of key field names */
-   protected List<String> keys;
+   /** An ordered list of database key field names */
+   protected List<String> dbKeys;
+
+   /** An ordered list of URL path field names */
+   protected List<String> urlKeys;
 
    /** An ordered list of non-key fields */
    protected List<String> columns;
@@ -142,7 +145,7 @@ public class TableServletBase extends LabbcatServlet {
    /** 
     * Constructor from attributes.
     * @param table The name of the data table.
-    * @param keys An ordered list of key field names.
+    * @param dbKeys An ordered list of key field names.
     * @param columns An ordered list of non-key fields, for single-item and full-list requests.
     * @param whereClause WHERE condition.
     * @param orderClause ORDER clause.
@@ -152,27 +155,41 @@ public class TableServletBase extends LabbcatServlet {
     * @param delete Whether Delete operations are allowed via DELETE.
     */
    protected TableServletBase(
-      String table, List<String> keys, List<String> columns,
+      String table, List<String> dbKeys, List<String> columns,
       String whereClause, String orderClause,
       boolean create, boolean read, boolean update, boolean delete) {      
-      this.table = table;
-      this.keys = keys;
-      this.columns = columns;
-      this.listColumns = columns;
-      this.whereClause = whereClause;
-      this.orderClause = orderClause;
-      this.create = create;
-      this.read = read;
-      this.update = update;
-      this.delete = delete;
-
-      this.title = this.table;
+      this(table, dbKeys, dbKeys, columns,
+           columns, whereClause, orderClause,
+           create, read, update, delete);
    }
    
    /** 
     * Constructor from attributes.
     * @param table The name of the data table.
-    * @param keys An ordered list of key field names.
+    * @param dbKeys An ordered list of primary key field names.
+    * @param urlKeys An ordered list of key field names used to identify a record on the URL path.
+    * @param columns An ordered list of non-key fields, for single-item and full-list requests.
+    * @param whereClause WHERE condition.
+    * @param orderClause ORDER clause.
+    * @param create Whether Create operations are allowed via POST.
+    * @param read Whether Read operations are allowed via GET.
+    * @param update Whether Update operations are allowed via PUT.
+    * @param delete Whether Delete operations are allowed via DELETE.
+    */
+   protected TableServletBase(
+      String table, List<String> dbKeys, List<String> urlKeys, List<String> columns,
+      String whereClause, String orderClause,
+      boolean create, boolean read, boolean update, boolean delete) {      
+      this(table, dbKeys, urlKeys, columns,
+           columns, whereClause, orderClause,
+           create, read, update, delete);
+   }   
+   
+   /** 
+    * Constructor from attributes.
+    * @param table The name of the data table.
+    * @param dbKeys An ordered list of database key field names.
+    * @param urlKeys An ordered list of key field names used to identify a record on the URL path.
     * @param columns An ordered list of non-key fields.
     * @param whereClause WHERE condition.
     * @param orderClause ORDER clause.
@@ -182,11 +199,13 @@ public class TableServletBase extends LabbcatServlet {
     * @param delete Whether Delete operations are allowed via DELETE.
     */
    protected TableServletBase(
-      String table, List<String> keys, List<String> columns, List<String> listColumns,
+      String table, List<String> dbKeys, List<String> urlKeys, List<String> columns,
+      List<String> listColumns,
       String whereClause, String orderClause,
       boolean create, boolean read, boolean update, boolean delete) {      
       this.table = table;
-      this.keys = keys;
+      this.dbKeys = dbKeys;
+      this.urlKeys = urlKeys;
       this.columns = columns;
       this.listColumns = listColumns;
       this.whereClause = whereClause;
@@ -230,7 +249,7 @@ public class TableServletBase extends LabbcatServlet {
                   if (request.getPathInfo() != null && !request.getPathInfo().equals("/")) {
                      keyValues = request.getPathInfo().substring(1).split("/");
                   }
-                  boolean partialKey = keyValues != null && keyValues.length < keys.size();
+                  boolean partialKey = keyValues != null && keyValues.length < urlKeys.size();
                   if (csv) {
                      String name = table;
                      if (keyValues != null) {
@@ -241,20 +260,17 @@ public class TableServletBase extends LabbcatServlet {
                   
                   // return a list of rows
                   StringBuilder query = new StringBuilder();
-                  Vector<String> allColumns = new Vector<String>(keys);
+                  Vector<String> allColumns = new Vector<String>(dbKeys);
+                  if (dbKeys != urlKeys) allColumns.addAll(urlKeys);
                   if (keyValues != null) {
                      allColumns.addAll(columns);
                   } else { // full list
                      allColumns.addAll(listColumns);
                   }
                   for (String column : allColumns) {
-                     if (query.length() == 0) {
-                        query.append("SELECT ");
-                     } else {
-                        query.append(", ");
-                     }
+                     query.append(query.length() == 0?"SELECT ":", ");
                      query.append(column);
-                  } // next columsn
+                  } // next column
                   query.append(" FROM ");
                   query.append(table);
                   StringBuffer where = new StringBuffer(); 
@@ -264,7 +280,7 @@ public class TableServletBase extends LabbcatServlet {
                   // or only one row, if there's a path
                   if (keyValues != null) {
                      int k = 0;
-                     for (String column : keys) {
+                     for (String column : urlKeys) {
                         
                         // only add as many parameters as values
                         if (++k > keyValues.length) break;
@@ -528,7 +544,8 @@ public class TableServletBase extends LabbcatServlet {
 
                StringBuilder query = new StringBuilder();
                StringBuilder parameters = new StringBuilder();
-               Vector<String> allColumns = new Vector<String>(keys);
+               Vector<String> allColumns = new Vector<String>(dbKeys);
+               if (dbKeys != urlKeys) allColumns.addAll(urlKeys);
                allColumns.addAll(columns);
                for (String column : allColumns) {
                   log("POST col " + column);
@@ -560,7 +577,7 @@ public class TableServletBase extends LabbcatServlet {
                   log("POST " + query.toString()); // TODO remove
                   PreparedStatement sql = connection.prepareStatement(query.toString());
                   int c = 1;
-                  for (String column : keys) {
+                  for (String column : dbKeys) {
                
                      // skip auto-generated key
                      if (column.equals(autoKey)) {
@@ -575,8 +592,9 @@ public class TableServletBase extends LabbcatServlet {
                            try {
                               if (rsAutoKey.next()) {
                                  // generate the value
-                                 String value = rsAutoKey.getString(0);
+                                 String value = rsAutoKey.getString(1);
                                  // put it into the INSERT statement
+                                 log("POST db " + c + " = " + value); // TODO remove
                                  sql.setString(c++, value);
                                  // add it to the key (for error reporting)
                                  key.append("/");
@@ -597,8 +615,15 @@ public class TableServletBase extends LabbcatServlet {
                         key.append(value);
                      }
                   } // next key
+                  if (dbKeys != urlKeys) {
+                     for (String column : urlKeys) {
+                        String value = ""+json.get(column);
+                        if (json.isNull(column)) value = null;
+                        sql.setString(c++, value);
+                     } // next column
+                  }
                   for (String column : columns) {
-                     String value = ""+json.get(column);
+                    String value = ""+json.get(column);
                      if (json.isNull(column)) value = null;
                      sql.setString(c++, value);
                   } // next column
@@ -679,7 +704,7 @@ public class TableServletBase extends LabbcatServlet {
 
                // prepare the UPDATE
                StringBuilder query = new StringBuilder();
-               Vector<String> allColumns = new Vector<String>(keys);
+               Vector<String> allColumns = new Vector<String>(urlKeys);
                allColumns.addAll(columns);
                for (String column : columns) {
                   if (query.length() == 0) {
@@ -693,7 +718,7 @@ public class TableServletBase extends LabbcatServlet {
                   query.append(" = ?");
                } // next column
                StringBuilder where = new StringBuilder();
-               for (String column : keys) {
+               for (String column : urlKeys) {
                   if (where.length() == 0) {
                      where.append(" WHERE ");
                   } else {
@@ -719,7 +744,7 @@ public class TableServletBase extends LabbcatServlet {
                         if (json.isNull(column)) value = null;
                         sql.setString(c++, value);
                      } // next column
-                     for (String column : keys) {
+                     for (String column : urlKeys) {
                         String value = ""+json.get(column);
                         if (key.length() > 0) key.append("/");
                         key.append(value);
@@ -733,6 +758,37 @@ public class TableServletBase extends LabbcatServlet {
                            .write(response.getWriter());
                      } else {
 
+                        if (dbKeys != urlKeys) {
+                           // fill in key values
+                           StringBuilder dbKeyQuery = new StringBuilder();
+                           for (String column : dbKeys) {
+                              dbKeyQuery.append(dbKeyQuery.length() == 0?"SELECT ":", ");
+                              dbKeyQuery.append(column);
+                           } // next column
+                           dbKeyQuery.append(" FROM ");
+                           dbKeyQuery.append(table);
+                           StringBuffer dbKeyWhere = new StringBuffer(); 
+                           for (String column : urlKeys) {
+                              if (dbKeyWhere.length() > 0) dbKeyWhere.append(" AND ");
+                              dbKeyWhere.append(column);
+                              dbKeyWhere.append(" = ?");
+                           } // next key
+                           dbKeyQuery.append(" WHERE ");
+                           dbKeyQuery.append(dbKeyWhere);
+                           log("PUT key query: " + dbKeyQuery);
+                           PreparedStatement sqlKeys = connection.prepareStatement(dbKeyQuery.toString());
+                           int k = 1;
+                           for (String column : urlKeys) {
+                              sqlKeys.setString(k++, ""+json.get(column));
+                           } // next key
+                           ResultSet rsKeys = sqlKeys.executeQuery();
+                           if (rsKeys.next()) {
+                              for (String column : dbKeys) {
+                                 json.put(column, rsKeys.getString(column));
+                              } // next key value
+                           }
+                        } // dbKeys != urlKeys
+                        
                         // set _cantDelete flag?
                         checkCanDelete(null, json, connection);
 
@@ -786,8 +842,8 @@ public class TableServletBase extends LabbcatServlet {
                   String[] keyValues = null;
                   if (request.getPathInfo() != null && !request.getPathInfo().equals("/")) {
                      keyValues = request.getPathInfo().substring(1).split("/");
-                     // only accept a path if all keys have a value
-                     if (keyValues.length != keys.size()) keyValues = null;
+                     // only accept a path if all urlKeys have a value
+                     if (keyValues.length != urlKeys.size()) keyValues = null;
                   }
                   if (keyValues == null) {
                      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -804,7 +860,7 @@ public class TableServletBase extends LabbcatServlet {
                   if (whereClause != null && whereClause.length() > 0) {
                      where.append(whereClause);
                   }
-                  for (String column : keys) {
+                  for (String column : urlKeys) {
                      if (where.length() > 0) {
                         where.append(" AND ");
                      }
@@ -822,7 +878,7 @@ public class TableServletBase extends LabbcatServlet {
                      for (DeleteCheck check : deleteChecks) {
                         for (String field : check.fields) {
                            checkFieldValues.put(field, null);
-                           if (!keys.contains(field)) needNonKeyValues = true;
+                           if (!urlKeys.contains(field)) needNonKeyValues = true;
                         }
                      } // next check
 
@@ -849,12 +905,7 @@ public class TableServletBase extends LabbcatServlet {
                         } // next key
                         ResultSet rs = sql.executeQuery();
                         try {
-                           if (!rs.next()) {
-                              response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                              failureResult("Could not query for delete-check values")
-                                 .write(response.getWriter());
-                              return;
-                           } else {
+                           if (rs.next()) {
                               for (String field : checkFieldValues.keySet()) {
                                  checkFieldValues.put(field, rs.getString(field));
                               } // next field
@@ -865,7 +916,7 @@ public class TableServletBase extends LabbcatServlet {
                         }
                      } else { // get check field values from key
                         int k = 0;
-                        for (String column : keys) {
+                        for (String column : urlKeys) {
                            checkFieldValues.put(column, keyValues[k++]);
                         } // next key
                      }

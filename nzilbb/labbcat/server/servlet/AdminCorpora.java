@@ -35,11 +35,13 @@ public class AdminCorpora extends TableServletBase {
 
    public AdminCorpora() {
       super("corpus", // table
-            new Vector<String>() {{ // keys
+            new Vector<String>() {{ // primary keys
                add("corpus_id");
-            }}, // keys
-            new Vector<String>() {{ // columns
+            }},
+            new Vector<String>() {{ // URL keys
                add("corpus_name");
+            }},
+            new Vector<String>() {{ // columns
                add("corpus_language");
                add("corpus_description");
             }},
@@ -49,8 +51,10 @@ public class AdminCorpora extends TableServletBase {
             true, // read
             true, // update
             true); // delete
+      
       autoKey = "corpus_id";
-      autoKeyQuery = "SELECT COALESCE(max(corpus_id) + 1, 1) FROM corpus";
+      autoKeyQuery = "SELECT COALESCE(max(corpus_id) + 1, 1) FROM corpus";      
+      
       deleteChecks = new Vector<DeleteCheck>() {{
             add(new DeleteCheck(
                    "SELECT COUNT(*), MIN(transcript_id) FROM transcript WHERE corpus_name = ?",
