@@ -37,6 +37,8 @@
              placeholder="Description"></textarea>
     </span>
     <span class="buttons">
+      <a title="Information about this corpus"
+         href="../corpus?corpus_id={{corpus.corpus_id}}">🛈</a>
       <button disabled="{{corpus._cantDelete}}"
               (click)="deleteRow(corpus);"
               title="{{corpus._cantDelete||'Delete '+corpus.corpus_name}}">➖</button>
