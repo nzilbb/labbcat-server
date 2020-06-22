@@ -21,8 +21,11 @@
 //
 package nzilbb.labbcat.server.servlet;
 
+import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 /**
  * Servlet that allows administration of rows in the the <em> corpus </em> table.
@@ -71,5 +74,31 @@ public class AdminCorpora extends TableServletBase {
          }};
    }
 
+   /**
+    * Validates a record before UPDATEing it.
+    * @param record The incoming record to validate.
+    * @return A list of validation errors, which should be null if the record is valid.
+    */
+   protected List<String> validateBeforeUpdate(JSONObject record) {
+      Vector<String> errors = null;
+      try {
+         if (!record.has("corpus_name") || record.isNull("corpus_name")) {
+            errors = new Vector<String>() {{ add("No corpus name was provided."); }};
+         } else {
+            // trim name
+            record.put("corpus_name", record.getString("corpus_name").trim());
+            if (record.getString("corpus_name").length() == 0) {
+               errors = new Vector<String>() {{ add("Corpus name cannot be blank."); }};
+            }
+         }
+      } catch (JSONException x) {
+         if (errors == null) errors = new Vector<String>();
+         errors.add(x.toString());
+         // not expecting this, so log it:
+         System.err.println("AdminCorpora.validateBeforeUpdate: ERROR " + x);
+      }
+      return errors;
+   } // end of validateBeforeUpdate()
+   
    private static final long serialVersionUID = 1;
 } // end of class AdminCorpora
