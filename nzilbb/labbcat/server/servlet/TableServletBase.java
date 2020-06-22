@@ -981,7 +981,7 @@ public class TableServletBase extends LabbcatServlet {
                         failureResult("Record doesn't exist: " + request.getPathInfo())
                            .write(response.getWriter());
                      } else {
-                        successResult(null, "Record deleted")
+                        successResult(null, "Record deleted.")
                            .write(response.getWriter());
                      }
                
