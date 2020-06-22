@@ -7,8 +7,9 @@
       <textarea #description placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <button (click)="project.reportValidity() && createRow(project.value, description.value); project.value = description.value = '';"
-              title="Add new record">➕</button>
+      <app-button action="create"
+                  (click)="project.reportValidity() && createRow(project.value, description.value); project.value = description.value = '';"
+                  title="Add new record"></app-button>
     </span>
   </div>
   
@@ -23,15 +24,17 @@
              placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <button disabled="{{project._cantDelete}}"
-              (click)="deleteRow(project);"
-              title="{{project._cantDelete||'Delete '+project.project}}">➖</button>
+      <app-button action="delete"
+                  disabled="{{project._cantDelete}}"
+                  (click)="deleteRow(project);"
+                  title="{{project._cantDelete||'Delete '+project.project}}"></app-button>
     </span>
 
   </div>
 </div>
 <div class="buttons">
-  <button (click)="updateChangedRows();"
-          *ngIf="changed"
-          title="Save all changed projects">💾</button>
+  <app-button action="save"
+              (click)="updateChangedRows();"
+              *ngIf="changed"
+              title="Save all changed projects"></app-button>
 </div>

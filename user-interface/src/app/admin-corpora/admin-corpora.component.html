@@ -13,8 +13,9 @@
       <textarea #description placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <button (click)="name.reportValidity() && createRow(name.value, language.value, description.value); name.value = description.value = ''; language.selectedIndex = 0;"
-              title="Add new record">➕</button>
+      <app-button  action="create"
+                   (click)="name.reportValidity() && createRow(name.value, language.value, description.value); name.value = description.value = ''; language.selectedIndex = 0;"
+                   title="Add new record"></app-button>
     </span>
   </div>
   
@@ -39,15 +40,17 @@
     <span class="buttons">
       <a title="Information about this corpus"
          href="corpus?corpus_id={{corpus.corpus_id}}">🛈</a>
-      <button disabled="{{corpus._cantDelete}}"
-              (click)="deleteRow(corpus);"
-              title="{{corpus._cantDelete||'Delete '+corpus.corpus_name}}">➖</button>
+      <app-button  action="delete"
+                   disabled="{{corpus._cantDelete}}"
+                   (click)="deleteRow(corpus);"
+                   title="{{corpus._cantDelete||'Delete '+corpus.corpus_name}}"></app-button>
     </span>
 
   </div>
 </div>
 <div class="buttons">
-  <button (click)="updateChangedRows();"
-          *ngIf="changed"
-          title="Save all changed corpora">💾</button>
+  <app-button action="update"
+              (click)="updateChangedRows();"
+              *ngIf="changed"
+              title="Save all changed corpora"></app-button>
 </div>

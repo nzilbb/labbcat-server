@@ -13,6 +13,7 @@ import { AdminMenuComponent } from './admin-menu/admin-menu.component';
 import { MessagesComponent } from './messages/messages.component';
 import { AboutComponent } from './about/about.component';
 import { AdminProjectsComponent } from './admin-projects/admin-projects.component';
+import { ButtonComponent } from './button/button.component';
 
 @NgModule({
     declarations: [
@@ -24,7 +25,8 @@ import { AdminProjectsComponent } from './admin-projects/admin-projects.componen
         AdminMenuComponent,
         MessagesComponent,
         AboutComponent,
-        AdminProjectsComponent
+        AdminProjectsComponent,
+        ButtonComponent
     ],
     imports: [
         BrowserModule,

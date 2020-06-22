@@ -62,18 +62,18 @@ app-wait {
     width: 100%;
 }
 
-.list .item {
+.list > .item {
     display: flex;
     flex-direction: column;
     padding-bottom: 10px;
 }
-.list .header {
+.list > .header {
     font-weight: bold;
 }
-.list .item:not(:first-child) {
+.list > .item:not(:first-child) {
     border-top: 1px dashed silver;
 }
-.list .item span {
+.list > .item > span {
     display: block;
     vertical-align: top;
     padding-left: 10px;
@@ -88,13 +88,10 @@ app-wait {
 .list > .item > span.center {
     text-align: center;
 }
-.list .item .buttons button {
-    margin-left: 5px;
-}
-.list .item span:first-child {
+.list > .item > span:first-child {
     padding-left: 5px;
 }
-.list .item span input, .list .item span select, .list .item span textarea {
+.list > .item > span > input, .list > .item > span > select, .list > .item > span > textarea {
     width: 90%;
 }
 .list > .item > label { display: none; }
@@ -103,17 +100,44 @@ app-wait {
 
 .buttons a { color: #859044; text-decoration: none; margin-left: 5px; margin-right: 5px; }
 
+/* Copied styles from legacy stylesheet - TODO revise these when migration complete */
+
+button {
+    white-space: nowrap;
+    padding: 0px;
+    width: 100px;
+    height: 45px;
+    background: silver;
+    border: 1px outset;
+    font-family: sans-serif;
+    font-size: 9pt;
+    padding: 1px;
+}
+button img {
+    padding-left: 8px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+@media all and (min-width: 640px) {
+    button {
+        height: unset;
+        height: 32px;
+    }
+}
+
+
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
     app-root nav { min-height: 100px; max-width: 120px; }
     app-root aside { max-width: 120px; }
     app-admin-menu li:first-child { border-top: 1px solid #859044; border-left: none; }
     .list { display: table; }
-    .list .item {
+    .list > .item {
         display: table-row;
         padding-bottom: 0px;
     }
-    .list .item span { display: table-cell; }
+    .list > .item > span { display: table-cell; }
     .list > .item > span > legend { display: none; }
     .list > .item > label { display: block; }
     .buttons { text-align: right; }
