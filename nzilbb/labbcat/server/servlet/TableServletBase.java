@@ -301,12 +301,12 @@ public class TableServletBase extends LabbcatServlet {
                      query.append(orderClause);
                   }
                   
-                  if (request.getParameter("p") != null) { // page
+                  if (request.getParameter("pageNumber") != null) { // page
                      try {
-                        int page = Integer.parseInt(request.getParameter("p"));
+                        int page = Integer.parseInt(request.getParameter("pageNumber"));
                         int pageLength = 20;
-                        if (request.getParameter("l") != null) {
-                           pageLength = Integer.parseInt(request.getParameter("l"));
+                        if (request.getParameter("pageLength") != null) {
+                           pageLength = Integer.parseInt(request.getParameter("pageLength"));
                         }
                         int offset = page * pageLength;
                         query.append(" LIMIT " + offset + ", " + pageLength);
@@ -570,6 +570,13 @@ public class TableServletBase extends LabbcatServlet {
                // read the incoming object
                JSONTokener reader = new JSONTokener(request.getReader());
                JSONObject json = new JSONObject(reader);
+               List<String> errors = validateBeforeCreate(json);
+               if (errors != null) {
+                  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                  failureResult(errors)
+                     .write(response.getWriter());
+                  return;
+               }
                StringBuffer key = new StringBuffer();
                try {
             
@@ -685,7 +692,7 @@ public class TableServletBase extends LabbcatServlet {
             connection.close();
          }
       } catch(SQLException exception) {
-         log("TableServletBase GET: Couldn't connect to database: " + exception);
+         log("TableServletBase POST: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
          failureResult("ERROR: " + exception.getMessage())
@@ -745,6 +752,13 @@ public class TableServletBase extends LabbcatServlet {
                      // read the incoming object
                      JSONTokener reader = new JSONTokener(request.getReader());
                      JSONObject json = new JSONObject(reader);
+                     List<String> errors = validateBeforeUpdate(json);
+                     if (errors != null) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        failureResult(errors)
+                           .write(response.getWriter());
+                        return;
+                     }
                      int c = 1;
                      StringBuffer key = new StringBuffer();
                      for (String column : columns) {                           
@@ -822,7 +836,7 @@ public class TableServletBase extends LabbcatServlet {
             connection.close();
          }
       } catch(SQLException exception) {
-         log("TableServletBase GET: Couldn't connect to database: " + exception);
+         log("TableServletBase PUT: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
          failureResult("ERROR: " + exception.getMessage())
@@ -984,13 +998,36 @@ public class TableServletBase extends LabbcatServlet {
             connection.close();
          }
       } catch(SQLException exception) {
-         log("TableServletBase GET: Couldn't connect to database: " + exception);
+         log("TableServletBase DELETE: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
          failureResult("ERROR: " + exception.getMessage())
             .write(response.getWriter());
       }      
    }
+   
+   /**
+    * Validates a record before INSERTing it.
+    * <p> This can be overridden by subclasses. The default implementation returns the
+    * result of {@link #validateBeforeUpdate(JSONObject)}.
+    * <p> This method may change the record, to standardize or provide default values.
+    * @param record The incoming record to validate.
+    * @return A list of validation errors, which should be null if the record is valid.
+    */
+   protected List<String> validateBeforeCreate(JSONObject record) {
+      return validateBeforeUpdate(record);
+   } // end of validateBeforeCreate()
+
+   /**
+    * Validates a record before UPDATEing it.
+    * <p> This can be overridden by subclasses. The default implementation returns null.
+    * <p> This method may change the record, to standardize or provide default values.
+    * @param record The incoming record to validate.
+    * @return A list of validation errors, which should be null if the record is valid.
+    */
+   protected List<String> validateBeforeUpdate(JSONObject record) {
+      return null;
+   } // end of validateBeforeUpdate()
 
    private static final long serialVersionUID = 1;
 } // end of class TableServletBase
