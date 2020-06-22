@@ -92,7 +92,9 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+                "src/nzilbb.labbcat.js"
+            ]
           }
         },
         "lint": {
