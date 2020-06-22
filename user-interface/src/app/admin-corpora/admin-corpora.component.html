@@ -4,8 +4,8 @@
     <span class="corpus-name" title="Name"><legend>Name</legend>
       <input #name type="text" required placeholder="Name"></span>
     <span class="corpus-language" title="Language"><legend>Language</legend>
-      <select *ngIf="languages" #language type="text">
-        <option value="{{languages[0].label}}">Language</option>
+      <select #language type="text">
+        <option *ngIf="languages" value="{{languages[0].label}}">Language</option>
         <option *ngFor="let language of languages" value="{{language.label}}">{{language.description}}</option>
       </select>
     </span>
