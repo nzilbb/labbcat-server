@@ -60,15 +60,12 @@ public class TestAdminCorpora
 
    @BeforeClass public static void setBaseUrl() throws MalformedURLException {
 
-      try
-      {
+      try {
          l = new LabbcatAdmin(labbcatUrl, username, password);
          l.setBatchMode(true);
          ro = new LabbcatAdmin(labbcatUrl, readonly_username, readonly_password);
          ro.setBatchMode(true);
-      }
-      catch(MalformedURLException exception)
-      {
+      } catch(MalformedURLException exception) {
          fail("Could not create Labbcat object");
       }
    }

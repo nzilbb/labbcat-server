@@ -40,7 +40,7 @@ import nzilbb.ag.PermissionException;
 import nzilbb.ag.StoreException;
 import nzilbb.labbcat.LabbcatView;
 import nzilbb.labbcat.ResponseException;
-import nzilbb.labbcat.Match;
+import nzilbb.labbcat.model.Match;
 import nzilbb.labbcat.http.HttpRequestGet;
 import org.json.JSONObject;
 
@@ -57,13 +57,10 @@ public class TestStoreQuery
 
    @BeforeClass public static void setBaseUrl() throws MalformedURLException {
 
-      try
-      {
+      try {
          l = new LabbcatView(labbcatUrl, username, password);
          l.setBatchMode(true);
-      }
-      catch(MalformedURLException exception)
-      {
+      } catch(MalformedURLException exception) {
          fail("Could not create Labbcat object");
       }
    }
