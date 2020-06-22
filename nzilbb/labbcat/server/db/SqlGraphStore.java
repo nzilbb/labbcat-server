@@ -1157,7 +1157,7 @@ public class SqlGraphStore
 
          // save the tags
          PreparedStatement sqlInsertParticipantAttribute = getConnection().prepareStatement(
-            "REPLACE INTO annotation_participant (speaker_number, layer, label, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
+            "INSERT INTO annotation_participant (speaker_number, layer, label, annotated_by, annotated_when) VALUES (?,?,?,?,?)");
          PreparedStatement sqlUpdateParticipantAttribute = getConnection().prepareStatement(
             "UPDATE annotation_participant SET label = ?, annotated_by = ?, annotated_when = ? WHERE layer = ? AND annotation_id = ?");
          PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
@@ -6626,7 +6626,7 @@ public class SqlGraphStore
 
                Layer layer = annotation.getLayer();
                if (layer == null) layer = getLayer(annotation.getLayerId());
-               if (!"1".equals(layer.get("@peers")))
+               if (!layer.getPeers())
                {
                   // the attribute might be new in this graph, but already exist in the database
                   // so delete first and then add
