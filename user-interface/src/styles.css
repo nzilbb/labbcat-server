@@ -119,6 +119,9 @@ button img {
     height: 16px;
     vertical-align: middle;
 }
+button:disabled img {
+    opacity: 0.5;
+}
 @media all and (min-width: 640px) {
     button {
         height: unset;
