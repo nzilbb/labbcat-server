@@ -27,6 +27,11 @@
 	 skipexisting="true"
 	 verbose="true"
 	 usetimestamp="true"/>    
+    <get src="https://github.com/nzilbb/labbcat-java/blob/master/bin/nzilbb.labbcat.jar?raw=true" 
+	 dest="${lib}" 
+	 skipexisting="true"
+	 verbose="true"
+	 usetimestamp="true"/>    
   </target>
 
   <target name="compile" depends="init,gitlibs"
@@ -83,7 +88,7 @@
   <target name="test" depends="dist" description="Run nzilbb.labbcat.server unit tests">
     <javac srcdir="${src}" destdir="."
 	   includes="${testsrcfiles}"
-	   classpath=".;${config.junitjar};${dist}/${ant.project.name}.jar;${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar;${lib}/antlr-runtime-4.7.2.jar"
+	   classpath=".;${config.junitjar};${dist}/${ant.project.name}.jar;${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar;${lib}/antlr-runtime-4.7.2.jar;${lib}/nzilbb.labbcat.jar"
 	   listfiles="yes"
 	   target="8"
 	   source="8"
@@ -97,7 +102,7 @@
 	fork="true"
 	>
       <classpath>
-	<pathelement path=".;${dist}/${ant.project.name}.jar;${config.junitjar};${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar;${lib}/antlr-runtime-4.7.2.jar"/>
+	<pathelement path=".;${dist}/${ant.project.name}.jar;${config.junitjar};${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar;${lib}/antlr-runtime-4.7.2.jar;${lib}/nzilbb.labbcat.jar"/>
       </classpath>
       <jvmarg value="-ea"/>
       <formatter type="plain" usefile="false" />
