@@ -12,6 +12,7 @@ import { EditMenuComponent } from './edit-menu/edit-menu.component';
 import { AdminMenuComponent } from './admin-menu/admin-menu.component';
 import { MessagesComponent } from './messages/messages.component';
 import { AboutComponent } from './about/about.component';
+import { AdminProjectsComponent } from './admin-projects/admin-projects.component';
 
 @NgModule({
     declarations: [
@@ -22,7 +23,8 @@ import { AboutComponent } from './about/about.component';
         EditMenuComponent,
         AdminMenuComponent,
         MessagesComponent,
-        AboutComponent
+        AboutComponent,
+        AdminProjectsComponent
     ],
     imports: [
         BrowserModule,

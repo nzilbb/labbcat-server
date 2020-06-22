@@ -1,0 +1,37 @@
+<h2>Projects</h2>
+<div class="list project-list">
+  <div class="item add-new">
+    <span class="project-name" title="Name"><legend>Name</legend>
+      <input #project type="text" required placeholder="Name"></span>
+    <span class="project-description" title="Description"><legend>Description</legend>
+      <textarea #description placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <button (click)="project.reportValidity() && createRow(project.value, description.value); project.value = description.value = '';"
+              title="Add new record">➕</button>
+    </span>
+  </div>
+  
+  <app-wait *ngIf="!rows"></app-wait>
+  <div class="item" *ngFor="let project of rows">
+    <span class="project-name" title="Name"><legend>Name</legend>
+      {{project.project}}</span>
+    <span class="project-description" title="Description"><legend>Description</legend>
+      <textarea #description
+             [(ngModel)]="project.description"
+             (input)="onChange(project)"
+             placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <button disabled="{{project._cantDelete}}"
+              (click)="deleteRow(project);"
+              title="{{project._cantDelete||'Delete '+project.project}}">➖</button>
+    </span>
+
+  </div>
+</div>
+<div class="buttons">
+  <button (click)="updateChangedRows();"
+          *ngIf="changed"
+          title="Save all changed projects">💾</button>
+</div>
