@@ -106,5 +106,4 @@ export class AdminCorporaComponent implements OnInit {
             }
         } // next row
     }
-
 }
