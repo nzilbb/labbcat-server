@@ -1,0 +1,18 @@
+.login-form {
+    width: 30vw;
+    min-width: 300px;
+    margin: auto;
+}
+.login-form fieldset input {
+    width: 95%;
+}
+.login-form > .buttons {
+    padding: 3px;
+}
+.login-form > .buttons > button {
+    width: 42px;
+    height: 42px;
+    font-size: 32px;
+    padding: 0px;
+    vertical-align: middle;
+}

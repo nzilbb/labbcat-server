@@ -14,6 +14,7 @@ import { MessagesComponent } from './messages/messages.component';
 import { AboutComponent } from './about/about.component';
 import { AdminProjectsComponent } from './admin-projects/admin-projects.component';
 import { ButtonComponent } from './button/button.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
     declarations: [
@@ -26,7 +27,8 @@ import { ButtonComponent } from './button/button.component';
         MessagesComponent,
         AboutComponent,
         AdminProjectsComponent,
-        ButtonComponent
+        ButtonComponent,
+        LoginComponent
     ],
     imports: [
         BrowserModule,

@@ -1,0 +1,26 @@
+<div class="login-form">
+  <fieldset class="user"><legend>User ID</legend>
+    <input #user
+           type="text"
+           autocomplete="off"
+           title="User ID"
+           placeholder="User ID"
+           (keyup.enter)="btn.click()"
+           required
+           autofocus>
+  </fieldset>
+  <fieldset class="password"><legend>Pass Phrase</legend>
+    <input #password
+           type="password"
+           title="Pass Phrase"
+           placeholder="Pass Phrase"
+           (keyup.enter)="btn.click()"
+           required>
+  </fieldset>
+  <div class="buttons">
+    <button #btn
+            (click)="user.reportValidity() && password.reportValidity() && login(user.value, password.value); user.value = password.value = ''; "
+            title="Log in">⎆</button>
+  </div>
+</div>
+
