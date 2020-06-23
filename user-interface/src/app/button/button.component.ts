@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-button',
@@ -10,7 +11,8 @@ export class ButtonComponent implements OnInit {
     @Input() title: string;
     @Input() disabled: boolean;
     @Output() click = new EventEmitter();
-    
+
+    imagesLocation = environment.baseUrl + environment.imagesLocation;
     label: string;
     icon: string;
     img: string;

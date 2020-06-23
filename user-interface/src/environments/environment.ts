@@ -4,7 +4,8 @@
 
 export const environment = {
     production: false,
-    baseUrl: "http://localhost:8080/labbcat/"
+    baseUrl: "http://localhost:8080/labbcat/",
+    imagesLocation: "assets"
 };
 
 /*
