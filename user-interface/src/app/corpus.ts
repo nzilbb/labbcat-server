@@ -1,9 +1,9 @@
 export interface Corpus {
-    corpus_id: String;
-    corpus_name: String;
-    corpus_language: String;
-    corpus_description: String;
+    corpus_id: string;
+    corpus_name: string;
+    corpus_language: string;
+    corpus_description: string;
 
     _changed: boolean;
-    _cantDelete: String;
+    _cantDelete: string;
 }

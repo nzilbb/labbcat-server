@@ -1,8 +1,8 @@
 export interface Project {
-    project_id: String;
-    project: String;
-    description: String;
+    project_id: string;
+    project: string;
+    description: string;
 
     _changed: boolean;
-    _cantDelete: String;
+    _cantDelete: string;
 }
