@@ -1,0 +1,54 @@
+<h2>Media Tracks</h2>
+<div class="list media-track-list">
+  <div class="item add-new">
+    <span class="media-track-name" title="Suffix"><legend>Suffix</legend>
+      <input #suffix type="text" placeholder="Suffix"></span>
+    <span class="media-track-description" title="Description"><legend>Description</legend>
+      <textarea #description placeholder="Description"></textarea>
+    </span>
+    <span class="media-track-display-order" title="Display order"><legend>Order</legend>
+      <input #displayOrder type="number" step="1" placeholder="Order"></span>
+    <span class="buttons">
+      <app-button action="create"
+                  (click)="createRow(suffix.value, description.value, displayOrder.value); suffix.value = description.value = displayOrder.value = '';"
+                  title="Add new record"></app-button>
+    </span>
+  </div>
+  
+  <app-wait *ngIf="!rows"></app-wait>
+  <div class="item" *ngFor="let track of rows">
+    <span class="media-track-name" title="Suffix"><legend>Suffix</legend>
+      {{track.suffix}}
+      <span *ngIf="!track.suffix"
+            class="no-suffix"
+            title="Media files with no suffix">
+        (no suffix)
+      </span>
+    </span>
+    <span class="media-rack-description" title="Description"><legend>Description</legend>
+      <textarea #description
+             [(ngModel)]="track.description"
+             (input)="onChange(track)"
+             placeholder="Description"></textarea>
+    </span>
+    <span class="media-track-display-order" title="Display order"><legend>Order</legend>
+      <input #displayOrder
+             [(ngModel)]="track.display_order"
+             (input)="onChange(track)"
+             type="number" step="1"
+             placeholder="Order"></span>
+    <span class="buttons">
+      <app-button action="delete"
+                  disabled="{{track._cantDelete}}"
+                  (click)="deleteRow(track);"
+                  title="{{track._cantDelete||'Delete '+track.suffix}}"></app-button>
+    </span>
+
+  </div>
+</div>
+<div class="buttons">
+  <app-button action="save"
+              (click)="updateChangedRows();"
+              *ngIf="changed"
+              title="Save all changed tracks"></app-button>
+</div>

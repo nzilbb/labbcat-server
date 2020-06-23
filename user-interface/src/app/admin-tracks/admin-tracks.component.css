@@ -1,0 +1,6 @@
+.no-suffix { color: silver; }
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    .media-track-description { width: 55%; }
+    .media-track-display-order { width: 10%; }
+}
