@@ -56,7 +56,7 @@ export class AdminCorporaComponent implements OnInit {
             name, language, description,
             (row, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
-                for (let message of messages) this.messageService.info(message);
+                if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
                 if (row) this.rows.push(row as Corpus);
                 this.updateChangedFlag();
@@ -67,7 +67,7 @@ export class AdminCorporaComponent implements OnInit {
         if (confirm(`Are you sure you want to delete ${row.corpus_name}`)) {
             this.labbcatService.labbcat.deleteCorpus(row.corpus_name, (model, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
-                for (let message of messages) this.messageService.info(message);
+                if (messages) for (let message of messages) this.messageService.info(message);
                 if (!errors) {
                     // remove from the model/view
                     this.rows = this.rows.filter(r => { return r !== row;});
@@ -87,7 +87,7 @@ export class AdminCorporaComponent implements OnInit {
             row.corpus_name, row.corpus_language, row.corpus_description,
             (corpus, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
-                for (let message of messages) this.messageService.info(message);
+                if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
                 const updatedRow = corpus as Corpus;
                 const i = this.rows.findIndex(r => {

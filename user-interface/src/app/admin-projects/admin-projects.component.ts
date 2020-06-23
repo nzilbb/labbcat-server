@@ -40,7 +40,7 @@ export class AdminProjectsComponent implements OnInit {
             project, description,
             (row, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
-                for (let message of messages) this.messageService.info(message);
+                if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
                 if (row) this.rows.push(row as Project);
                 this.updateChangedFlag();
@@ -51,7 +51,7 @@ export class AdminProjectsComponent implements OnInit {
         if (confirm(`Are you sure you want to delete ${row.project}`)) {
             this.labbcatService.labbcat.deleteProject(row.project, (model, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
-                for (let message of messages) this.messageService.info(message);
+                if (messages) for (let message of messages) this.messageService.info(message);
                 if (!errors) {
                     // remove from the model/view
                     this.rows = this.rows.filter(r => { return r !== row;});
@@ -71,7 +71,7 @@ export class AdminProjectsComponent implements OnInit {
             row.project, row.description,
             (project, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
-                for (let message of messages) this.messageService.info(message);
+                if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
                 const updatedRow = project as Project;
                 const i = this.rows.findIndex(r => {
@@ -90,5 +90,4 @@ export class AdminProjectsComponent implements OnInit {
             }
         } // next row
     }
-
 }
