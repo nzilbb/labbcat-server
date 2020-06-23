@@ -21,6 +21,7 @@
 //
 package nzilbb.labbcat.server.servlet;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
@@ -77,9 +78,10 @@ public class AdminCorpora extends TableServletBase {
    /**
     * Validates a record before UPDATEing it.
     * @param record The incoming record to validate.
+    * @param connection A connection to th database.
     * @return A list of validation errors, which should be null if the record is valid.
     */
-   protected List<String> validateBeforeUpdate(JSONObject record) {
+   protected List<String> validateBeforeUpdate(JSONObject record, Connection connection) {
       Vector<String> errors = null;
       try {
          if (!record.has("corpus_name") || record.isNull("corpus_name")) {

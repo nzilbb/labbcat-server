@@ -93,6 +93,9 @@ public class TableServletBase extends LabbcatServlet {
     * generates the new key itself) */
    protected String autoKeyQuery = null;
 
+   /** Are empty key values allowed? */
+   protected boolean emptyKeyAllowed = false;
+
    /** 
     * A query used to check each row to determine if there's a reason it can't be deleted.
     * <var>deleteQuery</var> should be a query that
@@ -570,7 +573,7 @@ public class TableServletBase extends LabbcatServlet {
                // read the incoming object
                JSONTokener reader = new JSONTokener(request.getReader());
                JSONObject json = new JSONObject(reader);
-               List<String> errors = validateBeforeCreate(json);
+               List<String> errors = validateBeforeCreate(json, connection);
                if (errors != null) {
                   response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                   failureResult(errors)
@@ -752,7 +755,7 @@ public class TableServletBase extends LabbcatServlet {
                      // read the incoming object
                      JSONTokener reader = new JSONTokener(request.getReader());
                      JSONObject json = new JSONObject(reader);
-                     List<String> errors = validateBeforeUpdate(json);
+                     List<String> errors = validateBeforeUpdate(json, connection);
                      if (errors != null) {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         failureResult(errors)
@@ -868,10 +871,15 @@ public class TableServletBase extends LabbcatServlet {
                      if (keyValues.length != urlKeys.size()) keyValues = null;
                   }
                   if (keyValues == null) {
-                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                     failureResult("Key values not found in path: " + request.getPathInfo())
-                        .write(response.getWriter());
-                     return;
+                     if (emptyKeyAllowed) {
+                        String[] emptyKey = {""};
+                        keyValues = emptyKey;
+                     } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        failureResult("Key values not found in path: " + request.getPathInfo())
+                           .write(response.getWriter());
+                        return;
+                     }
                   }
 
                   StringBuilder query = new StringBuilder();
@@ -1012,10 +1020,11 @@ public class TableServletBase extends LabbcatServlet {
     * result of {@link #validateBeforeUpdate(JSONObject)}.
     * <p> This method may change the record, to standardize or provide default values.
     * @param record The incoming record to validate.
+    * @param connection A connection to th database.
     * @return A list of validation errors, which should be null if the record is valid.
     */
-   protected List<String> validateBeforeCreate(JSONObject record) {
-      return validateBeforeUpdate(record);
+   protected List<String> validateBeforeCreate(JSONObject record, Connection connection) {
+      return validateBeforeUpdate(record, connection);
    } // end of validateBeforeCreate()
 
    /**
@@ -1023,9 +1032,10 @@ public class TableServletBase extends LabbcatServlet {
     * <p> This can be overridden by subclasses. The default implementation returns null.
     * <p> This method may change the record, to standardize or provide default values.
     * @param record The incoming record to validate.
+    * @param connection A connection to th database.
     * @return A list of validation errors, which should be null if the record is valid.
     */
-   protected List<String> validateBeforeUpdate(JSONObject record) {
+   protected List<String> validateBeforeUpdate(JSONObject record, Connection connection) {
       return null;
    } // end of validateBeforeUpdate()
 

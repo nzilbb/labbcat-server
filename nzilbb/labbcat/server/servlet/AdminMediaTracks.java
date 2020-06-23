@@ -22,6 +22,9 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
@@ -29,42 +32,30 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 /**
- * Servlet that allows administration of rows in the the <em> project </em> table.
- * <p> See <a href="package-summary.html#/api/admin/projects">API summary</a> for more details.
+ * Servlet that allows administration of rows in the the <em> corpus </em> table.
+ * <p> See <a href="package-summary.html#/api/admin/mediaTracks">API summary</a> for more details.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet(urlPatterns = "/api/admin/projects/*", loadOnStartup = 20)
+@WebServlet(urlPatterns = "/api/admin/mediatracks/*", loadOnStartup = 20)
 @RequiredRole("admin")
-public class AdminProjects extends TableServletBase {   
-
-   public AdminProjects() {
-      super("project", // table
+public class AdminMediaTracks extends TableServletBase {   
+   
+   public AdminMediaTracks() {
+      super("media_track", // table
             new Vector<String>() {{ // primary keys
-               add("project_id");
-            }},
-            new Vector<String>() {{ // URL keys
-               add("project");
+               add("suffix");
             }},
             new Vector<String>() {{ // columns
                add("description");
+               add("display_order");
             }},
             null, // where
-            "project", // order
+            "display_order", // order
             true, // create
             true, // read
             true, // update
             true); // delete
-      
-      autoKey = "project_id";
-      autoKeyQuery = "SELECT COALESCE(max(project_id) + 1, 1) FROM project";
-      
-      deleteChecks = new Vector<DeleteCheck>() {{
-            add(new DeleteCheck(
-                   "SELECT COUNT(*), MIN(short_description) FROM layer WHERE project_id = ?",
-                   "project_id",
-                   "{0,choice,1#There is still a layer using this corpus: {1}"
-                   +"|1<There are still {0} layers using this corpus, including {1}}"));
-         }};
+      emptyKeyAllowed = true;
    }
 
    /**
@@ -74,25 +65,27 @@ public class AdminProjects extends TableServletBase {
     * @return A list of validation errors, which should be null if the record is valid.
     */
    protected List<String> validateBeforeUpdate(JSONObject record, Connection connection) {
-      Vector<String> errors = null;
-      try {
-         if (!record.has("project") || record.isNull("project")) {
-            errors = new Vector<String>() {{ add("No project name was provided."); }};
-         } else {
-            // trim name
-            record.put("project", record.getString("project").trim());
-            if (record.getString("project").length() == 0) {
-               errors = new Vector<String>() {{ add("Project name cannot be blank."); }};
-            }
+      if (!record.has("display_order") || record.isNull("display_order")
+          || record.get("display_order").equals("")) {
+         try {
+            // default is one more that the MAX
+            PreparedStatement sql = connection.prepareStatement(
+               "SELECT COALESCE(MAX(display_order) + 1, 1) FROM media_track");
+            ResultSet rs = sql.executeQuery();
+            try {
+               rs.next();
+               record.put("display_order", rs.getInt(1));
+            } finally {
+               rs.close();
+               sql.close();
+            }            
+         } catch(SQLException exception) {
+            log("ERROR getting default value for display_order: " + exception);
+            record.put("display_order", 0);
          }
-      } catch (JSONException x) {
-         if (errors == null) errors = new Vector<String>();
-         errors.add(x.toString());
-         // not expecting this, so log it:
-         System.err.println("AdminProjects.validateBeforeUpdate: ERROR " + x);
-      }
-      return errors;
+      } 
+      return null;
    } // end of validateBeforeUpdate()
    
    private static final long serialVersionUID = 1;
-} // end of class AdminProjects
+} // end of class AdminMediaTracks
