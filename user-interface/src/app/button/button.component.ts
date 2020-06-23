@@ -12,7 +12,7 @@ export class ButtonComponent implements OnInit {
     @Input() disabled: boolean;
     @Output() click = new EventEmitter();
 
-    imagesLocation = environment.baseUrl + environment.imagesLocation;
+    imagesLocation = environment.imagesLocation;
     label: string;
     icon: string;
     img: string;
