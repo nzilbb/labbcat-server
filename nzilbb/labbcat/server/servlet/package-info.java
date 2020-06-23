@@ -651,8 +651,31 @@
  * <section role="region"><ul class="blockList"><li class="blockList">
  * <h3>Other functions include:</h3><ul class="blockList">
  * 
- * <li class="blockList"><h4 id="/api/admin/corpora">/api/admin/corpora[/<var>corpus_id</var>]</h4>
- *  <div> Allows administration (Create/Read/Update/Delete) of corpora records via
+ * <li class="blockList"><h4 id="/api/serialize/graphs">/api/serialize/graphs</h4>
+ *  <div> Converts transcript fragments. The request method can be <b> GET </b> or <b> POST </b>
+ *  <p> This expects an array of graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
+ *  a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
+ *   <dl>
+ *     <dt><span class="paramLabel">Parameters:</span></dt>
+ *     <dd><code>mimeType</code> - Content-type of the format to serialize to.</dd>
+ *     <dd><code>layerId</code> - A list of layer IDs to include in the serialization.</dd>
+ *     <dd><code>id</code> - One or more graph IDs.</dd>
+ *     <dd><code>name</code> - Content-type of the format to serialize to.</dd>
+ *     <dd><code>mimeType</code> - Optional name of the collection.</dd>
+ *   </dl>
+ *  <p><b>Output</b>: A each of the transcript fragments 
+ *  specified by the input parameters converted to the given 
+ *  format.  
+ *  <p> This may be a single file or multiple files, depending on
+ *  the converter behaviour and how many fragments are specified.
+ *  If there is only one, the file in returned as the response to 
+ *  the request.  If there are more than one, the response is a
+ *  zipfile containing the output files. </li>
+ *  </div>
+ * </li>
+ * 
+ * <li class="blockList"><h4 id="/api/admin/corpora">/api/admin/corpora[/<var>corpus_name</var>]</h4>
+ *  <div> Allows administration (Create/Read/Update/Delete) of corpus records via
  *  JSON-encoded objects with the following attributes:
  *   <ul>
  *    <li> <q> corpus_id </q> : The database key for the record. </li>
@@ -685,8 +708,8 @@
  *     <ul>
  *      <li><em> Parameters </em>
  *        <ul>
- *         <li><em> p </em> (integer) : The page to return. </li>
- *         <li><em> l </em> (integer) : How many rows per page (default is 20). </li>
+ *         <li><em> pageNumber </em> (integer) : The (zero-based) page to return. </li>
+ *         <li><em> pageLength </em> (integer) : How many rows per page (default is 20). </li>
  *         <li><em> Accept </em> (string) : Equivalent of the "Accept" request header (see below). </li>
  *        </ul>
  *      </li>
@@ -703,7 +726,7 @@
  *     </ul></li> 
  *    
  *    <li><b> PUT </b>
- *    - Update an existing record, specified by the <var> corpus_id </var> given in the
+ *    - Update an existing record, specified by the <var> corpus_name </var> given in the
  *    request body.
  *     <ul>
  *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
@@ -720,8 +743,8 @@
  *    <li><b> DELETE </b>
  *    - Delete an existing record.
  *     <ul>
- *      <li><em> Request Path </em> - /api/admin/corpora/<var>corpus_id</var> where 
- *          <var> corpus_id </var> is the database ID of the record to delete.</li>
+ *      <li><em> Request Path </em> - /api/admin/corpora/<var>corpus_name</var> where 
+ *          <var> corpus_name </var> is the name of the corpus to delete.</li>
  *      <li><em> Response Body </em> - the standard JSON envelope, including a message if
  *          the request succeeds or an error explaining the reason for failure. </li>
  *      <li><em> Response Status </em>
@@ -737,26 +760,88 @@
  *  </div>
  * </li>
  * 
- * <li class="blockList"><h4 id="/api/serialize/graphs">/api/serialize/graphs</h4>
- *  <div> Converts transcript fragments. The request method can be <b> GET </b> or <b> POST </b>
- *  <p> This expects an array of graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
- *  a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
- *   <dl>
- *     <dt><span class="paramLabel">Parameters:</span></dt>
- *     <dd><code>mimeType</code> - Content-type of the format to serialize to.</dd>
- *     <dd><code>layerId</code> - A list of layer IDs to include in the serialization.</dd>
- *     <dd><code>id</code> - One or more graph IDs.</dd>
- *     <dd><code>name</code> - Content-type of the format to serialize to.</dd>
- *     <dd><code>mimeType</code> - Optional name of the collection.</dd>
- *   </dl>
- *  <p><b>Output</b>: A each of the transcript fragments 
- *  specified by the input parameters converted to the given 
- *  format.  
- *  <p> This may be a single file or multiple files, depending on
- *  the converter behaviour and how many fragments are specified.
- *  If there is only one, the file in returned as the response to 
- *  the request.  If there are more than one, the response is a
- *  zipfile containing the output files. </li>
+ * <li class="blockList"><h4 id="/api/admin/projects">/api/admin/projects[/<var>project</var>]</h4>
+ *  <div> Allows administration (Create/Read/Update/Delete) of project records via
+ *  JSON-encoded objects with the following attributes:
+ *   <ul>
+ *    <li> <q> project_id </q> : The database key for the record. </li>
+ *    <li> <q> project </q> : The name of the project. </li>
+ *    <li> <q> project_description </q> : The description of the project. </li>
+ *    <li> <q> _cantDelete </q> : This is not a database field, but rather is present in
+ *         records returned from the server that can not currently be deleted; 
+ *         a string representing the reason the record can't be deleted. </li>
+ *   </ul>
+ *  The following operations, specified by the HTTP method, are supported:
+ *   <ul>
+ *    <li><b> POST </b>
+ *    - Create a new record.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the new record
+ *       (excluding <var>project_id</var>). </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the new record (including <var>project_id</var>). </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully created. </li>
+ *         <li><em> 409 </em> : The record could not be added because it was already there. </li> 
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ * 
+ *    <li><b> GET </b>
+ *    - Read the records. 
+ *     <ul>
+ *      <li><em> Parameters </em>
+ *        <ul>
+ *         <li><em> pageNumber </em> (integer) : The (zero-based) page to return. </li>
+ *         <li><em> pageLength </em> (integer) : How many rows per page (default is 20). </li>
+ *         <li><em> Accept </em> (string) : Equivalent of the "Accept" request header (see below). </li>
+ *        </ul>
+ *      </li>
+ *      <li><em> "Accept" request header/parameter </em> "text/csv" to return records as
+ *       Comma Separated Values. If not specified, records are returned as a JSON-encoded
+ *       array of objects.</li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as a
+ *       corresponding list of records.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The records could be listed. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *    
+ *    <li><b> PUT </b>
+ *    - Update an existing record, specified by the <var> project </var> given in the
+ *    request body.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the record. </li> 
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully updated. </li>
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *    
+ *    <li><b> DELETE </b>
+ *    - Delete an existing record.
+ *     <ul>
+ *      <li><em> Request Path </em> - /api/admin/projects/<var>project</var> where 
+ *          <var> project </var> is the database ID of the record to delete.</li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, including a message if
+ *          the request succeeds or an error explaining the reason for failure. </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully deleted. </li>
+ *         <li><em> 400 </em> : No <var> project </var> was specified in the URL path,
+ *             or the record exists but could not be deleted. </li> 
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *   </ul>
  *  </div>
  * </li>
  * 
