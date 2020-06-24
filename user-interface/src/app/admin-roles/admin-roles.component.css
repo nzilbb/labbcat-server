@@ -1,6 +1,6 @@
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
-    .project-description {
+    .role-description {
         width: 65%;
     }
 }
