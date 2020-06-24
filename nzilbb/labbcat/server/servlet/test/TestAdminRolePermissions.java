@@ -242,10 +242,11 @@ public class TestAdminRolePermissions
          assertTrue("There's at least one rolePermission", rolePermissions.length >= 1);
          boolean found = false;
          for (RolePermission c : rolePermissions) {
+            assertEquals("Only correct role listed",
+                         originalRolePermission.getRoleId(), c.getRoleId());
             if (c.getRoleId().equals(originalRolePermission.getRoleId())
                 && c.getEntity().equals(originalRolePermission.getEntity())) {
                found = true;
-               break;
             }
          }
          assertTrue("RolePermission was added", found);
