@@ -1,0 +1,40 @@
+<h2>Roles</h2>
+<div class="list role-list">
+  <div class="item add-new">
+    <span class="role-id" title="Name"><legend>Name</legend>
+      <input #role_id type="text" required placeholder="Name"></span>
+    <span class="role-description" title="Description"><legend>Description</legend>
+      <textarea #description placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <app-button action="create"
+                  (click)="role_id.reportValidity() && createRow(role_id.value, description.value); role_id.value = description.value = '';"
+                  title="Add new record"></app-button>
+    </span>
+  </div>
+  
+  <app-wait *ngIf="!rows"></app-wait>
+  <div class="item" *ngFor="let role of rows">
+    <span class="role-id" title="Name"><legend>Name</legend>
+      {{role.role_id}}</span>
+    <span class="role-description" title="Description"><legend>Description</legend>
+      <textarea #description
+             [(ngModel)]="role.description"
+             (input)="onChange(role)"
+             placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <app-button action="delete"
+                  disabled="{{role._cantDelete}}"
+                  (click)="deleteRow(role);"
+                  title="{{role._cantDelete||'Delete '+role.role}}"></app-button>
+    </span>
+
+  </div>
+</div>
+<div class="buttons">
+  <app-button action="save"
+              (click)="updateChangedRows();"
+              *ngIf="changed"
+              title="Save all changed roles"></app-button>
+</div>

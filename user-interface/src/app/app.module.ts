@@ -16,6 +16,7 @@ import { AdminProjectsComponent } from './admin-projects/admin-projects.componen
 import { ButtonComponent } from './button/button.component';
 import { LoginComponent } from './login/login.component';
 import { AdminTracksComponent } from './admin-tracks/admin-tracks.component';
+import { AdminRolesComponent } from './admin-roles/admin-roles.component';
 
 @NgModule({
     declarations: [
@@ -30,7 +31,8 @@ import { AdminTracksComponent } from './admin-tracks/admin-tracks.component';
         AdminProjectsComponent,
         ButtonComponent,
         LoginComponent,
-        AdminTracksComponent
+        AdminTracksComponent,
+        AdminRolesComponent
     ],
     imports: [
         BrowserModule,

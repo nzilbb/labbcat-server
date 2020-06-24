@@ -142,8 +142,11 @@ public class TableServletBase extends LabbcatServlet {
       } // end of formatMessage()
    }
 
-   /** An ordered list of key field names */
+   /** An ordered list of checks to discover whether a record can be deleted */
    protected List<DeleteCheck> deleteChecks;
+
+   /** An ordered list of updates to run before deleting a record */
+   protected List<DeleteCheck> beforeDelete;
 
    /** 
     * Constructor from attributes.
@@ -891,12 +894,15 @@ public class TableServletBase extends LabbcatServlet {
                   query.append(" WHERE ");
                   query.append(where);
 
-                  if (deleteChecks != null) {
+                  if (deleteChecks != null || beforeDelete != null) {
                      // get all the field values we'll need
+                     Vector<DeleteCheck> allQueries = new Vector<DeleteCheck>();
+                     if (deleteChecks != null) allQueries.addAll(deleteChecks);
+                     if (beforeDelete != null) allQueries.addAll(beforeDelete);
                      HashMap<String,String> checkFieldValues = new HashMap<String,String>();
                      HashSet<String> missingFields = new HashSet<String>();
                      boolean needNonKeyValues = false;
-                     for (DeleteCheck check : deleteChecks) {
+                     for (DeleteCheck check : allQueries) {
                         for (String field : check.fields) {
                            checkFieldValues.put(field, null);
                            if (!urlKeys.contains(field)) needNonKeyValues = true;
@@ -917,7 +923,6 @@ public class TableServletBase extends LabbcatServlet {
                         checkFieldValuesQuery.append(table);
                         checkFieldValuesQuery.append(" WHERE ");
                         checkFieldValuesQuery.append(where);
-                        log("DELETE " + request.getPathInfo() + " check values : " + checkFieldValuesQuery.toString()); // TODO remove
                         PreparedStatement sql = connection.prepareStatement(
                            checkFieldValuesQuery.toString());
                         int c = 1;
@@ -942,29 +947,51 @@ public class TableServletBase extends LabbcatServlet {
                         } // next key
                      }
                      
-                     // now that we've got the field values, run each check
-                     for (DeleteCheck check : deleteChecks) {
-                        log("DELETE " + request.getPathInfo() + " check query : " + check.query); // TODO remove
-                        PreparedStatement sqlCheck = connection.prepareStatement(check.query);
-                        // set parameter values
-                        int p = 1;
-                        for (String field : check.fields) {
-                           sqlCheck.setString(p++, checkFieldValues.get(field));
-                        } // next field
-                        ResultSet rsCheck = sqlCheck.executeQuery();
-                        try {
-                           if (rsCheck.next() && rsCheck.getLong(1) != 0) {
-                              response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                              failureResult(check.formatReason(rsCheck))
-                                 .write(response.getWriter());
-                              return;
+                     if (deleteChecks != null) {
+                        // now that we've got the field values, run each check
+                        for (DeleteCheck check : deleteChecks) {
+                           PreparedStatement sqlCheck = connection.prepareStatement(check.query);
+                           // set parameter values
+                           int p = 1;
+                           for (String field : check.fields) {
+                              sqlCheck.setString(p++, checkFieldValues.get(field));
+                           } // next field
+                           ResultSet rsCheck = sqlCheck.executeQuery();
+                           try {
+                              if (rsCheck.next() && rsCheck.getLong(1) != 0) {
+                                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                                 failureResult(check.formatReason(rsCheck))
+                                    .write(response.getWriter());
+                                 return;
+                              }
+                           } finally {
+                              rsCheck.close();
+                              sqlCheck.close();
                            }
-                        } finally {
-                           rsCheck.close();
-                           sqlCheck.close();
-                        }
-                     } // next check
-                  } // need to check before deleting
+                        } // next check
+                     } // deleteChecks
+
+                     // if we got this far, the delete will go ahead, so run beforeDeletes now
+                     
+                     if (beforeDelete != null) {
+                        // now that we've got the field values, run each check
+                        for (DeleteCheck update : beforeDelete) {
+                           PreparedStatement sqlUpdate = connection.prepareStatement(update.query);
+                           // set parameter values
+                           int p = 1;
+                           for (String field : update.fields) {
+                              sqlUpdate.setString(p++, checkFieldValues.get(field));
+                           } // next field
+                           try {
+                              sqlUpdate.executeUpdate();
+                           } catch (SQLException sqlX) {
+                              log("beforeDelete failed - " + update.query + " : " + sqlX);
+                           } finally {
+                              sqlUpdate.close();
+                           }
+                        } // next check
+                     } // deleteChecks
+                  } // need to check or update before deleting
 
                   log("DELETE " + request.getPathInfo() + " : " + query.toString()); // TODO remove
                   PreparedStatement sql = connection.prepareStatement(query.toString());
