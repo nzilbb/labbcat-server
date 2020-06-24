@@ -49,12 +49,13 @@ public class AdminMediaTracks extends TableServletBase {
                add("description");
                add("display_order");
             }},
-            null, // where
-            "display_order", // order
-            true, // create
-            true, // read
-            true, // update
-            true); // delete
+            "display_order"); // order
+      
+      create = true;
+      read = true;
+      update = true;
+      delete = true;
+      
       emptyKeyAllowed = true;
    }
 

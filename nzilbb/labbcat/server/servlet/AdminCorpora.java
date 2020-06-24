@@ -49,12 +49,12 @@ public class AdminCorpora extends TableServletBase {
                add("corpus_language");
                add("corpus_description");
             }},
-            null, // where
-            "corpus_name", // order
-            true, // create
-            true, // read
-            true, // update
-            true); // delete
+            "corpus_name"); // order
+      
+      create = true;
+      read = true;
+      update = true;
+      delete = true;
       
       autoKey = "corpus_id";
       autoKeyQuery = "SELECT COALESCE(max(corpus_id) + 1, 1) FROM corpus";      

@@ -74,16 +74,16 @@ public class TableServletBase extends LabbcatServlet {
    /** ORDER clause */
    protected String orderClause;
 
-   /** Whether Create operations are allowed via POST */
+   /** Whether Create operations are allowed via POST - default = false */
    protected boolean create = false;
 
-   /** Whether Read operations are allowed via GET */
-   protected boolean read = false;
+   /** Whether Read operations are allowed via GET - default = true */
+   protected boolean read = true;
 
-   /** Whether Update operations are allowed via PUT */
+   /** Whether Update operations are allowed via PUT - default = false */
    protected boolean update = false;
 
-   /** Whether Delete operations are allowed via DELETE */
+   /** Whether Delete operations are allowed via DELETE - default = false */
    protected boolean delete = false;
 
    /** Key that is automatically generated when records are created */
@@ -158,12 +158,8 @@ public class TableServletBase extends LabbcatServlet {
     * @param delete Whether Delete operations are allowed via DELETE.
     */
    protected TableServletBase(
-      String table, List<String> dbKeys, List<String> columns,
-      String whereClause, String orderClause,
-      boolean create, boolean read, boolean update, boolean delete) {      
-      this(table, dbKeys, dbKeys, columns,
-           columns, whereClause, orderClause,
-           create, read, update, delete);
+      String table, List<String> dbKeys, List<String> columns, String orderClause) {      
+      this(table, dbKeys, dbKeys, columns, columns, orderClause);
    }
    
    /** 
@@ -181,11 +177,8 @@ public class TableServletBase extends LabbcatServlet {
     */
    protected TableServletBase(
       String table, List<String> dbKeys, List<String> urlKeys, List<String> columns,
-      String whereClause, String orderClause,
-      boolean create, boolean read, boolean update, boolean delete) {      
-      this(table, dbKeys, urlKeys, columns,
-           columns, whereClause, orderClause,
-           create, read, update, delete);
+      String orderClause) {
+      this(table, dbKeys, urlKeys, columns, columns, orderClause);
    }   
    
    /** 
@@ -203,9 +196,7 @@ public class TableServletBase extends LabbcatServlet {
     */
    protected TableServletBase(
       String table, List<String> dbKeys, List<String> urlKeys, List<String> columns,
-      List<String> listColumns,
-      String whereClause, String orderClause,
-      boolean create, boolean read, boolean update, boolean delete) {      
+      List<String> listColumns, String orderClause) {      
       this.table = table;
       this.dbKeys = dbKeys;
       this.urlKeys = urlKeys;

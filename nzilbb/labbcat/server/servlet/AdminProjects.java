@@ -48,12 +48,12 @@ public class AdminProjects extends TableServletBase {
             new Vector<String>() {{ // columns
                add("description");
             }},
-            null, // where
-            "project", // order
-            true, // create
-            true, // read
-            true, // update
-            true); // delete
+            "project"); // order
+      
+      create = true;
+      read = true;
+      update = true;
+      delete = true;
       
       autoKey = "project_id";
       autoKeyQuery = "SELECT COALESCE(max(project_id) + 1, 1) FROM project";
