@@ -119,48 +119,50 @@ public class AdminRolePermissions extends TableServletBase {
    @Override
    protected List<String> validateBeforeCreate(JSONObject record, Connection connection) {
       List<String> errors = validateBeforeUpdate(record, connection);
-      try {
-         // check it's a valid role
-         PreparedStatement sql = connection.prepareStatement(
-            "SELECT role_id FROM role_definition WHERE role_id = ?");
-         sql.setString(1, record.getString("role_id"));
-         ResultSet rs = sql.executeQuery();
+      if (errors == null) {
          try {
-            if (!rs.next()) {
-               if (errors == null) errors = new Vector<String>();
-               errors.add(
-                  "Invalid role ID: " + record.getString("role_id"));
-            }
-         }
-         finally {
-            rs.close();
-            sql.close();
-         }
-         
-         // check it's a valid transcript attribute, or "corpus"
-         if (!record.getString("attribute_name").equals("corpus")) {
-            sql = connection.prepareStatement(
-               "SELECT attribute FROM attribute_definition"
-               +" WHERE class_id = 'transcript' AND attribute = ?");
-            sql.setString(1, record.getString("attribute_name"));
-            rs = sql.executeQuery();
+            // check it's a valid role
+            PreparedStatement sql = connection.prepareStatement(
+               "SELECT role_id FROM role_definition WHERE role_id = ?");
+            sql.setString(1, record.getString("role_id"));
+            ResultSet rs = sql.executeQuery();
             try {
                if (!rs.next()) {
                   if (errors == null) errors = new Vector<String>();
                   errors.add(
-                     "Invalid transcript attribute: " + record.getString("attribute_name"));
+                     "Invalid role ID: " + record.getString("role_id"));
                }
             }
             finally {
                rs.close();
                sql.close();
             }
-         } // attribute_name != "corpus"
-      } catch (SQLException x) {
-         if (errors == null) errors = new Vector<String>();
-         errors.add(x.toString());
-         // not expecting this, so log it:
-         System.err.println("AdminRolePermissions.validateBeforeInsert: ERROR " + x);
+            
+            // check it's a valid transcript attribute, or "corpus"
+            if (!record.getString("attribute_name").equals("corpus")) {
+               sql = connection.prepareStatement(
+                  "SELECT attribute FROM attribute_definition"
+                  +" WHERE class_id = 'transcript' AND attribute = ?");
+               sql.setString(1, record.getString("attribute_name"));
+               rs = sql.executeQuery();
+               try {
+                  if (!rs.next()) {
+                     if (errors == null) errors = new Vector<String>();
+                     errors.add(
+                        "Invalid transcript attribute: " + record.getString("attribute_name"));
+                  }
+            }
+               finally {
+                  rs.close();
+                  sql.close();
+               }
+            } // attribute_name != "corpus"
+         } catch (SQLException x) {
+            if (errors == null) errors = new Vector<String>();
+            errors.add(x.toString());
+            // not expecting this, so log it:
+            System.err.println("AdminRolePermissions.validateBeforeInsert: ERROR " + x);
+         }
       }
       return errors;
    } // end of validateBeforeUpdate()
