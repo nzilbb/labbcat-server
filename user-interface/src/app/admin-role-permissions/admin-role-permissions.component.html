@@ -1,0 +1,65 @@
+<h2>Role Permissions for <q>{{role_id}}</q></h2>
+<div class="list role-permission-list">
+  <div class="item add-new">
+    <span class="role-permission-entity" title="What the permssion protects"><legend>Entity</legend>
+      <select #entity required>
+        <option disabled selected>Entity</option>
+        <option *ngFor="let e of availableEntityValues"
+                value="{{e}}">
+          {{validEntities[e]}}
+        </option>
+      </select>
+    </span>
+    <span class="role-permission-attribute-name" title="Transcript attribute to check"><legend>Transcript Attribute</legend>
+      <select #attribute_name required>
+        <option disabled selected>Transcript Attribute</option>
+        <option *ngFor="let layer of attributes" value="{{layer.id}}">
+          {{layer.id}}
+        </option>
+      </select>
+    </span>
+    <span class="role-permission-value-pattern" title="Regular expression to match the attribute value"><legend>Pattern</legend>
+      <input #value_pattern type="text" placeholder="Pattern" required >
+    </span>
+    <span class="buttons">
+      <app-button action="create"
+                  (click)="entity.reportValidity() && attribute_name.reportValidity() && value_pattern.reportValidity() && createRow(entity.value, attribute_name.value, value_pattern.value) && !(entity.selectedIndex = attribute_name.selectedIndex = 0) && value_pattern.value = '';"
+                  title="Add new record"></app-button>
+    </span>
+  </div>
+  
+  <app-wait *ngIf="!rows"></app-wait>
+  <div class="item" *ngFor="let permission of rows">
+    <span class="role-permission-entity" title="Name"><legend>Entity</legend>
+      {{validEntities[permission.entity]}}</span>
+    <span class="role-permission-attribute-name" title="Transcript attribute to check"><legend>Transcript Attribute</legend>
+      <select #attribute_name
+              [(ngModel)]="permission.attribute_name"
+              (input)="onChange(permission)"
+              >
+        <option *ngFor="let layer of attributes" value="{{layer.id}}">{{layer.id}}</option>
+      </select>
+    </span>
+    <span class="role-permission-value-pattern" title="Regular expression to match the attribute value"><legend>Pattern</legend>
+      <input #value_pattern
+             [(ngModel)]="permission.value_pattern"
+             (input)="onChange(permission)"
+             type="text"
+             placeholder="Pattern"
+             required >
+    </span>
+    <span class="buttons">
+      <app-button action="delete"
+                  disabled="{{permission._cantDelete}}"
+                  (click)="deleteRow(permission);"
+                  title="{{permission._cantDelete||'Delete '+validEntities[permission.entity]}}"></app-button>
+    </span>
+    
+  </div>
+</div>
+<div class="buttons">
+  <app-button action="save"
+              (click)="updateChangedRows();"
+              *ngIf="changed"
+              title="Save all changed permissions"></app-button>
+</div>

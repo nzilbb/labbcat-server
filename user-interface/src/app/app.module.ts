@@ -17,6 +17,7 @@ import { ButtonComponent } from './button/button.component';
 import { LoginComponent } from './login/login.component';
 import { AdminTracksComponent } from './admin-tracks/admin-tracks.component';
 import { AdminRolesComponent } from './admin-roles/admin-roles.component';
+import { AdminRolePermissionsComponent } from './admin-role-permissions/admin-role-permissions.component';
 
 @NgModule({
     declarations: [
@@ -32,7 +33,8 @@ import { AdminRolesComponent } from './admin-roles/admin-roles.component';
         ButtonComponent,
         LoginComponent,
         AdminTracksComponent,
-        AdminRolesComponent
+        AdminRolesComponent,
+        AdminRolePermissionsComponent
     ],
     imports: [
         BrowserModule,

@@ -24,6 +24,9 @@
              placeholder="Description"></textarea>
     </span>
     <span class="buttons">
+      <a [routerLink]="['/admin','roles',role.role_id,'permissions']"
+         title="Permissions"
+         >🔒</a>
       <app-button action="delete"
                   disabled="{{role._cantDelete}}"
                   (click)="deleteRow(role);"
