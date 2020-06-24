@@ -65,6 +65,7 @@ public class AdminMediaTracks extends TableServletBase {
     * @param connection A connection to th database.
     * @return A list of validation errors, which should be null if the record is valid.
     */
+   @Override
    protected List<String> validateBeforeUpdate(JSONObject record, Connection connection) {
       if (!record.has("display_order") || record.isNull("display_order")
           || record.get("display_order").equals("")) {
