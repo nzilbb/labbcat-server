@@ -61,7 +61,6 @@ export class AdminRolePermissionsComponent implements OnInit {
                         && layer.id != "transcript_type" // (not transcript_type TODO fix this)
                         && layer.id != "episode" // (not episode)
                         && layer.id != "participant")) { // (but not participant layer)
-                    layer.id = layer.id.replace(/^transcript_/,"");
                     this.attributes.push(layer as Layer);                        
                 }
             } // next layer
@@ -118,7 +117,7 @@ export class AdminRolePermissionsComponent implements OnInit {
     
     updateRow(row: RolePermission) {
         this.labbcatService.labbcat.updateRolePermission(
-            this.role_id, row.entity, row.attribute_name, row.value_pattern,
+            this.role_id, row.entity, row.layer, row.value_pattern,
             (permission, errors, messages) => {
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);

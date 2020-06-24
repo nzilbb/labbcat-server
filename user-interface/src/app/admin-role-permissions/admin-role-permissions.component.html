@@ -10,8 +10,8 @@
         </option>
       </select>
     </span>
-    <span class="role-permission-attribute-name" title="Transcript attribute to check"><legend>Transcript Attribute</legend>
-      <select #attribute_name required>
+    <span class="role-permission-layer" title="Transcript attribute to check"><legend>Transcript Attribute</legend>
+      <select #layer required>
         <option disabled selected>Transcript Attribute</option>
         <option *ngFor="let layer of attributes" value="{{layer.id}}">
           {{layer.id}}
@@ -23,7 +23,7 @@
     </span>
     <span class="buttons">
       <app-button action="create"
-                  (click)="entity.reportValidity() && attribute_name.reportValidity() && value_pattern.reportValidity() && createRow(entity.value, attribute_name.value, value_pattern.value) && !(entity.selectedIndex = attribute_name.selectedIndex = 0) && value_pattern.value = '';"
+                  (click)="entity.reportValidity() && layer.reportValidity() && value_pattern.reportValidity() && createRow(entity.value, layer.value, value_pattern.value) && !(entity.selectedIndex = layer.selectedIndex = 0) && value_pattern.value = '';"
                   title="Add new record"></app-button>
     </span>
   </div>
@@ -32,9 +32,9 @@
   <div class="item" *ngFor="let permission of rows">
     <span class="role-permission-entity" title="Name"><legend>Entity</legend>
       {{validEntities[permission.entity]}}</span>
-    <span class="role-permission-attribute-name" title="Transcript attribute to check"><legend>Transcript Attribute</legend>
-      <select #attribute_name
-              [(ngModel)]="permission.attribute_name"
+    <span class="role-permission-layer" title="Transcript attribute to check"><legend>Transcript Attribute</legend>
+      <select #layer
+              [(ngModel)]="permission.layer"
               (input)="onChange(permission)"
               >
         <option *ngFor="let layer of attributes" value="{{layer.id}}">{{layer.id}}</option>
