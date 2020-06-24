@@ -35,7 +35,7 @@ import org.json.JSONException;
 
 /**
  * Servlet that allows administration of rows in the the <em> role_permissions </em> table.
- * <p> See <a href="package-summary.html#/api/admin/rolepermissions">API summary</a> for more details.
+ * <p> See <a href="package-summary.html#/api/admin/roles/permissions">API summary</a> for more details.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet(urlPatterns = "/api/admin/roles/permissions/*", loadOnStartup = 20)

@@ -1020,6 +1020,100 @@
  *  </div>
  * </li>
  * 
+ * <li class="blockList"><h4 id="/api/admin/roles/permissions">/api/admin/roles/permissions[/<var>role_id</var>[/<var>entity</var>]]</h4>
+ *  <div> Allows administration (Create/Read/Update/Delete) of user role permission records via
+ *  JSON-encoded objects with the following attributes:
+ *   <ul>
+ *    <li> <q> role_id </q> : The ID of the role this permission applies to. </li>
+ *    <li> <q> entity </q> : The media entity this permission applies to - a string made
+ *         up of "t" (transcript), "a" (audio), "v" (video), or "i" (image). </li>
+ *    <li> <q> attribute_name </q> : Name of a transcript attribute for which the value determines
+ *         access. This is either a valid transcript attribute name (i.e. excluding the
+ *         "transcript_" prefix in the layer ID), or "corpus". </li>
+ *    <li> <q> value_pattern </q> : Regular expression for matching against the 
+ *         <var> attribute_name </var> value. If the regular expression matches the value,
+ *         access is allowed. </li>
+ *    <li> <q> _cantDelete </q> : This is not a database field, but rather is present in
+ *         records returned from the server that can not currently be deleted; 
+ *         a string representing the reason the record can't be deleted. </li>
+ *   </ul>
+ *  The following operations, specified by the HTTP method, are supported:
+ *   <ul>
+ *    <li><b> POST </b>
+ *    - Create a new record.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the new record
+ *       (excluding <var>role_id</var>). </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the new record (including <var>role_id</var>). </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully created. </li>
+ *         <li><em> 409 </em> : The record could not be added because it was already there. </li> 
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ * 
+ *    <li><b> GET </b>
+ *    - Read the records. 
+ *     <ul>
+ *      <li><em> Request Path </em> - /api/admin/roles/permissions/<var>role_id</var> where 
+ *          <var> role_id </var> is the ID of the role the permissions belong to.</li>
+ *      <li><em> Parameters </em>
+ *        <ul>
+ *         <li><em> pageNumber </em> (integer) : The (zero-based) page to return. </li>
+ *         <li><em> pageLength </em> (integer) : How many rows per page (default is 20). </li>
+ *         <li><em> Accept </em> (string) : Equivalent of the "Accept" request header (see below). </li>
+ *        </ul>
+ *      </li>
+ *      <li><em> "Accept" request header/parameter </em> "text/csv" to return records as
+ *       Comma Separated Values. If not specified, records are returned as a JSON-encoded
+ *       array of objects.</li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as a
+ *       corresponding list of records.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The records could be listed. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *    
+ *    <li><b> PUT </b>
+ *    - Update an existing record, specified by the <var> role </var> given in the
+ *    request body.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the record. </li> 
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully updated. </li>
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *    
+ *    <li><b> DELETE </b>
+ *    - Delete an existing record.
+ *     <ul>
+ *      <li><em> Request Path </em> - /api/admin/roles/permissions/<var>role_id</var>/<var>entity</var>  
+ *          where <var> role_id </var> is the ID of the role the permissions belong to and
+ *          <var> entity </var> is the entity to delete the permission for..</li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, including a message if
+ *          the request succeeds or an error explaining the reason for failure. </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully deleted. </li>
+ *         <li><em> 400 </em> : No <var> role </var> was specified in the URL path,
+ *             or the record exists but could not be deleted. </li> 
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *   </ul>
+ *  </div>
+ * </li>
+ * 
  * </ul></li></ul></section>
  *
  */
