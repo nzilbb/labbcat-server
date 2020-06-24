@@ -20,7 +20,8 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 /**
- * <p>All LaBB-CAT request for which the the <q>Accept</q> HTTP header is set to
+ * <p>Servlet providing an HTTP-based API.
+ * <p>All LaBB-CAT requests for which the the <q>Accept</q> HTTP header is set to
  * <q>application/json</q> return a JSON response with the same standard envelope structure:
  * <dl>
  *  <dt>title</dt> <dd>(string) The title of the LaBB-CAT instance.</dd>
@@ -55,11 +56,16 @@
  *    }
  *}</pre>
  * <p>Graph store functions include:
+ * <ul>
+ *  <li><a href="#IGraphStoreQuery"> IGraphStoreQuery functions </a></li>
+ *  <li><a href="#IGraphStore"> IGraphStore functions </a></li>
+ *  <li><a href="#OtherFunctions"> and other LaBB-CAT-specific functions. </a></li>
+ * </ul>
 <!-- Based on IGraphStoreQuery javadoc -->
 <section role="region">
   <ul class="blockList">
     <li class="blockList">
-      <h3>/api/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStoreQuery.html">nzilbb.ag.IGraphStoreQuery</a> functions:</h3>
+      <h3 id="IGraphStoreQuery">/api/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStoreQuery.html">nzilbb.ag.IGraphStoreQuery</a> functions:</h3>
       <a id="getId()">
         <!--   -->
       </a>
@@ -591,7 +597,7 @@
 <section role="region">
   <ul class="blockList">
     <li class="blockList">
-      <h3>/api/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
+      <h3 id="IGraphStore">/api/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
       <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
         <!--   -->
       </a>
@@ -649,7 +655,7 @@
 </section>
  * 
  * <section role="region"><ul class="blockList"><li class="blockList">
- * <h3>Other functions include:</h3><ul class="blockList">
+ * <h3 id="OtherFunctions">Other functions include:</h3><ul class="blockList">
  * 
  * <li class="blockList"><h4 id="/api/serialize/graphs">/api/serialize/graphs</h4>
  *  <div> Converts transcript fragments. The request method can be <b> GET </b> or <b> POST </b>
@@ -670,7 +676,7 @@
  *  the converter behaviour and how many fragments are specified.
  *  If there is only one, the file in returned as the response to 
  *  the request.  If there are more than one, the response is a
- *  zipfile containing the output files. </li>
+ *  zipfile containing the output files.
  *  </div>
  * </li>
  * 

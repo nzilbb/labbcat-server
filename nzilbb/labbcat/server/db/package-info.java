@@ -20,7 +20,8 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 /**
- * Graph Store implementations and supporting classes, which use an RDBMS database
- * (assumed to by MySQL) as an annotation store, and the file system as a file store.
+ * Graph Store implementation.
+ * An RDBMS database (assumed to by MySQL) as an annotation store, and the file system as
+ * a file store. 
  */
 package nzilbb.labbcat.server.db;
