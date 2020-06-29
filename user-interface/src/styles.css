@@ -131,7 +131,7 @@ button:disabled img {
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
-    app-root nav { min-height: 100px; max-width: 120px; }
+    app-root nav { min-height: 100px; max-width: min-content; }
     app-root aside { max-width: 120px; }
     app-admin-menu li:first-child { border-top: 1px solid #859044; border-left: none; }
     .list { display: table; }
