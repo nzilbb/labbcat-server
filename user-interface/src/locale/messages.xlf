@@ -379,6 +379,13 @@
         </context-group>
         <note priority="1" from="description">[The source code is available] ... here</note>
       </trans-unit>
+      <trans-unit id="85820574788f07c1b4e432b7044ca18af57f5b5b" datatype="html">
+        <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION" equiv-text="{{label}}"/>} }</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/button/button.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="83c4d4d764d2e2725ab8e919ec16ac400e1f290a" datatype="html">
         <source>User ID</source>
         <context-group purpose="location">

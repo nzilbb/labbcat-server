@@ -22,17 +22,17 @@ export class ButtonComponent implements OnInit {
     ngOnInit(): void {
         switch (this.action) {
             case "create":
-                this.label = "New";
+                this.label = "New"; // TODO l10n
                 this.icon = "➕";
                 this.img = "new.png"; // TODO replace with svg, or maybe just use icon
                 break;
             case "delete":
-                this.label = "Delete";
+                this.label = "Delete"; // TODO l10n
                 this.icon = "➖"; 
                 this.img = "delete.png"; // TODO replace with svg
                 break;
             default:
-                this.label = "Save";
+                this.label = "Save"; // TODO l10n
                 this.icon = "💾";
                 this.img = "save.png"; // TODO replace with svg
                 break;
