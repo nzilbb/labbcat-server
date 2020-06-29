@@ -1,7 +1,7 @@
-<h2>Role Permissions for <q>{{role_id}}</q></h2>
+<h2><span i18n="page header|Role Permissions for [role_id]">Role Permissions for</span> <q>{{role_id}}</q></h2>
 <div class="list role-permission-list">
   <div class="item add-new">
-    <span class="role-permission-entity" title="What the permssion protects"><legend>Entity</legend>
+    <span class="role-permission-entity" i18n-title title="What the permission protects"><legend i18n="What is protected by a pemission (transcript, audio, video, etc.)">Entity</legend>
       <select #entity required>
         <option disabled selected>Entity</option>
         <option *ngFor="let e of availableEntityValues"
@@ -10,29 +10,29 @@
         </option>
       </select>
     </span>
-    <span class="role-permission-layer" title="Transcript attribute to check"><legend>Transcript Attribute</legend>
+    <span class="role-permission-layer" i18n-title title="Transcript attribute to check"><legend i18n>Transcript Attribute</legend>
       <select #layer required>
-        <option disabled selected>Transcript Attribute</option>
+        <option disabled selected i18n="select option placeholder">Transcript Attribute</option>
         <option *ngFor="let layer of attributes" value="{{layer.id}}">
           {{layer.id}}
         </option>
       </select>
     </span>
-    <span class="role-permission-value-pattern" title="Regular expression to match the attribute value"><legend>Pattern</legend>
+    <span class="role-permission-value-pattern" i18n-title title="Regular expression to match the attribute value"><legend i18n="field header|Regular expression pattern">Pattern</legend>
       <input #value_pattern type="text" placeholder="Pattern" required >
     </span>
     <span class="buttons">
       <app-button action="create"
                   (click)="entity.reportValidity() && layer.reportValidity() && value_pattern.reportValidity() && createRow(entity.value, layer.value, value_pattern.value) && !(entity.selectedIndex = layer.selectedIndex = 0) && value_pattern.value = '';"
-                  title="Add new record"></app-button>
+                  i18n-title title="Add new record"></app-button>
     </span>
   </div>
   
   <app-wait *ngIf="!rows"></app-wait>
   <div class="item" *ngFor="let permission of rows">
-    <span class="role-permission-entity" title="Name"><legend>Entity</legend>
+    <span class="role-permission-entity" i18n-title title="Name"><legend i18n>Entity</legend>
       {{validEntities[permission.entity]}}</span>
-    <span class="role-permission-layer" title="Transcript attribute to check"><legend>Transcript Attribute</legend>
+    <span class="role-permission-layer" i18n-title title="Transcript attribute to check"><legend i18n="field header">Transcript Attribute</legend>
       <select #layer
               [(ngModel)]="permission.layer"
               (input)="onChange(permission)"
@@ -40,19 +40,19 @@
         <option *ngFor="let layer of attributes" value="{{layer.id}}">{{layer.id}}</option>
       </select>
     </span>
-    <span class="role-permission-value-pattern" title="Regular expression to match the attribute value"><legend>Pattern</legend>
+    <span class="role-permission-value-pattern" i18n-title title="Regular expression to match the attribute value"><legend i18n="field header|Regular expression pattern">Pattern</legend>
       <input #value_pattern
              [(ngModel)]="permission.value_pattern"
              (input)="onChange(permission)"
              type="text"
-             placeholder="Pattern"
+             i18n-placeholder="input placeholder|Regular expression pattern" placeholder="Pattern"
              required >
     </span>
     <span class="buttons">
       <app-button action="delete"
                   disabled="{{permission._cantDelete}}"
                   (click)="deleteRow(permission);"
-                  title="{{permission._cantDelete||'Delete '+validEntities[permission.entity]}}"></app-button>
+                  title="{{permission._cantDelete}}"></app-button>
     </span>
     
   </div>
@@ -61,5 +61,5 @@
   <app-button action="save"
               (click)="updateChangedRows();"
               *ngIf="changed"
-              title="Save all changed permissions"></app-button>
+              i18n-title title="Save all changed records"></app-button>
 </div>

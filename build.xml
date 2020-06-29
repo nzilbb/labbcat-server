@@ -112,12 +112,24 @@
     </junit>
   </target>
 
+  <target name="i18n"
+          description="Extract resources for localization">
+    <exec executable="ng"
+          dir="user-interface"
+          failonerror="true">
+      <arg value="xi18n"/>
+      <arg value="--output-path"/>
+      <arg value="src/locale"/>
+    </exec>
+  </target>
+
   <target name="user-interface"
           description="Build the user-interface app">
     <exec executable="ng"
           dir="user-interface"
           failonerror="true">
       <arg value="build"/>
+      <arg value="--localize"/>
       <arg value="--prod"/>
       <arg value="--outputPath=${config.local-labbcat-path}/user-interface"/>
     </exec>

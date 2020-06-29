@@ -1,36 +1,37 @@
-<h2>Roles</h2>
+<h2 i18n="page header|Roles or groups that users can have/belong to">Roles</h2>
 <div class="list role-list">
   <div class="item add-new">
-    <span class="role-id" title="Name"><legend>Name</legend>
-      <input #role_id type="text" required placeholder="Name"></span>
-    <span class="role-description" title="Description"><legend>Description</legend>
-      <textarea #description placeholder="Description"></textarea>
+    <span class="role-id" i18n-title title="Name"><legend i18n>Name</legend>
+      <input #role_id type="text" i18n-placeholder required placeholder="Name"></span>
+    <span class="role-description" i18n-title title="Description"><legend i18n>Description</legend>
+      <textarea #description i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
       <app-button action="create"
                   (click)="role_id.reportValidity() && createRow(role_id.value, description.value); role_id.value = description.value = '';"
-                  title="Add new record"></app-button>
+                  i18n-title="Button title" title="Add new record"></app-button>
     </span>
   </div>
   
   <app-wait *ngIf="!rows"></app-wait>
   <div class="item" *ngFor="let role of rows">
-    <span class="role-id" title="Name"><legend>Name</legend>
+    <span class="role-id" i18n-title title="Name"><legend i18n>Name</legend>
       {{role.role_id}}</span>
-    <span class="role-description" title="Description"><legend>Description</legend>
+    <span class="role-description" i18n-title title="Description"><legend i18n>Description</legend>
       <textarea #description
-             [(ngModel)]="role.description"
-             (input)="onChange(role)"
-             placeholder="Description"></textarea>
+                [(ngModel)]="role.description"
+                (input)="onChange(role)"
+                i18n-placeholder
+                placeholder="Description"></textarea>
     </span>
     <span class="buttons">
       <a [routerLink]="['/admin','roles',role.role_id,'permissions']"
-         title="Permissions"
+         i18n-title title="Permissions"
          >🔒</a>
       <app-button action="delete"
                   disabled="{{role._cantDelete}}"
                   (click)="deleteRow(role);"
-                  title="{{role._cantDelete||'Delete '+role.role}}"></app-button>
+                  title="{{role._cantDelete}}"></app-button>
     </span>
 
   </div>
@@ -39,5 +40,5 @@
   <app-button action="save"
               (click)="updateChangedRows();"
               *ngIf="changed"
-              title="Save all changed roles"></app-button>
+              title="Save all changed records"></app-button>
 </div>

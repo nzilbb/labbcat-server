@@ -1,29 +1,29 @@
-<h2>Corpora</h2>
+<h2 i18n="page header">Corpora</h2>
 <div class="list corpus-list">
   <div class="item add-new">
-    <span class="corpus-name" title="Name"><legend>Name</legend>
-      <input #name type="text" required placeholder="Name"></span>
-    <span class="corpus-language" title="Language"><legend>Language</legend>
+    <span class="corpus-name" i18n-title title="Name"><legend i18n>Name</legend>
+      <input #name type="text" required i18n-placeholder placeholder="Name"></span>
+    <span class="corpus-language" i18n-title title="Language"><legend i18n>Language</legend>
       <select #language type="text">
-        <option *ngIf="languages" value="{{languages[0].label}}">Language</option>
+        <option *ngIf="languages" value="{{languages[0].label}}" i18n>Language</option>
         <option *ngFor="let language of languages" value="{{language.label}}">{{language.description}}</option>
       </select>
     </span>
-    <span class="corpus-description" title="Description"><legend>Description</legend>
-      <textarea #description placeholder="Description"></textarea>
+    <span class="corpus-description" i18n-title title="Description"><legend i18n>Description</legend>
+      <textarea #description i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <app-button  action="create"
-                   (click)="name.reportValidity() && createRow(name.value, language.value, description.value); name.value = description.value = ''; language.selectedIndex = 0;"
-                   title="Add new record"></app-button>
+      <app-button action="create"
+                  (click)="name.reportValidity() && createRow(name.value, language.value, description.value); name.value = description.value = ''; language.selectedIndex = 0;"
+                   i18n-title title="Add new record"></app-button>
     </span>
   </div>
   
   <app-wait *ngIf="!rows"></app-wait>
   <div class="item" *ngFor="let corpus of rows">
-    <span class="corpus-name" title="Name"><legend>Name</legend>
+    <span class="corpus-name" i18n-title title="Name"><legend i18n>Name</legend>
       {{corpus.corpus_name}}</span>
-    <span class="corpus-language" title="Language"><legend>Language</legend>
+    <span class="corpus-language" i18n-title title="Language"><legend i18n>Language</legend>
       <select #language
               type="text"
               [(ngModel)]="corpus.corpus_language"
@@ -31,19 +31,19 @@
         <option *ngFor="let language of languages" value="{{language.label}}">{{language.description}}</option>
       </select>
     </span>
-    <span class="corpus-description" title="Description"><legend>Description</legend>
+    <span class="corpus-description" i18n-title title="Description"><legend i18n>Description</legend>
       <textarea #description
              [(ngModel)]="corpus.corpus_description"
              (input)="onChange(corpus)"
-             placeholder="Description"></textarea>
+             i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <a title="Information about this corpus"
+      <a i18n-title title="Information about this corpus"
          href="corpus?corpus_id={{corpus.corpus_id}}">🛈</a>
       <app-button  action="delete"
                    disabled="{{corpus._cantDelete}}"
                    (click)="deleteRow(corpus);"
-                   title="{{corpus._cantDelete||'Delete '+corpus.corpus_name}}"></app-button>
+                   title="{{corpus._cantDelete}}"></app-button>
     </span>
 
   </div>
@@ -52,5 +52,5 @@
   <app-button action="update"
               (click)="updateChangedRows();"
               *ngIf="changed"
-              title="Save all changed corpora"></app-button>
+              i18n-title title="Save all changed records"></app-button>
 </div>

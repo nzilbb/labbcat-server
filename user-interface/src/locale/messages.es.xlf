@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" datatype="plaintext" original="ng2.template" target-language="es">
+    <body>
+      <trans-unit id="5d87314cda42c0b803a31b9f4893c6b6a08bcae1" datatype="html">
+        <source>Please wait...</source>
+        <target state="translated">Por favor espere...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/wait/wait.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9c2b7d292e28275598931c14d24af0e78bf0869f" datatype="html">
+        <source>Corpora</source>
+        <target state="translated">Corpuses</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <note priority="1" from="description">page header</note>
+      </trans-unit>
+      <trans-unit id="cff1428d10d59d14e45edec3c735a27b5482db59" datatype="html">
+        <source>Name</source>
+        <target state="translated">Nombre</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="fe46ccaae902ce974e2441abe752399288298619" datatype="html">
+        <source>Language</source>
+        <target state="translated">Idioma</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="eec715de352a6b114713b30b640d319fa78207a0" datatype="html">
+        <source>Description</source>
+        <target state="translated">Descripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="87453c49a7f17a9a71a3083fe7ef093424406564" datatype="html">
+        <source>Add new record</source>
+        <target state="translated">Añadir nuevo renglón</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="78d821bc92ba3fd802cc99d45a2bdead415bd954" datatype="html">
+        <source>Information about this corpus</source>
+        <target state="translated">Información sobre este corpus</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="daf799167799edbb0672d08d6160482912c04885" datatype="html">
+        <source>Save all changed records</source>
+        <target state="translated">Guardar todos los datos cambiados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-corpora/admin-corpora.component.html</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4c626ac4a3bc20698914ff26f73438d56632fa56" datatype="html">
+        <source>View, create, and edit corpora</source>
+        <target state="translated">Ver, crear, y editar corpuses</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+      <trans-unit id="d2a7deb7096cada2c3177157652680fe7e6de0ed" datatype="html">
+        <source>Projects</source>
+        <target state="translated">Proyectos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-projects/admin-projects.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <note priority="1" from="description">menu label</note>
+      </trans-unit>
+      <trans-unit id="5bb53f4143366e4b53d1c4ffd8179a748b9c1be7" datatype="html">
+        <source>View, create, and edit projects</source>
+        <target state="translated">Ver, crear, y editar proyectos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+      <trans-unit id="f97103b1395931c464d8d398c8265ffd93ad9a21" datatype="html">
+        <source>Media Tracks</source>
+        <target state="translated">Pistas de medios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <note priority="1" from="description">menu label</note>
+      </trans-unit>
+      <trans-unit id="77dc65f88b6046d21bcb6522c69bced70d015baa" datatype="html">
+        <source>View, create, and edit media tracks</source>
+        <target state="translated">Ver, crear, y editar pistas de medios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+      <trans-unit id="42bf8ee3a4cb67aa0fd9965566c55276b15009c8" datatype="html">
+        <source>User Roles</source>
+        <target state="translated">Roles de Usuarios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <note priority="1" from="description">menu label</note>
+      </trans-unit>
+      <trans-unit id="18118811979b9f75e878145d5dbccbd228cf4cb6" datatype="html">
+        <source>View, create, and edit user roles</source>
+        <target state="translated">Ver, crear, y editar roles de usuarios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+      <trans-unit id="873dc7261fcfc098ed881acbb6cb790375a4f074" datatype="html">
+        <source>LaBB-CAT</source>
+        <target state="translated">LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/about/about.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <note priority="1" from="description">about page header</note>
+      </trans-unit>
+      <trans-unit id="3fb17fce7f690ad23dad26d0d8a54a2cb686e6ec" datatype="html">
+        <source>was developed at</source>
+        <target state="translated">fue desarrollado por</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/about/about.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+        <note priority="1" from="description">[LaBB-CAT]... was developed at the ...[NZILBB]</note>
+      </trans-unit>
+      <trans-unit id="c3e701683ed76eb555b0b1f5e576d9c57ea8c98a" datatype="html">
+        <source>
+    the New Zealand Institute of Language, Brain and Behaviour</source>
+        <target state="translated"> el New Zealand Institute of Language, Brain and Behaviour</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/about/about.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <note priority="1" from="description">NZILBB</note>
+        <note priority="1" from="meaning">developer name</note>
+      </trans-unit>
+      <trans-unit id="47a9d0a4e40abec6fe590cb2d9a5f4da6fbb4e21" datatype="html">
+        <source>
+    and is free software distributed under the terms of the</source>
+        <target state="translated"> y es software libre distribuido bajo los terminos del</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/about/about.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <note priority="1" from="description">[LaBB-CAT was developed at NZILBB] and is FOSS dist. under terms of the [AGPL]</note>
+      </trans-unit>
+      <trans-unit id="6ee8806b69702bb88f992300914219960ced43d4" datatype="html">
+        <source>
+    GNU Affero General Public Licence</source>
+        <target state="translated"> GNU Affero General Public Licence</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/about/about.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <note priority="1" from="description">Name of the AGPL</note>
+      </trans-unit>
+      <trans-unit id="723d69ceeee2f4991f728e50c288807ced65c5b2" datatype="html">
+        <source>The source code is available</source>
+        <target state="translated">El código fuente está disponible</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/about/about.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <note priority="1" from="description">The source code is available ... [here]</note>
+      </trans-unit>
+      <trans-unit id="16bd21c1b48036d54c6a595f5cff2540cfba7f60" datatype="html">
+        <source>here</source>
+        <target state="translated">aquí</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/about/about.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <note priority="1" from="description">[The source code is available] ... here</note>
+      </trans-unit>
+      <trans-unit id="83c4d4d764d2e2725ab8e919ec16ac400e1f290a" datatype="html">
+        <source>User ID</source>
+        <target state="translated">Usuario</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/login/login.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/login/login.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/login/login.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dd6536f9df9bbf8d9fce4f2c296a9394d0eebcf6" datatype="html">
+        <source>Pass Phrase</source>
+        <target state="translated">Contraseña</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/login/login.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/login/login.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/login/login.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f093d9574ab746b231504bd2cbb65f04bd7b00db" datatype="html">
+        <source>Log in</source>
+        <target state="translated">Entrar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/login/login.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <note priority="1" from="description">button title</note>
+      </trans-unit>
+      <trans-unit id="f31c937e79d0fe252330ced40e6bd3f518ad1f06" datatype="html">
+        <source>Suffix</source>
+        <target state="translated">Sufijo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <note priority="1" from="description">File extension</note>
+      </trans-unit>
+      <trans-unit id="5704ec2049d007c5f5fb495a5d8b607e68d58081" datatype="html">
+        <source>Order</source>
+        <target state="translated">Órden</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <note priority="1" from="description">field header</note>
+      </trans-unit>
+      <trans-unit id="a25192043c9536850feec3a57e42fba177c6f06c" datatype="html">
+        <source>Display order</source>
+        <target state="translated">Órden de mostrar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7d2ae6a77bc1bb4b195994cad7c88b7a9c955388" datatype="html">
+        <source>Media files with no suffix</source>
+        <target state="translated">Archivos de medios sin sufijo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="372509cac121163228ecabcf0ff348c890c3e2d1" datatype="html">
+        <source>Roles</source>
+        <target state="translated">Roles</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <note priority="1" from="description">Roles or groups that users can have/belong to</note>
+        <note priority="1" from="meaning">page header</note>
+      </trans-unit>
+      <trans-unit id="70f45880fce6ac5d8e468e25e82aefbba8098cfe" datatype="html">
+        <source>Permissions</source>
+        <target state="translated">Permisos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="24f59ffe3e3908058ccc212b5e2205d3dbf2acd7" datatype="html">
+        <source>Entity</source>
+        <target state="translated">Entidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <note priority="1" from="description">What is protected by a pemission (transcript, audio, video, etc.)</note>
+      </trans-unit>
+      <trans-unit id="46427aa32272d46beb875e711167cfa37d19ca43" datatype="html">
+        <source>What the permission protects</source>
+        <target state="translated">Que proteje el permiso</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f083911e2326e7d94215f7780756a489ad3ffe7f" datatype="html">
+        <source>Transcript Attribute</source>
+        <target state="translated">Atributo de Transcripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="572d4d5a5b1228ddf69f99fc571a95c3d4e15306" datatype="html">
+        <source>Transcript attribute to check</source>
+        <target state="translated">Atributo de transcripción para verificar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8de3819ef894db543e155a9ee29ab1c9069dd59c" datatype="html">
+        <source>Pattern</source>
+        <target state="translated">Patrón</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <note priority="1" from="description">Regular expression pattern</note>
+        <note priority="1" from="meaning">field header</note>
+      </trans-unit>
+      <trans-unit id="eceaea25358797c4d6d54d3129bdc2dd88970a1b" datatype="html">
+        <source>Regular expression to match the attribute value</source>
+        <target state="translated">Expresión regular para testear el valor del atributo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="17a7388cf36569be194d2a0a24fb94a844f69c30" datatype="html">
+        <source>Pattern</source>
+        <target state="translated">Patrón</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+        <note priority="1" from="description">Regular expression pattern</note>
+        <note priority="1" from="meaning">input placeholder</note>
+      </trans-unit>
+      <trans-unit id="2c77e2eb0ee82ffd4693371563c34ed4673a6d2e" datatype="html">
+        <source>Role Permissions for</source>
+        <target state="translated">Permiso de rol para</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <note priority="1" from="description">Role Permissions for [role_id]</note>
+        <note priority="1" from="meaning">page header</note>
+      </trans-unit>
+      <trans-unit id="91d491ccc5b4f218b58d9a5b897b9f15a9342b51" datatype="html">
+        <source>Order</source>
+        <target state="translated">Orden</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <note priority="1" from="description">Order items are displayed in</note>
+        <note priority="1" from="meaning">field</note>
+      </trans-unit>
+      <trans-unit id="d096333865c2cf0ab66402bec9b63edc44ea9f07" datatype="html">
+        <source>Display order</source>
+        <target state="translated">Orden de muestra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-tracks/admin-tracks.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <note priority="1" from="description">Order items are displayed in</note>
+        <note priority="1" from="meaning">field</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

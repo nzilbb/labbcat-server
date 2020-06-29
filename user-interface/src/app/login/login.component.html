@@ -1,26 +1,26 @@
 <div class="login-form">
-  <fieldset class="user"><legend>User ID</legend>
+  <fieldset class="user"><legend i18n>User ID</legend>
     <input #user
            type="text"
            autocomplete="off"
-           title="User ID"
-           placeholder="User ID"
+           i18n-title title="User ID"
+           i18n-placeholder placeholder="User ID"
            (keyup.enter)="btn.click()"
            required
            autofocus>
   </fieldset>
-  <fieldset class="password"><legend>Pass Phrase</legend>
+  <fieldset class="password"><legend i18n>Pass Phrase</legend>
     <input #password
            type="password"
-           title="Pass Phrase"
-           placeholder="Pass Phrase"
+           i18n-title title="Pass Phrase"
+           i18n-placeholder placeholder="Pass Phrase"
            (keyup.enter)="btn.click()"
            required>
   </fieldset>
   <div class="buttons">
     <button #btn
             (click)="user.reportValidity() && password.reportValidity() && login(user.value, password.value); user.value = password.value = ''; "
-            title="Log in">⎆</button>
+            i18n-title="button title" title="Log in">⎆</button>
   </div>
 </div>
 

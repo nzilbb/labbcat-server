@@ -1,14 +1,18 @@
 <ul *ngIf="visible">
-  <li id="menu-admin-corpora"><a [routerLink]="['admin','corpora']"
-         title="View, create, and edit corpora"
-         >Corpora</a></li>
-  <li id="menu-admin-projects"><a [routerLink]="['admin','projects']"
-         title="View, create, and edit projects"
-         >Projects</a></li>
-  <li id="menu-admin-tracks"><a [routerLink]="['admin','tracks']"
-         title="View, create, and edit media tracks"
-         >Media Tracks</a></li>
-  <li id="menu-admin-roles"><a [routerLink]="['admin','roles']"
-         title="View, create, and edit user roles"
-         >User Roles</a></li>
+  <li id="menu-admin-corpora">
+    <a [routerLink]="['admin','corpora']"
+       i18n-title="menu title" title="View, create, and edit corpora"
+       i18n="menu label">Corpora</a> </li>
+  <li id="menu-admin-projects">
+    <a [routerLink]="['admin','projects']"
+       i18n-title="menu title" title="View, create, and edit projects"
+       i18n="menu label">Projects</a> </li>
+  <li id="menu-admin-tracks">
+    <a [routerLink]="['admin','tracks']"
+       i18n-title="menu title" title="View, create, and edit media tracks"
+       i18n="menu label">Media Tracks</a> </li>
+  <li id="menu-admin-roles">
+    <a [routerLink]="['admin','roles']"
+       i18n-title="menu title" title="View, create, and edit user roles"
+       i18n="menu label">User Roles</a> </li>
 </ul>

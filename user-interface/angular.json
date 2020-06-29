@@ -9,6 +9,12 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n" : {
+          "sourceLocale": "en",
+          "locales": {
+              "es": "src/locale/messages.es.xlf"
+          }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -18,6 +24,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
+            "localize": ["es"],
             "aot": true,
             "assets": [
               "src/favicon.ico",

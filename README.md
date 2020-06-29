@@ -39,7 +39,6 @@ More documentation is available [here](https://nzilbb.github.io/labbcat-server/)
 2. Angular CLI
    `npm install -g @angular/cli`
 
-
 ### Debugging / Development
 
 1. Ensure you have a local development instance of LaBB-CAT installed
@@ -48,6 +47,25 @@ More documentation is available [here](https://nzilbb.github.io/labbcat-server/)
 enabled in  ${config.local-labbcat-path}/WEB-INF/web.xml
 3. `cd user-interface`
 4. `ng serve`
+
+### Internationalization/Localization
+
+The user interface components are contain `i18n` attributes for resources that require
+translation to other languages. If changes are made, resource files can be generated for
+translation by executing:
+
+```
+ant xi18n
+```
+
+To localize to a new language/variety:
+1. Copy *user-interface/src/locale/messages.xlf* with a new name formatted
+   *messages.{language-code}-{country-code}.xlf* -
+   e.g. *messages.es-AR.xlf* for Argentine Spanish.
+2. Edit the new file with an XLIFF editor.
+3. Add the new locale to the "locales" setting in *user-interface/angular.json*
+4. 
+
 
 ### Deployment into LaBB-CAT
 
