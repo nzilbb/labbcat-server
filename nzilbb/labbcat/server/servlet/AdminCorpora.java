@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -82,16 +83,18 @@ public class AdminCorpora extends TableServletBase {
     * @return A list of validation errors, which should be null if the record is valid.
     */
    @Override
-   protected List<String> validateBeforeUpdate(JSONObject record, Connection connection) {
+   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
       Vector<String> errors = null;
       try {
          if (!record.has("corpus_name") || record.isNull("corpus_name")) {
-            errors = new Vector<String>() {{ add("No corpus name was provided."); }};
+            errors = new Vector<String>() {{
+                  add(localize(request, "No corpus name was provided.")); }};
          } else {
             // trim name
             record.put("corpus_name", record.getString("corpus_name").trim());
             if (record.getString("corpus_name").length() == 0) {
-               errors = new Vector<String>() {{ add("Corpus name cannot be blank."); }};
+               errors = new Vector<String>() {{
+                     add(localize(request, "Corpus name cannot be blank.")); }};
             }
          }
       } catch (JSONException x) {

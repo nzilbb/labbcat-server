@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, LOCALE_ID } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { Router } from '@angular/router';
@@ -15,9 +15,11 @@ export class LabbcatService {
     
     constructor(
         private router: Router,
-        private messageService: MessageService
+        private messageService: MessageService,
+        @Inject(LOCALE_ID) public locale: string
     ) {
         this.labbcat = new labbcat.LabbcatAdmin(environment.baseUrl); // TODO username/password
+        labbcat.language = this.locale;
     }
 
     login(user: string, password: string, url = "/") {

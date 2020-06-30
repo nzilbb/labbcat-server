@@ -30,6 +30,7 @@ import java.util.regex.PatternSyntaxException;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -67,38 +68,40 @@ public class AdminRolePermissions extends TableServletBase {
     * @return A list of validation errors, which should be null if the record is valid.
     */
    @Override
-   protected List<String> validateBeforeUpdate(JSONObject record, Connection connection) {
+   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
       Vector<String> errors = null;
       try {
          if (!record.has("role_id") || record.isNull("role_id")
              || record.getString("role_id").length() == 0) {
-            errors = new Vector<String>() {{ add("No role ID was provided."); }};
+            errors = new Vector<String>() {{
+                  add(localize(request, "No role ID was provided.")); }};
          } 
          if (!record.has("entity") || record.isNull("entity")) {
             if (errors == null) errors = new Vector<String>();
-            errors.add("No entity was provided.");
+            errors.add(localize(request, "No entity was provided."));
          } else {
             // check it includes at least one of: t(ranscript), i(mage), a(udio), v(ideo)
             if (!record.getString("entity").matches("^[tiav]+$")) {
                if (errors == null) errors = new Vector<String>();
-               errors.add("Invalid entity specifier: " + record.get("entity"));
+               errors.add(localize(request, "Invalid entity specifier: {0}", record.get("entity")));
             }
          }
          if (!record.has("attribute_name") || record.isNull("attribute_name")
              || record.getString("attribute_name").length() == 0) {
             if (errors == null) errors = new Vector<String>();
-            errors.add("No transcript attribute was specified.");
+            errors.add(localize(request, "No transcript attribute was specified."));
          }
          if (!record.has("value_pattern") || record.isNull("value_pattern")
              || record.getString("value_pattern").length() == 0) {
             if (errors == null) errors = new Vector<String>();
-            errors.add("No attribute value pattern was specified.");
+            errors.add(localize(request, "No attribute value pattern was specified."));
          } else {
             try { Pattern.compile(record.getString("value_pattern")); }
             catch(PatternSyntaxException exception) {
                if (errors == null) errors = new Vector<String>();
                errors.add(
-                  "Invalid value pattern: " + record.get("value_pattern") + " - " + exception);
+                  localize(request, "Invalid value pattern: {0} - {1}",
+                           record.get("value_pattern"), exception.getMessage()));
             }
          }
       } catch (JSONException x) {
@@ -117,8 +120,8 @@ public class AdminRolePermissions extends TableServletBase {
     * @return A list of validation errors, which should be null if the record is valid.
     */
    @Override
-   protected List<String> validateBeforeCreate(JSONObject record, Connection connection) {
-      List<String> errors = validateBeforeUpdate(record, connection);
+   protected List<String> validateBeforeCreate(HttpServletRequest request, JSONObject record, Connection connection) {
+      List<String> errors = validateBeforeUpdate(request, record, connection);
       if (errors == null) {
          try {
             // check it's a valid role
@@ -130,7 +133,7 @@ public class AdminRolePermissions extends TableServletBase {
                if (!rs.next()) {
                   if (errors == null) errors = new Vector<String>();
                   errors.add(
-                     "Invalid role ID: " + record.getString("role_id"));
+                     localize(request, "Invalid role ID: {0}", record.getString("role_id")));
                }
             }
             finally {
@@ -149,7 +152,8 @@ public class AdminRolePermissions extends TableServletBase {
                   if (!rs.next()) {
                      if (errors == null) errors = new Vector<String>();
                      errors.add(
-                        "Invalid transcript attribute: " + record.getString("attribute_name"));
+                        localize(request, "Invalid transcript attribute: {0}",
+                                 record.getString("attribute_name")));
                   }
             }
                finally {

@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -74,16 +75,18 @@ public class AdminProjects extends TableServletBase {
     * @return A list of validation errors, which should be null if the record is valid.
     */
    @Override
-   protected List<String> validateBeforeUpdate(JSONObject record, Connection connection) {
+   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
       Vector<String> errors = null;
       try {
          if (!record.has("project") || record.isNull("project")) {
-            errors = new Vector<String>() {{ add("No project name was provided."); }};
+            errors = new Vector<String>() {{
+                  add(localize(request, "No project name was provided.")); }};
          } else {
             // trim name
             record.put("project", record.getString("project").trim());
             if (record.getString("project").length() == 0) {
-               errors = new Vector<String>() {{ add("Project name cannot be blank."); }};
+               errors = new Vector<String>() {{
+                     add(localize(request, "Project name cannot be blank.")); }};
             }
          }
       } catch (JSONException x) {

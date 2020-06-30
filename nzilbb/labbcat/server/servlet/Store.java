@@ -87,7 +87,7 @@ public class Store extends StoreQuery {
       try { // check they have edit permission
          if (!isUserInRole("edit", request, store.getConnection())) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return failureResult("User has no edit permission");
+            return failureResult(request, "User has no edit permission.");
          }
       } catch(SQLException x) {
          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -132,30 +132,30 @@ public class Store extends StoreQuery {
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
+      if (id == null) errors.add(localize(request, "No ID specified."));
       String fromId = request.getParameter("fromId");
-      if (fromId == null) errors.add("No fromId specified.");
+      if (fromId == null) errors.add(localize(request, "No From ID specified."));
       String toId = request.getParameter("toId");
-      if (toId == null) errors.add("No toId specified.");
+      if (toId == null) errors.add(localize(request, "No To ID specified."));
       String layerId = request.getParameter("layerId");
-      if (layerId == null) errors.add("No layerId specified.");
+      if (layerId == null) errors.add(localize(request, "No layer ID specified."));
       String label = request.getParameter("label");
-      if (label == null) errors.add("No label specified.");
+      if (label == null) errors.add(localize(request, "No label specified."));
       Integer confidence = null;
       if (request.getParameter("confidence") == null) {
-         errors.add("No confidence specified.");
+         errors.add(localize(request, "No confidence specified."));
       } else {
          try {
             confidence = Integer.valueOf(request.getParameter("confidence"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid confidence: " + x.getMessage());
+            errors.add(localize(request, "Invalid confidence: {0}", x.getMessage()));
          }
       }
       String parentId = request.getParameter("parentId");
-      if (parentId == null) errors.add("No parentId specified.");
+      if (parentId == null) errors.add(localize(request, "No parent ID specified."));
       if (errors.size() > 0) return failureResult(errors);
       return successResult(
-         store.createAnnotation(id, fromId, toId, layerId, label, confidence, parentId), null);
+         request, store.createAnnotation(id, fromId, toId, layerId, label, confidence, parentId), null);
    }      
    
    /**
@@ -170,12 +170,12 @@ public class Store extends StoreQuery {
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
+      if (id == null) errors.add(localize(request, "No ID specified."));
       String annotationId = request.getParameter("annotationId");
-      if (annotationId == null) errors.add("No annotationId specified.");
+      if (annotationId == null) errors.add(localize(request, "No annotation ID specified."));
       if (errors.size() > 0) return failureResult(errors);
       store.destroyAnnotation(id, annotationId);
-      return successResult(null, "Annotation deleted: " + id);
+      return successResult(request, null, "Annotation deleted: {0}", id);
    }      
    // TODO saveParticipant
    // TODO saveMedia
@@ -194,10 +194,10 @@ public class Store extends StoreQuery {
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
+      if (id == null) errors.add(localize(request, "No id specified."));
       if (errors.size() > 0) return failureResult(errors);
       store.deleteTranscript(id);
-      return successResult(null, "Transcript deleted: " + id);
+      return successResult(request, null, "Transcript deleted: {0}", id);
    }      
    
    private static final long serialVersionUID = 1;

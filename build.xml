@@ -9,6 +9,7 @@
   <property name="javadoc" location="docs/javadoc"/>
   <property name="build"   location="build_${ant.project.name}"/>
   <property name="srcfiles" value="nzilbb/labbcat/server/**/*.java" /> 
+  <property name="resources" value="nzilbb/labbcat/server/locale/*.properties" /> 
   <property name="testsrcfiles" value="nzilbb/labbcat/server/**/Test*.java" />
  
   <target name="all" depends="compile,dist">
@@ -60,6 +61,8 @@
     <jar jarfile="${dist}/${ant.project.name}.jar" 
 	 basedir="${build}"
          comment="version ${DSTAMP}.${TSTAMP}">
+      <!-- include l10n resources -->
+      <fileset dir="${src}" includes="${resources}" />
       <!-- include source code -->
       <fileset dir="${src}" includes="${srcfiles}" />
       <!-- include this build file -->

@@ -81,7 +81,7 @@ public class StoreQuery extends LabbcatServlet {
             json = invokeFunction(request, response, store);
             if (json == null) {
                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-               json = failureResult("Invalid path: " + request.getPathInfo());
+               json = failureResult(request, "Invalid path: {0}", request.getPathInfo());
             }
          } finally {
             cacheStore(store);
@@ -97,7 +97,7 @@ public class StoreQuery extends LabbcatServlet {
          json = failureResult(x);
       } catch (SQLException x) {
          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-         json = failureResult("Cannot connect to database." + x.getMessage());
+         json = failureResult(request, "Cannot connect to database: {0}", x.getMessage());
       }
       if (json != null) {
          response.setContentType("application/json");
@@ -122,7 +122,7 @@ public class StoreQuery extends LabbcatServlet {
          // no path component
          json = successResult(
             // send the version in the model for backwards compatibility with labbcat-R <= 0.4-2
-            new JSONObject().put("version", version), null);
+            request, new JSONObject().put("version", version), null);
          // redirect /store?call=getXXX to /store/getXXX
          if (request.getMethod().equals("GET")
              && request.getParameter("call") != null
@@ -213,7 +213,7 @@ public class StoreQuery extends LabbcatServlet {
    protected JSONObject getId(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
-      return successResult(store.getId(), null);
+      return successResult(request, store.getId(), null);
    }      
    
    /**
@@ -227,7 +227,7 @@ public class StoreQuery extends LabbcatServlet {
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
-      return successResult(store.getLayerIds(), null);
+      return successResult(request, store.getLayerIds(), null);
    }      
    
    /**
@@ -244,7 +244,7 @@ public class StoreQuery extends LabbcatServlet {
       Layer[] layers = store.getLayers();
       // unset children so that JSON serialization doesn't double-up layers
       for (Layer layer : layers) layer.setChildren(null);
-     return successResult(layers, null);
+     return successResult(request, layers, null);
    }      
    
    /**
@@ -258,7 +258,7 @@ public class StoreQuery extends LabbcatServlet {
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
-      return successResult(store.getSchema(), null);
+      return successResult(request, store.getSchema(), null);
    }      
    
    /**
@@ -273,8 +273,8 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String id = request.getParameter("id");
-      if (id == null) return failureResult("No id specified.");
-      return successResult(store.getLayer(id), null);
+      if (id == null) return failureResult(request, "No ID specified.");
+      return successResult(request, store.getLayer(id), null);
    }      
    
    /**
@@ -289,7 +289,7 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String[] ids = store.getCorpusIds();
-      return successResult(ids, ids.length == 0?"There are no corpora.":null);
+      return successResult(request, ids, ids.length == 0?"There are no corpora.":null);
    }      
    
    /**
@@ -304,7 +304,7 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String[] ids = store.getParticipantIds();
-      return successResult(ids, ids.length == 0?"There are no participants.":null);
+      return successResult(request, ids, ids.length == 0?"There are no participants.":null);
    }
    
    /**
@@ -319,14 +319,14 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String id = request.getParameter("id");
-      if (id == null) return failureResult("No id specified.");
+      if (id == null) return failureResult(request, "No ID specified.");
       Annotation participant = store.getParticipant(id);
       if (participant == null)
       {
          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-         return failureResult("Participant not found: " + id);
+         return failureResult(request, "Participant not found: {0}", id);
       }
-      return successResult(participant, null);
+      return successResult(request, participant, null);
    }      
    
    /**
@@ -341,8 +341,8 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String expression = request.getParameter("expression");
-      if (expression == null) return failureResult("No expression specified.");
-      return successResult(store.countMatchingParticipantIds(expression), null);
+      if (expression == null) return failureResult(request, "No expression specified.");
+      return successResult(request, store.countMatchingParticipantIds(expression), null);
    }      
    
    /**
@@ -364,7 +364,7 @@ public class StoreQuery extends LabbcatServlet {
          try {
             pageLength = Integer.valueOf(request.getParameter("pageLength"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid pageLength: " + x.getMessage());
+            errors.add("Invalid page length: " + x.getMessage());
          }
       }
       Integer pageNumber = null;
@@ -372,12 +372,12 @@ public class StoreQuery extends LabbcatServlet {
          try {
             pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid pageNumber: " + x.getMessage());
+            errors.add("Invalid page number: " + x.getMessage());
          }
       }
       if (errors.size() > 0) return failureResult(errors);
       String[] ids = store.getMatchingParticipantIds(expression, pageLength, pageNumber);
-      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
+      return successResult(request, ids, ids.length == 0?"There are no matching IDs.":null);
    }         
    
    /**
@@ -391,7 +391,7 @@ public class StoreQuery extends LabbcatServlet {
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
-      return successResult(store.getTranscriptIds(), null);
+      return successResult(request, store.getTranscriptIds(), null);
    }      
    
    /**
@@ -406,9 +406,9 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String id = request.getParameter("id");
-      if (id == null) return failureResult("No id specified.");
+      if (id == null) return failureResult(request, "No ID specified.");
       String[] ids = store.getTranscriptIdsInCorpus(id);
-      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
+      return successResult(request, ids, ids.length == 0?"There are no matching IDs.":null);
    }      
    
    /**
@@ -423,9 +423,9 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String id = request.getParameter("id");
-      if (id == null) return failureResult("No id specified.");
+      if (id == null) return failureResult(request, "No ID specified.");
       String[] ids = store.getTranscriptIdsWithParticipant(id);
-      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
+      return successResult(request, ids, ids.length == 0?"There are no matching IDs.":null);
    }      
    
    /**
@@ -440,8 +440,8 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String expression = request.getParameter("expression");
-      if (expression == null) return failureResult("No expression specified.");
-      return successResult(store.countMatchingTranscriptIds(expression), null);
+      if (expression == null) return failureResult(request, "No expression specified.");
+      return successResult(request, store.countMatchingTranscriptIds(expression), null);
    }      
    
    /**
@@ -457,13 +457,13 @@ public class StoreQuery extends LabbcatServlet {
 
       Vector<String> errors = new Vector<String>();
       String expression = request.getParameter("expression");
-      if (expression == null) errors.add("No expression specified.");
+      if (expression == null) errors.add(localize(request, "No expression specified."));
       Integer pageLength = null;
       if (request.getParameter("pageLength") != null) {
          try {
             pageLength = Integer.valueOf(request.getParameter("pageLength"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid pageLength: " + x.getMessage());
+            errors.add(localize(request, "Invalid page length: " + x.getMessage()));
          }
       }
       Integer pageNumber = null;
@@ -471,12 +471,12 @@ public class StoreQuery extends LabbcatServlet {
          try {
             pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid pageNumber: " + x.getMessage());
+            errors.add(localize(request, "Invalid page number: " + x.getMessage()));
          }
       }
       if (errors.size() > 0) return failureResult(errors);
       String[] ids = store.getMatchingTranscriptIds(expression, pageLength, pageNumber);
-      return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
+      return successResult(request, ids, ids.length == 0?"There are no matching IDs.":null);
    }         
    
    /**
@@ -491,8 +491,8 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException {
       
       String expression = request.getParameter("expression");
-      if (expression == null) return failureResult("No expression specified.");
-      return successResult(store.countMatchingAnnotations(expression), null);
+      if (expression == null) return failureResult(request, "No expression specified.");
+      return successResult(request, store.countMatchingAnnotations(expression), null);
    }      
    
    /**
@@ -509,13 +509,13 @@ public class StoreQuery extends LabbcatServlet {
       
       Vector<String> errors = new Vector<String>();
       String expression = request.getParameter("expression");
-      if (expression == null) errors.add("No expression specified.");
+      if (expression == null) errors.add(localize(request, "No expression specified."));
       Integer pageLength = null;
       if (request.getParameter("pageLength") != null) {
          try {
             pageLength = Integer.valueOf(request.getParameter("pageLength"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid pageLength: " + x.getMessage());
+            errors.add(localize(request, "Invalid page length: {0}", x.getMessage()));
          }
       }
       Integer pageNumber = null;
@@ -523,12 +523,12 @@ public class StoreQuery extends LabbcatServlet {
          try {
             pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid pageNumber: " + x.getMessage());
+            errors.add(localize(request, "Invalid page number: {0}", x.getMessage()));
          }
       }
       if (errors.size() > 0) return failureResult(errors);
       Annotation[] annotations = store.getMatchingAnnotations(expression, pageLength, pageNumber);
-      return successResult(annotations, annotations.length == 0?"There are no annotations.":null);
+      return successResult(request, annotations, annotations.length == 0?"There are no annotations.":null);
    }         
 
    /**
@@ -544,11 +544,11 @@ public class StoreQuery extends LabbcatServlet {
       
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
+      if (id == null) errors.add(localize(request, "No ID specified."));
       String layerId = request.getParameter("layerId");
-      if (layerId == null) errors.add("No layerId specified.");
+      if (layerId == null) errors.add(localize(request, "No layer ID specified."));
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(store.countAnnotations(id, layerId), null);
+      return successResult(request, store.countAnnotations(id, layerId), null);
    }
    
    /**
@@ -565,15 +565,15 @@ public class StoreQuery extends LabbcatServlet {
       
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
+      if (id == null) errors.add("No ID specified.");
       String layerId = request.getParameter("layerId");
-      if (layerId == null) errors.add("No layerId specified.");
+      if (layerId == null) errors.add(localize(request, "No layer ID specified."));
       Integer pageLength = null;
       if (request.getParameter("pageLength") != null) {
          try {
             pageLength = Integer.valueOf(request.getParameter("pageLength"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid pageLength: " + x.getMessage());
+            errors.add(localize(request, "Invalid page length: {0}", x.getMessage()));
          }
       }
       Integer pageNumber = null;
@@ -581,12 +581,12 @@ public class StoreQuery extends LabbcatServlet {
          try {
             pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid pageNumber: " + x.getMessage());
+            errors.add(localize(request, "Invalid page number: {0}", x.getMessage()));
          }
       }
       if (errors.size() > 0) return failureResult(errors);
       Annotation[] annotations = store.getAnnotations(id, layerId, pageLength, pageNumber);
-      return successResult(annotations, annotations.length == 0?"There are no annotations.":null);
+      return successResult(request, annotations, annotations.length == 0?"There are no annotations.":null);
    }
 
    // TODO getMatchAnnotations
@@ -604,11 +604,11 @@ public class StoreQuery extends LabbcatServlet {
       
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
+      if (id == null) errors.add(localize(request, "No ID specified."));
       String[] anchorIds = request.getParameterValues("anchorIds");
-      if (anchorIds == null) errors.add("No anchorIds specified.");
+      if (anchorIds == null) errors.add(localize(request, "No anchor IDs specified."));
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(store.getAnchors(id, anchorIds), null);
+      return successResult(request, store.getAnchors(id, anchorIds), null);
    }
    
    /**
@@ -624,11 +624,11 @@ public class StoreQuery extends LabbcatServlet {
       
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
+      if (id == null) errors.add(localize(request, "No ID specified."));
       String[] layerIds = request.getParameterValues("layerIds");
       if (layerIds == null) layerIds = new String[0];
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(store.getTranscript(id, layerIds), null);
+      return successResult(request, store.getTranscript(id, layerIds), null);
    }
 
    // TODO getFragment
@@ -645,7 +645,7 @@ public class StoreQuery extends LabbcatServlet {
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
-      return successResult(store.getMediaTracks(), null);
+      return successResult(request, store.getMediaTracks(), null);
    }      
    
    /**
@@ -660,14 +660,14 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
       String id = request.getParameter("id");
-      if (id == null) return failureResult("No id specified.");
+      if (id == null) return failureResult(request, "No ID specified.");
 
       MediaFile[] media = store.getAvailableMedia(id);
       
       // strip out local file paths
       for (MediaFile file : media) file.setFile(null);
       
-      return successResult(media, media.length == 0?"There is no media.":null);
+      return successResult(request, media, media.length == 0?"There is no media.":null);
    }
 
    /**
@@ -683,16 +683,16 @@ public class StoreQuery extends LabbcatServlet {
       
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add("No id specified.");
+      if (id == null) errors.add(localize(request, "No ID specified."));
       String trackSuffix = request.getParameter("trackSuffix"); // optional
       String mimeType = request.getParameter("mimeType");
-      if (mimeType == null) errors.add("No mimeType specified.");
+      if (mimeType == null) errors.add(localize(request, "No Content Type specified."));
       Double startOffset = null;
       if (request.getParameter("startOffset") != null) {
          try {
             startOffset = Double.valueOf(request.getParameter("startOffset"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid startOffset: " + x.getMessage());
+            errors.add(localize(request, "Invalid start offset: {0}", x.getMessage()));
          }
       }
       Double endOffset = null;
@@ -700,19 +700,19 @@ public class StoreQuery extends LabbcatServlet {
          try {
             endOffset = Double.valueOf(request.getParameter("endOffset"));
          } catch(NumberFormatException x) {
-            errors.add("Invalid endOffset: " + x.getMessage());
+            errors.add(localize(request, "Invalid end offset: {0}", x.getMessage()));
          }
       }
       if (startOffset == null && endOffset == null) {
          if (errors.size() > 0) return failureResult(errors);
-         return successResult(store.getMedia(id, trackSuffix, mimeType), null);
+         return successResult(request, store.getMedia(id, trackSuffix, mimeType), null);
       } else {
-         if (startOffset == null) errors.add("startOffset not specified");
-         if (endOffset == null) errors.add("endOffset not specified");
+         if (startOffset == null) errors.add(localize(request, "Start offset not specified."));
+         if (endOffset == null) errors.add(localize(request, "End offset not specified."));
          if (endOffset <= startOffset)
-            errors.add("startOffset ("+startOffset+") must be before endOffset ("+endOffset+")");
+            errors.add(localize(request, "Start offset ({0,number,#.###}) must be before end offset ({1,number,#.###})", startOffset, endOffset));
          if (errors.size() > 0) return failureResult(errors);
-         return successResult(store.getMedia(id, trackSuffix, mimeType, startOffset, endOffset), null);
+         return successResult(request, store.getMedia(id, trackSuffix, mimeType, startOffset, endOffset), null);
       }
    }
 
@@ -728,14 +728,14 @@ public class StoreQuery extends LabbcatServlet {
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
       String id = request.getParameter("id");
-      if (id == null) return failureResult("No id specified.");
+      if (id == null) return failureResult(request, "No ID specified.");
 
       MediaFile[] media = store.getEpisodeDocuments(id);
       
       // strip out local file paths
       for (MediaFile file : media) file.setFile(null);
       
-      return successResult(media, media.length == 0?"There are no documents.":null);
+      return successResult(request, media, media.length == 0?"There are no documents.":null);
    }
 
    private static final long serialVersionUID = 1;

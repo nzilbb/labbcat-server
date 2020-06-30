@@ -31,7 +31,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -62,13 +66,16 @@ public class LabbcatServlet extends HttpServlet {
 
    protected String title;
    protected String version;
-   
+
    // Methods:
    
    /**
     * Default constructor.
     */
    public LabbcatServlet() {
+      // load a default set of localization resources
+      lastBundle = ResourceBundle.getBundle(
+         "nzilbb.labbcat.server.locale.Resources", Locale.UK);
    } // end of constructor
 
    /** 
@@ -282,9 +289,10 @@ public class LabbcatServlet extends HttpServlet {
     * Creates a JSON object representing a success result, with the given model.
     * @param result The result object.
     * @param message An optional message to include in the response envelope.
+    * @param args Arguments to be substituted into the message, if any
     * @return An object for returning as the request result.
     */
-   protected JSONObject successResult(Object result, String message) {
+   protected JSONObject successResult(HttpServletRequest request, Object result, String message, Object... args) {
       JSONObject response = new JSONObject();
       response.put("title", title);
       response.put("version", version);
@@ -327,11 +335,12 @@ public class LabbcatServlet extends HttpServlet {
     * {@link #startResult(JSONWriter)}
     * @param writer The object to write to.
     * @param message An optional message
+    * @param args Arguments to be substituted into the message, if any
     * @return The given writer.
     */
-   protected JSONWriter endSuccessResult(JSONWriter writer, String message) {
+   protected JSONWriter endSuccessResult(HttpServletRequest request, JSONWriter writer, String message, Object... args) {
       writer.key("messages").array();
-      if (message != null) writer.value(message);
+      if (message != null) writer.value(localize(request, message, args));
       writer.endArray();
       writer.key("code").value(0); // TODO deprecate?
       writer.key("errors").array().endArray();
@@ -344,11 +353,12 @@ public class LabbcatServlet extends HttpServlet {
     * {@link #startResult(JSONWriter)}
     * @param writer The object to write to.
     * @param message An error message
+    * @param args Arguments to be substituted into the message, if any
     * @return The given writer.
     */
-   protected JSONWriter endFailureResult(JSONWriter writer, String message) {
+   protected JSONWriter endFailureResult(HttpServletRequest request, JSONWriter writer, String message, Object... args) {
       writer.key("errors").array();
-      if (message != null) writer.value(message);
+      if (message != null) writer.value(localize(request, message, args));
       writer.endArray();
       writer.key("code").value(1); // TODO deprecate?
       writer.key("messages").array().endArray();
@@ -358,7 +368,8 @@ public class LabbcatServlet extends HttpServlet {
    
    /**
     * Creates a JSON object representing a failure result.
-    * @param messages The error messages to return.
+    * @param messages The error messages to return, which must be already localized using
+    * {@link #localize(HttpServletRequest,String,String)}.
     * @return An object for returning as the request result.
     */
    protected JSONObject failureResult(Collection<String> messages) {
@@ -379,9 +390,10 @@ public class LabbcatServlet extends HttpServlet {
    /**
     * Creates a JSON object representing a failure result.
     * @param message The error message to return.
+    * @param args Arguments to be substituted into the message, if any
     * @return An object for returning as the request result.
     */
-   protected JSONObject failureResult(String message) {
+   protected JSONObject failureResult(HttpServletRequest request, String message, Object... args) {
       JSONObject result = new JSONObject();
       result.put("title", title);
       result.put("version", version);
@@ -389,7 +401,7 @@ public class LabbcatServlet extends HttpServlet {
       if (message == null) {
          result.put("errors", new JSONArray());
       } else {
-         result.append("errors", message);
+         result.append("errors", localize(request, message, args));
       }
       result.put("messages", new JSONArray());
       result.put("model", JSONObject.NULL);
@@ -414,6 +426,64 @@ public class LabbcatServlet extends HttpServlet {
       result.put("model", JSONObject.NULL);
       return result;
    } // end of failureResult()
+
+   String lastLanguage = "en";
+   Locale lastLocale = Locale.UK;
+   ResourceBundle lastBundle;
+   /**
+    * Localizes the given message to the language found in the "Accept-Language" header of
+    * the given request, substituting in the given arguments if any.
+    * <p> The message is assumed to be a MessageFormat template like 
+    * "Row could not be added: {0}"
+    * @param request The request, for discovering the locale.
+    * @param message The message format to localize.
+    * @param args Arguments to be substituted into the message. 
+    * @return The localized message (or if the messages couldn't be localized, the
+    * original message) with the given arguments substituted. 
+    */
+   protected String localize(HttpServletRequest request, String message, Object... args) {
+
+      // determine the Locale/ResourceBundle
+      
+      String language = Optional.of(request.getHeader("Accept-Language")).orElse(lastLanguage)
+         // if multiple are specified, use the first one TODO process all possibilities?
+         .replaceAll(",.*","")
+         // and ignore q-factor weighting
+         .replaceAll(";.*","");
+      // fall back to English if they don't care
+      if (language.equals("*")) language = "en";
+      Locale locale = lastLocale; // keep a local locale for thread safety
+      ResourceBundle resources = lastBundle;
+      if (!language.equals(lastLanguage)) {
+         // is it just a language code ("en")? or does it include th country ("en-NZ")?
+         int dash = language.indexOf('-');
+         if (dash < 0) {
+            locale = new Locale(language);
+         } else {
+            locale = new Locale(language.substring(0, dash), language.substring(dash+1));
+         }
+         resources = ResourceBundle.getBundle(
+            "nzilbb.labbcat.server.locale.Resources", locale);
+      }
+
+      // get the localized version of the message
+      String localizedString = message;
+      try {
+         localizedString = resources.getString(message);
+      } catch(Throwable exception) {
+         log("i18n: missing resource in " + language + ": " + message);
+      }
+
+      // do we need to substitute in arguments?
+      if (args.length > 0) {
+         localizedString = new MessageFormat(localizedString).format(args);
+      }
+
+      lastLocale = locale;
+      lastBundle = resources;
+      return localizedString;
+   } // end of localize()
+
 
    private static final long serialVersionUID = 1;
 } // end of class LabbcatServlet

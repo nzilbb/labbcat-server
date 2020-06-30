@@ -87,7 +87,7 @@ public class StoreAdministration extends Store {
       try {
          if (!isUserInRole("admin", request, store.getConnection())) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return failureResult("User has no admin permission");         
+            return failureResult(request, "User has no admin permission.");         
          }
       } catch(SQLException x) {
          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

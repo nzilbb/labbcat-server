@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -66,7 +67,7 @@ public class AdminMediaTracks extends TableServletBase {
     * @return A list of validation errors, which should be null if the record is valid.
     */
    @Override
-   protected List<String> validateBeforeUpdate(JSONObject record, Connection connection) {
+   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
       if (!record.has("display_order") || record.isNull("display_order")
           || record.get("display_order").equals("")) {
          try {
