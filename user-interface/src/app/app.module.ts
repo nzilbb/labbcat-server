@@ -18,6 +18,7 @@ import { LoginComponent } from './login/login.component';
 import { AdminTracksComponent } from './admin-tracks/admin-tracks.component';
 import { AdminRolesComponent } from './admin-roles/admin-roles.component';
 import { AdminRolePermissionsComponent } from './admin-role-permissions/admin-role-permissions.component';
+import { AdminSystemAttributesComponent } from './admin-system-attributes/admin-system-attributes.component';
 
 @NgModule({
     declarations: [
@@ -34,7 +35,8 @@ import { AdminRolePermissionsComponent } from './admin-role-permissions/admin-ro
         LoginComponent,
         AdminTracksComponent,
         AdminRolesComponent,
-        AdminRolePermissionsComponent
+        AdminRolePermissionsComponent,
+        AdminSystemAttributesComponent
     ],
     imports: [
         BrowserModule,

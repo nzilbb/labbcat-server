@@ -1,0 +1,49 @@
+<h2 i18n="page header">System Attributes</h2>
+
+<div class="list attribute-list">
+  <app-wait *ngIf="!attributes"></app-wait>
+  <div class="item attribute-item" *ngFor="let attribute of attributes">
+    <label class="attribute" title="{{attribute.description}}"> {{attribute.label}} </label>
+    <span class="value type-{{attribute.type}}" title="{{attribute.description}}"><legend>{{attribute.label}}</legend>
+
+      <span *ngIf="attribute.type == 'readonly'"
+             title="{{attribute.label}}">{{attribute.value}}</span>
+      
+      <input *ngIf="attribute.type == 'integer'" type="number" step="1"
+             [(ngModel)]="attribute.value" (input)="onChange(attribute)"
+             placeholder="{{attribute.label}}"/>
+      
+      <input *ngIf="attribute.type == 'number'" type="number" step="0.01"
+             [(ngModel)]="attribute.value" (input)="onChange(attribute)"
+             placeholder="{{attribute.label}}"/>
+      
+      <label *ngIf="attribute.type == 'boolean'">
+        <input type="radio" name="{{attribute.attribute}}"
+               [(ngModel)]="attribute.value" (input)="onChange(attribute)"
+               value="1">
+        true
+      </label>
+      <label *ngIf="attribute.type == 'boolean'">
+        <input type="radio" name="{{attribute.attribute}}"
+               [(ngModel)]="attribute.value" (input)="onChange(attribute)"
+               value="0">
+        false
+      </label>
+      
+      <input *ngIf="attribute.type == 'string'" type="text"
+             [(ngModel)]="attribute.value" (input)="onChange(attribute)"
+             placeholder="{{attribute.label}}"/>
+      <select *ngIf="attribute.type == 'select'"
+              [(ngModel)]="attribute.value" (input)="onChange(attribute)"
+              >
+        <option *ngFor="let option of optionValues(attribute)" value="{{option}}">{{attribute.options[option]}}</option>
+      </select>
+    </span>
+  </div>
+</div>
+<div class="buttons">
+  <app-button action="update"
+              (click)="updateChangedAttributes();"
+              *ngIf="changed"
+              i18n-title title="Save all changed records"></app-button>
+</div>

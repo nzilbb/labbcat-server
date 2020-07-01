@@ -34,7 +34,6 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.servlet.ServletException;
@@ -76,6 +75,7 @@ public class LabbcatServlet extends HttpServlet {
       // load a default set of localization resources
       lastBundle = ResourceBundle.getBundle(
          "nzilbb.labbcat.server.locale.Resources", Locale.UK);
+      title = getClass().getSimpleName();
    } // end of constructor
 
    /** 
@@ -190,8 +190,8 @@ public class LabbcatServlet extends HttpServlet {
    } // end of baseUrl()
    
    /**
-    * Determines whether the request can continue. If the servlet is annotated with {@link
-    * RequiredRole}, whether the user is in that role.
+    * Determines whether the request can continue. If the servlet is annotated with 
+    * {@link RequiredRole}, whether the user is in that role.
     * <p> If this method returns false, a side-effect is that response.setStatus() has been
     * called with an appropriate status code.
     * @param request The request for identifying the user.
@@ -445,7 +445,10 @@ public class LabbcatServlet extends HttpServlet {
 
       // determine the Locale/ResourceBundle
       
-      String language = Optional.of(request.getHeader("Accept-Language")).orElse(lastLanguage)
+      String language = request.getHeader("Accept-Language");
+      if (language == null) language = lastLanguage;
+      if (language == null) language = "en";
+      language = language
          // if multiple are specified, use the first one TODO process all possibilities?
          .replaceAll(",.*","")
          // and ignore q-factor weighting
@@ -479,6 +482,7 @@ public class LabbcatServlet extends HttpServlet {
          localizedString = new MessageFormat(localizedString).format(args);
       }
 
+      lastLanguage = language;
       lastLocale = locale;
       lastBundle = resources;
       return localizedString;

@@ -55,7 +55,9 @@
  *        "category":null
  *    }
  *}</pre>
- * <p>Graph store functions include:
+ * <p> If the <q>Accept-Language</q> request header is set, the server will endeavor to
+ * localize messages to the specified language.
+ * <p> Graph store functions include:
  * <ul>
  *  <li><a href="#IGraphStoreQuery"> IGraphStoreQuery functions </a></li>
  *  <li><a href="#IGraphStore"> IGraphStore functions </a></li>
@@ -1106,6 +1108,56 @@
  *         <li><em> 200 </em> : The record was sucessfully deleted. </li>
  *         <li><em> 400 </em> : No <var> role </var> was specified in the URL path,
  *             or the record exists but could not be deleted. </li> 
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *   </ul>
+ *  </div>
+ * </li>
+ * 
+ * <li class="blockList"><h4 id="/api/admin/systemattributes">/api/admin/systemattributes</h4>
+ *  <div> Allows administration (Read/Update) of system attribute records via
+ *  JSON-encoded objects with the following attributes:
+ *   <ul>
+ *    <li> <q> attribute </q> : ID of the attribute. </li>
+ *    <li> <q> type </q> : The type of the attribute - "string", "integer", "boolean",
+ *                         "select", etc.  </li>
+ *    <li> <q> style </q> : Style definition which depends on <q> type </q> - e.g. whether
+ *                          the "boolean" is shown as a checkbox or radio buttons, etc.  </li>
+ *    <li> <q> label </q> : User-facing label for the attribute. </li>
+ *    <li> <q> description </q> : User-facing (long) description of the attribute. </li>
+ *    <li> <q> options </q> : If <q> type </q> is "select", this is an object defining the
+ *                            valid options for the attribute, where the object key is the
+ *                            attribute value and the key's value is the user-facing label
+ *                            for the option.  </li> 
+ *    <li> <q> value </q> : The value of the attribute. </li>
+ *   </ul>
+ *  The following operations, specified by the HTTP method, are supported:
+ *   <ul>
+ *    <li><b> GET </b>
+ *    - Read the records. 
+ *     <ul>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as a
+ *       corresponding list of records.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The records could be listed. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *    
+ *    <li><b> PUT </b>
+ *    - Update an existing record, specified by the <var> systemAttribute </var> given in the
+ *    request body.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the record. </li> 
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully updated. </li>
+ *         <li><em> 400 </em> : The record has type == "readonly" found. </li>
  *         <li><em> 404 </em> : The record was not found. </li>
  *        </ul>
  *      </li>
