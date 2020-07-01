@@ -20,7 +20,7 @@ const routes: Routes = [
     { path: 'admin/tracks', component: AdminTracksComponent },
     { path: 'admin/roles', component: AdminRolesComponent },
     { path: 'admin/roles/:role_id/permissions', component: AdminRolePermissionsComponent },
-    { path: 'admin/systemattributes', component: AdminSystemAttributesComponent },
+    { path: 'admin/attributes', component: AdminSystemAttributesComponent },
 ];
 
 @NgModule({
