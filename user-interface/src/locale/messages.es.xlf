@@ -254,6 +254,10 @@
           <context context-type="sourcefile">src/app/admin-role-permissions/admin-role-permissions.component.html</context>
           <context context-type="linenumber">64</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-system-attributes/admin-system-attributes.component.html</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="4c626ac4a3bc20698914ff26f73438d56632fa56" datatype="html">
         <source>View, create, and edit corpora</source>
@@ -661,6 +665,28 @@
           <context context-type="sourcefile">src/app/button/button.component.html</context>
           <context context-type="linenumber">6</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="65bf004c5d366f27c3349981353efac6504491ca" datatype="html">
+        <source>System Attributes</source>
+        <target>Atributos del Sistema</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-system-attributes/admin-system-attributes.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <note priority="1" from="description">menu label</note>
+      </trans-unit>
+      <trans-unit id="908f490b512f86e981fb9b71704a15076fd151ef" datatype="html">
+        <source>View and edit system attributes</source>
+        <target>Ver y editar atributos del sistema</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
       </trans-unit>
     </body>
   </file>
