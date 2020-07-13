@@ -37,10 +37,10 @@ import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import nzilbb.configure.ParameterSet;
-import nzilbb.ag.IGraphStoreAdministration;
+import nzilbb.ag.GraphStoreAdministration;
 import nzilbb.ag.Schema;
 import nzilbb.ag.Graph;
-import nzilbb.ag.serialize.ISerializer;
+import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.ConfigurationHelper;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -242,7 +242,7 @@ public class SerializeGraphs extends LabbcatServlet {
       
       File fTempDir = new File(System.getProperty("java.io.tmpdir"));
       
-      ISerializer serializer = store.serializerForMimeType(sMimeType);
+      GraphSerializer serializer = store.serializerForMimeType(sMimeType);
       if (serializer == null) {
 	 throw new Exception("Invalid MIME type: " + sMimeType);
       }

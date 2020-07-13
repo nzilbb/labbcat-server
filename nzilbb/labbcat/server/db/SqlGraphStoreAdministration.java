@@ -41,7 +41,7 @@ import nzilbb.util.IO;
  */
 public class SqlGraphStoreAdministration
    extends SqlGraphStore
-   implements IGraphStoreAdministration {
+   implements GraphStoreAdministration {
    
    // Attributes:
    
@@ -76,17 +76,17 @@ public class SqlGraphStoreAdministration
     * @see #getDeserializersByMimeType()
     * @see #setDeserializersByMimeType(HashMap)
     */
-   protected HashMap<String,IDeserializer> deserializersByMimeType = new HashMap<String,IDeserializer>();
+   protected HashMap<String,GraphDeserializer> deserializersByMimeType = new HashMap<String,GraphDeserializer>();
    /**
     * Getter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
     * @return Registered deserializers, keyed by MIME type.
     */
-   public HashMap<String,IDeserializer> getDeserializersByMimeType() { return deserializersByMimeType; }
+   public HashMap<String,GraphDeserializer> getDeserializersByMimeType() { return deserializersByMimeType; }
    /**
     * Setter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
     * @param newDeserializersByMimeType Registered deserializers, keyed by MIME type.
     */
-   public SqlGraphStoreAdministration setDeserializersByMimeType(HashMap<String,IDeserializer> newDeserializersByMimeType) { deserializersByMimeType = newDeserializersByMimeType; return this; }
+   public SqlGraphStoreAdministration setDeserializersByMimeType(HashMap<String,GraphDeserializer> newDeserializersByMimeType) { deserializersByMimeType = newDeserializersByMimeType; return this; }
 
    
    /**
@@ -94,55 +94,55 @@ public class SqlGraphStoreAdministration
     * @see #getDeserializersBySuffix()
     * @see #setDeserializersBySuffix(HashMap)
     */
-   protected HashMap<String,IDeserializer> deserializersBySuffix = new HashMap<String,IDeserializer>();
+   protected HashMap<String,GraphDeserializer> deserializersBySuffix = new HashMap<String,GraphDeserializer>();
    /**
     * Getter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file
     * suffix (extension).
     * @return Registered deserializers, keyed by file suffix (extension).
     */
-   public HashMap<String,IDeserializer> getDeserializersBySuffix() { return deserializersBySuffix; }
+   public HashMap<String,GraphDeserializer> getDeserializersBySuffix() { return deserializersBySuffix; }
    /**
     * Setter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file
     * suffix (extension).
     * @param newDeserializersBySuffix Registered deserializers, keyed by file suffix (extension).
     */
-   public SqlGraphStoreAdministration setDeserializersBySuffix(HashMap<String,IDeserializer> newDeserializersBySuffix) { deserializersBySuffix = newDeserializersBySuffix; return this; }
+   public SqlGraphStoreAdministration setDeserializersBySuffix(HashMap<String,GraphDeserializer> newDeserializersBySuffix) { deserializersBySuffix = newDeserializersBySuffix; return this; }
 
    /**
     * Registered serializers, keyed by MIME type.
     * @see #getSerializersByMimeType()
     * @see #setSerializersByMimeType(HashMap)
     */
-   protected HashMap<String,ISerializer> serializersByMimeType = new HashMap<String,ISerializer>();
+   protected HashMap<String,GraphSerializer> serializersByMimeType = new HashMap<String,GraphSerializer>();
    /**
     * Getter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
     * @return Registered serializers, keyed by MIME type.
     */
-   public HashMap<String,ISerializer> getSerializersByMimeType() { return serializersByMimeType; }
+   public HashMap<String,GraphSerializer> getSerializersByMimeType() { return serializersByMimeType; }
    /**
     * Setter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
     * @param newSerializersByMimeType Registered serializers, keyed by MIME type.
     */
-   public SqlGraphStoreAdministration setSerializersByMimeType(HashMap<String,ISerializer> newSerializersByMimeType) { serializersByMimeType = newSerializersByMimeType; return this; }
+   public SqlGraphStoreAdministration setSerializersByMimeType(HashMap<String,GraphSerializer> newSerializersByMimeType) { serializersByMimeType = newSerializersByMimeType; return this; }
    
    /**
     * Registered serializers, keyed by file suffix (extension).
     * @see #getSerializersBySuffix()
     * @see #setSerializersBySuffix(HashMap)
     */
-   protected HashMap<String,ISerializer> serializersBySuffix = new HashMap<String,ISerializer>();
+   protected HashMap<String,GraphSerializer> serializersBySuffix = new HashMap<String,GraphSerializer>();
    /**
     * Getter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix
     * (extension).
     * @return Registered serializers, keyed by file suffix (extension).
     */
-   public HashMap<String,ISerializer> getSerializersBySuffix() { return serializersBySuffix; }
+   public HashMap<String,GraphSerializer> getSerializersBySuffix() { return serializersBySuffix; }
    /**
     * Setter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix
     * (extension).
     * @param newSerializersBySuffix Registered serializers, keyed by file suffix (extension).
     */
-   public SqlGraphStoreAdministration setSerializersBySuffix(HashMap<String,ISerializer> newSerializersBySuffix) { serializersBySuffix = newSerializersBySuffix; return this; }
+   public SqlGraphStoreAdministration setSerializersBySuffix(HashMap<String,GraphSerializer> newSerializersBySuffix) { serializersBySuffix = newSerializersBySuffix; return this; }
 
    // Methods:
    
@@ -221,8 +221,8 @@ public class SqlGraphStoreAdministration
             URL[] url = new URL[] { file.toURI().toURL() };
             URLClassLoader classLoader = URLClassLoader.newInstance(url, getClass().getClassLoader());
             Object o = classLoader.loadClass(rs.getString("class")).getDeclaredConstructor().newInstance();
-            if (o instanceof IDeserializer) {
-               IDeserializer deserializer = (IDeserializer)o;
+            if (o instanceof GraphDeserializer) {
+               GraphDeserializer deserializer = (GraphDeserializer)o;
 	       
                // register it in memory
                SerializationDescriptor descriptor = deserializer.getDescriptor();
@@ -239,8 +239,8 @@ public class SqlGraphStoreAdministration
                   }
                }
             }
-            if (o instanceof ISerializer) {
-               ISerializer serializer = (ISerializer)o;
+            if (o instanceof GraphSerializer) {
+               GraphSerializer serializer = (GraphSerializer)o;
 	       
                // register it in memory
                SerializationDescriptor descriptor = serializer.getDescriptor();
@@ -275,7 +275,7 @@ public class SqlGraphStoreAdministration
     * @throws StoreException If an error prevents the deserializer from being registered.
     * @throws PermissionException If registering the deserializer is not permitted.
     */
-   public void registerDeserializer(IDeserializer deserializer)
+   public void registerDeserializer(GraphDeserializer deserializer)
       throws StoreException, PermissionException {
       
       deregisterDeserializer(deserializer);
@@ -317,7 +317,7 @@ public class SqlGraphStoreAdministration
     * @throws StoreException If an error prevents the deserializer from being deregistered.
     * @throws PermissionException If deregistering the deserializer is not permitted.
     */
-   public void deregisterDeserializer(IDeserializer deserializer)
+   public void deregisterDeserializer(GraphDeserializer deserializer)
       throws StoreException, PermissionException {
       
       try {
@@ -348,7 +348,7 @@ public class SqlGraphStoreAdministration
       
       SerializationDescriptor[] descriptors = new SerializationDescriptor[deserializersByMimeType.size()];
       int i = 0;
-      for (IDeserializer deserializer : deserializersByMimeType.values()) {
+      for (GraphDeserializer deserializer : deserializersByMimeType.values()) {
          SerializationDescriptor descriptor = deserializer.getDescriptor();
          try { // fix up the icon URL
             File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
@@ -369,11 +369,11 @@ public class SqlGraphStoreAdministration
     * @throws StoreException If an error prevents the operation from completing.
     * @throws PermissionException If the operation is not permitted.
     */
-   public IDeserializer deserializerForMimeType(String mimeType)
+   public GraphDeserializer deserializerForMimeType(String mimeType)
       throws StoreException, PermissionException {
       
       try {
-         return (IDeserializer)deserializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
+         return (GraphDeserializer)deserializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
       }
       catch(NoSuchMethodException x) { return null; }
       catch(InvocationTargetException x) { return null; }
@@ -389,10 +389,10 @@ public class SqlGraphStoreAdministration
     * @throws StoreException If an error prevents the operation from completing.
     * @throws PermissionException If the operation is not permitted.
     */
-   public IDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
+   public GraphDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
       
       try {
-         return (IDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
+         return (GraphDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
       }
       catch(InvocationTargetException exception) { return null; }
       catch(NoSuchMethodException exception) { return null; }
@@ -407,7 +407,7 @@ public class SqlGraphStoreAdministration
     * @throws StoreException If an error prevents the operation from completing.
     * @throws PermissionException If the operation is not permitted.
     */
-   public void registerSerializer(ISerializer serializer)
+   public void registerSerializer(GraphSerializer serializer)
       throws StoreException, PermissionException {
       
       deregisterSerializer(serializer);
@@ -449,7 +449,7 @@ public class SqlGraphStoreAdministration
     * @throws StoreException If an error prevents the operation from completing.
     * @throws PermissionException If the operation is not permitted.
     */
-   public void deregisterSerializer(ISerializer serializer)
+   public void deregisterSerializer(GraphSerializer serializer)
       throws StoreException, PermissionException {
       
       try {
@@ -479,7 +479,7 @@ public class SqlGraphStoreAdministration
       throws StoreException, PermissionException {
       SerializationDescriptor[] descriptors = new SerializationDescriptor[serializersByMimeType.size()];
       int i = 0;
-      for (ISerializer serializer : serializersByMimeType.values()) {
+      for (GraphSerializer serializer : serializersByMimeType.values()) {
          SerializationDescriptor descriptor = serializer.getDescriptor();
          try { // fix up the icon URL
             File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
@@ -500,11 +500,11 @@ public class SqlGraphStoreAdministration
     * @throws StoreException If an error prevents the operation from completing.
     * @throws PermissionException If the operation is not permitted.
     */
-   public ISerializer serializerForMimeType(String mimeType)
+   public GraphSerializer serializerForMimeType(String mimeType)
       throws StoreException, PermissionException {
       
       try {
-         return (ISerializer)serializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
+         return (GraphSerializer)serializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
       }
       catch(NoSuchMethodException exception) { return null; }
       catch(InvocationTargetException exception) { return null; }
@@ -520,10 +520,10 @@ public class SqlGraphStoreAdministration
     * @throws StoreException If an error prevents the operation from completing.
     * @throws PermissionException If the operation is not permitted.
     */
-   public ISerializer serializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
+   public GraphSerializer serializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
       
       try {
-         return (ISerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
+         return (GraphSerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
       }
       catch(InvocationTargetException exception) { return null; }
       catch(NoSuchMethodException exception) { return null; }

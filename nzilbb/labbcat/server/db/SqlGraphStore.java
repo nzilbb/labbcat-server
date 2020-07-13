@@ -54,8 +54,8 @@ import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.Validator;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.media.IMediaCensor;
-import nzilbb.media.IMediaConverter;
+import nzilbb.media.MediaCensor;
+import nzilbb.media.MediaConverter;
 import nzilbb.media.MediaException;
 import nzilbb.media.MediaThread;
 import nzilbb.media.ffmpeg.FfmpegCensor;
@@ -72,7 +72,7 @@ import nzilbb.util.Timers;
  */
 
 public class SqlGraphStore
-   implements IGraphStore
+   implements GraphStore
 {
    // Attributes:
 
@@ -208,7 +208,7 @@ public class SqlGraphStore
     */
    protected String id;
    /**
-    * IGraphStore method and getter for {@link #id}: The store's ID.
+    * GraphStore method and getter for {@link #id}: The store's ID.
     * @return The store's ID.
     * @throws StoreException If an error occurs.
     * @throws PermissionException If the operation is not permitted.
@@ -348,7 +348,7 @@ public class SqlGraphStore
       }
    } // end of finalize()
 
-   // IGraphStore methods
+   // GraphStore methods
 
    /**
     * Gets a list of layer IDs (annotation 'types').
@@ -7203,7 +7203,7 @@ public class SqlGraphStore
 	    
             ParameterSet configuration = new ParameterSet();
             configuration.addParameter(new Parameter("sampleRate", downsampleWav.equals("mono16kHz")?16000:22050));
-            IMediaConverter resampler = new Resampler();
+            MediaConverter resampler = new Resampler();
             resampler.configure(configuration);
 
             // run the resampler
@@ -7342,7 +7342,7 @@ public class SqlGraphStore
             configuration.addParameter(new Parameter("ffmpegPath", exe.getParentFile()));
             configuration.addParameter(new Parameter("audioFilter", censorshipFfmpegAudioFilter));
             configuration.addParameter(new Parameter("deleteSource", Boolean.TRUE));
-            IMediaCensor censor = new FfmpegCensor();
+            MediaCensor censor = new FfmpegCensor();
             censor.configure(configuration);
 
             // run the censor
@@ -7679,7 +7679,7 @@ public class SqlGraphStore
                      configuration.addParameter(new Parameter("ffmpegPath", exe.getParentFile()));
                      configuration.addParameter(
                         new Parameter("conversionCommandLine", rsConversions.getString("arguments")));
-                     IMediaConverter converter = new FfmpegConverter();
+                     MediaConverter converter = new FfmpegConverter();
                      converter.configure(configuration);
                      MediaThread thread = converter.start(
                         fromMimeType, gotFile.getFile(), wantedFile.getMimeType(), wantedFile.getFile());
