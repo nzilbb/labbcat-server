@@ -45,6 +45,23 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
    private boolean cancelling = false;
 
    /**
+    * Whether the task is currently running.
+    * @see #getRunning()
+    * @see #setRunning(boolean)
+    */
+   protected boolean running = false;
+   /**
+    * Getter for {@link #running}: Whether the task is currently running.
+    * @return Whether the task is currently running.
+    */
+   public boolean getRunning() { return running; }
+   /**
+    * Setter for {@link #running}: Whether the task is currently running.
+    * @param newRunning Whether the task is currently running.
+    */
+   public void setRunning(boolean newRunning) { running = newRunning; }
+
+   /**
     * The graph store object.
     * @see #getStore()
     * @see #setStore(SqlGraphStore)
@@ -131,7 +148,12 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
     */
    public boolean tryAdvance(Consumer<? super Graph> action) {
       
-      if (cancelling) return false;
+      running = false;
+      
+      if (cancelling) {
+         running = false;
+         return false;
+      }
       if (!iterator.hasNext()) return false;
       String spec = iterator.next();
       try {
@@ -181,7 +203,7 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
                for (Annotation a : fragment.getAnnotationsById().values()) {
                   if (a.getLayer().isAncestor(targetAncestor.getLayerId())) {
                      // annotation is a descendent of the participant layer
-                     if (a.my(targetAncestor.getLayerId()) != targetAncestor) {
+                     if (a.first(targetAncestor.getLayerId()) != targetAncestor) {
                         a.destroy();
                      } // annotation has a different ancestor on the same layer
                   } // annotation is a descendent of the target layer
@@ -194,6 +216,7 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
       } catch(Exception exception) {
          System.err.println("FragmentSeries: Could not get fragment from spec \""+spec+"\": "
                             + exception);
+         running = false;
 	 return false;
       }
    }

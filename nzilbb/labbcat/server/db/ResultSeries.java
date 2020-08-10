@@ -1,4 +1,4 @@
-//
+x//
 // Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
@@ -45,6 +45,23 @@ public class ResultSeries
    private long rowCount = -1;
    private boolean cancelling = false;
    private NumberFormat prefixFormatter = NumberFormat.getIntegerInstance();
+
+   /**
+    * Whether the task is currently running.
+    * @see #getRunning()
+    * @see #setRunning(boolean)
+    */
+   protected boolean running = false;
+   /**
+    * Getter for {@link #running}: Whether the task is currently running.
+    * @return Whether the task is currently running.
+    */
+   public boolean getRunning() { return running; }
+   /**
+    * Setter for {@link #running}: Whether the task is currently running.
+    * @param newRunning Whether the task is currently running.
+    */
+   public void setRunning(boolean newRunning) { running = newRunning; }
 
    /**
     * The graph store object.
@@ -194,22 +211,29 @@ public class ResultSeries
     */
    public boolean tryAdvance(Consumer<? super Graph> action) {
       
-      if (cancelling) return false;
-      if (!hasMoreElements()) return false;
+      if (cancelling) {
+         running = false;
+         return false;
+      }
+      if (!hasMoreElements()) {
+         running = false;
+         return false;
+      }
+      running = true;
       try {
 	 rs.next();
 	 nextRow++;
          Graph fragment = store.getFragment(
             rs.getString("ag_id"), "em_12_"+rs.getLong("defining_annotation_id"), layers);
          fragment.shiftAnchors(-rs.getDouble("start_offset"));
-         if (prefixNames)
-         {
+         if (prefixNames) {
             String prefix = prefixFormatter.format(nextRow);
             fragment.setId(prefix + "-" + fragment.getId());
          }
 	 action.accept(fragment);
          return true;
       } catch(Exception exception) {
+         running = false;
 	 return false;
       }
    }
