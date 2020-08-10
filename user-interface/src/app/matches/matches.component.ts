@@ -124,6 +124,14 @@ export class MatchesComponent implements OnInit {
         }
     }
 
+    onChangeWordsContext(): void {
+        // reload the first page
+        this.matches = [];
+        this.pageLength = 20;
+        this.pageNumber = 0;
+        this.readMatches();
+    }
+
     exportAudio(): void {
         this.form.nativeElement.action = this.labbcatService.labbcat.baseUrl + "soundfragment";
         this.form.nativeElement.submit();

@@ -101,7 +101,6 @@ app-wait {
 .buttons a { color: #859044; text-decoration: none; margin-left: 5px; margin-right: 5px; }
 
 /* Copied styles from legacy stylesheet - TODO revise these when migration complete */
-
 button {
     white-space: nowrap;
     padding: 0px;
@@ -125,13 +124,21 @@ button.icon-only {
     min-width: 45px;
     width: 45px;
 }
+app-button {
+    display: inline-block;
+    min-width: 75px;
+}
+app-button button {
+    width: 100%;
+}
+
 @media all and (min-width: 640px) {
     button {
         height: unset;
         height: 32px;
         padding: 5px;
     }
-    button.icon-only {
+    button.icon-only, app-button button.icon-only {
         min-width: 32px;
         width: 32px;
     }
@@ -157,7 +164,7 @@ button.icon-only {
 .hidden-panel {
     max-height: 0px;
     overflow: hidden;
-    transition: max-height 2s;
+    transition: max-height 0.5s;
 }
 .unhidden-panel {
     max-height: 500px;

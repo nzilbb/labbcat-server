@@ -14,6 +14,17 @@
       <span i18n="select all results">Select all results</span>
       ({{totalMatches}})
     </label>
+    
+    <select [(ngModel)]="wordsContext" name="words_context"
+            (change)="onChangeWordsContext()"
+            i18n-title title="Amount of context to show in the results">
+      <option value="1"  i18n="words context option">1 word before/after</option>
+      <option value="5"  i18n="words context option">5 words before/after</option>
+      <option value="10" i18n="words context option">10 words before/after</option>
+      <option value="20" i18n="words context option">20 words before/after</option>
+      <option value="-1" i18n="words context option">the whole line of</option>
+      <option value="0"  i18n="words context option">nothing surrounding</option>
+    </select>
   </div>
   <div id="matches">
     <ng-container class="match" *ngFor="let match of matches; let m = index;">
@@ -72,19 +83,19 @@
       ({{totalMatches}})
     </label>
   </div>
-  <div id="csv-export">
+  <div id="csv-export" class="controls">
+    <app-button (click)="exportCsv();" id="csv-export-btn"
+                img="csv.png" icon=",a,"
+                i18n-title title="Export results to CSV"
+                i18n-label label="CSV Export"></app-button>
     <app-button (click)="csvOptions();"
                 img="down-triangle.png" icon="▼"
                 i18n-title title="CSV export options"
                 ></app-button>
-    <app-button (click)="exportCsv();"
-                img="csv.png" icon=",a,"
-                i18n-title title="Export results to CSV"
-                i18n-label label="CSV Export"></app-button>
   </div>
   <div id="csv-export-options" class="{{showCsvOptions?'unhidden-panel':'hidden-panel'}}">
-    <div i18n>CSV Export</div>
-    <div class="csv-checkboxes">
+    <fieldset class="csv-checkboxes">
+      <legend i18n>CSV Columns</legend>
       <div class="csv-options">
         <div i18n="csv options title" class="header">Fields:</div>
         <label i18n="csv options"
@@ -139,39 +150,42 @@
                             excludeMainParticipant="true"
                             excludeTurn="true" excludeUtterance="true"
                             selected="{{selectedLayers}}"></app-layer-checkboxes>
-    </div>
+    </fieldset>
   </div>
-  <div id="export-audio">
-    <app-button (click)="exportAudio();"
-                img="audio.png" icon="🔊"
-                i18n-label label="Export Audio"></app-button>
-  </div>
-  <div id="emu-webapp">
+  <div id="emu-webapp" class="controls">
+    <app-button (click)="emuWebapp();"
+                img="emu.png" icon="eμ"
+                i18n-label label="EMU WebApp"></app-button>
     <app-button (click)="emuOptions();"
                 img="down-triangle.png" icon="▼"
                 i18n-title title="EMU WebApp options"
                 ></app-button>
-    <app-button (click)="emuWebapp();"
-                img="emu.png" icon="eμ"
-                i18n-label label="EMU WebApp"></app-button>
   </div>
   <div id="emu-options" class="{{showEmuOptions?'unhidden-panel':'hidden-panel'}}">
+    <fieldset>
+    <legend i18n>EMU WebApp Tiers</legend>
       <app-layer-checkboxes name="emu_layer"
                             word="true" segment="true"
                             selected="{{emuLayers}}"></app-layer-checkboxes>
+    </fieldset>
   </div>
-  <div id="serialize">
-    <select #mimetype name="mimetype"
-            [(ngModel)]="mimeType"
-            (input)="onChangeMimeType()">
-      <option *ngFor="let serializer of serializers"
-              value="{{serializer.mimeType}}">{{serializer.name}}</option>
-    </select>
+  <div id="serialize" class="controls">
     <app-button (click)="serialize();"
                 img="{{serializeImg}}" icon="📦"
                 i18n-label label="Convert"></app-button>
+    <select #mimetype name="mimetype"
+            [(ngModel)]="mimeType"
+            (change)="onChangeMimeType()">
+      <option *ngFor="let serializer of serializers"
+              value="{{serializer.mimeType}}">{{serializer.name}}</option>
+    </select>
   </div>
-  <div id="generate-layers">
+  <div id="export-audio" class="controls">
+    <app-button (click)="exportAudio();"
+                img="audio.png" icon="🔊"
+                i18n-label label="Export Audio"></app-button>
+  </div>
+  <div id="generate-layers" class="controls">
     <input #generate_layer type="hidden" name="generate_layer" value="{{generateLayer}}">
     <app-button (click)="runAnnotator('htk');"
                 img="cog.png" icon="⚙"
