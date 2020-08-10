@@ -27,9 +27,12 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.sql.*;
@@ -45,10 +48,13 @@ import java.util.LinkedHashSet;
 import java.util.SortedSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nzilbb.ag.*;
 import nzilbb.ag.ql.AGQLException;
+import nzilbb.ag.serialize.*;
+import nzilbb.ag.serialize.util.IconHelper;
 import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.Validator;
@@ -298,6 +304,7 @@ public class SqlGraphStore
       setConnection(connection);
       setFiles(new File(getSystemAttribute("transcriptPath")));
       setUser(user);
+      loadSerializers();
    } // end of constructor
 
    /**
@@ -308,12 +315,14 @@ public class SqlGraphStore
     * @param user ID of the user
     */
    public SqlGraphStore(String baseUrl, File files, Connection connection, String user)
+      throws SQLException
    {
       setId(baseUrl);
       setBaseUrl(baseUrl);
       setFiles(files);
       setConnection(connection);
       setUser(user);
+      loadSerializers();
    } // end of constructor
 
    /**
@@ -334,6 +343,7 @@ public class SqlGraphStore
       setFiles(files);
       setConnection(DriverManager.getConnection (connectString, user, password));
       setUser(storeUser);
+      loadSerializers();
    } // end of constructor
 
    /**
@@ -2140,7 +2150,7 @@ public class SqlGraphStore
             Anchor lastAnchor = anchors.last();
             for (String layerId : setStartEndLayers)
             {
-               for (Annotation a : graph.list(layerId))
+               for (Annotation a : graph.all(layerId))
                {
                   a.setStartId(firstAnchor.getId());
                   a.setEndId(lastAnchor.getId());
@@ -3777,7 +3787,7 @@ public class SqlGraphStore
                            if (layer_id >= 0)
                            {
                               sql.setInt(1, layer_id);
-                              for (Annotation parent : fragment.list(layer.getParentId()))
+                              for (Annotation parent : fragment.all(layer.getParentId()))
                               {
                                  String scope = null;
                                  layer_id = null;
@@ -3922,14 +3932,14 @@ public class SqlGraphStore
          } // layerIds specified
 	 
          // ensure that turn and utterance labels are set to the participant name
-         for (Annotation a : fragment.list(fragment.getSchema().getTurnLayerId()))
+         for (Annotation a : fragment.all(fragment.getSchema().getTurnLayerId()))
          {
-            Annotation who = a.my(fragment.getSchema().getParticipantLayerId());
+            Annotation who = a.first(fragment.getSchema().getParticipantLayerId());
             if (who != null) a.setLabel(who.getLabel());
          }
-         for (Annotation a : fragment.list(fragment.getSchema().getUtteranceLayerId()))
+         for (Annotation a : fragment.all(fragment.getSchema().getUtteranceLayerId()))
          {
-            Annotation who = a.my(fragment.getSchema().getParticipantLayerId());
+            Annotation who = a.first(fragment.getSchema().getParticipantLayerId());
             if (who != null) a.setLabel(who.getLabel());
          }
 
@@ -4077,7 +4087,7 @@ public class SqlGraphStore
                      }
 
                      // check for orphans
-                     for (Annotation annotation : fragment.list(layer.getId()))
+                     for (Annotation annotation : fragment.all(layer.getId()))
                      {
                         if (annotation.getParent() == null)
                         { // need to load the parent too
@@ -4100,7 +4110,7 @@ public class SqlGraphStore
                                     Annotation parent = match[0];
                                     for (String childLayerId : parentLayer.getChildren().keySet())
                                     {
-                                       Annotation firstChild = fragment.my(childLayerId);
+                                       Annotation firstChild = fragment.first(childLayerId);
                                        if (firstChild != null)
                                        {
                                           parent.setOrdinalMinimum(childLayerId, firstChild.getOrdinal());
@@ -4221,7 +4231,7 @@ public class SqlGraphStore
                layer = getLayer("corpus");
                graph.addLayer(layer);
             }
-            if (graph.my("corpus") == null)
+            if (graph.first("corpus") == null)
             { // set to the first value
                graph.createTag(graph, layer.getId(), layer.getValidLabels().keySet().iterator().next())
                   .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
@@ -4233,15 +4243,15 @@ public class SqlGraphStore
                layer = getLayer("episode");
                graph.addLayer(layer);
             }
-            if (graph.my("episode") == null)
+            if (graph.first("episode") == null)
             { // set to the graph name, without the extension
                graph.createTag(graph, layer.getId(), graph.getId().replaceAll("\\.[^.]*$",""))
                   .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
             }
-            else if (graph.my("episode").getLabel().length() == 0)
+            else if (graph.first("episode").getLabel().length() == 0)
             {
-               graph.my("corpus").setLabel(graph.getId().replaceAll("\\.[^.]*$",""));
-               graph.my("corpus").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+               graph.first("corpus").setLabel(graph.getId().replaceAll("\\.[^.]*$",""));
+               graph.first("corpus").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
             }
 
             layer = graph.getLayer("transcript_type");
@@ -4250,7 +4260,7 @@ public class SqlGraphStore
                layer = getLayer("transcript_type");
                graph.addLayer(layer);
             }
-            if (graph.my("transcript_type") == null)
+            if (graph.first("transcript_type") == null)
             { // set to the first value
                graph.createTag(graph, layer.getId(), layer.getValidLabels().keySet().iterator().next())
                   .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
@@ -4300,13 +4310,13 @@ public class SqlGraphStore
             String censorshipLayer = getSystemAttribute("censorshipLayer");
             String censorshipLabel = getSystemAttribute("censorshipLabel");
             int censoredCount = 0;
-            for (Annotation annotation : graph.list(censorshipLayer))
+            for (Annotation annotation : graph.all(censorshipLayer))
             {
                if (censorshipPattern.matcher(annotation.getLabel()).matches())
                { // matching annotation
                   censoredCount++;
                   // change all words to censorshipLabel
-                  for (Annotation word : annotation.list(schema.getWordLayerId()))
+                  for (Annotation word : annotation.all(schema.getWordLayerId()))
                   {
                      word.setLabel(censorshipLabel);
                   } // next word
@@ -6902,13 +6912,13 @@ public class SqlGraphStore
       Vector<MediaFile> files = new Vector<MediaFile>();
       String[] layers = { "corpus", "episode" };
       Graph graph = getTranscript(id, layers);
-      if (graph.my("corpus") == null || graph.my("episode") == null)
+      if (graph.first("corpus") == null || graph.first("episode") == null)
       { // corpus/episode not correctly set
          return new MediaFile[0];
       }
 
-      File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
-      File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+      File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
+      File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
       MediaTrackDefinition[] tracks = getMediaTracks();
       String baseName = graph.getId().replaceAll("\\.[^.]*$","");
       File[] aDirs = episodeDir.listFiles(new FileFilter() 
@@ -6940,9 +6950,9 @@ public class SqlGraphStore
                   {
                      StringBuffer url = new StringBuffer(getBaseUrl());
                      url.append("/files/");
-                     url.append(graph.my("corpus").getLabel());
+                     url.append(graph.first("corpus").getLabel());
                      url.append("/");
-                     url.append(graph.my("episode").getLabel());
+                     url.append(graph.first("episode").getLabel());
                      url.append("/");
                      url.append(mediaFile.getExtension());
                      url.append("/");
@@ -6995,8 +7005,8 @@ public class SqlGraphStore
    {
       String[] layers = { "corpus", "episode" };
       Graph graph = getTranscript(id, layers);
-      File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
-      File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+      File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
+      File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
       String[] mimeTypeParts = mimeType.split(";"); // e.g. "audio/wav; samplerate=16000"
       LinkedHashMap<String,String> mimeTypeParameters = new LinkedHashMap<String,String>();
       for (int p = 1; p < mimeTypeParts.length; p++)
@@ -7029,9 +7039,9 @@ public class SqlGraphStore
                {
                   StringBuffer url = new StringBuffer(getBaseUrl());
                   url.append("/files/");
-                  url.append(URLEncoder.encode(graph.my("corpus").getLabel(), "UTF-8"));
+                  url.append(URLEncoder.encode(graph.first("corpus").getLabel(), "UTF-8"));
                   url.append("/");
-                  url.append(URLEncoder.encode(graph.my("episode").getLabel(), "UTF-8"));
+                  url.append(URLEncoder.encode(graph.first("episode").getLabel(), "UTF-8"));
                   url.append("/");
                   url.append(URLEncoder.encode(extension, "UTF-8"));
                   url.append("/");
@@ -7132,9 +7142,9 @@ public class SqlGraphStore
       {
          String[] layers = { "corpus", "episode" };
          Graph graph = getTranscript(id, layers);
-         File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+         File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
          if (!corpusDir.exists()) corpusDir.mkdir();
-         File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+         File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
          if (!episodeDir.exists()) episodeDir.mkdir();
 	 
          // get the content
@@ -7271,7 +7281,7 @@ public class SqlGraphStore
             double lastEnd = 0.0;
             // get all censor annotations, sorted by anchor to ensure that if list returns
             // them out of order, they're processed in temporal order
-            for (Annotation annotation : new AnnotationsByAnchor(graph.list(censorshipLayer)))
+            for (Annotation annotation : new AnnotationsByAnchor(graph.all(censorshipLayer)))
             {
                if (censorshipPattern.matcher(annotation.getLabel()).matches())
                { // matching annotation
@@ -7283,8 +7293,8 @@ public class SqlGraphStore
                      if (annotation.getStart().getConfidence() < Constants.CONFIDENCE_AUTOMATIC)
                      { // uncertain start
                         // find the containing utterance, and use its start
-                        Annotation turn = annotation.my(schema.getTurnLayerId());
-                        for (Annotation line : turn.list(schema.getUtteranceLayerId()))
+                        Annotation turn = annotation.first(schema.getTurnLayerId());
+                        for (Annotation line : turn.all(schema.getUtteranceLayerId()))
                         {
                            if (line.includesOffset(start))
                            { // found the containing utterance
@@ -7304,8 +7314,8 @@ public class SqlGraphStore
                      if (annotation.getEnd().getConfidence() < Constants.CONFIDENCE_AUTOMATIC)
                      { // uncertain end
                         // find the containing utterance, and use its end
-                        Annotation turn = annotation.my(schema.getTurnLayerId());
-                        for (Annotation line : turn.list(schema.getUtteranceLayerId()))
+                        Annotation turn = annotation.first(schema.getTurnLayerId());
+                        for (Annotation line : turn.all(schema.getUtteranceLayerId()))
                         {
                            if (line.includesOffset(end))
                            { // found the containing utterance
@@ -7381,9 +7391,9 @@ public class SqlGraphStore
       {
          String[] layers = { "corpus", "episode" };
          Graph graph = getTranscript(id, layers);
-         File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+         File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
          if (!corpusDir.exists()) corpusDir.mkdir();
-         File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+         File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
          if (!episodeDir.exists()) episodeDir.mkdir();
 	 
          // get the content
@@ -7453,9 +7463,9 @@ public class SqlGraphStore
       {
          String[] layers = { "corpus", "episode" };
          Graph graph = getTranscript(id, layers);
-         File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
+         File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
          if (!corpusDir.exists()) corpusDir.mkdir();
-         File episodeDir = new File(corpusDir, graph.my("episode").getLabel());	
+         File episodeDir = new File(corpusDir, graph.first("episode").getLabel());	
          if (!episodeDir.exists()) episodeDir.mkdir();
  
          // get the content
@@ -7529,8 +7539,8 @@ public class SqlGraphStore
       Vector<MediaFile> files = new Vector<MediaFile>();
       String[] layers = { "corpus", "episode" };
       Graph graph = getTranscript(id, layers);
-      File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
-      File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+      File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
+      File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
       File docDir = new File(episodeDir, "doc");
       if (docDir.exists())
       {
@@ -7545,9 +7555,9 @@ public class SqlGraphStore
             {
                StringBuffer url = new StringBuffer(getBaseUrl());
                url.append("/files/");
-               url.append(graph.my("corpus").getLabel());
+               url.append(graph.first("corpus").getLabel());
                url.append("/");
-               url.append(graph.my("episode").getLabel());
+               url.append(graph.first("episode").getLabel());
                url.append("/doc/");
                url.append(f.getName());
                mediaFile.setUrl(url.toString());
@@ -7636,8 +7646,8 @@ public class SqlGraphStore
             // need some info about the graph...
             String[] layers = { "corpus", "episode" };
             Graph graph = getTranscript(id, layers);
-            File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
-            File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+            File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
+            File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
 
             PreparedStatement sqlConversions = getConnection().prepareStatement(
                "SELECT from_mimetype, method, arguments FROM media_conversion"
@@ -7728,11 +7738,11 @@ public class SqlGraphStore
             }
          } // next media file
       
-         if (graph.my("corpus") != null && graph.my("episode") != null)
+         if (graph.first("corpus") != null && graph.first("episode") != null)
          {
             // files to delete...
-            File corpusDir = new File(getFiles(), graph.my("corpus").getLabel());
-            File episodeDir = new File(corpusDir, graph.my("episode").getLabel());
+            File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
+            File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
          
             // transcript
             File trs = new File(episodeDir, "trs");
@@ -7826,7 +7836,225 @@ public class SqlGraphStore
       return value;
    } // end of getSystemAttribute()
 
+   /**
+    * Root directory for serializers.
+    * @see #getSerializersDirectory()
+    * @see #setSerializersDirectory(File)
+    */
+   protected File serializersDirectory;
+   /**
+    * Getter for {@link #serializersDirectory}: Root directory for serializers.
+    * @return Root directory for serializers.
+    */
+   public File getSerializersDirectory() { 
+      if (serializersDirectory == null) {
+         if (files != null) {
+            try {
+               setSerializersDirectory(new File(files.getParentFile(), "converters"));
+            } catch(Exception exception) {}
+         }
+      }
+      return serializersDirectory; 
+   }
+   /**
+    * Setter for {@link #serializersDirectory}: Root directory for serializers.
+    * @param newSerializersDirectory Root directory for serializers.
+    */
+   public SqlGraphStore setSerializersDirectory(File newSerializersDirectory) { serializersDirectory = newSerializersDirectory; return this; }
    
+   /**
+    * Registered deserializers, keyed by MIME type.
+    * @see #getDeserializersByMimeType()
+    * @see #setDeserializersByMimeType(HashMap)
+    */
+   protected HashMap<String,GraphDeserializer> deserializersByMimeType = new HashMap<String,GraphDeserializer>();
+   /**
+    * Getter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
+    * @return Registered deserializers, keyed by MIME type.
+    */
+   public HashMap<String,GraphDeserializer> getDeserializersByMimeType() { return deserializersByMimeType; }
+   /**
+    * Setter for {@link #deserializersByMimeType}: Registered deserializers, keyed by MIME type.
+    * @param newDeserializersByMimeType Registered deserializers, keyed by MIME type.
+    */
+   public SqlGraphStore setDeserializersByMimeType(HashMap<String,GraphDeserializer> newDeserializersByMimeType) { deserializersByMimeType = newDeserializersByMimeType; return this; }
+
+      
+   /**
+    * Registered deserializers, keyed by file suffix (extension).
+    * @see #getDeserializersBySuffix()
+    * @see #setDeserializersBySuffix(HashMap)
+    */
+   protected HashMap<String,GraphDeserializer> deserializersBySuffix = new HashMap<String,GraphDeserializer>();
+   /**
+    * Getter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file
+    * suffix (extension).
+    * @return Registered deserializers, keyed by file suffix (extension).
+    */
+   public HashMap<String,GraphDeserializer> getDeserializersBySuffix() { return deserializersBySuffix; }
+   /**
+    * Setter for {@link #deserializersBySuffix}: Registered deserializers, keyed by file
+    * suffix (extension).
+    * @param newDeserializersBySuffix Registered deserializers, keyed by file suffix (extension).
+    */
+   public SqlGraphStore setDeserializersBySuffix(HashMap<String,GraphDeserializer> newDeserializersBySuffix) { deserializersBySuffix = newDeserializersBySuffix; return this; }
+
+   /**
+    * Registered serializers, keyed by MIME type.
+    * @see #getSerializersByMimeType()
+    * @see #setSerializersByMimeType(HashMap)
+    */
+   protected HashMap<String,GraphSerializer> serializersByMimeType = new HashMap<String,GraphSerializer>();
+   /**
+    * Getter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
+    * @return Registered serializers, keyed by MIME type.
+    */
+   public HashMap<String,GraphSerializer> getSerializersByMimeType() { return serializersByMimeType; }
+   /**
+    * Setter for {@link #serializersByMimeType}: Registered serializers, keyed by MIME type.
+    * @param newSerializersByMimeType Registered serializers, keyed by MIME type.
+    */
+   public SqlGraphStore setSerializersByMimeType(HashMap<String,GraphSerializer> newSerializersByMimeType) { serializersByMimeType = newSerializersByMimeType; return this; }
+   
+   /**
+    * Registered serializers, keyed by file suffix (extension).
+    * @see #getSerializersBySuffix()
+    * @see #setSerializersBySuffix(HashMap)
+    */
+   protected HashMap<String,GraphSerializer> serializersBySuffix = new HashMap<String,GraphSerializer>();
+   /**
+    * Getter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix
+    * (extension).
+    * @return Registered serializers, keyed by file suffix (extension).
+    */
+   public HashMap<String,GraphSerializer> getSerializersBySuffix() { return serializersBySuffix; }
+   /**
+    * Setter for {@link #serializersBySuffix}: Registered serializers, keyed by file suffix
+    * (extension).
+    * @param newSerializersBySuffix Registered serializers, keyed by file suffix (extension).
+    */
+   public SqlGraphStore setSerializersBySuffix(HashMap<String,GraphSerializer> newSerializersBySuffix) { serializersBySuffix = newSerializersBySuffix; return this; }
+
+   /**
+    * Loads the registered serializers/deserializers.
+    * @throws SQLException On SQL error.
+    */
+   protected void loadSerializers()
+      throws SQLException {
+      
+      PreparedStatement sqlRegisteredConverter = getConnection().prepareStatement(
+         "SELECT DISTINCT class, jar, mimetype"
+         +" FROM converter"
+         +" WHERE type IN ('Serializer', 'Deserializer')"
+         +" ORDER BY mimetype");
+      ResultSet rs = sqlRegisteredConverter.executeQuery();
+      while (rs.next()) {
+         // get the jar file
+         File file = new File(getSerializersDirectory(), rs.getString("jar"));
+         try {
+            JarFile jar = new JarFile(file);
+	    
+            // get an instance of the class
+            URL[] url = new URL[] { file.toURI().toURL() };
+            URLClassLoader classLoader = URLClassLoader.newInstance(url, getClass().getClassLoader());
+            Object o = classLoader.loadClass(rs.getString("class")).getDeclaredConstructor().newInstance();
+            if (o instanceof GraphDeserializer) {
+               GraphDeserializer deserializer = (GraphDeserializer)o;
+	       
+               // register it in memory
+               SerializationDescriptor descriptor = deserializer.getDescriptor();
+               deserializersByMimeType.put(descriptor.getMimeType(), deserializer);
+               for (String suffix : descriptor.getFileSuffixes()) {
+                  deserializersBySuffix.put(suffix, deserializer);
+               } // next suffix
+               if (getSerializersDirectory() != null) {
+                  File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+                  if (getBaseUrl() != null && getBaseUrl().length() > 0)
+                  {
+                     descriptor.setIcon(
+                        new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+                  }
+               }
+            }
+            if (o instanceof GraphSerializer) {
+               GraphSerializer serializer = (GraphSerializer)o;
+	       
+               // register it in memory
+               SerializationDescriptor descriptor = serializer.getDescriptor();
+               serializersByMimeType.put(descriptor.getMimeType(), serializer);
+               for (String suffix : descriptor.getFileSuffixes()) {
+                  serializersBySuffix.put(suffix, serializer);
+               } // next suffix
+               if (getSerializersDirectory() != null) {
+                  File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+                  if (getBaseUrl() != null && getBaseUrl().length() > 0) {
+                     descriptor.setIcon(
+                        new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+                  }
+               }
+            }
+         }
+         catch(NoSuchMethodException x) { System.err.println(rs.getString("class") + ": " + x); }
+         catch(InvocationTargetException x) { System.err.println(rs.getString("class") + ": " + x); }
+         catch(ClassNotFoundException x) { System.err.println(rs.getString("class") + ": " + x); }
+         catch(InstantiationException x) { System.err.println(rs.getString("class") + ": " + x); }
+         catch(IllegalAccessException x) { System.err.println(rs.getString("class") + ": " + x); }
+         catch(MalformedURLException x) { System.err.println(rs.getString("class") + ": " + x); }
+         catch(IOException x) { System.err.println(rs.getString("class") + ": " + x); }
+      }
+      rs.close();
+      sqlRegisteredConverter.close();
+   } // end of loadSerializers()
+
+   /**
+    * Lists the descriptors of all registered serializers.
+    * @return A list of the descriptors of all registered serializers.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public SerializationDescriptor[] getSerializerDescriptors()
+      throws StoreException, PermissionException {
+      SerializationDescriptor[] descriptors = new SerializationDescriptor[serializersByMimeType.size()];
+      int i = 0;
+      for (GraphSerializer serializer : serializersByMimeType.values()) {
+         SerializationDescriptor descriptor = serializer.getDescriptor();
+         try { // fix up the icon URL
+            File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+            descriptor.setIcon(
+               new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+         }
+         catch(MalformedURLException exception) {}
+         catch(IOException exception) {}
+         descriptors[i++] = descriptor;
+      }
+      return descriptors;
+   }
+   
+   /**
+    * Lists the descriptors of all registered deserializers.
+    * @return A list of the descriptors of all registered deserializers.
+    * @throws StoreException If an error prevents the descriptors from being listed.
+    * @throws PermissionException If listing the deserializers is not permitted.
+    */
+   public SerializationDescriptor[] getDeserializerDescriptors()
+      throws StoreException, PermissionException {
+      
+      SerializationDescriptor[] descriptors = new SerializationDescriptor[deserializersByMimeType.size()];
+      int i = 0;
+      for (GraphDeserializer deserializer : deserializersByMimeType.values()) {
+         SerializationDescriptor descriptor = deserializer.getDescriptor();
+         try { // fix up the icon URL
+            File iconFile = IconHelper.EnsureIconFileExists(descriptor, getSerializersDirectory());
+            descriptor.setIcon(
+               new URL(getBaseUrl()+"/"+getSerializersDirectory().getName()+"/"+iconFile.getName()));
+         }
+         catch(MalformedURLException exception) {}
+         catch(IOException exception) {}
+         descriptors[i++] = descriptor;
+      }
+      return descriptors;
+   }
+      
    /**
     * Escapes quotes in the given string for inclusion in QL or SQL queries.
     * @param s The string to escape.
