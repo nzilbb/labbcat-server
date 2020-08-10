@@ -43,8 +43,8 @@
           i18n-title title="To select individual results, untick 'select all N results'"
           name="utterance"
           value="{{match.MatchId}}"
-          [checked]="match._selected" (checkedChange)="toggleMatch(match)"
-          [disabled]="selectAll"> </app-grouped-checkbox>
+          [checked]="match._selected" (checkedChange)="match._selected = !match._selected"
+          [disabled]="selectAll"></app-grouped-checkbox>
       </div>
       <div class="preceding-context match-transcript">
         {{match.BeforeMatch}}
@@ -145,6 +145,7 @@
         </label>
       </div>
       <app-layer-checkboxes name="csv_layer"
+                            includeCounts="true"
                             participant="true" transcript="true"
                             freeform="true" meta="true" word="true" segment="true"
                             excludeMainParticipant="true"

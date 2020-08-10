@@ -10,6 +10,7 @@ import { Layer } from '../layer';
 })
 export class LayerCheckboxesComponent implements OnInit {
     @Input() name: string;
+    @Input() includeCounts: boolean;
     @Input() participant: boolean;
     @Input() excludeParticipant: boolean;
     @Input() excludeMainParticipant: boolean;

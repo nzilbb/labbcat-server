@@ -44,8 +44,7 @@ export class GroupedCheckboxComponent implements OnInit {
                     }
                 } // next checkbox
             } // there is a first checkbox
-        } else { // not holding shift down
-            GroupedCheckboxComponent.groups[this.group] = lastChk;
-        }
+        } // holding shift down
+        GroupedCheckboxComponent.groups[this.group] = lastChk;
     }
 }
