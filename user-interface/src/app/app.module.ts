@@ -22,6 +22,7 @@ import { AdminSystemAttributesComponent } from './admin-system-attributes/admin-
 import { MatchesComponent } from './matches/matches.component';
 import { KeepAliveComponent } from './keep-alive/keep-alive.component';
 import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.component';
+import { GroupedCheckboxComponent } from './grouped-checkbox/grouped-checkbox.component';
 
 @NgModule({
     declarations: [
@@ -42,7 +43,8 @@ import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.co
         AdminSystemAttributesComponent,
         MatchesComponent,
         KeepAliveComponent,
-        LayerCheckboxesComponent
+        LayerCheckboxesComponent,
+        GroupedCheckboxComponent
     ],
     imports: [
         BrowserModule,

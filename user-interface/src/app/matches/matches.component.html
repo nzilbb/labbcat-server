@@ -38,19 +38,19 @@
         {{matches.indexOf(match) + 1}}.
       </div>
       <div class="match-id"><!-- TODO shift-click -->
-        <input type="checkbox"
-               i18n-title title="To select individual results, untick 'select all N results'"
-               name="utterance"
-               value="{{match.MatchId}}"
-               [checked]="match._selected" (change)="match._selected = !match._selected"
-               [disabled]="selectAll"
-               >
+        <app-grouped-checkbox
+          group="match"
+          i18n-title title="To select individual results, untick 'select all N results'"
+          name="utterance"
+          value="{{match.MatchId}}"
+          [checked]="match._selected" (checkedChange)="toggleMatch(match)"
+          [disabled]="selectAll"> </app-grouped-checkbox>
       </div>
       <div class="preceding-context match-transcript">
         {{match.BeforeMatch}}
       </div>
       <div class="match-text match-transcript">
-        <a href="{{transcriptUrl}}?transcript={{match.Transcript}}&amp;threadId={{threadId}}#{{MatchHash(match)}}"
+        <a href="{{transcriptUrl}}?transcript={{match.Transcript}}&amp;threadId={{threadId}}#{{matchHash(match)}}"
           i18n-title title="Open transcript"
           target="{{match.Transcript}}">
           {{match.Text}}
@@ -64,7 +64,7 @@
       <app-button (click)="moreMatches()"
                   [disabled]="totalMatches - matches.length <= 0"
                   i18n-title title="Show more results"
-                  label="{{Min(pageLength, totalMatches - matches.length)}} More Matches"
+                  label="{{min(pageLength, totalMatches - matches.length)}} More Matches"
                   img="down-triangle.png" icon="▼"
                   >
       </app-button>

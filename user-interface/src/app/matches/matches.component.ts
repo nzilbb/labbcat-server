@@ -63,7 +63,6 @@ export class MatchesComponent implements OnInit {
             this.status = task.status;
             this.totalMatches = parseInt(task.status.replace(/\D/g,"")); // TODO need something more formal
             this.zeroPad = task.status.replace(/\D/g,"").length;
-            console.log("totalMatches " + this.totalMatches);
             
             this.readMatches();
         });
@@ -172,7 +171,6 @@ export class MatchesComponent implements OnInit {
         for (let id of this.emuLayers) {
             serverUrl+= "&layer="+id;
         }
-        console.log(serverUrl);
         window.open(
             this.labbcatService.labbcat.baseUrl+"EMU-webApp/app?autoConnect=true&serverUrl="
                 +encodeURIComponent(serverUrl),
@@ -190,14 +188,18 @@ export class MatchesComponent implements OnInit {
         this.form.nativeElement.submit();
     }
 
+    toggleMatch(match: Match): void {
+        match._selected = !match._selected;
+    }
+
     // extract the transcript URL # from the MatchId
-    MatchHash(match: Match): string {
+    matchHash(match: Match): string {
         return match.MatchId
             .replace(/.*#=/,"")  // remove everything up to #=
             .replace(/;.*/,""); // remove everything after ;
     }
     // Math.min
-    Min(n1: number, n2: number): number {
+    min(n1: number, n2: number): number {
         return Math.min(n1, n2);
     }
 }
