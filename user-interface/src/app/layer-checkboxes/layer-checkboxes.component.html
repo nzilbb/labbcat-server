@@ -48,6 +48,10 @@
              type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
              class="include-count"
              title-i18n title="How many linked annotations to include">
+      <select name="relationship_{{layer.id}}" *ngIf="includeRelationship == true">
+	<option value="dominant">containing</option>
+	<option value="subordinate">contained</option>
+      </select>
     </span>
     {{layer.id}}
   </label>
@@ -62,10 +66,26 @@
       [checked]="layer._selected" (change)="layer._selected = !layer._selected"
       ></app-grouped-checkbox>
     <span class="layer-options" *ngIf="layer._selected">
+      <input *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+             type="checkbox" value="1" name="share_start_{{layer.id}}"
+             class="share-start"
+             id="{{name+'-'+layer.id+'-start'}}" style="display: none;">
+      <label for="{{name+'-'+layer.id+'-start'}}"
+             class="anchor"
+             title-i18n title="Click to select annotations that start when the target starts"
+             >⚓</label>
       <input *ngIf="includeCounts && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
              type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
              class="include-count"
              title-i18n title="How many linked annotations to include">
+      <input *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+             type="checkbox" value="1" name="share_end_{{layer.id}}"
+             class="share-end"
+             id="{{name+'-'+layer.id+'-end'}}" style="display: none;">
+      <label for="{{name+'-'+layer.id+'-end'}}"
+             class="anchor"
+             title-i18n title="Click to select annotations that end when the target ends"
+             >⚓</label>
     </span>
     {{layer.id}}
   </label>

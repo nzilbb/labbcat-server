@@ -8,3 +8,25 @@
 .include-count {
     width: 4ch;
 }
+.anchor  {
+    width: 20px;
+    display: inline-block;
+}
+.share-start + label {
+    border-top-left-radius: 50%;
+    border-top: 1px black dashed;
+    border-left: 1px transparent solid;
+}
+.share-start:checked + label {
+    border-top: 1px black solid;
+    border-left: 1px black solid;
+}
+.share-end + label {
+    border-top-right-radius: 50%;
+    border-top: 1px black dashed;
+    border-right: 1px transparent solid;
+}
+.share-end:checked + label {
+    border-top: 1px black solid;
+    border-right: 1px black solid;
+}
