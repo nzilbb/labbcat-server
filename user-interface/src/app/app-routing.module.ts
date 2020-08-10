@@ -11,10 +11,12 @@ import { AdminSystemAttributesComponent
        } from './admin-system-attributes/admin-system-attributes.component';
 import { AboutComponent } from './about/about.component';
 import { LoginComponent } from './login/login.component';
+import { MatchesComponent } from './matches/matches.component';
 
 const routes: Routes = [
     { path: 'about', component: AboutComponent },
     { path: 'login', component: LoginComponent },
+    { path: 'matches', component: MatchesComponent },
     { path: 'admin/corpora', component: AdminCorporaComponent },
     { path: 'admin/projects', component: AdminProjectsComponent },
     { path: 'admin/tracks', component: AdminTracksComponent },

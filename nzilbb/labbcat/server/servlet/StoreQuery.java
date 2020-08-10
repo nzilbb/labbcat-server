@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.labbcat.server.db.*;
 import nzilbb.util.IO;
 import org.json.*;
@@ -196,6 +197,10 @@ public class StoreQuery extends LabbcatServlet {
             json = getMedia(request, response, store);
          } else if (pathInfo.endsWith("getepisodedocuments")) {
             json = getEpisodeDocuments(request, response, store);
+         } else if (pathInfo.endsWith("getserializerdescriptors")) {
+            json = getSerializerDescriptors(request, response, store);
+         } else if (pathInfo.endsWith("getdeserializerdescriptors")) {
+            json = getDeserializerDescriptors(request, response, store);
          }
       }
       return json;
@@ -736,6 +741,34 @@ public class StoreQuery extends LabbcatServlet {
       for (MediaFile file : media) file.setFile(null);
       
       return successResult(request, media, media.length == 0?"There are no documents.":null);
+   }
+
+   /**
+    * Lists the descriptors of all registered serializers.
+    * @return A list of the descriptors of all registered serializers.
+    * @throws StoreException If an error prevents the operation from completing.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   protected JSONObject getSerializerDescriptors(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      SerializationDescriptor[] descriptors = store.getSerializerDescriptors();
+      return successResult(
+         request, descriptors, descriptors.length == 0?"There are no serializers.":null);
+   }
+   
+   /**
+    * Lists the descriptors of all registered deserializers.
+    * @return A list of the descriptors of all registered deserializers.
+    * @throws StoreException If an error prevents the descriptors from being listed.
+    * @throws PermissionException If listing the deserializers is not permitted.
+    */
+   protected JSONObject getDeserializerDescriptors(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      SerializationDescriptor[] descriptors = store.getDeserializerDescriptors();
+      return successResult(
+         request, descriptors, descriptors.length == 0?"There are no deserializers.":null);
    }
 
    private static final long serialVersionUID = 1;

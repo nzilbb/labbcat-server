@@ -1,0 +1,78 @@
+<div *ngIf="participant" class="layers participant-layers">
+  <div i18n="layer type header" class="header">Participant</div>
+  <label *ngFor="let layer of participantAttributes" title="{{layer.description}}">
+    <input type="checkbox" name="{{name}}" value="{{layer.id}}"
+           [checked]="layer._selected" (change)="layer._selected = !layer._selected">
+    <span class="layer-options" *ngIf="layer._selected">
+      <input *ngIf="layer.peers && layer.id != schema.participantLayerId"
+             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+             class="include-count"
+             title-i18n title="How many linked annotations to include">
+    </span>
+    {{ParticipantLayerLabel(layer.id)}}
+  </label>
+</div>
+<div *ngIf="transcript" class="layers transcript-layers">
+  <div i18n="layer type header" class="header">Transcript</div>
+  <label *ngFor="let layer of transcriptAttributes" title="{{layer.description}}">
+    <input type="checkbox" name="{{name}}" value="{{layer.id}}"
+           [checked]="layer._selected" (change)="layer._selected = !layer._selected">
+    <span class="layer-options" *ngIf="layer._selected">
+      <input *ngIf="layer.peers && layer.id != schema.corpusLayerId"
+             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+             class="include-count"
+             title-i18n title="How many linked annotations to include">
+    </span>
+    {{TranscriptLayerLabel(layer.id)}}
+  </label>
+</div>
+<div *ngIf="freeform" class="layers freeform-layers">
+  <div i18n="layer type header" class="header">Freeform</div>
+  <label *ngFor="let layer of freeformLayers" title="{{layer.description}}">
+    <input type="checkbox" name="{{name}}" value="{{layer.id}}"
+           [checked]="layer._selected" (change)="layer._selected = !layer._selected">
+    <span class="layer-options" *ngIf="layer._selected">
+      <input *ngIf="layer.peers"
+             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+             class="include-count"
+             title-i18n title="How many linked annotations to include">
+    </span>
+    {{layer.id}}
+  </label>
+</div>
+<div *ngIf="meta" class="layers meta-layers">
+  <div i18n="layer type header" class="header">Meta</div>
+  <label *ngFor="let layer of metaLayers" title="{{layer.description}}">
+    <input type="checkbox" name="{{name}}" value="{{layer.id}}"
+           [checked]="layer._selected" (change)="layer._selected = !layer._selected">
+    <span class="layer-options" *ngIf="layer._selected">
+      <input *ngIf="layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+             class="include-count"
+             title-i18n title="How many linked annotations to include">
+    </span>
+    {{layer.id}}
+  </label>
+</div>
+<div *ngIf="word" class="layers word-layers">
+  <div i18n="layer type header" class="header">Word</div>
+  <label *ngFor="let layer of wordLayers" title="{{layer.description}}">
+    <input type="checkbox" name="{{name}}" value="{{layer.id}}"
+           [checked]="layer._selected" (change)="layer._selected = !layer._selected">
+    <span class="layer-options" *ngIf="layer._selected">
+      <input *ngIf="layer.peers && layer.id != schema.wordLayerId"
+             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+             class="include-count"
+             title-i18n title="How many linked annotations to include">
+    </span>
+    {{layer.id}}
+  </label>
+</div>
+<div *ngIf="segment" class="layers segment-layers">
+  <div i18n="layer type header" class="header">Segment Layers</div>
+  <label *ngFor="let layer of segmentLayers" title="{{layer.description}}">
+    <input type="checkbox" name="{{name}}" value="{{layer.id}}"
+           [checked]="layer._selected" (change)="layer._selected = !layer._selected">
+    {{layer.id}}
+  </label>
+</div>

@@ -9,13 +9,14 @@ import { environment } from '../../environments/environment';
 export class ButtonComponent implements OnInit {
     @Input() action: string;
     @Input() title: string;
+    @Input() label: string;
+    @Input() icon: string;
+    @Input() img: string;
     @Input() disabled: boolean;
     @Output() click = new EventEmitter();
 
     imagesLocation = environment.imagesLocation;
-    label: string;
-    icon: string;
-    img: string;
+    classes = "btn";
     
     constructor() { }
     
@@ -31,12 +32,15 @@ export class ButtonComponent implements OnInit {
                 this.icon = "➖"; 
                 this.img = "delete.png"; // TODO replace with svg
                 break;
-            default:
+            case "save":
                 this.label = "Save"; // TODO l10n
                 this.icon = "💾";
                 this.img = "save.png"; // TODO replace with svg
                 break;
         }
+        this.title = this.title || this.label;
+        if (this.action) this.classes = this.action + "-btn";
+        if (!this.label) this.classes += " icon-only";
     }
 
     handleClick(): void {

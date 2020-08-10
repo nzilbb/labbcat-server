@@ -105,7 +105,7 @@ app-wait {
 button {
     white-space: nowrap;
     padding: 0px;
-    width: 75px;
+    min-width: 75px;
     height: 45px;
     background: silver;
     border: 1px outset;
@@ -121,10 +121,19 @@ button img {
 button:disabled img {
     opacity: 0.5;
 }
+button.icon-only {
+    min-width: 45px;
+    width: 45px;
+}
 @media all and (min-width: 640px) {
     button {
         height: unset;
         height: 32px;
+        padding: 5px;
+    }
+    button.icon-only {
+        min-width: 32px;
+        width: 32px;
     }
 }
 
@@ -143,4 +152,18 @@ button:disabled img {
     .list > .item > span > legend { display: none; }
     .list > .item > label { display: block; }
     .buttons { text-align: right; }
+}
+
+.hidden-panel {
+    max-height: 0px;
+    overflow: hidden;
+    transition: max-height 2s;
+}
+.unhidden-panel {
+    max-height: 500px;
+    overflow: scroll;
+    transition: max-height 0.5s;
+}
+.header {
+    font-style: italic;
 }

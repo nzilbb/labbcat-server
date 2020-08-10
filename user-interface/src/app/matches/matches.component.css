@@ -1,0 +1,62 @@
+#matches {
+    display: grid;
+    width: auto;
+    grid-column-gap: 5px;
+    grid-row-gap: 0px;
+    grid-template-columns: repeat(5, min-content);
+}
+#matches > * {
+    white-space: nowrap;
+}
+.match-transcript {
+    padding-top: 3px;
+}
+.transcript-change {
+    grid-column: 2 / -1;
+}
+#matches-footer button {
+    width: auto;
+    padding: 4px;
+}
+#matches-footer * {
+    padding: 4px;
+}
+.match {
+}
+.match > .match-id {
+}
+.match-participant {
+    font-weight: bold;
+}
+.match-participant:before {
+    content: " - ";
+}
+.preceding-context {
+    text-align: right;
+}
+.match-text {
+    background: yellow;
+    text-align: center;
+}
+.following-context {
+    text-align: left;
+}
+.csv-checkboxes {
+    display: flex;
+    flex-direction: column;
+}
+.csv-options {
+    display: flex;
+    flex-direction: column;
+}
+.csv-options label {
+    white-space: nowrap;
+}
+app-layer-checkboxes {
+    display: flex;
+    flex-direction: column;
+}
+
+@media all and (min-width: 640px) {
+    .csv-checkboxes, app-layer-checkboxes { flex-direction: row; }
+}

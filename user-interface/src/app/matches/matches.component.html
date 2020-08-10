@@ -1,0 +1,181 @@
+<h1>{{name}}</h1>
+
+<p>{{status}}</p>
+
+<app-wait *ngIf="!matches"></app-wait>
+<form #form method="POST" id="frm" *ngIf="matches.length">
+  <input type="hidden" name="threadId" value="{{threadId}}">
+  <input type="hidden" name="collection_name" value="{{name}}">
+  <input type="hidden" name="zeropad" value="{{zeroPad}}">
+  <input #todo type="hidden" name="todo" value="">
+  <div id="check-all-top">
+    <label i18n-title title="Select all results including those not shown here">
+      <input type="checkbox" [(checked)]="selectAll" (change)="all()">
+      <span i18n="select all results">Select all results</span>
+      ({{totalMatches}})
+    </label>
+  </div>
+  <div id="matches">
+    <ng-container class="match" *ngFor="let match of matches; let m = index;">
+
+      <div class="transcript-change" *ngIf="m == 0 || match.Transcript != matches[m-1].Transcript">
+        <span class="match-transcript">{{match.Transcript}}</span>
+        <span class="match-participant">{{match.Participant}}</span>
+      </div>
+
+      <div class="match-number">
+        {{matches.indexOf(match) + 1}}.
+      </div>
+      <div class="match-id"><!-- TODO shift-click -->
+        <input type="checkbox"
+               i18n-title title="To select individual results, untick 'select all N results'"
+               name="utterance"
+               value="{{match.MatchId}}"
+               [checked]="match._selected" (change)="match._selected = !match._selected"
+               [disabled]="selectAll"
+               >
+      </div>
+      <div class="preceding-context match-transcript">
+        {{match.BeforeMatch}}
+      </div>
+      <div class="match-text match-transcript">
+        <a href="{{transcriptUrl}}?transcript={{match.Transcript}}&amp;threadId={{threadId}}#{{MatchHash(match)}}"
+          i18n-title title="Open transcript"
+          target="{{match.Transcript}}">
+          {{match.Text}}
+        </a>
+      </div>
+      <div class="following-context match-transcript">{{match.AfterMatch}}</div>
+    </ng-container>
+  </div>
+  <div id="matches-footer">
+      <span class="match-count">{{matches.length}} results shown</span>
+      <app-button (click)="moreMatches()"
+                  [disabled]="totalMatches - matches.length <= 0"
+                  i18n-title title="Show more results"
+                  label="{{Min(pageLength, totalMatches - matches.length)}} More Matches"
+                  img="down-triangle.png" icon="▼"
+                  >
+      </app-button>
+      <app-button (click)="allMatches()"
+                  [disabled]="totalMatches - matches.length <= 0"
+                  i18n-title title="Show all results"
+                  label="{{totalMatches - matches.length}} Remaining Matches"
+                  img="down-double-triangle.png" icon="⏬"
+                  >
+      </app-button>
+    </div>
+  <div id="check-all-bottom">
+    <label i18n-title title="Select all results including those not shown here">
+      <input type="checkbox" [(checked)]="selectAll" (change)="all()">
+      <span i18n="select all results">Select all results</span>
+      ({{totalMatches}})
+    </label>
+  </div>
+  <div id="csv-export">
+    <app-button (click)="csvOptions();"
+                img="down-triangle.png" icon="▼"
+                i18n-title title="CSV export options"
+                ></app-button>
+    <app-button (click)="exportCsv();"
+                img="csv.png" icon=",a,"
+                i18n-title title="Export results to CSV"
+                i18n-label label="CSV Export"></app-button>
+  </div>
+  <div id="csv-export-options" class="{{showCsvOptions?'unhidden-panel':'hidden-panel'}}">
+    <div i18n>CSV Export</div>
+    <div class="csv-checkboxes">
+      <div class="csv-options">
+        <div i18n="csv options title" class="header">Fields:</div>
+        <label i18n="csv options"
+               i18n-title title="Identifier for this search">
+          <input type="checkbox" name="csv_option" value="collection_name" checked>
+          Search name
+        </label>
+        <label i18n="csv options"
+               i18n-title title="Result number">
+          <input type="checkbox" name="csv_option" value="result_number" checked>
+          Number
+        </label>
+        <label i18n="csv options"
+               i18n-title title="Start time of the transcript relative to the beginning of the whole series">
+          <input type="checkbox" name="csv_option" value="series_offset">
+          Series offset
+        </label>
+        <label i18n="csv options"
+               i18n-title title="End time of the transcript relative to the beginning of the whole series">
+          <input type="checkbox" name="csv_option" value="series_length">
+          Series length
+        </label>
+        <label i18n="csv options"
+               i18n-title title="Start time of the utterance relative to the beginning of the transcript">
+          <input type="checkbox" name="csv_option" value="line_time" checked>
+          Line
+        </label>
+        <label i18n="csv options"
+               i18n-title title="End time of the utterance relative to the beginning of the transcript">
+          <input type="checkbox" name="csv_option" value="line_end_time" checked>
+          Line end
+        </label>
+        <label i18n="csv options"
+               i18n-title title="Unique identifier for the match">
+          <input type="checkbox" name="csv_option" value="match" checked>
+          Match ID
+        </label>
+        <label i18n="csv options"
+               i18n-title title="URL for the match">
+          <input type="checkbox" name="csv_option" value="word_url" checked>
+          URL
+        </label>
+        <label i18n="csv options"
+               i18n-title title="The transcription of the match and its surrounding context">
+          <input type="checkbox" name="csv_option" value="result_text" checked>
+          Text
+        </label>
+      </div>
+      <app-layer-checkboxes name="csv_layer"
+                            participant="true" transcript="true"
+                            freeform="true" meta="true" word="true" segment="true"
+                            excludeMainParticipant="true"
+                            excludeTurn="true" excludeUtterance="true"
+                            selected="{{selectedLayers}}"></app-layer-checkboxes>
+    </div>
+  </div>
+  <div id="export-audio">
+    <app-button (click)="exportAudio();"
+                img="audio.png" icon="🔊"
+                i18n-label label="Export Audio"></app-button>
+  </div>
+  <div id="emu-webapp">
+    <app-button (click)="emuOptions();"
+                img="down-triangle.png" icon="▼"
+                i18n-title title="EMU WebApp options"
+                ></app-button>
+    <app-button (click)="emuWebapp();"
+                img="emu.png" icon="eμ"
+                i18n-label label="EMU WebApp"></app-button>
+  </div>
+  <div id="emu-options" class="{{showEmuOptions?'unhidden-panel':'hidden-panel'}}">
+      <app-layer-checkboxes name="emu_layer"
+                            word="true" segment="true"
+                            selected="{{emuLayers}}"></app-layer-checkboxes>
+  </div>
+  <div id="serialize">
+    <select #mimetype name="mimetype"
+            [(ngModel)]="mimeType"
+            (input)="onChangeMimeType()">
+      <option *ngFor="let serializer of serializers"
+              value="{{serializer.mimeType}}">{{serializer.name}}</option>
+    </select>
+    <app-button (click)="serialize();"
+                img="{{serializeImg}}" icon="📦"
+                i18n-label label="Convert"></app-button>
+  </div>
+  <div id="generate-layers">
+    <input #generate_layer type="hidden" name="generate_layer" value="{{generateLayer}}">
+    <app-button (click)="runAnnotator('htk');"
+                img="cog.png" icon="⚙"
+                i18n-label label="Generate HTK"></app-button>
+  </div>
+  <app-keep-alive threadId="{{threadId}}"></app-keep-alive>
+</form>

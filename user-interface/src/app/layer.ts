@@ -10,4 +10,6 @@ export interface Layer {
     type: string;
     category: string;
     validLabels: object;
+
+    _selected: boolean;
 }

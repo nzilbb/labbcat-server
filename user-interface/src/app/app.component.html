@@ -3,7 +3,10 @@
   <app-messages></app-messages>
 </header>
 <div id="main">
-  <nav><app-admin-menu></app-admin-menu></nav>
+  <nav>
+    <app-view-menu></app-view-menu>
+    <app-admin-menu></app-admin-menu>
+  </nav>
   <article>
     <router-outlet></router-outlet>
   </article>

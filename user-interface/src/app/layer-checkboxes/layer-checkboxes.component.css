@@ -1,0 +1,10 @@
+.layers {
+    display: flex;
+    flex-direction: column;
+}
+.layers > * {
+    white-space: nowrap;
+}
+.include-count {
+    width: 4ch;
+}

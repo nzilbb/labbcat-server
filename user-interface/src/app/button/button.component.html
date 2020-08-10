@@ -1,7 +1,7 @@
 <button (click)="handleClick"
         [disabled]="disabled"
         title="{{title}}"
-        class="{{action}}-btn">
-  <img src="{{imagesLocation}}/{{img}}" alt="{{icon}}">
+        class="{{classes}}">
+  <img src="{{img.startsWith('http')?img:imagesLocation+'/'+img}}" alt="{{icon}}">
   <label i18n>{label, select, New {New} Save {Save} Delete {Delete} other {{{label}}}}</label>
 </button>

@@ -19,6 +19,9 @@ import { AdminTracksComponent } from './admin-tracks/admin-tracks.component';
 import { AdminRolesComponent } from './admin-roles/admin-roles.component';
 import { AdminRolePermissionsComponent } from './admin-role-permissions/admin-role-permissions.component';
 import { AdminSystemAttributesComponent } from './admin-system-attributes/admin-system-attributes.component';
+import { MatchesComponent } from './matches/matches.component';
+import { KeepAliveComponent } from './keep-alive/keep-alive.component';
+import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.component';
 
 @NgModule({
     declarations: [
@@ -36,7 +39,10 @@ import { AdminSystemAttributesComponent } from './admin-system-attributes/admin-
         AdminTracksComponent,
         AdminRolesComponent,
         AdminRolePermissionsComponent,
-        AdminSystemAttributesComponent
+        AdminSystemAttributesComponent,
+        MatchesComponent,
+        KeepAliveComponent,
+        LayerCheckboxesComponent
     ],
     imports: [
         BrowserModule,
