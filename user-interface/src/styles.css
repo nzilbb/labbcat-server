@@ -168,7 +168,7 @@ app-button button {
 }
 .unhidden-panel {
     max-height: 500px;
-    overflow: scroll;
+    overflow: auto;
     transition: max-height 0.5s;
 }
 .header {
