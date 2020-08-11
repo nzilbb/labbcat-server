@@ -94,63 +94,65 @@
                 ></app-button>
   </div>
   <div id="csv-export-options" class="{{showCsvOptions?'unhidden-panel':'hidden-panel'}}">
-    <fieldset class="csv-checkboxes">
+    <fieldset>
       <legend i18n>CSV Columns</legend>
-      <div class="csv-options">
-        <div i18n="csv options title" class="header">Fields:</div>
-        <label i18n="csv options"
-               i18n-title title="Identifier for this search">
-          <input type="checkbox" name="csv_option" value="collection_name" checked>
-          Search name
-        </label>
-        <label i18n="csv options"
-               i18n-title title="Result number">
-          <input type="checkbox" name="csv_option" value="result_number" checked>
-          Number
-        </label>
-        <label i18n="csv options"
-               i18n-title title="Start time of the transcript relative to the beginning of the whole series">
-          <input type="checkbox" name="csv_option" value="series_offset">
-          Series offset
-        </label>
-        <label i18n="csv options"
-               i18n-title title="End time of the transcript relative to the beginning of the whole series">
-          <input type="checkbox" name="csv_option" value="series_length">
-          Series length
-        </label>
-        <label i18n="csv options"
-               i18n-title title="Start time of the utterance relative to the beginning of the transcript">
-          <input type="checkbox" name="csv_option" value="line_time" checked>
-          Line
-        </label>
-        <label i18n="csv options"
-               i18n-title title="End time of the utterance relative to the beginning of the transcript">
-          <input type="checkbox" name="csv_option" value="line_end_time" checked>
-          Line end
-        </label>
-        <label i18n="csv options"
-               i18n-title title="Unique identifier for the match">
-          <input type="checkbox" name="csv_option" value="match" checked>
-          Match ID
-        </label>
-        <label i18n="csv options"
-               i18n-title title="URL for the match">
-          <input type="checkbox" name="csv_option" value="word_url" checked>
-          URL
-        </label>
-        <label i18n="csv options"
-               i18n-title title="The transcription of the match and its surrounding context">
-          <input type="checkbox" name="csv_option" value="result_text" checked>
-          Text
-        </label>
+      <div class="csv-checkboxes">
+        <div class="csv-options">
+          <div i18n="csv options title" class="header">Fields:</div>
+          <label i18n="csv options"
+                 i18n-title title="Identifier for this search">
+            <input type="checkbox" name="csv_option" value="collection_name" checked>
+            Search name
+          </label>
+          <label i18n="csv options"
+                 i18n-title title="Result number">
+            <input type="checkbox" name="csv_option" value="result_number" checked>
+            Number
+          </label>
+          <label i18n="csv options"
+                 i18n-title title="Start time of the transcript relative to the beginning of the whole series">
+            <input type="checkbox" name="csv_option" value="series_offset">
+            Series offset
+          </label>
+          <label i18n="csv options"
+                 i18n-title title="End time of the transcript relative to the beginning of the whole series">
+            <input type="checkbox" name="csv_option" value="series_length">
+            Series length
+          </label>
+          <label i18n="csv options"
+                 i18n-title title="Start time of the utterance relative to the beginning of the transcript">
+            <input type="checkbox" name="csv_option" value="line_time" checked>
+            Line
+          </label>
+          <label i18n="csv options"
+                 i18n-title title="End time of the utterance relative to the beginning of the transcript">
+            <input type="checkbox" name="csv_option" value="line_end_time" checked>
+            Line end
+          </label>
+          <label i18n="csv options"
+                 i18n-title title="Unique identifier for the match">
+            <input type="checkbox" name="csv_option" value="match" checked>
+            Match ID
+          </label>
+          <label i18n="csv options"
+                 i18n-title title="URL for the match">
+            <input type="checkbox" name="csv_option" value="word_url" checked>
+            URL
+          </label>
+          <label i18n="csv options"
+                 i18n-title title="The transcription of the match and its surrounding context">
+            <input type="checkbox" name="csv_option" value="result_text" checked>
+            Text
+          </label>
+        </div>
+        <app-layer-checkboxes
+          name="csv_layer"
+          includeCounts="true" includeAnchorSharing="true"
+          participant="true" transcript="true"
+          freeform="true" meta="true" word="true" segment="true"
+          excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true"
+          selected="{{selectedLayers}}"></app-layer-checkboxes>
       </div>
-      <app-layer-checkboxes
-        name="csv_layer"
-        includeCounts="true" includeAnchorSharing="true"
-        participant="true" transcript="true"
-        freeform="true" meta="true" word="true" segment="true"
-        excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true"
-        selected="{{selectedLayers}}"></app-layer-checkboxes>
     </fieldset>
   </div>
   <div id="emu-webapp" class="controls" *ngIf="emuWebApp">
