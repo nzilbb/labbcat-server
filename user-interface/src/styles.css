@@ -104,7 +104,7 @@ app-wait {
 button {
     white-space: nowrap;
     padding: 0px;
-    min-width: 75px;
+    min-width: 80px;
     height: 45px;
     background: silver;
     border: 1px outset;
@@ -126,7 +126,7 @@ button.icon-only {
 }
 app-button {
     display: inline-block;
-    min-width: 75px;
+    min-width: 80px;
 }
 app-button button {
     width: 100%;
