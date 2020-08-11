@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-wait',
@@ -7,9 +8,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class WaitComponent implements OnInit {
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
+    imagesLocation = environment.imagesLocation;
+    constructor() { }
+    
+    ngOnInit(): void {
+    }
+    
 }
