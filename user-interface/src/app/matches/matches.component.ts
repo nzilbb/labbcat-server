@@ -38,9 +38,9 @@ export class MatchesComponent implements OnInit {
     showEmuOptions = false;
     emuLayers = [ "transcript", "segments" ];
     htkLayer = false; // TODO handle IUtteranceDataGenerator annotators better
+    baseUrl: string;
     emuWebApp = false;
-    user: User;
-    
+    user: User;    
     
     constructor(
         private labbcatService: LabbcatService,
@@ -56,12 +56,18 @@ export class MatchesComponent implements OnInit {
             this.wordsContext = params["wordsContext"] || 1;
             this.readTaskStatus();
         });
+        this.readBaseUrl();
         this.readUserInfo();
         this.readSerializers();
         this.readGenerableLayers();
         this.readEmuWebappSetting();
     }
 
+    readBaseUrl(): void {
+        this.labbcatService.labbcat.getId((url, errors, messages) => {
+            this.baseUrl = url;
+        });
+    }
     readUserInfo(): void {
         this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
             this.user = user as User;
@@ -149,13 +155,13 @@ export class MatchesComponent implements OnInit {
     }
 
     exportAudio(): void {
-        this.form.nativeElement.action = this.labbcatService.labbcat.baseUrl + "soundfragment";
+        this.form.nativeElement.action = this.baseUrl + "soundfragment";
         this.form.nativeElement.submit();
     }
 
     serialize(): void {
         this.todo.nativeElement.value = "convert";
-        this.form.nativeElement.action = this.labbcatService.labbcat.baseUrl + "results";
+        this.form.nativeElement.action = this.baseUrl + "results";
         this.form.nativeElement.submit();
     }
 
@@ -164,7 +170,7 @@ export class MatchesComponent implements OnInit {
     }
     exportCsv(): void {
         this.todo.nativeElement.value = "csv";
-        this.form.nativeElement.action = this.labbcatService.labbcat.baseUrl + "resultsStream";
+        this.form.nativeElement.action = this.baseUrl + "resultsStream";
         this.form.nativeElement.submit();
     }
 
@@ -172,7 +178,7 @@ export class MatchesComponent implements OnInit {
         this.showEmuOptions = !this.showEmuOptions;
     }
     emuWebapp(): void {
-        let serverUrl = this.labbcatService.labbcat.baseUrl.replace(/^http/,"ws") + "emu";
+        let serverUrl = this.baseUrl.replace(/^http/,"ws") + "emu";
 
         if (this.selectAll) {
             serverUrl+= "?threadId="+this.threadId;
@@ -189,7 +195,7 @@ export class MatchesComponent implements OnInit {
             serverUrl+= "&layer="+id;
         }
         window.open(
-            this.labbcatService.labbcat.baseUrl+"EMU-webApp/app?autoConnect=true&serverUrl="
+            this.baseUrl+"EMU-webApp/app?autoConnect=true&serverUrl="
                 +encodeURIComponent(serverUrl),
             "EMU-webApp").focus();
     }
@@ -199,7 +205,7 @@ export class MatchesComponent implements OnInit {
     }
 
     runAnnotator(layerId: string): void {
-        this.form.nativeElement.action = this.labbcatService.labbcat.baseUrl + "generateLayerUtterances";
+        this.form.nativeElement.action = this.baseUrl + "generateLayerUtterances";
         this.generateLayer.nativeElement.value = layerId;
         this.todo.nativeElement.value = "generate";
         this.form.nativeElement.submit();
