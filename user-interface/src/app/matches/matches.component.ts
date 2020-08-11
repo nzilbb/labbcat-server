@@ -49,7 +49,7 @@ export class MatchesComponent implements OnInit {
         this.transcriptUrl = this.labbcatService.labbcat.baseUrl + "transcript";
         this.route.queryParams.subscribe((params) => {
             this.threadId = params["threadId"];
-            this.wordsContext = params["wordsContext"];
+            this.wordsContext = params["wordsContext"] || 1;
             this.readTaskStatus();
         });
         this.readSerializers();
