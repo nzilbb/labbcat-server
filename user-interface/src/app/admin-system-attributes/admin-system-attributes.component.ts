@@ -49,7 +49,15 @@ export class AdminSystemAttributesComponent implements OnInit {
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // if there were errors, reload to ensure the model is correct
-                if (errors) this.readAttributes();
+                if (errors) {
+                    this.readAttributes();
+                } else {
+                    const updatedRow = attribute as SystemAttribute;                    
+                    const i = this.attributes.findIndex(r => {
+                        return r.attribute == updatedRow.attribute; })
+                    this.attributes[i] = updatedRow;
+                    this.updateChangedFlag();
+                }                    
             });
     }
     

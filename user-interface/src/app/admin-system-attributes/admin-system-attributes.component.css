@@ -1,3 +1,9 @@
 span.type-boolean label {
     display: block;
 }
+/* Layout on wider screens - 3 columns */
+@media all and (min-width: 640px) {
+    .attribute-item {
+        height: 26px;
+    }
+}
