@@ -153,7 +153,7 @@
         selected="{{selectedLayers}}"></app-layer-checkboxes>
     </fieldset>
   </div>
-  <div id="emu-webapp" class="controls">
+  <div id="emu-webapp" class="controls" *ngIf="emuWebApp">
     <app-button (click)="emuWebapp();"
                 img="emu.png" icon="eμ"
                 i18n-label label="EMU WebApp"></app-button>
@@ -186,7 +186,7 @@
                 img="audio.png" icon="🔊"
                 i18n-label label="Export Audio"></app-button>
   </div>
-  <div id="generate-layers" class="controls">
+  <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit')">
     <input #generate_layer type="hidden" name="generate_layer" value="{{generateLayer}}">
     <app-button (click)="runAnnotator('htk');"
                 img="cog.png" icon="⚙"

@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Response } from '../response';
 import { Match } from '../match';
 import { Task } from '../task';
+import { User } from '../user';
 import { SerializationDescriptor } from '../serialization-descriptor';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
@@ -37,6 +38,9 @@ export class MatchesComponent implements OnInit {
     showEmuOptions = false;
     emuLayers = [ "transcript", "segments" ];
     htkLayer = false; // TODO handle IUtteranceDataGenerator annotators better
+    emuWebApp = false;
+    user: User;
+    
     
     constructor(
         private labbcatService: LabbcatService,
@@ -52,10 +56,17 @@ export class MatchesComponent implements OnInit {
             this.wordsContext = params["wordsContext"] || 1;
             this.readTaskStatus();
         });
+        this.readUserInfo();
         this.readSerializers();
         this.readGenerableLayers();
+        this.readEmuWebappSetting();
     }
 
+    readUserInfo(): void {
+        this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
+            this.user = user as User;
+        });
+    }
     readTaskStatus(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
             if (errors) for (let message of errors) this.messageService.error(message);
@@ -100,6 +111,12 @@ export class MatchesComponent implements OnInit {
     readGenerableLayers(): void {
         this.labbcatService.labbcat.getLayer("htk", (layer, errors, messages) => {
             this.htkLayer == layer != null;
+        });
+    }
+    
+    readEmuWebappSetting(): void {
+        this.labbcatService.labbcat.getSystemAttribute("EMU-webApp", (attribute, errors, messages) => {
+          this.emuWebApp = attribute && attribute["value"] == "1";
         });
     }
     
