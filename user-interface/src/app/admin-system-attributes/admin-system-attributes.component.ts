@@ -55,7 +55,7 @@ export class AdminSystemAttributesComponent implements OnInit {
                     const updatedRow = attribute as SystemAttribute;                    
                     const i = this.attributes.findIndex(r => {
                         return r.attribute == updatedRow.attribute; })
-                    this.attributes[i] = updatedRow;
+                    this.attributes[i]._changed = false;
                     this.updateChangedFlag();
                 }                    
             });
