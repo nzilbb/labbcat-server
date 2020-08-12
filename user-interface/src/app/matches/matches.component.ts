@@ -22,6 +22,7 @@ export class MatchesComponent implements OnInit {
     status: string;
     totalMatches: number;
     zeroPad: number;
+    searchedLayers: string[];
     matches: Match[];
     threadId: string;
     wordsContext: number;
@@ -34,7 +35,7 @@ export class MatchesComponent implements OnInit {
     mimeType = "text/praat-textgrid";
     serializeImg = "zip.png";
     showCsvOptions = false;
-    selectedLayers = [ "transcript", "participant", "graph", "corpus" ]; // TODO load this from server
+    selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "transcript", "segments" ];
     htkLayer = false; // TODO handle IUtteranceDataGenerator annotators better
@@ -78,8 +79,11 @@ export class MatchesComponent implements OnInit {
             if (errors) for (let message of errors) this.messageService.error(message);
             if (messages) for (let message of messages) this.messageService.info(message);
             this.status = task.status;
-            this.totalMatches = parseInt(task.status.replace(/\D/g,"")); // TODO need something more formal
-            this.zeroPad = task.status.replace(/\D/g,"").length;
+            this.totalMatches = task.size; // TODO need something more formal
+            this.zeroPad = (""+task.size).length;
+            this.searchedLayers = task.layers;
+            this.selectedLayers = this.searchedLayers
+                .concat([ "transcript", "participant", "graph", "corpus" ]);
             
             this.readMatches();
         });

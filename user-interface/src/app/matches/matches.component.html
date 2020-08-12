@@ -9,22 +9,27 @@
   <input type="hidden" name="zeropad" value="{{zeroPad}}">
   <input #todo type="hidden" name="todo" value="">
   <div id="check-all-top">
+    
     <label i18n-title title="Select all results including those not shown here">
       <input type="checkbox" [(checked)]="selectAll" (change)="all()">
       <span i18n="select all results">Select all results</span>
       ({{totalMatches}})
     </label>
     
-    <select [(ngModel)]="wordsContext" name="words_context"
+    <label i18n-title title="How much context to show before/after match"
+           for="words_context"
+           i18n="KWIC context selector label"> Context: </label>
+    <select [(ngModel)]="wordsContext" name="words_context" id="words_context"
             (change)="onChangeWordsContext()"
-            i18n-title title="Amount of context to show in the results">
-      <option value="1"  i18n="words context option">1 word before/after</option>
-      <option value="5"  i18n="words context option">5 words before/after</option>
-      <option value="10" i18n="words context option">10 words before/after</option>
-      <option value="20" i18n="words context option">20 words before/after</option>
-      <option value="-1" i18n="words context option">the whole line of</option>
-      <option value="0"  i18n="words context option">nothing surrounding</option>
+            i18n-title title="How much context to show before/after match">
+      <option value="1"  i18n="words context option">1 word</option>
+      <option value="5"  i18n="words context option">5 words</option>
+      <option value="10" i18n="words context option">10 words</option>
+      <option value="20" i18n="words context option">20 words</option>
+      <option value="-1" i18n="words context option">the whole line</option>
+      <option value="0"  i18n="words context option">no context</option>
     </select>
+    
   </div>
   <div id="matches">
     <ng-container class="match" *ngFor="let match of matches; let m = index;">
