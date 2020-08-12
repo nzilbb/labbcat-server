@@ -38,10 +38,11 @@ import nzilbb.ag.MediaFile;
 import nzilbb.ag.MediaTrackDefinition;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.StoreException;
+import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.labbcat.LabbcatView;
 import nzilbb.labbcat.ResponseException;
-import nzilbb.labbcat.model.Match;
 import nzilbb.labbcat.http.HttpRequestGet;
+import nzilbb.labbcat.model.Match;
 import org.json.JSONObject;
 
 /**
@@ -213,6 +214,26 @@ public class TestStoreQuery
       {
          System.out.println("getEpisodeDocuments: " + graphId + " has no documents");
       }
+
+      SerializationDescriptor[] descriptors = l.getSerializerDescriptors();
+      // for (SerializationDescriptor descriptor : descriptors) System.out.println("descriptor " + descriptor);
+      assertTrue("Some descriptors are returned",
+                 descriptors.length > 0);
+      Set<Object> mimeTypeSet = Arrays.asList(descriptors).stream()
+         .map(l->l.getMimeType())
+         .collect(Collectors.toSet());
+      assertTrue("Has plain text serialization: " + mimeTypeSet,
+                 mimeTypeSet.contains("text/plain"));
+
+      descriptors = l.getDeserializerDescriptors();
+      // for (SerializationDescriptor descriptor : descriptors) System.out.println("descriptor " + descriptor);
+      assertTrue("Some descriptors are returned",
+                 descriptors.length > 0);
+      mimeTypeSet = Arrays.asList(descriptors).stream()
+         .map(l->l.getMimeType())
+         .collect(Collectors.toSet());
+      assertTrue("Has plain text serialization: " + mimeTypeSet,
+                 mimeTypeSet.contains("text/plain"));
    }
 
    public static void main(String args[]) {
