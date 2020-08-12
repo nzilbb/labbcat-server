@@ -50,6 +50,7 @@ import nzilbb.util.IO;
 
 /**
  * Servlet that provides information about the current user.
+ * <p> See <a href="package-summary.html#/api/user">API summary</a> for more details.
  * @author Robert Fromont
  */
 @WebServlet("/api/user")

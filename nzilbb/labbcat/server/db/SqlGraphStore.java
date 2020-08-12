@@ -8008,6 +8008,8 @@ public class SqlGraphStore
 
    /**
     * Lists the descriptors of all registered serializers.
+    * <p> Serializers are modules that export annotation structures as a specific file
+    * format, e.g. Praat TextGrid, plain text, etc.
     * @return A list of the descriptors of all registered serializers.
     * @throws StoreException If an error prevents the operation from completing.
     * @throws PermissionException If the operation is not permitted.
@@ -8032,6 +8034,8 @@ public class SqlGraphStore
    
    /**
     * Lists the descriptors of all registered deserializers.
+    * <p> Deserializers are modules that import annotation structures from a specific file
+    * format, e.g. Praat TextGrid, plain text, etc.
     * @return A list of the descriptors of all registered deserializers.
     * @throws StoreException If an error prevents the descriptors from being listed.
     * @throws PermissionException If listing the deserializers is not permitted.

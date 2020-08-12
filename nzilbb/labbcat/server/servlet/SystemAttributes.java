@@ -31,7 +31,7 @@ import org.json.JSONException;
 
 /**
  * Servlet that allows read-only access to system attributes.
- * <p> See <a href="package-summary.html#/api/admin/corpora">API summary</a> for more details.
+ * <p> See <a href="package-summary.html#/api/systemattributes">API summary</a> for more details.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet(urlPatterns = "/api/systemattributes/*", loadOnStartup = 20)

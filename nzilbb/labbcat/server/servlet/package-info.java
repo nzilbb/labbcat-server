@@ -590,6 +590,41 @@
           </dl>
         </li>
       </ul>
+
+      <a id="getSerializerDescriptors()">
+      <!--   -->
+      </a>
+      <ul class="blockList">
+      <li class="blockList">
+      <h4>/api/store/getSerializerDescriptors</h4>
+      <div class="block">Lists the descriptors of all registered serializers.
+      <p> Serializers are modules that export annotation structures as a specific file
+      format, e.g. Praat TextGrid, plain text, etc., so the
+      <code>mimeType</code> of descriptors reflects what 
+      <var>mimeType</var>s can be specified for exporting annotation data.</div>
+      <dl>
+      <dt><span class="returnLabel">Returns:</span></dt>
+      <dd>A list of the descriptors of all registered serializers.</dd>
+      </dl>
+      </li>
+      </ul>
+      
+      <a id="getDeserializerDescriptors()">
+      <!--   -->
+      </a>
+      <ul class="blockListLast">
+      <li class="blockList">
+      <h4>/api/store/getDeserializerDescriptors</h4>
+      <div class="block">Lists the descriptors of all registered deserializers.
+      <p> Deserializers are modules that import annotation structures from a specific file
+      format, e.g. Praat TextGrid, plain text, etc.</div>
+      <dl>
+      <dt><span class="returnLabel">Returns:</span></dt>
+      <dd>A list of the descriptors of all registered deserializers.</dd>
+      </dl>
+      </li>
+      </ul>
+
     </li>
   </ul>
 </section>
@@ -682,6 +717,50 @@
  *  </div>
  * </li>
  * 
+ * <li class="blockList"><h4 id="/api/systemattributes">/api/systemattributes/<var>name</var></h4>
+ *  <div> Allows access to the value of a given system attribute, returning a
+ *  JSON-encoded objects with the following attributes:
+ *   <ul>
+ *    <li> <q> name </q> : ID of the attribute. </li>
+ *    <li> <q> value </q> : The value of the attribute. </li>
+ *   </ul>
+ *   GET HTTP method is supported,
+ *   <ul>
+ *    <li>Only the <b> GET </b> HTTP method is supported.
+ *     <ul>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object with the above structure.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The attribute was found. </li>
+ *         <li><em> 404 </em> : The attribute was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *   </ul>
+ *  </div>
+ * </li>
+ * 
+ * <li class="blockList"><h4 id="/api/user">/api/user</h4>
+ *  <div> Allows access to information about the current user, returning a
+ *  JSON-encoded objects with the following attributes:
+ *   <ul>
+ *    <li> <q> user </q> : ID of the user. </li>
+ *    <li> <q> roles </q> : An array of strings, which are the roles or groups the user
+ *                          belongs to. </li> 
+ *   </ul>
+ *   GET HTTP method is supported,
+ *   <ul>
+ *    <li>Only the <b> GET </b> HTTP method is supported.
+ *     <ul>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object with the above structure.  </li>
+ *      <li><em> Response Status </em> n- <em> 200 </em> : Success. </li>
+ *     </ul></li> 
+ *   </ul>
+ *  </div>
+ * </li>
+ *
  * <li class="blockList"><h4 id="/api/admin/corpora">/api/admin/corpora[/<var>corpus_name</var>]</h4>
  *  <div> Allows administration (Create/Read/Update/Delete) of corpus records via
  *  JSON-encoded objects with the following attributes:
