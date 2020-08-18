@@ -59,15 +59,16 @@
  * localize messages to the specified language.
  * <p> Graph store functions include:
  * <ul>
- *  <li><a href="#IGraphStoreQuery"> IGraphStoreQuery functions </a></li>
- *  <li><a href="#IGraphStore"> IGraphStore functions </a></li>
+ *  <li><a href="#GraphStoreQuery"> GraphStoreQuery functions </a></li>
+ *  <li><a href="#GraphStore"> GraphStore functions </a></li>
+ *  <li><a href="#GraphStoreAdministration"> GraphStoreAdministration functions </a></li>
  *  <li><a href="#OtherFunctions"> and other LaBB-CAT-specific functions. </a></li>
  * </ul>
-<!-- Based on IGraphStoreQuery javadoc -->
+<!-- Based on GraphStoreQuery javadoc -->
 <section role="region">
   <ul class="blockList">
     <li class="blockList">
-      <h3 id="IGraphStoreQuery">/api/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStoreQuery.html">nzilbb.ag.IGraphStoreQuery</a> functions:</h3>
+      <h3 id="GraphStoreQuery">/api/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStoreQuery.html">nzilbb.ag.GraphStoreQuery</a> functions:</h3>
       <a id="getId()">
         <!--   -->
       </a>
@@ -629,12 +630,12 @@
   </ul>
 </section>
 
-<!-- Based on IGraphStore javadoc -->
+<!-- Based on GraphStore javadoc -->
 
 <section role="region">
   <ul class="blockList">
     <li class="blockList">
-      <h3 id="IGraphStore">/api/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a> functions:</h3>
+      <h3 id="GraphStore">/api/edit/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStore.html">nzilbb.ag.GraphStore</a> functions:</h3>
       <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
         <!--   -->
       </a>
@@ -654,6 +655,87 @@
             <dt><span class="returnLabel">Returns:</span></dt>
             <dd>The ID of the new annotation.</dd>
           </dl>
+        </li>
+      </ul>
+      <a id="destroyAnnotation(java.lang.String,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/edit/store/destroyAnnotation</h4>
+          <div class="block">Destroys the annotation with the given ID.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the transcript.</dd>
+            <dd><code>annotationId</code> - The annotation's ID.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="deleteTranscript(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/edit/store/deleteTranscript</h4>
+          <pre class="methodSignature">void&nbsp;deleteTranscript&#8203;(String&nbsp;id)
+            throws <a href="StoreException.html" title="class in nzilbb.ag">StoreException</a>,
+            <a href="PermissionException.html" title="class in nzilbb.ag">PermissionException</a>,
+            <a href="GraphNotFoundException.html" title="class in nzilbb.ag">GraphNotFoundException</a></pre>
+          <div class="block">Deletes the given transcript, and all associated files.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID transcript to delete.</dd>
+          </dl>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<!-- Based on GraphStoreAdministration javadoc -->
+
+<section role="region">
+  <ul class="blockList">
+    <li class="blockList">
+      <h3 id="GraphStoreAdministration">/api/admin/store/&hellip; <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStoreAdministration.html">nzilbb.ag.GraphStoreAdministration</a> functions:</h3>
+      <a id="saveLayer(nzilbb.ag.Layer)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/admin/store/saveLayer</h4>
+          <div class="block">Saves changes to a layer, or adds a new layer.
+          Only the <b> POST </b> or <b> PUT </b> HTTP method is supported.
+          <ul>
+          <li><em> Request Body </em> - a JSON-encoded object representing the layer definition, with the following structure:
+          <ul>
+          <li> <q> id </q> : The ID of the layer to create or update. </li>
+          <li> <q> parentId </q> : The layer's parent layer id. </li>
+          <li> <q> description </q> : The description of the layer. </li>
+          <li> <q> alignment </q> : The layer's alignment 
+           - 0 for none, 1 for point alignment, 2 for interval alignment. </li>
+          <li> <q> peers </q> : Whether children on this layer have peers or not. </li>
+          <li> <q> peersOverlap </q> : Whether child peers on this layer can overlap or not. </li>
+          <li> <q> parentIncludes </q> : Whether the parent temporally includes the child. </li>
+          <li> <q> saturated </q> : Whether children must temporally fill the entire parent
+           duration (true) or not (false). </li>
+          <li> <q> type </q> : The type for labels on this layer, e.g. string, number,
+          boolean, ipa. </li>
+          <li> <q> validLabels </q> : List of valid label values for this layer, or null 
+          if the layer values are not restricted. The 'key' is the possible label value, and 
+          each key is associated with a description of the value (e.g. for displaying to users).  
+          </li>
+          <li> <q> category </q> : Category for the layer, if any. </li>
+          </ul>
+         </li>
+          <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+          object representing the layer defintion actually saved, using the same stucture as the body. </li>
+          <li><em> Response Status </em>
+          <ul>
+          <li><em> 200 </em> : The layer was successfully saved. </li>
+          <li><em> 400 </em> : The layer was not successfully saved. </li> 
+      </ul></li> 
+        </div>
         </li>
       </ul>
       <a id="destroyAnnotation(java.lang.String,java.lang.String)">
