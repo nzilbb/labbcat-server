@@ -75,7 +75,7 @@ public class StoreAdministration extends Store {
     * Interprets the URL path, and executes the corresponding function on the store. This
     * method is an override of 
     * {@link StoreQuery#invokeFunction(HttpServletRequest,HttpServletResponse,SqlGraphStoreAdministration)}.
-    * <p> This implementation only allows POST HTTP requests.
+    * <p> This implementation only allows POST or PUT HTTP requests.
     * @param request The request.
     * @param response The response.
     * @param store The connected graph store.
@@ -96,7 +96,11 @@ public class StoreAdministration extends Store {
       JSONObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
       // only allow POST requests
-      if (request.getMethod().equals("POST")) {
+      if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
+         if (pathInfo.endsWith("savelayer"))
+         {
+            json = saveLayer(request, response, store);
+         }
          // TODO
          // if (pathInfo.endsWith("createannotation"))
          // {
@@ -130,6 +134,27 @@ public class StoreAdministration extends Store {
    // TODO getSerializerDescriptors
    // TODO serializerForMimeType
    // TODO serializerForFilesSuffix
+
+   /**
+    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#saveLayer(Layer)}
+    * @param request The HTTP request, the body of which must be a JSON-encoded {@link Layer}.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JSONObject saveLayer(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      Vector<String> errors = new Vector<String>();
+      JSONTokener reader = new JSONTokener(request.getReader());
+      JSONObject json = new JSONObject(reader);
+      Layer layer = new Layer(json);
+      if (layer.getId() == null) errors.add(localize(request, "No ID specified."));
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(
+         request, store.saveLayer(layer), null);
+   }      
    
+
    private static final long serialVersionUID = 1;
 } // end of class StoreAdministration

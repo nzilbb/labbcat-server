@@ -29,6 +29,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.jar.JarFile;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
@@ -307,6 +308,92 @@ public class SqlGraphStoreAdministration
       catch(IllegalAccessException exception) { return null; }
       catch(InstantiationException exception) { return null; }
       catch(NullPointerException exception) { return null; }
+   }
+
+   /**
+    * Saves changes to a layer, or adds a new layer.
+    * @param layer A new or modified layer definition.
+    * @return The resulting layer definition.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Layer saveLayer(Layer layer) throws StoreException, PermissionException {
+      try {
+         Layer oldVersion = getLayer(layer.getId());
+         if (layer.getId().equals("transcript_type")) {
+            // can only update validLabels
+
+            HashSet<String> toDelete = new HashSet<String>(oldVersion.getValidLabels().keySet());
+            toDelete.removeAll(layer.getValidLabels().keySet());
+            if (toDelete.size() > 0) {
+               // check missing options can be deleted
+               PreparedStatement sql = getConnection().prepareStatement(
+                  "SELECT COUNT(*) FROM transcript_type"
+                  +" INNER JOIN transcript ON transcript_type.type_id = transcript.type_id"
+                  +" WHERE transcript_type = ?");
+               try {
+                  for (String option : toDelete) {
+                     sql.setString(1, option);
+                     ResultSet rs = sql.executeQuery();
+                     rs.next();
+                     try {
+                        if (rs.getInt(1) > 0) {
+                           throw new StoreException("Option still in use: " + option);
+                        }
+                     } finally {
+                        rs.close();
+                     }
+                  }
+               } finally {
+                  sql.close();
+               }
+               
+               // delete missing options
+               sql = getConnection().prepareStatement(
+                  "DELETE FROM transcript_type WHERE transcript_type = ?");
+               for (String option : toDelete) {
+                  sql.setString(1, option);
+                  sql.executeUpdate();
+               }
+               sql.close();
+            }
+            
+            HashSet<String> toCreate = new HashSet<String>(layer.getValidLabels().keySet());
+            toCreate.removeAll(oldVersion.getValidLabels().keySet());            
+            if (toCreate.size() > 0) {
+               // insert new options
+               PreparedStatement sql = getConnection().prepareStatement(
+                  "SELECT COALESCE(MAX(type_id + 1), 1) FROM transcript_type");
+               ResultSet rs = sql.executeQuery();
+               rs.next();
+               int type_id = rs.getInt(1);
+               rs.close();
+               sql.close();
+               sql = getConnection().prepareStatement(
+                  "INSERT INTO transcript_type (type_id, transcript_type) VALUES (?,?)");
+               for (String option : toCreate) {
+                  sql.setInt(1, type_id++);
+                  sql.setString(2, option);
+                  sql.executeUpdate();
+               }
+               sql.close();
+            }
+
+            // ensure schema is reloaded with new layer
+            schema = null;
+
+            // return new definition
+            return getLayer(layer.getId());
+
+         } else {
+            throw new StoreException("Updating layer " + layer.getId() + " not yet implemented"); // TODO
+         }
+      } catch (SQLException x) {
+         throw new StoreException(x);
+      } catch (StoreException x) { // not found
+         // TODO add new layer
+         throw x;
+      }
    }
 
 } // end of class SqlGraphStoreAdministration
