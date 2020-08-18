@@ -51,7 +51,7 @@ export class AdminCorporaComponent implements OnInit {
         row._changed = this.changed = true;        
     }
     
-    createRow(name: string, language: string, description: string) {
+    createRow(name: string, language: string, description: string): boolean {
         this.labbcatService.labbcat.createCorpus(
             name, language, description,
             (row, errors, messages) => {
@@ -61,6 +61,7 @@ export class AdminCorporaComponent implements OnInit {
                 if (row) this.rows.push(row as Corpus);
                 this.updateChangedFlag();
             });
+        return true;
     }
     
     deleteRow(row: Corpus) {
