@@ -64,7 +64,6 @@ To localize to a new language/variety:
    e.g. *messages.es-AR.xlf* for Argentine Spanish.
 2. Edit the new file with an XLIFF editor.
 3. Add the new locale to the "locales" setting in *user-interface/angular.json*
-4. 
 
 
 ### Deployment into LaBB-CAT
@@ -75,3 +74,30 @@ LaBB-CAT:
 1. Check that the *local-labbcat-path* setting in *config.xml* is correct.
 2. `ant user-interface`
 
+## Docker image
+
+To build the docker image:
+
+1. copy the latest version of *labbcat.war* to be copied into the *bin* directory.
+2. docker build -t nzilbb/labbcat .
+
+To release a new version of the docker image:
+
+1. Execute:
+   docker push nzilbb/labbcat
+2. Tag the build with the version number:
+   docker tag nzilbb/labbcat nzilbb/labbcat:`unzip -qc bin/labbcat.war version.txt`
+3. Execute:
+   docker push nzilbb/labbcat:`unzip -qc bin/labbcat.war version.txt`
+
+The image does not include a MySQL server, which can be supplied from the MySQL docker
+image:
+
+```
+docker run --name=labbcat-db \
+ -e MYSQL_DATABASE=labbcat -e MYSQL_USER=labbcat \
+ -e MYSQL_PASSWORD=secret \
+ -d mysql/mysql-server:5.6 \
+ --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+docker run --name=labbcat --link labbcat-db -d -p 8888:8080 nzilbb/labbcat
+```
