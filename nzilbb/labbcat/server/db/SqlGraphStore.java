@@ -521,7 +521,7 @@ public class SqlGraphStore
       return layerLookup.values().toArray(new Layer[0]);
    }
 
-   private Schema schema = null;
+   protected Schema schema = null;
 
    /**
     * Gets the layer schema. For performance reasons, this implementation only retrieves/builds
