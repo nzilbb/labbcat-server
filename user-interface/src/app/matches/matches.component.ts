@@ -82,10 +82,6 @@ export class MatchesComponent implements OnInit {
             this.totalMatches = task.size; // TODO need something more formal
             this.zeroPad = (""+task.size).length;
             this.searchedLayers = task.layers || [];
-            if (!task.layers) {
-                // not a search, probably 'all utterances', so the match is the whole utterance
-                this.wordsContext = 0;
-            }
             this.selectedLayers = this.searchedLayers
                 .concat([ "transcript", "participant", "graph", "corpus" ]);
             
