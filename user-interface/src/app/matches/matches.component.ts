@@ -225,9 +225,21 @@ export class MatchesComponent implements OnInit {
 
     // extract the transcript URL # from the MatchId
     matchHash(match: Match): string {
-        return match.MatchId
-            .replace(/.*#=/,"")  // remove everything up to #=
+        // match.MatchId for word-based searches is something like:
+        // g_571;em_12_123;n_234-n_345;p_456;#=ew_0_567;prefix=16-;[0]=ew_0_567;[1]=ew_0_678
+        // and for segment-based searches:
+        // g_571;em_12_123;n_234-n_345;p_456;#=es_1_567;prefix=16-;[0]=ew_0_678;[1]=ew_0_789
+        
+        // for the transcript page hash, we want the ID of the first word, i.e. [0]=...
+        let hash = match.MatchId
+            .replace(/.*\[0\]=/,"")  // remove everything up to [0]=
             .replace(/;.*/,""); // remove everything after ;
+        if (!hash) { // fall back to #=...
+            hash =  match.MatchId
+                .replace(/.*#=/,"")  // remove everything up to #=
+                .replace(/;.*/,""); // remove everything after ;
+        }
+        return hash;
     }
     // Math.min
     min(n1: number, n2: number): number {
