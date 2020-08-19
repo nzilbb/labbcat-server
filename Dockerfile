@@ -29,6 +29,11 @@ RUN tar xvf praat6116_linux64barren.tar.gz
 RUN rm praat6116_linux64barren.tar.gz
 RUN cp praat_barren /usr/bin/praat
 
+# HTK cannot be distributed, but with a registers username/password, the source code can be
+# downloaded and compiled, so set up environment for HTK compilation
+RUN apt update && apt install -y \
+    libc6-dev-i386 libx11-dev gawk python-dev python-pip xorg-dev
+
 WORKDIR /labbcat
 
 # Tomcat runs on port 8080
