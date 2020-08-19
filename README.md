@@ -98,6 +98,6 @@ docker run --name=labbcat-db \
  -e MYSQL_DATABASE=labbcat -e MYSQL_USER=labbcat \
  -e MYSQL_PASSWORD=secret \
  -d mysql/mysql-server:5.6 \
- --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+ --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
 docker run --name=labbcat --link labbcat-db -d -p 8888:8080 nzilbb/labbcat
 ```
