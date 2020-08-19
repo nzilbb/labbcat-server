@@ -38,7 +38,7 @@ export class MatchesComponent implements OnInit {
     selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "transcript", "segments" ];
-    htkLayer = false; // TODO handle IUtteranceDataGenerator annotators better
+    htkLayer: string; // TODO handle IUtteranceDataGenerator annotators better
     baseUrl: string;
     emuWebApp = false;
     user: User;    
@@ -81,7 +81,11 @@ export class MatchesComponent implements OnInit {
             this.status = task.status;
             this.totalMatches = task.size; // TODO need something more formal
             this.zeroPad = (""+task.size).length;
-            this.searchedLayers = task.layers;
+            this.searchedLayers = task.layers || [];
+            if (!task.layers) {
+                // not a search, probably 'all utterances', so the match is the whole utterance
+                this.wordsContext = 0;
+            }
             this.selectedLayers = this.searchedLayers
                 .concat([ "transcript", "participant", "graph", "corpus" ]);
             
@@ -120,7 +124,7 @@ export class MatchesComponent implements OnInit {
 
     readGenerableLayers(): void {
         this.labbcatService.labbcat.getLayer("htk", (layer, errors, messages) => {
-            this.htkLayer == layer != null;
+            if (layer) this.htkLayer = layer.id;
         });
     }
     
