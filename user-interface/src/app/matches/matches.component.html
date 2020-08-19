@@ -180,7 +180,7 @@
   <div id="serialize" class="controls">
     <app-button (click)="serialize();"
                 img="{{serializeImg}}" icon="📦"
-                i18n-label label="Convert"></app-button>
+                i18n-label label="Utterance Export"></app-button>
     <select #mimetype name="mimetype"
             [(ngModel)]="mimeType"
             (change)="onChangeMimeType()">
@@ -191,11 +191,11 @@
   <div id="export-audio" class="controls">
     <app-button (click)="exportAudio();"
                 img="audio.png" icon="🔊"
-                i18n-label label="Export Audio"></app-button>
+                i18n-label label="Audio Export"></app-button>
   </div>
-  <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit')">
-    <input #generate_layer type="hidden" name="generate_layer" value="{{generateLayer}}">
-    <app-button (click)="runAnnotator('htk');"
+  <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayer">
+    <input #generate_layer type="hidden" name="generate_layer" value="">
+    <app-button (click)="runAnnotator(htkLayer);"
                 img="cog.png" icon="⚙"
                 i18n-label label="Generate HTK"></app-button>
   </div>
