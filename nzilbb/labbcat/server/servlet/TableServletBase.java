@@ -151,12 +151,7 @@ public class TableServletBase extends LabbcatServlet {
     * @param table The name of the data table.
     * @param dbKeys An ordered list of key field names.
     * @param columns An ordered list of non-key fields, for single-item and full-list requests.
-    * @param whereClause WHERE condition.
     * @param orderClause ORDER clause.
-    * @param create Whether Create operations are allowed via POST.
-    * @param read Whether Read operations are allowed via GET.
-    * @param update Whether Update operations are allowed via PUT.
-    * @param delete Whether Delete operations are allowed via DELETE.
     */
    protected TableServletBase(
       String table, List<String> dbKeys, List<String> columns, String orderClause) {      
@@ -169,12 +164,7 @@ public class TableServletBase extends LabbcatServlet {
     * @param dbKeys An ordered list of primary key field names.
     * @param urlKeys An ordered list of key field names used to identify a record on the URL path.
     * @param columns An ordered list of non-key fields, for single-item and full-list requests.
-    * @param whereClause WHERE condition.
     * @param orderClause ORDER clause.
-    * @param create Whether Create operations are allowed via POST.
-    * @param read Whether Read operations are allowed via GET.
-    * @param update Whether Update operations are allowed via PUT.
-    * @param delete Whether Delete operations are allowed via DELETE.
     */
    protected TableServletBase(
       String table, List<String> dbKeys, List<String> urlKeys, List<String> columns,
@@ -188,12 +178,8 @@ public class TableServletBase extends LabbcatServlet {
     * @param dbKeys An ordered list of database key field names.
     * @param urlKeys An ordered list of key field names used to identify a record on the URL path.
     * @param columns An ordered list of non-key fields.
-    * @param whereClause WHERE condition.
+    * @param listColumns An ordered list of non-key fields for full-listing requests
     * @param orderClause ORDER clause.
-    * @param create Whether Create operations are allowed via POST.
-    * @param read Whether Read operations are allowed via GET.
-    * @param update Whether Update operations are allowed via PUT.
-    * @param delete Whether Delete operations are allowed via DELETE.
     */
    protected TableServletBase(
       String table, List<String> dbKeys, List<String> urlKeys, List<String> columns,
@@ -203,12 +189,7 @@ public class TableServletBase extends LabbcatServlet {
       this.urlKeys = urlKeys;
       this.columns = columns;
       this.listColumns = listColumns;
-      this.whereClause = whereClause;
       this.orderClause = orderClause;
-      this.create = create;
-      this.read = read;
-      this.update = update;
-      this.delete = delete;
 
       this.title = this.table;
    }
