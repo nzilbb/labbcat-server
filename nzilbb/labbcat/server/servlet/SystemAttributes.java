@@ -46,6 +46,10 @@ public class SystemAttributes extends TableServletBase {
                add("value");
             }},
             "name"); // order
+      // keep sensitive information out of view-only user's eyes
+      whereClause = "name NOT LIKE '%SMTP%'" // no mail server details
+         +" AND name NOT LIKE '%password%'" // no passwords
+         +" AND name NOT LIKE '%email%'"; // no email addresses
    }
    
    private static final long serialVersionUID = 1;
