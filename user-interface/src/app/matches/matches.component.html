@@ -2,7 +2,7 @@
 
 <p>{{status}}</p>
 
-<app-wait *ngIf="!matches"></app-wait>
+<app-wait *ngIf="readingMatches"></app-wait>
 <form #form method="POST" id="frm" *ngIf="matches.length">
   <input type="hidden" name="threadId" value="{{threadId}}">
   <input type="hidden" name="collection_name" value="{{name}}">
@@ -66,14 +66,14 @@
   </div>
   <div id="matches-footer">
       <span class="match-count">{{matches.length}} results shown</span>
-      <app-button (click)="moreMatches()"
+      <app-button (press)="moreMatches()" [processing]="moreLoading"
                   [disabled]="totalMatches - matches.length <= 0"
                   i18n-title title="Show more results"
                   label="{{min(pageLength, totalMatches - matches.length)}} More Matches"
                   img="down-triangle.png" icon="▼"
                   >
       </app-button>
-      <app-button (click)="allMatches()"
+      <app-button (press)="allMatches()" [processing]="allLoading"
                   [disabled]="totalMatches - matches.length <= 0"
                   i18n-title title="Show all results"
                   label="{{totalMatches - matches.length}} Remaining Matches"
@@ -89,11 +89,11 @@
     </label>
   </div>
   <div id="csv-export" class="controls">
-    <app-button (click)="exportCsv();" id="csv-export-btn"
+    <app-button (press)="exportCsv();" id="csv-export-btn"
                 img="csv.png" icon=",a,"
                 i18n-title title="Export results to CSV"
                 i18n-label label="CSV Export"></app-button>
-    <app-button (click)="csvOptions();"
+    <app-button (press)="csvOptions();"
                 img="down-triangle.png" icon="▼"
                 i18n-title title="CSV export options"
                 ></app-button>
@@ -161,10 +161,10 @@
     </fieldset>
   </div>
   <div id="emu-webapp" class="controls" *ngIf="emuWebApp">
-    <app-button (click)="emuWebapp();"
+    <app-button (press)="emuWebapp();"
                 img="emu.png" icon="eμ"
                 i18n-label label="EMU WebApp"></app-button>
-    <app-button (click)="emuOptions();"
+    <app-button (press)="emuOptions();"
                 img="down-triangle.png" icon="▼"
                 i18n-title title="EMU WebApp options"
                 ></app-button>
@@ -178,7 +178,7 @@
     </fieldset>
   </div>
   <div id="serialize" class="controls">
-    <app-button (click)="serialize();"
+    <app-button (press)="serialize();"
                 img="{{serializeImg}}" icon="📦"
                 i18n-label label="Utterance Export"></app-button>
     <select #mimetype name="mimetype"
@@ -189,13 +189,13 @@
     </select>
   </div>
   <div id="export-audio" class="controls">
-    <app-button (click)="exportAudio();"
+    <app-button (press)="exportAudio();"
                 img="audio.png" icon="🔊"
                 i18n-label label="Audio Export"></app-button>
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayer">
     <input #generate_layer type="hidden" name="generate_layer" value="">
-    <app-button (click)="runAnnotator(htkLayer);"
+    <app-button (press)="runAnnotator(htkLayer);"
                 img="cog.png" icon="⚙"
                 i18n-label label="Generate HTK"></app-button>
   </div>

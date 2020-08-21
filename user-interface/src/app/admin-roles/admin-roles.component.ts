@@ -34,11 +34,14 @@ export class AdminRolesComponent implements OnInit {
     onChange(row: Role) {
         row._changed = this.changed = true;        
     }
-    
+
+    creating = false;
     createRow(role_id: string, description: string) {
+        this.creating = true;
         this.labbcatService.labbcat.createRole(
             role_id, description,
             (row, errors, messages) => {
+                this.creating = false;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
@@ -48,8 +51,10 @@ export class AdminRolesComponent implements OnInit {
     }
     
     deleteRow(row: Role) {
+        row._deleting = true;
         if (confirm(`Are you sure you want to delete ${row.role_id}`)) {
             this.labbcatService.labbcat.deleteRole(row.role_id, (model, errors, messages) => {
+                row._deleting = false;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 if (!errors) {
@@ -66,10 +71,13 @@ export class AdminRolesComponent implements OnInit {
             .forEach(r => this.updateRow(r));
     }
 
+    updating = 0;
     updateRow(row: Role) {
+        this.updating++;
         this.labbcatService.labbcat.updateRole(
             row.role_id, row.description,
             (role, errors, messages) => {
+                this.updating--;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned

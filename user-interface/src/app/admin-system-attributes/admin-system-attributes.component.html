@@ -43,7 +43,7 @@
 </div>
 <div class="buttons">
   <app-button action="save"
-              (click)="updateChangedAttributes();"
+              (press)="updateChangedAttributes();" [processing]="updating > 0"
               *ngIf="changed"
               i18n-title title="Save all changed records"></app-button>
 </div>

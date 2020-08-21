@@ -13,7 +13,8 @@ export class ButtonComponent implements OnInit {
     @Input() icon: string;
     @Input() img: string;
     @Input() disabled: boolean;
-    @Output() click = new EventEmitter();
+    @Output() press = new EventEmitter();
+    @Input() processing: boolean;
 
     imagesLocation = environment.imagesLocation;
     classes = "btn";
@@ -43,7 +44,7 @@ export class ButtonComponent implements OnInit {
         if (!this.label) this.classes += " icon-only";
     }
 
-    handleClick(): void {
-        this.click.emit();
+    handlePress(): void {
+        this.press.emit();
     }
 }

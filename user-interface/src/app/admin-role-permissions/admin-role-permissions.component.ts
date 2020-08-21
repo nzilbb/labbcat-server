@@ -81,11 +81,14 @@ export class AdminRolePermissionsComponent implements OnInit {
     onChange(row: RolePermission) {
         row._changed = this.changed = true;        
     }
-    
+
+    creating = false;
     createRow(entity: string, layer: string, value_pattern: string) : boolean {
+        this.creating = true;
         this.labbcatService.labbcat.createRolePermission(
             this.role_id, entity, layer, value_pattern,
             (row, errors, messages) => {
+                this.creating = false;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
@@ -96,9 +99,11 @@ export class AdminRolePermissionsComponent implements OnInit {
     }
     
     deleteRow(row: RolePermission) {
+        row._deleting = true;
         if (confirm(`Are you sure you want to delete ${this.validEntities[row.entity]}`)) {
             this.labbcatService.labbcat.deleteRolePermission(
                 this.role_id, row.entity, (model, errors, messages) => {
+                    row._deleting = false;
                     if (errors) for (let message of errors) this.messageService.error(message);
                     if (messages) for (let message of messages) this.messageService.info(message);
                     if (!errors) {
@@ -108,7 +113,8 @@ export class AdminRolePermissionsComponent implements OnInit {
                     }});
         }
     }
-    
+
+    updating = 0;
     updateChangedRows() {
         this.rows
             .filter(r => r._changed)
@@ -116,9 +122,11 @@ export class AdminRolePermissionsComponent implements OnInit {
     }
     
     updateRow(row: RolePermission) {
+        this.updating++;
         this.labbcatService.labbcat.updateRolePermission(
             this.role_id, row.entity, row.layer, row.value_pattern,
             (permission, errors, messages) => {
+                this.updating--;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned

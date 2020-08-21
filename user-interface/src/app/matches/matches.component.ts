@@ -41,7 +41,11 @@ export class MatchesComponent implements OnInit {
     htkLayer: string; // TODO handle IUtteranceDataGenerator annotators better
     baseUrl: string;
     emuWebApp = false;
-    user: User;    
+    user: User;
+
+    moreLoading = false;
+    allLoading = false;
+    readingMatches = false;
     
     constructor(
         private labbcatService: LabbcatService,
@@ -52,6 +56,7 @@ export class MatchesComponent implements OnInit {
     ngOnInit(): void {
         this.matches = [];
         this.transcriptUrl = this.labbcatService.labbcat.baseUrl + "transcript";
+        this.readingMatches = true;
         this.route.queryParams.subscribe((params) => {
             this.threadId = params["threadId"];
             this.wordsContext = params["wordsContext"] || 1;
@@ -105,6 +110,7 @@ export class MatchesComponent implements OnInit {
     }
     
     readMatches(): void {
+        this.readingMatches = true;
         this.labbcatService.labbcat.getMatches(
             this.threadId, this.wordsContext, this.pageLength, this.pageNumber,
             (results, errors, messages) => {
@@ -115,6 +121,7 @@ export class MatchesComponent implements OnInit {
                     match._selected = true;
                     this.matches.push(match as Match);
                 }
+                this.moreLoading = this.allLoading = this.readingMatches = false;
             });
     }
 
@@ -131,11 +138,13 @@ export class MatchesComponent implements OnInit {
     }
     
     moreMatches(): void {
+        this.moreLoading = true;
         this.pageNumber++;
         this.readMatches();
     }
     
     allMatches(): void { // TODO find a way to only load the rest
+        this.allLoading = true;
         // load all the results
         this.matches = [];
         this.pageLength = null;

@@ -50,11 +50,14 @@ export class AdminCorporaComponent implements OnInit {
     onChange(row: Corpus) {
         row._changed = this.changed = true;        
     }
-    
+
+    creating = false;
     createRow(name: string, language: string, description: string): boolean {
+        this.creating = true;
         this.labbcatService.labbcat.createCorpus(
             name, language, description,
             (row, errors, messages) => {
+                this.creating = false;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
@@ -63,10 +66,12 @@ export class AdminCorporaComponent implements OnInit {
             });
         return true;
     }
-    
+
     deleteRow(row: Corpus) {
+        row._deleting = true;
         if (confirm(`Are you sure you want to delete ${row.corpus_name}`)) {
             this.labbcatService.labbcat.deleteCorpus(row.corpus_name, (model, errors, messages) => {
+                row._deleting = false;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 if (!errors) {
@@ -76,17 +81,20 @@ export class AdminCorporaComponent implements OnInit {
                 }});
         }
     }
-
+    
     updateChangedRows() {
         this.rows
             .filter(r => r._changed)
             .forEach(r => this.updateRow(r));
     }
 
+    updating = 0;
     updateRow(row: Corpus) {
+        this.updating++;
         this.labbcatService.labbcat.updateCorpus(
             row.corpus_name, row.corpus_language, row.corpus_description,
             (corpus, errors, messages) => {
+                this.updating--;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned

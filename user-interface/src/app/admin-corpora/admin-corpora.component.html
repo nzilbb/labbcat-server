@@ -13,8 +13,8 @@
       <textarea #description i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <app-button action="create"
-                  (click)="name.reportValidity() && language.reportValidity() && createRow(name.value, language.value, description.value) && name.value = description.value = ''; language.selectedIndex = 0;"
+      <app-button action="create" [processing]="creating"
+                  (press)="name.reportValidity() && language.reportValidity() && createRow(name.value, language.value, description.value) && name.value = description.value = ''; language.selectedIndex = 0;"
                    i18n-title title="Add new record"></app-button>
     </span>
   </div>
@@ -40,17 +40,17 @@
     <span class="buttons">
       <a i18n-title title="Information about this corpus"
          href="corpus?corpus_id={{corpus.corpus_id}}">🛈</a>
-      <app-button  action="delete"
+      <app-button  action="delete" [processing]="corpus._deleting"
                    disabled="{{corpus._cantDelete}}"
-                   (click)="deleteRow(corpus);"
+                   (press)="deleteRow(corpus);"
                    title="{{corpus._cantDelete}}"></app-button>
     </span>
 
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save"
-              (click)="updateChangedRows();"
+  <app-button action="save" [processing]="updating > 0"
+              (press)="updateChangedRows();"
               *ngIf="changed"
               i18n-title title="Save all changed records"></app-button>
 </div>

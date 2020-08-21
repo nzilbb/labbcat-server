@@ -10,7 +10,8 @@
       <input #displayOrder type="number" step="1" i18n-placeholder="field|Order items are displayed in" placeholder="Order"></span>
     <span class="buttons">
       <app-button action="create"
-                  (click)="createRow(suffix.value, description.value, displayOrder.value); suffix.value = description.value = displayOrder.value = '';"
+                  (press)="createRow(suffix.value, description.value, displayOrder.value); suffix.value = description.value = displayOrder.value = '';"
+                  [processing]="creating"
                   i18n-title title="Add new record"></app-button>
     </span>
   </div>
@@ -41,7 +42,7 @@
     <span class="buttons">
       <app-button action="delete"
                   disabled="{{track._cantDelete}}"
-                  (click)="deleteRow(track);"
+                  (press)="deleteRow(track);" [processing]="track._deleting"
                   title="{{track._cantDelete}}"></app-button>
     </span>
 
@@ -49,7 +50,7 @@
 </div>
 <div class="buttons">
   <app-button action="save"
-              (click)="updateChangedRows();"
+              (press)="updateChangedRows();" [processing]="updating > 0"
               *ngIf="changed"
               title="Save all changed tracks"></app-button>
 </div>

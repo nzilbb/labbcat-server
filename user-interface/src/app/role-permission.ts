@@ -6,4 +6,5 @@ export interface RolePermission {
 
     _changed: boolean;
     _cantDelete: string;
+    _deleting: boolean;
 }

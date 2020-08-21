@@ -8,7 +8,7 @@
     </span>
     <span class="buttons">
       <app-button action="create"
-                  (click)="role_id.reportValidity() && createRow(role_id.value, description.value); role_id.value = description.value = '';"
+                  (press)="role_id.reportValidity() && createRow(role_id.value, description.value); role_id.value = description.value = '';" [processing]="creating"
                   i18n-title="Button title" title="Add new record"></app-button>
     </span>
   </div>
@@ -30,7 +30,7 @@
          >🔒</a>
       <app-button action="delete"
                   disabled="{{role._cantDelete}}"
-                  (click)="deleteRow(role);"
+                  (press)="deleteRow(role);"  [processing]="role._deleting"
                   title="{{role._cantDelete}}"></app-button>
     </span>
 
@@ -38,7 +38,7 @@
 </div>
 <div class="buttons">
   <app-button action="save"
-              (click)="updateChangedRows();"
+              (press)="updateChangedRows();"  [processing]="updating > 0"
               *ngIf="changed"
               title="Save all changed records"></app-button>
 </div>

@@ -5,4 +5,5 @@ export interface Project {
 
     _changed: boolean;
     _cantDelete: string;
+    _deleting: boolean;
 }

@@ -5,4 +5,5 @@ export interface MediaTrack {
 
     _changed: boolean;
     _cantDelete: string;
+    _deleting: boolean;
 }

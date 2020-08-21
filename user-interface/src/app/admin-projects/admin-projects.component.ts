@@ -34,11 +34,14 @@ export class AdminProjectsComponent implements OnInit {
     onChange(row: Project) {
         row._changed = this.changed = true;        
     }
-    
+
+    creating = false;
     createRow(project: string, description: string) {
+        this.creating = true;
         this.labbcatService.labbcat.createProject(
             project, description,
             (row, errors, messages) => {
+                this.creating = false;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned
@@ -48,8 +51,10 @@ export class AdminProjectsComponent implements OnInit {
     }
     
     deleteRow(row: Project) {
+        row._deleting = true;
         if (confirm(`Are you sure you want to delete ${row.project}`)) {
             this.labbcatService.labbcat.deleteProject(row.project, (model, errors, messages) => {
+                row._deleting = false;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 if (!errors) {
@@ -66,10 +71,13 @@ export class AdminProjectsComponent implements OnInit {
             .forEach(r => this.updateRow(r));
     }
 
+    updating = 0;
     updateRow(row: Project) {
+        this.updating++;
         this.labbcatService.labbcat.updateProject(
             row.project, row.description,
             (project, errors, messages) => {
+                this.updating--;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // update the model with the field returned

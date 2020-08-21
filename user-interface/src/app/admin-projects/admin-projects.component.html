@@ -8,7 +8,7 @@
     </span>
     <span class="buttons">
       <app-button action="create"
-                  (click)="project.reportValidity() && createRow(project.value, description.value); project.value = description.value = '';"
+                  (press)="project.reportValidity() && createRow(project.value, description.value); project.value = description.value = '';" [processing]="creating"
                   i18n-title title="Add new record"></app-button>
     </span>
   </div>
@@ -26,14 +26,14 @@
     <span class="buttons">
       <app-button action="delete"
                   disabled="{{project._cantDelete}}"
-                  (click)="deleteRow(project);"
+                  (press)="deleteRow(project);"  [processing]="project._deleting"
                   title="{{project._cantDelete}}"></app-button>
     </span>
   </div>
 </div>
 <div class="buttons">
   <app-button action="save"
-              (click)="updateChangedRows();"
+              (press)="updateChangedRows();"  [processing]="updating > 0"
               *ngIf="changed"
               i18n-title title="Save all changed records"></app-button>
 </div>

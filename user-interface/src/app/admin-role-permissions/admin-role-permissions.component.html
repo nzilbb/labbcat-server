@@ -23,7 +23,8 @@
     </span>
     <span class="buttons">
       <app-button action="create"
-                  (click)="entity.reportValidity() && layer.reportValidity() && value_pattern.reportValidity() && createRow(entity.value, layer.value, value_pattern.value) && !(entity.selectedIndex = layer.selectedIndex = 0) && value_pattern.value = '';"
+                  (press)="entity.reportValidity() && layer.reportValidity() && value_pattern.reportValidity() && createRow(entity.value, layer.value, value_pattern.value) && !(entity.selectedIndex = layer.selectedIndex = 0) && value_pattern.value = '';"
+                  [processing]="creating"
                   i18n-title title="Add new record"></app-button>
     </span>
   </div>
@@ -51,7 +52,7 @@
     <span class="buttons">
       <app-button action="delete"
                   disabled="{{permission._cantDelete}}"
-                  (click)="deleteRow(permission);"
+                  (press)="deleteRow(permission);" [processing]="permission._deleting"
                   title="{{permission._cantDelete}}"></app-button>
     </span>
     
@@ -59,7 +60,7 @@
 </div>
 <div class="buttons">
   <app-button action="save"
-              (click)="updateChangedRows();"
+              (press)="updateChangedRows();" [processing]="updating > 0"
               *ngIf="changed"
               i18n-title title="Save all changed records"></app-button>
 </div>

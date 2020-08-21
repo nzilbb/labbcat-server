@@ -42,10 +42,13 @@ export class AdminSystemAttributesComponent implements OnInit {
             .forEach(r => this.updateAttribute(r));
     }
 
+    updating = 0;
     updateAttribute(attribute: SystemAttribute) {
+        this.updating++;
         this.labbcatService.labbcat.updateSystemAttribute(
             attribute.attribute, attribute.value,
             (attribute, errors, messages) => {
+                this.updating--;
                 if (errors) for (let message of errors) this.messageService.error(message);
                 if (messages) for (let message of messages) this.messageService.info(message);
                 // if there were errors, reload to ensure the model is correct
