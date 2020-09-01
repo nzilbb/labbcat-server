@@ -1,4 +1,8 @@
 <ul *ngIf="visible">
+  <li id="menu-admin-transcript-types"> <!-- TODO reroute this to admin/layers/transcript_type/validLabels -->
+    <a [routerLink]="['admin','transcriptTypes']"
+       i18n-title="menu title" title="View, create, and edit transcript categories"
+       i18n="menu label">Transcript Types</a> </li>
   <li id="menu-admin-corpora">
     <a [routerLink]="['admin','corpora']"
        i18n-title="menu title" title="View, create, and edit corpora"

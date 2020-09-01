@@ -23,6 +23,7 @@ import { MatchesComponent } from './matches/matches.component';
 import { KeepAliveComponent } from './keep-alive/keep-alive.component';
 import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.component';
 import { GroupedCheckboxComponent } from './grouped-checkbox/grouped-checkbox.component';
+import { AdminTranscriptTypesComponent } from './admin-transcript-types/admin-transcript-types.component';
 
 @NgModule({
     declarations: [
@@ -44,7 +45,8 @@ import { GroupedCheckboxComponent } from './grouped-checkbox/grouped-checkbox.co
         MatchesComponent,
         KeepAliveComponent,
         LayerCheckboxesComponent,
-        GroupedCheckboxComponent
+        GroupedCheckboxComponent,
+        AdminTranscriptTypesComponent
     ],
     imports: [
         BrowserModule,
