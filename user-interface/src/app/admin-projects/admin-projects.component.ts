@@ -4,19 +4,22 @@ import { Response } from '../response';
 import { Project } from '../project';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
+import { AdminComponent } from '../admin-component';
 
 @Component({
   selector: 'app-admin-projects',
   templateUrl: './admin-projects.component.html',
   styleUrls: ['./admin-projects.component.css']
 })
-export class AdminProjectsComponent implements OnInit {
+export class AdminProjectsComponent extends AdminComponent implements OnInit {
     rows: Project[];
-    changed = false;
+
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService
-    ) { }
+        labbcatService: LabbcatService,
+        messageService: MessageService
+    ) {
+        super(labbcatService, messageService);
+    }
     
     ngOnInit(): void {
         this.readRows();

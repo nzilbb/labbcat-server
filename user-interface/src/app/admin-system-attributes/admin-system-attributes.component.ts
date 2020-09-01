@@ -4,20 +4,22 @@ import { Response } from '../response';
 import { SystemAttribute } from '../system-attribute';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
+import { AdminComponent } from '../admin-component';
 
 @Component({
   selector: 'app-admin-system-attributes',
   templateUrl: './admin-system-attributes.component.html',
   styleUrls: ['./admin-system-attributes.component.css']
 })
-export class AdminSystemAttributesComponent implements OnInit {
+export class AdminSystemAttributesComponent extends AdminComponent implements OnInit {
     attributes: SystemAttribute[];
-    changed = false;
 
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService
-    ) { }
+        labbcatService: LabbcatService,
+        messageService: MessageService
+    ) {
+        super(labbcatService, messageService);
+    }
     
     ngOnInit(): void {
         this.readAttributes();

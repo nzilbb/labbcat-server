@@ -13,18 +13,27 @@ import { AdminSystemAttributesComponent
 import { AboutComponent } from './about/about.component';
 import { LoginComponent } from './login/login.component';
 import { MatchesComponent } from './matches/matches.component';
+import { PendingChangesGuard } from './pending-changes.guard';
 
 const routes: Routes = [
     { path: 'about', component: AboutComponent },
     { path: 'login', component: LoginComponent },
     { path: 'matches', component: MatchesComponent },
-    { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent },
-    { path: 'admin/corpora', component: AdminCorporaComponent },
-    { path: 'admin/projects', component: AdminProjectsComponent },
-    { path: 'admin/tracks', component: AdminTracksComponent },
-    { path: 'admin/roles', component: AdminRolesComponent },
-    { path: 'admin/roles/:role_id/permissions', component: AdminRolePermissionsComponent },
-    { path: 'admin/attributes', component: AdminSystemAttributesComponent },
+    
+    { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent,
+      canDeactivate: [PendingChangesGuard] },
+    { path: 'admin/corpora', component: AdminCorporaComponent,
+      canDeactivate: [PendingChangesGuard] },
+    { path: 'admin/projects', component: AdminProjectsComponent,
+      canDeactivate: [PendingChangesGuard] },
+    { path: 'admin/tracks', component: AdminTracksComponent,
+      canDeactivate: [PendingChangesGuard] },
+    { path: 'admin/roles', component: AdminRolesComponent,
+      canDeactivate: [PendingChangesGuard] },
+    { path: 'admin/roles/:role_id/permissions', component: AdminRolePermissionsComponent,
+      canDeactivate: [PendingChangesGuard] },
+    { path: 'admin/attributes', component: AdminSystemAttributesComponent,
+      canDeactivate: [PendingChangesGuard] },
 ];
 
 @NgModule({

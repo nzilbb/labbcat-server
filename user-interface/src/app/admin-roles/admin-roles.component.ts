@@ -4,19 +4,22 @@ import { Response } from '../response';
 import { Role } from '../role';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
+import { AdminComponent } from '../admin-component';
 
 @Component({
   selector: 'app-admin-roles',
   templateUrl: './admin-roles.component.html',
   styleUrls: ['./admin-roles.component.css']
 })
-export class AdminRolesComponent implements OnInit {
+export class AdminRolesComponent extends AdminComponent implements OnInit {
     rows: Role[];
-    changed = false;
+
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService
-    ) { }
+        labbcatService: LabbcatService,
+        messageService: MessageService
+    ) {
+        super(labbcatService, messageService);
+    }
     
     ngOnInit(): void {
         this.readRows();

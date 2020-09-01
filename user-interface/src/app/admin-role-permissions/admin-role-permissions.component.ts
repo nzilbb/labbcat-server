@@ -6,13 +6,14 @@ import { Layer } from '../layer';
 import { RolePermission } from '../role-permission';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
+import { AdminComponent } from '../admin-component';
 
 @Component({
   selector: 'app-admin-role-permissions',
   templateUrl: './admin-role-permissions.component.html',
   styleUrls: ['./admin-role-permissions.component.css']
 })
-export class AdminRolePermissionsComponent implements OnInit {
+export class AdminRolePermissionsComponent extends AdminComponent implements OnInit {
     attributes: Layer[];
     validEntities = {
         tiav : "Everything",
@@ -38,12 +39,14 @@ export class AdminRolePermissionsComponent implements OnInit {
     rows: RolePermission[];
     get existingEntities(): string[] { return this.rows.map(permission=>permission.entity); }
     role_id: string;
-    changed = false;
+
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService,
+        labbcatService: LabbcatService,
+        messageService: MessageService,
         private route: ActivatedRoute
-    ) { }
+    ) {
+        super(labbcatService, messageService);
+    }
     
     ngOnInit(): void {
         this.readAttributes();

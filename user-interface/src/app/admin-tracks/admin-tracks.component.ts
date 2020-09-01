@@ -4,19 +4,22 @@ import { Response } from '../response';
 import { MediaTrack } from '../media-track';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
+import { AdminComponent } from '../admin-component';
 
 @Component({
   selector: 'app-admin-tracks',
   templateUrl: './admin-tracks.component.html',
   styleUrls: ['./admin-tracks.component.css']
 })
-export class AdminTracksComponent implements OnInit {
+export class AdminTracksComponent extends AdminComponent implements OnInit {
     rows: MediaTrack[];
-    changed = false;
+
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService
-    ) { }
+        labbcatService: LabbcatService,
+        messageService: MessageService
+    ) {
+        super(labbcatService, messageService);
+    }
     
     ngOnInit(): void {
         this.readRows();

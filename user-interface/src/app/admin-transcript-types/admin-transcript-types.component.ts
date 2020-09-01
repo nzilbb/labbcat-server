@@ -1,24 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 
 import { Response } from '../response';
-import { Layer } from '../layer.ts';
+import { Layer } from '../layer';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
+import { AdminComponent } from '../admin-component';
 
 @Component({
   selector: 'app-admin-transcript-types',
   templateUrl: './admin-transcript-types.component.html',
   styleUrls: ['./admin-transcript-types.component.css']
 })
-export class AdminTranscriptTypesComponent implements OnInit {
+export class AdminTranscriptTypesComponent extends AdminComponent implements OnInit {
     layer: Layer;
     types: string[];
-    changed = false;
     
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService
-    ) { }
+        labbcatService: LabbcatService,
+        messageService: MessageService
+    ) {
+        super(labbcatService, messageService);
+    }
     
     ngOnInit(): void {
         this.readLayer();
@@ -92,4 +94,5 @@ export class AdminTranscriptTypesComponent implements OnInit {
                 }
             });
     }
+
 }

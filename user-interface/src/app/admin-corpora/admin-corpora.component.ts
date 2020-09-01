@@ -4,21 +4,23 @@ import { Response } from '../response';
 import { Corpus } from '../corpus';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
+import { AdminComponent } from '../admin-component';
 
 @Component({
   selector: 'app-admin-corpora',
   templateUrl: './admin-corpora.component.html',
   styleUrls: ['./admin-corpora.component.css']
 })
-export class AdminCorporaComponent implements OnInit {
+export class AdminCorporaComponent extends AdminComponent implements OnInit {
     languages: any[];
     rows: Corpus[];
-    changed = false;
     
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService
-    ) { }
+        labbcatService: LabbcatService,
+        messageService: MessageService
+    ) {
+        super(labbcatService, messageService);
+    }
     
     ngOnInit(): void {
         this.readLanguages();
