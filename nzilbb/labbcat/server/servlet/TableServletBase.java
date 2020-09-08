@@ -323,10 +323,8 @@ public class TableServletBase extends LabbcatServlet {
                      ?null:
                      Json.createGenerator(response.getWriter());
                   if (jsonOut != null) {
-                     startResult(jsonOut);
-                     if (keyValues == null || partialKey) {
-                        jsonOut.writeStartArray(); // all rows, start an array
-                     }
+                     startResult(jsonOut,
+                                 keyValues == null || partialKey); // all rows, start an array
                   }
                   int rowCount = 0;
                   try {
@@ -343,11 +341,11 @@ public class TableServletBase extends LabbcatServlet {
                         if (jsonOut != null) jsonOut.writeStartObject().writeEnd(); // object
                      }
                   } finally {
-                     if (jsonOut != null) {
-                        if (keyValues == null || partialKey) {
-                           jsonOut.writeEnd(); // all rows, finish array
-                        }
-                     }
+                     // if (jsonOut != null) {
+                     //    if (keyValues == null || partialKey) {
+                     //       jsonOut.writeEnd(); // all rows, finish array
+                     //    }
+                     // }
                      if (csvOut != null) {
                         csvOut.close();
                      }

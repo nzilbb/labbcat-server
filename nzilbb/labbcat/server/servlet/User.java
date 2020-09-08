@@ -78,8 +78,7 @@ public class User extends LabbcatServlet {
       throws ServletException, IOException {      
       response.setContentType("application/json");
       JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
-      startResult(jsonOut);
-      jsonOut.writeStartObject();
+      startResult(jsonOut, false);
       String user = request.getRemoteUser();
       jsonOut.write("user", user);
       jsonOut.writeStartArray("roles");

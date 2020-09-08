@@ -84,8 +84,7 @@ public class AdminSystemAttributes extends LabbcatServlet {
                      +" ORDER BY value");
                   ResultSet rs = sql.executeQuery();
                   JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
-                  startResult(jsonOut);
-                  jsonOut.writeStartArray();
+                  startResult(jsonOut, true);
                   try {
                      while (rs.next()) {
                         jsonOut.writeStartObject();

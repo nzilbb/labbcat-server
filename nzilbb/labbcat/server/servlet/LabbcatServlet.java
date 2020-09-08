@@ -411,11 +411,15 @@ public class LabbcatServlet extends HttpServlet {
     * @param writer The object to write to.
     * @return The given writer.
     */
-   protected JsonGenerator startResult(JsonGenerator writer) {
+   protected JsonGenerator startResult(JsonGenerator writer, boolean modelIsArray) {
       writer.writeStartObject();
       writer.write("title", title);
       writer.write("version", version);
-      writer.writeStartObject("model");
+      if (modelIsArray) {
+         writer.writeStartArray("model");
+      } else {         
+         writer.writeStartObject("model");
+      }
       return writer;
    } // end of startResult()
    
@@ -429,12 +433,14 @@ public class LabbcatServlet extends HttpServlet {
     */
    protected JsonGenerator endSuccessResult(
       HttpServletRequest request, JsonGenerator writer, String message, Object... args) {
+      writer.writeEnd(); // end whatever we started in startResult
       writer.writeStartArray("messages");
       if (message != null) writer.write(localize(request, message, args));
       writer.writeEnd(); // array
       writer.write("code", 0); // TODO deprecate?
       writer.writeStartArray("errors").writeEnd(); // array
       writer.writeEnd(); // object started in startResult
+      writer.flush();
       return writer;
    } // end of endSuccessResult()
    
@@ -454,6 +460,7 @@ public class LabbcatServlet extends HttpServlet {
       writer.write("code", 1); // TODO deprecate?
       writer.writeStartArray("messages").writeEnd(); // array
       writer.writeEnd(); // obect started in startResult
+      writer.flush();
       return writer;
    } // end of endFailureResult()
    
