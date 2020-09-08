@@ -36,6 +36,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Vector;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+import javax.json.JsonWriter;
+import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -43,13 +51,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.json.*;
 /**
  * Base class that handles generic database table management.
  * <p> Subclasses specify the table name, key fields, and fields.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class TableServletBase extends LabbcatServlet {
+
+   @SuppressWarnings("serial")
+   protected class ValidationException extends Exception {
+      List<String> errors;
+      public ValidationException(List<String> errors) {
+         super(errors.toString());
+         this.errors = errors;
+      }
+   }
 
    /** The name of the data table */
    protected String table;
@@ -303,13 +319,13 @@ public class TableServletBase extends LabbcatServlet {
                   CSVPrinter csvOut = csv
                      ?new CSVPrinter(response.getWriter(), CSVFormat.EXCEL.withDelimiter(','))
                      :null;
-                  JSONWriter jsonOut = csv
+                  JsonGenerator jsonOut = csv
                      ?null:
-                     new JSONWriter(response.getWriter());
+                     Json.createGenerator(response.getWriter());
                   if (jsonOut != null) {
                      startResult(jsonOut);
                      if (keyValues == null || partialKey) {
-                        jsonOut.array(); // all rows, start an array
+                        jsonOut.writeStartArray(); // all rows, start an array
                      }
                   }
                   int rowCount = 0;
@@ -324,12 +340,12 @@ public class TableServletBase extends LabbcatServlet {
                      if (rowCount == 0 && keyValues != null && !partialKey) {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                         // JsonWriter hates to write nothing, so give it an empty object
-                        if (jsonOut != null) jsonOut.object().endObject();
+                        if (jsonOut != null) jsonOut.writeStartObject().writeEnd(); // object
                      }
                   } finally {
                      if (jsonOut != null) {
                         if (keyValues == null || partialKey) {
-                           jsonOut.endArray(); // all rows, finish array
+                           jsonOut.writeEnd(); // all rows, finish array
                         }
                      }
                      if (csvOut != null) {
@@ -346,8 +362,8 @@ public class TableServletBase extends LabbcatServlet {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                   log("TableServletBase GET: ERROR: " + exception);
                   response.setContentType("application/json");
-                  failureResult(exception)
-                     .write(response.getWriter());
+                  Json.createWriter(response.getWriter()).writeObject(
+                     failureResult(exception));
                }
             }
          } finally {
@@ -357,8 +373,8 @@ public class TableServletBase extends LabbcatServlet {
          log("TableServletBase GET: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         failureResult(exception)
-            .write(response.getWriter());
+         Json.createWriter(response.getWriter()).writeObject(
+            failureResult(exception));
       }      
    }
 
@@ -371,41 +387,40 @@ public class TableServletBase extends LabbcatServlet {
     * @param connection A database connection in case delete checks must be done.
     * @throws SQLException
     */
-   protected boolean outputRow(ResultSet rs, List<String> allColumns, ResultSetMetaData meta, JSONWriter jsonOut, Connection connection) throws SQLException {
+   protected boolean outputRow(ResultSet rs, List<String> allColumns, ResultSetMetaData meta, JsonGenerator jsonOut, Connection connection) throws SQLException {
       if (jsonOut == null) return false;
-      jsonOut.object();
+      jsonOut.writeStartObject();
       int c = 1;
       try {
          for (String column: allColumns) {
-            jsonOut.key(column);
             String value = rs.getString(column);
             if (value == null) {
-               jsonOut.value(null);
+               jsonOut.writeNull(column);
             } else {
                try {
                   switch(meta.getColumnType(c++)) { // get the type right
-                     case Types.BIGINT:   jsonOut.value(rs.getLong(column)); break;
-                     case Types.BIT:      jsonOut.value(rs.getInt(column) != 0); break;
-                     case Types.BOOLEAN:  jsonOut.value(rs.getBoolean(column)); break;
-                     case Types.DECIMAL:  jsonOut.value(rs.getDouble(column)); break;
-                     case Types.DOUBLE:   jsonOut.value(rs.getDouble(column)); break;
-                     case Types.FLOAT:    jsonOut.value(rs.getDouble(column)); break;
-                     case Types.NUMERIC:  jsonOut.value(rs.getDouble(column)); break;
-                     case Types.INTEGER:  jsonOut.value(rs.getInt(column)); break;
-                     case Types.SMALLINT: jsonOut.value(rs.getInt(column)); break;
-                     case Types.TINYINT:  jsonOut.value(rs.getInt(column)); break;
-                     case Types.NULL:     jsonOut.value(null); break;
-                     default:             jsonOut.value(value); break;
+                     case Types.BIGINT:   jsonOut.write(column, rs.getLong(column)); break;
+                     case Types.BIT:      jsonOut.write(column, rs.getInt(column) != 0); break;
+                     case Types.BOOLEAN:  jsonOut.write(column, rs.getBoolean(column)); break;
+                     case Types.DECIMAL:  jsonOut.write(column, rs.getDouble(column)); break;
+                     case Types.DOUBLE:   jsonOut.write(column, rs.getDouble(column)); break;
+                     case Types.FLOAT:    jsonOut.write(column, rs.getDouble(column)); break;
+                     case Types.NUMERIC:  jsonOut.write(column, rs.getDouble(column)); break;
+                     case Types.INTEGER:  jsonOut.write(column, rs.getInt(column)); break;
+                     case Types.SMALLINT: jsonOut.write(column, rs.getInt(column)); break;
+                     case Types.TINYINT:  jsonOut.write(column, rs.getInt(column)); break;
+                     case Types.NULL:     jsonOut.writeNull(column); break;
+                     default:             jsonOut.write(column, value); break;
                   }
                } catch (SQLDataException x) { // can't determine the type?
-                  jsonOut.value(value);
+                  jsonOut.write(column, value.toString());
                }                           
             } // no null
          } // next column
-         String cantDelete = checkCanDelete(rs, null, connection);
-         if (cantDelete != null) jsonOut.key("_cantDelete").value(cantDelete);
+         String cantDelete = checkCanDelete(rs, null, null, connection);
+         if (cantDelete != null) jsonOut.write("_cantDelete", cantDelete);
       } finally {
-         jsonOut.endObject();
+         jsonOut.writeEnd(); // object
       }
       return true;
    } // end of outputRow()
@@ -413,15 +428,16 @@ public class TableServletBase extends LabbcatServlet {
    /**
     * Checks whether the given row can be deleted, and returns a reason if not.
     * @param rs The ResultSet with the row values, or null if <var>json</var> should be
-    * used to determine field values.
+    * used to determine fieldd values.
     * @param json An object with row values, or null if <var>rs</var> should be used to
-    * determine field values. If a reason is found, a side-effect is that this object has
+    * determine field values.
+    * @param jsonResult A mutable copy of <var>json</var>. If a reason is found, this object has
     * a new attribute named <q>_cantDelete</q> with the reason as the value.
     * @param connection A connection to the database for running any necessary check queries.
     * @return The reason, if the row can't be deleted, or null if it is deletable.
     */
-   protected String checkCanDelete(ResultSet rs, JSONObject json, Connection connection)
-      throws SQLException{
+   protected String checkCanDelete(ResultSet rs, JsonObject json, JsonObjectBuilder jsonResult, Connection connection)
+      throws SQLException {
       if (deleteChecks != null) { // need to run delete checks
          for (DeleteCheck check : deleteChecks) {
             PreparedStatement sqlCheck = connection.prepareStatement(check.query);
@@ -431,7 +447,7 @@ public class TableServletBase extends LabbcatServlet {
                for (String field : check.fields) {
                   sqlCheck.setString(p++, rs.getString(field));
                } // next field
-            } else {
+            } else { // TODO
                for (String field : check.fields) {
                   sqlCheck.setString(p++, ""+json.get(field));
                } // next field
@@ -440,7 +456,7 @@ public class TableServletBase extends LabbcatServlet {
             try {
                if (rsCheck.next() && rsCheck.getLong(1) != 0) {
                   String reason = check.formatReason(rsCheck);
-                  if (json != null) json.put("_cantDelete", reason);
+                  if (jsonResult != null) jsonResult.add("_cantDelete", reason);
                   return reason;
                }
             } finally {
@@ -454,7 +470,7 @@ public class TableServletBase extends LabbcatServlet {
    } // end of checkCanDelete()
    
    /**
-    * Outputs a single row as JSON.
+    * Outputs a single row as CSV.
     * @param rs
     * @param csvOut
     * @throws SQLException
@@ -500,6 +516,24 @@ public class TableServletBase extends LabbcatServlet {
       }
       return true;
    } // end of outputRow()
+
+   /**
+    * Creates a 'mutable' copy of the JSON object, to which attributes can be added.
+    * @param json The object to copy.
+    * @param excludeAttributen The name of an attribute to exclude from the copy, which
+    * can be null
+    * @return A builder that already has the given object's attributes added.
+    */
+   protected JsonObjectBuilder createMutableCopy(JsonObject json, String excludeAttribute) {
+      JsonObjectBuilder copy = Json.createObjectBuilder();
+      for (String key : json.keySet()) {
+         if (!key.equals(excludeAttribute)) {
+            JsonValue value = json.get(key);
+            copy.add(key, value);
+         }
+      }
+      return copy;
+   } // end of createMutableCopy()
    
    /**
     * POST handler - add a new row.
@@ -544,18 +578,19 @@ public class TableServletBase extends LabbcatServlet {
                query.append(")");
          
                // read the incoming object
-               JSONTokener reader = new JSONTokener(request.getReader());
-               JSONObject json = new JSONObject(reader);
-               List<String> errors = validateBeforeCreate(request, json, connection);
-               if (errors != null) {
-                  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                  failureResult(errors)
-                     .write(response.getWriter());
-                  return;
-               }
+               JsonReader reader = Json.createReader(request.getReader());
+               // incoming object:
+               JsonObject json = reader.readObject();
+               
+               json = validateBeforeCreate(request, json, connection);
+               
+               // return a copy of it, which we might add stuff to:
+               JsonObjectBuilder jsonResult = createMutableCopy(
+                  json, "_changed"); // exclude _changed flag added by client
+               
                StringBuffer key = new StringBuffer();
                try {
-            
+                  
                   // insert the row
                   log("POST " + query.toString()); // TODO remove
                   PreparedStatement sql = connection.prepareStatement(query.toString());
@@ -585,7 +620,7 @@ public class TableServletBase extends LabbcatServlet {
                                     key.append(value);
                                  }
                                  // add it to the JSON object, for returning to the caller
-                                 json.put(column, value);
+                                 jsonResult.add(column, value);
                               }
                            } finally {
                               rsAutoKey.close();
@@ -622,8 +657,8 @@ public class TableServletBase extends LabbcatServlet {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_CONFLICT);
-                        failureResult(request, "Record not added: {0}", key.substring(1))
-                           .write(response.getWriter());
+                        Json.createWriter(response.getWriter()).writeObject(
+                           failureResult(request, "Record not added: {0}", key.substring(1)));
                      } else {
 
                         // if the key was auto-generated
@@ -635,18 +670,18 @@ public class TableServletBase extends LabbcatServlet {
                            try {                        
                               // add the key attribute
                               rsLastId.next();
-                              json.put(autoKey, rsLastId.getLong(1));
+                              jsonResult.add(autoKey, rsLastId.getLong(1)); // TODO
                            } finally {
                               rsLastId.close();
                               sqlLastId.close();
                            }
                         }
                         
-                        checkCanDelete(null, json, connection);
+                        checkCanDelete(null, json, jsonResult, connection);
    
                         // record added, so return it
-                        successResult(request, json, "Record created.")
-                           .write(response.getWriter());
+                        Json.createWriter(response.getWriter()).writeObject(
+                           successResult(request, jsonResult.build(), "Record created."));
                      }
                   } finally {
                      sql.close();
@@ -655,15 +690,19 @@ public class TableServletBase extends LabbcatServlet {
                } catch(SQLIntegrityConstraintViolationException exception) {
                   // row is already there
                   response.setStatus(HttpServletResponse.SC_CONFLICT);
-                  failureResult(request, "Record already exists: {0}", key.substring(1))
-                     .write(response.getWriter());
+                  Json.createWriter(response.getWriter()).writeObject(
+                     failureResult(request, "Record already exists: {0}", key.substring(1)));
                } catch(SQLException exception) {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                   log("TableServletBase POST: ERROR: " + exception);
-                  failureResult(exception)
-                     .write(response.getWriter());
+                  Json.createWriter(response.getWriter()).writeObject(
+                     failureResult(exception));
                }
             } 
+         } catch(ValidationException exception) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            Json.createWriter(response.getWriter()).writeObject(
+               failureResult(exception.errors));
          } finally {
             connection.close();
          }
@@ -671,8 +710,8 @@ public class TableServletBase extends LabbcatServlet {
          log("TableServletBase POST: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         failureResult(exception)
-            .write(response.getWriter());
+         Json.createWriter(response.getWriter()).writeObject(
+            failureResult(exception));
       }      
    }
 
@@ -726,15 +765,16 @@ public class TableServletBase extends LabbcatServlet {
 
                   try {
                      // read the incoming object
-                     JSONTokener reader = new JSONTokener(request.getReader());
-                     JSONObject json = new JSONObject(reader);
-                     List<String> errors = validateBeforeUpdate(request, json, connection);
-                     if (errors != null) {
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        failureResult(errors)
-                           .write(response.getWriter());
-                        return;
-                     }
+                     JsonReader reader = Json.createReader(request.getReader());
+                     // incoming object:
+                     JsonObject json = reader.readObject();
+                     
+                     json = validateBeforeUpdate(request, json, connection);
+
+                     // return a copy of it, which we might add stuff to:
+                     JsonObjectBuilder jsonResult = createMutableCopy(
+                        json, "_changed"); // exclude _changed flag added by client
+
                      int c = 1;
                      StringBuffer key = new StringBuffer();
                      for (String column : columns) {                           
@@ -752,8 +792,8 @@ public class TableServletBase extends LabbcatServlet {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        failureResult(request, "Record not found: {0}", key)
-                           .write(response.getWriter());
+                        Json.createWriter(response.getWriter()).writeObject(
+                           failureResult(request, "Record not found: {0}", key));
                      } else {
 
                         if (dbKeys != urlKeys) {
@@ -782,30 +822,31 @@ public class TableServletBase extends LabbcatServlet {
                            ResultSet rsKeys = sqlKeys.executeQuery();
                            if (rsKeys.next()) {
                               for (String column : dbKeys) {
-                                 json.put(column, rsKeys.getString(column));
+                                 jsonResult.add(column, rsKeys.getString(column));
                               } // next key value
                            }
                         } // dbKeys != urlKeys
                         
                         // set _cantDelete flag?
-                        checkCanDelete(null, json, connection);
-
-                        // unset _changed flag
-                        json.remove("_changed");
+                        checkCanDelete(null, json, jsonResult, connection);
 
                         // record update, so return it
-                        successResult(request, json, "Record updated.")
-                           .write(response.getWriter());
+                        Json.createWriter(response.getWriter()).writeObject(
+                           successResult(request, jsonResult.build(), "Record updated."));
                      }
                   } finally {
                      sql.close();
                      connection.close();
                   }
+               } catch(ValidationException exception) {
+                  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                  Json.createWriter(response.getWriter()).writeObject(
+                     failureResult(exception.errors));
                } catch(SQLException exception) {
                   log("TableServletBase POST: ERROR: " + exception);
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                  failureResult(exception)
-                     .write(response.getWriter());
+                  Json.createWriter(response.getWriter()).writeObject(
+                     failureResult(exception));
                }
             } 
          } finally {
@@ -815,8 +856,8 @@ public class TableServletBase extends LabbcatServlet {
          log("TableServletBase PUT: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         failureResult(exception)
-            .write(response.getWriter());
+         Json.createWriter(response.getWriter()).writeObject(
+            failureResult(exception));
       }      
    }
 
@@ -849,9 +890,9 @@ public class TableServletBase extends LabbcatServlet {
                         keyValues = emptyKey;
                      } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        failureResult(
-                           request, "Key values not found in path: {0}" + request.getPathInfo())
-                           .write(response.getWriter());
+                        Json.createWriter(response.getWriter()).writeObject(
+                           failureResult(
+                              request, "Key values not found in path: {0}" + request.getPathInfo()));
                         return;
                      }
                   }
@@ -940,8 +981,8 @@ public class TableServletBase extends LabbcatServlet {
                            try {
                               if (rsCheck.next() && rsCheck.getLong(1) != 0) {
                                  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                                 failureResult(request, check.formatReason(rsCheck))
-                                    .write(response.getWriter());
+                                 Json.createWriter(response.getWriter()).writeObject(
+                                    failureResult(request, check.formatReason(rsCheck)));
                                  return;
                               }
                            } finally {
@@ -984,11 +1025,12 @@ public class TableServletBase extends LabbcatServlet {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        failureResult(request, "Record not found: {0}", request.getPathInfo())
-                           .write(response.getWriter());
+                        Json.createWriter(response.getWriter()).writeObject(
+                           failureResult(
+                              request, "Record not found: {0}", request.getPathInfo()));
                      } else {
-                        successResult(request, null, "Record deleted.")
-                           .write(response.getWriter());
+                        Json.createWriter(response.getWriter()).writeObject(
+                           successResult(request, null, "Record deleted."));
                      }
                
                   } finally {
@@ -996,8 +1038,8 @@ public class TableServletBase extends LabbcatServlet {
                   }
                } catch(SQLException exception) {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                  failureResult(exception)
-                     .write(response.getWriter());
+                  Json.createWriter(response.getWriter()).writeObject(
+                     failureResult(exception));
                }
             } 
          } finally {
@@ -1007,34 +1049,47 @@ public class TableServletBase extends LabbcatServlet {
          log("TableServletBase DELETE: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         failureResult(exception)
-            .write(response.getWriter());
+         Json.createWriter(response.getWriter()).writeObject(
+            failureResult(exception));
       }      
    }
    
    /**
     * Validates a record before INSERTing it.
     * <p> This can be overridden by subclasses. The default implementation returns the
-    * result of {@link #validateBeforeUpdate(JSONObject)}.
+    * result of {@link #validateBeforeUpdate(HttpServletRequest,JsonObjectBuilder,Connection)}.
     * <p> This method may change the record, to standardize or provide default values.
-    * @param record The incoming record to validate.
-    * @param connection A connection to th database.
-    * @return A list of validation errors, which should be null if the record is valid.
+    * @param request The request.
+    * @param record The incoming record to validate, to which attributes can be added.
+    * @param connection A connection to the database.
+    * @return A JSON representation of the valid record, which may or may not be the same
+    * object as <var>record</var>.
+    * @throws ValidationException If the record is invalid.
+    * @see #createMutableCopy(JsonObject)
     */
-   protected List<String> validateBeforeCreate(HttpServletRequest request, JSONObject record, Connection connection) {
+   protected JsonObject validateBeforeCreate(
+      HttpServletRequest request, JsonObject record,
+      Connection connection) throws ValidationException {
       return validateBeforeUpdate(request, record, connection);
    } // end of validateBeforeCreate()
 
    /**
     * Validates a record before UPDATEing it.
     * <p> This can be overridden by subclasses. The default implementation returns null.
-    * <p> This method may change the record, to standardize or provide default values.
-    * @param record The incoming record to validate.
-    * @param connection A connection to th database.
-    * @return A list of validation errors, which should be null if the record is valid.
+    * <p> This method may change the record to standardize or provide default values, by
+    * adding attributes to <var>jsonRecord</var>.
+    * @param request The request.
+    * @param record The incoming record to validate, to which attributes can be added.
+    * @param connection A connection to the database.
+    * @return A JSON representation of the valid record, which may or may not be the same
+    * object as <var>record</var>.
+    * @throws ValidationException If the record is invalid.
+    * @see #createMutableCopy(JsonObject)
     */
-   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
-      return null;
+   protected JsonObject validateBeforeUpdate(
+      HttpServletRequest request, JsonObject record,
+      Connection connection) throws ValidationException {
+      return record;
    } // end of validateBeforeUpdate()
 
    private static final long serialVersionUID = 1;

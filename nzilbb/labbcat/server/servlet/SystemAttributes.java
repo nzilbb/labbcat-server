@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONObject;
-import org.json.JSONException;
 
 /**
  * Servlet that allows read-only access to system attributes.

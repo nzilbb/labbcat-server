@@ -24,10 +24,11 @@ package nzilbb.labbcat.server.servlet;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONObject;
-import org.json.JSONException;
 
 /**
  * Servlet that allows administration of rows in the the <em> role </em> table.
@@ -67,30 +68,41 @@ public class AdminRoles extends TableServletBase {
 
    /**
     * Validates a record before UPDATEing it.
-    * @param record The incoming record to validate.
-    * @param connection A connection to th database.
-    * @return A list of validation errors, which should be null if the record is valid.
+    * @param request The request.
+    * @param record The incoming record to validate, to which attributes can be added.
+    * @param connection A connection to the database.
+    * @return A JSON representation of the valid record, which may or may not be the same
+    * object as <var>record</var>.
+    * @throws ValidationException If the record is invalid.
     */
    @Override
-   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
+   protected JsonObject validateBeforeUpdate(
+      HttpServletRequest request, JsonObject record,
+      Connection connection) throws ValidationException {
+      
       Vector<String> errors = null;
       try {
-         if (!record.has("role_id") || record.isNull("role_id")) {
+         if (!record.containsKey("role_id") || record.isNull("role_id")) {
             errors = new Vector<String>() {{ add(localize(request, "No role ID was provided.")); }};
          } else {
             // trim name
-            record.put("role_id", record.getString("role_id").trim());
+            if (!record.getString("role_id").equals(record.getString("role_id").trim())) {
+               record = createMutableCopy(record, "role_id")
+                  .add("role_id", record.getString("role_id").trim())
+                  .build();
+            }
             if (record.getString("role_id").length() == 0) {
                errors = new Vector<String>() {{ add(localize(request, "Role ID cannot be blank.")); }};
             }
          }
-      } catch (JSONException x) {
+      } catch (JsonException x) {
          if (errors == null) errors = new Vector<String>();
          errors.add(x.toString());
          // not expecting this, so log it:
          System.err.println("AdminRoles.validateBeforeUpdate: ERROR " + x);
       }
-      return errors;
+      if (errors != null) throw new ValidationException(errors);
+      return record;
    } // end of validateBeforeUpdate()
    
    private static final long serialVersionUID = 1;

@@ -31,6 +31,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Vector;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -40,7 +43,6 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
 import nzilbb.labbcat.server.db.*;
-import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -82,7 +84,7 @@ public class StoreAdministration extends Store {
     * @return The response to send to the caller, or null if the request could not be interpreted.
     */
    @Override
-   protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+   protected JsonObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       try {
          if (!isUserInRole("admin", request, store.getConnection())) {
@@ -93,7 +95,7 @@ public class StoreAdministration extends Store {
          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
          return failureResult(x);
       }
-      JSONObject json = null;
+      JsonObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
       // only allow POST requests
       if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
@@ -142,12 +144,14 @@ public class StoreAdministration extends Store {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject saveLayer(
+   protected JsonObject saveLayer(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
-      JSONTokener reader = new JSONTokener(request.getReader());
-      JSONObject json = new JSONObject(reader);
+      // read the incoming object
+      JsonReader reader = Json.createReader(request.getReader());
+      // incoming object:
+      JsonObject json = reader.readObject();
       Layer layer = new Layer(json);
       if (layer.getId() == null) errors.add(localize(request, "No ID specified."));
       if (errors.size() > 0) return failureResult(errors);

@@ -36,6 +36,12 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -45,8 +51,8 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
 import nzilbb.labbcat.server.db.*;
+import nzilbb.util.CloneableBean;
 import nzilbb.util.IO;
-import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -292,99 +298,64 @@ public class LabbcatServlet extends HttpServlet {
     * @param args Arguments to be substituted into the message, if any
     * @return An object for returning as the request result.
     */
-   protected JSONObject successResult(HttpServletRequest request, Object result, String message, Object... args) {
-      JSONObject response = new JSONObject();
-      response.put("title", title);
-      response.put("version", version);
-      response.put("code", 0); // TODO deprecate?
-      response.put("errors", new JSONArray());
+   protected JsonObject successResult(
+      HttpServletRequest request, Object result, String message, Object... args) {
+      
+      JsonObjectBuilder response = Json.createObjectBuilder()
+         .add("title", title)
+         .add("version", version)
+         .add("code", 0) // TODO deprecate?
+         .add("errors", Json.createArrayBuilder());      
       if (message == null) {
-         response.put("messages", new JSONArray());
+         response = response.add("messages", Json.createArrayBuilder());
       } else {
-         response.append("messages", message);
+         response = response.add(
+            "messages", Json.createArrayBuilder()
+            .add(localize(request, message, args)));
       }
       if (result != null) {
-         if (result instanceof IJSONableBean) {
-            response.put("model", new JSONObject((IJSONableBean)result));
+         if (result instanceof JsonValue) {
+            response = response.add("model", (JsonValue)result);
+         } else if (result instanceof CloneableBean) {
+            response = response.add("model", ((CloneableBean)result).toJson());
+         } else if (result instanceof Integer) {
+            response = response.add("model", (Integer)result);
+         } else if (result instanceof Long) {
+            response = response.add("model", (Long)result);
+         } else if (result instanceof Double) {
+            response = response.add("model", (Double)result);
+         } else if (result instanceof Boolean) {
+            response = response.add("model", (Boolean)result);
          } else {
-            response.put("model", result);
+            response = response.add("model", result.toString());
          }
       } else {
-         response.put("model", JSONObject.NULL);
+         response = response.add("model", JsonValue.NULL);
       }
-      return response;
+      return response.build();
    } // end of successResult()
 
-   /**
-    * Start writing a standard JSON result, including the model key.
-    * <p> The caller should write the model object next, and then call 
-    * {@link #endSuccessResult(JSONWriter,String} or {@link #endFailureResult(JSONWriter,String)} 
-    * @param writer The object to write to.
-    * @return The given writer.
-    */
-   protected JSONWriter startResult(JSONWriter writer) {
-      writer.object();
-      writer.key("title").value(title);
-      writer.key("version").value(version);
-      writer.key("model");
-      return writer;
-   } // end of successResult()
-   
-   /**
-    * Finish writing a standard JSON success result that was started with 
-    * {@link #startResult(JSONWriter)}
-    * @param writer The object to write to.
-    * @param message An optional message
-    * @param args Arguments to be substituted into the message, if any
-    * @return The given writer.
-    */
-   protected JSONWriter endSuccessResult(HttpServletRequest request, JSONWriter writer, String message, Object... args) {
-      writer.key("messages").array();
-      if (message != null) writer.value(localize(request, message, args));
-      writer.endArray();
-      writer.key("code").value(0); // TODO deprecate?
-      writer.key("errors").array().endArray();
-      writer.endObject();
-      return writer;
-   } // end of successResult()
-   
-   /**
-    * Finish writing a standard JSON failure result that was started with 
-    * {@link #startResult(JSONWriter)}
-    * @param writer The object to write to.
-    * @param message An error message
-    * @param args Arguments to be substituted into the message, if any
-    * @return The given writer.
-    */
-   protected JSONWriter endFailureResult(HttpServletRequest request, JSONWriter writer, String message, Object... args) {
-      writer.key("errors").array();
-      if (message != null) writer.value(localize(request, message, args));
-      writer.endArray();
-      writer.key("code").value(1); // TODO deprecate?
-      writer.key("messages").array().endArray();
-      writer.endObject();
-      return writer;
-   } // end of successResult()
-   
    /**
     * Creates a JSON object representing a failure result.
     * @param messages The error messages to return, which must be already localized using
     * {@link #localize(HttpServletRequest,String,String)}.
     * @return An object for returning as the request result.
     */
-   protected JSONObject failureResult(Collection<String> messages) {
-      JSONObject result = new JSONObject();
-      result.put("title", title);
-      result.put("version", version);
-      result.put("code", 1); // TODO deprecate?
-      if (messages == null) {
-         result.put("errors", new JSONArray());
-      } else {
-         result.put("errors", messages);
+   protected JsonObject failureResult(Collection<String> messages) {
+      JsonObjectBuilder response = Json.createObjectBuilder()
+         .add("title", title)
+         .add("version", version)
+         .add("code", 1); // TODO deprecate?
+      JsonArrayBuilder errors = Json.createArrayBuilder();
+      if (messages != null) {
+         for (String error : messages) {
+            errors = errors.add(error);
+         }
       }
-      result.put("messages", new JSONArray());
-      result.put("model", JSONObject.NULL);
-      return result;
+      response = response.add("errors", errors)
+         .add("messages", Json.createArrayBuilder())
+         .add("model", JsonValue.NULL);
+      return response.build();
    } // end of failureResult()
 
    /**
@@ -393,19 +364,24 @@ public class LabbcatServlet extends HttpServlet {
     * @param args Arguments to be substituted into the message, if any
     * @return An object for returning as the request result.
     */
-   protected JSONObject failureResult(HttpServletRequest request, String message, Object... args) {
-      JSONObject result = new JSONObject();
-      result.put("title", title);
-      result.put("version", version);
-      result.put("code", 1); // TODO deprecate?
+   protected JsonObject failureResult(HttpServletRequest request, String message, Object... args) {
+      
+      JsonObjectBuilder response = Json.createObjectBuilder()
+         .add("title", title)
+         .add("version", version)
+         .add("code", 1); // TODO deprecate?
       if (message == null) {
-         result.put("errors", new JSONArray());
+         response = response
+            .add("errors", Json.createArrayBuilder());
       } else {
-         result.append("errors", localize(request, message, args));
+         response = response
+            .add("errors", Json.createArrayBuilder().add(
+                    localize(request, message, args)));
       }
-      result.put("messages", new JSONArray());
-      result.put("model", JSONObject.NULL);
-      return result;
+      response = response
+         .add("messages", Json.createArrayBuilder())
+         .add("model", JsonValue.NULL);
+      return response.build();
    } // end of failureResult()
 
    /**
@@ -413,20 +389,74 @@ public class LabbcatServlet extends HttpServlet {
     * @param message The error message to return.
     * @return An object for returning as the request result.
     */
-   protected JSONObject failureResult(Throwable t) {
-      JSONObject result = new JSONObject();
-      result.put("title", title);
-      result.put("version", version);
-      result.put("code", 1); // TODO deprecate?
-      result.append("errors", t.getMessage());
-      result.put("exception", new JSONObject()
-                 .put("type", t.getClass().getSimpleName())
-                 .put("message", t.getMessage()));
-      result.put("messages", new JSONArray());
-      result.put("model", JSONObject.NULL);
-      return result;
+   protected JsonObject failureResult(Throwable t) {
+      JsonObjectBuilder result = Json.createObjectBuilder()
+         .add("title", title)
+         .add("version", version)
+         .add("code", 1) // TODO deprecate?
+         .add("errors", Json.createArrayBuilder().add(t.getMessage()))
+         .add("exception", Json.createObjectBuilder()
+              .add("type", t.getClass().getSimpleName())
+              .add("message", t.getMessage()))
+         .add("messages", Json.createArrayBuilder())
+         .add("model", JsonValue.NULL);
+      return result.build();
    } // end of failureResult()
 
+   /**
+    * Start writing a standard JSON result, including the model key.
+    * <p> The caller should write the model object next, and then call 
+    * {@link #endSuccessResult(JsonGenerator,String} 
+    * or {@link #endFailureResult(JsonGenerator,String)} 
+    * @param writer The object to write to.
+    * @return The given writer.
+    */
+   protected JsonGenerator startResult(JsonGenerator writer) {
+      writer.writeStartObject();
+      writer.write("title", title);
+      writer.write("version", version);
+      writer.writeStartObject("model");
+      return writer;
+   } // end of startResult()
+   
+   /**
+    * Finish writing a standard JSON success result that was started with 
+    * {@link #startResult(JsonGenerator)}
+    * @param writer The object to write to.
+    * @param message An optional message
+    * @param args Arguments to be substituted into the message, if any
+    * @return The given writer.
+    */
+   protected JsonGenerator endSuccessResult(
+      HttpServletRequest request, JsonGenerator writer, String message, Object... args) {
+      writer.writeStartArray("messages");
+      if (message != null) writer.write(localize(request, message, args));
+      writer.writeEnd(); // array
+      writer.write("code", 0); // TODO deprecate?
+      writer.writeStartArray("errors").writeEnd(); // array
+      writer.writeEnd(); // object started in startResult
+      return writer;
+   } // end of endSuccessResult()
+   
+   /**
+    * Finish writing a standard JSON failure result that was started with 
+    * {@link #startResult(JsonGenerator)}
+    * @param writer The object to write to.
+    * @param message An error message
+    * @param args Arguments to be substituted into the message, if any
+    * @return The given writer.
+    */
+   protected JsonGenerator endFailureResult(
+      HttpServletRequest request, JsonGenerator writer, String message, Object... args) {
+      writer.writeStartArray("errors");
+      if (message != null) writer.write(localize(request, message, args));
+      writer.writeEnd(); // array
+      writer.write("code", 1); // TODO deprecate?
+      writer.writeStartArray("messages").writeEnd(); // array
+      writer.writeEnd(); // obect started in startResult
+      return writer;
+   } // end of endFailureResult()
+   
    String lastLanguage = "en";
    Locale lastLocale = Locale.UK;
    ResourceBundle lastBundle;
@@ -487,7 +517,6 @@ public class LabbcatServlet extends HttpServlet {
       lastBundle = resources;
       return localizedString;
    } // end of localize()
-
 
    private static final long serialVersionUID = 1;
 } // end of class LabbcatServlet

@@ -33,7 +33,6 @@ import java.util.function.Consumer;
 import java.util.zip.*;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
-import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import nzilbb.configure.ParameterSet;

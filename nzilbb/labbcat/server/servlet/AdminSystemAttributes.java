@@ -27,14 +27,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.json.JSONWriter;
 
 /**
  * Servlet that allows administration of rows in the the <em> system_attributes </em> table.
@@ -82,20 +83,20 @@ public class AdminSystemAttributes extends LabbcatServlet {
                      +" WHERE class_id = '' AND attribute = ?"
                      +" ORDER BY value");
                   ResultSet rs = sql.executeQuery();
-                  JSONWriter jsonOut = new JSONWriter(response.getWriter());
+                  JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
                   startResult(jsonOut);
-                  jsonOut.array();
+                  jsonOut.writeStartArray();
                   try {
                      while (rs.next()) {
-                        jsonOut.object();
+                        jsonOut.writeStartObject();
                         try {
-                           jsonOut.key("attribute").value(rs.getString("attribute"));
+                           jsonOut.write("attribute", rs.getString("attribute"));
                            String type = rs.getString("type");
                            if (type.startsWith("SELECT ")) type = "select";
-                           jsonOut.key("type").value(type);
-                           jsonOut.key("style").value(rs.getString("style"));
-                           jsonOut.key("label").value(rs.getString("label"));
-                           jsonOut.key("description").value(rs.getString("description"));
+                           jsonOut.write("type", type);
+                           jsonOut.write("style", rs.getString("style"));
+                           jsonOut.write("label", rs.getString("label"));
+                           jsonOut.write("description", rs.getString("description"));
                            // are there options?
                            PreparedStatement sqlOptionQuery = null;
                            
@@ -107,28 +108,26 @@ public class AdminSystemAttributes extends LabbcatServlet {
                            }
                            if (sqlOptionQuery != null) {
                               ResultSet rsOptions = sqlOptionQuery.executeQuery();
-                              jsonOut.key("options");
-                              jsonOut.object();
+                              jsonOut.writeStartObject("options");
                               try {
                                  while (rsOptions.next()) {
-                                    jsonOut.key(rsOptions.getString(1));
-                                    jsonOut.value(rsOptions.getString(2));
+                                    jsonOut.write(rsOptions.getString(1), rsOptions.getString(2));
                                  } // next option
                               } finally {
                                  rsOptions.close();
                                  if (sqlOptionQuery != sqlOptions) {
                                     sqlOptionQuery.close();
                                  }
-                                 jsonOut.endObject();
+                                 jsonOut.writeEnd(); // Object
                               }                              
                            } // options
-                           jsonOut.key("value").value(rs.getString("value"));
+                           jsonOut.write("value", rs.getString("value"));
                         } finally {
-                           jsonOut.endObject();
+                           jsonOut.writeEnd(); // Object
                         }
                      } // next attribute
                   } finally {
-                     jsonOut.endArray(); // all rows, finish array
+                     jsonOut.writeEnd(); // all rows, finish array
                      rs.close();
                      sql.close();
                      sqlOptions.close();
@@ -138,8 +137,8 @@ public class AdminSystemAttributes extends LabbcatServlet {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                   log("AdminSystemAttributes GET: ERROR: " + exception);
                   response.setContentType("application/json");
-                  failureResult(exception)
-                     .write(response.getWriter());
+                  Json.createWriter(response.getWriter()).writeObject(
+                     failureResult(exception));
                }
             }
          } finally {
@@ -149,8 +148,8 @@ public class AdminSystemAttributes extends LabbcatServlet {
          log("AdminSystemAttributes GET: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         failureResult(exception)
-            .write(response.getWriter());
+         Json.createWriter(response.getWriter()).writeObject(
+            failureResult(exception));
       }      
    }
 
@@ -169,8 +168,9 @@ public class AdminSystemAttributes extends LabbcatServlet {
                response.setContentType("application/json");
                response.setCharacterEncoding("UTF-8");
                
-               JSONTokener reader = new JSONTokener(request.getReader());
-               JSONObject json = new JSONObject(reader);
+               JsonReader reader = Json.createReader(request.getReader());
+               // incoming object:
+               JsonObject json = reader.readObject();
 
                // check it exists and isn't readonly
                PreparedStatement sqlCheck = connection.prepareStatement(
@@ -188,24 +188,24 @@ public class AdminSystemAttributes extends LabbcatServlet {
                         int rows = sql.executeUpdate();
                         if (rows == 0) { // shouldn't be possible
                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                           failureResult(
-                              request, "Record not updated: {0}", json.getString("attribute"))
-                              .write(response.getWriter());
+                           Json.createWriter(response.getWriter()).writeObject(
+                              failureResult(
+                                 request, "Record not updated: {0}", json.getString("attribute")));
                         } else {
-                           successResult(request, json, "Record updated.")
-                              .write(response.getWriter());
+                           Json.createWriter(response.getWriter()).writeObject(
+                              successResult(request, json, "Record updated."));
                         }
                         sql.close();
                      } else { // readonly
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        failureResult(
-                           request, "Read-only record: {0}", json.getString("attribute"))
-                           .write(response.getWriter());
+                        Json.createWriter(response.getWriter()).writeObject(
+                           failureResult(
+                              request, "Read-only record: {0}", json.getString("attribute")));
                      }
                   } else { // not found
                      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                     failureResult(request, "Record not found: {0}", json.getString("attribute"))
-                        .write(response.getWriter());
+                     Json.createWriter(response.getWriter()).writeObject(
+                        failureResult(request, "Record not found: {0}", json.getString("attribute")));
                   }
                } finally {
                   rsCheck.close();
@@ -219,8 +219,8 @@ public class AdminSystemAttributes extends LabbcatServlet {
          log("TableServletBase PUT: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         failureResult(exception)
-            .write(response.getWriter());
+         Json.createWriter(response.getWriter()).writeObject(
+            failureResult(exception));
       }      
    }
    

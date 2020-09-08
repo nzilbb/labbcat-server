@@ -27,10 +27,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Vector;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONObject;
-import org.json.JSONException;
 
 /**
  * Servlet that allows administration of rows in the the <em> corpus </em> table.
@@ -62,14 +63,20 @@ public class AdminMediaTracks extends TableServletBase {
 
    /**
     * Validates a record before UPDATEing it.
-    * @param record The incoming record to validate.
-    * @param connection A connection to th database.
-    * @return A list of validation errors, which should be null if the record is valid.
+    * @param request The request.
+    * @param record The incoming record to validate, to which attributes can be added.
+    * @param connection A connection to the database.
+    * @return A JSON representation of the valid record, which may or may not be the same
+    * object as <var>record</var>.
+    * @throws ValidationException If the record is invalid.
     */
    @Override
-   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
-      if (!record.has("display_order") || record.isNull("display_order")
-          || record.get("display_order").equals("")) {
+   protected JsonObject validateBeforeUpdate(
+      HttpServletRequest request, JsonObject record,
+      Connection connection) throws ValidationException {
+      
+      if (!record.containsKey("display_order") || record.isNull("display_order")
+          || record.get("display_order").toString().equals("")) {
          try {
             // default is one more that the MAX
             PreparedStatement sql = connection.prepareStatement(
@@ -77,17 +84,21 @@ public class AdminMediaTracks extends TableServletBase {
             ResultSet rs = sql.executeQuery();
             try {
                rs.next();
-               record.put("display_order", rs.getInt(1));
+               record = createMutableCopy(record, "display_order")
+                  .add("display_order", rs.getInt(1))
+                  .build();
             } finally {
                rs.close();
                sql.close();
             }            
          } catch(SQLException exception) {
             log("ERROR getting default value for display_order: " + exception);
-            record.put("display_order", 0);
+            record = createMutableCopy(record, "display_order")
+               .add("display_order", 0)
+               .build();
          }
       } 
-      return null;
+      return record;
    } // end of validateBeforeUpdate()
    
    private static final long serialVersionUID = 1;

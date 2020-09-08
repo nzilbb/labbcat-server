@@ -31,6 +31,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Vector;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -40,7 +41,6 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
 import nzilbb.labbcat.server.db.*;
-import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -82,7 +82,7 @@ public class Store extends StoreQuery {
     * @return The response to send to the caller, or null if the request could not be interpreted.
     */
    @Override
-   protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+   protected JsonObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       try { // check they have edit permission
          if (!isUserInRole("edit", request, store.getConnection())) {
@@ -94,7 +94,7 @@ public class Store extends StoreQuery {
          return failureResult(x);
       }
       
-      JSONObject json = null;
+      JsonObject json = null;
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
       // only allow POST requests
       if (request.getMethod().equals("POST")) {
@@ -127,7 +127,7 @@ public class Store extends StoreQuery {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject createAnnotation(
+   protected JsonObject createAnnotation(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
@@ -165,7 +165,7 @@ public class Store extends StoreQuery {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject destroyAnnotation(
+   protected JsonObject destroyAnnotation(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
@@ -189,7 +189,7 @@ public class Store extends StoreQuery {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject deleteTranscript(
+   protected JsonObject deleteTranscript(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();

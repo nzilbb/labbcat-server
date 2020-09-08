@@ -24,10 +24,11 @@ package nzilbb.labbcat.server.servlet;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONObject;
-import org.json.JSONException;
 
 /**
  * Servlet that allows administration of rows in the the <em> project </em> table.
@@ -70,32 +71,43 @@ public class AdminProjects extends TableServletBase {
 
    /**
     * Validates a record before UPDATEing it.
-    * @param record The incoming record to validate.
-    * @param connection A connection to th database.
-    * @return A list of validation errors, which should be null if the record is valid.
+    * @param request The request.
+    * @param record The incoming record to validate, to which attributes can be added.
+    * @param connection A connection to the database.
+    * @return A JSON representation of the valid record, which may or may not be the same
+    * object as <var>record</var>.
+    * @throws ValidationException If the record is invalid.
     */
    @Override
-   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
+   protected JsonObject validateBeforeUpdate(
+      HttpServletRequest request, JsonObject record,
+      Connection connection) throws ValidationException {
+      
       Vector<String> errors = null;
       try {
-         if (!record.has("project") || record.isNull("project")) {
+         if (!record.containsKey("project") || record.isNull("project")) {
             errors = new Vector<String>() {{
                   add(localize(request, "No project name was provided.")); }};
          } else {
             // trim name
-            record.put("project", record.getString("project").trim());
+            if (!record.getString("project").equals(record.getString("project").trim())) {
+               record = createMutableCopy(record, "project")
+                  .add("project", record.getString("project").trim())
+                  .build();
+            }
             if (record.getString("project").length() == 0) {
                errors = new Vector<String>() {{
                      add(localize(request, "Project name cannot be blank.")); }};
             }
          }
-      } catch (JSONException x) {
+      } catch (JsonException x) {
          if (errors == null) errors = new Vector<String>();
          errors.add(x.toString());
          // not expecting this, so log it:
          System.err.println("AdminProjects.validateBeforeUpdate: ERROR " + x);
       }
-      return errors;
+      if (errors != null) throw new ValidationException(errors);
+      return record;
    } // end of validateBeforeUpdate()
    
    private static final long serialVersionUID = 1;

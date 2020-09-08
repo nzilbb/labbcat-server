@@ -31,9 +31,10 @@ import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.zip.*;
+import javax.json.Json;
+import javax.json.stream.JsonGenerator;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
-import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import nzilbb.configure.ParameterSet;
@@ -76,18 +77,18 @@ public class User extends LabbcatServlet {
    public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {      
       response.setContentType("application/json");
-      JSONWriter jsonOut = new JSONWriter(response.getWriter());
+      JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
       startResult(jsonOut);
-      jsonOut.object();
+      jsonOut.writeStartObject();
       String user = request.getRemoteUser();
-      jsonOut.key("user").value(user);
-      jsonOut.key("roles").array();
+      jsonOut.write("user", user);
+      jsonOut.writeStartArray("roles");
       try {
          if (user == null) { // not using authentication
          jsonOut
-            .value("view")
-            .value("edit")
-            .value("admin");
+            .write("view")
+            .write("edit")
+            .write("admin");
          } else {
             Connection db = newConnection();
             PreparedStatement sqlUserGroups = db.prepareStatement(
@@ -95,19 +96,19 @@ public class User extends LabbcatServlet {
             sqlUserGroups.setString(1, user);
             ResultSet rstUserGroups = sqlUserGroups.executeQuery();
             while (rstUserGroups.next()) {
-               jsonOut.value(rstUserGroups.getString("role_id"));
+               jsonOut.write(rstUserGroups.getString("role_id"));
             } // next group
             rstUserGroups.close();
             sqlUserGroups.close();
             db.close();
          }
-         jsonOut.endArray();
-         jsonOut.endObject();
+         jsonOut.writeEnd(); // array
+         jsonOut.writeEnd(); // object
          endSuccessResult(request, jsonOut, null);
       } catch(SQLException exception) {
          log("User GET: Database operation failed: " + exception);
-         jsonOut.endArray();
-         jsonOut.endObject();
+         jsonOut.writeEnd(); // array
+         jsonOut.writeEnd(); // object
          endFailureResult(request, jsonOut, exception.getMessage());
       }
    }

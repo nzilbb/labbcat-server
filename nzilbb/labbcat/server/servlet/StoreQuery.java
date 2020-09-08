@@ -31,6 +31,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Vector;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -42,7 +44,6 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.labbcat.server.db.*;
 import nzilbb.util.IO;
-import org.json.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -72,7 +73,7 @@ public class StoreQuery extends LabbcatServlet {
    protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
       
-      JSONObject json = null;
+      JsonObject json = null;
       try {
          SqlGraphStoreAdministration store = getStore(request);
          try {
@@ -103,7 +104,7 @@ public class StoreQuery extends LabbcatServlet {
       if (json != null) {
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         json.write(response.getWriter());
+         Json.createWriter(response.getWriter()).writeObject(json);
          response.getWriter().flush();
       }
    }
@@ -116,14 +117,14 @@ public class StoreQuery extends LabbcatServlet {
     * @param store The connected graph store.
     * @return The response to send to the caller, or null if the request could not be interpreted.
     */
-   protected JSONObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+   protected JsonObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
-      JSONObject json = null;
+      JsonObject json = null;
       if (request.getPathInfo() == null || request.getPathInfo().equals("/")) {
          // no path component
          json = successResult(
             // send the version in the model for backwards compatibility with labbcat-R <= 0.4-2
-            request, new JSONObject().put("version", version), null);
+            request, Json.createObjectBuilder().add("version", version).build(), null);
          // redirect /store?call=getXXX to /store/getXXX
          if (request.getMethod().equals("GET")
              && request.getParameter("call") != null
@@ -215,7 +216,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getId(
+   protected JsonObject getId(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       return successResult(request, store.getId(), null);
@@ -228,7 +229,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getLayerIds(
+   protected JsonObject getLayerIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -242,7 +243,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getLayers(
+   protected JsonObject getLayers(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -259,7 +260,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getSchema(
+   protected JsonObject getSchema(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -273,7 +274,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getLayer(
+   protected JsonObject getLayer(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -289,7 +290,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getCorpusIds(
+   protected JsonObject getCorpusIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -304,7 +305,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getParticipantIds(
+   protected JsonObject getParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -319,7 +320,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getParticipant(
+   protected JsonObject getParticipant(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -341,7 +342,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject countMatchingParticipantIds(
+   protected JsonObject countMatchingParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -357,7 +358,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getMatchingParticipantIds(
+   protected JsonObject getMatchingParticipantIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -392,7 +393,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getTranscriptIds(
+   protected JsonObject getTranscriptIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -406,7 +407,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getTranscriptIdsInCorpus(
+   protected JsonObject getTranscriptIdsInCorpus(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -423,7 +424,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getTranscriptIdsWithParticipant(
+   protected JsonObject getTranscriptIdsWithParticipant(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -440,7 +441,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject countMatchingTranscriptIds(
+   protected JsonObject countMatchingTranscriptIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -456,7 +457,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getMatchingTranscriptIds(
+   protected JsonObject getMatchingTranscriptIds(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
 
@@ -491,7 +492,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject countMatchingAnnotations(
+   protected JsonObject countMatchingAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -508,7 +509,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getMatchingAnnotations(
+   protected JsonObject getMatchingAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -543,7 +544,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject countAnnotations(
+   protected JsonObject countAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
@@ -564,7 +565,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getAnnotations(
+   protected JsonObject getAnnotations(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
@@ -603,7 +604,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getAnchors(
+   protected JsonObject getAnchors(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
@@ -623,7 +624,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getTranscript(
+   protected JsonObject getTranscript(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
@@ -646,7 +647,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getMediaTracks(
+   protected JsonObject getMediaTracks(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException {
       
@@ -660,7 +661,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getAvailableMedia(
+   protected JsonObject getAvailableMedia(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
@@ -682,7 +683,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getMedia(
+   protected JsonObject getMedia(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
@@ -728,7 +729,7 @@ public class StoreQuery extends LabbcatServlet {
     * @param store A graph store object.
     * @return A JSON response for returning to the caller.
     */
-   protected JSONObject getEpisodeDocuments(
+   protected JsonObject getEpisodeDocuments(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       
@@ -752,7 +753,7 @@ public class StoreQuery extends LabbcatServlet {
     * @throws StoreException If an error prevents the operation from completing.
     * @throws PermissionException If the operation is not permitted.
     */
-   protected JSONObject getSerializerDescriptors(
+   protected JsonObject getSerializerDescriptors(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       SerializationDescriptor[] descriptors = store.getSerializerDescriptors();
@@ -768,7 +769,7 @@ public class StoreQuery extends LabbcatServlet {
     * @throws StoreException If an error prevents the descriptors from being listed.
     * @throws PermissionException If listing the deserializers is not permitted.
     */
-   protected JSONObject getDeserializerDescriptors(
+   protected JsonObject getDeserializerDescriptors(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       SerializationDescriptor[] descriptors = store.getDeserializerDescriptors();

@@ -29,10 +29,11 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.List;
 import java.util.Vector;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONObject;
-import org.json.JSONException;
 
 /**
  * Servlet that allows administration of rows in the the <em> role_permissions </em> table.
@@ -63,20 +64,26 @@ public class AdminRolePermissions extends TableServletBase {
 
    /**
     * Validates a record before UPDATEing it.
-    * @param record The incoming record to validate.
-    * @param connection A connection to th database.
-    * @return A list of validation errors, which should be null if the record is valid.
+    * @param request The request.
+    * @param record The incoming record to validate, to which attributes can be added.
+    * @param connection A connection to the database.
+    * @return A JSON representation of the valid record, which may or may not be the same
+    * object as <var>record</var>.
+    * @throws ValidationException If the record is invalid.
     */
    @Override
-   protected List<String> validateBeforeUpdate(HttpServletRequest request, JSONObject record, Connection connection) {
+   protected JsonObject validateBeforeUpdate(
+      HttpServletRequest request, JsonObject record,
+      Connection connection) throws ValidationException {      
+      
       Vector<String> errors = null;
       try {
-         if (!record.has("role_id") || record.isNull("role_id")
+         if (!record.containsKey("role_id") || record.isNull("role_id")
              || record.getString("role_id").length() == 0) {
             errors = new Vector<String>() {{
                   add(localize(request, "No role ID was provided.")); }};
          } 
-         if (!record.has("entity") || record.isNull("entity")) {
+         if (!record.containsKey("entity") || record.isNull("entity")) {
             if (errors == null) errors = new Vector<String>();
             errors.add(localize(request, "No entity was provided."));
          } else {
@@ -86,12 +93,12 @@ public class AdminRolePermissions extends TableServletBase {
                errors.add(localize(request, "Invalid entity specifier: {0}", record.get("entity")));
             }
          }
-         if (!record.has("attribute_name") || record.isNull("attribute_name")
+         if (!record.containsKey("attribute_name") || record.isNull("attribute_name")
              || record.getString("attribute_name").length() == 0) {
             if (errors == null) errors = new Vector<String>();
             errors.add(localize(request, "No transcript attribute was specified."));
          }
-         if (!record.has("value_pattern") || record.isNull("value_pattern")
+         if (!record.containsKey("value_pattern") || record.isNull("value_pattern")
              || record.getString("value_pattern").length() == 0) {
             if (errors == null) errors = new Vector<String>();
             errors.add(localize(request, "No attribute value pattern was specified."));
@@ -104,72 +111,79 @@ public class AdminRolePermissions extends TableServletBase {
                            record.get("value_pattern"), exception.getMessage()));
             }
          }
-      } catch (JSONException x) {
+      } catch (JsonException x) {
          if (errors == null) errors = new Vector<String>();
          errors.add(x.toString());
          // not expecting this, so log it:
          System.err.println("AdminRolePermissions.validateBeforeUpdate: ERROR " + x);
       }
-      return errors;
+      if (errors != null) throw new ValidationException(errors);
+      return record;
    } // end of validateBeforeUpdate()
 
    /**
     * Validates a record before INSERTing it.
-    * @param record The incoming record to validate.
+    * @param request The request.
+    * @param record The incoming record to validate, to which attributes can be added.
     * @param connection A connection to th database.
-    * @return A list of validation errors, which should be null if the record is valid.
+    * @return A JSON representation of the valid record, which may or may not be the same
+    * object as <var>record</var>.
+    * @throws ValidationException If the record is invalid.
     */
    @Override
-   protected List<String> validateBeforeCreate(HttpServletRequest request, JSONObject record, Connection connection) {
-      List<String> errors = validateBeforeUpdate(request, record, connection);
-      if (errors == null) {
+   protected JsonObject validateBeforeCreate(
+      HttpServletRequest request, JsonObject record,
+      Connection connection) throws ValidationException {
+
+      record = validateBeforeUpdate(request, record, connection);
+      Vector<String> errors = null;
+      try {
+         // check it's a valid role
+         PreparedStatement sql = connection.prepareStatement(
+            "SELECT role_id FROM role_definition WHERE role_id = ?");
+         sql.setString(1, record.getString("role_id"));
+         ResultSet rs = sql.executeQuery();
          try {
-            // check it's a valid role
-            PreparedStatement sql = connection.prepareStatement(
-               "SELECT role_id FROM role_definition WHERE role_id = ?");
-            sql.setString(1, record.getString("role_id"));
-            ResultSet rs = sql.executeQuery();
+            if (!rs.next()) {
+               if (errors == null) errors = new Vector<String>();
+               errors.add(
+                  localize(request, "Invalid role ID: {0}", record.getString("role_id")));
+            }
+         }
+         finally {
+            rs.close();
+            sql.close();
+         }
+         
+         // check it's a valid transcript attribute, or "corpus"
+         if (!record.getString("attribute_name").equals("corpus")) {
+            sql = connection.prepareStatement(
+               "SELECT attribute FROM attribute_definition"
+               +" WHERE class_id = 'transcript' AND attribute = ?");
+            sql.setString(1, record.getString("attribute_name"));
+            rs = sql.executeQuery();
             try {
                if (!rs.next()) {
                   if (errors == null) errors = new Vector<String>();
                   errors.add(
-                     localize(request, "Invalid role ID: {0}", record.getString("role_id")));
+                     localize(request, "Invalid transcript attribute: {0}",
+                              record.getString("attribute_name")));
                }
             }
             finally {
                rs.close();
                sql.close();
             }
-            
-            // check it's a valid transcript attribute, or "corpus"
-            if (!record.getString("attribute_name").equals("corpus")) {
-               sql = connection.prepareStatement(
-                  "SELECT attribute FROM attribute_definition"
-                  +" WHERE class_id = 'transcript' AND attribute = ?");
-               sql.setString(1, record.getString("attribute_name"));
-               rs = sql.executeQuery();
-               try {
-                  if (!rs.next()) {
-                     if (errors == null) errors = new Vector<String>();
-                     errors.add(
-                        localize(request, "Invalid transcript attribute: {0}",
-                                 record.getString("attribute_name")));
-                  }
-            }
-               finally {
-                  rs.close();
-                  sql.close();
-               }
-            } // attribute_name != "corpus"
-         } catch (SQLException x) {
-            if (errors == null) errors = new Vector<String>();
-            errors.add(x.toString());
-            // not expecting this, so log it:
-            System.err.println("AdminRolePermissions.validateBeforeInsert: ERROR " + x);
-         }
+         } // attribute_name != "corpus"
+      } catch (SQLException x) {
+         if (errors == null) errors = new Vector<String>();
+         errors.add(x.toString());
+         // not expecting this, so log it:
+         System.err.println("AdminRolePermissions.validateBeforeInsert: ERROR " + x);
       }
-      return errors;
-   } // end of validateBeforeUpdate()
+      if (errors != null) throw new ValidationException(errors);
+      return record;
+   } // end of validateBeforeCreate()
    
    private static final long serialVersionUID = 1;
 } // end of class AdminRolePermissions
