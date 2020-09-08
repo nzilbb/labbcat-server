@@ -43,7 +43,6 @@ import nzilbb.labbcat.LabbcatView;
 import nzilbb.labbcat.ResponseException;
 import nzilbb.labbcat.http.HttpRequestGet;
 import nzilbb.labbcat.model.Match;
-import org.json.JSONObject;
 
 /**
  * These tests assume that there is a working LaBB-CAT instance with the latest version of

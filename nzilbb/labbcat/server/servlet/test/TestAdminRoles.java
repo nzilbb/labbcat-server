@@ -42,7 +42,6 @@ import nzilbb.labbcat.LabbcatAdmin;
 import nzilbb.labbcat.ResponseException;
 import nzilbb.labbcat.model.Role;
 import nzilbb.labbcat.http.HttpRequestGet;
-import org.json.JSONObject;
 
 /**
  * These tests assume that there is a working LaBB-CAT instance with the latest version of
