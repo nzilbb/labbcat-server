@@ -42,7 +42,6 @@ import nzilbb.labbcat.LabbcatAdmin;
 import nzilbb.labbcat.ResponseException;
 import nzilbb.labbcat.model.Corpus;
 import nzilbb.labbcat.http.HttpRequestGet;
-import org.json.JSONObject;
 
 /**
  * These tests assume that there is a working LaBB-CAT instance with the latest version of
@@ -110,7 +109,6 @@ public class TestAdminCorpora
          .setName("unit-test")
          .setLanguage("en")
          .setDescription("Temporary corpus for unit testing");
-      
       try {
          Corpus newCorpus = l.createCorpus(originalCorpus);
          assertNotNull("Corpus returned", newCorpus);
