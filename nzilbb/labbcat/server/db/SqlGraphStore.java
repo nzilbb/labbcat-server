@@ -7997,6 +7997,7 @@ public class SqlGraphStore
          catch(NoSuchMethodException x) { System.err.println(rs.getString("class") + ": " + x); }
          catch(InvocationTargetException x) { System.err.println(rs.getString("class") + ": " + x); }
          catch(ClassNotFoundException x) { System.err.println(rs.getString("class") + ": " + x); }
+         catch(NoClassDefFoundError x) { System.err.println(rs.getString("class") + ": " + x); }
          catch(InstantiationException x) { System.err.println(rs.getString("class") + ": " + x); }
          catch(IllegalAccessException x) { System.err.println(rs.getString("class") + ": " + x); }
          catch(MalformedURLException x) { System.err.println(rs.getString("class") + ": " + x); }
