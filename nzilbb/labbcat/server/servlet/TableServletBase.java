@@ -42,7 +42,6 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
-import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -322,23 +321,23 @@ public class TableServletBase extends LabbcatServlet {
                   JsonGenerator jsonOut = csv
                      ?null:
                      Json.createGenerator(response.getWriter());
+                  boolean multipleRows = keyValues == null || partialKey;
                   if (jsonOut != null) {
-                     startResult(jsonOut,
-                                 keyValues == null || partialKey); // all rows, start an array
+                     startResult(jsonOut, multipleRows); 
                   }
                   int rowCount = 0;
                   try {
                      boolean headersWritten = false;
                      while (rs.next()) {
                         ResultSetMetaData meta = rs.getMetaData();
-                        outputRow(rs, allColumns, meta, jsonOut, connection);
+                        outputRow(rs, allColumns, meta, jsonOut, connection, multipleRows);
                         headersWritten = outputRow(rs, allColumns, meta, csvOut, headersWritten);
                         rowCount++;
                      } // next row
                      if (rowCount == 0 && keyValues != null && !partialKey) {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                         // JsonWriter hates to write nothing, so give it an empty object
-                        if (jsonOut != null) jsonOut.writeStartObject().writeEnd(); // object
+                        // if (jsonOut != null) jsonOut.writeStartObject().writeEnd(); // object
                      }
                   } finally {
                      // if (jsonOut != null) {
@@ -360,8 +359,7 @@ public class TableServletBase extends LabbcatServlet {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                   log("TableServletBase GET: ERROR: " + exception);
                   response.setContentType("application/json");
-                  Json.createWriter(response.getWriter()).writeObject(
-                     failureResult(exception));
+                  writeResponse(response, failureResult(exception));
                }
             }
          } finally {
@@ -371,8 +369,7 @@ public class TableServletBase extends LabbcatServlet {
          log("TableServletBase GET: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         Json.createWriter(response.getWriter()).writeObject(
-            failureResult(exception));
+         writeResponse(response, failureResult(exception));
       }      
    }
 
@@ -385,9 +382,9 @@ public class TableServletBase extends LabbcatServlet {
     * @param connection A database connection in case delete checks must be done.
     * @throws SQLException
     */
-   protected boolean outputRow(ResultSet rs, List<String> allColumns, ResultSetMetaData meta, JsonGenerator jsonOut, Connection connection) throws SQLException {
+   protected boolean outputRow(ResultSet rs, List<String> allColumns, ResultSetMetaData meta, JsonGenerator jsonOut, Connection connection, boolean modelIsArray) throws SQLException {
       if (jsonOut == null) return false;
-      jsonOut.writeStartObject();
+      if (modelIsArray) jsonOut.writeStartObject();
       int c = 1;
       try {
          for (String column: allColumns) {
@@ -418,7 +415,7 @@ public class TableServletBase extends LabbcatServlet {
          String cantDelete = checkCanDelete(rs, null, null, connection);
          if (cantDelete != null) jsonOut.write("_cantDelete", cantDelete);
       } finally {
-         jsonOut.writeEnd(); // object
+         if (modelIsArray) jsonOut.writeEnd(); // object
       }
       return true;
    } // end of outputRow()
@@ -655,8 +652,7 @@ public class TableServletBase extends LabbcatServlet {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_CONFLICT);
-                        Json.createWriter(response.getWriter()).writeObject(
-                           failureResult(request, "Record not added: {0}", key.substring(1)));
+                        writeResponse(response,       failureResult(request, "Record not added: {0}", key.substring(1)));
                      } else {
 
                         // if the key was auto-generated
@@ -678,8 +674,7 @@ public class TableServletBase extends LabbcatServlet {
                         checkCanDelete(null, json, jsonResult, connection);
    
                         // record added, so return it
-                        Json.createWriter(response.getWriter()).writeObject(
-                           successResult(request, jsonResult.build(), "Record created."));
+                        writeResponse(response,       successResult(request, jsonResult.build(), "Record created."));
                      }
                   } finally {
                      sql.close();
@@ -688,19 +683,16 @@ public class TableServletBase extends LabbcatServlet {
                } catch(SQLIntegrityConstraintViolationException exception) {
                   // row is already there
                   response.setStatus(HttpServletResponse.SC_CONFLICT);
-                  Json.createWriter(response.getWriter()).writeObject(
-                     failureResult(request, "Record already exists: {0}", key.substring(1)));
+                  writeResponse(response, failureResult(request, "Record already exists: {0}", key.substring(1)));
                } catch(SQLException exception) {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                   log("TableServletBase POST: ERROR: " + exception);
-                  Json.createWriter(response.getWriter()).writeObject(
-                     failureResult(exception));
+                  writeResponse(response, failureResult(exception));
                }
             } 
          } catch(ValidationException exception) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            Json.createWriter(response.getWriter()).writeObject(
-               failureResult(exception.errors));
+            writeResponse(response,    failureResult(exception.errors));
          } finally {
             connection.close();
          }
@@ -708,8 +700,7 @@ public class TableServletBase extends LabbcatServlet {
          log("TableServletBase POST: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         Json.createWriter(response.getWriter()).writeObject(
-            failureResult(exception));
+         writeResponse(response, failureResult(exception));
       }      
    }
 
@@ -790,8 +781,7 @@ public class TableServletBase extends LabbcatServlet {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        Json.createWriter(response.getWriter()).writeObject(
-                           failureResult(request, "Record not found: {0}", key));
+                        writeResponse(response,       failureResult(request, "Record not found: {0}", key));
                      } else {
 
                         if (dbKeys != urlKeys) {
@@ -829,8 +819,7 @@ public class TableServletBase extends LabbcatServlet {
                         checkCanDelete(null, json, jsonResult, connection);
 
                         // record update, so return it
-                        Json.createWriter(response.getWriter()).writeObject(
-                           successResult(request, jsonResult.build(), "Record updated."));
+                        writeResponse(response,       successResult(request, jsonResult.build(), "Record updated."));
                      }
                   } finally {
                      sql.close();
@@ -838,13 +827,11 @@ public class TableServletBase extends LabbcatServlet {
                   }
                } catch(ValidationException exception) {
                   response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                  Json.createWriter(response.getWriter()).writeObject(
-                     failureResult(exception.errors));
+                  writeResponse(response, failureResult(exception.errors));
                } catch(SQLException exception) {
                   log("TableServletBase POST: ERROR: " + exception);
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                  Json.createWriter(response.getWriter()).writeObject(
-                     failureResult(exception));
+                  writeResponse(response, failureResult(exception));
                }
             } 
          } finally {
@@ -854,8 +841,7 @@ public class TableServletBase extends LabbcatServlet {
          log("TableServletBase PUT: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         Json.createWriter(response.getWriter()).writeObject(
-            failureResult(exception));
+         writeResponse(response, failureResult(exception));
       }      
    }
 
@@ -888,8 +874,7 @@ public class TableServletBase extends LabbcatServlet {
                         keyValues = emptyKey;
                      } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        Json.createWriter(response.getWriter()).writeObject(
-                           failureResult(
+                        writeResponse(response,       failureResult(
                               request, "Key values not found in path: {0}" + request.getPathInfo()));
                         return;
                      }
@@ -979,8 +964,7 @@ public class TableServletBase extends LabbcatServlet {
                            try {
                               if (rsCheck.next() && rsCheck.getLong(1) != 0) {
                                  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                                 Json.createWriter(response.getWriter()).writeObject(
-                                    failureResult(request, check.formatReason(rsCheck)));
+                                 writeResponse(response,                failureResult(request, check.formatReason(rsCheck)));
                                  return;
                               }
                            } finally {
@@ -1023,12 +1007,10 @@ public class TableServletBase extends LabbcatServlet {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        Json.createWriter(response.getWriter()).writeObject(
-                           failureResult(
+                        writeResponse(response,       failureResult(
                               request, "Record not found: {0}", request.getPathInfo()));
                      } else {
-                        Json.createWriter(response.getWriter()).writeObject(
-                           successResult(request, null, "Record deleted."));
+                        writeResponse(response,       successResult(request, null, "Record deleted."));
                      }
                
                   } finally {
@@ -1036,8 +1018,7 @@ public class TableServletBase extends LabbcatServlet {
                   }
                } catch(SQLException exception) {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                  Json.createWriter(response.getWriter()).writeObject(
-                     failureResult(exception));
+                  writeResponse(response, failureResult(exception));
                }
             } 
          } finally {
@@ -1047,8 +1028,7 @@ public class TableServletBase extends LabbcatServlet {
          log("TableServletBase DELETE: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         Json.createWriter(response.getWriter()).writeObject(
-            failureResult(exception));
+         writeResponse(response, failureResult(exception));
       }      
    }
    

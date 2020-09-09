@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Vector;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -104,8 +105,9 @@ public class StoreQuery extends LabbcatServlet {
       if (json != null) {
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         Json.createWriter(response.getWriter()).writeObject(json);
-         response.getWriter().flush();
+         JsonWriter writer = Json.createWriter(response.getWriter());
+         writer.writeObject(json);
+         writer.close();
       }
    }
 

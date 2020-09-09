@@ -126,7 +126,6 @@ public class AdminSystemAttributes extends LabbcatServlet {
                         }
                      } // next attribute
                   } finally {
-                     jsonOut.writeEnd(); // all rows, finish array
                      rs.close();
                      sql.close();
                      sqlOptions.close();
@@ -136,8 +135,7 @@ public class AdminSystemAttributes extends LabbcatServlet {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                   log("AdminSystemAttributes GET: ERROR: " + exception);
                   response.setContentType("application/json");
-                  Json.createWriter(response.getWriter()).writeObject(
-                     failureResult(exception));
+                  writeResponse(response, failureResult(exception));
                }
             }
          } finally {
@@ -147,8 +145,7 @@ public class AdminSystemAttributes extends LabbcatServlet {
          log("AdminSystemAttributes GET: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         Json.createWriter(response.getWriter()).writeObject(
-            failureResult(exception));
+         writeResponse(response, failureResult(exception));
       }      
    }
 
@@ -187,24 +184,25 @@ public class AdminSystemAttributes extends LabbcatServlet {
                         int rows = sql.executeUpdate();
                         if (rows == 0) { // shouldn't be possible
                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                           Json.createWriter(response.getWriter()).writeObject(
-                              failureResult(
+                           writeResponse(
+                              response, failureResult(
                                  request, "Record not updated: {0}", json.getString("attribute")));
                         } else {
-                           Json.createWriter(response.getWriter()).writeObject(
-                              successResult(request, json, "Record updated."));
+                           writeResponse(
+                              response, successResult(request, json, "Record updated."));
                         }
                         sql.close();
                      } else { // readonly
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        Json.createWriter(response.getWriter()).writeObject(
-                           failureResult(
+                        writeResponse(
+                           response, failureResult(
                               request, "Read-only record: {0}", json.getString("attribute")));
                      }
                   } else { // not found
                      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                     Json.createWriter(response.getWriter()).writeObject(
-                        failureResult(request, "Record not found: {0}", json.getString("attribute")));
+                     writeResponse(
+                        response, failureResult(
+                           request, "Record not found: {0}", json.getString("attribute")));
                   }
                } finally {
                   rsCheck.close();
@@ -218,8 +216,7 @@ public class AdminSystemAttributes extends LabbcatServlet {
          log("TableServletBase PUT: Couldn't connect to database: " + exception);
          response.setContentType("application/json");
          response.setCharacterEncoding("UTF-8");
-         Json.createWriter(response.getWriter()).writeObject(
-            failureResult(exception));
+         writeResponse(response, failureResult(exception));
       }      
    }
    

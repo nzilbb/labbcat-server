@@ -102,12 +102,10 @@ public class User extends LabbcatServlet {
             db.close();
          }
          jsonOut.writeEnd(); // array
-         jsonOut.writeEnd(); // object
          endSuccessResult(request, jsonOut, null);
       } catch(SQLException exception) {
          log("User GET: Database operation failed: " + exception);
          jsonOut.writeEnd(); // array
-         jsonOut.writeEnd(); // object
          endFailureResult(request, jsonOut, exception.getMessage());
       }
    }

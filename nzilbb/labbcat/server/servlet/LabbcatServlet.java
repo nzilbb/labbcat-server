@@ -41,6 +41,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
+import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -326,6 +327,20 @@ public class LabbcatServlet extends HttpServlet {
             response = response.add("model", (Double)result);
          } else if (result instanceof Boolean) {
             response = response.add("model", (Boolean)result);
+         } else if (result instanceof CloneableBean[]) {
+            CloneableBean[] array = (CloneableBean[])result;
+            JsonArrayBuilder a = Json.createArrayBuilder();
+            for (CloneableBean object : array) {
+               a = a.add(object.toJson());
+            }
+            response = response.add("model", a);
+         } else if (result instanceof Object[]) {
+            Object[] array = (Object[])result;
+            JsonArrayBuilder a = Json.createArrayBuilder();
+            for (Object object : array) {
+               a = a.add(object.toString());
+            }
+            response = response.add("model", a);
          } else {
             response = response.add("model", result.toString());
          }
@@ -463,6 +478,19 @@ public class LabbcatServlet extends HttpServlet {
       writer.flush();
       return writer;
    } // end of endFailureResult()
+   
+   /**
+    * Writes the given JSON-encoded response to the given writer.
+    * @param response
+    * @param json
+    * @throws IOException
+    */
+   protected void writeResponse(HttpServletResponse response, JsonObject json)
+      throws IOException {
+      JsonWriter writer = Json.createWriter(response.getWriter());
+      writer.writeObject(json);
+      writer.close();
+   } // end of writeResponse()
    
    String lastLanguage = "en";
    Locale lastLocale = Locale.UK;
