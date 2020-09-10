@@ -48,89 +48,89 @@ public class TestAnnotationAgqlToSql {
             
          (Layer)(new Layer("transcript_language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true))
-         .with("@class_id", "transcript").with("@attribute", "language"),
+         .with("class_id", "transcript").with("attribute", "language"),
       
          (Layer)(new Layer("transcript_scribe", "Scribe").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true))
-         .with("@class_id", "transcript").with("@attribute", "scribe"),
+         .with("class_id", "transcript").with("attribute", "scribe"),
       
          new Layer("transcript_type", "Type").setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false).setPeersOverlap(false).setSaturated(true),
       
          (Layer)(new Layer("transcript_rating", "Ratings").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(true).setPeersOverlap(true).setSaturated(true))
-         .with("@class_id", "transcript").with("@attribute", "rating"),
+         .with("class_id", "transcript").with("attribute", "rating"),
       
          (Layer)(new Layer("corpus", "Corpus").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true))
-         .with("@layer_id", -100),
+         .with("layer_id", -100),
       
          (Layer)(new Layer("episode", "Episode").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true))
-         .with("@layer_id", -50),
+         .with("layer_id", -50),
       
          (Layer)(new Layer("recording_date", "Recording Date").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true).setParentId("episode"))
-         .with("@layer_id", -200),
+         .with("layer_id", -200),
       
          (Layer)(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(true).setPeersOverlap(true).setSaturated(true))
-         .with("@layer_id", -2),
+         .with("layer_id", -2),
       
          (Layer)(new Layer("main_participant", "Main Participant").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("who"))
-         .with("@layer_id", -3),
+         .with("layer_id", -3),
       
          (Layer)(new Layer("participant_gender", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("who"))
-         .with("@class_id", "speaker").with("@attribute", "gender"),
+         .with("class_id", "speaker").with("attribute", "gender"),
       
          (Layer)(new Layer("participant_age", "Age").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("who"))
-         .with("@class_id", "speaker").with("@attribute", "age"),
+         .with("class_id", "speaker").with("attribute", "age"),
       
          (Layer)(new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(false))
-         .with("@layer_id", 31).with("@scope", "F"),
+         .with("layer_id", 31).with("scope", "F"),
       
          (Layer)(new Layer("noise", "Noise")
                  .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false))
-         .with("@layer_id", 32).with("@scope", "F"),
+         .with("layer_id", 32).with("scope", "F"),
       
          (Layer)(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
                  .setParentId("who").setParentIncludes(true))
-         .with("@layer_id", 11).with("@scope", "M"),
+         .with("layer_id", 11).with("scope", "M"),
       
          (Layer)(new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
                  .setParentId("turn").setParentIncludes(true))
-         .with("@layer_id", 12).with("@scope", "M"),
+         .with("layer_id", 12).with("scope", "M"),
       
          (Layer)(new Layer("language", "Other Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
                  .setParentId("turn").setParentIncludes(true))
-         .with("@layer_id", 20).with("@scope", "M"),
+         .with("layer_id", 20).with("scope", "M"),
       
          (Layer)(new Layer("transcript", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
                  .setParentId("turn").setParentIncludes(true))
-         .with("@layer_id", 0).with("@scope", "W"),
+         .with("layer_id", 0).with("scope", "W"),
       
          (Layer)(new Layer("orthography", "Orthography").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(false)
                  .setParentId("transcript").setParentIncludes(true))
-         .with("@layer_id", 2).with("@scope", "W"),
+         .with("layer_id", 2).with("scope", "W"),
       
          (Layer)(new Layer("segments", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
                  .setParentId("transcript").setParentIncludes(true))
-         .with("@layer_id", 1).with("@scope", "S"),
+         .with("layer_id", 1).with("scope", "S"),
       
          (Layer)(new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true)
                  .setParentId("transcript").setParentIncludes(true))
-         .with("@layer_id", 23).with("@scope", "W"))
+         .with("layer_id", 23).with("scope", "W"))
 
          .setEpisodeLayerId("episode")
          .setCorpusLayerId("corpus");

@@ -175,14 +175,14 @@ public class GraphAgqlToSql {
                            errors.add("Invalid layer: " + ctx.getText());
                         } else {
                            String attribute = attribute(layerId);
-                           if ("transcript".equals(layer.get("@class_id"))) {
+                           if ("transcript".equals(layer.get("class_id"))) {
                               conditions.push(
                                  "(SELECT label"
                                  +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                                  +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                                  +" AND annotation_transcript.ag_id = transcript.ag_id"
                                  +" ORDER BY annotation_id LIMIT 1)");
-                           } else if ("speaker".equals(layer.get("@class_id"))) { // participant attribute
+                           } else if ("speaker".equals(layer.get("class_id"))) { // participant attribute
                               conditions.push(
                                  "(SELECT label"
                                  +" FROM annotation_participant"
@@ -201,13 +201,13 @@ public class GraphAgqlToSql {
                               // episode attribute
                               conditions.push(
                                  "(SELECT label"
-                                 +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                                 +" FROM `annotation_layer_" + layer.get("layer_id") + "` annotation"
                                  +" WHERE annotation.family_id = transcript.family_id"
                                  +" ORDER BY annotation.ordinal LIMIT 1)");
                            } else { // regular temporal layer
                               conditions.push(
                                  "(SELECT label"
-                                 +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
+                                 +" FROM annotation_layer_" + layer.get("layer_id") + " annotation"
                                  +" INNER JOIN anchor ON annotation.start_anchor_id = anchor.anchor_id"
                                  +" WHERE annotation.ag_id = transcript.ag_id"
                                  +" ORDER BY anchor.offset, annotation.annotation_id LIMIT 1)");
@@ -244,13 +244,13 @@ public class GraphAgqlToSql {
                      errors.add("Invalid layer: " + ctx.getText());
                   } else {
                      String attribute = attribute(layerId);
-                     if ("transcript".equals(layer.get("@class_id"))) {
+                     if ("transcript".equals(layer.get("class_id"))) {
                         conditions.push(
                            "(SELECT DISTINCT label"
                            +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                            +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                            +" AND annotation_transcript.ag_id = transcript.ag_id)");
-                     } else if ("speaker".equals(layer.get("@class_id"))) {
+                     } else if ("speaker".equals(layer.get("class_id"))) {
                         conditions.push(
                            "(SELECT DISTINCT label"
                            +" FROM annotation_participant"
@@ -266,12 +266,12 @@ public class GraphAgqlToSql {
                      } else if (schema.getEpisodeLayerId().equals(layer.getParentId())) { // episode attribute
                         conditions.push(
                            "(SELECT label"
-                           +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                           +" FROM `annotation_layer_" + layer.get("layer_id") + "` annotation"
                            +" WHERE annotation.family_id = transcript.family_id)");
                      } else { // regular temporal layer
                         conditions.push(
                            "(SELECT label"
-                           +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
+                           +" FROM annotation_layer_" + layer.get("layer_id") + " annotation"
                            +" WHERE annotation.ag_id = transcript.ag_id)");
                      } // regular temporal layer
                   } // valid layer
@@ -304,13 +304,13 @@ public class GraphAgqlToSql {
                      errors.add("Invalid layer: " + ctx.getText());
                   } else {
                      String attribute = attribute(layerId);
-                     if ("transcript".equals(layer.get("@class_id"))) {
+                     if ("transcript".equals(layer.get("class_id"))) {
                         conditions.push(
                            "(SELECT COUNT(*)"
                            +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                            +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                            +" AND annotation_transcript.ag_id = transcript.ag_id)");
-                     } else if ("speaker".equals(layer.get("@class_id"))) {
+                     } else if ("speaker".equals(layer.get("class_id"))) {
                         conditions.push(
                            "(SELECT COUNT(*)"
                            +" FROM annotation_participant"
@@ -324,12 +324,12 @@ public class GraphAgqlToSql {
                         // episode attribute
                         conditions.push(
                            "(SELECT COUNT(*)"
-                           +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                           +" FROM `annotation_layer_" + layer.get("layer_id") + "` annotation"
                            +" WHERE annotation.family_id = transcript.family_id)");
                      } else { // regular temporal layer
                         conditions.push(
                            "(SELECT COUNT(*)"
-                           +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
+                           +" FROM annotation_layer_" + layer.get("layer_id") + " annotation"
                            +" WHERE annotation.ag_id = transcript.ag_id)");
                      } // regular temporal layer
                   } // valid layer
@@ -345,13 +345,13 @@ public class GraphAgqlToSql {
                   errors.add("Invalid layer: " + ctx.getText());
                } else {
                   String attribute = attribute(layerId);
-                  if ("transcript".equals(layer.get("@class_id"))) {
+                  if ("transcript".equals(layer.get("class_id"))) {
                      conditions.push(
                         "(SELECT DISTINCT annotated_by"
                         +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                         +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                         +" AND annotation_transcript.ag_id = transcript.ag_id)");
-                  } else if ("speaker".equals(layer.get("@class_id"))) {
+                  } else if ("speaker".equals(layer.get("class_id"))) {
                      conditions.push(
                         "(SELECT DISTINCT annotated_by"
                         +" FROM annotation_participant"
@@ -363,12 +363,12 @@ public class GraphAgqlToSql {
                      // episode attribute
                      conditions.push(
                         "(SELECT DISTINCT annotated_by"
-                        +" FROM `annotation_layer_" + layer.get("@layer_id") + "` annotation"
+                        +" FROM `annotation_layer_" + layer.get("layer_id") + "` annotation"
                         +" WHERE annotation.family_id = transcript.family_id)");
                   } else { // regular temporal layer
                      conditions.push(
                         "(SELECT DISTINCT annotated_by"
-                        +" FROM annotation_layer_" + layer.get("@layer_id") + " annotation"
+                        +" FROM annotation_layer_" + layer.get("layer_id") + " annotation"
                         +" WHERE annotation.ag_id = transcript.ag_id)");
                   } // regular temporal layer
                } // valid layer

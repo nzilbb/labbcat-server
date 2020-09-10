@@ -155,7 +155,7 @@ public class ParticipantAgqlToSql {
                         if (layer == null) {
                            errors.add("Invalid layer: " + ctx.getText());
                         } else {
-                           if (!"speaker".equals(layer.get("@class_id"))) {
+                           if (!"speaker".equals(layer.get("class_id"))) {
                               errors.add(
                                  "Can only get labels for participant attributes: " + ctx.getText());
                            }
@@ -187,7 +187,7 @@ public class ParticipantAgqlToSql {
                      errors.add("Invalid layer: " + ctx.getText());
                   } else {
                      String attribute = attribute(layerId);
-                     if ("transcript".equals(layer.get("@class_id"))) {
+                     if ("transcript".equals(layer.get("class_id"))) {
                         conditions.push(
                            "(SELECT DISTINCT label"
                            +" FROM annotation_transcript"
@@ -196,7 +196,7 @@ public class ParticipantAgqlToSql {
                            +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                            +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                            +")");
-                     } else if ("speaker".equals(layer.get("@class_id"))) {
+                     } else if ("speaker".equals(layer.get("class_id"))) {
                         conditions.push(
                            "(SELECT DISTINCT label"
                            +" FROM annotation_participant"
@@ -237,7 +237,7 @@ public class ParticipantAgqlToSql {
                      errors.add("Invalid layer: " + ctx.getText());
                   } else {
                      String attribute = attribute(layerId);
-                     if ("transcript".equals(layer.get("@class_id")))
+                     if ("transcript".equals(layer.get("class_id")))
                      {
                         conditions.push(
                            "(SELECT COUNT(*)"
@@ -247,7 +247,7 @@ public class ParticipantAgqlToSql {
                            +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                            +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                            +")");
-                     } else if ("speaker".equals(layer.get("@class_id"))) {
+                     } else if ("speaker".equals(layer.get("class_id"))) {
                         conditions.push(
                            "(SELECT COUNT(*)"
                            +" FROM annotation_participant"
@@ -271,7 +271,7 @@ public class ParticipantAgqlToSql {
                   errors.add("Invalid layer: " + ctx.getText());
                } else {
                   String attribute = attribute(layerId);
-                  if ("transcript".equals(layer.get("@class_id"))) {
+                  if ("transcript".equals(layer.get("class_id"))) {
                      conditions.push(
                         "(SELECT annotated_by"
                         +" FROM annotation_transcript"
@@ -280,7 +280,7 @@ public class ParticipantAgqlToSql {
                         +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
                         +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                         +")");
-                  } else if ("speaker".equals(layer.get("@class_id"))) {
+                  } else if ("speaker".equals(layer.get("class_id"))) {
                      conditions.push(
                         "(SELECT annotated_by"
                         +" FROM annotation_participant"
