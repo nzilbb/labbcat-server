@@ -107,7 +107,7 @@ public class SerializeGraphs extends LabbcatServlet {
    public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
       
-      ServletContext context = request.getSession().getServletContext();
+      ServletContext context = getServletContext();
       
       // check parameters
       String name = request.getParameter("name");
