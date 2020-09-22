@@ -34,6 +34,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.json.Json;
@@ -175,11 +176,15 @@ public class LabbcatServlet extends HttpServlet {
     * @return The baseUrl.
     */
    protected String baseUrl(HttpServletRequest request) {
-      if (request.getSession() != null && request.getSession().getAttribute("baseUrl") != null) {
+      if (Optional.ofNullable(System.getenv("LABBCAT_BASE_URL")).orElse("").length() > 0) {
+         // get it from the environment variable
+         return System.getenv("LABBCAT_BASE_URL");
+      } else if (request.getSession() != null
+                 && request.getSession().getAttribute("baseUrl") != null) {
          // get it from the session
          return request.getSession().getAttribute("baseUrl").toString();
-      } else if (getServletContext().getInitParameter("baseUrl") != null
-               && getServletContext().getInitParameter("baseUrl").length() > 0) {
+      } else if (Optional.ofNullable(getServletContext().getInitParameter("baseUrl"))
+                 .orElse("").length() > 0) {
          // get it from the webapp configuration
          return getServletContext().getInitParameter("baseUrl");
       } else { // infer it from the request itself
