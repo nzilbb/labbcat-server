@@ -1277,6 +1277,74 @@ public class SqlGraphStore
       }
       return userWhereClauseSpeaker;
    } // end of userWhereClauseParticipant()
+   
+   /**
+    * Determines whether the current {@link #user} has access to the given content
+    * (entity) related to the given transcript. 
+    * @param id Transcript (graph) ID
+    * @param entity What they may or may not have access to - one of "t"(ranscript),
+    * "i"(mage), "a"(udio), or  "v"(ideo), or null for "has access to anything".
+    * @return true if the user has access, false otherwise.
+    */
+   public boolean hasAccess(String id, String entity) throws SQLException {
+      boolean bHasAccess = false;
+
+      if (getUser() == null) bHasAccess = true;
+
+      if (!bHasAccess) {
+         // members of "admin" get access to everything
+         bHasAccess = getUserRoles().contains("admin");
+      }
+      
+      if (!bHasAccess) {
+         // if they're not using permissions in general, then anyone gets access to everything
+         PreparedStatement sqlAccess = getConnection().prepareStatement(
+            "SELECT * FROM role_permission LIMIT 1");
+         ResultSet rsAccess = sqlAccess.executeQuery();
+         if (!rsAccess.next()) bHasAccess = true;
+         rsAccess.close();
+         sqlAccess.close();
+      }
+      if (!bHasAccess) { // no a super user, and using permissions, so check the permission tables
+         PreparedStatement sqlAccess = getConnection().prepareStatement(
+            "SELECT role.role_id FROM role"
+            + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+            + " INNER JOIN annotation_transcript access_attribute" 
+            + " ON access_attribute.layer = role_permission.attribute_name" 
+            + " AND access_attribute.label REGEXP role_permission.value_pattern"
+            + " AND role_permission.entity REGEXP CONCAT('.*', ? , '.*')" // what they can access
+            + " INNER JOIN transcript ON access_attribute.ag_id = transcript.transcript_id" 
+            + " WHERE user_id = ?"
+            + " AND transcript.transcript_id.ag_id = ?");
+         sqlAccess.setString(1, entity);
+         sqlAccess.setString(2, getUser());
+         sqlAccess.setString(3, id);
+         ResultSet rsAccess = sqlAccess.executeQuery();
+         if (rsAccess.next()) bHasAccess = true;
+         rsAccess.close();
+         sqlAccess.close();
+
+         if (!bHasAccess) { // check for 'corpus' as an attribute
+            sqlAccess = getConnection().prepareStatement(
+               "SELECT role.role_id FROM role"
+               + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+               + " INNER JOIN transcript" 
+               + " ON role_permission.attribute_name = 'corpus'" 
+               + " AND transcript.corpus_name REGEXP role_permission.value_pattern"
+               + " AND role_permission.entity REGEXP CONCAT('.*', ? , '.*')" // what they can access
+               + " WHERE user_id = ?"
+               + " AND transcript.transcript_id = ?");
+            sqlAccess.setString(1, entity);
+            sqlAccess.setString(2, getUser());
+            sqlAccess.setString(3, id);
+            rsAccess = sqlAccess.executeQuery();
+            if (rsAccess.next()) bHasAccess = true;
+            rsAccess.close();
+            sqlAccess.close();
+         }
+      } // need to check permission tables
+      return bHasAccess;
+   }
 
    /**
     * Gets a list of transcript IDs.
@@ -6936,24 +7004,32 @@ public class SqlGraphStore
                if (f.exists())
                {
                   MediaFile mediaFile = new MediaFile(f, track.getSuffix());
-                  if (getBaseUrl() == null) // TODO check this isn't a security risk
+                  try
                   {
-                     mediaFile.setUrl(f.toURI().toString());
+                     if (hasAccess(id, mediaFile.getType().substring(0,1)))
+                     {
+                        if (getBaseUrl() == null) // TODO check this isn't a security risk
+                        {
+                           mediaFile.setUrl(f.toURI().toString());
+                        }
+                        else
+                        {
+                           StringBuffer url = new StringBuffer(getBaseUrl());
+                           url.append("/files/");
+                           url.append(graph.first("corpus").getLabel());
+                           url.append("/");
+                           url.append(graph.first("episode").getLabel());
+                           url.append("/");
+                           url.append(mediaFile.getExtension());
+                           url.append("/");
+                           url.append(f.getName());
+                           mediaFile.setUrl(url.toString());
+                        }
+                        files.add(mediaFile);
+                     } // user has access
+                  } catch (SQLException x) {
+                     throw new StoreException(x);
                   }
-                  else
-                  {
-                     StringBuffer url = new StringBuffer(getBaseUrl());
-                     url.append("/files/");
-                     url.append(graph.first("corpus").getLabel());
-                     url.append("/");
-                     url.append(graph.first("episode").getLabel());
-                     url.append("/");
-                     url.append(mediaFile.getExtension());
-                     url.append("/");
-                     url.append(f.getName());
-                     mediaFile.setUrl(url.toString());
-                  }
-                  files.add(mediaFile);
                } // f.exists()
             } // next track
          } // next subdir
@@ -6966,7 +7042,7 @@ public class SqlGraphStore
     * @param id The transcript ID.
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media, which may include parameters for type
-    * conversion, e.g. "text/wav; samplerate=16000".
+    * conversion, e.g. "audio/wav; samplerate=16000".
     * @return A URL to the given media for the given transcript, or null if the given media
     * doesn't exist.
     * @throws StoreException If an error occurs.
@@ -6983,7 +7059,7 @@ public class SqlGraphStore
     * @param id The transcript ID.
     * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
     * @param mimeType The MIME type of the media, which may include parameters for type
-    * conversion, e.g. "text/wav; samplerate=16000"
+    * conversion, e.g. "audio/wav; samplerate=16000"
     * @param startOffset The start offset of the media sample, or null for the start of the whole
     * recording. 
     * @param endOffset The end offset of the media sample, or null for the end of the
@@ -6997,6 +7073,14 @@ public class SqlGraphStore
    public String getMedia(String id, String trackSuffix, String mimeType, Double startOffset, Double endOffset) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
+      try {
+         if (!hasAccess(id, mimeType.substring(0,1))) {
+            throw new PermissionException(getUser(), "Access not permitted to " + mimeType);
+         }
+      } catch (SQLException x) {
+         new StoreException(x);
+      }
+
       String[] layers = { "corpus", "episode" };
       Graph graph = getTranscript(id, layers);
       File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
