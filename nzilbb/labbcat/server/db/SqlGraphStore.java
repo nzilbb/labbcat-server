@@ -45,6 +45,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -1286,7 +1288,7 @@ public class SqlGraphStore
     * "i"(mage), "a"(udio), or  "v"(ideo), or null for "has access to anything".
     * @return true if the user has access, false otherwise.
     */
-   public boolean hasAccess(String id, String entity) throws SQLException {
+   protected boolean hasAccess(String id, String entity) throws SQLException {
       boolean bHasAccess = false;
 
       if (getUser() == null) bHasAccess = true;
@@ -6961,6 +6963,43 @@ public class SqlGraphStore
    }
 
    /**
+    * Returns all the available conversions from one media type to another.
+    * @return A map of MIME types to a set of MIME types that the key can be converted to.
+    */
+   protected Map<String,Set<String>> getMediaConversions() {
+      Map<String,Set<String>> mConversionsFrom = new HashMap<String,Set<String>>();
+      try {
+         if (getSystemAttribute("ffmpegPath") != null) {
+            PreparedStatement sqlSourceType = getConnection().prepareStatement(
+               "SELECT DISTINCT from_mimetype FROM media_conversion WHERE method = 'ffmpeg'"
+               +" ORDER BY from_mimetype");
+            PreparedStatement sqlDestinationType = getConnection().prepareStatement(
+               "SELECT to_mimetype FROM media_conversion"
+               +" WHERE method = 'ffmpeg' AND from_mimetype = ?"
+               +" ORDER BY to_mimetype");
+            ResultSet rsSourceType = sqlSourceType.executeQuery();
+            while (rsSourceType.next()) {
+               String fromMimetype = rsSourceType.getString("from_mimetype");
+               sqlDestinationType.setString(1, fromMimetype);
+               ResultSet rsDestinationType = sqlDestinationType.executeQuery();
+               HashSet<String> toMimeTypes = new HashSet<String>();
+               while (rsDestinationType.next()) {
+                  toMimeTypes.add(rsDestinationType.getString("to_mimetype"));
+               } // next destination type
+               rsDestinationType.close();
+               mConversionsFrom.put(fromMimetype, toMimeTypes);
+            } // next source media type
+            rsSourceType.close();
+            sqlSourceType.close();
+            sqlDestinationType.close();
+         }
+      } catch(SQLException exception) {
+         System.err.println("getMediaConversions: " + exception);
+      }
+      return mConversionsFrom;
+   } // end of mediaConversions()
+
+   /**
     * List the media available for the given transcript.
     * @param id The transcript ID.
     * @return List of media files available for the given transcript.
@@ -6971,7 +7010,7 @@ public class SqlGraphStore
    public MediaFile[] getAvailableMedia(String id) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
-      Vector<MediaFile> files = new Vector<MediaFile>();
+      Map<String,MediaFile> files = new LinkedHashMap<String,MediaFile>(); // key=name
       String[] layers = { "corpus", "episode" };
       Graph graph = getTranscript(id, layers);
       if (graph.first("corpus") == null || graph.first("episode") == null)
@@ -7025,7 +7064,7 @@ public class SqlGraphStore
                            url.append(f.getName());
                            mediaFile.setUrl(url.toString());
                         }
-                        files.add(mediaFile);
+                        files.put(mediaFile.getName(), mediaFile);
                      } // user has access
                   } catch (SQLException x) {
                      throw new StoreException(x);
@@ -7034,7 +7073,55 @@ public class SqlGraphStore
             } // next track
          } // next subdir
       }
-      return files.toArray(new MediaFile[0]);
+      
+      Map<String,Set<String>> mConversionsFrom = getMediaConversions();
+      if (mConversionsFrom.size() > 0) { // conversions are possible
+         // for each existing file (traverse a copy of values, to avoid concurrent modification)
+         for (MediaFile file : new Vector<MediaFile>(files.values())) {
+            if (mConversionsFrom.containsKey(file.getMimeType())) {
+               // there's a conversion for this type of file
+               // for each destination format
+               for (String toMimeType : mConversionsFrom.get(file.getMimeType())) {
+                  String toExtension = MediaFile.MimeTypeToSuffix().get(toMimeType);
+                  // add a file
+                  File toDir = new File(
+                     file.getFile().getParentFile().getParentFile(), toExtension);
+                  File toFile = new File(
+                     toDir, file.getNameWithoutSuffix() + "." + toExtension);
+                  
+                  if (!toFile.exists()) {
+                     MediaFile possibleFile = new MediaFile(toFile, file);
+                     possibleFile.setGenerateFrom(file);
+                     // only if we're not generating it some other way
+                     if (!files.containsKey(possibleFile.getName())) {
+                        try {
+                           if (hasAccess(id, possibleFile.getType().substring(0,1))) {
+                              if (getBaseUrl() == null) { // TODO check this isn't a security risk
+                                 possibleFile.setUrl(toFile.toURI().toString());
+                              } else {
+                                 StringBuffer url = new StringBuffer(getBaseUrl());
+                                 url.append("/files/");
+                                 url.append(graph.first("corpus").getLabel());
+                                 url.append("/");
+                                 url.append(graph.first("episode").getLabel());
+                                 url.append("/");
+                                 url.append(possibleFile.getExtension());
+                                 url.append("/");
+                                 url.append(possibleFile.getName());
+                                 possibleFile.setUrl(url.toString());
+                              }
+                              files.put(possibleFile.getName(), possibleFile);
+                           } // user has access
+                        } catch (SQLException x) {
+                           throw new StoreException(x);
+                        }
+                     } // not already registered as available
+                  } // doesn't already exist
+               } // next destination format
+            } // conversion exists
+         } // next file         
+      } // conversions are possible
+      return files.values().toArray(new MediaFile[0]);
    }
  
    /**
@@ -7078,7 +7165,7 @@ public class SqlGraphStore
             throw new PermissionException(getUser(), "Access not permitted to " + mimeType);
          }
       } catch (SQLException x) {
-         new StoreException(x);
+         throw new StoreException(x);
       }
 
       String[] layers = { "corpus", "episode" };
