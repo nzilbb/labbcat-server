@@ -30,10 +30,13 @@ import java.net.URLClassLoader;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.jar.JarFile;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.IconHelper;
+import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
 
 /**
@@ -44,7 +47,6 @@ public class SqlGraphStoreAdministration
    extends SqlGraphStore
    implements GraphStoreAdministration {
    
-   // Attributes:
    // Methods:
    
    /**
@@ -55,6 +57,7 @@ public class SqlGraphStoreAdministration
     * @throws SQLException If an error occurs during connection or loading of configuraion.
     * @throws PermissionException If the store user doesn't have administrator privileges
     */
+   @Deprecated
    public SqlGraphStoreAdministration(String baseUrl, Connection connection, String user)
       throws SQLException, PermissionException {
       
@@ -71,10 +74,42 @@ public class SqlGraphStoreAdministration
     * @throws SQLException If an error occurs during connection or loading of configuraion.
     * @throws PermissionException If the store user doesn't have administrator privileges
     */
+   @Deprecated
    public SqlGraphStoreAdministration(String baseUrl, File files, Connection connection, String user)
       throws SQLException, PermissionException {
       
       super(baseUrl, files, connection, user);
+      // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
+   } // end of constructor
+
+   /**
+    * Constructor with connection.
+    * @param baseUrl URL prefix for file access.
+    * @param db A database connection factory.
+    * @param user ID of the user
+    * @throws SQLException If an error occurs during connection or loading of configuraion.
+    * @throws PermissionException If the store user doesn't have administrator privileges
+    */
+   public SqlGraphStoreAdministration(String baseUrl, ConnectionFactory db, String user)
+      throws SQLException, PermissionException {
+      
+      super(baseUrl, db, user);
+      // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
+   } // end of constructor
+
+   /**
+    * Constructor with connection.
+    * @param baseUrl URL prefix for file access.
+    * @param files Root directory for file structure.
+    * @param db A database connection factory.
+    * @param user ID of the user
+    * @throws SQLException If an error occurs during connection or loading of configuraion.
+    * @throws PermissionException If the store user doesn't have administrator privileges
+    */
+   public SqlGraphStoreAdministration(String baseUrl, File files, ConnectionFactory db, String user)
+      throws SQLException, PermissionException {
+      
+      super(baseUrl, files, db, user);
       // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
    } // end of constructor
 
@@ -96,6 +131,16 @@ public class SqlGraphStoreAdministration
       // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
    }
 
+   
+   /**
+    * Checks the user has the 'admin' role, and throws PermissionException if not.
+    * @throws PermissionException If {@link SqlGraphStore#getUserRoles()} doesn't contain "admin".
+    */
+   private void requireAdmin() throws PermissionException {
+      if (!getUserRoles().contains("admin")) throw new PermissionException("Use does not have admin role"); // TODO i18n
+   } // end of requireAdmin()
+
+
    /**
     * Registers a transcript deserializer.
     * @param deserializer The deserializer to register.
@@ -104,7 +149,8 @@ public class SqlGraphStoreAdministration
     */
    public void registerDeserializer(GraphDeserializer deserializer)
       throws StoreException, PermissionException {
-      
+      requireAdmin();
+         
       deregisterDeserializer(deserializer);
 
       try {
@@ -146,6 +192,7 @@ public class SqlGraphStoreAdministration
     */
    public void deregisterDeserializer(GraphDeserializer deserializer)
       throws StoreException, PermissionException {
+      requireAdmin();
       
       try {
          SerializationDescriptor descriptor = deserializer.getDescriptor();
@@ -173,6 +220,7 @@ public class SqlGraphStoreAdministration
     */
    public GraphDeserializer deserializerForMimeType(String mimeType)
       throws StoreException, PermissionException {
+      requireAdmin();
       
       try {
          return (GraphDeserializer)deserializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
@@ -192,6 +240,7 @@ public class SqlGraphStoreAdministration
     * @throws PermissionException If the operation is not permitted.
     */
    public GraphDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
+      requireAdmin();
       
       try {
          return (GraphDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
@@ -211,6 +260,7 @@ public class SqlGraphStoreAdministration
     */
    public void registerSerializer(GraphSerializer serializer)
       throws StoreException, PermissionException {
+      requireAdmin();
       
       deregisterSerializer(serializer);
 
@@ -253,6 +303,7 @@ public class SqlGraphStoreAdministration
     */
    public void deregisterSerializer(GraphSerializer serializer)
       throws StoreException, PermissionException {
+      requireAdmin();
       
       try {
          SerializationDescriptor descriptor = serializer.getDescriptor();
@@ -280,6 +331,7 @@ public class SqlGraphStoreAdministration
     */
    public GraphSerializer serializerForMimeType(String mimeType)
       throws StoreException, PermissionException {
+      requireAdmin();
       
       try {
          return (GraphSerializer)serializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
@@ -299,6 +351,7 @@ public class SqlGraphStoreAdministration
     * @throws PermissionException If the operation is not permitted.
     */
    public GraphSerializer serializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
+      requireAdmin();
       
       try {
          return (GraphSerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
@@ -318,6 +371,7 @@ public class SqlGraphStoreAdministration
     * @throws PermissionException If the operation is not permitted.
     */
    public Layer saveLayer(Layer layer) throws StoreException, PermissionException {
+      requireAdmin();
       try {
          Layer oldVersion = getLayer(layer.getId());
          if (layer.getId().equals("transcript_type")) {
@@ -395,5 +449,188 @@ public class SqlGraphStoreAdministration
          throw x;
       }
    }
+   
+   /**
+    * Create a new annotator task with the given ID and description.
+    * @param annotatorId The ID of the annotator that will perform the task.
+    * @param taskId The ID of the task, which must not already exist.
+    * @param description The description of the task.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public void newAnnotatorTask(String annotatorId, String taskId, String description)
+      throws StoreException, PermissionException {
+      requireAdmin();
 
+      if (getAnnotator(annotatorId) == null) {
+         throw new InvalidIdException(annotatorId);
+      }
+      
+      try {
+         PreparedStatement sql = getConnection().prepareStatement(
+            "INSERT INTO automation (annotator_id, task_id, description, user_id)"
+            +" VALUES (?,?,?,?)");
+         sql.setString(1, annotatorId);
+         sql.setString(2, taskId);
+         sql.setString(3, description);
+         sql.setString(4, getUser()==null?"":getUser());
+         try {
+            sql.executeUpdate();
+         } finally {
+            sql.close();
+         }
+      } catch (SQLIntegrityConstraintViolationException x) {
+         throw new ExistingIdException(taskId);
+      } catch (SQLException x) {
+         throw new StoreException(x);
+      }
+   } // end of newAnnotatorTask()
+   
+   /**
+    * Supplies a list of automation tasks for the identified annotator.
+    * @param annotatorId The ID of the annotator.
+    * @return A map of task IDs to descriptions.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Map<String,String> getAnnotatorTasks(String annotatorId)
+      throws StoreException, PermissionException {
+      requireAdmin();
+
+      try {
+         LinkedHashMap<String,String> tasks = new LinkedHashMap<String,String>();
+         PreparedStatement sql = getConnection().prepareStatement(
+            "SELECT task_id, description FROM automation"
+            +" WHERE annotator_id = ? ORDER BY execution_order, automation_id");
+         sql.setString(1, annotatorId);
+         ResultSet rs = sql.executeQuery();
+         try {
+            while (rs.next()) {
+               tasks.put(rs.getString("task_id"), rs.getString("description"));
+            } // next task
+         } finally {
+            rs.close();
+            sql.close();
+         }
+         return tasks;
+      } catch (SQLException x) {
+         throw new StoreException(x);
+      }
+   } // end of getAnnotatorTasks()   
+   
+   /**
+    * Supplies the given task's parameter string.
+    * @param taskId The ID of the automation task.
+    * @return The task parameters, serialized as a string, or null if the
+    * <var>taskId</var> does not exist. 
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public String getAnnotatorTaskParameters(String taskId)
+      throws StoreException, PermissionException {
+      requireAdmin();
+      
+      try {
+         PreparedStatement sql = getConnection().prepareStatement(
+            "SELECT parameters FROM automation WHERE task_id = ?");
+         sql.setString(1, taskId);
+         ResultSet rs = sql.executeQuery();
+         try {
+            if (rs.next()) {
+               return rs.getString("parameters");
+            } else {
+               throw new StoreException("No such task: " + taskId);
+            }
+         } finally {
+            rs.close();
+            sql.close();
+         }
+      } catch (SQLException x) {
+         throw new StoreException(x);
+      }
+   } // end of getAnnotatorTaskParameters()
+   
+   /**
+    * Update the annotator task description.
+    * @param taskId The ID of the task, which must not already exist.
+    * @param description The description of the task.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public void saveAnnotatorTaskDescription(String taskId, String description)
+      throws StoreException, PermissionException {
+      requireAdmin();
+      
+      try {
+         PreparedStatement sql = getConnection().prepareStatement(
+            "UPDATE automation SET description = ? WHERE task_id = ?");
+         sql.setString(1, description);
+         sql.setString(2, taskId);
+         try {
+            if (sql.executeUpdate() <= 0) {
+               throw new StoreException("Invalid task ID: " + taskId);
+            }
+         } finally {
+            sql.close();
+         }
+      } catch (SQLException x) {
+         throw new StoreException(x);
+      }
+   } // end of saveAnnotatorTaskDescription()
+
+   /**
+    * Update the annotator task parameters.
+    * @param taskId The ID of the automation task.
+    * @param parameters The task parameters, serialized as a string.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public void saveAnnotatorTaskParameters(String taskId, String parameters)
+    throws StoreException, PermissionException {
+      requireAdmin();
+      
+      try {
+         PreparedStatement sql = getConnection().prepareStatement(
+            "UPDATE automation SET parameters = ? WHERE task_id = ?");
+         sql.setString(1, parameters);
+         sql.setString(2, taskId);
+         try {
+            if (sql.executeUpdate() <= 0) {
+               throw new StoreException("Invalid task ID: " + taskId);
+            }
+         } finally {
+            sql.close();
+         }
+      } catch (SQLException x) {
+         throw new StoreException(x);
+      }
+   } // end of saveAnnotatorTaskParameters()
+
+   /**
+    * Delete the identified automation task.
+    * @param taskId The ID of the automation task.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public void deleteAnnotatorTask(String taskId)
+      throws StoreException, PermissionException {
+      requireAdmin();
+      
+      try {
+         PreparedStatement sql = getConnection().prepareStatement(
+            "DELETE FROM automation WHERE task_id = ?");
+         sql.setString(1, taskId);
+         
+         try {
+            if (sql.executeUpdate() <= 0) {
+               throw new StoreException("No such task: " + taskId);
+            }
+         } finally {
+            sql.close();
+         }
+      } catch (SQLException x) {
+         throw new StoreException(x);
+      }
+   } // end of deleteAnnotatorTask()
+   
 } // end of class SqlGraphStoreAdministration

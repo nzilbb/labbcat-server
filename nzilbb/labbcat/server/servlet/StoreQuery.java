@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
+import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.labbcat.server.db.*;
 import nzilbb.util.IO;
@@ -204,6 +205,8 @@ public class StoreQuery extends LabbcatServlet {
             json = getSerializerDescriptors(request, response, store);
          } else if (pathInfo.endsWith("getdeserializerdescriptors")) {
             json = getDeserializerDescriptors(request, response, store);
+         } else if (pathInfo.endsWith("getannotatordescriptors")) {
+            json = getAnnotatorDescriptors(request, response, store);
          }
       }
       return json;
@@ -777,6 +780,21 @@ public class StoreQuery extends LabbcatServlet {
       SerializationDescriptor[] descriptors = store.getDeserializerDescriptors();
       return successResult(
          request, descriptors, descriptors.length == 0?"There are no deserializers.":null);
+   }
+
+   /**
+    * Lists descriptors of all annotators that are installed.
+    * <p> Annotators are modules that perform automated annations of existing transcripts.
+    * @return A list of the descriptors of all registered annotators.
+    * @throws StoreException If an error prevents the descriptors from being listed.
+    * @throws PermissionException If listing the deserializers is not permitted.
+    */
+   protected JsonObject getAnnotatorDescriptors(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      AnnotatorDescriptor[] descriptors = store.getAnnotatorDescriptors();
+      return successResult(
+         request, descriptors, descriptors.length == 0?"There are no annotators.":null);
    }
 
    private static final long serialVersionUID = 1;

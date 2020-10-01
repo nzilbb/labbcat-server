@@ -34,6 +34,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -53,6 +54,8 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
 import nzilbb.labbcat.server.db.*;
+import nzilbb.sql.ConnectionFactory;
+import nzilbb.sql.mysql.MySQLConnectionFactory;
 import nzilbb.util.CloneableBean;
 import nzilbb.util.IO;
 import org.w3c.dom.*;
@@ -70,6 +73,7 @@ public class LabbcatServlet extends HttpServlet {
    protected String connectionURL;
    protected String connectionName;
    protected String connectionPassword;
+   protected ConnectionFactory connectionFactory;
 
    protected String title;
    protected String version;
@@ -115,6 +119,8 @@ public class LabbcatServlet extends HttpServlet {
             connectionURL = xpath.evaluate("//Realm/@connectionURL", doc);
             connectionName = xpath.evaluate("//Realm/@connectionName", doc);
             connectionPassword = xpath.evaluate("//Realm/@connectionPassword", doc);
+            connectionFactory = new MySQLConnectionFactory(
+               connectionURL, connectionName, connectionPassword);
 
             // ensure it's registered with the driver manager
             Class.forName(driverName).getConstructor().newInstance();
@@ -134,7 +140,7 @@ public class LabbcatServlet extends HttpServlet {
       throws SQLException, PermissionException {
       Connection connection = newConnection();
       return new SqlGraphStoreAdministration(
-         baseUrl(request), connection, request.getRemoteUser());
+         baseUrl(request), connectionFactory, request.getRemoteUser());
    } // end of getStore()
 
    /**
@@ -304,6 +310,7 @@ public class LabbcatServlet extends HttpServlet {
     * @param args Arguments to be substituted into the message, if any
     * @return An object for returning as the request result.
     */
+   @SuppressWarnings("unchecked")
    protected JsonObject successResult(
       HttpServletRequest request, Object result, String message, Object... args) {
       
@@ -346,6 +353,13 @@ public class LabbcatServlet extends HttpServlet {
                a = a.add(object.toString());
             }
             response = response.add("model", a);
+         } else if (result instanceof Map) {
+            Map<String,String> map = (Map<String,String>)result;
+            JsonObjectBuilder o = Json.createObjectBuilder();
+            for (String k : map.keySet()) {
+               o = o.add(k, map.get(k));
+            }
+            response = response.add("model", o);
          } else {
             response = response.add("model", result.toString());
          }
@@ -410,14 +424,15 @@ public class LabbcatServlet extends HttpServlet {
     * @return An object for returning as the request result.
     */
    protected JsonObject failureResult(Throwable t) {
+      String message = ""+t.getMessage();
       JsonObjectBuilder result = Json.createObjectBuilder()
          .add("title", title)
          .add("version", version)
          .add("code", 1) // TODO deprecate?
-         .add("errors", Json.createArrayBuilder().add(t.getMessage()))
+         .add("errors", Json.createArrayBuilder().add(message))
          .add("exception", Json.createObjectBuilder()
               .add("type", t.getClass().getSimpleName())
-              .add("message", t.getMessage()))
+              .add("message", message))
          .add("messages", Json.createArrayBuilder())
          .add("model", JsonValue.NULL);
       return result.build();
@@ -557,6 +572,24 @@ public class LabbcatServlet extends HttpServlet {
       lastBundle = resources;
       return localizedString;
    } // end of localize()
+   
+   /**
+    * Returns the root of the persistent file system.
+    * @return The "files" directory.
+    */
+   public File getFilesDir() {
+      return new File(getServletContext().getRealPath("files"));
+   } // end of getAnnotatorDir()
+   
+   /**
+    * Returns the location of the annotators directory.
+    * @return The annotator installation directory.
+    */
+   public File getAnnotatorDir() {
+      File dir = new File(getFilesDir(), "annotators");
+      if (!dir.exists()) dir.mkdir();
+      return dir;
+   } // end of getAnnotatorDir()   
 
    private static final long serialVersionUID = 1;
 } // end of class LabbcatServlet

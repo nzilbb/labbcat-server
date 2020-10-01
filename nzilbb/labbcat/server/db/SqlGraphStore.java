@@ -48,12 +48,17 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nzilbb.ag.*;
+import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.UsesFileSystem;
+import nzilbb.ag.automation.UsesRelationalDatabase;
+import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.ql.AGQLException;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.IconHelper;
@@ -70,6 +75,8 @@ import nzilbb.media.ffmpeg.FfmpegCensor;
 import nzilbb.media.ffmpeg.FfmpegConverter;
 import nzilbb.media.wav.FragmentExtractor;
 import nzilbb.media.wav.Resampler;
+import nzilbb.sql.ConnectionFactory;
+import nzilbb.sql.mysql.MySQLConnectionFactory;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableSeries;
 import nzilbb.util.Timers;
@@ -135,7 +142,17 @@ public class SqlGraphStore
     * @param newFiles Root directory for file structure.
     */
    public SqlGraphStore setFiles(File newFiles) { files = newFiles; return this; }
-
+   
+   /**
+    * Returns the location of the annotators directory.
+    * @return The annotator installation directory.
+    */
+   public File getAnnotatorDir() {
+      File dir = new File(getFiles(), "annotators");
+      if (!dir.exists()) dir.mkdir();
+      return dir;
+   } // end of getAnnotatorDir()   
+   
    /**
     * Database connection.
     * @see #getConnection()
@@ -152,6 +169,30 @@ public class SqlGraphStore
     * @param newConnection Database connection.
     */
    public SqlGraphStore setConnection(Connection newConnection) { connection = newConnection; return this; }
+
+   
+   /**
+    * Factory for generating connections to the database.
+    * @see #getDb()
+    * @see #setDb(ConnectionFactory)
+    */
+   protected ConnectionFactory db;
+   /**
+    * Getter for {@link #db}: Factory for generating connections to the database.
+    * @return Factory for generating connections to the database.
+    */
+   public ConnectionFactory getDb() { return db; }
+   /**
+    * Setter for {@link #db}: Factory for generating connections to the database.
+    * @param newDb Factory for generating connections to the database.
+    */
+   public SqlGraphStore setDb(ConnectionFactory newDb) throws SQLException {
+      db = newDb;
+      if (db != null) {
+         connection = db.newConnection();
+      }
+      return this;
+   }
    
    /**
     * Whether transcript-access permissions are specified (i.e. there are rows in role_permission).
@@ -252,6 +293,7 @@ public class SqlGraphStore
    {
       if (newUser != null && !newUser.equals(user))
       { // user is changing, get their group membership
+         userRoles.clear();
          try
          {
             PreparedStatement sqlUserGroups = getConnection().prepareStatement(
@@ -276,7 +318,12 @@ public class SqlGraphStore
     * Roles the user fulfills.
     * @see #getUserRoles()
     */
-   protected HashSet<String> userRoles = new HashSet<String>();
+   protected HashSet<String> userRoles = new HashSet<String>() {{
+         // if there's no user auth, then the 'user' has all roles
+         add("view");
+         add("edit");
+         add("admin");
+      }};
    /**
     * Getter for {@link #userRoles}: Roles the user fulfills.
     * @return Roles the user fulfills.
@@ -298,6 +345,7 @@ public class SqlGraphStore
     * @param connection An opened database connection.
     * @param user ID of the user
     */
+   @Deprecated
    public SqlGraphStore(String baseUrl, Connection connection, String user)
       throws SQLException
    {
@@ -316,6 +364,7 @@ public class SqlGraphStore
     * @param connection An opened database connection.
     * @param user ID of the user
     */
+   @Deprecated
    public SqlGraphStore(String baseUrl, File files, Connection connection, String user)
       throws SQLException
    {
@@ -323,6 +372,41 @@ public class SqlGraphStore
       setBaseUrl(baseUrl);
       setFiles(files);
       setConnection(connection);
+      setUser(user);
+      loadSerializers();
+   } // end of constructor
+
+   /**
+    * Constructor with connection.
+    * @param baseUrl URL prefix for file access.
+    * @param db A database connection factory.
+    * @param user ID of the user
+    */
+   public SqlGraphStore(String baseUrl, ConnectionFactory db, String user)
+      throws SQLException
+   {
+      setId(baseUrl);
+      setBaseUrl(baseUrl);
+      setDb(db);
+      setFiles(new File(getSystemAttribute("transcriptPath")));
+      setUser(user);
+      loadSerializers();
+   } // end of constructor
+
+   /**
+    * Constructor with connection.
+    * @param baseUrl URL prefix for file access.
+    * @param files Root directory for file structure.
+    * @param db A database connection factory.
+    * @param user ID of the user
+    */
+   public SqlGraphStore(String baseUrl, File files, ConnectionFactory db, String user)
+      throws SQLException
+   {
+      setId(baseUrl);
+      setBaseUrl(baseUrl);
+      setFiles(files);
+      setDb(db);
       setUser(user);
       loadSerializers();
    } // end of constructor
@@ -343,7 +427,7 @@ public class SqlGraphStore
       setId(baseUrl);
       setBaseUrl(baseUrl);
       setFiles(files);
-      setConnection(DriverManager.getConnection (connectString, user, password));
+      setDb(new MySQLConnectionFactory(connectString, user, password));
       setUser(storeUser);
       loadSerializers();
    } // end of constructor
@@ -8225,6 +8309,92 @@ public class SqlGraphStore
       return descriptors;
    }
       
+   /**
+    * Lists descriptors of all annotators that are installed.
+    * @return A list of descriptors of all annotators that are installed.
+    */
+   public AnnotatorDescriptor[] getAnnotatorDescriptors() {
+      TreeMap<String,AnnotatorDescriptor> descriptors = new TreeMap<String,AnnotatorDescriptor>();
+      File dir = getAnnotatorDir();
+      for (File jar : dir.listFiles(new FileFilter() {
+            public boolean accept(File f) {
+               return !f.isDirectory() && f.getName().endsWith(".jar");
+            }})) {
+         try {
+            AnnotatorDescriptor descriptor = new AnnotatorDescriptor(jar);
+            Annotator annotator = descriptor.getInstance();
+            
+            // give the annotator the resources it needs
+            annotator.setSchema(getSchema());            
+            if (annotator.getClass().isAnnotationPresent(UsesFileSystem.class)) {
+               File annotatorDir = new File(dir, annotator.getAnnotatorId());
+               if (!annotatorDir.exists()) annotatorDir.mkdir();
+               annotator.setWorkingDirectory(annotatorDir);
+            }            
+            if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
+               annotator.rdbConnectionFactory(db);
+            }
+            
+            descriptors.put(annotator.getAnnotatorId(), descriptor);
+         } catch(Exception exception) {
+         }
+      } // next possible jar
+      return descriptors.values().toArray(new AnnotatorDescriptor[0]);
+   } // end of getAnnotatorDescriptor()
+   
+   /**
+    * Gets an instance of the annotator with the given ID.
+    * @param annotatorId
+    * @return An instance of the given annotator, or null if there is no registered
+    * annotator with the given ID. 
+    */
+   public Annotator getAnnotator(String annotatorId) {
+      AnnotatorDescriptor descriptor = getAnnotatorDescriptor(annotatorId);
+      if (descriptor != null) {
+         return descriptor.getInstance();
+      }
+      return null;
+   } // end of getAnnotator()
+
+   /**
+    * Gets a descriptor of the annotator with the given ID.
+    * @param annotatorId
+    * @return A descriptor of the given annotator, or null if there is no registered
+    * annotator with the given ID. 
+    */
+   public AnnotatorDescriptor getAnnotatorDescriptor(String annotatorId) {
+      File dir = getAnnotatorDir();
+      for (File jar : dir.listFiles(new FileFilter() {
+            public boolean accept(File f) {
+               return !f.isDirectory() && f.getName().startsWith(annotatorId + "-")
+                  && f.getName().endsWith(".jar");
+            }})) {
+         try {
+            AnnotatorDescriptor descriptor = new AnnotatorDescriptor(jar);
+            Annotator annotator = descriptor.getInstance();
+            if (annotator.getAnnotatorId().equals(annotatorId)) {
+
+               // give the annotator the resources it needs
+               annotator.setSchema(getSchema());
+               
+               if (annotator.getClass().isAnnotationPresent(UsesFileSystem.class)) {
+                  File annotatorDir = new File(dir, annotator.getAnnotatorId());
+                  if (!annotatorDir.exists()) annotatorDir.mkdir();
+                  annotator.setWorkingDirectory(annotatorDir);
+               }
+               
+               if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
+                  annotator.rdbConnectionFactory(db);
+               }
+               
+               return descriptor;
+            }
+         } catch(Exception exception) {
+         }
+      } // next possible jar
+      return null;
+   } // end of getAnnotatorDescriptor()
+
    /**
     * Escapes quotes in the given string for inclusion in QL or SQL queries.
     * @param s The string to escape.

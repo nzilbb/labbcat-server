@@ -674,7 +674,8 @@ public class TableServletBase extends LabbcatServlet {
                         checkCanDelete(null, json, jsonResult, connection);
    
                         // record added, so return it
-                        writeResponse(response,       successResult(request, jsonResult.build(), "Record created."));
+                        writeResponse(
+                           response, successResult(request, jsonResult.build(), "Record created."));
                      }
                   } finally {
                      sql.close();
@@ -683,7 +684,8 @@ public class TableServletBase extends LabbcatServlet {
                } catch(SQLIntegrityConstraintViolationException exception) {
                   // row is already there
                   response.setStatus(HttpServletResponse.SC_CONFLICT);
-                  writeResponse(response, failureResult(request, "Record already exists: {0}", key.substring(1)));
+                  writeResponse(response, failureResult(
+                                   request, "Record already exists: {0}", key.substring(1)));
                } catch(SQLException exception) {
                   response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                   log("TableServletBase POST: ERROR: " + exception);
