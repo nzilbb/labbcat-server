@@ -1,0 +1,12 @@
+a.info {
+    cursor: pointer;
+}
+.buttons {
+    float: right;
+}
+.item {
+    padding: 10px;
+}
+.annotator-id {
+    padding-top: 20px;
+}

@@ -1,0 +1,39 @@
+<h2 i18n="page header">Annotators</h2>
+
+<div id="new-annotator">
+  <a [routerLink]="['..','annotator']"
+     i18n-title="menu title" title="Install or upgrade annotator module"
+     i18n>Upload Annotator Module</a>
+</div>
+
+<div class="list annotator-list">
+  
+  <app-wait *ngIf="!rows"></app-wait>
+  <div class="item" *ngFor="let annotator of rows">
+    <div class="annotator-id" i18n-title title="ID">
+      <a class="info"
+         (click)="annotator._showInfo = !annotator._showInfo"
+         i18n-title title="Show information"
+         >{{annotator.annotatorId}}</a> ({{annotator.version}})
+      <span class="buttons">
+        <app-link [routerLink]="['..','annotator',annotator.annotatorId,'tasks']"
+                  i18n-title title="Automation tasks performed by this annotator"
+                  i18n-label label="Tasks"
+                  img="cog.png" icon="⚙"
+                  ></app-link>
+        <app-link *ngIf="annotator.hasExtWebapp"
+                  [routerLink]="['..','annotator',annotator.annotatorId,'ext']"
+                  i18n-title title="Annotation extensions"
+                  i18n-label label="Extensions"
+                  img="cog.png" icon="⚙"
+                  ></app-link>
+      <app-button action="delete"
+                  (press)="uninstall(annotator);" [processing]="annotator._deleting"
+                  i18n-title title="Uninstall"></app-button>
+      </span>
+    </div>
+    <div [innerHTML]="annotator.info"
+         id="#info-{{annotator.annotatorId}}"
+         class="{{annotator._showInfo?'unhidden-panel':'hidden-panel'}}"></div>
+  </div>
+</div>

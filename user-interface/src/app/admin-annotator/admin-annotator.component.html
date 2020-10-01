@@ -1,0 +1,54 @@
+<h2 i18n="page header">Install Annotator</h2>
+
+<div id="upload" *ngIf="!annotator">
+  <div id="file-chooser" *ngIf="!uploading">
+    <label for="jarFile" i18n>Annotator .jar File</label>
+    <input id="jarFile" type="file" (change)="upload($event.target.files)">
+    
+  </div>
+  <progress id="progress" max="100" [value]="percentCompleted" *ngIf="uploading"></progress>
+</div>
+
+<div id="annotator" *ngIf="annotator && !configuring">
+  <div class="list attribute-list">
+    <div class="item attribute-item">
+      <label class="attribute" i18n i18n-title title="Annotator ID"> Annotator ID </label>
+      <span class="value" id="annotatorId" i18n-title title="Annotator ID">
+        <legend i18n>Annotator ID</legend>
+        <span>{{annotator.annotatorId}}</span>
+      </span>
+    </div>
+    <div class="item attribute-item" *ngIf="annotator.installedVersion">
+      <label class="attribute" i18n i18n-title title="Replaces version"> Replaces version </label>
+      <span class="value" id="installedVersion" i18n-title title="Replaces version">
+        <legend i18n>Replaces version</legend>
+        <span>{{annotator.installedVersion}}</span>
+      </span>
+    </div>
+    <div class="item attribute-item" *ngIf="annotator.installedVersion">
+      <label class="attribute">  </label>
+      <span class="value"> <span>&darr;</span> </span>
+    </div>
+    <div class="item attribute-item">
+      <label class="attribute" i18n i18n-title title="Version"> Version </label>
+      <span class="value" id="version" i18n-title title="Version">
+        <legend i18n>Version</legend>
+        <span>{{annotator.version}}</span>
+      </span>
+    </div>
+  </div>
+  <div class="controls">
+    <app-button (press)="install(true)"
+                i18n-label label="Install"
+                i18n-title title="Install annotator installation"
+                img="check-mark.svg" icon="✓"></app-button>
+    <app-button (press)="install(false)"
+                i18n-label label="Cancel"
+                i18n-title title="Cancel annotator installation"
+                img="cross-mark.svg" icon="❌"></app-button>
+  </div>
+  <div [innerHTML]="annotator.info" i18n-title title="Annotator information"></div>
+</div>
+
+<iframe #configWebapp
+        class="{{configuring?'unhidden-panel':'hidden-panel'}}"></iframe>

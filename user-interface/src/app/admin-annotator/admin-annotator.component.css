@@ -1,0 +1,8 @@
+#installedVersion span {
+    text-decoration: line-through;
+}
+iframe {
+    width: 100%;
+    height: 70vh;
+    border: none;
+}

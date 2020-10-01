@@ -1,0 +1,49 @@
+<h2><span i18n="page header|Automation Tasks for [annotatorId]">Automation Tasks for </span> <q>{{annotatorId}}</q></h2>
+
+<div class="list task-list">
+  <div class="item add-new">
+    <span class="task-id" i18n-title title="ID"><legend i18n>ID</legend>
+      <input #taskId
+             type="text"
+             i18n-placeholder="input placeholder|Task ID" placeholder="Task ID"
+             required >
+    </span>
+    <span class="task-description" i18n-title title="Description"><legend i18n>Description</legend>
+      <textarea #description i18n-placeholder placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <app-button action="create" [processing]="creating"
+                  (press)="taskId.reportValidity() && createRow(taskId.value, description.value) && taskId.value = description.value = '';"
+                   i18n-title title="Add new record"></app-button>
+    </span>
+  </div>
+  
+  <app-wait *ngIf="!rows"></app-wait>
+  <div class="item" *ngFor="let task of rows">
+    <span class="task-id" i18n-title title="ID"><legend i18n>ID</legend>
+      {{task.taskId}}</span>
+    <span class="task-description" i18n-title title="Description"><legend i18n>Description</legend>
+      <textarea #description
+                [(ngModel)]="task.description"
+                (input)="onChange(task)"
+                i18n-placeholder placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <app-link [routerLink]="[task.taskId]"
+                i18n-title title="Task Parameters"
+                i18n-label label="Parameters"
+                img="cog.png" icon="⚙"
+                ></app-link>
+      <app-button action="delete"
+                  (press)="deleteRow(task);" [processing]="task._deleting"
+                  title="{{task._cantDelete}}"></app-button>
+    </span>
+    
+  </div>
+</div>
+<div class="buttons">
+  <app-button action="save"
+              (press)="updateChangedRows();" [processing]="updating > 0"
+              *ngIf="changed"
+              i18n-title title="Save all changed records"></app-button>
+</div>

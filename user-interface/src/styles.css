@@ -8,6 +8,10 @@ h4 { font-size: 14pt; color: #859044; }
 h5 { font-size: 13pt; color: #859044; }
 h6 { font-size: 12pt; color: #859044; }
 
+a {
+    color: #859044;
+    text-decoration: none;
+}
 app-admin-menu a { color: #859044; }
 app-admin-menu li {
     border-bottom: 1px solid #859044;
@@ -96,9 +100,21 @@ app-wait {
 }
 .list > .item > label { display: none; }
 
+.list > .attribute-item > label { font-weight:  bold; }
+
 .list + div.buttons { min-height: 30px; }
 
-.buttons a { color: #859044; text-decoration: none; margin-left: 5px; margin-right: 5px; }
+.buttons a {
+    display: inline-block;
+    color: #859044;
+    text-decoration: none;
+    margin-left: 5px;
+    margin-right: 5px;
+    border: 1px #859044 solid;
+    padding: 4px;
+    height: 30px;
+    vertical-align: middle;
+}
 
 /* Copied styles from legacy stylesheet - TODO revise these when migration complete */
 button {
@@ -137,6 +153,9 @@ app-button button {
         height: unset;
         height: 32px;
         padding: 5px;
+    }
+    .buttons a {
+        height: auto;
     }
     button.icon-only, app-button button.icon-only {
         min-width: 32px;

@@ -1,0 +1,7 @@
+
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    .task-description {
+        width: 60%;
+    }
+}

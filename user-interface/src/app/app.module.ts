@@ -24,6 +24,12 @@ import { KeepAliveComponent } from './keep-alive/keep-alive.component';
 import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.component';
 import { GroupedCheckboxComponent } from './grouped-checkbox/grouped-checkbox.component';
 import { AdminTranscriptTypesComponent } from './admin-transcript-types/admin-transcript-types.component';
+import { AdminAnnotatorComponent } from './admin-annotator/admin-annotator.component';
+import { AdminAnnotatorsComponent } from './admin-annotators/admin-annotators.component';
+import { AdminAnnotatorTasksComponent } from './admin-annotator-tasks/admin-annotator-tasks.component';
+import { AdminAnnotatorTaskParametersComponent } from './admin-annotator-task-parameters/admin-annotator-task-parameters.component';
+import { LinkComponent } from './link/link.component';
+import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotator-ext.component';
 
 @NgModule({
     declarations: [
@@ -46,7 +52,13 @@ import { AdminTranscriptTypesComponent } from './admin-transcript-types/admin-tr
         KeepAliveComponent,
         LayerCheckboxesComponent,
         GroupedCheckboxComponent,
-        AdminTranscriptTypesComponent
+        AdminTranscriptTypesComponent,
+        AdminAnnotatorComponent,
+        AdminAnnotatorsComponent,
+        AdminAnnotatorTasksComponent,
+        AdminAnnotatorTaskParametersComponent,
+        LinkComponent,
+        AdminAnnotatorExtComponent
     ],
     imports: [
         BrowserModule,

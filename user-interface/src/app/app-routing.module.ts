@@ -10,6 +10,11 @@ import { AdminRolePermissionsComponent
        } from './admin-role-permissions/admin-role-permissions.component';
 import { AdminSystemAttributesComponent
        } from './admin-system-attributes/admin-system-attributes.component';
+import { AdminAnnotatorComponent } from './admin-annotator/admin-annotator.component';
+import { AdminAnnotatorsComponent } from './admin-annotators/admin-annotators.component';
+import { AdminAnnotatorTasksComponent } from './admin-annotator-tasks/admin-annotator-tasks.component';
+import { AdminAnnotatorTaskParametersComponent } from './admin-annotator-task-parameters/admin-annotator-task-parameters.component';
+import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotator-ext.component';
 import { AboutComponent } from './about/about.component';
 import { LoginComponent } from './login/login.component';
 import { MatchesComponent } from './matches/matches.component';
@@ -34,6 +39,12 @@ const routes: Routes = [
       canDeactivate: [PendingChangesGuard] },
     { path: 'admin/attributes', component: AdminSystemAttributesComponent,
       canDeactivate: [PendingChangesGuard] },
+    { path: 'admin/annotator', component: AdminAnnotatorComponent },
+    { path: 'admin/annotator/:annotatorId/tasks', component: AdminAnnotatorTasksComponent,
+      canDeactivate: [PendingChangesGuard] },
+    { path: 'admin/annotator/:annotatorId/tasks/:taskId', component: AdminAnnotatorTaskParametersComponent },
+    { path: 'admin/annotator/:annotatorId/ext', component: AdminAnnotatorExtComponent },
+    { path: 'admin/annotators', component: AdminAnnotatorsComponent },
 ];
 
 @NgModule({
