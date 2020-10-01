@@ -80,7 +80,9 @@ public class User extends LabbcatServlet {
       JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
       startResult(jsonOut, false);
       String user = request.getRemoteUser();
-      jsonOut.write("user", user);
+      if (user != null) {
+         jsonOut.write("user", user);
+      }
       jsonOut.writeStartArray("roles");
       try {
          if (user == null) { // not using authentication
