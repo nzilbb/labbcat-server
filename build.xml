@@ -31,6 +31,35 @@
         file="${lib}/javax.json-1.0.jar"
         tofile="${lib}/javax.json.jar"
         />
+    <!-- Get commons libraries -->
+    <get src="https://downloads.apache.org/commons/csv/binaries/commons-csv-1.8-bin.zip" 
+	 dest="lib/commons-csv-1.8-bin.zip" 
+	 skipexisting="true"
+	 verbose="true"
+	 usetimestamp="true"/>
+    <unzip src="lib/commons-csv-1.8-bin.zip" dest="lib">
+      <patternset>
+        <include name="commons-csv-1.8/commons-csv-1.8.jar"/>
+      </patternset>
+    </unzip>
+    <move
+        file="lib/commons-csv-1.8/commons-csv-1.8.jar"
+        tofile="lib/commons-csv.jar"
+        />
+    <get src="https://downloads.apache.org/commons/fileupload/binaries/commons-fileupload-1.4-bin.zip" 
+	 dest="lib/commons-fileupload-1.4-bin.zip" 
+	 skipexisting="true"
+	 verbose="true"
+	 usetimestamp="true"/>
+    <unzip src="lib/commons-fileupload-1.4-bin.zip" dest="lib">
+      <patternset>
+        <include name="commons-fileupload-1.4-bin/commons-fileupload-1.4.jar"/>
+      </patternset>
+    </unzip>
+    <move
+        file="lib/commons-fileupload-1.4-bin/commons-fileupload-1.4.jar"
+        tofile="lib/commons-fileupload.jar"
+        />
   </target>
 
   <target name="gitlibs" description="Ensure we have the jar libraries we need">
@@ -52,7 +81,7 @@
     <javac srcdir="${src}" destdir="${build}"
 	   includes="${srcfiles}"
 	   excludes="${testsrcfiles} **/package-info.java"
-	   classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar;${lib}/javax.json.jar"
+	   classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/commons-csv.jar;${lib}/commons-fileupload.jar;${lib}/nzilbb.ag.jar;${lib}/javax.json.jar"
 	   listfiles="yes"
 	   target="${config.classversion}"
 	   source="${config.classversion}"
