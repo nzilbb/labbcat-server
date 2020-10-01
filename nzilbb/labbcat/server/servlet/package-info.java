@@ -626,6 +626,21 @@
       </li>
       </ul>
 
+      <a id="getAnnotatorDescriptors()">
+      <!--   -->
+      </a>
+      <ul class="blockListLast">
+      <li class="blockList">
+      <h4>/api/store/getAnnotatorDescriptors</h4>
+      <div class="block">Lists descriptors of all annotators that are installed.
+      <p> Annotators are modules that perform automated annations of existing transcripts.</div>
+      <dl>
+      <dt><span class="returnLabel">Returns:</span></dt>
+      <dd>A list of the descriptors of all registered annotators.</dd>
+      </dl>
+      </li>
+      </ul>
+
     </li>
   </ul>
 </section>
@@ -758,10 +773,6 @@
       <ul class="blockListLast">
         <li class="blockList">
           <h4>/api/edit/store/deleteTranscript</h4>
-          <pre class="methodSignature">void&nbsp;deleteTranscript&#8203;(String&nbsp;id)
-            throws <a href="StoreException.html" title="class in nzilbb.ag">StoreException</a>,
-            <a href="PermissionException.html" title="class in nzilbb.ag">PermissionException</a>,
-            <a href="GraphNotFoundException.html" title="class in nzilbb.ag">GraphNotFoundException</a></pre>
           <div class="block">Deletes the given transcript, and all associated files.</div>
           <dl>
             <dt><span class="paramLabel">Parameters:</span></dt>
@@ -769,6 +780,96 @@
           </dl>
         </li>
       </ul>
+
+      <a id="newAnnotatorTask(java.lang.String,java.lang.String,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/admin/store/newAnnotatorTask</h4>
+          <div class="block">Create a new annotator task with the given ID and description.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dt> annotatorId </dt><dd> The ID of the annotator that will perform the task. </dd>
+            <dt> taskId </dt>     <dd> The ID of the task, which must not already exist. </dd>
+            <dt> description </dt><dd> The description of the task. </dd>
+          </dl>
+        </li>
+      </ul>
+
+      <a id="getAnnotatorTasks(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/admin/store/getAnnotatorTasks</h4>
+          <div class="block">Supplies a list of automation tasks for the identified annotator.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dt> annotatorId </dt><dd> The ID of the annotator that performs the tasks. </dd>
+          </dl>
+          <div>The response contains a model which represents a map of <var>taskId</var>s to <var>description</var>s.</div> 
+        </li>
+      </ul>
+
+      <a id="getAnnotatorTaskParameters(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/admin/store/getAnnotatorTaskParameters</h4>
+          <div class="block">Supplies the given task's parameter string.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dt> taskId </dt>     <dd> The ID of the task, which must not already exist. </dd>
+          </dl>
+        </li>
+      </ul>
+
+      <a id="saveAnnotatorTaskDescription(java.lang.String,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/admin/store/saveAnnotatorTaskDescription</h4>
+          <div class="block">Update the annotator task description.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dt> taskId </dt>     <dd> The ID of the task, which must already exist. </dd>
+            <dt> description </dt><dd> The description of the task. </dd>
+          </dl>
+        </li>
+      </ul>
+
+      <a id="saveAnnotatorTaskParameters(java.lang.String,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/admin/store/saveAnnotatorTaskParameters</h4>
+          <div class="block">Update the annotator task parameters.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dt> taskId </dt>     <dd> The ID of the task, which must already exist. </dd>
+            <dt> parameters </dt><dd> The task parameters, serialized as a string. </dd>
+          </dl>
+        </li>
+      </ul>
+
+      <a id="deleteAnnotatorTask(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/admin/store/deleteAnnotatorTask</h4>
+          <div class="block">Delete the identified automation task..</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dt> taskId </dt>     <dd> The ID of the task, which must already exist. </dd>
+          </dl>
+        </li>
+      </ul>
+
     </li>
   </ul>
 </section>

@@ -50,7 +50,7 @@ import nzilbb.util.MonitorableSeries;
  * @author Robert Fromont
  */
 @WebServlet({"/api/serialize/fragment", "/serialize/fragment"} )
-public class SerializeFragments extends LabbcatServlet {
+public class SerializeFragments extends LabbcatServlet { // TODO unit test
    
    // Attributes:
    private boolean bCancel = false;
@@ -111,8 +111,8 @@ public class SerializeFragments extends LabbcatServlet {
     * If there is only one, the file in returned as the response to 
     * the request.  If there are more than one, the response is a
     * zipfile containing the output files. 
-    * @param req HTTP request
-    * @param res HTTP response
+    * @param request HTTP request
+    * @param response HTTP response
     */
    @Override
    public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -293,18 +293,21 @@ public class SerializeFragments extends LabbcatServlet {
    } // end of cancel()
    
    /**
-    * Converts the given utterances to the given format.
-    * @param vUtterances Utterances to convert. If an utterance has a value for {@link Annotation#getTag()}, then it is used as a prefix for converted files, if possible.
-    * @param layers A list of layer names.
-    * @param sMimeType
-    * @param labbcat
-    * @return A Stream containing the fragments - could be a single stream with the fragments, of the given MIME type, or a ZIP file containing individual files.
+    * Serializes the given series of utterances using the given serializer.
+    * @param name The name of the collection.
+    * @param utterances Utterances to serialize.
+    * @param serializer The serialization module.
+    * @param streamConsumer Consumer for receiving the serialized streams.
+    * @param errorConsumer Consumer for handling serialization errors.
+    * @param layerIds A list of layer names.
+    * @param mimeType
+    * @param store Graph store.
     * @throws Exception
     */
    public void serializeFragments(
       String name, MonitorableSeries<Graph> utterances, GraphSerializer serializer,
       Consumer<NamedStream> streamConsumer, Consumer<SerializationException> errorConsumer,
-      String[] layerIds, String sMimeType, GraphStoreAdministration store)
+      String[] layerIds, String mimeType, GraphStoreAdministration store)
       throws Exception {
       
       bCancel = false;

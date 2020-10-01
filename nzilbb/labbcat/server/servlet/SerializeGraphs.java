@@ -52,7 +52,7 @@ import nzilbb.util.IO;
  * @author Robert Fromont
  */
 @WebServlet({"/api/serialize/graphs", "/serialize/graphs"} )
-public class SerializeGraphs extends LabbcatServlet {
+public class SerializeGraphs extends LabbcatServlet { // TODO unit test
    
    // Attributes:
 
