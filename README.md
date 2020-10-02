@@ -55,7 +55,7 @@ translation to other languages. If changes are made, resource files can be gener
 translation by executing:
 
 ```
-ant xi18n
+ant i18n
 ```
 
 To localize to a new language/variety:

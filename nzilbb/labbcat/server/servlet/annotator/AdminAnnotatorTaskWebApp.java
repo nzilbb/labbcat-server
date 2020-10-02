@@ -230,8 +230,9 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
                annotator.setTaskParameters(parameters);
                
                String finishedResponse
-                  ="<html><head><title>Task Parameters</title></head><body>"
-                  +"<p style='text-align: center;'><big>Thanks</big></p>"
+                  ="<html><head><title>"
+                  +localize(request, "Task Parameters")+"</title></head><body>"
+                  +"<p style='text-align: center;'><big>"+localize(request, "Thanks.")+"</big></p>"
                   +"<script type='text/javascript'>"
                   +"window.parent.postMessage({ resource: 'setTaskParameters' }, '*');"
                   +"</script>"

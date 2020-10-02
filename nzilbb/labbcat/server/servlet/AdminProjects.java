@@ -64,8 +64,8 @@ public class AdminProjects extends TableServletBase {
             add(new DeleteCheck(
                    "SELECT COUNT(*), MIN(short_description) FROM layer WHERE project_id = ?",
                    "project_id",
-                   "{0,choice,1#There is still a layer using this corpus: {1}"
-                   +"|1<There are still {0} layers using this corpus, including {1}}"));
+                   "{0,choice,1#There is still a layer using this project: {1}"
+                   +"|1<There are still {0} layers using this project, including {1}}"));
          }};
    }
 

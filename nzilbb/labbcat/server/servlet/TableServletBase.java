@@ -141,14 +141,12 @@ public class TableServletBase extends LabbcatServlet {
        * @param rs
        * @return The formatted message.
        */
-      public String formatReason(ResultSet rs) {
-         if (!reason.contains("{")) return reason;
-         MessageFormat format = new MessageFormat(reason);
+      public String formatReason(ResultSet rs, HttpServletRequest request, TableServletBase servlet) {
+         if (!reason.contains("{")) return servlet.localize(request, reason);;
          try {
-            Object[] args = {
-               rs.getLong(1), // the number returned
-               reason.contains("{1")?rs.getString(2):null }; // the optional second column
-            return format.format(args);
+            return servlet.localize(
+               request, reason, rs.getLong(1), // the number returned
+               reason.contains("{1")?rs.getString(2):null); // the optional second column
          } catch (Throwable anything) {
             return reason;
          }
@@ -330,7 +328,8 @@ public class TableServletBase extends LabbcatServlet {
                      boolean headersWritten = false;
                      while (rs.next()) {
                         ResultSetMetaData meta = rs.getMetaData();
-                        outputRow(rs, allColumns, meta, jsonOut, connection, multipleRows);
+                        outputRow(
+                           rs, allColumns, meta, jsonOut, connection, request, multipleRows);
                         headersWritten = outputRow(rs, allColumns, meta, csvOut, headersWritten);
                         rowCount++;
                      } // next row
@@ -382,7 +381,7 @@ public class TableServletBase extends LabbcatServlet {
     * @param connection A database connection in case delete checks must be done.
     * @throws SQLException
     */
-   protected boolean outputRow(ResultSet rs, List<String> allColumns, ResultSetMetaData meta, JsonGenerator jsonOut, Connection connection, boolean modelIsArray) throws SQLException {
+   protected boolean outputRow(ResultSet rs, List<String> allColumns, ResultSetMetaData meta, JsonGenerator jsonOut, Connection connection, HttpServletRequest request, boolean modelIsArray) throws SQLException {
       if (jsonOut == null) return false;
       if (modelIsArray) jsonOut.writeStartObject();
       int c = 1;
@@ -412,7 +411,7 @@ public class TableServletBase extends LabbcatServlet {
                }                           
             } // no null
          } // next column
-         String cantDelete = checkCanDelete(rs, null, null, connection);
+         String cantDelete = checkCanDelete(rs, null, null, connection, request);
          if (cantDelete != null) jsonOut.write("_cantDelete", cantDelete);
       } finally {
          if (modelIsArray) jsonOut.writeEnd(); // object
@@ -431,7 +430,7 @@ public class TableServletBase extends LabbcatServlet {
     * @param connection A connection to the database for running any necessary check queries.
     * @return The reason, if the row can't be deleted, or null if it is deletable.
     */
-   protected String checkCanDelete(ResultSet rs, JsonObject json, JsonObjectBuilder jsonResult, Connection connection)
+   protected String checkCanDelete(ResultSet rs, JsonObject json, JsonObjectBuilder jsonResult, Connection connection, HttpServletRequest request)
       throws SQLException {
       if (deleteChecks != null) { // need to run delete checks
          for (DeleteCheck check : deleteChecks) {
@@ -450,7 +449,7 @@ public class TableServletBase extends LabbcatServlet {
             ResultSet rsCheck = sqlCheck.executeQuery();
             try {
                if (rsCheck.next() && rsCheck.getLong(1) != 0) {
-                  String reason = check.formatReason(rsCheck);
+                  String reason = check.formatReason(rsCheck, request, this);
                   if (jsonResult != null) jsonResult.add("_cantDelete", reason);
                   return reason;
                }
@@ -671,7 +670,7 @@ public class TableServletBase extends LabbcatServlet {
                            }
                         }
                         
-                        checkCanDelete(null, json, jsonResult, connection);
+                        checkCanDelete(null, json, jsonResult, connection, request);
    
                         // record added, so return it
                         writeResponse(
@@ -818,7 +817,7 @@ public class TableServletBase extends LabbcatServlet {
                         } // dbKeys != urlKeys
                         
                         // set _cantDelete flag?
-                        checkCanDelete(null, json, jsonResult, connection);
+                        checkCanDelete(null, json, jsonResult, connection, request);
 
                         // record update, so return it
                         writeResponse(response,       successResult(request, jsonResult.build(), "Record updated."));
@@ -966,7 +965,9 @@ public class TableServletBase extends LabbcatServlet {
                            try {
                               if (rsCheck.next() && rsCheck.getLong(1) != 0) {
                                  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                                 writeResponse(response,                failureResult(request, check.formatReason(rsCheck)));
+                                 writeResponse(
+                                    response, failureResult(
+                                       request, check.formatReason(rsCheck, request, this)));
                                  return;
                               }
                            } finally {

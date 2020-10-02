@@ -258,11 +258,11 @@ public class AdminAnnotators extends LabbcatServlet {
                      deleteAllJars(annotatorId);
                      writeResponse(
                         response, successResult(
-                           request, null, "Annotator uninstalled.")); // TODO i18n
+                           request, null, "Annotator uninstalled."));
                   } catch(CouldNotDeleteFileException x) {
                      writeResponse(
                         response, failureResult(
-                           request, "Could not uninstall annotator {0}", // TODO i18n
+                           request, "Could not uninstall annotator {0}",
                            x.file.getName()));
                      return;
                   }
@@ -272,7 +272,7 @@ public class AdminAnnotators extends LabbcatServlet {
                   File uploadedJarFile = new File(tempDir, fileName);
                   if (!uploadedJarFile.exists()) {
                      writeResponse(response, failureResult(
-                                      request, "File not found {0}", fileName));
+                                      request, "File not found: {0}", fileName));
                   } else { // uploadedJarFile exists
                      
                      if (action.equals("install")) { // install
@@ -292,7 +292,7 @@ public class AdminAnnotators extends LabbcatServlet {
                            catch(CouldNotDeleteFileException x) {
                               writeResponse(
                                  response, failureResult(
-                                    request, "Could not delete previous version {0}", // TODO i18n
+                                    request, "Could not delete previous version: {0}",
                                     x.file.getName()));
                               return;
                            }
@@ -321,7 +321,7 @@ public class AdminAnnotators extends LabbcatServlet {
                                  request, jsonResult.build(), "Annotator installed."));
                         } catch (ClassNotFoundException noAnnotator) {
                            writeResponse(response, failureResult(
-                                            request, "No annotator found in {0}", fileName)); // TODO i18n
+                                            request, "No annotator found in {0}", fileName));
                            
                         }
                      } else { // cancel

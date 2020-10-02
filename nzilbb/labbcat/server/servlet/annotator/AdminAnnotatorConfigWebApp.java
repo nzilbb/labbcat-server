@@ -199,8 +199,9 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
             } else if (resource.equals("/setConfig")) {
                // return something
                String finishedResponse
-                  ="<html><head><title>Installing...</title></head><body>"
-                  +"<progress id='p' value='0' max='100' style='width: 100%'>Installing...</progress>"
+                  ="<html><head><title>"+localize(request, "Installing...")+"</title></head><body>"
+                  +"<progress id='p' value='0' max='100' style='width: 100%'>"
+                  +localize(request, "Installing...")+"</progress>"
                   +"<p id='m' style='text-align:center;'></p>"
                   +"<script type='text/javascript'>"
                   +"\nfunction p() {"
@@ -219,7 +220,8 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
                   +"\n      progress.title = this.responseText+'%';"
                   +"\n      if (progress.value < 100) window.setTimeout(p, 500);"
                   +"\n      else {"
-                  +"\n        document.getElementById('m').innerHTML = 'You can close this window.';"
+                  +"\n        document.getElementById('m').innerHTML = '"
+                  +localize(request, "You can close this window.")+"';"
                   +"\n        window.parent.postMessage({ resource: 'setConfig' }, '*');"
                   +"\n      }"
                   +"\n    }, false);"

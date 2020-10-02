@@ -191,7 +191,7 @@ public class StoreAdministration extends Store {
       Vector<String> errors = new Vector<String>();
       // get/validate the parameters
       String annotatorId = request.getParameter("annotatorId");
-      if (annotatorId == null) errors.add(localize(request, "No Annotator ID specified.")); // TODO i18n
+      if (annotatorId == null) errors.add(localize(request, "No Annotator ID specified."));
       String taskId = request.getParameter("taskId");
       if (taskId == null) errors.add(localize(request, "No ID specified."));
       String description = request.getParameter("description");
@@ -201,13 +201,13 @@ public class StoreAdministration extends Store {
       try {
          store.newAnnotatorTask(annotatorId, taskId, description);
          return successResult(
-            request, null, localize(request, "Record created.")); // TODO i18n
+            request, null, localize(request, "Record created."));
       } catch(ExistingIdException exception) {
          errors.add(localize(
-                       request, "A task with that ID already exists: {0}", exception.getId())); // TODO i18n
+                       request, "A task with that ID already exists: {0}", exception.getId()));
          return failureResult(errors);
       } catch(InvalidIdException exception) {
-         errors.add(localize(request, "That annotator isn't installed: {0}", exception.getId())); // TODO i18n
+         errors.add(localize(request, "That annotator isn't installed: {0}", exception.getId()));
          return failureResult(errors);
       }
    }      
@@ -228,7 +228,7 @@ public class StoreAdministration extends Store {
       Vector<String> errors = new Vector<String>();
       // get/validate the parameters
       String annotatorId = request.getParameter("annotatorId");
-      if (annotatorId == null) errors.add(localize(request, "No Annotator ID specified.")); // TODO i18n
+      if (annotatorId == null) errors.add(localize(request, "No Annotator ID specified."));
       if (errors.size() > 0) return failureResult(errors);
 
       return successResult(
@@ -282,7 +282,7 @@ public class StoreAdministration extends Store {
 
       store.saveAnnotatorTaskDescription(taskId, description);
       return successResult(
-         request, null, localize(request, "Record updated.")); // TODO i18n
+         request, null, localize(request, "Record updated."));
    }      
 
    /**
@@ -309,7 +309,7 @@ public class StoreAdministration extends Store {
 
       store.saveAnnotatorTaskParameters(taskId, parameters);
       return successResult(
-         request, null, localize(request, "Record updated.")); // TODO i18n
+         request, null, localize(request, "Record updated."));
    }      
 
    /**
@@ -333,7 +333,7 @@ public class StoreAdministration extends Store {
 
       store.deleteAnnotatorTask(taskId);
       return successResult(
-         request, null, localize(request, "Record deleted.")); // TODO i18n
+         request, null, localize(request, "Record deleted."));
    }
 
    private static final long serialVersionUID = 1;
