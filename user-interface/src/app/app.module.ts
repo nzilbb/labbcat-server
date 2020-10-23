@@ -30,6 +30,7 @@ import { AdminAnnotatorTasksComponent } from './admin-annotator-tasks/admin-anno
 import { AdminAnnotatorTaskParametersComponent } from './admin-annotator-task-parameters/admin-annotator-task-parameters.component';
 import { LinkComponent } from './link/link.component';
 import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotator-ext.component';
+import { UrlEncodePipe } from './url-encode.pipe';
 
 @NgModule({
     declarations: [
@@ -58,7 +59,8 @@ import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotato
         AdminAnnotatorTasksComponent,
         AdminAnnotatorTaskParametersComponent,
         LinkComponent,
-        AdminAnnotatorExtComponent
+        AdminAnnotatorExtComponent,
+        UrlEncodePipe
     ],
     imports: [
         BrowserModule,

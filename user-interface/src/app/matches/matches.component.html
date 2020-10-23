@@ -55,7 +55,7 @@
         {{match.BeforeMatch}}
       </div>
       <div class="match-text match-transcript">
-        <a href="{{transcriptUrl}}?transcript={{match.Transcript}}&amp;threadId={{threadId}}#{{matchHash(match)}}"
+        <a href="{{transcriptUrl}}?transcript={{match.Transcript | urlEncode}}&amp;threadId={{threadId}}#{{matchHash(match)}}"
           i18n-title title="Open transcript"
           target="{{match.Transcript}}">
           {{match.Text}}
