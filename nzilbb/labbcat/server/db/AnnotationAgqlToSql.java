@@ -945,7 +945,7 @@ public class AnnotationAgqlToSql {
                space();
                try
                { // ensure string literals use single, not double, quotes
-                  conditions.push("'"+unquote(ctx.literal().stringLiteral().getText())+"'");
+                  conditions.push("'"+unquote(ctx.literal().stringLiteral().getText()).replace("'","\\'")+"'");
                }
                catch(Exception exception)
                { // not a string literal
