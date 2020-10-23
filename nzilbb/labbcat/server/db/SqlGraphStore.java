@@ -8403,7 +8403,7 @@ public class SqlGraphStore
    private String esc(String s)
    {
       if (s == null) return "";
-      return s.replaceAll("\\\\","\\\\\\\\").replaceAll("'","\\'");
+      return s.replace("\\","\\\\").replace("'","\\'");
    } // end of esc()
 
 
