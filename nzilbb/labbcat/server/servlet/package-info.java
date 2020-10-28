@@ -877,6 +877,27 @@
  * <section role="region"><ul class="blockList"><li class="blockList">
  * <h3 id="OtherFunctions">Other functions include:</h3><ul class="blockList">
  * 
+ * <li class="blockList"><h4 id="/api/info">/api/admin/info</h4>
+ *  <div> Allows access to the corpus information document, which is 
+ *   an HTML document that provides information about the database as a whole; the corpora
+ *   it contains, where the data comes from, what meta-data is specified, and any other
+ *   information.
+ *   <p> The following operations, specified by the HTTP method, are supported:
+ *   <ul>
+ *    <li><b> GET </b>
+ *    - Read the HTML document. 
+ *     <ul>
+ *      <li><em> Response Body </em> - an HTML document, which may be completely empty.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The information was retrieved successfully. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *   </ul>
+ *  </div>
+ * </li>
+ *
  * <li class="blockList"><h4 id="/api/serialize/graphs">/api/serialize/graphs</h4>
  *  <div> Converts transcript fragments. The request method can be <b> GET </b> or <b> POST </b>
  *  <p> This expects an array of graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
@@ -1421,6 +1442,40 @@
  *         <li><em> 200 </em> : The record was sucessfully updated. </li>
  *         <li><em> 400 </em> : The record has type == "readonly" found. </li>
  *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *   </ul>
+ *  </div>
+ * </li>
+ * 
+ * <li class="blockList"><h4 id="/api/admin/info">/api/admin/info</h4>
+ *  <div> Allows administration (Read/Update) of the corpus information document, which is 
+ *   an HTML document that provides information about the database as a whole; the corpora
+ *   it contains, where the data comes from, what meta-data is specified, and any other
+ *   information.
+ *   <p> The following operations, specified by the HTTP method, are supported:
+ *   <ul>
+ *    <li><b> GET </b>
+ *    - Read the HTML document. 
+ *     <ul>
+ *      <li><em> Response Body </em> - an HTML document, which may be completely empty.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The information was retrieved successfully. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></li> 
+ *    
+ *    <li><b> PUT </b>
+ *    - Update the HTML document.
+ *     <ul>
+ *      <li><em> Request Body </em> - the HTML document to save. </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the record. </li> 
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The document was updated. </li>
  *        </ul>
  *      </li>
  *     </ul></li> 
