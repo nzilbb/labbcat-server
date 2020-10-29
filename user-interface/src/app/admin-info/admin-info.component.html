@@ -1,0 +1,13 @@
+<app-wait *ngIf="loading"></app-wait>
+<div *ngIf="!loading">
+  <h2 i18n>Overall Corpus information</h2>
+  <div class="text-html">
+    <ckeditor [(ngModel)]="info" [editor]="Editor" (change)="onChange($event)"></ckeditor>
+  </div>
+  <div class="buttons">
+    <app-button action="save"
+                (press)="updateInfo();" [processing]="updating"
+                *ngIf="changed"
+                i18n-title title="Save info"></app-button>
+  </div>
+</div>

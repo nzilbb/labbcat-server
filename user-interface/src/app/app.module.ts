@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 
 import { PendingChangesGuard } from './pending-changes.guard';
 import { AppComponent } from './app.component';
@@ -68,6 +69,7 @@ import { AdminInfoComponent } from './admin-info/admin-info.component';
     imports: [
         BrowserModule,
         HttpClientModule,
+        CKEditorModule,
         RouterModule.forRoot([
             { path: 'about', component: AboutComponent },
             { path: 'login', component: LoginComponent },
@@ -93,6 +95,7 @@ import { AdminInfoComponent } from './admin-info/admin-info.component';
             { path: 'admin/annotator/:annotatorId/tasks/:taskId', component: AdminAnnotatorTaskParametersComponent },
             { path: 'admin/annotator/:annotatorId/ext', component: AdminAnnotatorExtComponent },
             { path: 'admin/annotators', component: AdminAnnotatorsComponent },
+            { path: 'admin/info', component: AdminInfoComponent },
         ]),
         FormsModule
     ],
