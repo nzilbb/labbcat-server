@@ -1,9 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
-import { AppRoutingModule } from './app-routing.module';
+import { PendingChangesGuard } from './pending-changes.guard';
 import { AppComponent } from './app.component';
 import { WaitComponent } from './wait/wait.component';
 import { AdminCorporaComponent } from './admin-corpora/admin-corpora.component';
@@ -31,6 +32,7 @@ import { AdminAnnotatorTaskParametersComponent } from './admin-annotator-task-pa
 import { LinkComponent } from './link/link.component';
 import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotator-ext.component';
 import { UrlEncodePipe } from './url-encode.pipe';
+import { AdminInfoComponent } from './admin-info/admin-info.component';
 
 @NgModule({
     declarations: [
@@ -60,13 +62,39 @@ import { UrlEncodePipe } from './url-encode.pipe';
         AdminAnnotatorTaskParametersComponent,
         LinkComponent,
         AdminAnnotatorExtComponent,
-        UrlEncodePipe
+        UrlEncodePipe,
+        AdminInfoComponent
     ],
     imports: [
         BrowserModule,
         HttpClientModule,
-        AppRoutingModule,
-      FormsModule
+        RouterModule.forRoot([
+            { path: 'about', component: AboutComponent },
+            { path: 'login', component: LoginComponent },
+            { path: 'matches', component: MatchesComponent },
+            
+            { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/corpora', component: AdminCorporaComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/projects', component: AdminProjectsComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/tracks', component: AdminTracksComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/roles', component: AdminRolesComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/roles/:role_id/permissions', component: AdminRolePermissionsComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/attributes', component: AdminSystemAttributesComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/annotator', component: AdminAnnotatorComponent },
+            { path: 'admin/annotator/:annotatorId/tasks', component: AdminAnnotatorTasksComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/annotator/:annotatorId/tasks/:taskId', component: AdminAnnotatorTaskParametersComponent },
+            { path: 'admin/annotator/:annotatorId/ext', component: AdminAnnotatorExtComponent },
+            { path: 'admin/annotators', component: AdminAnnotatorsComponent },
+        ]),
+        FormsModule
     ],
     providers: [],
     bootstrap: [AppComponent]
