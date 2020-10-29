@@ -2,7 +2,10 @@
 <div *ngIf="!loading">
   <h2 i18n>Overall Corpus information</h2>
   <div class="text-html">
-    <ckeditor [(ngModel)]="info" [editor]="Editor" (change)="onChange($event)"></ckeditor>
+    <ckeditor [(ngModel)]="info"
+              [editor]="Editor"
+              (ready)="onReady($event)"
+              (change)="onChange($event)"></ckeditor>
   </div>
   <div class="buttons">
     <app-button action="save"

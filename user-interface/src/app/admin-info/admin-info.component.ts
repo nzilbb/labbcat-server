@@ -5,6 +5,7 @@ import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
 import { AdminComponent } from '../admin-component';
+import { CkUploadAdapter } from '../ck-upload-adapter';
 
 @Component({
   selector: 'app-admin-info',
@@ -22,10 +23,20 @@ export class AdminInfoComponent extends AdminComponent implements OnInit {
         messageService: MessageService
     ) {
         super(labbcatService, messageService);
+        console.log("ClassicEditor.builtinPlugins[1] " + ClassicEditor.builtinPlugins[1]);
+        for (let p in ClassicEditor.builtinPlugins)
+            console.log(" " + p + " : " + ClassicEditor.builtinPlugins[p].pluginName );
     }
     
     ngOnInit(): void {
         this.getInfo();
+    }
+    
+    onReady(editor: ClassicEditor): void {
+        console.log("onReady " + editor);
+        editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
+            return new CkUploadAdapter( loader );
+        };
     }
     
     getInfo(): void {
