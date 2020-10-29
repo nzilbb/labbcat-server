@@ -394,6 +394,18 @@ public class TestAnnotationAgqlToSql {
                    +" AND 'orthography' = 'orthography'"
                    +" ORDER BY graph.transcript_id, parent_id, annotation_id",
                    q.sql);
+
+      q = transformer.sqlFor(
+         "graph.id == 'Ada\\'Aicheson-01.trs' && layer.id == 'orthography'",
+         "DISTINCT annotation.*", null, null);
+      assertEquals("Graph ID with apostrophe",
+                   "SELECT DISTINCT annotation.*, 'orthography' AS layer"
+                   +" FROM annotation_layer_2 annotation"
+                   +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+                   +" WHERE graph.transcript_id = 'Ada\\'Aicheson-01.trs'"
+                   +" AND 'orthography' = 'orthography'"
+                   +" ORDER BY graph.transcript_id, parent_id, annotation_id",
+                   q.sql);
    }
 
    @Test public void graphAnnotationsByLayer() throws AGQLException {
