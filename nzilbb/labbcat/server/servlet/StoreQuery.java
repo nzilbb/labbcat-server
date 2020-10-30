@@ -50,9 +50,581 @@ import org.w3c.dom.*;
 import org.xml.sax.*;
 
 /**
- * Controller that handles
- * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStoreQuery.html">nzilbb.ag.IGraphStoreQuery</a>
- * requests.
+ * <tt>/api/store/&hellip;</tt> :
+ * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStoreQuery.html">GraphStoreQuery</a> 
+ * functions.
+      <a id="getId()">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getId</h4>
+          <div class="block">Gets the store's ID.</div>
+          <dl>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The annotation store's ID.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getLayerIds()">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getLayerIds</h4>
+          <div class="block">Gets a list of layer IDs (annotation 'types').</div>
+          <dl>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of layer IDs.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getLayers()">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getLayers</h4>
+          <div class="block">Gets a list of layer definitions.</div>
+          <dl>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of layer definitions.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getSchema()">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getSchema</h4>
+          <div class="block">Gets the layer schema.</div>
+          <dl>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A schema defining the layers and how they relate to each other.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getLayer(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getLayer</h4>
+          <div class="block">Gets a layer definition.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - ID of the layer to get the definition for.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The definition of the given layer.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getCorpusIds()">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getCorpusIds</h4>
+          <div class="block">Gets a list of corpus IDs.</div>
+          <dl>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of corpus IDs.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getParticipantIds()">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getParticipantIds</h4>
+          <div class="block">Gets a list of participant IDs.</div>
+          <dl>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of participant IDs.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getParticipant(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getParticipant</h4>
+          <div class="block">Gets the participant record specified by the given identifier.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the participant, which could be their name or their database annotation
+              ID.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>An annotation representing the participant, or null if the participant was not found.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="countMatchingParticipantIds(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/countMatchingParticipantIds</h4>
+          <div class="block">Counts the number of participants that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which participants match.
+              <p> The expression language is currently not well defined, but expressions such as the
+                following can be used: 
+                <ul>
+                  <li><code>id MATCHES 'Ada.+'</code></li>
+                  <li><code>'CC' IN labels('corpus')</code></li>
+                  <li><code>'en' IN labels('participant_languages')</code></li>
+                  <li><code>'en' IN labels('transcript_language')</code></li>
+                  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+                  <li><code>list('transcript_rating').length &gt; 2</code></li>
+                  <li><code>list('participant_rating').length = 0</code></li>
+                  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+                  <li><code>my('participant_gender').label = 'NA'</code></li>
+            </ul></dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The number of matching participants.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getMatchingParticipantIds(java.lang.String,java.lang.Integer,java.lang.Integer)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getMatchingParticipantIds</h4>
+          <div class="block">Gets a list of IDs of participants that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which participants match.
+              <p> The expression language is currently not well defined, but expressions such as the
+                following can be used: 
+                <ul>
+                  <li><code>id MATCHES 'Ada.+'</code></li>
+                  <li><code>'CC' IN labels('corpus')</code></li>
+                  <li><code>'en' IN labels('participant_languages')</code></li>
+                  <li><code>'en' IN labels('transcript_language')</code></li>
+                  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+                  <li><code>list('transcript_rating').length &gt; 2</code></li>
+                  <li><code>list('participant_rating').length = 0</code></li>
+                  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+                  <li><code>my('participant_gender').label = 'NA'</code></li>
+            </ul></dd>
+            <dd><code>pageLength</code> (Optional) - The maximum number of IDs to return, or absent to return all.</dd>
+            <dd><code>pageNumber</code> (Optional) - The zero-based page number to return, or absent to return the first page.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of participant IDs.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getTranscriptIds()">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getTranscriptIds</h4>
+          <div class="block">Gets a list of transcript IDs.</div>
+          <dl>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of transcript IDs.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getTranscriptIdsInCorpus(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getTranscriptIdsInCorpus</h4>
+          <div class="block">Gets a list of transcript IDs in the given corpus.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - A corpus ID.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of transcript IDs.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getTranscriptIdsWithParticipant(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getTranscriptIdsWithParticipant</h4>
+          <div class="block">Gets a list of IDs of transcripts that include the given participant.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - A participant ID.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of transcript IDs.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="countMatchingTranscriptIds(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/countMatchingTranscriptIds</h4>
+          <div class="block">Counts the number of transcripts that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which transcripts match.
+              <p> The expression language is currently not well defined, but expressions such as the following can be used:
+                <ul>
+                  <li><code>id MATCHES 'Ada.+'</code></li>
+                  <li><code>'Robert' IN labels('who')</code></li>
+                  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
+                  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+                  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+                  <li><code>my('participant_languages').label = 'en'</code></li>
+                  <li><code>my('noise').label = 'bell'</code></li>
+                  <li><code>'en' IN labels('transcript_languages')</code></li>
+                  <li><code>'en' IN labels('participant_languages')</code></li>
+                  <li><code>'bell' IN labels('noise')</code></li>
+                  <li><code>list('transcript_languages').length gt; 1</code></li>
+                  <li><code>list('participant_languages').length gt; 1</code></li>
+                  <li><code>list('transcript').length gt; 100</code></li>
+                  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+                  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+            </ul></dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The number of matching transcripts.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getMatchingTranscriptIds(java.lang.String,java.lang.Integer,java.lang.Integer,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getMatchingTranscriptIds</h4>
+          <div class="block"><p>Gets a list of IDs of transcripts that match a particular pattern.</p>
+            <p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
+              can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
+            <p>The order of the list can be specified.  If ommitted, the transcripts are listed in ID
+              order.</p></div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which transcripts match.
+              <p> The expression language is currently not well defined, but expressions such as the following can be used:
+                <ul>
+                  <li><code>id MATCHES 'Ada.+'</code></li>
+                  <li><code>'Robert' IN labels('who')</code></li>
+                  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
+                  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+                  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+                  <li><code>my('participant_languages').label = 'en'</code></li>
+                  <li><code>my('noise').label = 'bell'</code></li>
+                  <li><code>'en' IN labels('transcript_languages')</code></li>
+                  <li><code>'en' IN labels('participant_languages')</code></li>
+                  <li><code>'bell' IN labels('noise')</code></li>
+                  <li><code>list('transcript_languages').length gt; 1</code></li>
+                  <li><code>list('participant_languages').length gt; 1</code></li>
+                  <li><code>list('transcript').length gt; 100</code></li>
+                  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+                  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+            </ul></dd>
+            <dd><code>pageLength</code> (Optional) - The maximum number of IDs to return, or absent to return all.</dd>
+            <dd><code>pageNumber</code> (Optional) - The zero-based page number to return, or absent to return the first page.</dd>
+            <dd><code>order</code> (Optional) - The ordering for the list of IDs, a string containing a comma-separated list of
+              expressions, which may be appended by " ASC" or " DESC", or absent for transcript ID order.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of transcript IDs.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="countMatchingAnnotations(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/countMatchingAnnotations</h4>
+          <div class="block">Counts the number of annotations that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which participants match.
+              <p> The expression language is currently not well defined, but expressions such as the following can be used:
+                <ul>
+                  <li><code>id = 'ew_0_456'</code></li>
+                  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+                  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
+                      my('utterances').start.offset = 12.345</code></li> 
+                  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+                      &gt; 10.5</code></li> 
+                </ul>
+              <p><em>NB</em> all expressions must match by either id or layer.id.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The number of matching annotations.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getMatchingAnnotations(java.lang.String,java.lang.Integer,java.lang.Integer)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getMatchingAnnotations</h4>
+          <div class="block">Gets a list of annotations that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which transcripts match.
+              <p> The expression language is currently not well defined, but expressions such as the
+                following can be used: 
+                <ul>
+                  <li><code>id = 'ew_0_456'</code></li>
+                  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+                  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
+                  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+                      &gt; 10.5</code></li> 
+                  <li><code>previous.id = 'ew_0_456'</code></li>
+                </ul>
+              <p><em>NB</em> all expressions must match by either id or layer.id.</dd>
+            <dd><code>pageLength</code> (Optional) - The maximum number of annotations to return, or absent to return all.</dd>
+            <dd><code>pageNumber</code> (Optional) - The zero-based page number to return, or absent to return the first page.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of matching <a href="Annotation.html" title="class in nzilbb.ag"><code>Annotation</code></a>s.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="countAnnotations(java.lang.String,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/countAnnotations</h4>
+          <div class="block">Gets the number of annotations on the given layer of the given transcript.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the transcript.</dd>
+            <dd><code>layerId</code> - The ID of the layer.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A (possibly empty) array of annotations.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getAnnotations(java.lang.String,java.lang.String,java.lang.Integer,java.lang.Integer)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getAnnotations</h4>
+          <div class="block">Gets the annotations on the given layer of the given transcript.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the transcript.</dd>
+            <dd><code>layerId</code> - The ID of the layer.</dd>
+            <dd><code>pageLength</code> (Optional) - The maximum number of IDs to return, or absent to return all.</dd>
+            <dd><code>pageNumber</code> (Optional) - The zero-based page number to return, or absent to return the first page.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A (possibly empty) array of annotations.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getAnchors(java.lang.String,java.lang.String[])">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getAnchors</h4>
+          <div class="block">Gets the given anchors in the given transcript.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the transcript.</dd>
+            <dd><code>anchorIds</code> - A list of anchor IDs, passed by specifying the <code>anchorIds</code> parameter multiple times, once for each anchor.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A (possibly empty) array of anchors.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getTranscript(java.lang.String,java.lang.String[])">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getTranscript</h4>
+          <div class="block">Gets a transcript given its ID, containing only the given layers.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The given transcript ID.</dd>
+            <dd><code>layerIds</code> - The IDs of the layers to load, passed by specifying the <code>layerIds</code> multiple times, once for each layer, or absent if only transcript data is required.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The identified transcript.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getMediaTracks()">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getMediaTracks</h4>
+          <div class="block">List the predefined media tracks available for transcripts.</div>
+          <dl>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>An ordered list of media track definitions.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getAvailableMedia(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getAvailableMedia</h4>
+          <div class="block">List the media available for the given transcript.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The transcript ID.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>List of media files available for the given transcript.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getMedia(java.lang.String,java.lang.String,java.lang.String,java.lang.Double,java.lang.Double)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getMedia</h4>
+          <div class="block">Gets a given media track for a given transcript.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The transcript ID.</dd>
+            <dd><code>trackSuffix</code> (Optional) - The track suffix of the media - see <a href="MediaTrackDefinition.html#suffix"><code>MediaTrackDefinition.suffix</code></a>.</dd>
+            <dd><code>mimeType</code> - The MIME type of the media, which may include parameters for type
+              conversion, e.g. "text/wav; samplerate=16000"</dd>
+            <dd><code>startOffset</code> (Optional) - The start offset of the media sample, or null for the start of the whole
+              recording.</dd>
+            <dd><code>endOffset</code> (Optional) - The end offset of the media sample, or null for the end of the whole
+              recording.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A URL to the given media for the given transcript, or null if the given media doesn't
+              exist.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="countMatchingAnnotations(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/countMatchingAnnotations</h4>
+          <div class="block">Counts the number of annotations that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which participants match.
+              <p> The expression language is currently not well defined, but expressions such as the following can be used:
+                <ul>
+                  <li><code>id = 'ew_0_456'</code></li>
+                  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+                  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
+                      my('utterances').start.offset = 12.345</code></li> 
+                  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+                      &gt; 10.5</code></li> 
+                </ul>
+              <p><em>NB</em> all expressions must match by either id or layer.id.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The number of matching annotations.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getMatchingAnnotations(java.lang.String,java.lang.Integer,java.lang.Integer)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getMatchingAnnotations</h4>
+          <div class="block">Gets a list of annotations that match a particular pattern.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>expression</code> - An expression that determines which transcripts match.
+              <p> The expression language is currently not well defined, but expressions such as the
+                following can be used: 
+                <ul>
+                  <li><code>id = 'ew_0_456'</code></li>
+                  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+                  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
+                  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+                      &gt; 10.5</code></li> 
+                  <li><code>previous.id = 'ew_0_456'</code></li>
+                </ul>
+              <p><em>NB</em> all expressions must match by either id or layer.id.</dd>
+            <dd><code>pageLength</code> - The maximum number of annotations to return, or null to return all.</dd>
+            <dd><code>pageNumber</code> - The zero-based page number to return, or null to return the first page.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of matching <a href="Annotation.html" title="class in nzilbb.ag"><code>Annotation</code></a>s.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getEpisodeDocuments(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/store/getEpisodeDocuments</h4>
+          <div class="block">Get a list of documents associated with the episode of the given transcript.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The transcript ID.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>List of URLs to documents.</dd>
+          </dl>
+        </li>
+      </ul>
+
+      <a id="getSerializerDescriptors()">
+      <!--   -->
+      </a>
+      <ul class="blockList">
+      <li class="blockList">
+      <h4>/api/store/getSerializerDescriptors</h4>
+      <div class="block">Lists the descriptors of all registered serializers.
+      <p> Serializers are modules that export annotation structures as a specific file
+      format, e.g. Praat TextGrid, plain text, etc., so the
+      <code>mimeType</code> of descriptors reflects what 
+      <var>mimeType</var>s can be specified for exporting annotation data.</div>
+      <dl>
+      <dt><span class="returnLabel">Returns:</span></dt>
+      <dd>A list of the descriptors of all registered serializers.</dd>
+      </dl>
+      </li>
+      </ul>
+      
+      <a id="getDeserializerDescriptors()">
+      <!--   -->
+      </a>
+      <ul class="blockListLast">
+      <li class="blockList">
+      <h4>/api/store/getDeserializerDescriptors</h4>
+      <div class="block">Lists the descriptors of all registered deserializers.
+      <p> Deserializers are modules that import annotation structures from a specific file
+      format, e.g. Praat TextGrid, plain text, etc.</div>
+      <dl>
+      <dt><span class="returnLabel">Returns:</span></dt>
+      <dd>A list of the descriptors of all registered deserializers.</dd>
+      </dl>
+      </li>
+      </ul>
+
+      <a id="getAnnotatorDescriptors()">
+      <!--   -->
+      </a>
+      <ul class="blockListLast">
+      <li class="blockList">
+      <h4>/api/store/getAnnotatorDescriptors</h4>
+      <div class="block">Lists descriptors of all annotators that are installed.
+      <p> Annotators are modules that perform automated annations of existing transcripts.</div>
+      <dl>
+      <dt><span class="returnLabel">Returns:</span></dt>
+      <dd>A list of the descriptors of all registered annotators.</dd>
+      </dl>
+      </li>
+      </ul>
+
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/api/store/*"} )

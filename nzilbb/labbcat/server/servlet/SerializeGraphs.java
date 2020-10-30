@@ -48,7 +48,26 @@ import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.util.IO;
 
 /**
- * Servlet that converts transcript fragments.
+ * <tt>/api/serialize/graphs</tt>
+ * : Converts transcripts to specific formats.
+ * <p> Converts transcripts to annotation file formats. 
+ * <p> The request method can be <b> GET </b> or <b> POST </b>
+ * <p> This expects an array of graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
+ *  a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
+ *   <dl>
+ *     <dt><span class="paramLabel">Parameters:</span></dt>
+ *     <dd><code>mimeType</code> - Content-type of the format to serialize to.</dd>
+ *     <dd><code>layerId</code> - A list of layer IDs to include in the serialization.</dd>
+ *     <dd><code>id</code> - One or more graph IDs.</dd>
+ *     <dd><code>name</code> - Content-type of the format to serialize to.</dd>
+ *     <dd><code>mimeType</code> - Optional name of the collection.</dd>
+ *   </dl>
+ * <p><b>Output</b>: A each of the transcript fragments specified by the input parameters
+ * converted to the given format.  
+ * <p> This may be a single file or multiple files, depending on the converter behaviour
+ * and how many fragments are specified. If there is only one, the file in returned as the
+ * response to  the request.  If there are more than one, the response is a zipfile
+ * containing the output files. 
  * @author Robert Fromont
  */
 @WebServlet({"/api/serialize/graphs", "/serialize/graphs"} )

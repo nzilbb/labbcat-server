@@ -38,9 +38,52 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet that allows administration of rows in the the <em> system_attributes </em> table.
- * <p> See <a href="package-summary.html#/api/admin/systemattributes">API summary</a> for
- * more details.
+ * <tt>/api/admin/systemattributes</tt> : Administration of <em> system attribute </em> records.
+ *  <p> Allows administration (Read/Update) of system attribute records via
+ *  JSON-encoded objects with the following attributes:
+ *   <dl>
+ *    <dt> attribute </dt><dd> ID of the attribute. </dd>
+ *    <dt> type </dt><dd> The type of the attribute - "string", "integer", "boolean",
+ *                         "select", etc.  </dd>
+ *    <dt> style </dt><dd> Style definition which depends on <q> type </dt><dd> - e.g. whether
+ *                          the "boolean" is shown as a checkbox or radio buttons, etc.  </dd>
+ *    <dt> label </dt><dd> User-facing label for the attribute. </dd>
+ *    <dt> description </dt><dd> User-facing (long) description of the attribute. </dd>
+ *    <dt> options </dt><dd> If <q> type </dt><dd> is "select", this is an object defining the
+ *                            valid options for the attribute, where the object key is the
+ *                            attribute value and the key's value is the user-facing label
+ *                            for the option.  </dd> 
+ *    <dt> value </dt><dd> The value of the attribute. </dd>
+ *   </dl>
+ *  <p> The following operations, specified by the HTTP method, are supported:
+ *   <dl>
+ *    <dt> GET </dt><dd> Read the records. 
+ *     <ul>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as a
+ *       corresponding list of records.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The records could be listed. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ *    
+ *    <dt> PUT </dt><dd> Update an existing record, specified by the <var> systemAttribute </var> given in the
+ *    request body.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the record. </li> 
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully updated. </li>
+ *         <li><em> 400 </em> : The record has type == "readonly" found. </li>
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ *   </dl>
+ *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/api/admin/systemattributes"} )

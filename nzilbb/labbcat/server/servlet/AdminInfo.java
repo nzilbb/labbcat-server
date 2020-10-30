@@ -42,9 +42,36 @@ import javax.servlet.http.HttpServletResponse;
 import nzilbb.util.IO;
 
 /**
- * Servlet that allows administration of the corpus information file.
- * <p> See <a href="package-summary.html#/api/admin/info">API summary</a> for
- * more details.
+ * <tt>/api/admin/info</tt> : Administration of the corpus information document.
+ *  <p> Allows administration (Read/Update) of the corpus information document, which is 
+ *   an HTML document that provides information about the database as a whole; the corpora
+ *   it contains, where the data comes from, what meta-data is specified, and any other
+ *   information.
+ *   <p> The following operations, specified by the HTTP method, are supported:
+ *   <dl>
+ *    <dt> GET </dt><dd> Read the HTML document. 
+ *     <ul>
+ *      <li><em> Response Body </em> - an HTML document, which may be completely empty.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The information was retrieved successfully. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ *    
+ *    <dt> PUT </dt><dd> Update the HTML document.
+ *     <ul>
+ *      <li><em> Request Body </em> - the HTML document to save. </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the record. </li> 
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The document was updated. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ *   </dl>
+ *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/api/admin/info"} )

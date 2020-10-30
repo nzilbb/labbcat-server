@@ -11,7 +11,6 @@
  * These are styles that are specific to individual HTML elements. Changing them affects the style of a particular
  * HTML element throughout the page.
  */
-
 body {
     background-color:#ffffff;
     color:#353833;
@@ -338,11 +337,9 @@ ul.blockList li.blockList h2 {
 .contentContainer .description dl dt, .contentContainer .details dl dt, .serializedFormContainer dl dt {
     font-size:12px;
     font-weight:bold;
-    margin:10px 0 0 0;
     color:#4E4E4E;
 }
 .contentContainer .description dl dd, .contentContainer .details dl dd, .serializedFormContainer dl dd {
-    margin:5px 0 10px 0px;
     font-size:14px;
     font-family:'DejaVu Serif', Georgia, "Times New Roman", Times, serif;
 }
@@ -908,3 +905,27 @@ table.striped > tbody > tr > th {
 figure img {
     max-width: 90vw;
 }
+
+/* customizations */
+dl {
+    display: grid;
+    width: max-content;
+    max-width: 100%;
+}
+dt {
+    grid-column: 1;
+    font-weight: bold;
+}
+dt:after {
+    content: ':';
+}
+dd {
+    grid-column: 2;
+}
+dt, dd {
+/*    display: table-cell;
+    vertical-align: top;
+*/
+    padding: 1px;
+}
+

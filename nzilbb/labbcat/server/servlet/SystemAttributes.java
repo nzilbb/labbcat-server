@@ -28,8 +28,29 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Servlet that allows read-only access to system attributes.
- * <p> See <a href="package-summary.html#/api/systemattributes">API summary</a> for more details.
+ * <tt>/api/systemattributes/<var>name</var></tt>
+ * : Access to system attributes.
+ *  <p> Allows access to the value of a given system attribute, returning a
+ *  JSON-encoded objects with the following attributes:
+ *   <ul>
+ *    <li> <q> name </q> : ID of the attribute. </li>
+ *    <li> <q> value </q> : The value of the attribute. </li>
+ *   </ul>
+ *   GET HTTP method is supported,
+ *   <dl>
+ *    <li>Only the <b> GET </dt><dd> HTTP method is supported.
+ *     <ul>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object with the above structure.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The attribute was found. </li>
+ *         <li><em> 404 </em> : The attribute was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ *   </dl>
+ *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet(urlPatterns = "/api/systemattributes/*", loadOnStartup = 20)

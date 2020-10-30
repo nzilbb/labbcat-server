@@ -45,9 +45,62 @@ import org.w3c.dom.*;
 import org.xml.sax.*;
 
 /**
- * Controller that handles
- * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a>
- * requests. This includes all requests supported by {@link StoreQuery}.
+ * <tt>/api/edit/store/&hellip;</tt> :
+ * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStore.html">GraphStore</a>
+ * functions. This includes all requests supported by {@link StoreQuery}.
+      <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/edit/store/createAnnotation</h4>
+          <div class="block">Creates an annotation starting at <var>from</var> and ending at <var>to</var>.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the transcript.</dd>
+            <dd><code>fromId</code> - The start anchor's ID.</dd>
+            <dd><code>toId</code> - The end anchor's ID.</dd>
+            <dd><code>layerId</code> - The layer ID of the resulting annotation.</dd>
+            <dd><code>label</code> - The label of the resulting annotation.</dd>
+            <dd><code>confidence</code> - The confidence rating.</dd>
+            <dd><code>parentId</code> - The new annotation's parent's ID.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The ID of the new annotation.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="destroyAnnotation(java.lang.String,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/edit/store/destroyAnnotation</h4>
+          <div class="block">Destroys the annotation with the given ID.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the transcript.</dd>
+            <dd><code>annotationId</code> - The annotation's ID.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="deleteTranscript(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/edit/store/deleteTranscript</h4>
+          <pre class="methodSignature">void&nbsp;deleteTranscript&#8203;(String&nbsp;id)
+            throws <a href="StoreException.html" title="class in nzilbb.ag">StoreException</a>,
+            <a href="PermissionException.html" title="class in nzilbb.ag">PermissionException</a>,
+            <a href="GraphNotFoundException.html" title="class in nzilbb.ag">GraphNotFoundException</a></pre>
+          <div class="block">Deletes the given transcript, and all associated files.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID transcript to delete.</dd>
+          </dl>
+        </li>
+      </ul>
+
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/edit/store/*", "/api/edit/store/*"})

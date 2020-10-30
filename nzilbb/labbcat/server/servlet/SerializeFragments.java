@@ -46,7 +46,29 @@ import nzilbb.util.IO;
 import nzilbb.util.MonitorableSeries;
 
 /**
- * Servlet that converts transcript fragments.
+ * <tt>/api/serialize/fragment</tt>
+ * : Converts transcript fragments to specific formats.
+ *  <p> Converts parts of transcripts to annotation file formats. 
+ *  <p> The request method can be <b> GET </b> or <b> POST </b>
+ * The servlet expects an array of graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
+ * a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
+ * <p><b>Input HTTP parameters</b>:
+ * <ul>
+ *  <li><i>mimeType</i> - content-type of the format to serialize to. </li>
+ *  <li><i>layerId</i> - a list of layer IDs to include in the serialization. </li>
+ *  <li><i>id</i> - one or more graph IDs. </li>
+ *  <li><i>start</i> - one or more start times (in seconds).</li>
+ *  <li><i>end</i> - one or more end times (in seconds).</li>
+ *  <li><i>filter</i> - (optional) one or more annotation IDs to filter by. e.g. a turn
+ * annotation ID, which would ensure that only words within the specified turn are
+ * included, not words from other turns.</li> 
+ *  <li><i>name</i> - (optional) name of the collection.</li>
+ * </ul>
+ * <br><b>Output</b>: A each of the transcript fragments  specified by the input
+ * parameters converted to the given  format. This may be a single file or multiple files,
+ * depending on the converter behaviour and how many fragments are specified. If there is
+ * only one, the file in returned as the response to the request.  If there are more than
+ * one, the response is a zip file containing the output files. 
  * @author Robert Fromont
  */
 @WebServlet({"/api/serialize/fragment", "/serialize/fragment"} )

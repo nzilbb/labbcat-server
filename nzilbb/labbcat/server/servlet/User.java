@@ -50,8 +50,24 @@ import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.util.IO;
 
 /**
- * Servlet that provides information about the current user.
- * <p> See <a href="package-summary.html#/api/user">API summary</a> for more details.
+ * <tt>/api/user</tt> : information about the current user.
+ *  <p> Allows access to information about the current user, returning a
+ *  JSON-encoded objects with the following attributes:
+ *   <dl>
+ *    <dt> user </dt><dd> ID of the user. </dd>
+ *    <dt> roles </dt><dd> An array of strings, which are the roles or groups the user
+ *                          belongs to. </dd> 
+ *   </dl>
+ *   <p> Only the GET HTTP method is supported:
+ *   <dl>
+ *    <dt> GET </dt><dd>
+ *     <ul>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object with the above structure.  </li>
+ *      <li><em> Response Status </em> n- <em> 200 </em> : Success. </li>
+ *     </ul></dd> 
+ *   </dl>
+ *  </p>
  * @author Robert Fromont
  */
 @WebServlet("/api/user")

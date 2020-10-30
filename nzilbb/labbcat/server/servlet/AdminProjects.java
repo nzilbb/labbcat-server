@@ -31,8 +31,86 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Servlet that allows administration of rows in the the <em> project </em> table.
- * <p> See <a href="package-summary.html#/api/admin/projects">API summary</a> for more details.
+ * <tt>/api/admin/projects[/<var>project</var>]</tt> 
+ * : Administration of <em> project </em> records.
+ *  <p> Allows administration (Create/Read/Update/Delete) of project records via
+ *  JSON-encoded objects with the following attributes:
+ *   <dl>
+ *    <dt> project_id </dt><dd> The database key for the record. </dd>
+ *    <dt> project </dt><dd> The name of the project. </dd>
+ *    <dt> description </dt><dd> The description of the project. </dd>
+ *    <dt> _cantDelete </dt><dd> This is not a database field, but rather is present in
+ *         records returned from the server that can not currently be deleted; 
+ *         a string representing the reason the record can't be deleted. </dd>
+ *   </dl>
+ *  <p> The following operations, specified by the HTTP method, are supported:
+ *   <dl>
+ *    <dt> POST </dt><dd> Create a new record.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the new record
+ *       (excluding <var>project_id</var>). </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the new record (including <var>project_id</var>). </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully created. </li>
+ *         <li><em> 409 </em> : The record could not be added because it was already there. </li> 
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ * 
+ *    <dt> GET </dt><dd> Read the records. 
+ *     <ul>
+ *      <li><em> Parameters </em>
+ *        <ul>
+ *         <li><em> pageNumber </em> (integer) : The (zero-based) page to return. </li>
+ *         <li><em> pageLength </em> (integer) : How many rows per page (default is 20). </li>
+ *         <li><em> Accept </em> (string) : Equivalent of the "Accept" request header (see below). </li>
+ *        </ul>
+ *      </li>
+ *      <li><em> "Accept" request header/parameter </em> "text/csv" to return records as
+ *       Comma Separated Values. If not specified, records are returned as a JSON-encoded
+ *       array of objects.</li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as a
+ *       corresponding list of records.  </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The records could be listed. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ *    
+ *    <dt> PUT </dt><dd> Update an existing record, specified by the <var> project </var> given in the
+ *    request body.
+ *     <ul>
+ *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+ *       object representing the record. </li> 
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully updated. </li>
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ *    
+ *    <dt> DELETE </dt><dd> Delete an existing record.
+ *     <ul>
+ *      <li><em> Request Path </em> - /api/admin/projects/<var>project</var> where 
+ *          <var> project </var> is the database ID of the record to delete.</li>
+ *      <li><em> Response Body </em> - the standard JSON envelope, including a message if
+ *          the request succeeds or an error explaining the reason for failure. </li>
+ *      <li><em> Response Status </em>
+ *        <ul>
+ *         <li><em> 200 </em> : The record was sucessfully deleted. </li>
+ *         <li><em> 400 </em> : No <var> project </var> was specified in the URL path,
+ *             or the record exists but could not be deleted. </li> 
+ *         <li><em> 404 </em> : The record was not found. </li>
+ *        </ul>
+ *      </li>
+ *     </ul></dd> 
+ *   </dl>
+ *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet(urlPatterns = "/api/admin/projects/*", loadOnStartup = 20)
