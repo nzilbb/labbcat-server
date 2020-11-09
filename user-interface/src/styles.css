@@ -136,6 +136,23 @@ button.icon-only {
     min-width: 45px;
     width: 45px;
 }
+progress, div.progress_container, div.progress {
+    color: #859044;
+    width: 95%;
+    min-width: 120px; /* this because of strangeness in chromium */
+    height: 20px;
+    vertical-align: middle;
+}
+
+
+
+
+
+progress::-moz-progress-bar, progress::-webkit-progress-value {
+    background: #859044;
+}
+
+
 app-button {
     display: inline-block;
     min-width: 80px;

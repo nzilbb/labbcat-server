@@ -1,0 +1,98 @@
+import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
+import { Task } from '../task';
+import { MessageService } from '../message.service';
+import { LabbcatService } from '../labbcat.service';
+
+@Component({
+  selector: 'app-task',
+  templateUrl: './task.component.html',
+  styleUrls: ['./task.component.css']
+})
+export class TaskComponent implements OnInit {
+    @Input() threadId: string;
+    @Input() cancelButton = true;
+    @Input() showStatus = true;
+    @Input() showName = true;
+    task: Task;
+    timeout: number;
+    cancelling = false;
+    @ViewChild('resultAnchor', {static: false}) taskResultAnchor: ElementRef;    
+        
+    constructor(
+        private labbcatService: LabbcatService,
+        private messageService: MessageService,
+        private route: ActivatedRoute
+    ) { }
+    
+    ngOnInit(): void {
+        if (!this.threadId) {
+            this.route.queryParams.subscribe((params) => {
+                this.threadId = params["threadId"];
+                this.readTaskStatus();
+            });
+        } else {
+            this.readTaskStatus();
+        }
+    }
+
+    readTaskStatus(): void {
+        if (!this.cancelling) { // only update status if we're not cancelling...
+            this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
+                // show messages
+                if (errors) for (let message of errors) this.messageService.error(message);
+                if (messages) for (let message of messages) this.messageService.info(message);
+                
+                // update model
+                this.task = task || this.task;
+
+                // if finished and there's a result URL, open the results
+                if (!this.task.running && this.task.resultUrl) {
+                    this.openResults();
+                }
+                
+                // while this is visible, we keep checking the status of the thread.
+                // this keeps the thread and any resources it's holding alive until nobody
+                // is interested
+                
+                // set timeout for next check...
+                this.timeout = setTimeout(()=>{
+                    this.readTaskStatus();
+                }, this.task.refreshSeconds*1000 || 5000);
+            });
+        }
+    }
+
+    resultsOpened = false;
+    openResults(): void {
+        if (!this.task.running && this.task.resultUrl && !this.resultsOpened) {
+            setTimeout(()=>{ // wait a second for the anchor component to come into being
+                if (this.taskResultAnchor) {
+                    this.taskResultAnchor.nativeElement.click();
+                    this.resultsOpened = true;
+                } else {
+                    this.openResults(); // try again in a second...
+                }
+            }, 1000);
+        }
+    }
+    
+    cancelTask(): void {
+        this.cancelling = true;
+        this.labbcatService.labbcat.cancelTask(this.threadId, (result, errors, messages) => {
+
+            // show messages
+            if (errors) for (let message of errors) this.messageService.error(message);
+            if (messages) for (let message of messages) this.messageService.info(message);
+
+            // stop the regular timeout from firing
+            clearTimeout(this.timeout);
+            this.cancelling = false;
+
+            // get the status again
+            this.readTaskStatus();
+        });
+    }
+
+}

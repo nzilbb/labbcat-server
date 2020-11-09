@@ -34,6 +34,7 @@ import { LinkComponent } from './link/link.component';
 import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotator-ext.component';
 import { UrlEncodePipe } from './url-encode.pipe';
 import { AdminInfoComponent } from './admin-info/admin-info.component';
+import { TaskComponent } from './task/task.component';
 
 @NgModule({
     declarations: [
@@ -64,7 +65,8 @@ import { AdminInfoComponent } from './admin-info/admin-info.component';
         LinkComponent,
         AdminAnnotatorExtComponent,
         UrlEncodePipe,
-        AdminInfoComponent
+        AdminInfoComponent,
+        TaskComponent
     ],
     imports: [
         BrowserModule,
@@ -73,6 +75,7 @@ import { AdminInfoComponent } from './admin-info/admin-info.component';
         RouterModule.forRoot([
             { path: 'about', component: AboutComponent },
             { path: 'login', component: LoginComponent },
+            { path: 'task', component: TaskComponent },
             { path: 'matches', component: MatchesComponent },
             
             { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent,

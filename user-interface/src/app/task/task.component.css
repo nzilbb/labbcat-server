@@ -1,0 +1,15 @@
+.task-progress {
+    max-width: 500px;
+    margin: auto;
+}
+.components {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.task-status, .task-result {
+    text-align: center;
+}
+app-button {
+    min-width: 32px;
+}
