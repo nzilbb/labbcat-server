@@ -3,7 +3,7 @@
 <p>{{status}}</p>
 
 <app-wait *ngIf="readingMatches"></app-wait>
-<form #form method="POST" id="frm" *ngIf="matches.length">
+<form #form method="POST" id="frm" *ngIf="matches.length" target="_blank">
   <input type="hidden" name="threadId" value="{{threadId}}">
   <input type="hidden" name="collection_name" value="{{name}}">
   <input type="hidden" name="zeropad" value="{{zeroPad}}">
