@@ -3,31 +3,31 @@
 /* some things used in lots of places: */
 :root {
     --progress-size: 22px;
-    --nzilbb-colour: #859044;
+    --theme-color: #859044;
 }
 
 /* general look and feel */
 h1 { font-size: 17pt; color: black; }
 h2 { font-size: 16pt; color: black; }
-h3 { font-size: 15pt; color: var(--nzilbb-colour); font-style:italic; }
-h4 { font-size: 14pt; color: var(--nzilbb-colour); }
-h5 { font-size: 13pt; color: var(--nzilbb-colour); }
-h6 { font-size: 12pt; color: var(--nzilbb-colour); }
+h3 { font-size: 15pt; color: var(--theme-color); font-style:italic; }
+h4 { font-size: 14pt; color: var(--theme-color); }
+h5 { font-size: 13pt; color: var(--theme-color); }
+h6 { font-size: 12pt; color: var(--theme-color); }
 
 article h1 {
     font-weight: normal;
 }
 
-app-admin-menu a { color: var(--nzilbb-colour); }
+app-admin-menu a { color: var(--theme-color); }
 app-admin-menu li {
-    border-bottom: 1px solid var(--nzilbb-colour);
-    border-right: 1px solid var(--nzilbb-colour);
+    border-bottom: 1px solid var(--theme-color);
+    border-right: 1px solid var(--theme-color);
     white-space: nowrap;
 }
-app-admin-menu li:first-child { border-left: 1px solid var(--nzilbb-colour); }
+app-admin-menu li:first-child { border-left: 1px solid var(--theme-color); }
 
-app-root footer { color: var(--nzilbb-colour); }
-app-root footer a { color: var(--nzilbb-colour); text-decoration: none; }
+app-root footer { color: var(--theme-color); }
+app-root footer a { color: var(--theme-color); text-decoration: none; }
 
 /* Layout */
 app-root, #main { display: flex; flex-direction: column; }
@@ -112,11 +112,11 @@ app-wait {
 
 .buttons a {
     display: inline-block;
-    color: var(--nzilbb-colour);
+    color: var(--theme-color);
     text-decoration: none;
     margin-left: 5px;
     margin-right: 5px;
-    border: 1px var(--nzilbb-colour) solid;
+    border: 1px var(--theme-color) solid;
     padding: 4px;
     height: 30px;
     vertical-align: middle;
@@ -150,7 +150,7 @@ button.icon-only label {
     display: none;
 }
 progress, div.progress_container, div.progress {
-    color: var(--nzilbb-colour);
+    color: var(--theme-color);
     width: 95%;
     min-width: 120px; /* this because of strangeness in chromium */
     height: 20px;
@@ -161,16 +161,16 @@ progress, div.progress_container, div.progress {
 
 
 progress { -webkit-appearance: none; }
-progress::-webkit-progress-value { background: var(--nzilbb-colour); }
+progress::-webkit-progress-value { background: var(--theme-color); }
 progress::-webkit-progress-bar { background: #EEEEEE; }
-progress::-moz-progress-bar { background: var(--nzilbb-colour); }
+progress::-moz-progress-bar { background: var(--theme-color); }
 .progress-container {
     width: 100%;
     min-width: 500px;
     background: #EEEEEE;
 }
 .progress-container .progress {
-    background: var(--nzilbb-colour);
+    background: var(--theme-color);
 }
 
 app-button {
@@ -219,7 +219,7 @@ app-task progress, app-task .progress-container, app-task .progress-container .p
 @media all and (min-width: 640px) {
     app-root nav { min-height: 100px; max-width: min-content; }
     app-root aside { max-width: min-content; }
-    app-admin-menu li:first-child { border-top: 1px solid var(--nzilbb-colour); border-left: none; }
+    app-admin-menu li:first-child { border-top: 1px solid var(--theme-color); border-left: none; }
     .list { display: table; }
     .list > .item {
         display: table-row;
