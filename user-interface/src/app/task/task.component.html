@@ -1,11 +1,12 @@
 <div class="task-progress">
   <h1 *ngIf="showName">{{task.threadName}}</h1>
   <div class="components">
-    <progress id="task-{{threadId}}"
-              value="{{task.percentComplete}}" max="100"
-              title="{{task.status}}">
-      <div class="progress_container">
-        <div class="progress" id="task-div-{{threadId}}" title="task {{threadId}}" style="width: 1%;">&nbsp;</div>
+    <progress value="{{task.percentComplete}}" max="100"
+              title="{{task.percentComplete + '% ' + task.status}}">
+      <div class="progress-container">
+        <div class="progress"
+             title="{{task.percentComplete + '% ' + task.status}}"
+             [style.width]="task.percentComplete + '%'">&nbsp;</div>
       </div>
     </progress>
     <app-button *ngIf="cancelButton && task.running"
@@ -16,8 +17,8 @@
     </app-button>
   </div>
   <div class="text">
-    <div *ngIf="showStatus" id="task-status-{{threadId}}" class="task-status">{{task.status}}</div>
-    <div *ngIf="showStatus && task.resultUrl" id="task-result-{{threadId}}" class="task-result">
+    <div *ngIf="showStatus" class="task-status">{{task.status}}</div>
+    <div *ngIf="showStatus && task.resultUrl" class="task-result">
       <a href="{{task.resultUrl}}" target="task-{{threadId}}" #resultAnchor>
         <span *ngIf="task.resultText">{{task.resultText}}</span>
         <span *ngIf="!task.resultText" i18n="Default task result text">Open Results</span>
