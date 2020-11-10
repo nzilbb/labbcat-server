@@ -212,47 +212,6 @@ public class SqlGraphStoreAdministration
    }
 
    /**
-    * Gets the deserializer for the given MIME type.
-    * @param mimeType The MIME type.
-    * @return The deserializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the operation from completing.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public GraphDeserializer deserializerForMimeType(String mimeType)
-      throws StoreException, PermissionException {
-      requireAdmin();
-      
-      try {
-         return (GraphDeserializer)deserializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
-      }
-      catch(NoSuchMethodException x) { return null; }
-      catch(InvocationTargetException x) { return null; }
-      catch(IllegalAccessException exception) { return null; }
-      catch(InstantiationException exception) { return null; }
-      catch(NullPointerException exception) { return null; }
-   }
-
-   /**
-    * Gets the deserializer for the given file suffix (extension).
-    * @param suffix The file extension.
-    * @return The deserializer for the given suffix, or null if none is registered.
-    * @throws StoreException If an error prevents the operation from completing.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public GraphDeserializer deserializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
-      requireAdmin();
-      
-      try {
-         return (GraphDeserializer)deserializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
-      }
-      catch(InvocationTargetException exception) { return null; }
-      catch(NoSuchMethodException exception) { return null; }
-      catch(IllegalAccessException exception) { return null; }
-      catch(InstantiationException exception) { return null; }
-      catch(NullPointerException exception) { return null; }
-   }
-
-   /**
     * Registers a transcript serializer.
     * @param serializer The serializer to register.
     * @throws StoreException If an error prevents the operation from completing.
@@ -320,47 +279,6 @@ public class SqlGraphStoreAdministration
       } catch(SQLException exception) {
          throw new StoreException(exception);
       }
-   }
-
-   /**
-    * Gets the serializer for the given MIME type.
-    * @param mimeType The MIME type.
-    * @return The serializer for the given MIME type, or null if none is registered.
-    * @throws StoreException If an error prevents the operation from completing.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public GraphSerializer serializerForMimeType(String mimeType)
-      throws StoreException, PermissionException {
-      requireAdmin();
-      
-      try {
-         return (GraphSerializer)serializersByMimeType.get(mimeType).getClass().getDeclaredConstructor().newInstance();
-      }
-      catch(NoSuchMethodException exception) { return null; }
-      catch(InvocationTargetException exception) { return null; }
-      catch(IllegalAccessException exception) { return null; }
-      catch(InstantiationException exception) { return null; }
-      catch(NullPointerException exception) { return null; }
-   }
-
-   /**
-    * Gets the serializer for the given file suffix (extension).
-    * @param suffix The file extension.
-    * @return The serializer for the given suffix, or null if none is registered.
-    * @throws StoreException If an error prevents the operation from completing.
-    * @throws PermissionException If the operation is not permitted.
-    */
-   public GraphSerializer serializerForFilesSuffix(String suffix) throws StoreException, PermissionException {
-      requireAdmin();
-      
-      try {
-         return (GraphSerializer)serializersBySuffix.get(suffix.toLowerCase()).getClass().getDeclaredConstructor().newInstance();
-      }
-      catch(InvocationTargetException exception) { return null; }
-      catch(NoSuchMethodException exception) { return null; }
-      catch(IllegalAccessException exception) { return null; }
-      catch(InstantiationException exception) { return null; }
-      catch(NullPointerException exception) { return null; }
    }
 
    /**
