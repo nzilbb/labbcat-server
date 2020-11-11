@@ -64,7 +64,7 @@ import javax.servlet.http.HttpServletRequest;
  *       object representing the new record (including <var>role_id</var>). </li>
  *      <li><em> Response Status </em>
  *        <ul>
- *         <li><em> 200 </em> : The record was sucessfully created. </li>
+ *         <li><em> 200 </em> : The record was successfully created. </li>
  *         <li><em> 409 </em> : The record could not be added because it was already there. </li> 
  *        </ul>
  *      </li>
@@ -101,7 +101,7 @@ import javax.servlet.http.HttpServletRequest;
  *       object representing the record. </li> 
  *      <li><em> Response Status </em>
  *        <ul>
- *         <li><em> 200 </em> : The record was sucessfully updated. </li>
+ *         <li><em> 200 </em> : The record was successfully updated. </li>
  *         <li><em> 404 </em> : The record was not found. </li>
  *        </ul>
  *      </li>
@@ -116,7 +116,7 @@ import javax.servlet.http.HttpServletRequest;
  *          the request succeeds or an error explaining the reason for failure. </li>
  *      <li><em> Response Status </em>
  *        <ul>
- *         <li><em> 200 </em> : The record was sucessfully deleted. </li>
+ *         <li><em> 200 </em> : The record was successfully deleted. </li>
  *         <li><em> 400 </em> : No <var> role </var> was specified in the URL path,
  *             or the record exists but could not be deleted. </li> 
  *         <li><em> 404 </em> : The record was not found. </li>

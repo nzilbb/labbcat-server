@@ -76,7 +76,7 @@ import javax.servlet.http.HttpServletResponse;
  *       object representing the record. </li> 
  *      <li><em> Response Status </em>
  *        <ul>
- *         <li><em> 200 </em> : The record was sucessfully updated. </li>
+ *         <li><em> 200 </em> : The record was successfully updated. </li>
  *         <li><em> 400 </em> : The record has type == "readonly" found. </li>
  *         <li><em> 404 </em> : The record was not found. </li>
  *        </ul>
