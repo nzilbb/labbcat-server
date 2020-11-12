@@ -1,0 +1,30 @@
+<h2><span i18n="page header|Users with Role [role_id]">Users with Role </span> <q>{{role_id}}</q></h2>
+
+<div id="universe" i18n-title title="Click users to add or remove them">
+  <div id="non-members">
+    <div *ngFor="let user of nonmembers" class="user non-member">
+      <button i18n-title title="Click to add user to role"
+              (click)="addUser($event, user);"
+              class="icon-only"><img src="assets/add.svg" alt="+"></button>
+      {{user.user}}
+    </div>
+  </div>
+  <div id="members">
+    <label>{{role_id}}</label>
+    <div id="set">
+      <div *ngFor="let user of members" class="user member">
+        <button i18n-title title="Click to remove user from role"
+                (click)="removeUser($event, user);"
+                class="icon-only"><img src="assets/remove.svg" alt="-"></button>
+        {{user.user}}
+      </div>
+    </div>
+  </div>
+</div>
+<div class="below">
+  <p i18n> Click users to add or remove them </p>
+  <app-button action="save" [processing]="updating > 0"
+              (press)="updateChangedUsers();"
+              *ngIf="changed"
+              i18n-title title="Save all changed records"></app-button>
+</div>

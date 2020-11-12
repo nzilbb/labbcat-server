@@ -25,6 +25,9 @@
                 placeholder="Description"></textarea>
     </span>
     <span class="buttons">
+      <a [routerLink]="['/admin','roles',role.role_id,'users']"
+         i18n-title title="Members"
+         >👥</a>
       <a [routerLink]="['/admin','roles',role.role_id,'permissions']"
          i18n-title title="Permissions"
          >🔒</a>

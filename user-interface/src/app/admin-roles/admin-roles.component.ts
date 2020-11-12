@@ -27,6 +27,8 @@ export class AdminRolesComponent extends AdminComponent implements OnInit {
 
     readRows(): void {
         this.labbcatService.labbcat.readRoles((roles, errors, messages) => {
+            if (errors) for (let message of errors) this.messageService.error(message);
+            if (messages) for (let message of messages) this.messageService.info(message);
             this.rows = [];
             for (let role of roles) {
                 this.rows.push(role as Role);

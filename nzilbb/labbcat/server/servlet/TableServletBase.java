@@ -81,6 +81,12 @@ public class TableServletBase extends LabbcatServlet {
    /** An ordered list of non-key fields for full-listing requests */
    protected List<String> listColumns;
 
+   /** A map from table column names to object attribute names */
+   protected HashMap<String,String> columnToAttribute = new HashMap<String,String>();
+
+   /** A map from object attribute names to table column names */
+   protected HashMap<String,String> attributeToColumn = new HashMap<String,String>();
+
    /** WHERE condition */
    protected String whereClause;
 
@@ -205,8 +211,39 @@ public class TableServletBase extends LabbcatServlet {
       this.orderClause = orderClause;
 
       this.title = this.table;
+      
+      mapAliases();
    }
+
+   /**
+    * Defines aliases for table columns.
+    * @param columnToAttribute
+    */
+   protected void setAliases(HashMap<String,String> columnToAttribute) {
+      this.columnToAttribute = columnToAttribute;
+      mapAliases();
+   } // end of setAliases()
    
+   /**
+    * Populate maps between table column names and object attribute names.
+    */
+   private void mapAliases() {
+      // any fields that have no alias in the object are mapped to themselves
+      for (String field : new Vector<String>() {{
+         addAll(dbKeys);
+         addAll(urlKeys);
+         addAll(columns);
+      }}) {
+         if (!columnToAttribute.containsKey(field)) {
+            columnToAttribute.put(field, field);
+         }
+      } // next field
+      // reverse mapping
+      for (String field : columnToAttribute.keySet()) {
+         attributeToColumn.put(columnToAttribute.get(field), field);
+      }
+   } // end of mapAliases()
+
    /**
     * GET handler lists all rows. 
     * <p> The return is JSON encoded, unless the "Accept" request header, or the "Accept"
@@ -388,29 +425,34 @@ public class TableServletBase extends LabbcatServlet {
       try {
          for (String column: allColumns) {
             String value = rs.getString(column);
+            String attribute = columnToAttribute.get(column);
             if (value == null) {
-               jsonOut.writeNull(column);
+               jsonOut.writeNull(attribute);
             } else {
                try {
                   switch(meta.getColumnType(c++)) { // get the type right
-                     case Types.BIGINT:   jsonOut.write(column, rs.getLong(column)); break;
-                     case Types.BIT:      jsonOut.write(column, rs.getInt(column) != 0); break;
-                     case Types.BOOLEAN:  jsonOut.write(column, rs.getBoolean(column)); break;
-                     case Types.DECIMAL:  jsonOut.write(column, rs.getDouble(column)); break;
-                     case Types.DOUBLE:   jsonOut.write(column, rs.getDouble(column)); break;
-                     case Types.FLOAT:    jsonOut.write(column, rs.getDouble(column)); break;
-                     case Types.NUMERIC:  jsonOut.write(column, rs.getDouble(column)); break;
-                     case Types.INTEGER:  jsonOut.write(column, rs.getInt(column)); break;
-                     case Types.SMALLINT: jsonOut.write(column, rs.getInt(column)); break;
-                     case Types.TINYINT:  jsonOut.write(column, rs.getInt(column)); break;
-                     case Types.NULL:     jsonOut.writeNull(column); break;
-                     default:             jsonOut.write(column, value); break;
+                     case Types.BIGINT:   jsonOut.write(attribute, rs.getLong(column)); break;
+                     case Types.BIT:      jsonOut.write(attribute, rs.getInt(column) != 0); break;
+                     case Types.BOOLEAN:  jsonOut.write(attribute, rs.getBoolean(column)); break;
+                     case Types.DECIMAL:  jsonOut.write(attribute, rs.getDouble(column)); break;
+                     case Types.DOUBLE:   jsonOut.write(attribute, rs.getDouble(column)); break;
+                     case Types.FLOAT:    jsonOut.write(attribute, rs.getDouble(column)); break;
+                     case Types.NUMERIC:  jsonOut.write(attribute, rs.getDouble(column)); break;
+                     case Types.INTEGER:  jsonOut.write(attribute, rs.getInt(column)); break;
+                     case Types.SMALLINT: jsonOut.write(attribute, rs.getInt(column)); break;
+                     case Types.TINYINT:  jsonOut.write(attribute, rs.getInt(column)); break;
+                     case Types.NULL:     jsonOut.writeNull(attribute); break;
+                     default:             jsonOut.write(attribute, value); break;
                   }
                } catch (SQLDataException x) { // can't determine the type?
-                  jsonOut.write(column, value.toString());
+                  jsonOut.write(attribute, value.toString());
                }                           
             } // no null
          } // next column
+
+         // allow subclasses to add data
+         editOutputRecord(rs, jsonOut, connection);
+         
          String cantDelete = checkCanDelete(rs, null, null, connection, request);
          if (cantDelete != null) jsonOut.write("_cantDelete", cantDelete);
       } finally {
@@ -443,7 +485,7 @@ public class TableServletBase extends LabbcatServlet {
                } // next field
             } else { // TODO
                for (String field : check.fields) {
-                  sqlCheck.setString(p++, ""+json.get(field));
+                  sqlCheck.setString(p++, ""+json.get(columnToAttribute.get(field)));
                } // next field
             }
             ResultSet rsCheck = sqlCheck.executeQuery();
@@ -472,9 +514,9 @@ public class TableServletBase extends LabbcatServlet {
    protected boolean outputRow(ResultSet rs, List<String> allColumns, ResultSetMetaData meta, CSVPrinter csvOut, boolean headersWritten)
       throws SQLException, IOException {
       if (csvOut == null) return false;
-      if (!headersWritten) { // write a line of header TODO
+      if (!headersWritten) { // write a line of header
          for (String column: allColumns) {
-            csvOut.print(column);
+            csvOut.print(columnToAttribute.get(column));
          }
          csvOut.println();
       }
@@ -552,7 +594,6 @@ public class TableServletBase extends LabbcatServlet {
                if (dbKeys != urlKeys) allColumns.addAll(urlKeys);
                allColumns.addAll(columns);
                for (String column : allColumns) {
-                  log("POST col " + column);
                   // skip auto-generated key
                   if (autoKeyQuery == null && column.equals(autoKey)) continue;
             
@@ -590,7 +631,7 @@ public class TableServletBase extends LabbcatServlet {
                   PreparedStatement sql = connection.prepareStatement(query.toString());
                   int c = 1;
                   for (String column : dbKeys) {
-               
+                     String attribute = columnToAttribute.get(column);
                      // skip auto-generated key
                      if (column.equals(autoKey)) {
                         if (autoKeyQuery == null) {
@@ -606,7 +647,6 @@ public class TableServletBase extends LabbcatServlet {
                                  // generate the value
                                  String value = rsAutoKey.getString(1);
                                  // put it into the INSERT statement
-                                 log("POST db " + c + " = " + value); // TODO remove
                                  sql.setString(c++, value);
                                  if (dbKeys == urlKeys) {
                                     // add it to the key (for error reporting)
@@ -614,7 +654,7 @@ public class TableServletBase extends LabbcatServlet {
                                     key.append(value);
                                  }
                                  // add it to the JSON object, for returning to the caller
-                                 jsonResult.add(column, value);
+                                 jsonResult.add(attribute, value);
                               }
                            } finally {
                               rsAutoKey.close();
@@ -622,8 +662,8 @@ public class TableServletBase extends LabbcatServlet {
                            }
                         }
                      } else {
-                        String value = ""+json.get(column);
-                        if (json.isNull(column)) value = null;
+                        String value = ""+json.get(attribute);
+                        if (!json.containsKey(attribute) || json.isNull(attribute)) value = null;
                         sql.setString(c++, value); 
                         if (dbKeys == urlKeys) {
                            // add it to the key (for error reporting)
@@ -634,8 +674,9 @@ public class TableServletBase extends LabbcatServlet {
                   } // next key
                   if (dbKeys != urlKeys) {
                      for (String column : urlKeys) {
-                        String value = ""+json.get(column);
-                        if (json.isNull(column)) value = null;
+                        String attribute = columnToAttribute.get(column);
+                        String value = ""+json.get(attribute);
+                        if (!json.containsKey(attribute) || json.isNull(attribute)) value = null;
                         sql.setString(c++, value);
                         // add it to the key (for error reporting)
                         key.append("/");
@@ -643,15 +684,17 @@ public class TableServletBase extends LabbcatServlet {
                      } // next column
                   }
                   for (String column : columns) {
-                    String value = ""+json.get(column);
-                     if (json.isNull(column)) value = null;
+                     String attribute = columnToAttribute.get(column);
+                     String value = ""+json.get(attribute);
+                     if (!json.containsKey(attribute) || json.isNull(attribute)) value = null;
                      sql.setString(c++, value);
                   } // next column
                   try {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_CONFLICT);
-                        writeResponse(response,       failureResult(request, "Record not added: {0}", key.substring(1)));
+                        writeResponse(response, failureResult(
+                                         request, "Record not added: {0}", key.substring(1)));
                      } else {
 
                         // if the key was auto-generated
@@ -663,12 +706,15 @@ public class TableServletBase extends LabbcatServlet {
                            try {                        
                               // add the key attribute
                               rsLastId.next();
-                              jsonResult.add(autoKey, rsLastId.getLong(1)); // TODO
+                              jsonResult.add(columnToAttribute.get(autoKey), rsLastId.getLong(1));
                            } finally {
                               rsLastId.close();
                               sqlLastId.close();
                            }
                         }
+                        
+                        // give subclasses an opportunity to process the new record
+                        editNewRecord(json, jsonResult, connection);
                         
                         checkCanDelete(null, json, jsonResult, connection, request);
    
@@ -767,13 +813,15 @@ public class TableServletBase extends LabbcatServlet {
 
                      int c = 1;
                      StringBuffer key = new StringBuffer();
-                     for (String column : columns) {                           
-                        String value = ""+json.get(column);
-                        if (json.isNull(column)) value = null;
+                     for (String column : columns) {
+                        String attribute = columnToAttribute.get(column);
+                        String value = ""+json.get(attribute);
+                        if (!json.containsKey(attribute) || json.isNull(attribute)) value = null;
                         sql.setString(c++, value);
                      } // next column
                      for (String column : urlKeys) {
-                        String value = ""+json.get(column);
+                        String attribute = columnToAttribute.get(column);
+                        String value = ""+json.get(attribute);
                         if (key.length() > 0) key.append("/");
                         key.append(value);
                         sql.setString(c++, value); 
@@ -811,16 +859,22 @@ public class TableServletBase extends LabbcatServlet {
                            ResultSet rsKeys = sqlKeys.executeQuery();
                            if (rsKeys.next()) {
                               for (String column : dbKeys) {
-                                 jsonResult.add(column, rsKeys.getString(column));
+                                 String attribute = columnToAttribute.get(column);
+                                 jsonResult.add(attribute, rsKeys.getString(column));
                               } // next key value
                            }
                         } // dbKeys != urlKeys
+                        
+                        // give subclasses an opportunity to process the updated record
+                        editUpdatedRecord(json, jsonResult, connection);
                         
                         // set _cantDelete flag?
                         checkCanDelete(null, json, jsonResult, connection, request);
 
                         // record update, so return it
-                        writeResponse(response,       successResult(request, jsonResult.build(), "Record updated."));
+                        writeResponse(
+                           response, successResult(
+                              request, jsonResult.build(), "Record updated."));
                      }
                   } finally {
                      sql.close();
@@ -1072,6 +1126,49 @@ public class TableServletBase extends LabbcatServlet {
       Connection connection) throws ValidationException {
       return record;
    } // end of validateBeforeUpdate()
+
+   /**
+    * Allows a JSON record to be added to before it's returned.
+    * <p> This method can be overridden by subclasses in order to add further information
+    * (e.g. data from dependent tables) to the JSON object returned by the request.
+    * @param rs The record.
+    * @param jsonOut The object to return in the response, after main columns have been
+    * written, and before <var> _canDelete </var> and the object end has been written.
+    * @param connection Database connection
+    * @throws SQLException If there's an error operating with the database.
+    */
+   protected void editOutputRecord(ResultSet rs, JsonGenerator jsonOut, Connection connection)
+      throws SQLException {
+   } // end of editOutputRecord()
+   
+   /**
+    * Allows a new record to be further processed after it's been added to the table.
+    * <p> This method can be overridden by subclasses in order to further process a new
+    * record (e.g. data can be inserted into dependent tables).
+    * <p> The default implementation calls 
+    * {@link #editUpdatedRecord(JsonObject,JsonObjectBuilder,Connection)}
+    * @param jsonIn The JSON representation of the object received with the request.
+    * @param jsonOut The object to return in the response, after main columns have been
+    * written, and before <var> _canDelete </var> and the object end has been written.
+    * @param connection Database connection
+    */
+   protected void editNewRecord(
+      JsonObject jsonIn, JsonObjectBuilder jsonOut, Connection connection) {
+      editUpdatedRecord(jsonIn, jsonOut, connection);
+   } // end of editNewRecord()
+
+   /**
+    * Allows an edited record to be further processed after it's been updated in the table.
+    * <p> This method can be overridden by subclasses in order to further process an updated
+    * record (e.g. data can be merged into dependent tables).
+    * @param jsonIn The JSON representation of the object received with the request.
+    * @param jsonOut The object to return in the response, after main columns have been
+    * written, and before <var> _canDelete </var> and the object end has been written.
+    * @param connection Database connection
+    */
+   protected void editUpdatedRecord(
+      JsonObject jsonIn, JsonObjectBuilder jsonOut, Connection connection) {
+   } // end of editUpdatedRecord()
 
    private static final long serialVersionUID = 1;
 } // end of class TableServletBase

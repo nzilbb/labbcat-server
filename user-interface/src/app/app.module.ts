@@ -20,6 +20,7 @@ import { LoginComponent } from './login/login.component';
 import { AdminTracksComponent } from './admin-tracks/admin-tracks.component';
 import { AdminRolesComponent } from './admin-roles/admin-roles.component';
 import { AdminRolePermissionsComponent } from './admin-role-permissions/admin-role-permissions.component';
+import { AdminRoleUsersComponent } from './admin-role-users/admin-role-users.component';
 import { AdminSystemAttributesComponent } from './admin-system-attributes/admin-system-attributes.component';
 import { MatchesComponent } from './matches/matches.component';
 import { KeepAliveComponent } from './keep-alive/keep-alive.component';
@@ -66,7 +67,8 @@ import { TaskComponent } from './task/task.component';
         AdminAnnotatorExtComponent,
         UrlEncodePipe,
         AdminInfoComponent,
-        TaskComponent
+        TaskComponent,
+        AdminRoleUsersComponent
     ],
     imports: [
         BrowserModule,
@@ -89,6 +91,8 @@ import { TaskComponent } from './task/task.component';
             { path: 'admin/roles', component: AdminRolesComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/roles/:role_id/permissions', component: AdminRolePermissionsComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/roles/:role_id/users', component: AdminRoleUsersComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/attributes', component: AdminSystemAttributesComponent,
               canDeactivate: [PendingChangesGuard] },
