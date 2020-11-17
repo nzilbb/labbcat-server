@@ -830,7 +830,8 @@ public class TableServletBase extends LabbcatServlet {
                      int rows = sql.executeUpdate();
                      if (rows == 0) {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        writeResponse(response,       failureResult(request, "Record not found: {0}", key));
+                        writeResponse(response,
+                                      failureResult(request, "Record not found: {0}", key));
                      } else {
 
                         if (dbKeys != urlKeys) {
