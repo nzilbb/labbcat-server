@@ -183,6 +183,6 @@ public class TestAdminSystemAttributes
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestAdminSystemAttributes");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestAdminSystemAttributes");
    }
 }

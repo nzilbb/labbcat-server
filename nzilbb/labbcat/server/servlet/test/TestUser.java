@@ -78,6 +78,6 @@ public class TestUser
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestUser");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestUser");
    }
 }

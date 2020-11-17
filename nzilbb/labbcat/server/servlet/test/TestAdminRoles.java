@@ -235,6 +235,6 @@ public class TestAdminRoles
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestAdminRoles");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestAdminRoles");
    }
 }

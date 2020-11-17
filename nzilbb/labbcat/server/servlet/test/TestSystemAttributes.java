@@ -84,6 +84,6 @@ public class TestSystemAttributes
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestSystemAttributes");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestSystemAttributes");
    }
 }

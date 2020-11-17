@@ -243,6 +243,6 @@ public class TestAdminCorpora
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestAdminCorpora");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestAdminCorpora");
    }
 }

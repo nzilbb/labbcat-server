@@ -360,6 +360,6 @@ public class TestAdminRolePermissions
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestAdminRolePermissions");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestAdminRolePermissions");
    }
 }
