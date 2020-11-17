@@ -163,7 +163,7 @@ public class AdminUsers extends TableServletBase {
    }
 
    /**
-    * Validates a record before INSERTing it.
+    * Validates a record before UPDATEing it.
     * @param request The request.
     * @param record The incoming record to validate, to which attributes can be added.
     * @param connection A connection to th database.
@@ -172,7 +172,7 @@ public class AdminUsers extends TableServletBase {
     * @throws ValidationException If the record is invalid.
     */
    @Override
-   protected JsonObject validateBeforeCreate(
+   protected JsonObject validateBeforeUpdate(
       HttpServletRequest request, JsonObject record,
       Connection connection) throws ValidationException {
       
@@ -220,7 +220,7 @@ public class AdminUsers extends TableServletBase {
       }
       if (errors != null) throw new ValidationException(errors);
       return record;
-   } // end of validateBeforeUpdate()
+   } // end of validateBeforeCreate()
    
    /**
     * Add roles to the returned object.
