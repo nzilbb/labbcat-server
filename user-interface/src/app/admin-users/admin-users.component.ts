@@ -120,7 +120,7 @@ export class AdminUsersComponent extends AdminComponent implements OnInit {
                 this.rows                         // users...
                     .filter(r => r._changed)      // but only the changed ones...
                     .map(r => this.updateRow(r))) // save them
-                .then(resolve);                   // and resolve when finished 
+                .then(()=>resolve());                   // and resolve when finished 
         });
     }
     
