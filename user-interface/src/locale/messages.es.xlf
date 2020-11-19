@@ -259,6 +259,24 @@
           <context context-type="linenumber">48</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="321e4419a943044e674beb55b8039f42a9761ca5" datatype="html">
+        <source>Info</source>
+        <target state="translated">Info</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <note priority="1" from="description">menu label</note>
+      </trans-unit>
+      <trans-unit id="ed86c35fb9ca3717c845217fae71e4ff8c065894" datatype="html">
+        <source>Edit overall information</source>
+        <target state="translated">Editar información general</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
       <trans-unit id="167f88ef64bd4cf3996bfe622373214e086f7af7" datatype="html">
         <source>Transcript Types</source>
         <target state="translated">Tipos de Transcripción</target>
@@ -549,6 +567,14 @@
         </context-group>
         <note priority="1" from="description">Roles or groups that users can have/belong to</note>
         <note priority="1" from="meaning">page header</note>
+      </trans-unit>
+      <trans-unit id="80fa90ce67552f3f8a824f756a94327e41d3fc49" datatype="html">
+        <source>Members</source>
+        <target state="translated">Miembros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/admin-roles/admin-roles.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="70f45880fce6ac5d8e468e25e82aefbba8098cfe" datatype="html">
         <source>Permissions</source>
@@ -1312,7 +1338,7 @@
           <context context-type="linenumber">42</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="f2158c415155b86315d78b781a578d1f34eb46e8" datatype="html">
+      <trans-unit id="663a7ed9c185d8754d6efc0299799a88be98fb95" datatype="html">
         <source>Confirm annotator installation</source>
         <target state="translated">Confirmar instalación del glosador</target>
         <context-group purpose="location">
@@ -1518,7 +1544,7 @@
       </trans-unit>
       <trans-unit id="e21731528d0d470411017a2a84f16466abf1977b" datatype="html">
         <source>Users with Role </source>
-        <target state="translated">Usuarios con Rol</target>
+        <target state="translated">Usuarios con Rol </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-role-users/admin-role-users.component.html</context>
           <context context-type="linenumber">1</context>
@@ -1552,7 +1578,7 @@
       </trans-unit>
       <trans-unit id="e862348ec992b5770927d4eb028eda5f13b53c43" datatype="html">
         <source> Click users to add or remove them </source>
-        <target state="translated">Pulsar el botón del usuario para agregar o sacarlo</target>
+        <target state="translated"> Pulsar el botón del usuario para agregar o sacarlo</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-role-users/admin-role-users.component.html</context>
           <context context-type="linenumber">25</context>
@@ -1620,7 +1646,7 @@
       </trans-unit>
       <trans-unit id="bda148b42885bbea182c26d4a3633f45f284dfd1" datatype="html">
         <source>Change Pass Phrase for </source>
-        <target state="translated">Cambiar contraseña para</target>
+        <target state="translated">Cambiar contraseña para </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-change-password/admin-change-password.component.html</context>
           <context context-type="linenumber">1</context>
@@ -1662,7 +1688,7 @@
       </trans-unit>
       <trans-unit id="75a6e152c98f1d6198839935d0e0d990b8926e16" datatype="html">
         <source>Reset Next Login </source>
-        <target state="translated">Recolocar al Entrar</target>
+        <target state="translated">Recolocar al Entrar </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-change-password/admin-change-password.component.html</context>
           <context context-type="linenumber">28</context>
