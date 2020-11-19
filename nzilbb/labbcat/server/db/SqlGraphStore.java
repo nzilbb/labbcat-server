@@ -4141,9 +4141,10 @@ public class SqlGraphStore
             +" WHERE layer.ag_id = ?"
             + " AND start.offset >= ? AND end.offset <= ?"
             +" ORDER BY start.offset, end.offset DESC, annotation_id");
+         double granularity = Constants.GRANULARITY_MILLISECONDS / 2; // TODO this should be a parameter
          sqlAnnotationsByOffset.setInt(2, ag_id);
-         sqlAnnotationsByOffset.setDouble(3, start);
-         sqlAnnotationsByOffset.setDouble(4, end);
+         sqlAnnotationsByOffset.setDouble(3, start - granularity);
+         sqlAnnotationsByOffset.setDouble(4, end + granularity);
 
          final HashSet<String> layersToLoad = new HashSet<String>(Arrays.asList(layerIds));
          // traverse top-down through the schema, looking for layers to add
