@@ -43,8 +43,8 @@ export class AdminChangePasswordComponent extends AdminComponent implements OnIn
             this.labbcatService.labbcat.setPassword(
                 this.user, this.p, this.resetPassword, (result, errors, messages)=>{
                     this.processing = false;
-                    if (errors) for (let message of errors) this.messageService.error(message);
-                    if (messages) for (let message of messages) this.messageService.info(message);
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
                     this.p = this.p2 = "";
                     this.changed = false;
                     if (!errors) {

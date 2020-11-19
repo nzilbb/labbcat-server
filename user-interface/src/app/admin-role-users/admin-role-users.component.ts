@@ -33,8 +33,8 @@ export class AdminRoleUsersComponent extends AdminComponent implements OnInit {
         this.role_id = this.route.snapshot.paramMap.get('role_id');
         this.labbcatService.labbcat.readUsers(
             (users, errors, messages) => {
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 this.nonmembers = [];
                 this.members = [];
                 for (let user of users) {
@@ -85,8 +85,8 @@ export class AdminRoleUsersComponent extends AdminComponent implements OnInit {
             user.user, user.email, user.resetPassword, user.roles,
             (updated, errors, messages) => {
                 this.updating--;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 const updatedUser = updated as User;
                 let i = this.members.findIndex(u => {

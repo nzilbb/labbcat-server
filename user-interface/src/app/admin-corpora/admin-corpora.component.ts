@@ -60,8 +60,8 @@ export class AdminCorporaComponent extends AdminComponent implements OnInit {
             name, language, description,
             (row, errors, messages) => {
                 this.creating = false;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 if (row) this.rows.push(row as Corpus);
                 this.updateChangedFlag();
@@ -74,13 +74,15 @@ export class AdminCorporaComponent extends AdminComponent implements OnInit {
         if (confirm(`Are you sure you want to delete ${row.corpus_name}`)) {
             this.labbcatService.labbcat.deleteCorpus(row.corpus_name, (model, errors, messages) => {
                 row._deleting = false;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 if (!errors) {
                     // remove from the model/view
                     this.rows = this.rows.filter(r => { return r !== row;});
                     this.updateChangedFlag();
                 }});
+        } else {
+            row._deleting = false;
         }
     }
     
@@ -97,8 +99,8 @@ export class AdminCorporaComponent extends AdminComponent implements OnInit {
             row.corpus_name, row.corpus_language, row.corpus_description,
             (corpus, errors, messages) => {
                 this.updating--;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 const updatedRow = corpus as Corpus;
                 const i = this.rows.findIndex(r => {

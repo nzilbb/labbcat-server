@@ -92,8 +92,8 @@ export class AdminRolePermissionsComponent extends AdminComponent implements OnI
             this.role_id, entity, layer, value_pattern,
             (row, errors, messages) => {
                 this.creating = false;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 if (row) this.rows.push(row as RolePermission);
                 this.updateChangedFlag();
@@ -107,13 +107,15 @@ export class AdminRolePermissionsComponent extends AdminComponent implements OnI
             this.labbcatService.labbcat.deleteRolePermission(
                 this.role_id, row.entity, (model, errors, messages) => {
                     row._deleting = false;
-                    if (errors) for (let message of errors) this.messageService.error(message);
-                    if (messages) for (let message of messages) this.messageService.info(message);
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
                     if (!errors) {
                         // remove from the model/view
                         this.rows = this.rows.filter(r => { return r !== row;});
                         this.updateChangedFlag();
                     }});
+        } else {
+            row._deleting = false;
         }
     }
 
@@ -130,8 +132,8 @@ export class AdminRolePermissionsComponent extends AdminComponent implements OnI
             this.role_id, row.entity, row.layer, row.value_pattern,
             (permission, errors, messages) => {
                 this.updating--;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 const updatedRow = permission as RolePermission;
                 const i = this.rows.findIndex(r => {

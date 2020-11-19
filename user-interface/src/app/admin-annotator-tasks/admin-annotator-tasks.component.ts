@@ -49,8 +49,8 @@ export class AdminAnnotatorTasksComponent extends AdminComponent implements OnIn
             this.annotatorId, taskId, description,
             (row, errors, messages) => {
                 this.creating = false;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 if (!errors) this.rows.push({ taskId : taskId, description : description });
                 this.updateChangedFlag();
@@ -63,13 +63,15 @@ export class AdminAnnotatorTasksComponent extends AdminComponent implements OnIn
         if (confirm(`Are you sure you want to delete ${row.taskId}`)) { // TODO i18n
             this.labbcatService.labbcat.deleteAnnotatorTask(row.taskId, (model, errors, messages) => {
                 row._deleting = false;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 if (!errors) {
                     // remove from the model/view
                     this.rows = this.rows.filter(r => { return r !== row;});
                     this.updateChangedFlag();
                 }});
+        } else {
+            row._deleting = false;
         }
     }
     
@@ -86,8 +88,8 @@ export class AdminAnnotatorTasksComponent extends AdminComponent implements OnIn
             row.taskId, row.description,
             (task, errors, messages) => {
                 this.updating--;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 row._changed = false;
                 this.updateChangedFlag();

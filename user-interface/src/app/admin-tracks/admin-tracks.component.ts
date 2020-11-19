@@ -45,8 +45,8 @@ export class AdminTracksComponent extends AdminComponent implements OnInit {
             suffix, description, display_order,
             (row, errors, messages) => {
                 this.creating = false;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 if (row) this.rows.push(row as MediaTrack);
                 this.updateChangedFlag();
@@ -58,13 +58,15 @@ export class AdminTracksComponent extends AdminComponent implements OnInit {
         if (confirm(`Are you sure you want to delete track with suffix "${row.suffix}"`)) {
             this.labbcatService.labbcat.deleteMediaTrack(row.suffix, (model, errors, messages) => {
                 row._deleting = false;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 if (!errors) {
                     // remove from the model/view
                     this.rows = this.rows.filter(r => { return r !== row;});
                     this.updateChangedFlag();
                 }});
+        } else {
+            row._deleting = false;
         }
     }
 
@@ -81,8 +83,8 @@ export class AdminTracksComponent extends AdminComponent implements OnInit {
             row.suffix, row.description, row.display_order,
             (mediaTrack, errors, messages) => {
                 this.updating--;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 const updatedRow = mediaTrack as MediaTrack;
                 const i = this.rows.findIndex(r => {

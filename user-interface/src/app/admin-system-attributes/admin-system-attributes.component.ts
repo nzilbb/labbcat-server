@@ -51,8 +51,8 @@ export class AdminSystemAttributesComponent extends AdminComponent implements On
             attribute.attribute, attribute.value,
             (attribute, errors, messages) => {
                 this.updating--;
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 // if there were errors, reload to ensure the model is correct
                 if (errors) {
                     this.readAttributes();

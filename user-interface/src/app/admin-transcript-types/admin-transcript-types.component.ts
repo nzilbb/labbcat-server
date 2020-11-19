@@ -28,8 +28,8 @@ export class AdminTranscriptTypesComponent extends AdminComponent implements OnI
 
     readLayer(): void {
         this.labbcatService.labbcat.getLayer("transcript_type", (layer, errors, messages) => {
-            if (errors) for (let message of errors) this.messageService.error(message);
-            if (messages) for (let message of messages) this.messageService.info(message);
+            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (messages) messages.forEach(m => this.messageService.info(m));
             this.setLayer(layer as Layer);
         });
     }
@@ -82,8 +82,8 @@ export class AdminTranscriptTypesComponent extends AdminComponent implements OnI
             this.layer, (layer, errors, messages) => {
                 this.updating = false;
                 this.changed = false;        
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 if (layer) {
                     if (!messages) {
                         this.messageService.info("Updated transcript types"); // TODO i18n
