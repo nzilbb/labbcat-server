@@ -36,6 +36,9 @@ import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotato
 import { UrlEncodePipe } from './url-encode.pipe';
 import { AdminInfoComponent } from './admin-info/admin-info.component';
 import { TaskComponent } from './task/task.component';
+import { AdminUsersComponent } from './admin-users/admin-users.component';
+import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
+import { AutofocusDirective } from './autofocus.directive';
 
 @NgModule({
     declarations: [
@@ -68,7 +71,10 @@ import { TaskComponent } from './task/task.component';
         UrlEncodePipe,
         AdminInfoComponent,
         TaskComponent,
-        AdminRoleUsersComponent
+        AdminRoleUsersComponent,
+        AdminUsersComponent,
+        AdminChangePasswordComponent,
+        AutofocusDirective
     ],
     imports: [
         BrowserModule,
@@ -87,6 +93,10 @@ import { TaskComponent } from './task/task.component';
             { path: 'admin/projects', component: AdminProjectsComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/tracks', component: AdminTracksComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/users', component: AdminUsersComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/users/:user', component: AdminChangePasswordComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/roles', component: AdminRolesComponent,
               canDeactivate: [PendingChangesGuard] },

@@ -1,0 +1,60 @@
+<h2 i18n="page header">Users</h2>
+<div class="list user-list">
+  <div class="item add-new">
+    <span class="user-id" i18n-title title="User ID"><legend i18n="User ID">ID</legend>
+      <input #user type="text" i18n-placeholder placeholder="User ID" required>
+    </span>
+    <span class="user-email" i18n-title title="Email Address"><legend i18n>Email</legend>
+      <input #email
+             type="email"
+             i18n-placeholder placeholder="Email Address">
+    </span>
+    <span class="user-roles header-only" i18n-title title="Roles the user has">
+      Roles
+    </span>
+    <span class="buttons">
+      <app-button action="create"
+                  (press)="user.reportValidity() && email.reportValidity() && createRow(user.value, email.value) && user.value = email.value = '';" [processing]="creating"
+                  i18n-title="Button title" title="Add new record"></app-button>
+    </span>
+  </div>
+  
+  <app-wait *ngIf="!rows"></app-wait>
+  <div class="item" *ngFor="let user of rows">
+    <span class="user-id" i18n-title title="User ID"><legend i18n="User ID">ID</legend>
+      {{user.user}}</span>
+    <span class="user-email" i18n-title title="Email Address"><legend i18n>Email</legend>
+      <input #email
+             type="email"
+             [(ngModel)]="user.email"
+             (input)="onChange(user)"
+             i18n-placeholder placeholder="Email Address">
+    </span>
+    <span class="user-roles" i18n-title title="Roles"><legend i18n>Roles</legend>
+      <div class="user-role" *ngFor="let role of roles">
+        <label title="{{role.description}}">
+          <input type="checkbox"
+                 [checked]="user.roles.includes(role.role_id)"
+                 (change)="toggleRole(user, role.role_id)">
+          {{role.role_id}}
+        </label>
+      </div>
+    </span>
+    <span class="buttons">
+      <a [routerLink]="['/admin','users',user.user]"
+         i18n-title title="Password"
+         >🔑</a>
+      <app-button action="delete"
+                  disabled="{{user._cantDelete}}"
+                  (press)="deleteRow(user);"  [processing]="user._deleting"
+                  title="{{user._cantDelete}}"></app-button>
+    </span>
+    
+  </div>
+</div>
+<div class="buttons">
+  <app-button action="save"
+              (press)="updateChangedRows();"  [processing]="updating > 0"
+              *ngIf="changed"
+              title="Save all changed records"></app-button>
+</div>

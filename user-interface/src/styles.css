@@ -89,6 +89,9 @@ app-wait {
     padding-left: 10px;
     white-space: nowrap;
 }
+.list > .item > span.header-only {
+    display: none;
+}
 .list > .item > span > legend {
     font-size: 10pt;
 }
@@ -225,7 +228,9 @@ app-task progress, app-task .progress-container, app-task .progress-container .p
         display: table-row;
         padding-bottom: 0px;
     }
+    .list > .item:nth-child(even) { background: #FAFAFA; }
     .list > .item > span { display: table-cell; }
+    .list > .item > span.header-only { display: table-cell; }
     .list > .item > span > legend { display: none; }
     .list > .item > label { display: block; }
     .buttons { text-align: right; }
