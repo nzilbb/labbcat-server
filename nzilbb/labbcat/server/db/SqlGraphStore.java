@@ -624,23 +624,23 @@ public class SqlGraphStore
          for (Layer layer : getLayers())
          {
             schema.addLayer(layer);
-            if (Integer.valueOf(11).equals(layer.get("layer_id")))
+            if (Integer.valueOf(SqlConstants.LAYER_TURN).equals(layer.get("layer_id")))
             {
                schema.setTurnLayerId(layer.getId());
             }
-            else if (Integer.valueOf(12).equals(layer.get("layer_id")))
+            else if (Integer.valueOf(SqlConstants.LAYER_UTTERANCE).equals(layer.get("layer_id")))
             {
                schema.setUtteranceLayerId(layer.getId());
             } 
-            else if (Integer.valueOf(0).equals(layer.get("layer_id")))
+            else if (Integer.valueOf(SqlConstants.LAYER_TRANSCRIPTION).equals(layer.get("layer_id")))
             {
                schema.setWordLayerId(layer.getId());
             } 
-            else if (Integer.valueOf(-50).equals(layer.get("layer_id")))
+            else if (Integer.valueOf(SqlConstants.LAYER_SERIES).equals(layer.get("layer_id")))
             {
                schema.setEpisodeLayerId(layer.getId());
             } 
-            else if (Integer.valueOf(-100).equals(layer.get("layer_id")))
+            else if (Integer.valueOf(SqlConstants.LAYER_CORPUS).equals(layer.get("layer_id")))
             {
                schema.setCorpusLayerId(layer.getId());
             }
