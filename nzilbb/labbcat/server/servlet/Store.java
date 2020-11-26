@@ -247,7 +247,7 @@ public class Store extends StoreQuery {
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       String id = request.getParameter("id");
-      if (id == null) errors.add(localize(request, "No id specified."));
+      if (id == null) errors.add(localize(request, "No ID specified."));
       if (errors.size() > 0) return failureResult(errors);
       store.deleteTranscript(id);
       return successResult(request, null, "Transcript deleted: {0}", id);
