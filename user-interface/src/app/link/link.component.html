@@ -1,6 +1,22 @@
-<a [routerLink]="routerLink"
+<a *ngIf="routerLink"
+   [routerLink]="routerLink"
    title="{{title}}"
    class="{{classes}}">
-  <img src="{{processing?imagesLocation+'/'+'wait.gif':img.startsWith('http')?img:imagesLocation+'/'+img}}" alt="{{icon}}">
-  <label>{{label}}</label>
+  <img *ngIf="img"
+       src="{{processing?imagesLocation+'/'+'wait.gif':img.startsWith('http')?img:imagesLocation+'/'+img}}"
+       alt="{{icon}}">
+  <span *ngIf="!img && processing">⌛</span>
+  <span *ngIf="!img && !processing">{{icon}}</span>
+  <label *ngIf="label">{{label}}</label>
+</a>
+<a *ngIf="href"
+   href="{{href}}"
+   title="{{title}}"
+   class="{{classes}}">
+  <img *ngIf="img"
+       src="{{processing?imagesLocation+'/'+'wait.gif':img.startsWith('http')?img:imagesLocation+'/'+img}}"
+       alt="{{icon}}">
+  <span *ngIf="!img && processing">⌛</span>
+  <span *ngIf="!img && !processing">{{icon}}</span>
+  <label *ngIf="label">{{label}}</label>
 </a>

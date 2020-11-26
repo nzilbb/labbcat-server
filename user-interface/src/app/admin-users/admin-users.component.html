@@ -41,9 +41,9 @@
       </div>
     </span>
     <span class="buttons">
-      <a [routerLink]="['/admin','users',user.user]"
-         i18n-title title="Password"
-         >🔑</a>
+      <app-link [routerLink]="['/admin','users',user.user]"
+                i18n-title title="Password"
+                img="key.svg" icon="🔑"></app-link>
       <app-button action="delete"
                   disabled="{{user._cantDelete}}"
                   (press)="deleteRow(user);"  [processing]="user._deleting"

@@ -282,8 +282,8 @@ public class SqlGraphStoreAdministration
    }
 
    /**
-    * Saves changes to a layer, or adds a new layer.
-    * @param layer A new or modified layer definition.
+    * Saves changes to a layer.
+    * @param layer A modified layer definition.
     * @return The resulting layer definition.
     * @throws StoreException If an error prevents the operation.
     * @throws PermissionException If the operation is not permitted.
@@ -354,17 +354,480 @@ public class SqlGraphStoreAdministration
             // ensure schema is reloaded with new layer
             schema = null;
 
-            // return new definition
-            return getLayer(layer.getId());
+         } else if (oldVersion.containsKey("layer_id")
+                    && (Integer)oldVersion.get("layer_id") >= 0) { // temporal layer
+            int layer_id = (Integer)oldVersion.get("layer_id");
+            
+            // attribute-wise updates...
 
+            // description
+            if (!oldVersion.getDescription().equals(layer.getDescription())) {
+               PreparedStatement sql = getConnection().prepareStatement(
+                  "UPDATE layer SET description = ? WHERE layer_id = ?"); // TODO "notes" instead, once "description" and "notes" are merged into one field.
+               sql.setString(1, layer.getDescription());
+               sql.setInt(2, layer_id);
+               sql.executeUpdate();
+               sql.close();
+            }
+
+            // some attributes cannot be updated for system layers
+            if (layer_id != SqlConstants.LAYER_SEGMENT
+                && layer_id != SqlConstants.LAYER_TRANSCRIPTION
+                && layer_id != SqlConstants.LAYER_UTTERANCE
+                && layer_id != SqlConstants.LAYER_TURN) {
+                
+               // alignment
+               if (oldVersion.getAlignment() != layer.getAlignment()) {
+                  PreparedStatement sql = getConnection().prepareStatement(
+                     "UPDATE layer SET alignment = ? WHERE layer_id = ?");
+                  sql.setInt(1, layer.getAlignment());
+                  sql.setInt(2, layer_id);
+                  sql.executeUpdate();
+                  sql.close();
+               }
+
+               // relationship flag
+               if (oldVersion.getPeers() != layer.getPeers()
+                   || oldVersion.getPeersOverlap() != layer.getPeersOverlap()
+                   || oldVersion.getParentIncludes() != layer.getParentIncludes()
+                   || oldVersion.getSaturated() != layer.getSaturated()) {
+                  PreparedStatement sql = getConnection().prepareStatement(
+                     "UPDATE layer"
+                     +" SET peers = ?, peers_overlap = ?, parent_includes = ?, saturated = ?"
+                     +" WHERE layer_id = ?");
+                  sql.setInt(1, layer.getPeers()?1:0);
+                  sql.setInt(2, layer.getPeersOverlap()?1:0);
+                  sql.setInt(3, layer.getParentIncludes()?1:0);
+                  sql.setInt(4, layer.getSaturated()?1:0);
+                  sql.setInt(5, layer_id);
+                  sql.executeUpdate();
+                  sql.close();
+               }
+
+               if (!oldVersion.getType().equals(layer.getType())) {
+                  String subtype = "T"; // Constants.TYPE_STRING
+                  if (Constants.TYPE_NUMBER.equals(layer.getType())) {
+                     subtype = "N";  // TODO handle type = number/integer
+                  } else if (Constants.TYPE_IPA.equals(layer.getType())) {
+                     subtype = "D";
+                  } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
+                     subtype = "boolean";
+                  }
+                  PreparedStatement sql = getConnection().prepareStatement(
+                     "UPDATE layer SET type = ? WHERE layer_id = ?");
+                  sql.setString(1, subtype);
+                  sql.setInt(2, layer_id);
+                  sql.executeUpdate();
+                  sql.close();
+               }
+               
+               // category
+               if (!(""+oldVersion.getCategory()).equals(layer.getCategory())) {
+                  PreparedStatement sql = getConnection().prepareStatement(
+                     "UPDATE layer"
+                     +" SET project_id = (SELECT project_id FROM project WHERE project = ?)"
+                     +" WHERE layer_id = ?");
+                  sql.setString(1, layer.getCategory());
+                  sql.setInt(2, layer_id);
+                  sql.executeUpdate();
+                  sql.close();
+               }
+
+               // LaBB-CAT extensions:
+
+               // enabled
+               if (layer.containsKey("enabled")
+                   && !oldVersion.get("enabled").equals(layer.get("enabled"))) {
+                  PreparedStatement sql = getConnection().prepareStatement(
+                     "UPDATE layer SET enabled = ? WHERE layer_id = ?");
+                  sql.setString(1, layer.get("enabled").toString());
+                  sql.setInt(2, layer_id);
+                  sql.executeUpdate();
+                  sql.close();
+               }
+               
+            } // non-system layer
+
+            // TODO validLabels
          } else {
             throw new StoreException("Updating layer " + layer.getId() + " not yet implemented"); // TODO
          }
+         // return new definition
+         return getLayer(layer.getId());
+
       } catch (SQLException x) {
          throw new StoreException(x);
       } catch (StoreException x) { // not found
-         // TODO add new layer
-         throw x;
+         throw new StoreException("Layer not found: " + layer.getId());
+      }
+   }
+   /**
+    * Adds a new layer.
+    * @param layer A new layer definition.
+    * @return The resulting layer definition.
+    * @throws StoreException If an error prevents the operation.
+    * @throws PermissionException If the operation is not permitted.
+    */
+   public Layer newLayer(Layer layer) throws StoreException, PermissionException {
+      requireAdmin();
+
+      // validate ID
+      if (layer.getId() == null || layer.getId().trim().length() == 0) {
+         throw new StoreException("No ID specified");
+      }
+      layer.setId(layer.getId().trim());
+      try {
+         Layer existingLayer = getLayer(layer.getId());
+         // if we get this far, the layer already exists
+         throw new StoreException("Layer already exists: " + layer.getId());
+      } catch(StoreException exception) {
+      }         
+      
+      String subtype = "T"; // Constants.TYPE_STRING
+      if (Constants.TYPE_NUMBER.equals(layer.getType())) {
+         subtype = "N";  // TODO handle type = number/integer
+      } else if (Constants.TYPE_IPA.equals(layer.getType())) {
+         subtype = "D";
+      } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
+         subtype = "boolean";
+      }
+         
+      // check parent
+      if (layer.getParentId() == null) {
+         throw new StoreException("No parentId specified: " + layer.getId());
+      }
+      Schema schema = getSchema();
+      Layer parent = schema.getLayer(layer.getParentId());
+      if (parent == null) {
+         throw new StoreException(
+            "Invalid parent ("+layer.getParentId()+") for: " + layer.getId());
+      }
+
+      try {
+         int project_id = -1;
+         PreparedStatement sql = getConnection().prepareStatement(
+            "SELECT project_id FROM project WHERE project = ?");
+         if (layer.getCategory() != null) {
+            sql.setString(1, layer.getCategory());
+            ResultSet rs = sql.executeQuery();
+            if (rs.next()) project_id = rs.getInt(1);
+            rs.close();
+         }
+         sql.close();
+
+         sql = getConnection().prepareStatement(
+            "SELECT MAX(layer_id) + 1 FROM layer");
+         ResultSet rs = sql.executeQuery();
+         rs.next();
+         int layer_id = rs.getInt(1);
+         rs.close();
+         sql.close();
+            
+         sql = getConnection().prepareStatement(
+            "INSERT INTO layer"
+            +" (layer_id, short_description, description, alignment," // TODO description->notes
+            +" peers, peers_overlap, parent_includes, saturated, type,"
+            +" layer_manager_id, enabled, project_id, parent_id, scope)"
+            +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+         sql.setInt(1, layer_id);
+         sql.setString(2, layer.getId());
+         sql.setString(3, layer.getDescription());
+         sql.setInt(4, layer.getAlignment());
+         sql.setInt(5, layer.getPeers()?1:0);
+         sql.setInt(6, layer.getPeersOverlap()?1:0);
+         sql.setInt(7, layer.getParentIncludes()?1:0);
+         sql.setInt(8, layer.getSaturated()?1:0);
+         sql.setString(9, subtype);
+         if (layer.containsKey("layer_manager_id")
+             && layer.get("layer_manager_id").toString().length() > 0) {
+            sql.setString(10, layer.get("layer_manager_id").toString());
+         } else {
+            sql.setNull(10, java.sql.Types.VARCHAR);
+         }
+         if (layer.containsKey("enabled")
+             && layer.get("enabled").toString().length() > 0) {
+            sql.setString(11, layer.get("enabled").toString());
+         } else {
+            sql.setNull(11, java.sql.Types.VARCHAR);
+         }
+         if (project_id >= 0) {
+            sql.setInt(12, project_id);
+         } else {
+            sql.setNull(12, java.sql.Types.INTEGER);
+         }
+            
+         try {
+            if (parent.getId().equals(schema.getWordLayerId())) { // word layer
+                  
+               sql.setInt(13, (Integer)parent.get("layer_id"));
+               sql.setString(14, SqlConstants.SCOPE_WORD.toUpperCase());
+               sql.executeUpdate();
+               sql.close();
+                  
+               // create annotation table
+               sql = getConnection().prepareStatement(
+                  "CREATE TABLE annotation_layer_"+layer_id+" ("
+                  + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
+                  + " ag_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Annotation graph (transcript) ID',"
+                  + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+                  + " NOT NULL DEFAULT ''" 
+                  + " COMMENT 'Text annotation for the word'," 
+                  + " label_status TINYINT UNSIGNED DEFAULT 0"
+                  + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
+                  + " data MEDIUMBLOB" 
+                  + " COMMENT 'Binary data attached to annotation'," 
+                  + " start_anchor_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Anchor for start time',"
+                  + " end_anchor_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Anchor for end time',"
+                  + " turn_annotation_id INTEGER UNSIGNED NOT NULL" 
+                  + " COMMENT 'References annotation_layer_11.annotation_id',"
+                  + " ordinal_in_turn INTEGER" 
+                  + " COMMENT 'Copy of annotation_layer_0.ordinal_in_turn',"  
+                  + " word_annotation_id INTEGER UNSIGNED" 
+                  + " COMMENT 'References annotation_layer_0.annotation_id'," 
+                  + " parent_id INTEGER UNSIGNED NULL"
+                  + " COMMENT 'Parent annotation_id',"
+                  + " ordinal INTEGER NULL"
+                  + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
+                  + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+                  + " COMMENT 'Name of person/system who created/changed the anchor',"
+                  + " annotated_when DATETIME NULL"
+                  + " COMMENT 'Date/time of the creation or last change of the anchor',"
+                  + " PRIMARY KEY (annotation_id),"
+                  + " INDEX IDX_LABEL(label, ag_id, turn_annotation_id), "
+                  + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id), "
+                  + " INDEX IDX_END_ANCHOR(end_anchor_id),"
+                  + " INDEX IDX_WORD(word_annotation_id),"
+                  + " INDEX IDX_TURN(turn_annotation_id, ordinal_in_turn),"
+                  +"  INDEX IDX_AG(ag_id, annotation_id)"
+                  + " ) ENGINE=MyISAM;");
+               sql.executeUpdate();
+               sql.close();
+                  
+            } else if (parent.getId().equals("segments")) { // segments layer
+                  
+               sql.setInt(13, (Integer)parent.get("layer_id"));
+               sql.setString(14, SqlConstants.SCOPE_SEGMENT.toUpperCase());
+               sql.executeUpdate();
+               sql.close();
+                  
+               // create annotation table
+               sql = getConnection().prepareStatement(
+                  "CREATE TABLE annotation_layer_"+layer_id+" ("
+                  + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
+                  + " ag_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Annotation graph (transcript) ID',"
+                  + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+                  + " NOT NULL DEFAULT ''" 
+                  + " COMMENT 'Text annotation for the segment'," 
+                  + " label_status TINYINT UNSIGNED DEFAULT 0"
+                  + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
+                  + " data MEDIUMBLOB" 
+                  + " COMMENT 'Binary data attached to annotation'," 
+                  + " start_anchor_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Anchor for start time',"
+                  + " end_anchor_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Anchor for end time',"
+                  + " turn_annotation_id INTEGER UNSIGNED NOT NULL" 
+                  + " COMMENT 'References annotation_layer_11.annotation_id',"
+                  + " ordinal_in_turn INTEGER" 
+                  + " COMMENT 'Copy of annotation_layer_0.ordinal_in_turn',"  
+                  + " word_annotation_id INTEGER UNSIGNED" 
+                  + " COMMENT 'References annotation_layer_0.annotation_id'," 
+                  + " ordinal_in_word INTEGER" 
+                  + " COMMENT 'Copy of annotation_layer_1.ordinal_in_word',"
+                  + " segment_annotation_id INTEGER UNSIGNED NOT NULL" 
+                  + " COMMENT 'References annotation_layer_1.annotation_id',"
+                  + " parent_id INTEGER UNSIGNED NULL"
+                  + " COMMENT 'Parent annotation_id',"
+                  + " ordinal INTEGER NULL"
+                  + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
+                  + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+                  + " COMMENT 'Name of person/system who created/changed the anchor',"
+                  + " annotated_when DATETIME NULL"
+                  + " COMMENT 'Date/time of the creation or last change of the anchor',"
+                  + " PRIMARY KEY (annotation_id),"
+                  + " INDEX IDX_LABEL(label, word_annotation_id, ag_id, turn_annotation_id), "
+                  + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id), "
+                  + " INDEX IDX_END_ANCHOR(end_anchor_id),"
+                  + " INDEX IDX_WORD(word_annotation_id, ordinal_in_word),"
+                  + " INDEX IDX_SEGMENT(segment_annotation_id),"
+                  + " INDEX IDX_TURN(turn_annotation_id, ordinal_in_turn, word_annotation_id, ordinal_in_word),"
+                  +"  INDEX IDX_AG(ag_id, annotation_id)"
+                  + " ) ENGINE=MyISAM;");
+               sql.executeUpdate();
+               sql.close();
+                  
+            } else if (parent.getId().equals(schema.getTurnLayerId())) { // phrase layer
+                  
+               sql.setInt(13, (Integer)parent.get("layer_id"));
+               sql.setString(14, SqlConstants.SCOPE_META.toUpperCase());
+               sql.executeUpdate();
+               sql.close();
+                  
+               // create annotation table
+               sql = getConnection().prepareStatement(
+                  "CREATE TABLE annotation_layer_"+layer_id+" ("
+                  + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
+                  + " ag_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Annotation graph (transcript) ID',"
+                  + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+                  + " NOT NULL DEFAULT ''" 
+                  + " COMMENT 'Speaker number (from speaker.speaker_number)'," 
+                  + " label_status TINYINT UNSIGNED DEFAULT 0"
+                  + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
+                  + " data MEDIUMBLOB" 
+                  + " COMMENT 'Binary data attached to annotation'," 
+                  + " start_anchor_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Anchor for start time'," 
+                  + " end_anchor_id INTEGER UNSIGNED NOT NULL"
+                  + " COMMENT 'Anchor for end time'," 
+                  + " turn_annotation_id INTEGER UNSIGNED" 
+                  + " COMMENT 'References annotation_layer_11.annotation_id'," 
+                  + " parent_id INTEGER UNSIGNED NULL"
+                  + " COMMENT 'Parent annotation_id',"
+                  + " ordinal INTEGER NULL"
+                  + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
+                  + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+                  + " COMMENT 'Name of person/system who created/changed the anchor',"
+                  + " annotated_when DATETIME NULL"
+                  + " COMMENT 'Date/time of the creation or last change of the anchor',"
+                  + " PRIMARY KEY (annotation_id),"
+                  + " INDEX IDX_LABEL(label, ag_id, start_anchor_id), "
+                  + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id),"
+                  + " INDEX IDX_END_ANCHOR(end_anchor_id),"
+                  + " INDEX IDX_TURN(turn_annotation_id, annotation_id),"
+                  +"  INDEX IDX_AG(ag_id, annotation_id)"
+                  + " ) ENGINE=MyISAM;");
+               sql.executeUpdate();
+               sql.close();
+                  
+            } else if (parent.getId().equals(schema.getRoot().getId())) { // span layer
+               if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
+                     
+                  sql.setInt(13, (Integer)parent.get("layer_id"));
+                  sql.setString(14, SqlConstants.SCOPE_FREEFORM.toUpperCase());
+                  sql.executeUpdate();
+                  sql.close();
+                     
+                  // create annotation table
+                  sql = getConnection().prepareStatement(
+                     "CREATE TABLE annotation_layer_"+layer_id+" ("
+                     + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
+                     + " ag_id INTEGER UNSIGNED NOT NULL"
+                     + " COMMENT 'Annotation graph (transcript) ID',"
+                     + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+                     + " NOT NULL DEFAULT ''"
+                     + " COMMENT 'Text annotation'," 
+                     + " label_status TINYINT UNSIGNED DEFAULT 0"
+                     + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
+                     + " data MEDIUMBLOB" 
+                     + " COMMENT 'Binary data attached to annotation'," 
+                     + " start_anchor_id INTEGER UNSIGNED NOT NULL"
+                     + " COMMENT 'Anchor for start time'," 
+                     + " end_anchor_id INTEGER UNSIGNED NOT NULL"
+                     + " COMMENT 'Anchor for end time'," 
+                     + " parent_id INTEGER UNSIGNED NULL"
+                     + " COMMENT 'Parent annotation_id',"
+                     + " ordinal INTEGER NULL"
+                     + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
+                     + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+                     + " COMMENT 'Name of person/system who created/changed the anchor',"
+                     + " annotated_when DATETIME NULL"
+                     + " COMMENT 'Date/time of the creation or last change of the anchor',"
+                     + " PRIMARY KEY (annotation_id),"
+                     + " INDEX IDX_LABEL(label, ag_id, start_anchor_id), "
+                     + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id),"
+                     + " INDEX IDX_END_ANCHOR(end_anchor_id),"
+                     +"  INDEX IDX_AG(ag_id, annotation_id)"
+                     + " ) ENGINE=MyISAM;");
+                  sql.executeUpdate();
+                  sql.close();
+                     
+               } else { // layer.getAlignment() == Constants.ALIGNMENT_NONE TODO transcript attributes
+                  throw new StoreException("Span layers must be aligned");
+               }
+            } else { // TODO support participant attributes
+               throw new StoreException(
+                  "Invalid parentId "+layer.getParentId()
+                  +" - must be one of: " + schema.getWordLayerId() + ", " + schema.getTurnLayerId()
+                  + ", " + schema.getRoot().getId());
+            }
+         } finally {
+            sql.close();
+         }
+
+         // TODO validLabels
+            
+         // ensure schema is reloaded with new layer
+         schema = null;
+            
+         return getLayer(layer.getId());
+      } catch (SQLException sqlX) {
+         System.err.println("SqlGraphStoreAdministration.saveLayer(" + layer + "): " + sqlX);
+         sqlX.printStackTrace(System.err);
+         throw new StoreException(sqlX);
+      } catch (Throwable t) {
+         System.err.println("SqlGraphStoreAdministration.saveLayer(" + layer + "): " + t);
+         t.printStackTrace(System.err);
+         throw new StoreException(t);
+      }
+   }
+   
+   /**
+    * Deletes the given layer, and all associated annotations.
+    * @param id The ID layer to delete.
+    * @throws StoreException If an error prevents the transcript from being saved.
+    * @throws PermissionException If saving the transcript is not permitted.
+    */
+   public void deleteLayer(String id) throws StoreException, PermissionException {
+      requireAdmin();
+      if (id == null) throw new StoreException("Deleting layer: no ID specified");
+      try {
+         Schema schema = getSchema();
+         if (id.equals(schema.getWordLayerId())
+             || id.equals(schema.getUtteranceLayerId())
+             || id.equals(schema.getTurnLayerId())
+             || id.equals("orthography")
+             || id.equals("segments")) {
+            throw new StoreException("Cannot delete system layer: " + id);
+         }
+         Layer layer = getLayer(id);
+         if (!layer.containsKey("layer_id")) {
+            throw new StoreException("Deleting layer " + id + " not yet implemented");
+         }
+         int layer_id = (Integer)layer.get("layer_id");
+         if (layer_id < 0) {
+            throw new StoreException("Cannot delete system layer: " + id + " ("+layer_id+")");
+         }
+
+         // drop the annotation table
+         PreparedStatement sql = getConnection().prepareStatement(
+            "DROP TABLE IF EXISTS annotation_layer_" + layer_id);
+         sql.executeUpdate();
+         sql.close();
+
+         // delete any auxiliary configurations
+         sql = getConnection().prepareStatement(
+            "DELETE FROM layer_auxiliary_manager WHERE layer_id = ?");
+         sql.setInt(1, layer_id);
+         sql.executeUpdate();
+         sql.close();
+
+         // delete the layer row
+         sql = getConnection().prepareStatement(
+            "DELETE FROM layer WHERE layer_id = ?");
+         sql.setInt(1, layer_id);
+         sql.executeUpdate();
+         sql.close();
+         
+         // ensure schema is reloaded with layer removed
+         schema = null;
+         
+      } catch (SQLException x) {
+         throw new StoreException(x);
       }
    }
    

@@ -39,6 +39,7 @@ import { TaskComponent } from './task/task.component';
 import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AutofocusDirective } from './autofocus.directive';
+import { AdminLayersComponent } from './admin-layers/admin-layers.component';
 
 @NgModule({
     declarations: [
@@ -74,7 +75,8 @@ import { AutofocusDirective } from './autofocus.directive';
         AdminRoleUsersComponent,
         AdminUsersComponent,
         AdminChangePasswordComponent,
-        AutofocusDirective
+        AutofocusDirective,
+        AdminLayersComponent
     ],
     imports: [
         BrowserModule,
@@ -112,8 +114,9 @@ import { AutofocusDirective } from './autofocus.directive';
             { path: 'admin/annotator/:annotatorId/tasks/:taskId', component: AdminAnnotatorTaskParametersComponent },
             { path: 'admin/annotator/:annotatorId/ext', component: AdminAnnotatorExtComponent },
             { path: 'admin/annotators', component: AdminAnnotatorsComponent },
+            { path: 'admin/layers/:scope', component: AdminLayersComponent},
             { path: 'admin/info', component: AdminInfoComponent },
-        ]),
+        ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule
     ],
     providers: [],

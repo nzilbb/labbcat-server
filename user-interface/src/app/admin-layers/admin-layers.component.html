@@ -1,0 +1,161 @@
+<h2 i18n="page header" *ngIf="scope == 'segment'">Segment Layers</h2>
+<h2 i18n="page header" *ngIf="scope == 'word'">Word Layers</h2>
+<h2 i18n="page header" *ngIf="scope == 'phrase'">Phrase Layers</h2>
+<h2 i18n="page header" *ngIf="scope == 'span'">Span Layers</h2>
+
+<div class="layer-list">
+  <span class="layer-id" i18n-title="Layer ID" title="ID"><legend i18n>ID</legend>
+    <input #name
+           type="text" required i18n-placeholder placeholder="Layer ID"
+           [(ngModel)]="newLayerId"></span>
+  <span class="layer-type" i18n-title="Type of data in labels" title="Label Type"><legend i18n="Type of data in labels">Type</legend>
+    <select #labelType required>
+      <option disabled selected i18n="Label type label">Type</option>
+      <option value="string" i18n="Label type option">Text</option>
+      <option value="number" i18n="Label type option">Number</option>
+      <option value="ipa" i18n="Label type option">Phonological</option>
+      <option *ngIf="scope == 'phrase'" value="tree" i18n="Label type option">Tree</option>
+    </select>
+  </span>
+  <span class="layer-alignment" i18n-title title="Alignment"><legend i18n>Alignment</legend>
+    <select #alignment required>
+      <option disabled selected i18n="Alignment label">Alignment</option>
+      <option *ngIf="scope == 'word'" value="0" i18n>None</option>
+      <option *ngIf="scope != 'phrase'" value="1" i18n>Instants</option>
+      <option value="2" i18n>Intervals</option>
+    </select>
+  </span>
+  <span class="layer-manager" i18n-title title="Layer Manager"><legend i18n>Manager</legend>
+    <select #manager
+            [(ngModel)]="managerFilter">
+      <option selected value="" i18n="Manager label">Manager</option>
+      <option *ngFor="let manager of layerManagers" value="{{manager.layer_manager_id}}">{{manager.name}}</option>
+    </select>
+    <img src="{{imagesLocation+'/filter.svg'}}" i18n-alt alt="Filter"
+         i18n-title title="Filter the list"
+         [className]="newLayerId?'no-filter':'filter'">
+  </span>
+  <span class="layer-enabled" i18n-title title="When to generate layer data"><legend i18n>Generate</legend>
+    <select #enabled required>
+      <option disabled selected i18n="Generate label">Generate</option>
+      <option i18n value="WTL">Always</option>
+      <option i18n value="WL">Config.</option>
+      <option i18n value="WT">Upload</option>
+      <option i18n value=" ">Never</option>
+    </select>
+  </span>
+  <span class="layer-category" i18n-title title="Project"><legend i18n>Project</legend>
+    <select #project
+            [(ngModel)]="categoryFilter">
+      <option selected value="" i18n="Category label">Project</option>
+      <option *ngFor="let category of categories" value="{{category}}">{{category}}</option>
+    </select>
+    <img src="{{imagesLocation+'/filter.svg'}}" i18n-alt alt="Filter"
+         i18n-title title="Filter the list"
+         [className]="newLayerId?'no-filter':'filter'">
+  </span>
+  <span class="buttons">
+    <app-button action="create" [processing]="creating"
+                (press)="name.reportValidity() && labelType.reportValidity() && alignment.reportValidity() && createRow(name.value, labelType.value, alignment.value, manager.value, enabled.value, project.value) && !(name.value = '') && !(labelType.selectedIndex = alignment.selectedIndex = manager.selectedIndex = enabled.selectedIndex = project.selectedIndex = 0);"
+                i18n-title title="Add new record"></app-button>
+  </span>
+
+  <app-wait *ngIf="!rows"></app-wait>
+  <ng-container class="item" *ngFor="let layer of rows">
+    <ng-container *ngIf="newLayerId || (!categoryFilter || layer.category == categoryFilter) && (!managerFilter || layer.layer_manager_id == managerFilter)">
+      <span class="layer-id" i18n-title="Layer ID" title="ID"><legend i18n>ID</legend>
+        {{layer.id}}</span>
+      <span class="layer-type" i18n-title="Type of data in labels" title="Label Type"><legend i18n="Type of data in labels">Type</legend>
+        <select #labelType
+                [(ngModel)]="layer.type"
+                (input)="onChange(layer)">
+          <option value="string" i18n="Label type option">Text</option>
+          <option value="number" i18n="Label type option">Number</option>
+          <option value="ipa" i18n="Label type option">Phonological</option>
+          <option *ngIf="scope == 'phrase'" value="tree" i18n="Label type option">Tree</option>
+        </select>
+      </span>
+      <span class="layer-alignment" i18n-title title="Alignment"><legend i18n>Alignment</legend>
+        <select #alignment
+                [(ngModel)]="layer.alignment"
+                (input)="onChange(layer)">
+          <option *ngIf="scope == 'word' || scope == 'segment'" value="0" i18n>None</option>
+          <option *ngIf="scope != 'phrase'" value="1" i18n>Instants</option>
+          <option value="2" i18n>Intervals</option>
+        </select>
+      </span>
+      <span class="layer-manager" title="{{lookupLayerManager(layer.layer_manager_id)}}"><legend i18n *ngIf="layer.layer_manager_id">Manager</legend>
+        {{lookupLayerManager(layer.layer_manager_id)}}
+      </span>
+      <span class="layer-enabled" i18n-title title="When to generate layer data"><legend i18n *ngIf="layer.layer_manager_id">Generate</legend>
+        <select #enabled
+                [(ngModel)]="layer.enabled"
+                (input)="onChange(layer)"
+                *ngIf="layer.layer_manager_id">
+          <option i18n value="WTL">Always</option>
+          <option i18n value="WL">Config.</option>
+          <option i18n value="WT">Upload</option>
+          <option i18n value=" ">Never</option>
+        </select>
+      </span>
+      <span class="layer-category" i18n-title title="Project"><legend i18n>Project</legend>
+        <select #project
+                [(ngModel)]="layer.category"
+                (input)="onChange(layer)">
+          <option value="" i18n="No category">[none]</option>
+          <option *ngFor="let category of categories" value="{{category}}">{{category}}</option>
+        </select>
+      </span>
+      <span class="buttons">
+        <app-link *ngIf="layer.layer_manager_id"
+                  i18n-title title="Layer configuration"
+                  img="wrench.svg" icon="🔧"
+                  href="admin/layers/configure?layer_id={{layer.layer_id}}"></app-link>
+        <app-link *ngIf="layer.layer_manager_id && layer.parentId == schema.wordLayerId"
+                  i18n-title title="Layer dictionary"
+                  img="book.svg" icon="📕 "
+                  href="admin/layers/dictionary?layer_id={{layer.layer_id}}"></app-link>
+        <app-link *ngIf="layer.id == 'orthography'"
+                  i18n-title title="Lexical Auxiliary"
+                  img="add.svg" icon="+"
+                  href="admin/layers/lexicalAuxiliary?layer_id={{layer.layer_id}}"></app-link>
+        <app-link *ngIf="layer.type == 'ipa' && layer.layer_manager_id"
+                  i18n-title title="Pronounce Auxiliary"
+                  img="add.svg" icon="+"
+                  href="admin/layers/pronounceAuxiliary?layer_id={{layer.layer_id}}"></app-link>
+        <app-link *ngIf="layer.layer_manager_id"
+                  i18n-title title="Other configurations for this layer"
+                  img="project.svg" icon="⚙"
+                  href="admin/layers/auxiliaryManagers?layer_id={{layer.layer_id}}"></app-link>
+        <app-link *ngIf="layer.layer_manager_id"
+                  i18n-title title="Regenerate annotations"
+                  img="cog.svg" icon="⚙"
+                  href="admin/layers/regenerate?layer_id={{layer.layer_id}}"></app-link>
+        <app-link *ngIf="!layer.layer_manager_id"
+                  i18n-title title="Copy from other layer"
+                  img="duplicate.svg" icon="⧉"
+                  href="admin/layers/copy?layer_id={{layer.layer_id}}"></app-link>
+        <app-link i18n-title title="Clear layer"
+                  img="delete.svg" icon="⌫"
+                  href="admin/layers/clear?layer_id={{layer.layer_id}}"></app-link>
+        <app-button  action="delete" [processing]="layer._deleting"
+                     disabled="{{layer._cantDelete}}"
+                     (press)="deleteRow(layer);"
+                     title="{{layer._cantDelete}}"></app-button>
+      </span>
+      <span class="layer-description" i18n-title title="Description"><legend i18n>Description</legend>
+        <textarea #description
+                  [(ngModel)]="layer.description"
+                  (input)="onChange(layer)"
+                  i18n-placeholder placeholder="Description"></textarea>
+      </span>
+      
+    </ng-container>
+  </ng-container>
+</div>
+<div class="buttons">
+  <app-button action="save" [processing]="updating > 0"
+              (press)="updateChangedRows();"
+              *ngIf="changed"
+              i18n-title title="Save all changed records"></app-button>
+</div>

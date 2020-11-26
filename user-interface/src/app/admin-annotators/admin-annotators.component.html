@@ -19,7 +19,7 @@
         <app-link [routerLink]="['..','annotator',annotator.annotatorId,'tasks']"
                   i18n-title title="Automation tasks performed by this annotator"
                   i18n-label label="Tasks"
-                  img="cog.png" icon="⚙"
+                  img="cog.svg" icon="⚙"
                   ></app-link>
         <app-link *ngIf="annotator.hasExtWebapp"
                   [routerLink]="['..','annotator',annotator.annotatorId,'ext']"

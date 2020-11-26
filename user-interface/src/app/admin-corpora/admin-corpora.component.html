@@ -38,8 +38,9 @@
              i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <a i18n-title title="Information about this corpus"
-         href="corpus?corpus_id={{corpus.corpus_id}}">🛈</a>
+      <app-link [routerLink]="['corpus?corpus_id='+corpus.corpus_id]"
+                i18n-title title="Information about this corpus"
+                img="info.svg" icon="🛈"></app-link>
       <app-button  action="delete" [processing]="corpus._deleting"
                    disabled="{{corpus._cantDelete}}"
                    (press)="deleteRow(corpus);"

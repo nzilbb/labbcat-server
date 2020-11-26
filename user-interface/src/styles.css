@@ -142,6 +142,13 @@ button img {
     height: 16px;
     vertical-align: middle;
 }
+.lnk img, .lnk > span {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    padding: 6px;
+    display: inline-block;
+}
 button:disabled img {
     opacity: 0.5;
 }
@@ -201,6 +208,13 @@ app-task progress, app-task .progress-container, app-task .progress-container .p
     height: var(--progress-size);
 }
 
+.buttons {
+    text-align: right;
+}
+.lnk {
+    vertical-align: middle;
+    white-space: nowrap;
+}
 
 @media all and (min-width: 640px) {
     button {
@@ -214,6 +228,10 @@ app-task progress, app-task .progress-container, app-task .progress-container .p
     button.icon-only, app-button button.icon-only {
         min-width: 32px;
         width: 32px;
+    }
+    .lnk img, .lnk > span {
+        vertical-align: middle;
+        padding: unset;
     }
 }
 
@@ -233,7 +251,6 @@ app-task progress, app-task .progress-container, app-task .progress-container .p
     .list > .item > span.header-only { display: table-cell; }
     .list > .item > span > legend { display: none; }
     .list > .item > label { display: block; }
-    .buttons { text-align: right; }
 }
 
 .hidden-panel {

@@ -1,0 +1,56 @@
+input, select { width: 95%; }
+textarea { width: 100%; }
+
+.layer-list > span {
+    white-space: nowrap;
+}
+/* 
+ * Manager and Project dropdowns can be used for filtering too,
+ * but not when entering details for a new layer (no-filter).
+ */
+.filter, .no-filter {
+    vertical-align: middle;
+    height: 15px;
+    position: relative;
+    background: white;
+    right: 19px;
+    bottom: 1px;
+}
+/* when entering details for a new filter, hide the filter icon */
+.no-filter {
+    opacity: 0;
+    z-index: -1;
+}
+
+.layer-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.layer-description {
+    padding-bottom: 30px;
+}
+
+
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    legend { display: none; }
+    .layer-list {
+        display: grid;
+        width: auto;
+        grid-column-gap: 5px;
+        grid-row-gap: 0px;
+        grid-template-columns: repeat(7, auto);
+    }
+    .layer-description, app-wait {
+        grid-column: 2 / -1;
+    }
+    .layer-description textarea {
+        width: 100%;
+    }
+    .layer-manager {
+        max-width: 25vw;
+        overflow: hidden;
+    }
+    
+}

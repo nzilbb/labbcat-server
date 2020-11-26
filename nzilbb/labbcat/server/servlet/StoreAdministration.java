@@ -50,18 +50,18 @@ import org.xml.sax.*;
  * <tt>/api/admin/store/&hellip;</tt> :
  * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStoreAdministration.html">GraphStoreAdministration</a>
  * functions. This includes all requests supported by {@link StoreQuery} and {@link Store}.
-      <a id="saveLayer(nzilbb.ag.Layer)">
+      <a id="newLayer(nzilbb.ag.Layer)">
         <!--   -->
       </a>
       <ul class="blockList">
         <li class="blockList">
-          <h4>/api/admin/store/saveLayer</h4>
-          <div class="block">Saves changes to a layer, or adds a new layer.
+          <h4>/api/admin/store/newLayer</h4>
+          <div class="block">Adds a new layer.
           Only the <b> POST </b> or <b> PUT </b> HTTP method is supported.
           <ul>
           <li><em> Request Body </em> - a JSON-encoded object representing the layer definition, with the following structure:
           <ul>
-          <li> <q> id </q> : The ID of the layer to create or update. </li>
+          <li> <q> id </q> : The ID of the layer to create. </li>
           <li> <q> parentId </q> : The layer's parent layer id. </li>
           <li> <q> description </q> : The description of the layer. </li>
           <li> <q> alignment </q> : The layer's alignment 
@@ -86,6 +86,70 @@ import org.xml.sax.*;
           <ul>
           <li><em> 200 </em> : The layer was successfully saved. </li>
           <li><em> 400 </em> : The layer was not successfully saved. </li> 
+      </ul></li> 
+        </div>
+        </li>
+      </ul>
+      <a id="saveLayer(nzilbb.ag.Layer)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/admin/store/saveLayer</h4>
+          <div class="block">Saves changes to a layer, or adds a new layer.
+          Only the <b> POST </b> or <b> PUT </b> HTTP method is supported.
+          <ul>
+          <li><em> Request Body </em> - a JSON-encoded object representing the layer definition, with the following structure:
+          <ul>
+          <li> <q> id </q> : The ID of the layer to update. </li>
+          <li> <q> parentId </q> : The layer's parent layer id. </li>
+          <li> <q> description </q> : The description of the layer. </li>
+          <li> <q> alignment </q> : The layer's alignment 
+           - 0 for none, 1 for point alignment, 2 for interval alignment. </li>
+          <li> <q> peers </q> : Whether children on this layer have peers or not. </li>
+          <li> <q> peersOverlap </q> : Whether child peers on this layer can overlap or not. </li>
+          <li> <q> parentIncludes </q> : Whether the parent temporally includes the child. </li>
+          <li> <q> saturated </q> : Whether children must temporally fill the entire parent
+           duration (true) or not (false). </li>
+          <li> <q> type </q> : The type for labels on this layer, e.g. string, number,
+          boolean, ipa. </li>
+          <li> <q> validLabels </q> : List of valid label values for this layer, or null 
+          if the layer values are not restricted. The 'key' is the possible label value, and 
+          each key is associated with a description of the value (e.g. for displaying to users).  
+          </li>
+          <li> <q> category </q> : Category for the layer, if any. </li>
+          </ul>
+         </li>
+          <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+          object representing the layer defintion actually saved, using the same stucture as the body. </li>
+          <li><em> Response Status </em>
+          <ul>
+          <li><em> 200 </em> : The layer was successfully saved. </li>
+          <li><em> 400 </em> : The layer was not successfully saved. </li> 
+      </ul></li> 
+        </div>
+        </li>
+      </ul>
+      <a id="deleteLayer(String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/admin/store/deleteLayer</h4>
+          <div class="block">Deletes an existing layer.
+          Only the <b> POST </b> or <b> PUT </b> HTTP method is supported.
+          <ul>
+          <li><em> Request Body </em> - a application/x-www-form-urlencoded body with the following parameter:
+          <ul>
+          <li> <q> id </q> : The ID of the layer to delete. </li>
+          </ul>
+         </li>
+          <li><em> Response Body </em> - the standard JSON envelope, with the model as an
+          object representing the layer defintion actually saved, using the same stucture as the body. </li>
+          <li><em> Response Status </em>
+          <ul>
+          <li><em> 200 </em> : The layer was successfully deleted. </li>
+          <li><em> 400 </em> : The layer was not successfully deleted. </li> 
       </ul></li> 
         </div>
         </li>
@@ -256,8 +320,12 @@ public class StoreAdministration extends Store {
       String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
       // only allow POST requests
       if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
-         if (pathInfo.endsWith("savelayer")) {
+         if (pathInfo.endsWith("newlayer")) {
+            json = newLayer(request, response, store);
+         } else if (pathInfo.endsWith("savelayer")) {
             json = saveLayer(request, response, store);
+         } else if (pathInfo.endsWith("deletelayer")) {
+            json = deleteLayer(request, response, store);
          } else if (pathInfo.endsWith("newannotatortask")) {
             json = newAnnotatorTask(request, response, store);
          } else if (pathInfo.endsWith("saveannotatortaskdescription")) {
@@ -309,7 +377,29 @@ public class StoreAdministration extends Store {
    // TODO serializerForFilesSuffix
 
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#saveLayer(Layer)}
+    * Implementation of {@link nzilbb.ag.GraphStoreAdministration#newLayer(Layer)}
+    * @param request The HTTP request, the body of which must be a JSON-encoded {@link Layer}.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JsonObject newLayer(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      Vector<String> errors = new Vector<String>();
+      // read the incoming object
+      JsonReader reader = Json.createReader(request.getReader());
+      // incoming object:
+      JsonObject json = reader.readObject();
+      Layer layer = new Layer(json);
+      if (layer.getId() == null) errors.add(localize(request, "No ID specified."));
+      if (errors.size() > 0) return failureResult(errors);
+      return successResult(
+         request, store.newLayer(layer), null);
+   }
+   
+   /**
+    * Implementation of {@link nzilbb.ag.GraphStoreAdministration#saveLayer(Layer)}
     * @param request The HTTP request, the body of which must be a JSON-encoded {@link Layer}.
     * @param request The HTTP response.
     * @param store A graph store object.
@@ -328,7 +418,25 @@ public class StoreAdministration extends Store {
       if (errors.size() > 0) return failureResult(errors);
       return successResult(
          request, store.saveLayer(layer), null);
-   }      
+   }
+   
+   /**
+    * Implementation of {@link nzilbb.ag.GraphStoreAdministration#deleteLayer(Layer)}
+    * @param request The HTTP request, the body of which must be a JSON-encoded {@link Layer}.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JsonObject deleteLayer(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add(localize(request, "No ID specified."));
+      if (errors.size() > 0) return failureResult(errors);
+      store.deleteLayer(id);
+      return successResult(request, null, "Layer deleted: {0}", id);
+   }
    
    /**
     * Create a new annotator task with the given ID and description.
