@@ -10,7 +10,7 @@
            [(ngModel)]="newLayerId"></span>
   <span class="layer-type" i18n-title="Type of data in labels" title="Label Type"><legend i18n="Type of data in labels">Type</legend>
     <select #labelType required>
-      <option disabled selected i18n="Label type label">Type</option>
+      <option disabled selected value="" i18n="Label type label">Type</option>
       <option value="string" i18n="Label type option">Text</option>
       <option value="number" i18n="Label type option">Number</option>
       <option value="ipa" i18n="Label type option">Phonological</option>
@@ -19,7 +19,7 @@
   </span>
   <span class="layer-alignment" i18n-title title="Alignment"><legend i18n>Alignment</legend>
     <select #alignment required>
-      <option disabled selected i18n="Alignment label">Alignment</option>
+      <option disabled selected value="" i18n="Alignment label">Alignment</option>
       <option *ngIf="scope == 'word'" value="0" i18n>None</option>
       <option *ngIf="scope != 'phrase'" value="1" i18n>Instants</option>
       <option value="2" i18n>Intervals</option>
@@ -37,7 +37,7 @@
   </span>
   <span class="layer-enabled" i18n-title title="When to generate layer data"><legend i18n>Generate</legend>
     <select #enabled required>
-      <option disabled selected i18n="Generate label">Generate</option>
+      <option disabled selected value="" i18n="Generate label">Generate</option>
       <option i18n value="WTL">Always</option>
       <option i18n value="WL">Config.</option>
       <option i18n value="WT">Upload</option>
