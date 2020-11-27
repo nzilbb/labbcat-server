@@ -158,6 +158,12 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
             // update the model with the field returned
             if (row) this.rows.push(row as Layer);
             this.updateChangedFlag();
+
+            // if it's a managed layer, go to configuration page
+            if (layer.layer_manager_id) {
+                document.location.href = 
+                    `${environment.baseUrl}admin/layers/configure?id=${layer.id}`;
+            }
         });
         return true;
     }
