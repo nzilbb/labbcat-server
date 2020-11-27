@@ -21,12 +21,12 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() excludeCorpus: boolean;
     transcriptAttributes: Layer[];
     @Input() excludeRoot: boolean;
-    @Input() freeform: boolean;
-    freeformLayers: Layer[];
-    @Input() meta: boolean;
+    @Input() span: boolean;
+    spanLayers: Layer[];
+    @Input() phrase: boolean;
     @Input() excludeTurn: boolean;
     @Input() excludeUtterance: boolean;
-    metaLayers: Layer[];
+    phraseLayers: Layer[];
     @Input() word: boolean;
     wordLayers: Layer[];
     @Input() segment: boolean;
@@ -47,8 +47,8 @@ export class LayerCheckboxesComponent implements OnInit {
             this.schema = schema;
             this.participantAttributes = [];
             this.transcriptAttributes = [];
-            this.freeformLayers = [];
-            this.metaLayers = [];
+            this.spanLayers = [];
+            this.phraseLayers = [];
             this.wordLayers = [];
             this.segmentLayers = [];
             if (!this.selected) this.selected = [];
@@ -64,11 +64,11 @@ export class LayerCheckboxesComponent implements OnInit {
                     || layer.parentId == schema.wordLayerId) {
                     this.wordLayers.push(layer);
                 } else if (layer.id == schema.turnLayerId) {
-                    if (!this.excludeTurn) this.metaLayers.push(layer);
+                    if (!this.excludeTurn) this.phraseLayers.push(layer);
                 } else if (layer.id == schema.utteranceLayerId) {
-                    if (!this.excludeUtterance) this.metaLayers.push(layer);
+                    if (!this.excludeUtterance) this.phraseLayers.push(layer);
                 } else if (layer.parentId == schema.turnLayerId) {
-                    this.metaLayers.push(layer);
+                    this.phraseLayers.push(layer);
                 } else if (layer.id == schema.participantLayerId) {
                     if (!this.excludeParticipant) this.participantAttributes.push(layer);
                 } else if (layer.id == "main_participant") {
@@ -82,7 +82,7 @@ export class LayerCheckboxesComponent implements OnInit {
                     if (layer.alignment == 0) {
                         this.transcriptAttributes.push(layer);
                     } else {
-                        this.freeformLayers.push(layer);
+                        this.spanLayers.push(layer);
                     }
                 }
             }

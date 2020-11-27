@@ -1,5 +1,5 @@
 <div *ngIf="participant" class="layers participant-layers">
-  <div i18n="layer type header" class="header">Participant</div>
+  <div class="header" i18n-title title="Participant Attributes" i18n="layer type header">Participant</div>
   <label *ngFor="let layer of participantAttributes" title="{{layer.description}}">
     <app-grouped-checkbox
       group="{{name}}"
@@ -17,7 +17,7 @@
   </label>
 </div>
 <div *ngIf="transcript" class="layers transcript-layers">
-  <div i18n="layer type header" class="header">Transcript</div>
+  <div class="header" i18n-title title="Transcript Attributes" i18n="layer type header">Transcript</div>
   <label *ngFor="let layer of transcriptAttributes" title="{{layer.description}}">
     <app-grouped-checkbox
       group="{{name}}"
@@ -34,9 +34,9 @@
     {{TranscriptLayerLabel(layer.id)}}
   </label>
 </div>
-<div *ngIf="freeform" class="layers freeform-layers">
-  <div i18n="layer type header" class="header">Freeform</div>
-  <label *ngFor="let layer of freeformLayers" title="{{layer.description}}">
+<div *ngIf="span" class="layers span-layers">
+  <div class="header" i18n-title title="Span Layers" i18n="layer type header">Span</div>
+  <label *ngFor="let layer of spanLayers" title="{{layer.description}}">
     <app-grouped-checkbox
       group="{{name}}"
       name="{{name}}"
@@ -56,9 +56,9 @@
     {{layer.id}}
   </label>
 </div>
-<div *ngIf="meta" class="layers meta-layers">
-  <div i18n="layer type header" class="header">Meta</div>
-  <label *ngFor="let layer of metaLayers" title="{{layer.description}}">
+<div *ngIf="phrase" class="layers phrase-layers">
+  <div class="header" i18n-title title="Phrase Layers" i18n="layer type header">Phrase</div>
+  <label *ngFor="let layer of phraseLayers" title="{{layer.description}}">
     <app-grouped-checkbox
       group="{{name}}"
       name="{{name}}"
@@ -91,7 +91,7 @@
   </label>
 </div>
 <div *ngIf="word" class="layers word-layers">
-  <div i18n="layer type header" class="header">Word</div>
+  <div class="header" i18n-title title="Word Layers" i18n="layer type header">Word</div>
   <label *ngFor="let layer of wordLayers" title="{{layer.description}}">
     <app-grouped-checkbox
       group="{{name}}"
@@ -109,7 +109,7 @@
   </label>
 </div>
 <div *ngIf="segment" class="layers segment-layers">
-  <div i18n="layer type header" class="header">Segment Layers</div>
+  <div class="header" i18n-title title="Segment Layers" i18n="layer type header" >Segment</div>
   <label *ngFor="let layer of segmentLayers" title="{{layer.description}}">
     <app-grouped-checkbox
       group="{{name}}"
