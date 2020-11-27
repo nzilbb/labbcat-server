@@ -663,7 +663,7 @@ public class SqlGraphStore
    {
       Layer layer = new Layer();
       layer.setId(rs.getString("short_description"));
-      layer.setDescription(rs.getString("description"));
+      layer.setDescription(rs.getString("notes"));
       layer.setAlignment(rs.getInt("alignment"));
       layer.setParentId(rs.getString("parent_name"));
       layer.setParentIncludes(rs.getInt("parent_includes") == 1);

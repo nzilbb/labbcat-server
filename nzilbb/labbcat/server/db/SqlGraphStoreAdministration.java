@@ -363,7 +363,7 @@ public class SqlGraphStoreAdministration
             // description
             if (!oldVersion.getDescription().equals(layer.getDescription())) {
                PreparedStatement sql = getConnection().prepareStatement(
-                  "UPDATE layer SET description = ? WHERE layer_id = ?"); // TODO "notes" instead, once "description" and "notes" are merged into one field.
+                  "UPDATE layer SET notes = ? WHERE layer_id = ?");
                sql.setString(1, layer.getDescription());
                sql.setInt(2, layer_id);
                sql.executeUpdate();
@@ -525,42 +525,43 @@ public class SqlGraphStoreAdministration
             
          sql = getConnection().prepareStatement(
             "INSERT INTO layer"
-            +" (layer_id, short_description, description, alignment," // TODO description->notes
+            +" (layer_id, short_description, description, notes, alignment," // TODO remove description
             +" peers, peers_overlap, parent_includes, saturated, type,"
             +" layer_manager_id, enabled, project_id, parent_id, scope)"
-            +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
          sql.setInt(1, layer_id);
          sql.setString(2, layer.getId());
-         sql.setString(3, layer.getDescription());
-         sql.setInt(4, layer.getAlignment());
-         sql.setInt(5, layer.getPeers()?1:0);
-         sql.setInt(6, layer.getPeersOverlap()?1:0);
-         sql.setInt(7, layer.getParentIncludes()?1:0);
-         sql.setInt(8, layer.getSaturated()?1:0);
-         sql.setString(9, subtype);
+         sql.setString(3, layer.getId()); // 'description', which is deprecated
+         sql.setString(4, layer.getDescription()); // 'notes'
+         sql.setInt(5, layer.getAlignment());
+         sql.setInt(6, layer.getPeers()?1:0);
+         sql.setInt(7, layer.getPeersOverlap()?1:0);
+         sql.setInt(8, layer.getParentIncludes()?1:0);
+         sql.setInt(9, layer.getSaturated()?1:0);
+         sql.setString(10, subtype);
          if (layer.containsKey("layer_manager_id")
              && layer.get("layer_manager_id").toString().length() > 0) {
-            sql.setString(10, layer.get("layer_manager_id").toString());
-         } else {
-            sql.setNull(10, java.sql.Types.VARCHAR);
-         }
-         if (layer.containsKey("enabled")
-             && layer.get("enabled").toString().length() > 0) {
-            sql.setString(11, layer.get("enabled").toString());
+            sql.setString(11, layer.get("layer_manager_id").toString());
          } else {
             sql.setNull(11, java.sql.Types.VARCHAR);
          }
-         if (project_id >= 0) {
-            sql.setInt(12, project_id);
+         if (layer.containsKey("enabled")
+             && layer.get("enabled").toString().length() > 0) {
+            sql.setString(12, layer.get("enabled").toString());
          } else {
-            sql.setNull(12, java.sql.Types.INTEGER);
+            sql.setNull(12, java.sql.Types.VARCHAR);
+         }
+         if (project_id >= 0) {
+            sql.setInt(13, project_id);
+         } else {
+            sql.setNull(13, java.sql.Types.INTEGER);
          }
             
          try {
             if (parent.getId().equals(schema.getWordLayerId())) { // word layer
                   
-               sql.setInt(13, (Integer)parent.get("layer_id"));
-               sql.setString(14, SqlConstants.SCOPE_WORD.toUpperCase());
+               sql.setInt(14, (Integer)parent.get("layer_id"));
+               sql.setString(15, SqlConstants.SCOPE_WORD.toUpperCase());
                sql.executeUpdate();
                sql.close();
                   
@@ -608,8 +609,8 @@ public class SqlGraphStoreAdministration
                   
             } else if (parent.getId().equals("segments")) { // segments layer
                   
-               sql.setInt(13, (Integer)parent.get("layer_id"));
-               sql.setString(14, SqlConstants.SCOPE_SEGMENT.toUpperCase());
+               sql.setInt(14, (Integer)parent.get("layer_id"));
+               sql.setString(15, SqlConstants.SCOPE_SEGMENT.toUpperCase());
                sql.executeUpdate();
                sql.close();
                   
@@ -662,8 +663,8 @@ public class SqlGraphStoreAdministration
                   
             } else if (parent.getId().equals(schema.getTurnLayerId())) { // phrase layer
                   
-               sql.setInt(13, (Integer)parent.get("layer_id"));
-               sql.setString(14, SqlConstants.SCOPE_META.toUpperCase());
+               sql.setInt(14, (Integer)parent.get("layer_id"));
+               sql.setString(15, SqlConstants.SCOPE_META.toUpperCase());
                sql.executeUpdate();
                sql.close();
                   
@@ -704,11 +705,38 @@ public class SqlGraphStoreAdministration
                sql.executeUpdate();
                sql.close();
                   
+               // create transcript speaker table (some layer managers still need this)
+               sql = getConnection().prepareStatement(
+                  "CREATE TABLE transcript_speaker_layer_"+layer_id+" ("
+                  +" speaker_number INT NOT NULL,"
+                  +" ag_id INT NOT NULL,"
+                  +" variant int(10) unsigned NOT NULL default 0,"
+                  +" representation varchar(100) NOT NULL default '''',"
+                  +" number DOUBLE unsigned NOT NULL default 0,"
+                  +" PRIMARY KEY  (speaker_number,ag_id,variant),"
+                  +" KEY IDX_REPRESENTATION (representation)"
+                  +" ) ENGINE=MyISAM;");
+               sql.executeUpdate();
+               sql.close();
+                  
+               // create corpus table (some layer managers still need this)
+               sql = getConnection().prepareStatement(
+                  "CREATE TABLE corpus_layer_"+layer_id+" ("
+                  +" corpus_id int(11) NOT NULL default 0,"
+                  +" variant int(10) unsigned NOT NULL default 0,"
+                  +" representation varchar(100) NOT NULL default '''',"
+                  +" number DOUBLE unsigned NOT NULL default 0,"
+                  +" PRIMARY KEY  (corpus_id, variant),"
+                  +" KEY IDX_REPRESENTATION (representation)"
+                  +" ) ENGINE=MyISAM;");
+               sql.executeUpdate();
+               sql.close();
+                  
             } else if (parent.getId().equals(schema.getRoot().getId())) { // span layer
                if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
                      
-                  sql.setInt(13, (Integer)parent.get("layer_id"));
-                  sql.setString(14, SqlConstants.SCOPE_FREEFORM.toUpperCase());
+                  sql.setInt(14, (Integer)parent.get("layer_id"));
+                  sql.setString(15, SqlConstants.SCOPE_FREEFORM.toUpperCase());
                   sql.executeUpdate();
                   sql.close();
                      
@@ -745,11 +773,12 @@ public class SqlGraphStoreAdministration
                      + " ) ENGINE=MyISAM;");
                   sql.executeUpdate();
                   sql.close();
-                     
+
                } else { // layer.getAlignment() == Constants.ALIGNMENT_NONE TODO transcript attributes
                   throw new StoreException("Span layers must be aligned");
                }
             } else { // TODO support participant attributes
+               // TODO support episode layers
                throw new StoreException(
                   "Invalid parentId "+layer.getParentId()
                   +" - must be one of: " + schema.getWordLayerId() + ", " + schema.getTurnLayerId()
@@ -815,6 +844,16 @@ public class SqlGraphStoreAdministration
          sql.setInt(1, layer_id);
          sql.executeUpdate();
          sql.close();
+
+         // drop old 'meta' layer tables
+         sql = getConnection().prepareStatement(
+            "DROP TABLE IF EXISTS transcript_speaker_layer_" + layer_id);
+         sql.executeUpdate();
+         sql.close();         
+         sql = getConnection().prepareStatement(
+            "DROP TABLE IF EXISTS corpus_layer_" + layer_id);
+         sql.executeUpdate();
+         sql.close();            
 
          // delete the layer row
          sql = getConnection().prepareStatement(
