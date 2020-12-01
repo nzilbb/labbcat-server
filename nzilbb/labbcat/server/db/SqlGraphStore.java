@@ -1662,7 +1662,7 @@ public class SqlGraphStore
     *  <li><code>labels('noise').includes('bell')</code></li>
     *  <li><code>list('transcript_languages').length gt; 1</code></li>
     *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('transcript').length gt; 100</code></li>
+    *  <li><code>list('word').length &gt; 100</code></li>
     *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
     *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
     * labels('participant').includes('Robert')</code></li> 
@@ -1706,7 +1706,7 @@ public class SqlGraphStore
     *  <li><code>labels('noise').includes('bell')</code></li>
     *  <li><code>list('transcript_languages').length gt; 1</code></li>
     *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('transcript').length gt; 100</code></li>
+    *  <li><code>list('word').length &gt; 100</code></li>
     *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
     *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
     * labels('participant').includes('Robert')</code></li> 
@@ -1757,7 +1757,7 @@ public class SqlGraphStore
     *  <li><code>labels('noise').includes('bell')</code></li>
     *  <li><code>list('transcript_languages').length gt; 1</code></li>
     *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('transcript').length gt; 100</code></li>
+    *  <li><code>list('word').length &gt; 100</code></li>
     *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
     *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
     * labels('participant').includes('Robert')</code></li> 
@@ -2355,7 +2355,7 @@ public class SqlGraphStore
     * my('utterances').start.offset = 12.345</code> - TODO</li> 
     *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography' &amp;&amp;
     * start.offset &gt; 10.5</code></li> 
-    *  <li><code>layer.id == 'utterance' &amp;&amp; list('transcript').includes('ew_0_456')</code></li>
+    *  <li><code>layer.id == 'utterance' &amp;&amp; list('word').includes('ew_0_456')</code></li>
     *  <li><code>previous.id = 'ew_0_456'</code> - TODO</li>
     *  <li><code>layerId = 'utterance' &amp;&amp; labels('orthography').includes('foo')</code></li>
     *  <li><code>layerId = 'utterance' &amp;&amp; labels('participant').includes('Ada')</code></li>
@@ -2375,7 +2375,7 @@ public class SqlGraphStore
       Layer layer = null;
       Pattern wordBasedQueryPattern = Pattern.compile(
          // TODO change harcoded schema.wordLayerId
-         "my\\('transcript'\\)\\.id ==? 'ew_0_(\\d+)' (AND|&&) layer\\.id ==? '([^']+)'");
+         "my\\('word'\\)\\.id ==? 'ew_0_(\\d+)' (AND|&&) layer\\.id ==? '([^']+)'");
       Matcher wordBasedQueryMatcher = wordBasedQueryPattern.matcher(expression);
       if (wordBasedQueryMatcher.matches())
       { // optimization for common word_annotation_id-based queries may be possible
