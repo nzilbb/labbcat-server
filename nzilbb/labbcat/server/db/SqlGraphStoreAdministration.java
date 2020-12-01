@@ -476,12 +476,14 @@ public class SqlGraphStoreAdministration
          throw new StoreException("No ID specified");
       }
       layer.setId(layer.getId().trim());
+      Layer existingLayer = null;
       try {
-         Layer existingLayer = getLayer(layer.getId());
-         // if we get this far, the layer already exists
-         throw new StoreException("Layer already exists: " + layer.getId());
+         existingLayer = getLayer(layer.getId());
       } catch(StoreException exception) {
-      }         
+      }
+      if (existingLayer != null) {
+         throw new StoreException("Layer already exists: " + layer.getId());
+      }
       
       String subtype = "T"; // Constants.TYPE_STRING
       if (Constants.TYPE_NUMBER.equals(layer.getType())) {

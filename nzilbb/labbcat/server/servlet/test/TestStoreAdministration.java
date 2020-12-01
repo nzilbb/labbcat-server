@@ -694,7 +694,7 @@ public class TestStoreAdministration
             l.newLayer(testLayer);
             fail("Test layer can't be created if it already exists: " + testLayer.getId());
          } catch (StoreException x) {
-         }      
+         }
 
          // edit it
          testLayer.setDescription("Changed description")
