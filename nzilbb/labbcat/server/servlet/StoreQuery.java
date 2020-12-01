@@ -324,7 +324,7 @@ import org.xml.sax.*;
                   <li><code>'bell' IN labels('noise')</code></li>
                   <li><code>list('transcript_languages').length gt; 1</code></li>
                   <li><code>list('participant_languages').length gt; 1</code></li>
-                  <li><code>list('transcript').length gt; 100</code></li>
+                  <li><code>list('word').length gt; 100</code></li>
                   <li><code>'Robert' IN annotators('transcript_rating')</code></li>
                   <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
             </ul></dd>

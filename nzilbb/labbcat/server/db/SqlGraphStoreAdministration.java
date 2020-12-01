@@ -607,7 +607,7 @@ public class SqlGraphStoreAdministration
                sql.executeUpdate();
                sql.close();
                   
-            } else if (parent.getId().equals("segments")) { // segments layer
+            } else if (parent.getId().equals("segment")) { // segment layer
                   
                sql.setInt(14, (Integer)parent.get("layer_id"));
                sql.setString(15, SqlConstants.SCOPE_SEGMENT.toUpperCase());
@@ -820,7 +820,7 @@ public class SqlGraphStoreAdministration
              || id.equals(schema.getUtteranceLayerId())
              || id.equals(schema.getTurnLayerId())
              || id.equals("orthography")
-             || id.equals("segments")) {
+             || id.equals("segment")) {
             throw new StoreException("Cannot delete system layer: " + id);
          }
          Layer layer = getLayer(id);

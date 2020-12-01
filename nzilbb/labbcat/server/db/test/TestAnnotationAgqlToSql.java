@@ -44,7 +44,7 @@ public class TestAnnotationAgqlToSql {
     */
    public Schema getSchema() {
       return new Schema(
-         "who", "turn", "utterance", "transcript",
+         "who", "turn", "utterance", "word",
             
          (Layer)(new Layer("transcript_language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true))
@@ -112,24 +112,24 @@ public class TestAnnotationAgqlToSql {
                  .setParentId("turn").setParentIncludes(true))
          .with("layer_id", 20).with("scope", "M"),
       
-         (Layer)(new Layer("transcript", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         (Layer)(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
                  .setParentId("turn").setParentIncludes(true))
          .with("layer_id", 0).with("scope", "W"),
       
          (Layer)(new Layer("orthography", "Orthography").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(false)
-                 .setParentId("transcript").setParentIncludes(true))
+                 .setParentId("word").setParentIncludes(true))
          .with("layer_id", 2).with("scope", "W"),
       
-         (Layer)(new Layer("segments", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         (Layer)(new Layer("segment", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
-                 .setParentId("transcript").setParentIncludes(true))
+                 .setParentId("word").setParentIncludes(true))
          .with("layer_id", 1).with("scope", "S"),
       
          (Layer)(new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true)
-                 .setParentId("transcript").setParentIncludes(true))
+                 .setParentId("word").setParentIncludes(true))
          .with("layer_id", 23).with("scope", "W"))
 
          .setEpisodeLayerId("episode")
@@ -143,7 +143,7 @@ public class TestAnnotationAgqlToSql {
          "DISTINCT annotation.*", null, null);
       assertEquals("SQL - id ==",
                    "SELECT DISTINCT annotation.*,"
-                   +" 'transcript' AS layer"
+                   +" 'word' AS layer"
                    +" FROM annotation_layer_0 annotation"
                    +" WHERE CONCAT('ew_0_', annotation.annotation_id) = 'ew_0_456'"
                    +" ORDER BY ag_id, parent_id, annotation_id",
@@ -262,7 +262,7 @@ public class TestAnnotationAgqlToSql {
    @Test public void inList() throws AGQLException {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query q = transformer.sqlFor(
-         "layer.id == 'utterance' && list('transcript').includes('ew_0_456')",
+         "layer.id == 'utterance' && list('word').includes('ew_0_456')",
          "DISTINCT annotation.*", null, null);
       assertEquals("SQL",
                    "SELECT DISTINCT annotation.*, 'utterance' AS layer"
@@ -540,7 +540,7 @@ public class TestAnnotationAgqlToSql {
                    q.sql);
       
       q = transformer.sqlFor(
-         "layerId = 'utterance' && list('transcript').length > 100",
+         "layerId = 'utterance' && list('word').length > 100",
          "DISTINCT annotation.*", null, null);
       assertEquals("Annotation - SQL",
                    "SELECT DISTINCT annotation.*, 'utterance' AS layer"
@@ -614,14 +614,14 @@ public class TestAnnotationAgqlToSql {
                    q.sql);
 
          q = transformer.sqlFor(
-         "layerId = 'transcript' && annotators('language').includes('someone')",
+         "layerId = 'word' && annotators('language').includes('someone')",
          "DISTINCT annotation.*", null, null);
          assertEquals("Annotation - SQL",
-                      "SELECT DISTINCT annotation.*, 'transcript' AS layer"
+                      "SELECT DISTINCT annotation.*, 'word' AS layer"
                       +" FROM annotation_layer_0 annotation"
                       +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
                       +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
-                      +" WHERE 'transcript' = 'transcript'"
+                      +" WHERE 'word' = 'word'"
                       +" AND 'someone' IN (SELECT annotated_by"
                       +" FROM annotation_layer_20 otherLayer"
                       +" INNER JOIN anchor otherLayer_start"
@@ -674,7 +674,7 @@ public class TestAnnotationAgqlToSql {
          null);
       assertEquals(
          "SQL - label",
-         "SELECT DISTINCT annotation.*, graph.ag_id, 'transcript' AS layer"
+         "SELECT DISTINCT annotation.*, graph.ag_id, 'word' AS layer"
          +" FROM annotation_layer_0 annotation"
          +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
          +" WHERE CONCAT('ew_0_', annotation.annotation_id) = 'ew_0_456'"

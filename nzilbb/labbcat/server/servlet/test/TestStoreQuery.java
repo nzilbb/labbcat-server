@@ -77,7 +77,7 @@ public class TestStoreQuery
                  ids.length > 0);
       Set<String> idSet = Arrays.asList(ids).stream().collect(Collectors.toSet());
       assertTrue("getLayerIds: Has transcript layer",
-                 idSet.contains("transcript"));
+                 idSet.contains("word"));
 
       Layer[] layers = l.getLayers();
       //for (String id : ids) System.out.println("layer " + id);

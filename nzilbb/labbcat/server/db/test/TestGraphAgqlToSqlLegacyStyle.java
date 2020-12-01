@@ -44,7 +44,7 @@ public class TestGraphAgqlToSqlLegacyStyle {
     */
    public Schema getSchema() {
       return new Schema(
-         "who", "turn", "utterance", "transcript",
+         "participant", "turn", "utterance", "word",
             
          (Layer)(new Layer("transcript_language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(false).setPeersOverlap(false).setSaturated(true))
@@ -73,20 +73,20 @@ public class TestGraphAgqlToSqlLegacyStyle {
                  .setPeers(false).setPeersOverlap(false).setSaturated(true).setParentId("episode"))
          .with("layer_id", -200),
       
-         (Layer)(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+         (Layer)(new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
                  .setPeers(true).setPeersOverlap(true).setSaturated(true))
          .with("layer_id", -2),
       
          (Layer)(new Layer("main_participant", "Main Participant").setAlignment(Constants.ALIGNMENT_NONE)
-                 .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("who"))
+                 .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("participant"))
          .with("layer_id", -3),
       
          (Layer)(new Layer("participant_gender", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
-                 .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("who"))
+                 .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("participant"))
          .with("class_id", "speaker").with("attribute", "gender"),
       
          (Layer)(new Layer("participant_age", "Age").setAlignment(Constants.ALIGNMENT_NONE)
-                 .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("who"))
+                 .setPeers(true).setPeersOverlap(true).setSaturated(true).setParentId("participant"))
          .with("class_id", "speaker").with("attribute", "age"),
       
          (Layer)(new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -107,7 +107,7 @@ public class TestGraphAgqlToSqlLegacyStyle {
                  .setParentId("turn").setParentIncludes(true))
          .with("layer_id", 12),
       
-         (Layer)(new Layer("transcript", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         (Layer)(new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
                  .setParentId("turn").setParentIncludes(true))
          .with("layer_id", 0),
@@ -273,7 +273,7 @@ public class TestGraphAgqlToSqlLegacyStyle {
    @Test public void whoLabels() throws AGQLException {
       GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
       GraphAgqlToSql.Query q = transformer.sqlFor(
-         "'someone' IN labels('who')",
+         "'someone' IN labels('participant')",
          "transcript.transcript_id", null, null, null);
       assertEquals("Transcript attribute - SQL",
                    "SELECT transcript.transcript_id FROM transcript"
@@ -288,7 +288,7 @@ public class TestGraphAgqlToSqlLegacyStyle {
       assertEquals("Parameter count", 0, q.parameters.size());
 
       q = transformer.sqlFor(
-         "my('who').label = 'someone'",
+         "my('participant').label = 'someone'",
          "transcript.transcript_id", null, null, null);
       assertEquals("Transcript attribute - SQL",
                    "SELECT transcript.transcript_id FROM transcript"
@@ -470,7 +470,7 @@ public class TestGraphAgqlToSqlLegacyStyle {
       assertEquals("Parameter count", 0, q.parameters.size());
 
       q = transformer.sqlFor(
-         "list('transcript').length > 100",
+         "list('word').length > 100",
          "transcript.transcript_id", null, null, null);
       assertEquals("Annotation - SQL",
                    "SELECT transcript.transcript_id FROM transcript"

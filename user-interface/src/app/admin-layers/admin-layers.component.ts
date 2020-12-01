@@ -92,7 +92,7 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
             if (messages) messages.forEach(m => this.messageService.info(m));
             this.rows = [];
             if (schema) {
-                let isLayerInScope = l => l.parentId == schema.wordLayerId && l.id != "segments";
+                let isLayerInScope = l => l.parentId == schema.wordLayerId && l.id != "segment";
                 if (this.scope == "phrase") {
                     isLayerInScope = l => l.parentId == schema.turnLayerId
                         && l.id != schema.wordLayerId && l.id != schema.utteranceLayerId;
@@ -100,7 +100,7 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
                     isLayerInScope = l => l.parentId == schema.root.id
                         && l.alignment > 0;
                 } else if (this.scope == "segment") {
-                    isLayerInScope = l => l.parentId == "segments" || l.id == "segments";
+                    isLayerInScope = l => l.parentId == "segment" || l.id == "segment";
                 }
                 for (let l in schema.layers) {
                     let layer = schema.layers[l] as Layer;
@@ -149,7 +149,7 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
         switch (this.scope) {
             case "phrase":  { layer.parentId = this.schema.turnLayerId; break; }
             case "span":    { layer.parentId = this.schema.root.id; break; }
-            case "segment": { layer.parentId = "segments"; break; }
+            case "segment": { layer.parentId = "segment"; break; }
         }
         this.labbcatService.labbcat.newLayer(layer, (row, errors, messages) => {
             this.creating = false;

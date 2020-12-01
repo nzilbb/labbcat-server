@@ -620,7 +620,7 @@ public class TestStoreAdministration
    
    @Test public void newSaveDeleteLayer() throws Exception {
       Layer testLayer = new Layer("unit-test", "Unit test layer")
-         .setParentId("transcript") // TODO change to "word"
+         .setParentId("word")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true)
          .setPeersOverlap(true)
@@ -692,10 +692,9 @@ public class TestStoreAdministration
          // can't create it again
          try {
             l.newLayer(testLayer);
-            fail("Test layer can't be create if it already exists: " + testLayer.getId());
+            fail("Test layer can't be created if it already exists: " + testLayer.getId());
          } catch (StoreException x) {
-         }
-      
+         }      
 
          // edit it
          testLayer.setDescription("Changed description")
@@ -714,7 +713,7 @@ public class TestStoreAdministration
          assertEquals("saved Description",
                       newLayer.getDescription(), testLayer.getDescription());
          assertEquals("parent not saved",
-                      newLayer.getParentId(), "transcript"); // TODO change to word
+                      newLayer.getParentId(), "word");
          assertEquals("saved alignment",
                       newLayer.getAlignment(), testLayer.getAlignment());
          assertEquals("saved peers",
@@ -737,7 +736,7 @@ public class TestStoreAdministration
          assertEquals("saved Description",
                       newLayer.getDescription(), testLayer.getDescription());
          assertEquals("parent not saved",
-                      newLayer.getParentId(), "transcript"); // TODO change to word
+                      newLayer.getParentId(), "word");
          assertEquals("saved alignment",
                       newLayer.getAlignment(), testLayer.getAlignment());
          assertEquals("saved peers",

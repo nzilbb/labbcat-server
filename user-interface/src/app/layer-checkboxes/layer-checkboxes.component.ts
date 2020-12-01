@@ -57,8 +57,8 @@ export class LayerCheckboxesComponent implements OnInit {
                 if (this.selected.includes(layer.id)) layer._selected = true;
                 if (layer.id == schema.root.id) {
                     if (!this.excludeRoot) this.transcriptAttributes.push(layer);
-                } else if (layer.id == "segments"
-                    || layer.parentId == "segments") {
+                } else if (layer.id == "segment"
+                    || layer.parentId == "segment") {
                     this.segmentLayers.push(layer);
                 } else if (layer.id == schema.wordLayerId
                     || layer.parentId == schema.wordLayerId) {

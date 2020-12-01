@@ -37,7 +37,7 @@ export class MatchesComponent implements OnInit {
     showCsvOptions = false;
     selectedLayers: string[];
     showEmuOptions = false;
-    emuLayers = [ "transcript", "segments" ];
+    emuLayers = [ "word", "segment" ];
     htkLayer: string; // TODO handle IUtteranceDataGenerator annotators better
     baseUrl: string;
     emuWebApp = false;
@@ -88,7 +88,7 @@ export class MatchesComponent implements OnInit {
             this.zeroPad = (""+task.size).length;
             this.searchedLayers = task.layers || [];
             this.selectedLayers = this.searchedLayers
-                .concat([ "transcript", "participant", "graph", "corpus" ]);
+                .concat([ "word", "participant", "graph", "corpus" ]);
             
             this.readMatches();
         });
