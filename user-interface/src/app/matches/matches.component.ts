@@ -88,7 +88,7 @@ export class MatchesComponent implements OnInit {
             this.zeroPad = (""+task.size).length;
             this.searchedLayers = task.layers || [];
             this.selectedLayers = this.searchedLayers
-                .concat([ "word", "participant", "graph", "corpus" ]);
+                .concat([ "word", "participant", "transcript", "corpus" ]);
             
             this.readMatches();
         });

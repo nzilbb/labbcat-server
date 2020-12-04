@@ -154,7 +154,7 @@ public class TestGraphAgqlToSqlLegacyStyle {
       assertEquals("Parameter count - id", 0, q.parameters.size());
     
       q = transformer.sqlFor(
-         "my('graph').label NOT MATCHES \"Ada.+\"",
+         "my('transcript').label NOT MATCHES \"Ada.+\"",
          "transcript.transcript_id, transcript.ag_id", null, "id ASC", "LIMIT 1,1");
       assertEquals("SQL - id",
                    "SELECT transcript.transcript_id, transcript.ag_id FROM transcript"

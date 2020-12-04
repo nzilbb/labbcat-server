@@ -154,7 +154,7 @@ public class TestGraphAgqlToSql {
       assertEquals("Parameter count - id", 0, q.parameters.size());
     
       q = transformer.sqlFor(
-         "!/Ada.+/.test(my('graph').label)",
+         "!/Ada.+/.test(my('transcript').label)",
          "transcript.transcript_id, transcript.ag_id", null, "id ASC", "LIMIT 1,1");
       assertEquals("SQL - id",
                    "SELECT transcript.transcript_id, transcript.ag_id FROM transcript"

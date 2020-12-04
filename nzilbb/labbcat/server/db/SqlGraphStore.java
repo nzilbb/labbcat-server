@@ -670,7 +670,7 @@ public class SqlGraphStore implements GraphStore {
       layer.setId("transcript_" + rs.getString("attribute"));
       layer.setDescription(rs.getString("label"));
       layer.setAlignment(Constants.ALIGNMENT_NONE);
-      layer.setParentId("graph");
+      layer.setParentId("transcript");
       layer.setParentIncludes(true);
       layer.setPeers(rs.getInt("peers") == 1
                      || rs.getString("style").matches(".*multiple.*"));
@@ -807,7 +807,7 @@ public class SqlGraphStore implements GraphStore {
                .setPeers(false)
                .setPeersOverlap(false)
                .setSaturated(true)
-               .setParentId("graph")
+               .setParentId("transcript")
                .setParentIncludes(true);
             layer.setValidLabels(new LinkedHashMap<String,String>());
             PreparedStatement sql = getConnection().prepareStatement(
@@ -1732,7 +1732,7 @@ public class SqlGraphStore implements GraphStore {
             sqlAnnotation.setInt(2, iAgId);
             for (String layerId : layersToLoad) {
                Layer layer = getLayer(layerId);
-               if (layerId.equals("graph")) { // special case
+               if (layerId.equals("transcript")) { // special case
                   continue;
                } else if (layerId.equals("participant")) {
                   // create participant layer...
