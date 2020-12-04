@@ -26,17 +26,17 @@ export class ButtonComponent implements OnInit {
             case "create":
                 this.label = "New"; // TODO l10n
                 this.icon = "➕";
-                this.img = "new.png"; // TODO replace with svg, or maybe just use icon
+                this.img = "add.svg"; // TODO replace with svg, or maybe just use icon
                 break;
             case "delete":
                 this.label = "Delete"; // TODO l10n
                 this.icon = "➖"; 
-                this.img = "delete.png"; // TODO replace with svg
+                this.img = "trash.svg"; // TODO replace with svg
                 break;
             case "save":
                 this.label = "Save"; // TODO l10n
                 this.icon = "💾";
-                this.img = "save.png"; // TODO replace with svg
+                this.img = "save.svg"; // TODO replace with svg
                 break;
         }
         this.title = this.title || this.label;

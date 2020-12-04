@@ -38,9 +38,9 @@
   <span class="layer-enabled" i18n-title title="When to generate layer data"><legend i18n>Generate</legend>
     <select #enabled required>
       <option disabled selected value="" i18n="Generate label">Generate</option>
-      <option i18n value="WTL">Always</option>
-      <option i18n value="WL">Config.</option>
-      <option i18n value="WT">Upload</option>
+      <option i18n value="WTL" *ngIf="manager.value">Always</option>
+      <option i18n value="WL" *ngIf="manager.value">Config.</option>
+      <option i18n value="WT" *ngIf="manager.value">Upload</option>
       <option i18n value=" ">Never</option>
     </select>
   </span>
@@ -58,6 +58,11 @@
     <app-button action="create" [processing]="creating"
                 (press)="name.reportValidity() && labelType.reportValidity() && alignment.reportValidity() && createRow(name.value, labelType.value, alignment.value, manager.value, enabled.value, project.value) && !(name.value = '') && !(labelType.selectedIndex = alignment.selectedIndex = manager.selectedIndex = enabled.selectedIndex = project.selectedIndex = 0);"
                 i18n-title title="Add new record"></app-button>
+  </span>
+  <span class="layer-description new-layer" i18n-title title="Description"><legend i18n>Description</legend>
+    <textarea #description
+              i18n-placeholder placeholder="Description"
+              [className]="newLayerId?'show-description':'hide-description'"></textarea>
   </span>
 
   <app-wait *ngIf="!rows"></app-wait>
