@@ -457,8 +457,6 @@ public class SqlGraphStoreAdministration
 
       } catch (SQLException x) {
          throw new StoreException(x);
-      } catch (StoreException x) { // not found
-         throw new StoreException("Layer not found: " + layer.getId());
       }
    }
    /**
