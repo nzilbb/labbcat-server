@@ -1707,7 +1707,7 @@ public class SqlGraphStore implements GraphStore {
          if (layerIds != null) {
             // for each layer specified, all ancestor layers must also be loaded, to
             // ensure the graph is well structured.
-            LinkedHashSet<String> layersToLoad = new LinkedHashSet<String>();
+            final LinkedHashSet<String> layersToLoad = new LinkedHashSet<String>();
             for (String layerId : layerIds) {
                Layer layer = mainSchema.getLayer(layerId);
                if (layer != null) {
@@ -1717,6 +1717,17 @@ public class SqlGraphStore implements GraphStore {
                   layersToLoad.add(layerId);
                } // layer exists
             } // next specified layer
+
+            // order them top-down to ensure parents are available if required
+            LayerHierarchyTraversal<LinkedHashSet<String>> topDown
+               = new LayerHierarchyTraversal<LinkedHashSet<String>>(
+                  new LinkedHashSet<String>(), mainSchema) {
+                     protected void pre(Layer layer) {
+                        if (layersToLoad.contains(layer.getId())) {
+                           result.add(layer.getId());
+                        }
+                     }
+                  };
 	    
             // load annotations
             PreparedStatement sqlAnnotation = getConnection().prepareStatement(
@@ -1730,7 +1741,7 @@ public class SqlGraphStore implements GraphStore {
                +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
                +" WHERE layer.ag_id = ? ORDER BY start.offset, end.offset DESC, annotation_id");
             sqlAnnotation.setInt(2, iAgId);
-            for (String layerId : layersToLoad) {
+            for (String layerId : topDown.getResult()) {
                Layer layer = getLayer(layerId);
                if (layerId.equals("transcript")) { // special case
                   continue;
