@@ -119,12 +119,12 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
     }
 
     creating = false;
-    createRow(name: string, labelType: string, alignment: string, manager: string, enabled: string, project: string): boolean {
+    createRow(name: string, labelType: string, alignment: string, manager: string, enabled: string, project: string, description: string): boolean {
         this.creating = true;
         
         let layer = {
             id: name,
-            description: "",
+            description: description,
             parentId: this.schema.wordLayerId,
             alignment: Number(alignment),
             peers: true,

@@ -56,7 +56,7 @@
   </span>
   <span class="buttons">
     <app-button action="create" [processing]="creating"
-                (press)="name.reportValidity() && labelType.reportValidity() && alignment.reportValidity() && createRow(name.value, labelType.value, alignment.value, manager.value, enabled.value, project.value) && !(name.value = '') && !(labelType.selectedIndex = alignment.selectedIndex = manager.selectedIndex = enabled.selectedIndex = project.selectedIndex = 0);"
+                (press)="name.reportValidity() && labelType.reportValidity() && alignment.reportValidity() && createRow(name.value, labelType.value, alignment.value, manager.value, enabled.value, project.value, description.value) && !(name.value = description.value = '') && !(labelType.selectedIndex = alignment.selectedIndex = manager.selectedIndex = enabled.selectedIndex = project.selectedIndex = 0);"
                 i18n-title title="Add new record"></app-button>
   </span>
   <span class="layer-description new-layer" i18n-title title="Description"><legend i18n>Description</legend>
