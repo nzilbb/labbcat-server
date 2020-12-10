@@ -11,7 +11,9 @@ export interface Layer {
     category: string;
     validLabels: object;
 
+    layer_id: string; // TODO - remove this once new automation API is live
     layer_manager_id: string; // TODO - remove this once new automation API is live
+    extra: string; // TODO - remove this once new automation API is live
     enabled: string; // TODO - remove this once new automation API is live
 
     _selected: boolean;

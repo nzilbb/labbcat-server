@@ -1,0 +1,33 @@
+#dictionary-panel {
+    display: flex;
+    flex-direction: column;
+    
+}
+.missing-annotations {
+    display: grid;
+    width: auto;
+    grid-column-gap: 5px;
+    grid-row-gap: 0px;
+    grid-template-columns: repeat(4, min-content);
+}
+.lookup {
+    white-space: nowrap;
+    grid-column: 2 / -1;
+}
+.lookup h3 {
+    font-size: 12pt;
+}
+.no-matches:before { content: "["; }
+.no-matches:after { content: "]"; }
+app-disc-helper {
+    grid-column: 2 / -1;
+}
+
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    #dictionary-panel {
+        display: flex;
+        flex-direction: row;
+        
+    }
+}

@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Response } from '../response';
 import { Match } from '../match';
 import { Task } from '../task';
+import { Layer } from '../layer';
 import { User } from '../user';
 import { SerializationDescriptor } from '../serialization-descriptor';
 import { MessageService } from '../message.service';
@@ -25,6 +26,7 @@ export class MatchesComponent implements OnInit {
     searchedLayers: string[];
     matches: Match[];
     threadId: string;
+    task: Task;
     wordsContext: number;
     transcriptUrl: string;
     pageLength = 20;
@@ -38,7 +40,8 @@ export class MatchesComponent implements OnInit {
     selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "word", "segment" ];
-    htkLayer: string; // TODO handle IUtteranceDataGenerator annotators better
+    schema: any;
+    htkLayer: Layer; // TODO handle IUtteranceDataGenerator annotators better
     baseUrl: string;
     emuWebApp = false;
     user: User;
@@ -50,7 +53,8 @@ export class MatchesComponent implements OnInit {
     constructor(
         private labbcatService: LabbcatService,
         private messageService: MessageService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private router: Router
     ) { }
     
     ngOnInit(): void {
@@ -81,8 +85,9 @@ export class MatchesComponent implements OnInit {
     }
     readTaskStatus(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
-            if (errors) for (let message of errors) this.messageService.error(message);
-            if (messages) for (let message of messages) this.messageService.info(message);
+            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (messages) messages.forEach(m => this.messageService.info(m));
+            this.task = task;
             this.status = task.status;
             this.totalMatches = task.size; // TODO need something more formal
             this.zeroPad = (""+task.size).length;
@@ -96,8 +101,8 @@ export class MatchesComponent implements OnInit {
     
     readSerializers(): void {
         this.labbcatService.labbcat.getSerializerDescriptors((descriptors, errors, messages) => {
-            if (errors) for (let message of errors) this.messageService.error(message);
-            if (messages) for (let message of messages) this.messageService.info(message);
+            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (messages) messages.forEach(m => this.messageService.info(m));
             this.serializers = [];
             for (let descriptor of descriptors) {
                 this.serializers.push(descriptor as SerializationDescriptor);
@@ -114,8 +119,8 @@ export class MatchesComponent implements OnInit {
         this.labbcatService.labbcat.getMatches(
             this.threadId, this.wordsContext, this.pageLength, this.pageNumber,
             (results, errors, messages) => {
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (messages) messages.forEach(m => this.messageService.info(m));
                 this.name = results.name;
                 for (let match of results.matches) {
                     match._selected = true;
@@ -126,8 +131,15 @@ export class MatchesComponent implements OnInit {
     }
 
     readGenerableLayers(): void {
-        this.labbcatService.labbcat.getLayer("htk", (layer, errors, messages) => {
-            if (layer) this.htkLayer = layer.id;
+        this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
+            this.schema = schema;
+            for (let layerId in schema.layers) {
+                const layer = schema.layers[layerId] as Layer;
+                if (layer.layer_manager_id == "HTK") {
+                    this.htkLayer = layer;
+                    break; // TODO looks for other layers that are generable from here
+                }
+            }
         });
     }
     
@@ -218,6 +230,40 @@ export class MatchesComponent implements OnInit {
     }
 
     runAnnotator(layerId: string): void {
+        const layer = this.schema.layers[layerId] as Layer;
+        if (layer && layer.layer_manager_id == "HTK") {
+            try {
+                // TODO api/missingAnnotations -> api/suggest -> api/lookup -> api/edit/dictionary/addentry -> generateLayerUtterances
+                const seriesId = this.task.seriesId;
+                const tokenLayerId = this.schema.layers["orthography"]?"orthography":this.schema.wordLayerId;
+                // the annotationLayerId is currently specified in the htk layer configuration
+                const PronunciationLayerId = /PronunciationLayerId=([0-9]+)/.exec(
+                    this.htkLayer.extra)[1];
+                // PronunciationLayerId is currently a layer_id number, so convert it to a layerId
+                let annotationLayerId = null;
+                for (let layerId in this.schema.layers) {
+                    const layer = this.schema.layers[layerId] as Layer;
+                    if (layer.layer_id == PronunciationLayerId) {
+                        annotationLayerId = layerId;
+                        break;
+                    }
+                } // next layer
+                if (annotationLayerId) {
+                    this.router.navigate(["missingAnnotations"], {
+                        queryParams : {
+                            sourceThreadId : this.threadId,
+                            seriesId : seriesId,
+                            tokenLayerId : tokenLayerId,
+                            annotationLayerId : annotationLayerId }});
+
+                    return;
+                }
+            } catch (x) {
+                console.log("Could not process HTK layer: "+x);
+                // just fall through...
+            }
+        } // HTK layer
+        
         this.form.nativeElement.action = this.baseUrl + "generateLayerUtterances";
         this.generateLayer.nativeElement.value = layerId;
         this.todo.nativeElement.value = "generate";

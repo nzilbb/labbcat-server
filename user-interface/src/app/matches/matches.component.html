@@ -186,7 +186,7 @@
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayer">
     <input #generate_layer type="hidden" name="generate_layer" value="">
-    <app-button (press)="runAnnotator(htkLayer);"
+    <app-button (press)="runAnnotator(htkLayer.id);"
                 img="cog.png" icon="⚙"
                 i18n-label label="Generate HTK"></app-button>
   </div>

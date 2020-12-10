@@ -1,0 +1,13 @@
+.disc-helper {
+    text-align: left;
+    white-space: nowrap;
+    position: absolute;
+    background: white;
+    border: 1px solid var(--theme-color);
+    padding: 10px;
+}
+.disc-helper a {
+    padding-left: 4px;
+    color: var(--theme-color);
+    text-decoration: none;
+}

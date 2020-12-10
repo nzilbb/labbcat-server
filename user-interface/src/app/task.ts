@@ -3,6 +3,7 @@ export interface Task {
     threadName: string;
     resultUrl: string;
     resultText: string;
+    seriesId: string;
     running: boolean;
     duration: number;
     percentComplete: number;

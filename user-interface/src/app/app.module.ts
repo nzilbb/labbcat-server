@@ -40,6 +40,9 @@ import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AutofocusDirective } from './autofocus.directive';
 import { AdminLayersComponent } from './admin-layers/admin-layers.component';
+import { MissingAnnotationsComponent } from './missing-annotations/missing-annotations.component';
+import { IpaHelperComponent } from './ipa-helper/ipa-helper.component';
+import { DiscHelperComponent } from './disc-helper/disc-helper.component';
 
 @NgModule({
     declarations: [
@@ -76,7 +79,10 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
         AdminUsersComponent,
         AdminChangePasswordComponent,
         AutofocusDirective,
-        AdminLayersComponent
+        AdminLayersComponent,
+        MissingAnnotationsComponent,
+        IpaHelperComponent,
+        DiscHelperComponent
     ],
     imports: [
         BrowserModule,
@@ -87,6 +93,8 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
             { path: 'login', component: LoginComponent },
             { path: 'task', component: TaskComponent },
             { path: 'matches', component: MatchesComponent },
+            { path: 'missingAnnotations', component: MissingAnnotationsComponent,
+              canDeactivate: [PendingChangesGuard] },
             
             { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent,
               canDeactivate: [PendingChangesGuard] },

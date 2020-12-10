@@ -185,7 +185,6 @@ progress::-moz-progress-bar { background: var(--theme-color); }
 
 app-button {
     display: inline-block;
-    min-width: 80px;
 }
 app-button button {
     width: 100%;

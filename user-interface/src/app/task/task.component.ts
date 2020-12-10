@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, EventEmitter, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Task } from '../task';
@@ -15,6 +15,8 @@ export class TaskComponent implements OnInit {
     @Input() cancelButton = true;
     @Input() showStatus = true;
     @Input() showName = true;
+    @Input() autoOpenResults = true;
+    @Output() finished = new EventEmitter<Task>();
     task: Task;
     timeout: number;
     cancelling = false;
@@ -41,15 +43,18 @@ export class TaskComponent implements OnInit {
         if (!this.cancelling) { // only update status if we're not cancelling...
             this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
                 // show messages
-                if (errors) for (let message of errors) this.messageService.error(message);
-                if (messages) for (let message of messages) this.messageService.info(message);
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
                 
                 // update model
                 this.task = task || this.task;
 
                 // if finished and there's a result URL, open the results
                 if (!this.task.running && this.task.resultUrl) {
-                    this.openResults();
+                    this.finished.emit(this.task);
+                    if (this.autoOpenResults) {
+                        this.openResults();
+                    }
                 }
                 
                 // while this is visible, we keep checking the status of the thread.
@@ -83,8 +88,8 @@ export class TaskComponent implements OnInit {
         this.labbcatService.labbcat.cancelTask(this.threadId, (result, errors, messages) => {
 
             // show messages
-            if (errors) for (let message of errors) this.messageService.error(message);
-            if (messages) for (let message of messages) this.messageService.info(message);
+            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (messages) messages.forEach(m => this.messageService.info(m));
 
             // stop the regular timeout from firing
             clearTimeout(this.timeout);
