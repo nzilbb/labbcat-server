@@ -251,6 +251,7 @@ export class MatchesComponent implements OnInit {
                 if (annotationLayerId) {
                     this.router.navigate(["missingAnnotations"], {
                         queryParams : {
+                            generateLayerId : layerId,
                             sourceThreadId : this.threadId,
                             seriesId : seriesId,
                             tokenLayerId : tokenLayerId,

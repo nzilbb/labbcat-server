@@ -181,14 +181,16 @@
   </div>
   <div id="export-audio" class="controls">
     <app-button (press)="exportAudio();"
-                img="audio.png" icon="🔊"
+                img="audio.svg" icon="🔊"
                 i18n-label label="Audio Export"></app-button>
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayer">
     <input #generate_layer type="hidden" name="generate_layer" value="">
     <app-button (press)="runAnnotator(htkLayer.id);"
-                img="cog.png" icon="⚙"
-                i18n-label label="Generate HTK"></app-button>
+                [disabled]="!selectAll"
+                img="cog.svg" icon="⚙"
+                i18n-title title="Generate"
+                label="{{htkLayer.id}}"></app-button>
   </div>
   <app-keep-alive threadId="{{threadId}}"></app-keep-alive>
 </form>

@@ -5,6 +5,8 @@
     background: white;
     border: 1px solid var(--theme-color);
     padding: 10px;
+    animation-name: fade-in;
+    animation-duration: 500ms;
 }
 .ipa-helper a {
     padding-left: 4px;

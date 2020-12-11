@@ -8,11 +8,13 @@
     width: auto;
     grid-column-gap: 5px;
     grid-row-gap: 0px;
-    grid-template-columns: repeat(4, min-content);
+    grid-template-columns: repeat(5, min-content);
 }
-.lookup {
+fieldset.lookup {
     white-space: nowrap;
     grid-column: 2 / -1;
+    animation-name: fade-down;
+    animation-duration: 500ms;
 }
 .lookup h3 {
     font-size: 12pt;
@@ -20,9 +22,11 @@
 .no-matches:before { content: "["; }
 .no-matches:after { content: "]"; }
 app-disc-helper {
-    grid-column: 2 / -1;
+    grid-column: 3 / -1;
 }
-
+app-wait.row-pending { /* never taller than the row */
+    height: 30px;
+}
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
     #dictionary-panel {
