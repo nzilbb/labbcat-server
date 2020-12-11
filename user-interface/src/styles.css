@@ -3,7 +3,31 @@
 /* some things used in lots of places: */
 :root {
     --progress-size: 22px;
-    --theme-color: #859044;
+    --theme-color: #7C883C;
+}
+
+/* animations */
+@keyframes sidle-fade {
+    0%   { opacity: 0; left: 10%; }
+    10%  { opacity: 1; left: 0%; }
+    90%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { end: 1; }
+}
+@keyframes fade-down {
+    from {
+        opacity: 0;
+        position: relative;
+        top: -50px;
+    }
+    to {
+        end: 1;
+        position: relative;
+        top: 0px;
+    }
 }
 
 /* general look and feel */

@@ -3,12 +3,6 @@
     width: 80vw;
 }
 
-@keyframes sidle-fade {
-    0%   { opacity: 0; left: 10%; }
-    10%  { opacity: 1; left: 0%; }
-    90%  { opacity: 1; }
-    100% { opacity: 0; }
-}
 .message {
     position: relative;
     font-style: italic;
