@@ -72,7 +72,7 @@
     </ng-container>
   </div>
 </div>
-<div class="buttons" *ngIf="missing">  
+<div class="buttons">  
   <app-button action="save" [processing]="updating"
               (press)="addNextEntry();"
               *ngIf="changed"
@@ -82,7 +82,8 @@
     <input type="hidden" name="threadId" value="{{sourceThreadId}}">
     <input type="hidden" name="collection_name" value="{{seriesName}}">
     <input type="hidden" name="todo" value="force">
-    <app-button (press)="form.submit()"
+    <app-button *ngIf="missing"
+                (press)="form.submit()"
                 img="cog.svg"
                 i18n-label label="Start"
                 i18n-title title="Start forced alignment"></app-button>

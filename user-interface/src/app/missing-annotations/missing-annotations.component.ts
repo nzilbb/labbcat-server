@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Response } from '../response';
@@ -14,6 +14,7 @@ import { AdminComponent } from '../admin-component';
     styleUrls: ['./missing-annotations.component.css']
 })
 export class MissingAnnotationsComponent extends AdminComponent implements OnInit {
+    @ViewChild("form") form;
 
     generateLayerId: string; // layerId for the layer to generate afterwards
     sourceThreadId: string; // threadId of original search/allUtterances result    
@@ -120,6 +121,8 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
                     setTimeout(()=>this.getSuggestions(), 1000);
                     // missing is the map of word->first-occurrence                    
                     this.missing = missing;
+
+                    this.checkMissing();
                 }, task.resultUrl)
                 .send();
         }
@@ -217,5 +220,17 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
 
         // some of the new entries may lead to new suggestions
         this.getSuggestions();
+
+        // or maybe that was the last entry required, so we can continue...
+        this.checkMissing();
+    }
+
+    checkMissing(): void {
+        // are there no missing entries?
+        if (Object.keys(this.missing).length == 0) {
+            this.messageService.info("No missing entries.");
+            // go straight to generating the layer
+            this.form.nativeElement.submit();
+        }
     }
 }
