@@ -699,6 +699,49 @@ public class TestAnnotationAgqlToSql {
       assertEquals("Parameter count - label", 0, q.parameters.size());
    }
 
+   @Test public void confidence() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query q = transformer.sqlFor(
+         "layer.id == 'segment' AND confidence >= 100",
+         "COUNT(*)", null, null);
+      assertEquals("SQL - layer.id ==",
+                   "SELECT COUNT(*),"
+                   +" 'segment' AS layer"
+                   +" FROM annotation_layer_1 annotation"
+                   +" WHERE 'segment' = 'segment'"
+                   +" AND annotation.label_status >= 100",
+                   q.sql);
+   }
+
+   @Test public void anchorConfidence() throws AGQLException {
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query q = transformer.sqlFor(
+         "layer.id == 'segment' AND start.confidence >= 100",
+         "COUNT(*)", null, null);
+      assertEquals("SQL - layer.id ==",
+                   "SELECT COUNT(*),"
+                   +" 'segment' AS layer"
+                   +" FROM annotation_layer_1 annotation"
+                   +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+                   +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+                   +" WHERE 'segment' = 'segment'"
+                   +" AND start.alignment_status >= 100",
+                   q.sql);
+
+      q = transformer.sqlFor(
+         "layer.id == 'segment' AND end.confidence == 50",
+         "COUNT(*)", null, null);
+      assertEquals("SQL - layer.id ==",
+                   "SELECT COUNT(*),"
+                   +" 'segment' AS layer"
+                   +" FROM annotation_layer_1 annotation"
+                   +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+                   +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+                   +" WHERE 'segment' = 'segment'"
+                   +" AND end.alignment_status = 50",
+                   q.sql);
+   }
+
    public static void main(String args[])  {
       org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.db.test.TestAnnotationAgqlToSql");
    }

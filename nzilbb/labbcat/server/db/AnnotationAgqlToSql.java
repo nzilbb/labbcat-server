@@ -863,6 +863,10 @@ public class AnnotationAgqlToSql {
                space();
                conditions.push("annotation.ordinal");
             }
+            @Override public void exitConfidenceOperand(AGQLParser.ConfidenceOperandContext ctx) {
+               space();
+               conditions.push("annotation.label_status");
+            }
             @Override public void exitAtomListExpression(AGQLParser.AtomListExpressionContext ctx) {
                // pop all the elements off the stack
                Stack<String> atoms = new Stack<String>();
@@ -976,6 +980,18 @@ public class AnnotationAgqlToSql {
                   flags.anchorsJoin = true;
                } else {
                   conditions.push("start.offset");
+                  flags.anchorsJoin = true;
+               }
+            }
+            @Override public void exitAnchorConfidenceExpression(AGQLParser.AnchorConfidenceExpressionContext ctx) {
+               space();
+               if (ctx.anchorExpression().other != null) {
+                  errors.add("Can only reference this annotation's anchor offsets: " + ctx.getText());
+               } else if (ctx.getText().contains("end")) {
+                  conditions.push("end.alignment_status");
+                  flags.anchorsJoin = true;
+               } else {
+                  conditions.push("start.alignment_status");
                   flags.anchorsJoin = true;
                }
             }
