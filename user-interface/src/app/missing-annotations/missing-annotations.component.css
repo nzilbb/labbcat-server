@@ -27,6 +27,12 @@ app-disc-helper {
 app-wait.row-pending { /* never taller than the row */
     height: 30px;
 }
+class.spinner {
+    min-width: 30px;
+}
+.lookup button { /* ensure phonemic button labels aren't capitalized */
+    text-transform: none; 
+}
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
     #dictionary-panel {

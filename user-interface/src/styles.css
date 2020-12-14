@@ -3,7 +3,7 @@
 /* some things used in lots of places: */
 :root {
     --progress-size: 22px;
-    --theme-color: #7C883C;
+    --theme-color: #78842E;
 }
 
 /* animations */
@@ -231,6 +231,11 @@ app-task progress, app-task .progress-container, app-task .progress-container .p
     height: var(--progress-size);
 }
 
+app-missing-annotations {
+    margin: auto;
+    width: max-content;
+    display: block;
+}
 .buttons {
     text-align: right;
 }
@@ -264,6 +269,7 @@ app-task progress, app-task .progress-container, app-task .progress-container .p
     app-root nav { min-height: 100px; max-width: min-content; }
     app-root aside { max-width: min-content; }
     app-admin-menu li:first-child { border-top: 1px solid var(--theme-color); border-left: none; }
+    app-missing-annotations progress { min-width: 400px; }
     .list { display: table; }
     .list > .item {
         display: table-row;
