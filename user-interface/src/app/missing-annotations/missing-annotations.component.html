@@ -81,7 +81,7 @@
     <input type="hidden" name="generate_layer_id" value="{{generateLayer.layer_id}}">
     <input type="hidden" name="threadId" value="{{sourceThreadId}}">
     <input type="hidden" name="collection_name" value="{{seriesName}}">
-    <input type="hidden" name="todo" value="force">
+    <input type="hidden" name="todo" value="generate-now">
     <app-button *ngIf="missing"
                 (press)="form.submit()"
                 img="cog.svg"
