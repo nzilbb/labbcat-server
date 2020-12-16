@@ -3924,6 +3924,7 @@ public class SqlGraphStore implements GraphStore {
    {
       Timers timers = new Timers();
       timers.start("saveGraph");
+      Schema schema = getSchema();
       Graph graph = transcript;
       try {
          // validate the graph before saving it
@@ -3996,7 +3997,6 @@ public class SqlGraphStore implements GraphStore {
          // censor the graph?
          String censorshipRegexp = getSystemAttribute("censorshipRegexp");
          if (censorshipRegexp != null && censorshipRegexp.length() > 0) { // censorship required
-            Schema schema = getSchema();
             Pattern censorshipPattern = Pattern.compile(censorshipRegexp);
             String censorshipLayer = getSystemAttribute("censorshipLayer");
             String censorshipLabel = getSystemAttribute("censorshipLabel");
@@ -4054,6 +4054,9 @@ public class SqlGraphStore implements GraphStore {
          Collection<Change> changes = graph.getChanges();
          if (changes.size() == 0) return false;
 
+         boolean wordChanges = false;
+         boolean segmentChanges = false;
+
          timers.start("changes");
          Object lastObject = graph;
          for (Change change : changes) {
@@ -4105,6 +4108,14 @@ public class SqlGraphStore implements GraphStore {
                                               + change.getObject().getId());
                   }
                } else {
+                  if (((Annotation)change.getObject()).getLayerId()
+                      .equals(schema.getWordLayerId())) {
+                     wordChanges = true;
+                  } else if (((Annotation)change.getObject()).getLayerId()
+                      .equals("segment")) {
+                     segmentChanges = true;
+                  }
+                  
                   try {
                      if (change.getObject().getChange() != Change.Operation.Create) {
                         Object[] o = fmtAnnotationId.parse(change.getObject().getId());
@@ -4128,13 +4139,15 @@ public class SqlGraphStore implements GraphStore {
                         try {
                            Long databaseId = (Long)o[2];
                         } catch(ClassCastException castX) {
-                           throw new StoreException("Parsed annotation ID is not a Long integer:"
-                                                    + change.getObject().getId() + " - " + o[2]);
+                           throw new StoreException(
+                              "Parsed annotation ID is not a Long integer:"
+                              + change.getObject().getId() + " - " + o[2]);
                         }
                      }
                   } catch(ParseException parseX) {
-                     throw new StoreException("Could not parse annotation ID:"
-                                              + change.getObject().getId());
+                     throw new StoreException(
+                        "Could not parse annotation ID " + change.getObject().getId()
+                        + " : " + change.getObject().toJsonString() + " ("+change.getObject().getChange()+" - "+change.getOperation()+")");
                   }
                } // not a participant annotation
             } else {
@@ -4398,6 +4411,58 @@ public class SqlGraphStore implements GraphStore {
             // untag anchors and annotations
             for (Anchor a : graph.getAnchors().values()) a.remove("@SqlUpdated");
             for (Annotation a : graph.getAnnotationsById().values()) a.remove("@SqlUpdated");
+
+            if (graph.getChange() != Change.Operation.Create) { // updating
+               // ensure that tag annotations have their anchors updated with their parents,
+               // even if they're not mentioned in the given graph
+               
+               if (wordChanges) {
+                  PreparedStatement sqlFixWordTagAnchors = connection.prepareStatement(
+                     "UPDATE annotation_layer_?"
+                     +" INNER JOIN annotation_layer_0"
+                     +" ON annotation_layer_?.word_annotation_id = annotation_layer_0.annotation_id"
+                     +" SET annotation_layer_?.start_anchor_id = annotation_layer_0.start_anchor_id,"
+                     +" annotation_layer_?.end_anchor_id = annotation_layer_0.end_anchor_id"
+                     +" WHERE annotation_layer_?.ag_id = ?");
+                  sqlFixWordTagAnchors.setInt(6, iAgId);
+                  for (Layer child : schema.getWordLayer().getChildren().values()) {
+                     if (child.getAlignment() == Constants.ALIGNMENT_NONE) { // tag
+                        Integer layer_id = (Integer)child.get("layer_id");
+                        sqlFixWordTagAnchors.setInt(1, layer_id);
+                        sqlFixWordTagAnchors.setInt(2, layer_id);
+                        sqlFixWordTagAnchors.setInt(3, layer_id);
+                        sqlFixWordTagAnchors.setInt(4, layer_id);
+                        sqlFixWordTagAnchors.setInt(5, layer_id);
+                        sqlFixWordTagAnchors.executeUpdate();
+                     }
+                  } // next child
+                  sqlFixWordTagAnchors.close();
+               }
+
+               if (segmentChanges) {
+                  PreparedStatement sqlFixSegmentTagAnchors = connection.prepareStatement(
+                     "UPDATE annotation_layer_?"
+                     +" INNER JOIN annotation_layer_1"
+                     +" ON annotation_layer_?.segment_annotation_id = annotation_layer_1.annotation_id"
+                     +" SET annotation_layer_?.start_anchor_id = annotation_layer_1.start_anchor_id,"
+                     +" annotation_layer_?.end_anchor_id = annotation_layer_1.end_anchor_id"
+                     +" WHERE annotation_layer_?.ag_id = ?");
+                  sqlFixSegmentTagAnchors.setInt(6, iAgId);
+                  for (Layer child : schema.getLayer("segment").getChildren().values()) {
+                     if (child.getAlignment() == Constants.ALIGNMENT_NONE) { // tag
+                        Integer layer_id = (Integer)child.get("layer_id");
+                        sqlFixSegmentTagAnchors.setInt(1, layer_id);
+                        sqlFixSegmentTagAnchors.setInt(2, layer_id);
+                        sqlFixSegmentTagAnchors.setInt(3, layer_id);
+                        sqlFixSegmentTagAnchors.setInt(4, layer_id);
+                        sqlFixSegmentTagAnchors.setInt(5, layer_id);
+                        sqlFixSegmentTagAnchors.executeUpdate();
+                     }
+                  } // next child
+                  sqlFixSegmentTagAnchors.close();
+               }
+            }
+
          } finally {
             sqlInsertAnchor.close();
             sqlUpdateAnchor.close();
