@@ -118,18 +118,20 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
                     for (let word in this.labels) { // create entries
                         this.wordsPending[word] = true;
                     }
-                    setTimeout(()=>this.getSuggestions(), 1000);
+                    // give the UX a second to create elements, then check missing words
+                    setTimeout(()=>this.checkMissing(), 1000);
                     // missing is the map of word->first-occurrence                    
                     this.missing = missing;
 
-                    this.checkMissing();
                 }, task.resultUrl)
                 .send();
         }
     }
 
-    getSuggestions(): void {
+    checkMissing(): void {
+        let missingWords = false;
         for (let word in this.labels) {
+            missingWords = true;
             const w = word;
             this.wordsPending[w] = true;
             // ask dictionary for a suggested pronunciation
@@ -142,6 +144,12 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
                     }
                 });                        
         }
+        if (!missingWords) {
+            this.messageService.info("No missing entries.");
+            // go straight to generating the layer
+            this.form.nativeElement.submit();
+        }
+        
     }
 
     lookupWord: string;
@@ -219,18 +227,7 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
         this.changed = false;
 
         // some of the new entries may lead to new suggestions
-        this.getSuggestions();
-
-        // or maybe that was the last entry required, so we can continue...
         this.checkMissing();
     }
 
-    checkMissing(): void {
-        // are there no missing entries?
-        if (Object.keys(this.missing).length == 0) {
-            this.messageService.info("No missing entries.");
-            // go straight to generating the layer
-            this.form.nativeElement.submit();
-        }
-    }
 }

@@ -20,7 +20,7 @@
   <span class="layer-alignment" i18n-title title="Alignment"><legend i18n>Alignment</legend>
     <select #alignment required>
       <option disabled selected value="" i18n="Alignment label">Alignment</option>
-      <option *ngIf="scope == 'word'" value="0" i18n>None</option>
+      <option *ngIf="scope == 'word' || scope == 'segment'" value="0" i18n>None</option>
       <option *ngIf="scope != 'phrase'" value="1" i18n>Instants</option>
       <option value="2" i18n>Intervals</option>
     </select>

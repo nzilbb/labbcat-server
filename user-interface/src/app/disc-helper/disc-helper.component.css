@@ -3,7 +3,7 @@
     white-space: nowrap;
     position: absolute;
     background: white;
-    border: 1px solid var(--theme-color);
+    border: 1px solid var(--theme-text-color);
     padding: 10px;
     animation-name: fade-in;
     animation-duration: 500ms;

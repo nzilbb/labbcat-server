@@ -3,7 +3,8 @@
 /* some things used in lots of places: */
 :root {
     --progress-size: 22px;
-    --theme-color: #78842E;
+    --theme-block-color: #96A339; /* from NZILBB logo*/
+    --theme-text-color: #78832E;  /* darkened for legibility */
 }
 
 /* animations */
@@ -33,25 +34,25 @@
 /* general look and feel */
 h1 { font-size: 17pt; color: black; }
 h2 { font-size: 16pt; color: black; }
-h3 { font-size: 15pt; color: var(--theme-color); font-style:italic; }
-h4 { font-size: 14pt; color: var(--theme-color); }
-h5 { font-size: 13pt; color: var(--theme-color); }
-h6 { font-size: 12pt; color: var(--theme-color); }
+h3 { font-size: 15pt; color: var(--theme-text-color); font-style:italic; }
+h4 { font-size: 14pt; color: var(--theme-text-color); }
+h5 { font-size: 13pt; color: var(--theme-text-color); }
+h6 { font-size: 12pt; color: var(--theme-text-color); }
 
 article h1 {
     font-weight: normal;
 }
 
-app-admin-menu a { color: var(--theme-color); }
+app-admin-menu a { color: var(--theme-text-color); }
 app-admin-menu li {
-    border-bottom: 1px solid var(--theme-color);
-    border-right: 1px solid var(--theme-color);
+    border-bottom: 1px solid var(--theme-text-color);
+    border-right: 1px solid var(--theme-text-color);
     white-space: nowrap;
 }
-app-admin-menu li:first-child { border-left: 1px solid var(--theme-color); }
+app-admin-menu li:first-child { border-left: 1px solid var(--theme-text-color); }
 
-app-root footer { color: var(--theme-color); }
-app-root footer a { color: var(--theme-color); text-decoration: none; }
+app-root footer { color: var(--theme-text-color); }
+app-root footer a { color: var(--theme-text-color); text-decoration: none; }
 
 /* Layout */
 app-root, #main { display: flex; flex-direction: column; }
@@ -139,11 +140,11 @@ app-wait {
 
 .buttons a {
     display: inline-block;
-    color: var(--theme-color);
+    color: var(--theme-text-color);
     text-decoration: none;
     margin-left: 5px;
     margin-right: 5px;
-    border: 1px var(--theme-color) solid;
+    border: 1px var(--theme-text-color) solid;
     padding: 4px;
     height: 30px;
     vertical-align: middle;
@@ -184,7 +185,7 @@ button.icon-only label {
     display: none;
 }
 progress, div.progress_container, div.progress {
-    color: var(--theme-color);
+    color: var(--theme-block-color);
     width: 95%;
     min-width: 120px; /* this because of strangeness in chromium */
     height: 20px;
@@ -195,16 +196,16 @@ progress, div.progress_container, div.progress {
 
 
 progress { -webkit-appearance: none; }
-progress::-webkit-progress-value { background: var(--theme-color); }
+progress::-webkit-progress-value { background: var(--theme-block-color); }
 progress::-webkit-progress-bar { background: #EEEEEE; }
-progress::-moz-progress-bar { background: var(--theme-color); }
+progress::-moz-progress-bar { background: var(--theme-block-color); }
 .progress-container {
     width: 100%;
     min-width: 500px;
     background: #EEEEEE;
 }
 .progress-container .progress {
-    background: var(--theme-color);
+    background: var(--theme-block-color);
 }
 
 app-button {
@@ -268,7 +269,7 @@ app-missing-annotations {
 @media all and (min-width: 640px) {
     app-root nav { min-height: 100px; max-width: min-content; }
     app-root aside { max-width: min-content; }
-    app-admin-menu li:first-child { border-top: 1px solid var(--theme-color); border-left: none; }
+    app-admin-menu li:first-child { border-top: 1px solid var(--theme-text-color); border-left: none; }
     app-missing-annotations progress { min-width: 400px; }
     .list { display: table; }
     .list > .item {
