@@ -27,8 +27,11 @@ app-disc-helper {
 app-wait.row-pending { /* never taller than the row */
     height: 30px;
 }
-class.spinner {
-    min-width: 30px;
+span.spinner {
+    width: 30px;
+}
+.missing-annotations > .buttons {
+    grid-column: 4 / -1;
 }
 .lookup button { /* ensure phonemic button labels aren't capitalized */
     text-transform: none; 

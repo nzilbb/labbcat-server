@@ -44,7 +44,7 @@
                        (symbolSelected)="symbolSelected(word, $event)"
                        ></app-disc-helper>
       <fieldset class="lookup" *ngIf="lookupWord == word && lookupWordsResult">
-        <legend i18n>{{lookupWords}}</legend>
+        <legend>{{lookupWords}}</legend>
         <app-wait *ngIf="lookupPending"></app-wait>
         <div class="lookup combined" *ngIf="lookupCombined">
           <button
@@ -70,22 +70,23 @@
         </div>
       </fieldset>
     </ng-container>
+    <div class="buttons">  
+      <app-button action="save" [processing]="updating"
+                  (press)="addNextEntry();"
+                  *ngIf="changed"
+                  i18n-title title="Save all pronunciations"></app-button>
+      <form #form action="{{baseUrl}}generateLayerUtterances" method="POST">
+        <input type="hidden" name="generate_layer_id" value="{{generateLayer.layer_id}}">
+        <input type="hidden" name="threadId" value="{{sourceThreadId}}">
+        <input type="hidden" name="collection_name" value="{{seriesName}}">
+        <input type="hidden" name="todo" value="generate-now">
+        <app-button *ngIf="missing"
+                    (press)="form.submit()"
+                    img="cog.svg"
+                    i18n-label label="Start"
+                    i18n-title title="Start forced alignment"></app-button>
+      </form>
+    </div>
+
   </div>
-</div>
-<div class="buttons">  
-  <app-button action="save" [processing]="updating"
-              (press)="addNextEntry();"
-              *ngIf="changed"
-              i18n-title title="Save all pronunciations"></app-button>
-  <form #form action="{{baseUrl}}generateLayerUtterances" method="POST">
-    <input type="hidden" name="generate_layer_id" value="{{generateLayer.layer_id}}">
-    <input type="hidden" name="threadId" value="{{sourceThreadId}}">
-    <input type="hidden" name="collection_name" value="{{seriesName}}">
-    <input type="hidden" name="todo" value="generate-now">
-    <app-button *ngIf="missing"
-                (press)="form.submit()"
-                img="cog.svg"
-                i18n-label label="Start"
-                i18n-title title="Start forced alignment"></app-button>
-  </form>
 </div>
