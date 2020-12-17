@@ -28,9 +28,10 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
     seriesName: string;
     missingAnnotationsThreadId: string;
     Object = Object; // so we can call Object.keys in the template
-    missing: object;
-    labels: object;
-    wordsPending: object;
+    missing: object;      // word -> url of first mention
+    labels: object;       // word -> entry
+    wordsPending: object; // word -> pending status (spinner for suggestions etc.)
+    alreadyAdded: object;   // word -> whether or not we've already added an entry
     ipaHelperWord: string;
     updating: false;
     
@@ -50,53 +51,119 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
             this.tokenLayerId = params["tokenLayerId"];
             this.annotationLayerId = params["annotationLayerId"];
 
-            this.getBaseUrl();
-            this.getGenerateLayer();
-            this.getAnnotationLayer();
-            this.getSourceTaskName();
-            this.startMissingAnnotationsTask();
+            this.getBaseUrl().then(()=>{
+                this.getGenerateLayer().then(()=>{
+                    this.getAnnotationLayer().then(()=>{
+                        this.getSourceTaskName().then(()=>{
+                            this.startMissingAnnotationsTask();
+                        });
+                    });
+                });
+            });
+            
         });
     }
     
-    getBaseUrl(): void {
-        this.labbcatService.labbcat.getId((url, errors, messages) => {
-            this.baseUrl = url;
+    getBaseUrl(): Promise<String> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.getId((url, errors, messages) => {
+                this.baseUrl = url;
+                resolve(url);
+            });
         });
     }
 
-    getGenerateLayer(): void {
-        this.labbcatService.labbcat.getLayer(this.generateLayerId, (layer, errors, messages) => {
-            if (errors) errors.forEach(m => this.messageService.error(m));
-            if (messages) messages.forEach(m => this.messageService.info(m));
-            this.generateLayer = layer;
+    getGenerateLayer(): Promise<Layer> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.getLayer(
+                this.generateLayerId, (layer, errors, messages) => {
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    this.generateLayer = layer;
+                    resolve(this.generateLayer);
+                });
         });
     }
 
-    getAnnotationLayer(): void {
-        this.labbcatService.labbcat.getLayer(this.annotationLayerId, (layer, errors, messages) => {
-            if (errors) errors.forEach(m => this.messageService.error(m));
-            if (messages) messages.forEach(m => this.messageService.info(m));
-            this.annotationLayer = layer;
+    getAnnotationLayer(): Promise<Layer> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.getLayer(
+                this.annotationLayerId, (layer, errors, messages) => {
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    this.annotationLayer = layer;
+                    resolve(this.annotationLayer);
+                });
         });
     }
 
-    getSourceTaskName(): void {
-        this.labbcatService.labbcat.taskStatus(this.sourceThreadId, (task, errors, messages) => {
-            if (errors) errors.forEach(m => this.messageService.error(m));
-            if (messages) messages.forEach(m => this.messageService.info(m));
-            this.seriesName = task.resultsName;
+    getSourceTaskName(): Promise<String> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.taskStatus(
+                this.sourceThreadId, (task, errors, messages) => {
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    this.seriesName = task.resultsName;
+                    resolve(this.seriesName);
+                });
         });
     }
     
     startMissingAnnotationsTask(): void {
+        this.missing = {};
+        this.labels = {};
+        this.wordsPending = {};
+        this.alreadyAdded = {};
+        
         this.labbcatService.labbcat.missingAnnotations(
             this.seriesId, this.tokenLayerId, this.annotationLayerId,
             (threadId, errors, messages) => {
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.missingAnnotationsThreadId = threadId;
+                
+                // start asking for interim results
+                this.getMissingAnnotations();
             });
         
+    }
+
+    getMissingAnnotations(): void {
+
+        if (this.missingAnnotationsThreadId) {
+            // get an interim list of missing words        
+            const url
+                = `${this.baseUrl}api/missingAnnotations?threadId=${this.missingAnnotationsThreadId}`;
+            this.labbcatService.labbcat.createRequest(
+                "missingAnnotations", null, (missing, errors, messages) => {
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    this.updateMissingAnnotationsList(missing);
+                    this.labbcatService.labbcat.taskStatus(
+                        this.missingAnnotationsThreadId, (task, errors, messages) => {
+                            if (errors) errors.forEach(m => this.messageService.error(m));
+                            if (messages) messages.forEach(m => this.messageService.info(m));
+                            if (task.running) { // still running, so ask for an update again soon
+                                setTimeout(() => this.getMissingAnnotations(), 20000);
+                            }
+                        });
+                }, url)
+                .send();
+        }
+    }
+
+    updateMissingAnnotationsList(missing: object): void {
+        for (let word in missing) {
+            if (!(word in this.labels)) {
+                this.missing[word] = missing[word];
+                this.labels[word] = "";
+                this.wordsPending[word] = false;
+                this.alreadyAdded[word] = false;
+            }
+        } // next missing word
+        
+        // give the UX a second to create elements, then check missing words
+        setTimeout(()=>this.checkMissing(), 1000);
     }
 
     taskFinished(task : Task): void {
@@ -108,21 +175,7 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
                 "missingAnnotations", null, (missing, errors, messages) => {
                     if (errors) errors.forEach(m => this.messageService.error(m));
                     if (messages) messages.forEach(m => this.messageService.info(m));
-                    // labels is the map of word->pronunciation
-                    this.labels = {};
-                    for (let word in missing) {
-                        this.labels[word] = "";
-                    }
-                    // wordPending is the map of word->boolean (true=pending)
-                    this.wordsPending = {};
-                    for (let word in this.labels) { // create entries
-                        this.wordsPending[word] = true;
-                    }
-                    // give the UX a second to create elements, then check missing words
-                    setTimeout(()=>this.checkMissing(), 1000);
-                    // missing is the map of word->first-occurrence                    
-                    this.missing = missing;
-
+                    this.updateMissingAnnotationsList(missing);
                 }, task.resultUrl)
                 .send();
         }
@@ -131,20 +184,23 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
     checkMissing(): void {
         let missingWords = false;
         for (let word in this.labels) {
+            if (this.alreadyAdded[word]) continue; // skip already-added words
             missingWords = true;
-            const w = word;
-            this.wordsPending[w] = true;
-            // ask dictionary for a suggested pronunciation
-            this.labbcatService.labbcat.dictionarySuggest(
-                this.annotationLayerId, w, (suggestion, errors, messages) => {
-                    this.wordsPending[w] = false;
-                    if (suggestion.words[w] != "") {
-                        this.labels[w] = suggestion.words[w];
-                        this.changed = true;
-                    }
-                });                        
-        }
-        if (!missingWords) {
+            if (this.labels[word] == "") { // only suggest for words that don't have an entry
+                const w = word;
+                this.wordsPending[w] = true;
+                // ask dictionary for a suggested pronunciation
+                this.labbcatService.labbcat.dictionarySuggest(
+                    this.annotationLayerId, w, (suggestion, errors, messages) => {
+                        this.wordsPending[w] = false;
+                        if (suggestion.words[w] != "") {
+                            this.labels[w] = suggestion.words[w];
+                            this.changed = true;
+                        }
+                    });
+            } // no entry yet
+        } // next word
+        if (!missingWords && !this.missingAnnotationsThreadId) {
             this.messageService.info("No missing entries.");
             // go straight to generating the layer
             this.form.nativeElement.submit();
@@ -200,7 +256,8 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
     addNextEntry(): void {
         this.lookupWord = null;
         for (let word in this.labels) {
-            if (this.labels[word]) { // there is a pronunciation
+            if (this.labels[word]               // there is a pronunciation
+                && !this.alreadyAdded[word]) { // and we haven' already added it
                 // save it
                 const label = word;
                 const entry = this.labels[word];
@@ -211,9 +268,8 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
                         if (errors) errors.forEach(m => this.messageService.error(m));
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         if (!errors) { // add ok
-                            // remove the word from the list
-                            delete this.missing[label];
-                            delete this.labels[label];
+                            // remove the word from the visible list
+                            this.alreadyAdded[label] = true;
                             // process next entry
                             this.addNextEntry();
                         }
@@ -230,4 +286,19 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
         this.checkMissing();
     }
 
+    start(): void {
+        if (this.missingAnnotationsThreadId) { // still looking for missing annotations
+            // cancel that first
+            this.labbcatService.labbcat.cancelTask(
+                this.missingAnnotationsThreadId, (result, errors, messages) => {
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    // now start...
+                    this.form.nativeElement.submit();
+                });            
+        } else {
+            // start now...
+            this.form.nativeElement.submit();
+        }
+    }
 }

@@ -10,65 +10,67 @@
 <div id="dictionary-panel">
   <div *ngIf="missing" class="missing-annotations">
     <ng-container *ngFor="let word of Object.keys(missing)">
-      <span class="word">
-        <a i18n-title title="First occurrence of the word"
-           href="{{missing[word]}}"
-           target="first-occurance">{{word}}</a>
-      </span>
-      <app-button
-        (press)="lookup(word)"
-        i18n-title title="Search the dictionary for a similar word"
-        img="magnifying-glass.svg" icon="🔍"
-        ></app-button>
-      <span class="pronunciation">
-        <input id="pron-{{word}}"
-               type="text"
-               (keyup)="changed = true"
-               (keydown.enter)="addNextEntry();"
-               i18n-title title="Pronunciation to add to the dictionary"
-               i18n-placeholder placeholder="Pronunciation"
-               [(ngModel)]="labels[word]"
-               >
-      </span>
-      <span class="helper">
-        <button *ngIf="annotationLayer && annotationLayer.type == 'ipa'"
-                class="icon-only"
-                i18n-title title="Phoneme symbol selector"
-                (click)="ipaHelperWord = (ipaHelperWord == word?null:word)">«</button>
-      </span>
-      <span class="spinner">
-        <app-wait class="row-pending" *ngIf="wordsPending[word]"
-                  i18n-title title="Generating suggestions..."></app-wait>
-      </span>
-      <app-disc-helper *ngIf="ipaHelperWord == word"
-                       (symbolSelected)="symbolSelected(word, $event)"
-                       ></app-disc-helper>
-      <fieldset class="lookup" *ngIf="lookupWord == word && lookupWordsResult">
-        <legend>{{lookupWords}}</legend>
-        <app-wait *ngIf="lookupPending"></app-wait>
-        <div class="lookup combined" *ngIf="lookupCombined">
-          <button
-            (click)="useLabel(lookupCombined, false);"
-            i18n-title title="Use this pronunciation"
-            appAutofocus
-            >{{lookupCombined}}</button>
-        </div>
-        <div *ngIf="!lookupCombined" class="no-matches" i18n>no matches</div>
-        <div class="words" *ngIf="Object.keys(lookupWordsResult).length > 1 || lookupWordsResult[Object.keys(lookupWordsResult)[0]].length > 1">
-          <div *ngFor="let word of Object.keys(lookupWordsResult)">
-            <h3>{{word}}</h3>
-            <div class="entries">
-              <div class="lookup" *ngFor="let entry of lookupWordsResult[word]">
-                <button
-                  (click)="useLabel(entry, true);"
-                  i18n-title title="Use this pronunciation"
-                  >{{entry}}</button>
-              </div>
-              <div *ngIf="lookupWordsResult[word].length == 0" class="no-matches" i18n>no matches</div>
+      <ng-container *ngIf="!alreadyAdded[word]">
+        <span class="word">
+          <a i18n-title title="First occurrence of the word"
+             href="{{missing[word]}}"
+             target="first-occurance">{{word}}</a>
+        </span>
+        <app-button
+          (press)="lookup(word)"
+          i18n-title title="Search the dictionary for a similar word"
+          img="magnifying-glass.svg" icon="🔍"
+          ></app-button>
+        <span class="pronunciation">
+          <input id="pron-{{word}}"
+                 type="text"
+                 (keyup)="changed = true"
+                 (keydown.enter)="addNextEntry();"
+                 i18n-title title="Pronunciation to add to the dictionary"
+                 i18n-placeholder placeholder="Pronunciation"
+                 [(ngModel)]="labels[word]"
+                 >
+        </span>
+        <span class="helper">
+          <button *ngIf="annotationLayer && annotationLayer.type == 'ipa'"
+                  class="icon-only"
+                  i18n-title title="Phoneme symbol selector"
+                  (click)="ipaHelperWord = (ipaHelperWord == word?null:word)">«</button>
+        </span>
+        <span class="spinner">
+          <app-wait class="row-pending" *ngIf="wordsPending[word]"
+                    i18n-title title="Generating suggestions..."></app-wait>
+        </span>
+        <app-disc-helper *ngIf="ipaHelperWord == word"
+                         (symbolSelected)="symbolSelected(word, $event)"
+                         ></app-disc-helper>
+        <fieldset class="lookup" *ngIf="lookupWord == word && lookupWordsResult">
+          <legend>{{lookupWords}}</legend>
+          <app-wait *ngIf="lookupPending"></app-wait>
+          <div class="lookup combined" *ngIf="lookupCombined">
+            <button
+              (click)="useLabel(lookupCombined, false);"
+              i18n-title title="Use this pronunciation"
+              appAutofocus
+              >{{lookupCombined}}</button>
+          </div>
+          <div *ngIf="!lookupCombined" class="no-matches" i18n>no matches</div>
+          <div class="words" *ngIf="Object.keys(lookupWordsResult).length > 1 || lookupWordsResult[Object.keys(lookupWordsResult)[0]].length > 1">
+            <div *ngFor="let word of Object.keys(lookupWordsResult)">
+              <h3>{{word}}</h3>
+              <div class="entries">
+                <div class="lookup" *ngFor="let entry of lookupWordsResult[word]">
+                  <button
+                    (click)="useLabel(entry, true);"
+                    i18n-title title="Use this pronunciation"
+                    >{{entry}}</button>
+                </div>
+                <div *ngIf="lookupWordsResult[word].length == 0" class="no-matches" i18n>no matches</div>
+            </div>
             </div>
           </div>
-        </div>
-      </fieldset>
+        </fieldset>
+      </ng-container>
     </ng-container>
     <div class="buttons">  
       <app-button action="save" [processing]="updating"
@@ -81,7 +83,7 @@
         <input type="hidden" name="collection_name" value="{{seriesName}}">
         <input type="hidden" name="todo" value="generate-now">
         <app-button *ngIf="missing"
-                    (press)="form.submit()"
+                    (press)="start()"
                     img="cog.svg"
                     i18n-label label="Start"
                     i18n-title title="Start forced alignment"></app-button>

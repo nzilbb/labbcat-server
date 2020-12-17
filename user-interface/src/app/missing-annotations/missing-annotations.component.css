@@ -3,6 +3,10 @@
     flex-direction: column;
     
 }
+.word, .pronunciation, .helper, app-button {
+    animation-name: fade-in;
+    animation-duration: 1s;    
+}
 .missing-annotations {
     display: grid;
     width: auto;
