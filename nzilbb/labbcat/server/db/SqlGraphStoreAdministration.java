@@ -735,7 +735,7 @@ public class SqlGraphStoreAdministration
             } else if (parent.getId().equals(schema.getRoot().getId())) { // span layer
                if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
                      
-                  sql.setInt(14, (Integer)parent.get("layer_id"));
+                  sql.setInt(14, SqlConstants.LAYER_GRAPH);
                   sql.setString(15, SqlConstants.SCOPE_FREEFORM.toUpperCase());
                   sql.executeUpdate();
                   sql.close();
