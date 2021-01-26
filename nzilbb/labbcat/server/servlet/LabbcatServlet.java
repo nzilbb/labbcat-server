@@ -24,6 +24,8 @@ package nzilbb.labbcat.server.servlet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
@@ -425,14 +427,29 @@ public class LabbcatServlet extends HttpServlet {
     */
    protected JsonObject failureResult(Throwable t) {
       String message = ""+t.getMessage();
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      t.printStackTrace(pw);
+      JsonObjectBuilder exception = Json.createObjectBuilder()
+         .add("type", t.getClass().getSimpleName())
+         .add("message", message)
+         .add("stackTrace", sw.toString());
+      if (t.getCause() != null) {
+         sw = new StringWriter();
+         pw = new PrintWriter(sw);
+         t.getCause().printStackTrace(pw);
+         exception.add("cause", Json.createObjectBuilder()
+                       .add("type", t.getCause().getClass().getSimpleName())
+                       .add("message", ""+t.getCause().getMessage())
+                       .add("stackTrace", sw.toString()));
+      }
+      
       JsonObjectBuilder result = Json.createObjectBuilder()
          .add("title", title)
          .add("version", version)
          .add("code", 1) // TODO deprecate?
          .add("errors", Json.createArrayBuilder().add(message))
-         .add("exception", Json.createObjectBuilder()
-              .add("type", t.getClass().getSimpleName())
-              .add("message", message))
+         .add("exception", exception)
          .add("messages", Json.createArrayBuilder())
          .add("model", JsonValue.NULL);
       return result.build();
