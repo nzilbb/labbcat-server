@@ -2134,6 +2134,7 @@ public class SqlGraphStore implements GraphStore {
       Layer layer = null;
       Pattern wordBasedQueryPattern = Pattern.compile(
          // TODO change harcoded schema.wordLayerId
+         // TODO use first instead of my
          "my\\('word'\\)\\.id ==? 'ew_0_(\\d+)' (AND|&&) layer\\.id ==? '([^']+)'");
       Matcher wordBasedQueryMatcher = wordBasedQueryPattern.matcher(expression);
       if (wordBasedQueryMatcher.matches()) {
