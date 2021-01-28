@@ -111,7 +111,28 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
     * @param newLayers Layers to load into the fragments.
     */
    public FragmentSeries setLayers(String[] newLayers) { layers = newLayers; return this; }
-   
+
+   /**
+    * Whether to shift all anchors in the fragment so that the start anchor has an offset
+    * of 0.0. Default is <code>true</code>.
+    * @see #getShiftAnchors()
+    * @see #setShiftAnchors(boolean)
+    */
+   protected boolean shiftAnchors = true;
+   /**
+    * Getter for {@link #shiftAnchors}: Whether to shift all anchors in the fragment so
+    * that the start anchor has an offset of 0.0. Default is <code>true</code>.
+    * @return Whether to shift all anchors in the fragment so that the start anchor has an
+    * offset of 0.0. 
+    */
+   public boolean getShiftAnchors() { return shiftAnchors; }   
+   /**
+    * Setter for {@link #shiftAnchors}: Whether to shift all anchors in the fragment so
+    * that the start anchor has an offset of 0.0. 
+    * @param newShiftAnchors Whether to shift all anchors in the fragment so that the
+    * start anchor has an offset of 0.0. 
+    */
+   public FragmentSeries setShiftAnchors(boolean newShiftAnchors) { shiftAnchors = newShiftAnchors; return this; }
    // Methods:
    
    /**
@@ -194,7 +215,7 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
          }
         
          Graph fragment = store.getFragment(graphId, start, end, layers);
-         fragment.shiftAnchors(-start);
+         if (shiftAnchors) fragment.shiftAnchors(-start);
          if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());
          if (filterId.length() > 0) { // filter annotation is specified
             // remove annotations that don't belong to the specified filter annotation
