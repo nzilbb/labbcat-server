@@ -1039,6 +1039,9 @@ public class AnnotationAgqlToSql {
       sql.append(", '");
       sql.append(layer.getId().replaceAll("\\'", "\\\\'"));
       sql.append("' AS layer");
+      if (flags.anchorsJoin && sqlSelectClause.startsWith("DISTINCT")) {
+         sql.append(", start.offset, end.offset");
+      }
       sql.append(" FROM annotation_layer_"+layer.get("layer_id")+" annotation");
       if (flags.transcriptJoin) {
          sql.append(" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id");

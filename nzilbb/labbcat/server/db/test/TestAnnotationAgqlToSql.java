@@ -265,7 +265,7 @@ public class TestAnnotationAgqlToSql {
          "layer.id == 'utterance' && list('word').includes('ew_0_456')",
          "DISTINCT annotation.*", null, null);
       assertEquals("SQL",
-                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer, start.offset, end.offset"
                    +" FROM annotation_layer_12 annotation"
                    +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
                    +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
@@ -351,7 +351,7 @@ public class TestAnnotationAgqlToSql {
          +" && start.offset < 12.345",
          "DISTINCT annotation.*", null, null);
       assertEquals("Who",
-                   "SELECT DISTINCT annotation.*, 'orthography' AS layer"
+                   "SELECT DISTINCT annotation.*, 'orthography' AS layer, start.offset, end.offset"
                    +" FROM annotation_layer_2 annotation"
                    +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
                    +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
@@ -458,7 +458,7 @@ public class TestAnnotationAgqlToSql {
          "layerId = 'utterance' && labels('orthography').includes('foo')",
          "DISTINCT annotation.*", null, null);
       assertEquals("Transcript attribute - SQL",
-                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer, start.offset, end.offset"
                    +" FROM annotation_layer_12 annotation"
                    +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
                    +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
@@ -543,7 +543,7 @@ public class TestAnnotationAgqlToSql {
          "layerId = 'utterance' && list('word').length > 100",
          "DISTINCT annotation.*", null, null);
       assertEquals("Annotation - SQL",
-                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer, start.offset, end.offset"
                    +" FROM annotation_layer_12 annotation"
                    +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
                    +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
@@ -596,7 +596,7 @@ public class TestAnnotationAgqlToSql {
          "layerId = 'utterance' && annotators('noise').includes('someone')",
          "DISTINCT annotation.*", null, null);
       assertEquals("Annotation - SQL",
-                   "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                   "SELECT DISTINCT annotation.*, 'utterance' AS layer, start.offset, end.offset"
                    +" FROM annotation_layer_12 annotation"
                    +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
                    +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
@@ -617,7 +617,7 @@ public class TestAnnotationAgqlToSql {
          "layerId = 'word' && annotators('language').includes('someone')",
          "DISTINCT annotation.*", null, null);
          assertEquals("Annotation - SQL",
-                      "SELECT DISTINCT annotation.*, 'word' AS layer"
+                      "SELECT DISTINCT annotation.*, 'word' AS layer, start.offset, end.offset"
                       +" FROM annotation_layer_0 annotation"
                       +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
                       +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
