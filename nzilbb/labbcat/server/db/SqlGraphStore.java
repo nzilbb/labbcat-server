@@ -3923,8 +3923,8 @@ public class SqlGraphStore implements GraphStore {
    public boolean saveTranscript(Graph transcript) 
       throws StoreException, PermissionException, GraphNotFoundException
    {
-      Timers timers = new Timers();
-      timers.start("saveGraph");
+      // Timers timers = new Timers();
+      // timers.start("saveGraph");
       Schema schema = getSchema();
       Graph graph = transcript;
       try {
@@ -3974,10 +3974,10 @@ public class SqlGraphStore implements GraphStore {
          if (graph.containsKey("@valid")) { // TODO remove this workaround
             System.err.println("Graph " + graph.getId() + ": skipping validation");
          } else {
-            timers.start("validate");
+            // timers.start("validate");
             v.transform(graph);
-            timers.end("validate");
-            System.out.println("saveGraph: " + timers);
+            // timers.end("validate");
+            // System.out.println("saveGraph: " + timers);
             if (v.getErrors().size() != 0) {
                StringBuffer messages = new StringBuffer();
                for (String s : v.getErrors()) {
@@ -4058,7 +4058,7 @@ public class SqlGraphStore implements GraphStore {
          boolean wordChanges = false;
          boolean segmentChanges = false;
 
-         timers.start("changes");
+         // timers.start("changes");
          Object lastObject = graph;
          for (Change change : changes) {
             if (change.getObject() == lastObject) continue; // already did this object
@@ -4390,8 +4390,8 @@ public class SqlGraphStore implements GraphStore {
                   }
                } // Annotation change
             } // next change
-            timers.end("changes");
-            System.out.println("saveGraph: " + timers);
+            // timers.end("changes");
+            // System.out.println("saveGraph: " + timers);
 	    
             // extras
             HashSet<Annotation> newExtraUpdates = new HashSet<Annotation>();
@@ -4502,9 +4502,9 @@ public class SqlGraphStore implements GraphStore {
          System.err.println(exception.toString());
          throw new StoreException(exception);
       }
-      System.err.println("saveGraph finished.");
-      timers.end("saveGraph");
-      System.out.println("saveGraph: " + timers);
+      // System.err.println("saveGraph finished.");
+      // timers.end("saveGraph");
+      // System.out.println("saveGraph: " + timers);
       return true;
    }
 
@@ -4618,12 +4618,14 @@ public class SqlGraphStore implements GraphStore {
             annotation.setStartId(fmtAnchorId.format(anchorIdParts));
             anchorIdParts[0] = Long.valueOf(rsAnnotation.getLong("end_anchor_id"));
             annotation.setEndId(fmtAnchorId.format(anchorIdParts));
-            
+
          } else { // 'structural' layer
             Object[] annotationIdParts = {
                layer.get("layer_id"), rsAnnotation.getString("annotation_id")};
             annotation.setId(fmtMetaAnnotationId.format(annotationIdParts));
          } // 'structural' layer
+
+         if (graph != null) annotation.setGraph(graph);
             
          return annotation;
       }  else if ("transcript".equals(layer.get("class_id"))) { // transcript attribute
