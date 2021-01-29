@@ -6482,7 +6482,8 @@ public class SqlGraphStore implements GraphStore {
             if (getBaseUrl() == null) // TODO check this isn't a security risk
             {
                FragmentExtractor extractor = new FragmentExtractor();
-               if (mimeTypeParameters.containsKey("samplerate")) {
+               if (mimeTypeParameters.containsKey("samplerate")
+                  && mimeTypeParameters.get("samplerate") != null) {
                   extractor.setSampleRate(
                      Integer.parseInt(mimeTypeParameters.get("samplerate")));
                }
