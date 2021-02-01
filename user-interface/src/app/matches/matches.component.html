@@ -5,7 +5,11 @@
 <app-wait *ngIf="readingMatches"></app-wait>
 <form #form method="POST" id="frm" *ngIf="matches.length" target="_blank">
   <input type="hidden" name="threadId" value="{{threadId}}">
+  <input type="hidden" name="generateLayerId" value="{{generateLayerId}}">
+  <input type="hidden" name="annotationLayerId" value="{{annotationLayerId}}">
+  <input type="hidden" name="tokenLayerId" value="{{tokenLayerId}}">
   <input type="hidden" name="collection_name" value="{{name}}">
+  <input type="hidden" name="seriesId" value="{{task.seriesId}}">
   <input type="hidden" name="zeropad" value="{{zeroPad}}">
   <input #todo type="hidden" name="todo" value="">
   <div id="check-all-top">
@@ -187,7 +191,6 @@
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayer">
     <input #generate_layer type="hidden" name="generate_layer" value="">
     <app-button (press)="runAnnotator(htkLayer.id);"
-                [disabled]="!selectAll"
                 img="cog.svg" icon="⚙"
                 i18n-title title="Generate"
                 label="{{htkLayer.id}}"></app-button>

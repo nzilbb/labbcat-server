@@ -21,6 +21,7 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
     seriesId: string;          // parameter for missingAnnotations
     tokenLayerId: string;      // parameter for missingAnnotations
     annotationLayerId: string; // parameter for missingAnnotations
+    utterances: string[];      // parameter for selected utterances, if any
     
     baseUrl: string;
     generateLayer: Layer;
@@ -46,10 +47,11 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
     ngOnInit(): void {
         this.route.queryParams.subscribe((params) => {
             this.generateLayerId = params["generateLayerId"];
-            this.sourceThreadId = params["sourceThreadId"];
+            this.sourceThreadId = params["threadId"];
             this.seriesId = params["seriesId"];
             this.tokenLayerId = params["tokenLayerId"];
             this.annotationLayerId = params["annotationLayerId"];
+            this.utterances = params["utterance"];
 
             this.getBaseUrl().then(()=>{
                 this.getGenerateLayer().then(()=>{
@@ -116,7 +118,7 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
         this.alreadyAdded = {};
         
         this.labbcatService.labbcat.missingAnnotations(
-            this.seriesId, this.tokenLayerId, this.annotationLayerId,
+            this.seriesId, this.tokenLayerId, this.annotationLayerId, this.utterances,
             (threadId, errors, messages) => {
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
@@ -203,7 +205,7 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
         if (!missingWords && !this.missingAnnotationsThreadId) {
             this.messageService.info("No missing entries.");
             // go straight to generating the layer
-            this.form.nativeElement.submit();
+            //this.form.nativeElement.submit();
         }
         
     }

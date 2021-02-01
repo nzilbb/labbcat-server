@@ -49,6 +49,11 @@ export class MatchesComponent implements OnInit {
     moreLoading = false;
     allLoading = false;
     readingMatches = false;
+
+    // for HTK/layer generation
+    generateLayerId: string;
+    tokenLayerId: string;
+    annotationLayerId: string;
     
     constructor(
         private labbcatService: LabbcatService,
@@ -231,44 +236,53 @@ export class MatchesComponent implements OnInit {
 
     runAnnotator(layerId: string): void {
         const layer = this.schema.layers[layerId] as Layer;
+        let formAction = this.baseUrl + "generateLayerUtterances";
+        let formMethod = "POST";
+        let formTarget = "_blank";
         if (layer && layer.layer_manager_id == "HTK") {
             try {
                 // TODO api/missingAnnotations -> api/suggest -> api/lookup -> api/edit/dictionary/addentry -> generateLayerUtterances
-                const seriesId = this.task.seriesId;
-                const tokenLayerId = this.schema.layers["orthography"]?"orthography":this.schema.wordLayerId;
+                this.tokenLayerId = this.schema.layers["orthography"]?"orthography":this.schema.wordLayerId;
                 // the annotationLayerId is currently specified in the htk layer configuration
                 const PronunciationLayerId = /PronunciationLayerId=([0-9]+)/.exec(
                     this.htkLayer.extra)[1];
                 // PronunciationLayerId is currently a layer_id number, so convert it to a layerId
-                let annotationLayerId = null;
                 for (let layerId in this.schema.layers) {
                     const layer = this.schema.layers[layerId] as Layer;
                     if (layer.layer_id == PronunciationLayerId) {
-                        annotationLayerId = layerId;
+                        this.annotationLayerId = layerId;
                         break;
                     }
                 } // next layer
-                if (annotationLayerId) {
-                    this.router.navigate(["missingAnnotations"], {
-                        queryParams : {
-                            generateLayerId : layerId,
-                            sourceThreadId : this.threadId,
-                            seriesId : seriesId,
-                            tokenLayerId : tokenLayerId,
-                            annotationLayerId : annotationLayerId }});
+                if (this.annotationLayerId) {
+                    // this.router.navigate(["missingAnnotations"], {
+                    //     queryParams : {
+                    //         generateLayerId : layerId,
+                    //         sourceThreadId : this.threadId,
+                    //         seriesId : seriesId,
+                    //         tokenLayerId : tokenLayerId,
+                    //         annotationLayerId : annotationLayerId }});
 
-                    return;
+                    // return;
+                    this.generateLayerId = layerId;
+                    formAction = "missingAnnotations";
+                    formMethod = "GET"; // TODO debug mode only
+                    formTarget = "";
                 }
             } catch (x) {
                 console.log("Could not process HTK layer: "+x);
                 // just fall through...
             }
         } // HTK layer
-        
-        this.form.nativeElement.action = this.baseUrl + "generateLayerUtterances";
-        this.generateLayer.nativeElement.value = layerId;
-        this.todo.nativeElement.value = "generate";
-        this.form.nativeElement.submit();
+
+        window.setTimeout(()=>{
+            this.form.nativeElement.method = formMethod;
+            this.form.nativeElement.action = formAction;
+            this.form.nativeElement.target = formTarget;
+            this.generateLayer.nativeElement.value = layerId;
+            this.todo.nativeElement.value = "generate";
+            this.form.nativeElement.submit();
+        }, 500);
     }
 
     toggleMatch(match: Match): void {
