@@ -275,7 +275,7 @@ export class MatchesComponent implements OnInit {
             }
         } // HTK layer
 
-        window.setTimeout(()=>{
+        setTimeout(()=>{ // give a chance for the HTML form to update, then submit...
             this.form.nativeElement.method = formMethod;
             this.form.nativeElement.action = formAction;
             this.form.nativeElement.target = formTarget;
