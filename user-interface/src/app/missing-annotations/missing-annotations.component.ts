@@ -205,7 +205,7 @@ export class MissingAnnotationsComponent extends AdminComponent implements OnIni
         if (!missingWords && !this.missingAnnotationsThreadId) {
             this.messageService.info("No missing entries.");
             // go straight to generating the layer
-            //this.form.nativeElement.submit();
+            this.form.nativeElement.submit();
         }
         
     }
