@@ -371,39 +371,11 @@ public class SqlGraphStoreAdministration
             }
 
             // some attributes cannot be updated for system layers
-            if (layer_id != SqlConstants.LAYER_SEGMENT
-                && layer_id != SqlConstants.LAYER_TRANSCRIPTION
+            if (layer_id != SqlConstants.LAYER_TRANSCRIPTION
                 && layer_id != SqlConstants.LAYER_UTTERANCE
                 && layer_id != SqlConstants.LAYER_TURN) {
-                
-               // alignment
-               if (oldVersion.getAlignment() != layer.getAlignment()) {
-                  PreparedStatement sql = getConnection().prepareStatement(
-                     "UPDATE layer SET alignment = ? WHERE layer_id = ?");
-                  sql.setInt(1, layer.getAlignment());
-                  sql.setInt(2, layer_id);
-                  sql.executeUpdate();
-                  sql.close();
-               }
 
-               // relationship flag
-               if (oldVersion.getPeers() != layer.getPeers()
-                   || oldVersion.getPeersOverlap() != layer.getPeersOverlap()
-                   || oldVersion.getParentIncludes() != layer.getParentIncludes()
-                   || oldVersion.getSaturated() != layer.getSaturated()) {
-                  PreparedStatement sql = getConnection().prepareStatement(
-                     "UPDATE layer"
-                     +" SET peers = ?, peers_overlap = ?, parent_includes = ?, saturated = ?"
-                     +" WHERE layer_id = ?");
-                  sql.setInt(1, layer.getPeers()?1:0);
-                  sql.setInt(2, layer.getPeersOverlap()?1:0);
-                  sql.setInt(3, layer.getParentIncludes()?1:0);
-                  sql.setInt(4, layer.getSaturated()?1:0);
-                  sql.setInt(5, layer_id);
-                  sql.executeUpdate();
-                  sql.close();
-               }
-
+               // type (only) can be changed for segment layer
                if (!oldVersion.getType().equals(layer.getType())) {
                   String subtype = "T"; // Constants.TYPE_STRING
                   if (Constants.TYPE_NUMBER.equals(layer.getType())) {
@@ -419,32 +391,64 @@ public class SqlGraphStoreAdministration
                   sql.setInt(2, layer_id);
                   sql.executeUpdate();
                   sql.close();
-               }
-               
-               // category
-               if (!(""+oldVersion.getCategory()).equals(layer.getCategory())) {
-                  PreparedStatement sql = getConnection().prepareStatement(
-                     "UPDATE layer"
-                     +" SET project_id = (SELECT project_id FROM project WHERE project = ?)"
-                     +" WHERE layer_id = ?");
-                  sql.setString(1, layer.getCategory());
-                  sql.setInt(2, layer_id);
-                  sql.executeUpdate();
-                  sql.close();
-               }
+               }               
 
-               // LaBB-CAT extensions:
-
-               // enabled
-               if (layer.containsKey("enabled")
-                   && !oldVersion.get("enabled").equals(layer.get("enabled"))) {
-                  PreparedStatement sql = getConnection().prepareStatement(
-                     "UPDATE layer SET enabled = ? WHERE layer_id = ?");
-                  sql.setString(1, layer.get("enabled").toString());
-                  sql.setInt(2, layer_id);
-                  sql.executeUpdate();
-                  sql.close();
-               }
+               // no other attributes can be updated for the segment layer
+               if (layer_id != SqlConstants.LAYER_SEGMENT) {
+                  
+                  // alignment
+                  if (oldVersion.getAlignment() != layer.getAlignment()) {
+                     PreparedStatement sql = getConnection().prepareStatement(
+                        "UPDATE layer SET alignment = ? WHERE layer_id = ?");
+                     sql.setInt(1, layer.getAlignment());
+                     sql.setInt(2, layer_id);
+                     sql.executeUpdate();
+                     sql.close();
+                  }
+                  
+                  // relationship flag
+                  if (oldVersion.getPeers() != layer.getPeers()
+                      || oldVersion.getPeersOverlap() != layer.getPeersOverlap()
+                      || oldVersion.getParentIncludes() != layer.getParentIncludes()
+                      || oldVersion.getSaturated() != layer.getSaturated()) {
+                     PreparedStatement sql = getConnection().prepareStatement(
+                        "UPDATE layer"
+                        +" SET peers = ?, peers_overlap = ?, parent_includes = ?, saturated = ?"
+                        +" WHERE layer_id = ?");
+                     sql.setInt(1, layer.getPeers()?1:0);
+                     sql.setInt(2, layer.getPeersOverlap()?1:0);
+                     sql.setInt(3, layer.getParentIncludes()?1:0);
+                     sql.setInt(4, layer.getSaturated()?1:0);
+                     sql.setInt(5, layer_id);
+                     sql.executeUpdate();
+                     sql.close();
+                  }
+                  
+                  // category
+                  if (!(""+oldVersion.getCategory()).equals(layer.getCategory())) {
+                     PreparedStatement sql = getConnection().prepareStatement(
+                        "UPDATE layer"
+                        +" SET project_id = (SELECT project_id FROM project WHERE project = ?)"
+                        +" WHERE layer_id = ?");
+                     sql.setString(1, layer.getCategory());
+                     sql.setInt(2, layer_id);
+                     sql.executeUpdate();
+                     sql.close();
+                  }
+                  
+                  // LaBB-CAT extensions:
+                  
+                  // enabled
+                  if (layer.containsKey("enabled")
+                      && !oldVersion.get("enabled").equals(layer.get("enabled"))) {
+                     PreparedStatement sql = getConnection().prepareStatement(
+                        "UPDATE layer SET enabled = ? WHERE layer_id = ?");
+                     sql.setString(1, layer.get("enabled").toString());
+                     sql.setInt(2, layer_id);
+                     sql.executeUpdate();
+                     sql.close();
+                  }
+               } // non-segment layer
                
             } // non-system layer
 
