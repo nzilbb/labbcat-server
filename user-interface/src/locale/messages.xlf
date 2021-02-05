@@ -912,11 +912,11 @@
         <source>Select all results</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">15</context>
+          <context context-type="linenumber">19</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <note priority="1" from="description">select all results</note>
       </trans-unit>
@@ -924,18 +924,18 @@
         <source>Select all results including those not shown here</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">13</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">89</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4dbc6595c173dcba49cdf6a1917cbe17d4b8d71e" datatype="html">
         <source> Context: </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">21</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <note priority="1" from="description">KWIC context selector label</note>
       </trans-unit>
@@ -943,18 +943,18 @@
         <source>How much context to show before/after match</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">23</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="linenumber">28</context>
         </context-group>
       </trans-unit>
       <trans-unit id="017443b0251704f5fd633d6820a7d45337ac7b92" datatype="html">
         <source>1 word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">25</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <note priority="1" from="description">words context option</note>
       </trans-unit>
@@ -962,7 +962,7 @@
         <source>5 words</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">26</context>
+          <context context-type="linenumber">30</context>
         </context-group>
         <note priority="1" from="description">words context option</note>
       </trans-unit>
@@ -970,7 +970,7 @@
         <source>10 words</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">27</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <note priority="1" from="description">words context option</note>
       </trans-unit>
@@ -978,7 +978,7 @@
         <source>20 words</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <note priority="1" from="description">words context option</note>
       </trans-unit>
@@ -986,7 +986,7 @@
         <source>the whole line</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <note priority="1" from="description">words context option</note>
       </trans-unit>
@@ -994,7 +994,7 @@
         <source>no context</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <note priority="1" from="description">words context option</note>
       </trans-unit>
@@ -1002,63 +1002,63 @@
         <source>To select individual results, untick &apos;select all N results&apos;</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">48</context>
+          <context context-type="linenumber">52</context>
         </context-group>
       </trans-unit>
       <trans-unit id="43b66cd0eb491eeb79022fb8fd4c2da0138f3077" datatype="html">
         <source>Open transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="linenumber">63</context>
         </context-group>
       </trans-unit>
       <trans-unit id="d2fa020deea3280e45da7df4a48b660231024315" datatype="html">
         <source>Show more results</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">75</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3dd7c2ef8e985338490087245fa323488e0f5258" datatype="html">
         <source>Show all results</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">82</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3941358201360e6d540587e9e5b8bb419ffdf8da" datatype="html">
         <source>Export results to CSV</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">98</context>
         </context-group>
       </trans-unit>
       <trans-unit id="bb25b6b472236ec2ce6881c199c88811dbc63666" datatype="html">
         <source>CSV Export</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">99</context>
         </context-group>
       </trans-unit>
       <trans-unit id="85bac19b1e6bd7557247384675e7b2741a525bb9" datatype="html">
         <source>CSV export options</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">102</context>
         </context-group>
       </trans-unit>
       <trans-unit id="d920534b614425f04d3c5743f075de1f71298020" datatype="html">
         <source>CSV Columns</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">107</context>
         </context-group>
       </trans-unit>
       <trans-unit id="a44630d1be065c67e9346b39aea0c1c4c28f80fb" datatype="html">
         <source>Fields:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <note priority="1" from="description">csv options title</note>
       </trans-unit>
@@ -1066,7 +1066,7 @@
         <source>Search name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">113</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
@@ -1074,14 +1074,14 @@
         <source>Identifier for this search</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">111</context>
         </context-group>
       </trans-unit>
       <trans-unit id="fbcb0d75afbe6aec04269381598a737f4bd19db7" datatype="html">
         <source>Number</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-layers/admin-layers.component.html</context>
@@ -1097,14 +1097,14 @@
         <source>Result number</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">115</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3d9556a1041326aec23a7d6757603c5dc6c2ca3f" datatype="html">
         <source>Series offset</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
@@ -1112,14 +1112,14 @@
         <source>Start time of the transcript relative to the beginning of the whole series</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">115</context>
+          <context context-type="linenumber">119</context>
         </context-group>
       </trans-unit>
       <trans-unit id="d3bdf6d4e710737be5db50cfb4f2f6b8b1949d6e" datatype="html">
         <source>Series length</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">125</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
@@ -1127,14 +1127,14 @@
         <source>End time of the transcript relative to the beginning of the whole series</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">119</context>
+          <context context-type="linenumber">123</context>
         </context-group>
       </trans-unit>
       <trans-unit id="af942a24234fa47efa01bf2d4236dad05131a5a0" datatype="html">
         <source>Line</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">129</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
@@ -1142,14 +1142,14 @@
         <source>Start time of the utterance relative to the beginning of the transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">127</context>
         </context-group>
       </trans-unit>
       <trans-unit id="82206026dafca5d115810a130656da0d174ae7ec" datatype="html">
         <source>Line end</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">133</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
@@ -1157,14 +1157,14 @@
         <source>End time of the utterance relative to the beginning of the transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">131</context>
         </context-group>
       </trans-unit>
       <trans-unit id="055d3652624214c21c0f3b6dfdf45a0e53b1d1d7" datatype="html">
         <source>Match ID</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">137</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
@@ -1172,14 +1172,14 @@
         <source>Unique identifier for the match</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">131</context>
+          <context context-type="linenumber">135</context>
         </context-group>
       </trans-unit>
       <trans-unit id="801b98c6f02fe3b32f6afa3ee854c99ed83474e6" datatype="html">
         <source>URL</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">137</context>
+          <context context-type="linenumber">141</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
@@ -1187,14 +1187,14 @@
         <source>URL for the match</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">135</context>
+          <context context-type="linenumber">139</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8ba143716c2da6e4120c0c1a804f0bdd9a7e5f5b" datatype="html">
         <source>Text</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">145</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-layers/admin-layers.component.html</context>
@@ -1210,49 +1210,49 @@
         <source>The transcription of the match and its surrounding context</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">139</context>
+          <context context-type="linenumber">143</context>
         </context-group>
       </trans-unit>
       <trans-unit id="56deb121623350662ea8abc0e0c7698593011739" datatype="html">
         <source>EMU WebApp</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">157</context>
+          <context context-type="linenumber">161</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9f43df28ef7b88d83985ff01413f2c63a748aca5" datatype="html">
         <source>EMU WebApp options</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">160</context>
+          <context context-type="linenumber">164</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5e1a909ac98451f50c606f9958c620807fa3d735" datatype="html">
         <source>EMU WebApp Tiers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">165</context>
+          <context context-type="linenumber">169</context>
         </context-group>
       </trans-unit>
       <trans-unit id="c7343e9bdcf1f04ef99e7145ee0dd99670c0ac5f" datatype="html">
         <source>Utterance Export</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">178</context>
         </context-group>
       </trans-unit>
       <trans-unit id="95494cca6c7254f282a1d412542c9b892d47adeb" datatype="html">
         <source>Audio Export</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">185</context>
+          <context context-type="linenumber">189</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1b258b258b4cc475ceb2871305b61756b0134f4a" datatype="html">
         <source>Generate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/matches/matches.component.html</context>
-          <context context-type="linenumber">192</context>
+          <context context-type="linenumber">195</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-layers/admin-layers.component.html</context>
@@ -2112,64 +2112,64 @@
         <source>First occurrence of the word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">14</context>
+          <context context-type="linenumber">15</context>
         </context-group>
       </trans-unit>
       <trans-unit id="b62b55206d8f01937927f1441003ce99d95a646b" datatype="html">
         <source>Search the dictionary for a similar word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">21</context>
         </context-group>
       </trans-unit>
       <trans-unit id="bada76a06c0e23f11f2f0fdd003c00ecc1a54dbc" datatype="html">
         <source>Pronunciation to add to the dictionary</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="e43b8e5233d99c22067de745853be5aeb55655bc" datatype="html">
         <source>Pronunciation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">30</context>
         </context-group>
       </trans-unit>
       <trans-unit id="93d8a7a30906a9b836df364053b731dd6896004e" datatype="html">
         <source>Phoneme symbol selector</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">37</context>
         </context-group>
       </trans-unit>
       <trans-unit id="481a56761330b23350a5a3b668d5d1c2f6af988a" datatype="html">
         <source>Generating suggestions...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6b197ba31cdb5c9321f1520127e762d447acf7de" datatype="html">
         <source>Use this pronunciation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">53</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">65</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5c6cf8464b10c8df1b8e42aa7289702c91938b51" datatype="html">
         <source>no matches</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">68</context>
         </context-group>
       </trans-unit>
       <trans-unit id="341efb8c24835807ec3a5a5d5263220af6881e26" datatype="html">
@@ -2183,14 +2183,14 @@
         <source>Start</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="f560fec2d60ba01de23114f9f0e0bd073a8b90ae" datatype="html">
         <source>Start forced alignment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/missing-annotations/missing-annotations.component.html</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">92</context>
         </context-group>
       </trans-unit>
     </body>
