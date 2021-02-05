@@ -163,7 +163,11 @@ public class AdminSystemAttributes extends LabbcatServlet {
                                  jsonOut.writeEnd(); // Object
                               }                              
                            } // options
-                           jsonOut.write("value", rs.getString("value"));
+                           if (rs.getString("value") != null) {
+                              jsonOut.write("value", rs.getString("value"));
+                           } else {
+                              jsonOut.write("value", "");
+                           }
                         } finally {
                            jsonOut.writeEnd(); // Object
                         }
