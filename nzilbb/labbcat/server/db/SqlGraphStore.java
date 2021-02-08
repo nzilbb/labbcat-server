@@ -1664,7 +1664,9 @@ public class SqlGraphStore implements GraphStore {
                +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
                +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
                +" WHERE transcript.transcript_id REGEXP ?"+userWhereClauseGraph(true, "transcript"));
-            sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","") + "\\.[^.]+$");
+            sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","")
+                          .replace("(","\\(").replace(")","\\)") // parentheses are literal
+                          + "\\.[^.]+$");
             rs = sql.executeQuery();
             if (!rs.next()) { // graph not found - maybe we've been given an ag_id?
                try {
