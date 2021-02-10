@@ -24,9 +24,9 @@ RUN sed -i '/USER-SECURITY/d' WEB-INF/web_install.xml
 # install Praat
 RUN mkdir /opt/praat
 WORKDIR /opt/praat
-RUN wget http://www.fon.hum.uva.nl/praat/praat6116_linux64barren.tar.gz
-RUN tar xvf praat6116_linux64barren.tar.gz
-RUN rm praat6116_linux64barren.tar.gz
+RUN wget http://www.fon.hum.uva.nl/praat/praat6139_linux64barren.tar.gz
+RUN tar xvf praat6139_linux64barren.tar.gz
+RUN rm praat6139_linux64barren.tar.gz
 RUN cp praat_barren /usr/bin/praat
 
 # HTK cannot be distributed, but with a registers username/password, the source code can be
