@@ -929,3 +929,8 @@ dt, dd {
     padding: 1px;
 }
 
+.legalCopy img { /* CC-BY-SA logo */
+    vertical-align:middle;
+    height:40px;
+    display: inline-block;
+}
