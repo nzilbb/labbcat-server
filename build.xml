@@ -122,8 +122,7 @@
              Overview="nzilbb/labbcat/server/overview.html"
              stylesheetfile="doc-files/style.css"
              noqualifier="all"
-             bottom="&lt;i&gt;&amp;copy; NZILBB - ${TODAY}&lt;/i&gt;"
-             >
+             bottom="&lt;a rel='license' href='http://creativecommons.org/licenses/by-sa/2.0/'&gt;&lt;img alt='CC-BY-SA Creative Commons Licence ' src='/labbcat-server/cc-by-sa.svg' title='This work is licensed under a Creative Commons Attribution-ShareAlike 2.0 Generic License' /&gt;&lt;/a&gt;&lt;a rel='author' href='https://www.canterbury.ac.nz/nzilbb/'&gt;&lt;img src='/labbcat-server/nzilbb.svg' alt='Te Kāhui Roro Reo | The New Zealand Institute of Language, Brain and Behaviour' title='&amp;copy; ${TODAY} NZILBB'&gt;&lt;/a&gt;"             >
       <fileset dir="${src}" includes="${srcfiles}" excludes="${testsrcfiles}" />
     </javadoc>
   </target>
