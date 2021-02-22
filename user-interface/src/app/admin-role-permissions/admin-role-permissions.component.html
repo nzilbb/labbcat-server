@@ -22,14 +22,14 @@
       <input #value_pattern type="text" placeholder="Pattern" required >
     </span>
     <span class="buttons">
-      <app-button action="create"
+      <lib-button action="create"
                   (press)="entity.reportValidity() && layer.reportValidity() && value_pattern.reportValidity() && createRow(entity.value, layer.value, value_pattern.value) && !(entity.selectedIndex = layer.selectedIndex = 0) && value_pattern.value = '';"
                   [processing]="creating"
-                  i18n-title title="Add new record"></app-button>
+                  i18n-title title="Add new record"></lib-button>
     </span>
   </div>
   
-  <app-wait *ngIf="!rows"></app-wait>
+  <lib-wait *ngIf="!rows"></lib-wait>
   <div class="item" *ngFor="let permission of rows">
     <span class="role-permission-entity" i18n-title title="Name"><legend i18n>Entity</legend>
       {{validEntities[permission.entity]}}</span>
@@ -50,17 +50,17 @@
              required >
     </span>
     <span class="buttons">
-      <app-button action="delete"
+      <lib-button action="delete"
                   disabled="{{permission._cantDelete}}"
                   (press)="deleteRow(permission);" [processing]="permission._deleting"
-                  title="{{permission._cantDelete}}"></app-button>
+                  title="{{permission._cantDelete}}"></lib-button>
     </span>
     
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save"
+  <lib-button action="save"
               (press)="updateChangedRows();" [processing]="updating > 0"
               *ngIf="changed"
-              i18n-title title="Save all changed records"></app-button>
+              i18n-title title="Save all changed records"></lib-button>
 </div>

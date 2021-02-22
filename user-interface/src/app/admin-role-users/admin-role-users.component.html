@@ -23,8 +23,8 @@
 </div>
 <div class="below">
   <p i18n> Click users to add or remove them </p>
-  <app-button action="save" [processing]="updating > 0"
+  <lib-button action="save" [processing]="updating > 0"
               (press)="updateChangedUsers();"
               *ngIf="changed"
-              i18n-title title="Save all changed records"></app-button>
+              i18n-title title="Save all changed records"></lib-button>
 </div>

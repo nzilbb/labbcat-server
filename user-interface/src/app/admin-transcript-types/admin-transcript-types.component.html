@@ -6,28 +6,28 @@
           i18n-title="Transcript Type" title="Type"><legend i18n="Transcript Type">Type</legend>
       <input #newType type="text" required i18n-placeholder="Transcript Type" placeholder="Type"></span>
     <span class="buttons">
-      <app-button action="create"
+      <lib-button action="create"
                   (press)="newType.reportValidity() && createRow(newType.value) && newType.value = '';"
-                  i18n-title title="Add new record"></app-button>
+                  i18n-title title="Add new record"></lib-button>
     </span>
   </div>
   
-  <app-wait *ngIf="!types"></app-wait>
+  <lib-wait *ngIf="!types"></lib-wait>
   <div class="item" *ngFor="let label of types">
     <span class="transcript-type-label"
           i18n-title="Transcript Type" title="Type"><legend i18n="Transcript Type">Type</legend>
       {{label}}</span>
     <span class="buttons">
-      <app-button action="delete"
+      <lib-button action="delete"
                   [disabled]="types.length <= 1"
                   (press)="deleteRow(label);"
-                  i18n-title title="Delete record"></app-button>
+                  i18n-title title="Delete record"></lib-button>
     </span>
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save"
+  <lib-button action="save"
               (press)="updateChangedRows();"  [processing]="updating"
               *ngIf="changed"
-              i18n-title title="Save all changed records"></app-button>
+              i18n-title title="Save all changed records"></lib-button>
 </div>

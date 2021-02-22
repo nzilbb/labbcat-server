@@ -2,7 +2,7 @@
 
 <p>{{status}}</p>
 
-<app-wait *ngIf="readingMatches"></app-wait>
+<lib-wait *ngIf="readingMatches"></lib-wait>
 <form #form method="POST" id="frm" *ngIf="matches.length" target="_blank">
   <input type="hidden" name="threadId" value="{{threadId}}">
   <input type="hidden" name="generateLayerId" value="{{generateLayerId}}">
@@ -70,20 +70,20 @@
   </div>
   <div id="matches-footer">
       <span class="match-count">{{matches.length}} results shown</span>
-      <app-button (press)="moreMatches()" [processing]="moreLoading"
+      <lib-button (press)="moreMatches()" [processing]="moreLoading"
                   [disabled]="totalMatches - matches.length <= 0"
                   i18n-title title="Show more results"
                   label="{{min(pageLength, totalMatches - matches.length)}} More Matches"
                   img="down-triangle.png" icon="▼"
                   >
-      </app-button>
-      <app-button (press)="allMatches()" [processing]="allLoading"
+      </lib-button>
+      <lib-button (press)="allMatches()" [processing]="allLoading"
                   [disabled]="totalMatches - matches.length <= 0"
                   i18n-title title="Show all results"
                   label="{{totalMatches - matches.length}} Remaining Matches"
                   img="down-double-triangle.png" icon="⏬"
                   >
-      </app-button>
+      </lib-button>
     </div>
   <div id="check-all-bottom">
     <label i18n-title title="Select all results including those not shown here">
@@ -93,14 +93,14 @@
     </label>
   </div>
   <div id="csv-export" class="controls">
-    <app-button (press)="exportCsv();" id="csv-export-btn"
+    <lib-button (press)="exportCsv();" id="csv-export-btn"
                 img="csv.png" icon=",a,"
                 i18n-title title="Export results to CSV"
-                i18n-label label="CSV Export"></app-button>
-    <app-button (press)="csvOptions();"
+                i18n-label label="CSV Export"></lib-button>
+    <lib-button (press)="csvOptions();"
                 img="down-triangle.png" icon="▼"
                 i18n-title title="CSV export options"
-                ></app-button>
+                ></lib-button>
   </div>
   <div id="csv-export-options" class="{{showCsvOptions?'unhidden-panel':'hidden-panel'}}">
     <fieldset>
@@ -156,13 +156,13 @@
     </fieldset>
   </div>
   <div id="emu-webapp" class="controls" *ngIf="emuWebApp">
-    <app-button (press)="emuWebapp();"
+    <lib-button (press)="emuWebapp();"
                 img="emu.png" icon="eμ"
-                i18n-label label="EMU WebApp"></app-button>
-    <app-button (press)="emuOptions();"
+                i18n-label label="EMU WebApp"></lib-button>
+    <lib-button (press)="emuOptions();"
                 img="down-triangle.png" icon="▼"
                 i18n-title title="EMU WebApp options"
-                ></app-button>
+                ></lib-button>
   </div>
   <div id="emu-options" class="{{showEmuOptions?'unhidden-panel':'hidden-panel'}}">
     <fieldset>
@@ -173,9 +173,9 @@
     </fieldset>
   </div>
   <div id="serialize" class="controls">
-    <app-button (press)="serialize();"
+    <lib-button (press)="serialize();"
                 img="{{serializeImg}}" icon="📦"
-                i18n-label label="Utterance Export"></app-button>
+                i18n-label label="Utterance Export"></lib-button>
     <select #mimetype name="mimetype"
             [(ngModel)]="mimeType"
             (change)="onChangeMimeType()">
@@ -184,16 +184,16 @@
     </select>
   </div>
   <div id="export-audio" class="controls">
-    <app-button (press)="exportAudio();"
+    <lib-button (press)="exportAudio();"
                 img="audio.svg" icon="🔊"
-                i18n-label label="Audio Export"></app-button>
+                i18n-label label="Audio Export"></lib-button>
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayer">
     <input #generate_layer type="hidden" name="generate_layer" value="">
-    <app-button (press)="runAnnotator(htkLayer.id);"
+    <lib-button (press)="runAnnotator(htkLayer.id);"
                 img="cog.svg" icon="⚙"
                 i18n-title title="Generate"
-                label="{{htkLayer.id}}"></app-button>
+                label="{{htkLayer.id}}"></lib-button>
   </div>
-  <app-keep-alive threadId="{{threadId}}"></app-keep-alive>
+  <lib-keep-alive threadId="{{threadId}}"></lib-keep-alive>
 </form>

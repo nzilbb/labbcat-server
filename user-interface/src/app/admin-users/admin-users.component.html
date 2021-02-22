@@ -13,13 +13,13 @@
       Roles
     </span>
     <span class="buttons">
-      <app-button action="create"
+      <lib-button action="create"
                   (press)="user.reportValidity() && email.reportValidity() && createRow(user.value, email.value) && user.value = email.value = '';" [processing]="creating"
-                  i18n-title="Button title" title="Add new record"></app-button>
+                  i18n-title="Button title" title="Add new record"></lib-button>
     </span>
   </div>
   
-  <app-wait *ngIf="!rows"></app-wait>
+  <lib-wait *ngIf="!rows"></lib-wait>
   <div class="item" *ngFor="let user of rows">
     <span class="user-id" i18n-title title="User ID"><legend i18n="User ID">ID</legend>
       {{user.user}}</span>
@@ -44,17 +44,17 @@
       <app-link [routerLink]="['/admin','users',user.user]"
                 i18n-title title="Password"
                 img="key.svg" icon="🔑"></app-link>
-      <app-button action="delete"
+      <lib-button action="delete"
                   disabled="{{user._cantDelete}}"
                   (press)="deleteRow(user);"  [processing]="user._deleting"
-                  title="{{user._cantDelete}}"></app-button>
+                  title="{{user._cantDelete}}"></lib-button>
     </span>
     
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save"
+  <lib-button action="save"
               (press)="updateChangedRows();"  [processing]="updating > 0"
               *ngIf="changed"
-              title="Save all changed records"></app-button>
+              title="Save all changed records"></lib-button>
 </div>

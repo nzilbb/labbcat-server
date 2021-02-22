@@ -9,14 +9,14 @@
     <span class="media-track-display-order" i18n-title="field|Order items are displayed in" title="Display order"><legend i18n="field|Order items are displayed in">Order</legend>
       <input #displayOrder type="number" step="1" i18n-placeholder="field|Order items are displayed in" placeholder="Order"></span>
     <span class="buttons">
-      <app-button action="create"
+      <lib-button action="create"
                   (press)="createRow(suffix.value, description.value, displayOrder.value); suffix.value = description.value = displayOrder.value = '';"
                   [processing]="creating"
-                  i18n-title title="Add new record"></app-button>
+                  i18n-title title="Add new record"></lib-button>
     </span>
   </div>
   
-  <app-wait *ngIf="!rows"></app-wait>
+  <lib-wait *ngIf="!rows"></lib-wait>
   <div class="item" *ngFor="let track of rows">
     <span class="media-track-name" i18n-title title="Suffix"><legend i18n>Suffix</legend>
       {{track.suffix}}
@@ -40,17 +40,17 @@
              type="number" step="1"
              i18n-placeholder="field|Order items are displayed in" placeholder="Order"></span>
     <span class="buttons">
-      <app-button action="delete"
+      <lib-button action="delete"
                   disabled="{{track._cantDelete}}"
                   (press)="deleteRow(track);" [processing]="track._deleting"
-                  title="{{track._cantDelete}}"></app-button>
+                  title="{{track._cantDelete}}"></lib-button>
     </span>
 
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save"
+  <lib-button action="save"
               (press)="updateChangedRows();" [processing]="updating > 0"
               *ngIf="changed"
-              title="Save all changed tracks"></app-button>
+              title="Save all changed tracks"></lib-button>
 </div>

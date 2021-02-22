@@ -13,13 +13,13 @@
       <textarea #description i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <app-button action="create" [processing]="creating"
+      <lib-button action="create" [processing]="creating"
                   (press)="name.reportValidity() && language.reportValidity() && createRow(name.value, language.value, description.value) && name.value = description.value = ''; language.selectedIndex = 0;"
-                   i18n-title title="Add new record"></app-button>
+                   i18n-title title="Add new record"></lib-button>
     </span>
   </div>
   
-  <app-wait *ngIf="!rows"></app-wait>
+  <lib-wait *ngIf="!rows"></lib-wait>
   <div class="item" *ngFor="let corpus of rows">
     <span class="corpus-name" i18n-title title="Name"><legend i18n>Name</legend>
       {{corpus.corpus_name}}</span>
@@ -41,17 +41,17 @@
       <app-link [routerLink]="['corpus?corpus_id='+corpus.corpus_id]"
                 i18n-title title="Information about this corpus"
                 img="info.svg" icon="🛈"></app-link>
-      <app-button  action="delete" [processing]="corpus._deleting"
+      <lib-button  action="delete" [processing]="corpus._deleting"
                    disabled="{{corpus._cantDelete}}"
                    (press)="deleteRow(corpus);"
-                   title="{{corpus._cantDelete}}"></app-button>
+                   title="{{corpus._cantDelete}}"></lib-button>
     </span>
 
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save" [processing]="updating > 0"
+  <lib-button action="save" [processing]="updating > 0"
               (press)="updateChangedRows();"
               *ngIf="changed"
-              i18n-title title="Save all changed records"></app-button>
+              i18n-title title="Save all changed records"></lib-button>
 </div>

@@ -55,9 +55,9 @@
          [className]="newLayerId?'no-filter':'filter'">
   </span>
   <span class="buttons">
-    <app-button action="create" [processing]="creating"
+    <lib-button action="create" [processing]="creating"
                 (press)="name.reportValidity() && labelType.reportValidity() && alignment.reportValidity() && createRow(name.value, labelType.value, alignment.value, manager.value, enabled.value, project.value, description.value) && !(name.value = description.value = '') && !(labelType.selectedIndex = alignment.selectedIndex = manager.selectedIndex = enabled.selectedIndex = project.selectedIndex = 0);"
-                i18n-title title="Add new record"></app-button>
+                i18n-title title="Add new record"></lib-button>
   </span>
   <span class="layer-description new-layer" i18n-title title="Description"><legend i18n>Description</legend>
     <textarea #description
@@ -65,7 +65,7 @@
               [className]="newLayerId?'show-description':'hide-description'"></textarea>
   </span>
 
-  <app-wait *ngIf="!rows"></app-wait>
+  <lib-wait *ngIf="!rows"></lib-wait>
   <ng-container class="item" *ngFor="let layer of rows">
     <ng-container *ngIf="newLayerId || (!categoryFilter || layer.category == categoryFilter) && (!managerFilter || layer.layer_manager_id == managerFilter)">
       <span class="layer-id" i18n-title="Layer ID" title="ID"><legend i18n>ID</legend>
@@ -143,10 +143,10 @@
         <app-link i18n-title title="Clear layer"
                   img="delete.svg" icon="⌫"
                   href="admin/layers/clear?layer_id={{layer.layer_id}}"></app-link>
-        <app-button  action="delete" [processing]="layer._deleting"
+        <lib-button  action="delete" [processing]="layer._deleting"
                      disabled="{{layer._cantDelete}}"
                      (press)="deleteRow(layer);"
-                     title="{{layer._cantDelete}}"></app-button>
+                     title="{{layer._cantDelete}}"></lib-button>
       </span>
       <span class="layer-description" i18n-title title="Description"><legend i18n>Description</legend>
         <textarea #description
@@ -159,8 +159,8 @@
   </ng-container>
 </div>
 <div class="buttons">
-  <app-button action="save" [processing]="updating > 0"
+  <lib-button action="save" [processing]="updating > 0"
               (press)="updateChangedRows();"
               *ngIf="changed"
-              i18n-title title="Save all changed records"></app-button>
+              i18n-title title="Save all changed records"></lib-button>
 </div>

@@ -8,7 +8,7 @@
 
 <div class="list annotator-list">
   
-  <app-wait *ngIf="!rows"></app-wait>
+  <lib-wait *ngIf="!rows"></lib-wait>
   <div class="item" *ngFor="let annotator of rows">
     <div class="annotator-id" i18n-title title="ID">
       <a class="info"
@@ -27,9 +27,9 @@
                   i18n-label label="Extensions"
                   img="cog.png" icon="⚙"
                   ></app-link>
-      <app-button action="delete"
+      <lib-button action="delete"
                   (press)="uninstall(annotator);" [processing]="annotator._deleting"
-                  i18n-title title="Uninstall"></app-button>
+                  i18n-title title="Uninstall"></lib-button>
       </span>
     </div>
     <div [innerHTML]="annotator.info"

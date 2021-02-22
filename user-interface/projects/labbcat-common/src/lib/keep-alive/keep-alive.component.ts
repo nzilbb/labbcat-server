@@ -4,7 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LabbcatService } from '../labbcat.service';
 
 @Component({
-  selector: 'app-keep-alive',
+  selector: 'lib-keep-alive',
   templateUrl: './keep-alive.component.html',
   styleUrls: ['./keep-alive.component.css']
 })

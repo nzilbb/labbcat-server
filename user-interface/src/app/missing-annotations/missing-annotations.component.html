@@ -1,12 +1,12 @@
 <h1 i18n="page header">Missing Pronunciations</h1>
 <h2>{{seriesName}}</h2>
-<app-keep-alive threadId="{{sourceThreadId}}"></app-keep-alive>
+<lib-keep-alive threadId="{{sourceThreadId}}"></lib-keep-alive>
 
-<app-task *ngIf="missingAnnotationsThreadId"
+<lib-task *ngIf="missingAnnotationsThreadId"
           threadId="{{missingAnnotationsThreadId}}"
           [showName]="false"
           [autoOpenResults]="false"
-          (finished)="taskFinished($event)"></app-task>
+          (finished)="taskFinished($event)"></lib-task>
 <div id="dictionary-panel">
   <div *ngIf="missing" class="missing-annotations">
     <ng-container *ngFor="let word of Object.keys(missing)">
@@ -16,11 +16,11 @@
              href="{{missing[word]}}"
              target="first-occurance">{{word}}</a>
         </span>
-        <app-button
+        <lib-button
           (press)="lookup(word)"
           i18n-title title="Search the dictionary for a similar word"
           img="magnifying-glass.svg" icon="🔍"
-          ></app-button>
+          ></lib-button>
         <span class="pronunciation">
           <input id="pron-{{word}}"
                  type="text"
@@ -38,15 +38,15 @@
                   (click)="ipaHelperWord = (ipaHelperWord == word?null:word)">«</button>
         </span>
         <span class="spinner">
-          <app-wait class="row-pending" *ngIf="wordsPending[word]"
-                    i18n-title title="Generating suggestions..."></app-wait>
+          <lib-wait class="row-pending" *ngIf="wordsPending[word]"
+                    i18n-title title="Generating suggestions..."></lib-wait>
         </span>
         <app-disc-helper *ngIf="ipaHelperWord == word"
                          (symbolSelected)="symbolSelected(word, $event)"
                          ></app-disc-helper>
         <fieldset class="lookup" *ngIf="lookupWord == word && lookupWordsResult">
           <legend>{{lookupWords}}</legend>
-          <app-wait *ngIf="lookupPending"></app-wait>
+          <lib-wait *ngIf="lookupPending"></lib-wait>
           <div class="lookup combined" *ngIf="lookupCombined">
             <button
               (click)="useLabel(lookupCombined, false);"
@@ -73,10 +73,10 @@
       </ng-container>
     </ng-container>
     <div class="buttons">  
-      <app-button action="save" [processing]="updating"
+      <lib-button action="save" [processing]="updating"
                   (press)="addNextEntry();"
                   *ngIf="changed"
-                  i18n-title title="Save all pronunciations"></app-button>
+                  i18n-title title="Save all pronunciations"></lib-button>
       <form #form action="{{baseUrl}}generateLayerUtterances" method="POST">
         <input type="hidden" name="generate_layer_id" value="{{generateLayer.layer_id}}">
         <input type="hidden" name="threadId" value="{{sourceThreadId}}">
@@ -85,11 +85,11 @@
         </ng-container>
         <input type="hidden" name="collection_name" value="{{seriesName}}">
         <input type="hidden" name="todo" value="generate-now">
-        <app-button *ngIf="missing"
+        <lib-button *ngIf="missing"
                     (press)="start()"
                     img="cog.svg"
                     i18n-label label="Start"
-                    i18n-title title="Start forced alignment"></app-button>
+                    i18n-title title="Start forced alignment"></lib-button>
       </form>
     </div>
 

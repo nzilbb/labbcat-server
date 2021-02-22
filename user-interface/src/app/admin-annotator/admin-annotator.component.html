@@ -38,14 +38,14 @@
     </div>
   </div>
   <div class="controls">
-    <app-button (press)="install(true)"
+    <lib-button (press)="install(true)"
                 i18n-label label="Install"
                 i18n-title title="Confirm annotator installation"
-                img="check-mark.svg" icon="✓"></app-button>
-    <app-button (press)="install(false)"
+                img="check-mark.svg" icon="✓"></lib-button>
+    <lib-button (press)="install(false)"
                 i18n-label label="Cancel"
                 i18n-title title="Cancel annotator installation"
-                img="cross-mark.svg" icon="❌"></app-button>
+                img="cross-mark.svg" icon="❌"></lib-button>
   </div>
   <div [innerHTML]="annotator.info" i18n-title title="Annotator information"></div>
 </div>

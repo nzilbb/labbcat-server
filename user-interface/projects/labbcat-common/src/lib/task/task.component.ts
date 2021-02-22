@@ -6,7 +6,7 @@ import { MessageService } from '../message.service';
 import { LabbcatService } from '../labbcat.service';
 
 @Component({
-  selector: 'app-task',
+  selector: 'lib-task',
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.css']
 })

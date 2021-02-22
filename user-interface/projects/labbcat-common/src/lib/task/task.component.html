@@ -9,12 +9,12 @@
              [style.width]="task.percentComplete + '%'">&nbsp;</div>
       </div>
     </progress>
-    <app-button *ngIf="cancelButton && task.running"
+    <lib-button *ngIf="cancelButton && task.running"
                 (press)="cancelTask()" [processing]="cancelling"
                 i18n-title title="Cancel task"
                 img="cross-mark.svg" icon="×"
               >
-    </app-button>
+    </lib-button>
   </div>
   <div class="text">
     <div *ngIf="showStatus" class="task-status">{{task.status}}</div>

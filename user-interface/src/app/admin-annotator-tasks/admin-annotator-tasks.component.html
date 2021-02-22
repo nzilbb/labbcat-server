@@ -12,13 +12,13 @@
       <textarea #description i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <app-button action="create" [processing]="creating"
+      <lib-button action="create" [processing]="creating"
                   (press)="taskId.reportValidity() && createRow(taskId.value, description.value) && taskId.value = description.value = '';"
-                   i18n-title title="Add new record"></app-button>
+                   i18n-title title="Add new record"></lib-button>
     </span>
   </div>
   
-  <app-wait *ngIf="!rows"></app-wait>
+  <lib-wait *ngIf="!rows"></lib-wait>
   <div class="item" *ngFor="let task of rows">
     <span class="task-id" i18n-title title="ID"><legend i18n>ID</legend>
       {{task.taskId}}</span>
@@ -34,16 +34,16 @@
                 i18n-label label="Parameters"
                 img="cog.svg" icon="⚙"
                 ></app-link>
-      <app-button action="delete"
+      <lib-button action="delete"
                   (press)="deleteRow(task);" [processing]="task._deleting"
-                  title="{{task._cantDelete}}"></app-button>
+                  title="{{task._cantDelete}}"></lib-button>
     </span>
     
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save"
+  <lib-button action="save"
               (press)="updateChangedRows();" [processing]="updating > 0"
               *ngIf="changed"
-              i18n-title title="Save all changed records"></app-button>
+              i18n-title title="Save all changed records"></lib-button>
 </div>

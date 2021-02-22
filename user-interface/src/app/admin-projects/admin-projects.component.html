@@ -7,13 +7,13 @@
       <textarea #description i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <app-button action="create"
+      <lib-button action="create"
                   (press)="project.reportValidity() && createRow(project.value, description.value); project.value = description.value = '';" [processing]="creating"
-                  i18n-title title="Add new record"></app-button>
+                  i18n-title title="Add new record"></lib-button>
     </span>
   </div>
   
-  <app-wait *ngIf="!rows"></app-wait>
+  <lib-wait *ngIf="!rows"></lib-wait>
   <div class="item" *ngFor="let project of rows">
     <span class="project-name" i18n-title title="Name"><legend i18n>Name</legend>
       {{project.project}}</span>
@@ -24,16 +24,16 @@
              i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <app-button action="delete"
+      <lib-button action="delete"
                   disabled="{{project._cantDelete}}"
                   (press)="deleteRow(project);"  [processing]="project._deleting"
-                  title="{{project._cantDelete}}"></app-button>
+                  title="{{project._cantDelete}}"></lib-button>
     </span>
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save"
+  <lib-button action="save"
               (press)="updateChangedRows();"  [processing]="updating > 0"
               *ngIf="changed"
-              i18n-title title="Save all changed records"></app-button>
+              i18n-title title="Save all changed records"></lib-button>
 </div>

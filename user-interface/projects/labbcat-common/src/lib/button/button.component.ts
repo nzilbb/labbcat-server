@@ -2,7 +2,7 @@ import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Inject } from '@angular/core';
 
 @Component({
-  selector: 'app-button',
+  selector: 'lib-button',
   templateUrl: './button.component.html',
   styleUrls: ['./button.component.css']
 })

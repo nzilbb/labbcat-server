@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Inject } from '@angular/core';
 
 @Component({
-  selector: 'app-wait',
+  selector: 'lib-wait',
   templateUrl: './wait.component.html',
   styleUrls: ['./wait.component.css']
 })

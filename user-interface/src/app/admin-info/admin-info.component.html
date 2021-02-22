@@ -1,4 +1,4 @@
-<app-wait *ngIf="loading"></app-wait>
+<lib-wait *ngIf="loading"></lib-wait>
 <div *ngIf="!loading">
   <h2 i18n>Overall Corpus information</h2>
   <div class="text-html">
@@ -8,9 +8,9 @@
               (change)="onChange($event)"></ckeditor>
   </div>
   <div class="buttons">
-    <app-button action="save"
+    <lib-button action="save"
                 (press)="updateInfo();" [processing]="updating"
                 *ngIf="changed"
-                i18n-title title="Save info"></app-button>
+                i18n-title title="Save info"></lib-button>
   </div>
 </div>

@@ -1,7 +1,7 @@
 <h2 i18n="page header">System Attributes</h2>
 
 <div class="list attribute-list">
-  <app-wait *ngIf="!attributes"></app-wait>
+  <lib-wait *ngIf="!attributes"></lib-wait>
   <div class="item attribute-item" *ngFor="let attribute of attributes">
     <label class="attribute" title="{{attribute.description}}"> {{attribute.label}} </label>
     <span class="value type-{{attribute.type}}" title="{{attribute.description}}"><legend>{{attribute.label}}</legend>
@@ -42,8 +42,8 @@
   </div>
 </div>
 <div class="buttons">
-  <app-button action="save"
+  <lib-button action="save"
               (press)="updateChangedAttributes();" [processing]="updating > 0"
               *ngIf="changed"
-              i18n-title title="Save all changed records"></app-button>
+              i18n-title title="Save all changed records"></lib-button>
 </div>
