@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { LabbcatService } from '../labbcat.service';
+import { LabbcatService } from 'labbcat-common';
 
 @Component({
   selector: 'app-login',

@@ -2,8 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 
-import { MessageService } from '../message.service';
-import { LabbcatService } from '../labbcat.service';
+import { MessageService, LabbcatService } from 'labbcat-common';
 
 @Component({
   selector: 'app-admin-annotator-ext',

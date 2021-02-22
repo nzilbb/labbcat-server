@@ -2,8 +2,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 
-import { MessageService } from '../message.service';
-import { LabbcatService } from '../labbcat.service';
+import { MessageService, LabbcatService } from 'labbcat-common';
 
 @Component({
   selector: 'app-admin-annotator-task-parameters',

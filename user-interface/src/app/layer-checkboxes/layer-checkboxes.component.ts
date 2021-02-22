@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 
-import { LabbcatService } from '../labbcat.service';
+import { LabbcatService } from 'labbcat-common';
 import { Layer } from '../layer';
 
 @Component({

@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { Inject } from '@angular/core';
 
 @Component({
   selector: 'app-button',
@@ -16,10 +16,12 @@ export class ButtonComponent implements OnInit {
     @Output() press = new EventEmitter();
     @Input() processing: boolean;
 
-    imagesLocation = environment.imagesLocation;
+    imagesLocation : string;
     classes = "btn";
     
-    constructor() { }
+    constructor(@Inject('environment') private environment) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
         switch (this.action) {

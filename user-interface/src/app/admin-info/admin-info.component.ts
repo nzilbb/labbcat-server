@@ -2,8 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 
-import { MessageService } from '../message.service';
-import { LabbcatService } from '../labbcat.service';
+import { MessageService, LabbcatService } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 import { CkUploadAdapter } from '../ck-upload-adapter';
 

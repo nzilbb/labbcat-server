@@ -6,8 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { Layer } from '../layer';
 import { Project } from '../project';
 import { Response } from '../response';
-import { MessageService } from '../message.service';
-import { LabbcatService } from '../labbcat.service';
+import { MessageService, LabbcatService } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({

@@ -34,7 +34,7 @@
               "src/styles.css"
             ],
             "scripts": [
-                "src/nzilbb.labbcat.js"
+                "projects/labbcat-common/src/nzilbb.labbcat.js"
             ]
           },
           "configurations": {
@@ -100,7 +100,7 @@
               "src/styles.css"
             ],
             "scripts": [
-                "src/nzilbb.labbcat.js"
+                "projects/labbcat-common/src/nzilbb.labbcat.js"
             ]
           }
         },
@@ -127,6 +127,46 @@
             "production": {
               "devServerTarget": "user-interface:serve:production"
             }
+          }
+        }
+      }
+    },
+    "labbcat-common": {
+      "projectType": "library",
+      "root": "projects/labbcat-common",
+      "sourceRoot": "projects/labbcat-common/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/labbcat-common/tsconfig.lib.json",
+            "project": "projects/labbcat-common/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/labbcat-common/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/labbcat-common/src/test.ts",
+            "tsConfig": "projects/labbcat-common/tsconfig.spec.json",
+            "karmaConfig": "projects/labbcat-common/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/labbcat-common/tsconfig.lib.json",
+              "projects/labbcat-common/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
           }
         }
       }

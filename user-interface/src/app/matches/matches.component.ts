@@ -3,12 +3,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { Response } from '../response';
 import { Match } from '../match';
-import { Task } from '../task';
+import { Task } from 'labbcat-common';
 import { Layer } from '../layer';
 import { User } from '../user';
 import { SerializationDescriptor } from '../serialization-descriptor';
-import { MessageService } from '../message.service';
-import { LabbcatService } from '../labbcat.service';
+import { MessageService, LabbcatService } from 'labbcat-common';
 
 @Component({
   selector: 'app-matches',

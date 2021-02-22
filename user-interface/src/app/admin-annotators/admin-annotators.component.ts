@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { Response } from '../response';
 import { Annotator } from '../annotator';
-import { MessageService } from '../message.service';
-import { LabbcatService } from '../labbcat.service';
+import { MessageService, LabbcatService } from 'labbcat-common';
 
 @Component({
   selector: 'app-admin-annotators',

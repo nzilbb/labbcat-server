@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { Response } from '../response';
 import { MediaTrack } from '../media-track';
-import { MessageService } from '../message.service';
-import { LabbcatService } from '../labbcat.service';
+import { MessageService, LabbcatService } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({
