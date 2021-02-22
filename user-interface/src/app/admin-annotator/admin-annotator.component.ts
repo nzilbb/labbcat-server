@@ -1,9 +1,8 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Response } from '../response';
 import { Annotator } from '../annotator';
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { MessageService, LabbcatService, Response } from 'labbcat-common';
 
 @Component({
   selector: 'app-admin-annotator',

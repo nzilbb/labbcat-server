@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Response } from '../response';
-import { Layer } from '../layer';
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { MessageService, LabbcatService, Response, Layer } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({

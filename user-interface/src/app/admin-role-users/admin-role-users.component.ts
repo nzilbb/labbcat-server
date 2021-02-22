@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Response } from '../response';
-import { User } from '../user';
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { MessageService, LabbcatService, Response, User } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({

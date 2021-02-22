@@ -47,13 +47,13 @@
         {{matches.indexOf(match) + 1}}.
       </div>
       <div class="match-id"><!-- TODO shift-click -->
-        <app-grouped-checkbox
+        <lib-grouped-checkbox
           group="match"
           i18n-title title="To select individual results, untick 'select all N results'"
           name="utterance"
           value="{{match.MatchId}}"
           [checked]="match._selected" (checkedChange)="match._selected = !match._selected"
-          [disabled]="selectAll"></app-grouped-checkbox>
+          [disabled]="selectAll"></lib-grouped-checkbox>
       </div>
       <div class="preceding-context match-transcript">
         {{match.BeforeMatch}}
@@ -145,13 +145,13 @@
             <span i18n="csv options">Text</span>
           </label>
         </div>
-        <app-layer-checkboxes
+        <lib-layer-checkboxes
           name="csv_layer"
           includeCounts="true" includeAnchorSharing="true"
           participant="true" transcript="true"
           span="true" phrase="true" word="true" segment="true"
           excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true"
-          selected="{{selectedLayers}}"></app-layer-checkboxes>
+          selected="{{selectedLayers}}"></lib-layer-checkboxes>
       </div>
     </fieldset>
   </div>
@@ -167,9 +167,9 @@
   <div id="emu-options" class="{{showEmuOptions?'unhidden-panel':'hidden-panel'}}">
     <fieldset>
     <legend i18n>EMU WebApp Tiers</legend>
-      <app-layer-checkboxes name="emu_layer"
+      <lib-layer-checkboxes name="emu_layer"
                             word="true" segment="true"
-                            selected="{{emuLayers}}"></app-layer-checkboxes>
+                            selected="{{emuLayers}}"></lib-layer-checkboxes>
     </fieldset>
   </div>
   <div id="serialize" class="controls">

@@ -1,10 +1,10 @@
 import { Component, OnInit, Input } from '@angular/core';
 
-import { LabbcatService } from 'labbcat-common';
+import { LabbcatService } from '../labbcat.service';
 import { Layer } from '../layer';
 
 @Component({
-  selector: 'app-layer-checkboxes',
+  selector: 'lib-layer-checkboxes',
   templateUrl: './layer-checkboxes.component.html',
   styleUrls: ['./layer-checkboxes.component.css']
 })

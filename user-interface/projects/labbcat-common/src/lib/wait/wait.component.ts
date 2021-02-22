@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { Inject } from '@angular/core';
 
 @Component({
   selector: 'app-wait',
@@ -8,8 +8,10 @@ import { environment } from '../../environments/environment';
 })
 export class WaitComponent implements OnInit {
 
-    imagesLocation = environment.imagesLocation;
-    constructor() { }
+    imagesLocation : string;
+    constructor(@Inject('environment') private environment) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
     }

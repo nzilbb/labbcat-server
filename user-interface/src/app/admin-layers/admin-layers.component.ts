@@ -3,10 +3,8 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { switchMap } from 'rxjs/operators';
 
-import { Layer } from '../layer';
 import { Project } from '../project';
-import { Response } from '../response';
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { MessageService, LabbcatService, Response, Layer } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({

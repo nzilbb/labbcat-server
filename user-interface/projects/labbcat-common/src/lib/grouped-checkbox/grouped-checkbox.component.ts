@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-grouped-checkbox',
+  selector: 'lib-grouped-checkbox',
   templateUrl: './grouped-checkbox.component.html',
   styleUrls: ['./grouped-checkbox.component.css']
 })

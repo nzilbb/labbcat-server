@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Response } from '../response';
 import { SystemAttribute } from '../system-attribute';
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { MessageService, LabbcatService, Response } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({

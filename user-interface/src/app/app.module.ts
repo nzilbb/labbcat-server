@@ -10,7 +10,6 @@ import { environment } from '../environments/environment';
 import { PendingChangesGuard } from './pending-changes.guard';
 import { AppComponent } from './app.component';
 import { LabbcatCommonModule, TaskComponent } from 'labbcat-common';
-import { WaitComponent } from './wait/wait.component';
 import { AdminCorporaComponent } from './admin-corpora/admin-corpora.component';
 import { ViewMenuComponent } from './view-menu/view-menu.component';
 import { EditMenuComponent } from './edit-menu/edit-menu.component';
@@ -23,9 +22,6 @@ import { AdminRolesComponent } from './admin-roles/admin-roles.component';
 import { AdminRolePermissionsComponent } from './admin-role-permissions/admin-role-permissions.component';
 import { AdminRoleUsersComponent } from './admin-role-users/admin-role-users.component';
 import { AdminSystemAttributesComponent } from './admin-system-attributes/admin-system-attributes.component';
-import { MatchesComponent } from './matches/matches.component';
-import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.component';
-import { GroupedCheckboxComponent } from './grouped-checkbox/grouped-checkbox.component';
 import { AdminTranscriptTypesComponent } from './admin-transcript-types/admin-transcript-types.component';
 import { AdminAnnotatorComponent } from './admin-annotator/admin-annotator.component';
 import { AdminAnnotatorsComponent } from './admin-annotators/admin-annotators.component';
@@ -33,7 +29,6 @@ import { AdminAnnotatorTasksComponent } from './admin-annotator-tasks/admin-anno
 import { AdminAnnotatorTaskParametersComponent } from './admin-annotator-task-parameters/admin-annotator-task-parameters.component';
 import { LinkComponent } from './link/link.component';
 import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotator-ext.component';
-import { UrlEncodePipe } from './url-encode.pipe';
 import { AdminInfoComponent } from './admin-info/admin-info.component';
 import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
@@ -46,7 +41,6 @@ import { DiscHelperComponent } from './disc-helper/disc-helper.component';
 @NgModule({
     declarations: [
         AppComponent,
-        WaitComponent,
         AdminCorporaComponent,
         ViewMenuComponent,
         EditMenuComponent,
@@ -58,9 +52,6 @@ import { DiscHelperComponent } from './disc-helper/disc-helper.component';
         AdminRolesComponent,
         AdminRolePermissionsComponent,
         AdminSystemAttributesComponent,
-        MatchesComponent,
-        LayerCheckboxesComponent,
-        GroupedCheckboxComponent,
         AdminTranscriptTypesComponent,
         AdminAnnotatorComponent,
         AdminAnnotatorsComponent,
@@ -68,7 +59,6 @@ import { DiscHelperComponent } from './disc-helper/disc-helper.component';
         AdminAnnotatorTaskParametersComponent,
         LinkComponent,
         AdminAnnotatorExtComponent,
-        UrlEncodePipe,
         AdminInfoComponent,
         AdminRoleUsersComponent,
         AdminUsersComponent,
@@ -87,7 +77,6 @@ import { DiscHelperComponent } from './disc-helper/disc-helper.component';
             { path: 'about', component: AboutComponent },
             { path: 'login', component: LoginComponent },
             { path: 'task', component: TaskComponent },
-            { path: 'matches', component: MatchesComponent },
             { path: 'missingAnnotations', component: MissingAnnotationsComponent,
               canDeactivate: [PendingChangesGuard] },
             

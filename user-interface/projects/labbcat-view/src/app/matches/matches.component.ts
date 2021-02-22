@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Response } from '../response';
+import { Response } from 'labbcat-common';
 import { Match } from '../match';
 import { Task } from 'labbcat-common';
-import { Layer } from '../layer';
-import { User } from '../user';
+import { Layer } from 'labbcat-common';
+import { User } from 'labbcat-common';
 import { SerializationDescriptor } from '../serialization-descriptor';
 import { MessageService, LabbcatService } from 'labbcat-common';
 

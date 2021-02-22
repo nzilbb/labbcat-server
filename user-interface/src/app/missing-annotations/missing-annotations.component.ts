@@ -1,10 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Response } from '../response';
-import { Task } from 'labbcat-common';
-import { Layer } from '../layer';
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { MessageService, LabbcatService, Task, Layer, Response } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({
