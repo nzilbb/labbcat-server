@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { UrlEncodePipe } from './url-encode.pipe';
@@ -33,7 +34,7 @@ import { AutofocusDirective } from './autofocus.directive';
         AutofocusDirective
     ],
     imports: [
-        RouterModule
+        RouterModule, CommonModule
     ],
     exports: [
         UrlEncodePipe,
