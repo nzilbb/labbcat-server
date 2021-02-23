@@ -169,8 +169,19 @@
 
   <target name="user-interface"
           description="Build the user-interface apps"
-          depends="view-user-interface,edit-user-interface,admin-user-interface">
+          depends="user-interface-common,view-user-interface,edit-user-interface,admin-user-interface">
   </target>  
+  <target name="user-interface-common"
+          description="Build the common library used by all three UI apps">
+    <exec executable="ng"
+          dir="user-interface"
+          failonerror="true">
+      <arg value="build"/>
+      <!--arg value="- -localize"/--> <!-- TODO figure out how i18n works with libraries -->
+      <arg value="labbcat-common"/>
+      <arg value="--prod"/>
+    </exec>
+  </target>
   <target name="view-user-interface"
           description="Build the read-only user interface app">
     <exec executable="ng"
