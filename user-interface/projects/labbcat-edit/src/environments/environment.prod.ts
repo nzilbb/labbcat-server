@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
     baseUrl: "./",
-    imagesLocation: "./edit/user-interface/assets"
+    imagesLocation: "./edit/user-interface/en/assets"
 };

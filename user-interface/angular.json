@@ -49,6 +49,12 @@
       "root": "projects/labbcat-view",
       "sourceRoot": "projects/labbcat-view/src",
       "prefix": "app",
+      "i18n" : {
+          "sourceLocale": "en",
+          "locales": {
+              "es": "src/locale/messages.es.xlf"
+          }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -58,6 +64,7 @@
             "main": "projects/labbcat-view/src/main.ts",
             "polyfills": "projects/labbcat-view/src/polyfills.ts",
             "tsConfig": "projects/labbcat-view/tsconfig.app.json",
+            "localize": ["es"],
             "aot": true,
             "assets": [
               "projects/labbcat-view/src/favicon.ico",
@@ -170,6 +177,12 @@
       "root": "projects/labbcat-edit",
       "sourceRoot": "projects/labbcat-edit/src",
       "prefix": "app",
+      "i18n" : {
+          "sourceLocale": "en",
+          "locales": {
+              "es": "src/locale/messages.es.xlf"
+          }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -179,6 +192,7 @@
             "main": "projects/labbcat-edit/src/main.ts",
             "polyfills": "projects/labbcat-edit/src/polyfills.ts",
             "tsConfig": "projects/labbcat-edit/tsconfig.app.json",
+            "localize": ["es"],
             "aot": true,
             "assets": [
               "projects/labbcat-edit/src/favicon.ico",
@@ -291,6 +305,12 @@
       "root": "projects/labbcat-admin",
       "sourceRoot": "projects/labbcat-admin/src",
       "prefix": "app",
+      "i18n" : {
+          "sourceLocale": "en",
+          "locales": {
+              "es": "src/locale/messages.es.xlf"
+          }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -300,6 +320,7 @@
             "main": "projects/labbcat-admin/src/main.ts",
             "polyfills": "projects/labbcat-admin/src/polyfills.ts",
             "tsConfig": "projects/labbcat-admin/tsconfig.app.json",
+            "localize": ["es"],
             "aot": true,
             "assets": [
               "projects/labbcat-admin/src/favicon.ico",
