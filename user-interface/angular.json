@@ -412,6 +412,127 @@
           }
         }
       }
+    },
+    "labbcat-admin": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/labbcat-admin",
+      "sourceRoot": "projects/labbcat-admin/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/labbcat-admin",
+            "index": "projects/labbcat-admin/src/index.html",
+            "main": "projects/labbcat-admin/src/main.ts",
+            "polyfills": "projects/labbcat-admin/src/polyfills.ts",
+            "tsConfig": "projects/labbcat-admin/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "projects/labbcat-admin/src/favicon.ico",
+              "projects/labbcat-admin/src/assets"
+            ],
+            "styles": [
+              "projects/labbcat-admin/src/styles.css"
+            ],
+            "scripts": [
+                "projects/labbcat-common/src/nzilbb.labbcat.js"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/labbcat-admin/src/environments/environment.ts",
+                  "with": "projects/labbcat-admin/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "labbcat-admin:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "labbcat-admin:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "labbcat-admin:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/labbcat-admin/src/test.ts",
+            "polyfills": "projects/labbcat-admin/src/polyfills.ts",
+            "tsConfig": "projects/labbcat-admin/tsconfig.spec.json",
+            "karmaConfig": "projects/labbcat-admin/karma.conf.js",
+            "assets": [
+              "projects/labbcat-admin/src/favicon.ico",
+              "projects/labbcat-admin/src/assets"
+            ],
+            "styles": [
+              "projects/labbcat-admin/src/styles.css"
+            ],
+            "scripts": [
+                "projects/labbcat-common/src/nzilbb.labbcat.js"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/labbcat-admin/tsconfig.app.json",
+              "projects/labbcat-admin/tsconfig.spec.json",
+              "projects/labbcat-admin/e2e/tsconfig.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/labbcat-admin/e2e/protractor.conf.js",
+            "devServerTarget": "labbcat-admin:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "labbcat-admin:serve:production"
+            }
+          }
+        }
+      }
     }},
   "defaultProject": "user-interface"
 }

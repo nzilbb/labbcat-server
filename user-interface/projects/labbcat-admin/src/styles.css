@@ -1,0 +1,298 @@
+/* TODO once the classic UI is totally replaced, remove the app-root... selectors below */
+
+/* some things used in lots of places: */
+:root {
+    --progress-size: 22px;
+    --theme-block-color: #96A339; /* from NZILBB logo*/
+    --theme-text-color: #78832E;  /* darkened for legibility */
+}
+
+/* animations */
+@keyframes sidle-fade {
+    0%   { opacity: 0; left: 10%; }
+    10%  { opacity: 1; left: 0%; }
+    90%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { end: 1; }
+}
+@keyframes fade-down {
+    from {
+        opacity: 0;
+        position: relative;
+        top: -50px;
+    }
+    to {
+        end: 1;
+        position: relative;
+        top: 0px;
+    }
+}
+
+/* general look and feel */
+h1 { font-size: 17pt; color: black; }
+h2 { font-size: 16pt; color: black; }
+h3 { font-size: 15pt; color: var(--theme-text-color); font-style:italic; }
+h4 { font-size: 14pt; color: var(--theme-text-color); }
+h5 { font-size: 13pt; color: var(--theme-text-color); }
+h6 { font-size: 12pt; color: var(--theme-text-color); }
+
+article h1 {
+    font-weight: normal;
+}
+
+app-admin-menu a { color: var(--theme-text-color); }
+app-admin-menu li {
+    border-bottom: 1px solid var(--theme-text-color);
+    border-right: 1px solid var(--theme-text-color);
+    white-space: nowrap;
+}
+app-admin-menu li:first-child { border-left: 1px solid var(--theme-text-color); }
+
+app-root footer { color: var(--theme-text-color); }
+app-root footer a { color: var(--theme-text-color); text-decoration: none; }
+
+/* Layout */
+app-root, #main { display: flex; flex-direction: column; }
+app-root article, app-root nav, app-root aside { order: 0; }
+app-root article { flex: 3 1 60%; min-height: 100px; }
+app-root nav { flex: 1 6 20%; }
+app-root aside { flex: 1 6 10%; min-height: 100px; }
+app-root header, app-root footer { min-height: 50px; }
+/* Layout on wider screens - 3 columns */
+@media all and (min-width: 640px) {
+    #main { flex-direction: row; }
+    article { order: 2; }
+    nav { order: 1; }
+    aside { order: 3; }
+    header, footer { min-height: 100px; }
+}
+app-root article {
+    margin: 4px;
+    padding: 5px;
+}
+
+app-root header {
+    text-align: center;
+}
+app-root footer {
+    text-align: center;
+    font-size: 10pt;
+}
+
+div.messages div.error { color: red; font-weight: bold; }
+.message { color: black; }
+
+app-wait {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+/* lists of things */
+
+.list {
+    width: 100%;
+}
+
+.list > .item {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+.list > .header {
+    font-weight: bold;
+}
+.list > .item:not(:first-child) {
+    border-top: 1px dashed silver;
+}
+.list > .item > span {
+    display: block;
+    vertical-align: top;
+    padding-left: 10px;
+    white-space: nowrap;
+}
+.list > .item > span.header-only {
+    display: none;
+}
+.list > .item > span > legend {
+    font-size: 10pt;
+}
+.list > .item > span.number {
+    text-align: right;
+}
+.list > .item > span.center {
+    text-align: center;
+}
+.list > .item > span:first-child {
+    padding-left: 5px;
+}
+.list > .item > span > input, .list > .item > span > select, .list > .item > span > textarea {
+    width: 95%;
+}
+.list > .item > label { display: none; }
+
+.list > .attribute-item > label { font-weight:  bold; }
+
+.list + div.buttons { min-height: 30px; }
+
+.buttons a {
+    display: inline-block;
+    color: var(--theme-text-color);
+    text-decoration: none;
+    margin-left: 5px;
+    margin-right: 5px;
+    border: 1px var(--theme-text-color) solid;
+    padding: 4px;
+    height: 30px;
+    vertical-align: middle;
+}
+
+/* Copied styles from legacy stylesheet - TODO revise these when migration complete */
+button {
+    white-space: nowrap;
+    padding: 0px;
+    min-width: 80px;
+    height: 45px;
+    background: #DDDDDD;
+    border: 1px outset;
+    font-family: sans-serif;
+    font-size: 9pt;
+    padding: 1px;
+}
+button img {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+.lnk img, .lnk > span {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    padding: 6px;
+    display: inline-block;
+}
+button:disabled img {
+    opacity: 0.5;
+}
+button.icon-only {
+    min-width: 45px;
+    width: 45px;
+}
+button.icon-only label {
+    display: none;
+}
+progress, div.progress_container, div.progress {
+    color: var(--theme-block-color);
+    width: 95%;
+    min-width: 120px; /* this because of strangeness in chromium */
+    height: 20px;
+    vertical-align: middle;
+}
+
+
+
+
+progress { -webkit-appearance: none; }
+progress::-webkit-progress-value { background: var(--theme-block-color); }
+progress::-webkit-progress-bar { background: #EEEEEE; }
+progress::-moz-progress-bar { background: var(--theme-block-color); }
+.progress-container {
+    width: 100%;
+    min-width: 500px;
+    background: #EEEEEE;
+}
+.progress-container .progress {
+    background: var(--theme-block-color);
+}
+
+app-button {
+    display: inline-block;
+}
+app-button button {
+    width: 100%;
+}
+
+/* task progress */
+app-task app-button {
+    min-width: var(--progress-size);
+}
+app-task app-button button {
+    padding: 1px;
+    height: var(--progress-size);
+    width: var(--progress-size) !important;
+    min-width: auto !important;
+}
+app-task app-button img {    
+    height: 100%;
+}
+app-task progress, app-task .progress-container, app-task .progress-container .progress  {    
+    height: var(--progress-size);
+}
+
+app-missing-annotations {
+    margin: auto;
+    width: max-content;
+    display: block;
+}
+.buttons {
+    text-align: right;
+}
+.lnk {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+@media all and (min-width: 640px) {
+    button {
+        height: unset;
+        height: 32px;
+        padding: 5px;
+    }
+    .buttons a {
+        height: auto;
+    }
+    button.icon-only, app-button button.icon-only {
+        min-width: 32px;
+        width: 32px;
+    }
+    .lnk img, .lnk > span {
+        vertical-align: middle;
+        padding: unset;
+    }
+}
+
+
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    app-root nav { min-height: 100px; max-width: min-content; }
+    app-root aside { max-width: min-content; }
+    app-admin-menu li:first-child { border-top: 1px solid var(--theme-text-color); border-left: none; }
+    app-missing-annotations progress { min-width: 400px; }
+    .list { display: table; }
+    .list > .item {
+        display: table-row;
+        padding-bottom: 0px;
+    }
+    .list > .item:nth-child(even) { background: #FAFAFA; }
+    .list > .item > span { display: table-cell; }
+    .list > .item > span.header-only { display: table-cell; }
+    .list > .item > span > legend { display: none; }
+    .list > .item > label { display: block; }
+}
+
+.hidden-panel {
+    max-height: 0px;
+    overflow: hidden;
+    transition: max-height 0.5s;
+}
+.unhidden-panel {
+    max-height: 500px;
+    overflow: auto;
+    transition: max-height 0.5s;
+}
+.header {
+    font-style: italic;
+}
