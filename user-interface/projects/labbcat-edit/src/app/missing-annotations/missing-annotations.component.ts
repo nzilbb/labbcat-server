@@ -2,14 +2,14 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { MessageService, LabbcatService, Task, Layer, Response } from 'labbcat-common';
-import { AdminComponent } from '../admin-component';
+import { EditComponent } from '../edit-component';
 
 @Component({
     selector: 'app-missing-annotations',
     templateUrl: './missing-annotations.component.html',
     styleUrls: ['./missing-annotations.component.css']
 })
-export class MissingAnnotationsComponent extends AdminComponent implements OnInit {
+export class MissingAnnotationsComponent extends EditComponent implements OnInit {
     @ViewChild("form") form;
 
     generateLayerId: string; // layerId for the layer to generate afterwards

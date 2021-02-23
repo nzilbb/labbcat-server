@@ -41,9 +41,9 @@
           <lib-wait class="row-pending" *ngIf="wordsPending[word]"
                     i18n-title title="Generating suggestions..."></lib-wait>
         </span>
-        <app-disc-helper *ngIf="ipaHelperWord == word"
+        <lib-disc-helper *ngIf="ipaHelperWord == word"
                          (symbolSelected)="symbolSelected(word, $event)"
-                         ></app-disc-helper>
+                         ></lib-disc-helper>
         <fieldset class="lookup" *ngIf="lookupWord == word && lookupWordsResult">
           <legend>{{lookupWords}}</legend>
           <lib-wait *ngIf="lookupPending"></lib-wait>

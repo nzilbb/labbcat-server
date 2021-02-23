@@ -1,7 +1,7 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-disc-helper',
+  selector: 'lib-disc-helper',
   templateUrl: './disc-helper.component.html',
   styleUrls: ['./disc-helper.component.css']
 })

@@ -7,6 +7,8 @@ import { TaskComponent } from './task/task.component';
 import { WaitComponent } from './wait/wait.component';
 import { GroupedCheckboxComponent } from './grouped-checkbox/grouped-checkbox.component';
 import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.component';
+import { DiscHelperComponent } from './disc-helper/disc-helper.component';
+import { IpaHelperComponent } from './ipa-helper/ipa-helper.component';
 
 @NgModule({
     declarations: [
@@ -17,7 +19,9 @@ import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.co
         WaitComponent,
         TaskComponent,
         GroupedCheckboxComponent,
-        LayerCheckboxesComponent
+        LayerCheckboxesComponent,
+        DiscHelperComponent,
+        IpaHelperComponent
     ],
     imports: [
     ],
@@ -29,7 +33,9 @@ import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.co
         WaitComponent,
         TaskComponent,
         GroupedCheckboxComponent,
-        LayerCheckboxesComponent
+        LayerCheckboxesComponent,
+        DiscHelperComponent,
+        IpaHelperComponent
     ]
 })
 export class LabbcatCommonModule {

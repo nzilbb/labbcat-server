@@ -1,7 +1,7 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-ipa-helper',
+  selector: 'lib-ipa-helper',
   templateUrl: './ipa-helper.component.html',
   styleUrls: ['./ipa-helper.component.css']
 })

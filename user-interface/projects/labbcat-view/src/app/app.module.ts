@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
-import { LabbcatCommonModule, TaskComponent, GroupedCheckboxComponent } from 'labbcat-common';
+import { LabbcatCommonModule, TaskComponent, GroupedCheckboxComponent, PendingChangesGuard } from 'labbcat-common';
 import { MatchesComponent } from './matches/matches.component';
 
 @NgModule({

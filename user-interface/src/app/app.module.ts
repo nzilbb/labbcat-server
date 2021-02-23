@@ -7,9 +7,8 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 
 import { environment } from '../environments/environment';
 
-import { PendingChangesGuard } from './pending-changes.guard';
 import { AppComponent } from './app.component';
-import { LabbcatCommonModule, TaskComponent } from 'labbcat-common';
+import { LabbcatCommonModule, TaskComponent, PendingChangesGuard } from 'labbcat-common';
 import { AdminCorporaComponent } from './admin-corpora/admin-corpora.component';
 import { ViewMenuComponent } from './view-menu/view-menu.component';
 import { EditMenuComponent } from './edit-menu/edit-menu.component';
@@ -34,7 +33,6 @@ import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AutofocusDirective } from './autofocus.directive';
 import { AdminLayersComponent } from './admin-layers/admin-layers.component';
-import { MissingAnnotationsComponent } from './missing-annotations/missing-annotations.component';
 import { IpaHelperComponent } from './ipa-helper/ipa-helper.component';
 import { DiscHelperComponent } from './disc-helper/disc-helper.component';
 
@@ -77,8 +75,6 @@ import { DiscHelperComponent } from './disc-helper/disc-helper.component';
             { path: 'about', component: AboutComponent },
             { path: 'login', component: LoginComponent },
             { path: 'task', component: TaskComponent },
-            { path: 'missingAnnotations', component: MissingAnnotationsComponent,
-              canDeactivate: [PendingChangesGuard] },
             
             { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent,
               canDeactivate: [PendingChangesGuard] },

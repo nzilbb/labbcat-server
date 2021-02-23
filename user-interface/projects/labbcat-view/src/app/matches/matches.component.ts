@@ -264,7 +264,7 @@ export class MatchesComponent implements OnInit {
 
                     // return;
                     this.generateLayerId = layerId;
-                    formAction = "missingAnnotations";
+                    formAction = "edit/missingAnnotations";
                     formMethod = "GET"; // TODO debug mode only
                     formTarget = "";
                 }
