@@ -156,15 +156,24 @@
 
   <target name="i18n"
           description="Extract resources for localization">
-    <echo>Internalionalization is temporarily disabled.</echo>
-     <!-- TODO figure out how i18n works with libraries -->
-    <!--exec executable="ng"
-          dir="user-interface"
-          failonerror="true">
+    <exec executable="ng" dir="user-interface" failonerror="true">
       <arg value="xi18n"/>
-      <arg value="- -output-path"/>
+      <arg value="labbcat-view"/>
+      <arg value="--output-path"/>
       <arg value="src/locale"/>
-    </exec-->
+    </exec>
+    <exec executable="ng" dir="user-interface" failonerror="true">
+      <arg value="xi18n"/>
+      <arg value="labbcat-edit"/>
+      <arg value="--output-path"/>
+      <arg value="src/locale"/>
+    </exec>
+    <exec executable="ng" dir="user-interface" failonerror="true">
+      <arg value="xi18n"/>
+      <arg value="labbcat-admin"/>
+      <arg value="--output-path"/>
+      <arg value="src/locale"/>
+    </exec>
   </target>
 
   <target name="user-interface"
