@@ -19,7 +19,8 @@ import { MatchesComponent } from './matches/matches.component';
       HttpClientModule,
       RouterModule.forRoot([
           { path: 'about', component: AboutComponent },
-          { path: 'matches', component: MatchesComponent },            
+          { path: 'matches', component: MatchesComponent },
+          { path: 'task', component: TaskComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

@@ -156,24 +156,55 @@
 
   <target name="i18n"
           description="Extract resources for localization">
-    <exec executable="ng"
+    <echo>Internalionalization is temporarily disabled.</echo>
+     <!-- TODO figure out how i18n works with libraries -->
+    <!--exec executable="ng"
           dir="user-interface"
           failonerror="true">
       <arg value="xi18n"/>
-      <arg value="--output-path"/>
+      <arg value="- -output-path"/>
       <arg value="src/locale"/>
-    </exec>
+    </exec-->
   </target>
 
   <target name="user-interface"
-          description="Build the user-interface app">
+          description="Build the user-interface apps"
+          depends="view-user-interface,edit-user-interface,admin-user-interface">
+  </target>  
+  <target name="view-user-interface"
+          description="Build the read-only user interface app">
     <exec executable="ng"
           dir="user-interface"
           failonerror="true">
       <arg value="build"/>
-      <arg value="--localize"/>
+      <!--arg value="- -localize"/--> <!-- TODO figure out how i18n works with libraries -->
+      <arg value="labbcat-view"/>
       <arg value="--prod"/>
       <arg value="--outputPath=${config.local-labbcat-path}/user-interface"/>
+    </exec>
+  </target>
+  <target name="edit-user-interface"
+          description="Build the read-write user interface app">
+    <exec executable="ng"
+          dir="user-interface"
+          failonerror="true">
+      <arg value="build"/>
+      <!--arg value="- -localize"/--> <!-- TODO figure out how i18n works with libraries -->
+      <arg value="labbcat-edit"/>
+      <arg value="--prod"/>
+      <arg value="--outputPath=${config.local-labbcat-path}/edit/user-interface"/>
+    </exec>
+  </target>
+  <target name="admin-user-interface"
+          description="Build the read-write user interface app">
+    <exec executable="ng"
+          dir="user-interface"
+          failonerror="true">
+      <arg value="build"/>
+      <!--arg value="- -localize"/--> <!-- TODO figure out how i18n works with libraries -->
+      <arg value="labbcat-admin"/>
+      <arg value="--prod"/>
+      <arg value="--outputPath=${config.local-labbcat-path}/admin/user-interface"/>
     </exec>
   </target>
 
