@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="85820574788f07c1b4e432b7044ca18af57f5b5b" datatype="html">
+        <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION" equiv-text="{{label}}"/>} }</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/button/button.component.d.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="66c55282428a8a9b227e41674da232d4275315b2" datatype="html">
+        <source>Cancel task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/task/task.component.d.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9b2413d6c670553ed4588cb604692e1e26b97573" datatype="html">
+        <source>Open Results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/task/task.component.d.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <note priority="1" from="description">Default task result text</note>
+      </trans-unit>
+      <trans-unit id="5d87314cda42c0b803a31b9f4893c6b6a08bcae1" datatype="html">
+        <source>Please wait...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/wait/wait.component.d.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="0d9c6e3131447c381a0d4f769def7e6eadc82701" datatype="html">
+        <source>Participant</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+      <trans-unit id="676840cc7025773312b58c4dd0c77148e58ad797" datatype="html">
+        <source>Participant Attributes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1d59b60ed76b45c0af896705e1f4d8d6339e52c2" datatype="html">
+        <source>Transcript</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+      <trans-unit id="b3a61a5de1933c93c5bb3ca6ac897af9233553ee" datatype="html">
+        <source>Transcript Attributes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7f1fab347fc3f64f7fd812062199329eb28b298a" datatype="html">
+        <source>Span</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+      <trans-unit id="f710f6e2d388444f97eefee9ef110290c0bcb845" datatype="html">
+        <source>Span Layers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5f5abe15cf9bac583662eb3c99761ab2b15f8891" datatype="html">
+        <source>Phrase</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+      <trans-unit id="c469d38b8e5ce39b0eefe9882256882f478e0307" datatype="html">
+        <source>Phrase Layers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9b0a085531b3557c1a2c0b98276fb31d6b0682bb" datatype="html">
+        <source>Word</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+        <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+      <trans-unit id="b2fa2f2e8c7200a64579d30e0a12207cef917cfb" datatype="html">
+        <source>Word Layers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8fbd80a3ad0ce1c5dbc1bb371d3bad810599c51a" datatype="html">
+        <source>Segment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+        <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+      <trans-unit id="84879f4170e14e46eb31490d9c1c81751bdfb361" datatype="html">
+        <source>Segment Layers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="873dc7261fcfc098ed881acbb6cb790375a4f074" datatype="html">
+        <source>LaBB-CAT</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/about/about.component.d.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <note priority="1" from="description">about page header</note>
+      </trans-unit>
+      <trans-unit id="3fb17fce7f690ad23dad26d0d8a54a2cb686e6ec" datatype="html">
+        <source>was developed at</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/about/about.component.d.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+        <note priority="1" from="description">[LaBB-CAT]... was developed at the ...[NZILBB]</note>
+      </trans-unit>
+      <trans-unit id="c3e701683ed76eb555b0b1f5e576d9c57ea8c98a" datatype="html">
+        <source>
+    the New Zealand Institute of Language, Brain and Behaviour</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/about/about.component.d.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <note priority="1" from="description">NZILBB</note>
+        <note priority="1" from="meaning">developer name</note>
+      </trans-unit>
+      <trans-unit id="47a9d0a4e40abec6fe590cb2d9a5f4da6fbb4e21" datatype="html">
+        <source>
+    and is free software distributed under the terms of the</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/about/about.component.d.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <note priority="1" from="description">[LaBB-CAT was developed at NZILBB] and is FOSS dist. under terms of the [AGPL]</note>
+      </trans-unit>
+      <trans-unit id="6ee8806b69702bb88f992300914219960ced43d4" datatype="html">
+        <source>
+    GNU Affero General Public Licence</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/about/about.component.d.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <note priority="1" from="description">Name of the AGPL</note>
+      </trans-unit>
+      <trans-unit id="723d69ceeee2f4991f728e50c288807ced65c5b2" datatype="html">
+        <source>The source code is available</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/about/about.component.d.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <note priority="1" from="description">The source code is available ... [here]</note>
+      </trans-unit>
+      <trans-unit id="16bd21c1b48036d54c6a595f5cff2540cfba7f60" datatype="html">
+        <source>here</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/about/about.component.d.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <note priority="1" from="description">[The source code is available] ... here</note>
+      </trans-unit>
+      <trans-unit id="83c4d4d764d2e2725ab8e919ec16ac400e1f290a" datatype="html">
+        <source>User ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/login/login.component.d.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/login/login.component.d.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/login/login.component.d.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dd6536f9df9bbf8d9fce4f2c296a9394d0eebcf6" datatype="html">
+        <source>Pass Phrase</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/login/login.component.d.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/login/login.component.d.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/login/login.component.d.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="f093d9574ab746b231504bd2cbb65f04bd7b00db" datatype="html">
+        <source>Log in</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/login/login.component.d.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <note priority="1" from="description">button title</note>
+      </trans-unit>
+      <trans-unit id="67ed5fa2838ee88617de4773f650daa3a1e273c9" datatype="html">
+        <source>Select all results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+        <note priority="1" from="description">select all results</note>
+      </trans-unit>
+      <trans-unit id="0a79380e0c9ff0670d8661e94fbf301124abca72" datatype="html">
+        <source>Select all results including those not shown here</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4dbc6595c173dcba49cdf6a1917cbe17d4b8d71e" datatype="html">
+        <source> Context: </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <note priority="1" from="description">KWIC context selector label</note>
+      </trans-unit>
+      <trans-unit id="a556cb87f7d630567a8c997557bb633f4db4d9af" datatype="html">
+        <source>How much context to show before/after match</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="017443b0251704f5fd633d6820a7d45337ac7b92" datatype="html">
+        <source>1 word</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+      <trans-unit id="4427563cb02349fe1cf7f36d809adc0edc5390cc" datatype="html">
+        <source>5 words</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+      <trans-unit id="5fa4b50a2e85ab4a8fb870b2190f4255d98e35b4" datatype="html">
+        <source>10 words</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+      <trans-unit id="9c701aa946f151ad6b9cf7bd5a59cd9fa150d04f" datatype="html">
+        <source>20 words</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+      <trans-unit id="b03e514fdef96c870e2186744ffac677f3869e21" datatype="html">
+        <source>the whole line</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+      <trans-unit id="8a073ec8cc23e3147169ded38748727a6c197905" datatype="html">
+        <source>no context</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+      <trans-unit id="c0399ca79bc517d55b74a95d7ac0ba92df5d9341" datatype="html">
+        <source>To select individual results, untick &apos;select all N results&apos;</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="43b66cd0eb491eeb79022fb8fd4c2da0138f3077" datatype="html">
+        <source>Open transcript</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d2fa020deea3280e45da7df4a48b660231024315" datatype="html">
+        <source>Show more results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3dd7c2ef8e985338490087245fa323488e0f5258" datatype="html">
+        <source>Show all results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3941358201360e6d540587e9e5b8bb419ffdf8da" datatype="html">
+        <source>Export results to CSV</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="bb25b6b472236ec2ce6881c199c88811dbc63666" datatype="html">
+        <source>CSV Export</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">99</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="85bac19b1e6bd7557247384675e7b2741a525bb9" datatype="html">
+        <source>CSV export options</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d920534b614425f04d3c5743f075de1f71298020" datatype="html">
+        <source>CSV Columns</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="a44630d1be065c67e9346b39aea0c1c4c28f80fb" datatype="html">
+        <source>Fields:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+        <note priority="1" from="description">csv options title</note>
+      </trans-unit>
+      <trans-unit id="e829450ae904f52f655cc235b04a2bb27f2d18ad" datatype="html">
+        <source>Search name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="bd4264b6e556feaef24a88f5616f5fdfd538dd5c" datatype="html">
+        <source>Identifier for this search</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="fbcb0d75afbe6aec04269381598a737f4bd19db7" datatype="html">
+        <source>Number</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="8c66e7106b6ae6b11fc3cbe7ae1060eb944c39fe" datatype="html">
+        <source>Result number</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3d9556a1041326aec23a7d6757603c5dc6c2ca3f" datatype="html">
+        <source>Series offset</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">121</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="05ed4228cf8b37694e1c888acf732150e3f04125" datatype="html">
+        <source>Start time of the transcript relative to the beginning of the whole series</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">119</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d3bdf6d4e710737be5db50cfb4f2f6b8b1949d6e" datatype="html">
+        <source>Series length</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">125</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="7530dd467fbe04d1b78ff7dacf786ab7f077d362" datatype="html">
+        <source>End time of the transcript relative to the beginning of the whole series</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">123</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="af942a24234fa47efa01bf2d4236dad05131a5a0" datatype="html">
+        <source>Line</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">129</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="4c7867d5f565d079f32ef6cb573d9e59d3f67976" datatype="html">
+        <source>Start time of the utterance relative to the beginning of the transcript</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">127</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="82206026dafca5d115810a130656da0d174ae7ec" datatype="html">
+        <source>Line end</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">133</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="242585d0bbad427dac6666515ee86f909792f3db" datatype="html">
+        <source>End time of the utterance relative to the beginning of the transcript</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">131</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="055d3652624214c21c0f3b6dfdf45a0e53b1d1d7" datatype="html">
+        <source>Match ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">137</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="4e5b117dc9ea613b455eca8500240a45b6e38cd7" datatype="html">
+        <source>Unique identifier for the match</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">135</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="801b98c6f02fe3b32f6afa3ee854c99ed83474e6" datatype="html">
+        <source>URL</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">141</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="fac5a09c8bd40021f268b7c29f37dabfcf6b1251" datatype="html">
+        <source>URL for the match</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">139</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8ba143716c2da6e4120c0c1a804f0bdd9a7e5f5b" datatype="html">
+        <source>Text</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">145</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+      <trans-unit id="bf4a671dc45d027a5f9d4881b59482a57cd583ac" datatype="html">
+        <source>The transcription of the match and its surrounding context</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">143</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="56deb121623350662ea8abc0e0c7698593011739" datatype="html">
+        <source>EMU WebApp</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">161</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9f43df28ef7b88d83985ff01413f2c63a748aca5" datatype="html">
+        <source>EMU WebApp options</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">164</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5e1a909ac98451f50c606f9958c620807fa3d735" datatype="html">
+        <source>EMU WebApp Tiers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">169</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="c7343e9bdcf1f04ef99e7145ee0dd99670c0ac5f" datatype="html">
+        <source>Utterance Export</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">178</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="95494cca6c7254f282a1d412542c9b892d47adeb" datatype="html">
+        <source>Audio Export</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">189</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1b258b258b4cc475ceb2871305b61756b0134f4a" datatype="html">
+        <source>Generate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">195</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
