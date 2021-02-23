@@ -16,17 +16,17 @@
          i18n-title title="Show information"
          >{{annotator.annotatorId}}</a> ({{annotator.version}})
       <span class="buttons">
-        <app-link [routerLink]="['..','annotator',annotator.annotatorId,'tasks']"
+        <lib-link [routerLink]="['..','annotator',annotator.annotatorId,'tasks']"
                   i18n-title title="Automation tasks performed by this annotator"
                   i18n-label label="Tasks"
                   img="cog.svg" icon="⚙"
-                  ></app-link>
-        <app-link *ngIf="annotator.hasExtWebapp"
+                  ></lib-link>
+        <lib-link *ngIf="annotator.hasExtWebapp"
                   [routerLink]="['..','annotator',annotator.annotatorId,'ext']"
                   i18n-title title="Annotation extensions"
                   i18n-label label="Extensions"
                   img="cog.png" icon="⚙"
-                  ></app-link>
+                  ></lib-link>
       <lib-button action="delete"
                   (press)="uninstall(annotator);" [processing]="annotator._deleting"
                   i18n-title title="Uninstall"></lib-button>

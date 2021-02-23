@@ -25,12 +25,12 @@
                 placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <app-link [routerLink]="['/admin','roles',role.role_id,'users']"
+      <lib-link [routerLink]="['/admin','roles',role.role_id,'users']"
                 i18n-title title="Members"
-                img="people.svg" icon="👥"></app-link>
-      <app-link [routerLink]="['/admin','roles',role.role_id,'permissions']"
+                img="people.svg" icon="👥"></lib-link>
+      <lib-link [routerLink]="['/admin','roles',role.role_id,'permissions']"
                 i18n-title title="Permissions"
-                img="lock-locked.svg" icon="🔒"></app-link>
+                img="lock-locked.svg" icon="🔒"></lib-link>
       <lib-button action="delete"
                   disabled="{{role._cantDelete}}"
                   (press)="deleteRow(role);"  [processing]="role._deleting"
