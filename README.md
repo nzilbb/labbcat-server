@@ -33,6 +33,11 @@ More documentation is available [here](https://nzilbb.github.io/labbcat-server/)
 
 ## User interface
 
+The user interface is broken into three angular apps
+- *labbcat-view* - for 'read-only' functions common to all users,
+- *labbcat-edit* - for 'read-write' functions available to users with 'edit' access, and
+- *labbcat-admin* - for administration functions available to users with 'admin' access.
+
 ### Dependencies
 
 1. Node and npm
@@ -47,6 +52,9 @@ More documentation is available [here](https://nzilbb.github.io/labbcat-server/)
 enabled in  ${config.local-labbcat-path}/WEB-INF/web.xml
 3. `cd user-interface`
 4. `ng serve`
+
+The default app is *labbcat-admin*. To serve the view/edit apps,
+use `ng serve labbcat-view` or `ng serve labbcat-edit` (respectively)
 
 ### Internationalization/Localization
 
