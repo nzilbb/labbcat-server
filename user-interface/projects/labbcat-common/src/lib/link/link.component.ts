@@ -1,8 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { Inject } from '@angular/core';
 
 @Component({
-  selector: 'app-link',
+  selector: 'lib-link',
   templateUrl: './link.component.html',
   styleUrls: ['./link.component.css']
 })
@@ -15,10 +15,12 @@ export class LinkComponent implements OnInit {
     @Input() href: string;
     processing: false;
     
-    imagesLocation = environment.imagesLocation;
+    imagesLocation: string;
     classes = "lnk";
     
-    constructor() { }
+    constructor(@Inject('environment') private environment) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
         this.title = this.title || this.label;

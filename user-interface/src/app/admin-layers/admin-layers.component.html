@@ -112,37 +112,37 @@
         </select>
       </span>
       <span class="buttons">
-        <app-link *ngIf="layer.layer_manager_id"
+        <lib-link *ngIf="layer.layer_manager_id"
                   i18n-title title="Layer configuration"
                   img="wrench.svg" icon="🔧"
-                  href="admin/layers/configure?layer_id={{layer.layer_id}}"></app-link>
-        <app-link *ngIf="layer.layer_manager_id && layer.parentId == schema.wordLayerId"
+                  href="admin/layers/configure?layer_id={{layer.layer_id}}"></lib-link>
+        <lib-link *ngIf="layer.layer_manager_id && layer.parentId == schema.wordLayerId"
                   i18n-title title="Layer dictionary"
                   img="book.svg" icon="📕 "
-                  href="admin/layers/dictionary?layer_id={{layer.layer_id}}"></app-link>
-        <app-link *ngIf="layer.id == 'orthography'"
+                  href="admin/layers/dictionary?layer_id={{layer.layer_id}}"></lib-link>
+        <lib-link *ngIf="layer.id == 'orthography'"
                   i18n-title title="Lexical Auxiliary"
                   img="add.svg" icon="+"
-                  href="admin/layers/lexicalAuxiliary?layer_id={{layer.layer_id}}"></app-link>
-        <app-link *ngIf="layer.type == 'ipa' && layer.layer_manager_id"
+                  href="admin/layers/lexicalAuxiliary?layer_id={{layer.layer_id}}"></lib-link>
+        <lib-link *ngIf="layer.type == 'ipa' && layer.layer_manager_id"
                   i18n-title title="Pronounce Auxiliary"
                   img="add.svg" icon="+"
-                  href="admin/layers/pronounceAuxiliary?layer_id={{layer.layer_id}}"></app-link>
-        <app-link *ngIf="layer.layer_manager_id"
+                  href="admin/layers/pronounceAuxiliary?layer_id={{layer.layer_id}}"></lib-link>
+        <lib-link *ngIf="layer.layer_manager_id"
                   i18n-title title="Other configurations for this layer"
                   img="project.svg" icon="⚙"
-                  href="admin/layers/auxiliaryManagers?layer_id={{layer.layer_id}}"></app-link>
-        <app-link *ngIf="layer.layer_manager_id"
+                  href="admin/layers/auxiliaryManagers?layer_id={{layer.layer_id}}"></lib-link>
+        <lib-link *ngIf="layer.layer_manager_id"
                   i18n-title title="Regenerate annotations"
                   img="cog.svg" icon="⚙"
-                  href="admin/layers/regenerate?layer_id={{layer.layer_id}}"></app-link>
-        <app-link *ngIf="!layer.layer_manager_id"
+                  href="admin/layers/regenerate?layer_id={{layer.layer_id}}"></lib-link>
+        <lib-link *ngIf="!layer.layer_manager_id"
                   i18n-title title="Copy from other layer"
                   img="duplicate.svg" icon="⧉"
-                  href="admin/layers/copy?layer_id={{layer.layer_id}}"></app-link>
-        <app-link i18n-title title="Clear layer"
+                  href="admin/layers/copy?layer_id={{layer.layer_id}}"></lib-link>
+        <lib-link i18n-title title="Clear layer"
                   img="delete.svg" icon="⌫"
-                  href="admin/layers/clear?layer_id={{layer.layer_id}}"></app-link>
+                  href="admin/layers/clear?layer_id={{layer.layer_id}}"></lib-link>
         <lib-button  action="delete" [processing]="layer._deleting"
                      disabled="{{layer._cantDelete}}"
                      (press)="deleteRow(layer);"

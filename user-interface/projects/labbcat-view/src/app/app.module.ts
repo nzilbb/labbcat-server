@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
-import { LabbcatCommonModule, TaskComponent, GroupedCheckboxComponent, PendingChangesGuard } from 'labbcat-common';
+import { LabbcatCommonModule, TaskComponent, GroupedCheckboxComponent, PendingChangesGuard, AboutComponent } from 'labbcat-common';
 import { MatchesComponent } from './matches/matches.component';
 
 @NgModule({
@@ -18,6 +18,7 @@ import { MatchesComponent } from './matches/matches.component';
       BrowserModule,
       HttpClientModule,
       RouterModule.forRoot([
+          { path: 'about', component: AboutComponent },
           { path: 'matches', component: MatchesComponent },            
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,

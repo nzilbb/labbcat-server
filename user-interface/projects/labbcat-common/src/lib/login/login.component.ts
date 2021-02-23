@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
-import { LabbcatService } from 'labbcat-common';
+import { LabbcatService } from '../labbcat.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'lib-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })

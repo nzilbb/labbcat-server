@@ -1,7 +1,6 @@
 import { HostListener } from '@angular/core';
 
-import { MessageService, LabbcatService } from 'labbcat-common';
-import { ComponentCanDeactivate } from './pending-changes.guard';
+import { MessageService, LabbcatService, ComponentCanDeactivate } from 'labbcat-common';
 
 // Base class for components that implement any kind of CRUD administration operations
 export class AdminComponent implements ComponentCanDeactivate {

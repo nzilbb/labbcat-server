@@ -4,7 +4,7 @@ import { MessageService } from './message.service';
 
 import { Response } from './response';
 
-export class Service {
+export class Service { // TODO is this used?
 
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json;charset=UTF-8' })

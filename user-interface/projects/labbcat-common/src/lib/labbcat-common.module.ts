@@ -1,4 +1,5 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { UrlEncodePipe } from './url-encode.pipe';
 import { MessagesComponent } from './messages/messages.component';
 import { KeepAliveComponent } from './keep-alive/keep-alive.component';
@@ -9,6 +10,10 @@ import { GroupedCheckboxComponent } from './grouped-checkbox/grouped-checkbox.co
 import { LayerCheckboxesComponent } from './layer-checkboxes/layer-checkboxes.component';
 import { DiscHelperComponent } from './disc-helper/disc-helper.component';
 import { IpaHelperComponent } from './ipa-helper/ipa-helper.component';
+import { AboutComponent } from './about/about.component';
+import { LinkComponent } from './link/link.component';
+import { LoginComponent } from './login/login.component';
+import { AutofocusDirective } from './autofocus.directive';
 
 @NgModule({
     declarations: [
@@ -21,9 +26,14 @@ import { IpaHelperComponent } from './ipa-helper/ipa-helper.component';
         GroupedCheckboxComponent,
         LayerCheckboxesComponent,
         DiscHelperComponent,
-        IpaHelperComponent
+        IpaHelperComponent,
+        AboutComponent,
+        LinkComponent,
+        LoginComponent,
+        AutofocusDirective
     ],
     imports: [
+        RouterModule
     ],
     exports: [
         UrlEncodePipe,
@@ -35,7 +45,11 @@ import { IpaHelperComponent } from './ipa-helper/ipa-helper.component';
         GroupedCheckboxComponent,
         LayerCheckboxesComponent,
         DiscHelperComponent,
-        IpaHelperComponent
+        IpaHelperComponent,
+        AboutComponent,
+        LinkComponent,
+        LoginComponent,
+        AutofocusDirective
     ]
 })
 export class LabbcatCommonModule {
