@@ -184,9 +184,12 @@ public class TestStoreQuery
       assertEquals("getLayer: Correct layer",
                    "orthography", layer.getId());
 
-      Annotation participant = l.getParticipant(participantId);
+      String[] attributes = { "participant_gender" };
+      Annotation participant = l.getParticipant(participantId, attributes);
       assertEquals("getParticipant: Correct participant",
                    participantId, participant.getLabel()); // not getId()
+      assertTrue("getParticipant: Includes attribute",
+                 participant.getAnnotations(attributes[0]).size() > 0);
 
       count = l.countMatchingAnnotations(
          "layer.id == 'orthography' && label == 'and'");
