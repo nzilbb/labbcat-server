@@ -952,14 +952,17 @@ public class SqlGraphStore implements GraphStore {
    
    /**
     * Gets the participant record specified by the given identifier.
-    * @param id The ID of the participant, which could be their name or their database
-    * annotation ID. 
+    * @param id The ID of the participant, which could be their name or their database annotation
+    * ID. 
+    * @param layerIds The IDs of the participant attribute layers to load, or null if only
+    * participant data is required. 
     * @return An annotation representing the participant, or null if the participant was
-    * not found. 
+    * not found.
     * @throws StoreException
     * @throws PermissionException
     */
-   public Annotation getParticipant(String id) throws StoreException, PermissionException {
+   public Annotation getParticipant(String id, String[] layerIds)
+      throws StoreException, PermissionException {
       try {
          String speakerNumber = null;
          String name = null;
@@ -994,46 +997,50 @@ public class SqlGraphStore implements GraphStore {
             // add participant annotation
             Annotation participant = new Annotation(
                "m_-2_" + speakerNumber, name, schema.getParticipantLayerId());
-	    
-            PreparedStatement sqlValue = getConnection().prepareStatement(
-               "SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
-               +" FROM annotation_participant a"
-               +" WHERE a.layer = ? and a.speaker_number = ?");
-            sqlValue.setString(2, speakerNumber);
-	    
-            // load participant attributes
-            for (Layer attributeLayer
-                    : schema.getLayer(schema.getParticipantLayerId()).getChildren().values()) {
-               // participant tag layers
-               if (attributeLayer.getAlignment() == Constants.ALIGNMENT_NONE) {
-                  if ("speaker".equals(attributeLayer.get("class_id"))) {
-                     sqlValue.setString(1, attributeLayer.get("attribute").toString());
-                     ResultSet rsValue = sqlValue.executeQuery();
-                     int ordinal = 1;
-                     while (rsValue.next()) {
-                        // add graph-tag annotation
-                        Object[] annotationIdParts = {
-                           attributeLayer.get("attribute"),
-                           Integer.valueOf(rsValue.getInt("annotation_id"))};
-                        Annotation attribute = new Annotation(
-                           fmtParticipantAttributeId.format(annotationIdParts), 
-                           rsValue.getString("label"), attributeLayer.getId());
-                        if (rsValue.getString("annotated_by") != null) {
-                           attribute.setAnnotator(rsValue.getString("annotated_by"));
-                        }
-                        if (rsValue.getTimestamp("annotated_when") != null) {
-                           attribute.setWhen(rsValue.getTimestamp("annotated_when"));
-                        }
-                        attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
-                        attribute.setOrdinal(ordinal++);
-                        participant.addAnnotation(attribute);
-                     } // next annotation
-                     rsValue.close();
-                  } // class_id set
-               } // unaligned layer
-            } // next child of "participant" layer
-            sqlValue.close();
 
+            if (layerIds != null && layerIds.length > 0) {
+               PreparedStatement sqlValue = getConnection().prepareStatement(
+                  "SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
+                  +" FROM annotation_participant a"
+                  +" WHERE a.layer = ? and a.speaker_number = ?");
+               sqlValue.setString(2, speakerNumber);
+               
+               // load participant attributes
+               for (String layerId : layerIds) {
+                  Layer layer = schema.getLayer(layerId);
+                  if (layer == null) continue;
+                  // participant tag layers
+                  if (layer.getParentId().equals(schema.getParticipantLayerId())
+                      && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
+                     if ("speaker".equals(layer.get("class_id"))) {
+                        sqlValue.setString(1, layer.get("attribute").toString());
+                        ResultSet rsValue = sqlValue.executeQuery();
+                        int ordinal = 1;
+                        while (rsValue.next()) {
+                           // add graph-tag annotation
+                           Object[] annotationIdParts = {
+                              layer.get("attribute"),
+                              Integer.valueOf(rsValue.getInt("annotation_id"))};
+                           Annotation attribute = new Annotation(
+                              fmtParticipantAttributeId.format(annotationIdParts), 
+                              rsValue.getString("label"), layerId);
+                           if (rsValue.getString("annotated_by") != null) {
+                              attribute.setAnnotator(rsValue.getString("annotated_by"));
+                           }
+                           if (rsValue.getTimestamp("annotated_when") != null) {
+                              attribute.setWhen(rsValue.getTimestamp("annotated_when"));
+                           }
+                           attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
+                           attribute.setOrdinal(ordinal++);
+                           participant.addAnnotation(attribute);
+                        } // next annotation
+                        rsValue.close();
+                     } // class_id set
+                  } // unaligned participant child layer
+                  // TODO else layerId == schema.getCorpusLayerId()
+               } // next layerId
+               sqlValue.close();
+            } // there are layerIds specified
             return participant;
          } else {
             return null;

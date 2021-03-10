@@ -146,7 +146,7 @@ import org.xml.sax.*;
           </dl>
         </li>
       </ul>
-      <a id="getParticipant(java.lang.String)">
+      <a id="getParticipant(java.lang.String,java.lang.String[])">
         <!--   -->
       </a>
       <ul class="blockList">
@@ -157,6 +157,7 @@ import org.xml.sax.*;
             <dt><span class="paramLabel">Parameters:</span></dt>
             <dd><code>id</code> - The ID of the participant, which could be their name or their database annotation
               ID.</dd>
+            <dd><code>layerIds</code> - The IDs of the participant attribute layers to load, passed by specifying the <code>layerIds</code> multiple times, once for each layer, or absent if only participant data is required.</dd></dd>
             <dt><span class="returnLabel">Returns:</span></dt>
             <dd>An annotation representing the participant, or null if the participant was not found.</dd>
           </dl>
@@ -903,7 +904,8 @@ public class StoreQuery extends LabbcatServlet {
       
       String id = request.getParameter("id");
       if (id == null) return failureResult(request, "No ID specified.");
-      Annotation participant = store.getParticipant(id);
+      String[] layerIds = request.getParameterValues("layerIds");
+      Annotation participant = store.getParticipant(id, layerIds);
       if (participant == null)
       {
          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
