@@ -1036,8 +1036,26 @@ public class SqlGraphStore implements GraphStore {
                         } // next annotation
                         rsValue.close();
                      } // class_id set
-                  } // unaligned participant child layer
-                  // TODO else layerId == schema.getCorpusLayerId()
+                  } else if (layerId.equals(schema.getCorpusLayerId())) {
+                     // participant corpora
+                     PreparedStatement sqlCorpora = getConnection().prepareStatement(
+                        "SELECT c.corpus_id, c.corpus_name"
+                        +" FROM speaker_corpus sc"
+                        +" INNER JOIN corpus c ON sc.corpus_id = c.corpus_id"
+                        +" WHERE sc.speaker_number = ?");
+                     sqlCorpora.setString(1, speakerNumber);
+                     ResultSet rsCorpora = sqlCorpora.executeQuery();
+                     while (rsCorpora.next()) {                     
+                        Object[] annotationIdParts = {
+                           layer.get("layer_id"), rsCorpora.getString("corpus_id")};
+                        Annotation corpus = new Annotation(
+                           fmtMetaAnnotationId.format(annotationIdParts), 
+                           rsCorpora.getString("corpus_name"), layer.getId());
+                        participant.addAnnotation(corpus);
+                     } // next corpus
+                     rsCorpora.close();
+                     sqlCorpora.close();
+                  }
                } // next layerId
                sqlValue.close();
             } // there are layerIds specified
