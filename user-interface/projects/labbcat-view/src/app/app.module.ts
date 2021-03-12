@@ -8,11 +8,13 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { LabbcatCommonModule, TaskComponent, GroupedCheckboxComponent, PendingChangesGuard, AboutComponent } from 'labbcat-common';
 import { MatchesComponent } from './matches/matches.component';
+import { ParticipantsComponent } from './participants/participants.component';
 
 @NgModule({
   declarations: [
       AppComponent,
-      MatchesComponent
+      MatchesComponent,
+      ParticipantsComponent
   ],
   imports: [
       BrowserModule,
@@ -21,6 +23,7 @@ import { MatchesComponent } from './matches/matches.component';
           { path: 'about', component: AboutComponent },
           { path: 'matches', component: MatchesComponent },
           { path: 'task', component: TaskComponent },
+          { path: 'participants', component: ParticipantsComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

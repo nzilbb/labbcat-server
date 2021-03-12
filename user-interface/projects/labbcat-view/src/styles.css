@@ -43,14 +43,6 @@ article h1 {
     font-weight: normal;
 }
 
-app-admin-menu a { color: var(--theme-text-color); }
-app-admin-menu li {
-    border-bottom: 1px solid var(--theme-text-color);
-    border-right: 1px solid var(--theme-text-color);
-    white-space: nowrap;
-}
-app-admin-menu li:first-child { border-left: 1px solid var(--theme-text-color); }
-
 app-root footer { color: var(--theme-text-color); }
 app-root footer a { color: var(--theme-text-color); text-decoration: none; }
 
@@ -85,7 +77,7 @@ app-root footer {
 div.messages div.error { color: red; font-weight: bold; }
 .message { color: black; }
 
-app-wait {
+lib-wait {
     display: block;
     width: 100%;
     text-align: center;
@@ -208,35 +200,30 @@ progress::-moz-progress-bar { background: var(--theme-block-color); }
     background: var(--theme-block-color);
 }
 
-app-button {
+lib-button {
     display: inline-block;
 }
-app-button button {
+lib-button button {
     width: 100%;
 }
 
 /* task progress */
-app-task app-button {
+lib-task lib-button {
     min-width: var(--progress-size);
 }
-app-task app-button button {
+lib-task lib-button button {
     padding: 1px;
     height: var(--progress-size);
     width: var(--progress-size) !important;
     min-width: auto !important;
 }
-app-task app-button img {    
+lib-task lib-button img {    
     height: 100%;
 }
-app-task progress, app-task .progress-container, app-task .progress-container .progress  {    
+lib-task progress, lib-task .progress-container, lib-task .progress-container .progress  {    
     height: var(--progress-size);
 }
 
-app-missing-annotations {
-    margin: auto;
-    width: max-content;
-    display: block;
-}
 .buttons {
     text-align: right;
 }
@@ -254,7 +241,7 @@ app-missing-annotations {
     .buttons a {
         height: auto;
     }
-    button.icon-only, app-button button.icon-only {
+    button.icon-only, lib-button button.icon-only {
         min-width: 32px;
         width: 32px;
     }
@@ -269,8 +256,6 @@ app-missing-annotations {
 @media all and (min-width: 640px) {
     app-root nav { min-height: 100px; max-width: min-content; }
     app-root aside { max-width: min-content; }
-    app-admin-menu li:first-child { border-top: 1px solid var(--theme-text-color); border-left: none; }
-    app-missing-annotations progress { min-width: 400px; }
     .list { display: table; }
     .list > .item {
         display: table-row;
@@ -295,4 +280,18 @@ app-missing-annotations {
 }
 .header {
     font-style: italic;
+}
+
+.pagination {
+    text-align: center;
+    font-weight: normal;
+    font-size: 9pt;
+}
+.pagination > * {
+    padding: 3px;
+}
+.pagination .current {
+    font-weight: bold;
+    padding: 3px;
+    border: inset 2px;
 }

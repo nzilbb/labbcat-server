@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { UrlEncodePipe } from './url-encode.pipe';
@@ -15,6 +16,7 @@ import { AboutComponent } from './about/about.component';
 import { LinkComponent } from './link/link.component';
 import { LoginComponent } from './login/login.component';
 import { AutofocusDirective } from './autofocus.directive';
+import { LayerFilterComponent } from './layer-filter/layer-filter.component';
 
 @NgModule({
     declarations: [
@@ -31,10 +33,11 @@ import { AutofocusDirective } from './autofocus.directive';
         AboutComponent,
         LinkComponent,
         LoginComponent,
-        AutofocusDirective
+        AutofocusDirective,
+        LayerFilterComponent
     ],
     imports: [
-        RouterModule, CommonModule
+        RouterModule, CommonModule, FormsModule
     ],
     exports: [
         UrlEncodePipe,
@@ -50,7 +53,8 @@ import { AutofocusDirective } from './autofocus.directive';
         AboutComponent,
         LinkComponent,
         LoginComponent,
-        AutofocusDirective
+        AutofocusDirective,
+        LayerFilterComponent
     ]
 })
 export class LabbcatCommonModule {

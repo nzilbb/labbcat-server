@@ -1,0 +1,62 @@
+fieldset {
+    display: inline-block;
+    height: 50px;
+}
+
+.range {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    min-width: 140px;
+    max-width: 280px;
+}
+.range input {
+    text-align: right;
+    width: 45%;
+}
+
+.select .many {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-y: hidden;
+    max-height: 24px;
+    border: 1px solid transparent;
+}
+.select .many > span:first-child::after {
+    content: '▼';
+    opacity: 0.7;
+}
+.select .many:hover {
+    position: relative;
+    overflow-y: auto; 
+    max-height: 120px;
+    background: white;
+    border: 1px solid silver;
+}
+.select .many:hover > span:first-child::after {
+    content: '';
+}
+.select .many span {
+    white-space: nowrap;
+}
+.select .many label {
+    white-space: nowrap;
+    padding: 3px;
+}
+
+.select .few {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+.select .few input {
+    display: none;
+}
+.select .few input + label {
+    border: 1px solid transparent;
+    display: inline-block;
+}
+.select .few input:checked + label {
+    border: 1px solid silver;
+}

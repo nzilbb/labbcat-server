@@ -46,7 +46,7 @@
       <div class="match-number">
         {{matches.indexOf(match) + 1}}.
       </div>
-      <div class="match-id"><!-- TODO shift-click -->
+      <div class="match-id">
         <lib-grouped-checkbox
           group="match"
           i18n-title title="To select individual results, untick 'select all N results'"
@@ -94,7 +94,7 @@
   </div>
   <div id="csv-export" class="controls">
     <lib-button (press)="exportCsv();" id="csv-export-btn"
-                img="csv.png" icon=",a,"
+                img="csv.svg" icon=",a,"
                 i18n-title title="Export results to CSV"
                 i18n-label label="CSV Export"></lib-button>
     <lib-button (press)="csvOptions();"

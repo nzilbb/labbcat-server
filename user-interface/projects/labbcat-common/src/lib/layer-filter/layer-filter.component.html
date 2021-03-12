@@ -1,0 +1,59 @@
+<fieldset title="{{layer.id}}">
+  <legend>{{layer.description}}</legend>
+  
+  <div class="{{inputType}}">
+    
+    <input
+      *ngIf="inputType == 'regexp'"
+      type="text"
+      i18n-placeholder placeholder="Regular Expression"
+      value="{{values[0]}}"
+      (input)="handleTextChange($event.target.value)"
+      ><!-- TODO validate regexp -->
+
+    <ng-container *ngIf="inputType == 'range'">
+      <input
+        type="number"
+        i18n-placeholder="range lower bound" placeholder="From  "
+        i18n-title="range lower bound" title="Lower bound (inclusive)"
+        value="{{values[0]}}"
+        (input)="handleRangeChange(0, $event.target.value)"
+        >
+      <span>&mdash;</span>
+      <input
+        type="number"
+        i18n-placeholder="range upper bound" placeholder="To  "
+        i18n-title="range upper bound" title="Upper bound (inclusive)"
+        value="{{values[1]}}"
+        (input)="handleRangeChange(1, $event.target.value)"
+        >
+    </ng-container>
+
+    <div *ngIf="inputType == 'select'" class="{{validLabelKeys().length < 4?'few':'many'}}">
+      <span *ngFor="let label of validLabelKeys()">
+        <input
+          id="{{layer.id}}-{{label}}"
+          type="checkbox"
+          value="{{label}}"
+          [checked]="values.includes(label)"
+          (click)="handleCheckboxClick(label, $event.target.checked)"
+          >
+        <label for="{{layer.id}}-{{label}}" title="{{layer.validLabels[label]}}">{{label}}</label>
+      </span>
+      <span *ngIf="otherAllowed">
+        <input
+          id="{{layer.id}}_other"
+          type="checkbox"
+          value="!"
+          [checked]="values.includes('!')"
+          (click)="handleCheckboxClick('!', $event.target.checked)"
+          >
+        <label for="{{layer.id}}_other"
+               title-i18n title="Label other than predefined options"
+               i18n>[other]</label>
+      </span>
+    </div>
+    <!-- TODO boolean -->
+    <!-- TODO date/datetime -->
+  </div>
+</fieldset>

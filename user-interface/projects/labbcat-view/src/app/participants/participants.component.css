@@ -1,0 +1,10 @@
+#spinner {
+    text-align: center;
+    height: 20px;
+}
+td.participant {
+    white-space: nowrap;
+}
+tbody td:not(.participant) {
+    text-align: center;
+}

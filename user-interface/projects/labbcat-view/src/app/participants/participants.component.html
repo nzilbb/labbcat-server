@@ -1,0 +1,86 @@
+<div id="spinner"><lib-wait *ngIf="loadingList || listParticipantsTimer >= 0"></lib-wait></div>
+<div class="participants">
+  <table>
+    <thead>
+      <tr class="filters">
+        <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
+          <lib-layer-filter            
+            [layer]="layer"
+            [values]="filterValues[layer.id]"
+            (changeValues)="filterChange(layer, $event)"
+            ></lib-layer-filter>
+        </td>
+      </tr><!-- Select from file -->
+      <tr class="controls">
+        <td colSpan="{{filterLayers.length}}">
+          <lib-button
+            action="delete"
+            (press)="deleteParticipants()" [processing]="deleting"
+            [disabled]="selectedIds.length == 0"
+            i18n-title title="Delete record"
+            ></lib-button>
+          <lib-button
+            *ngIf="user.roles.includes('edit')"
+            (press)="mergeParticipants()"
+            [disabled]="selectedIds.length < 2"
+            img="people.svg" icon="👥"
+            i18n-label label="Merge"
+            i18n-title title="Merge selected participant records into one record"
+            ></lib-button>
+          <lib-button
+            (press)="allUtterances()"
+            [disabled]="selectedIds.length == 0"
+            img="all-utterances.svg" icon="“"
+            i18n-label label="All Utterances"
+            i18n-title title="List all utterances by these participants"
+            ></lib-button>
+          <lib-button
+            (press)="exportAttributes()"
+            img="csv.svg" icon=",a,"
+            i18n-label label="Export Attributes"
+            i18n-title title="Export attributes to CSV"
+            ></lib-button>
+          <lib-button
+            (press)="layeredSearch()"
+            img="magnifying-glass.svg" icon="🔍"
+            i18n-label label="Layered Search"
+            i18n-title title="Search transcripts including these participants"
+            ></lib-button>
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let id of participantIds">
+        <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
+          <span class="id" *ngIf="layer.id == schema.participantLayerId">
+            <lib-grouped-checkbox
+              group="participant"
+              name="id"
+              value="{{id}}"
+              [checked]="selectedIds.includes(id)"
+              (checkedChange)="selectedIds.includes(id)?selectedIds.splice(selectedIds.indexOf(id),1):selectedIds.push(id)"></lib-grouped-checkbox>
+            <a href="participant?id={{id}}">{{id}}</a>
+          </span>
+          <span class="attribute" *ngIf="layer.id != schema.participantLayerId && attributeValues[id].annotations">
+
+            <span class="value" *ngFor="let annotation of attributeValues[id].annotations[layer.id]">
+              {{annotation.label}}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="pagination"
+     i18n-title title="Page links">
+  <span *ngFor="let hint of pageLinks; let pg = index" class="page">
+    <span *ngIf="pg+1 == p"
+          class="current"
+          i18n-title title="Current page">{{pg+1}}</span>
+    <a *ngIf="pg+1 != p"
+       title="{{hint}}"
+       (click)="goToPage(pg+1)"
+       href="#">{{pg+1}}</a>
+  </span>
+</div>

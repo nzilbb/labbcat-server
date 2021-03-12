@@ -53,13 +53,13 @@
 .csv-options label {
     white-space: nowrap;
 }
-app-layer-checkboxes {
+lib-layer-checkboxes {
     display: flex;
     flex-direction: column;
 }
-.controls app-button {
+.controls lib-button {
     min-width: 150px;
 }
 @media all and (min-width: 640px) {
-    .csv-checkboxes, app-layer-checkboxes { flex-direction: row; }
+    .csv-checkboxes, lib-layer-checkboxes { flex-direction: row; }
 }

@@ -250,7 +250,9 @@
 	    var queryString = "";
 	    if (parameters) {
 	        for (var key in parameters) {
-		    if (parameters[key]) {
+		    if (parameters[key] // parameter is not false-ish
+                        || parameters[key] === "" // or it's an empty string
+                        || parameters[key] == 0) { // or it's 0
   		        if (parameters[key].constructor === Array) {
 			    for (var i in parameters[key]) {
 			        queryString += "&"+key+"="+encodeURIComponent(parameters[key][i])
@@ -411,12 +413,18 @@
          * Gets the participant record specified by the given identifier.
          * @param id The ID of the participant, which could be their name or their
          * database annotation ID. 
+         * @param layerIds The IDs of the participant attribute layers to load, or null if only
+         * participant data is required. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:   An annotation representing the participant,
          * or null if the participant was not found.
          */
-        getParticipant(id, onResult) {
-	    this.createRequest("getParticipant", {id : id}, onResult).send();
+        getParticipant(id, layerIds, onResult) {
+            if (typeof layerIds === "function") { // (id, onResult)
+                onResult = layerIds;
+                layerIds = null;
+            }
+	    this.createRequest("getParticipant", {id : id, layerIds : layerIds}, onResult).send();
         }
         
         /**
