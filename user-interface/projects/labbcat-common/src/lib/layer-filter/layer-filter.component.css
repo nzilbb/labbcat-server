@@ -19,6 +19,9 @@ fieldset {
     text-align: right;
     width: 45%;
 }
+.range input::placeholder {
+    text-align: left;
+}
 
 .date-range {
     display: flex;
@@ -28,7 +31,6 @@ fieldset {
     max-width: 380px;
 }
 .date-range input {
-    text-align: right;
     width: 45%;
 }
 
