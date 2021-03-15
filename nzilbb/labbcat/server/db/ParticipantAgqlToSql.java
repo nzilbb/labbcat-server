@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.function.UnaryOperator;
+import java.util.regex.*;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.ql.*;
@@ -144,28 +145,37 @@ public class ParticipantAgqlToSql {
                         ctx.other.firstMethodCall().layer.quotedString.getText());
                      if (layerId.equals(schema.getCorpusLayerId())) { // corpus
                         conditions.push(
-                           // TODO technically, a participant can be in more than one corpus
-                           // TODO - this matches only the first one
                            "(SELECT corpus.corpus_name"
                            +" FROM speaker_corpus"
                            +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
                            +" WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)");
+                     } else if (layerId.equals(schema.getEpisodeLayerId())) { // episode
+                        conditions.push(
+                           "(SELECT DISTINCT transcript_family.name"
+                           +" FROM transcript_family"
+                           +" INNER JOIN transcript"
+                           +" ON transcript_family.family_id = transcript.family_id"
+                           +" INNER JOIN transcript_speaker"
+                           +" ON transcript.ag_id = transcript_speaker.ag_id"
+                           +" WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+                           +" ORDER BY transcript_family.name LIMIT 1)");
                      } else { // other layer
                         Layer layer = getSchema().getLayer(layerId);
                         if (layer == null) {
                            errors.add("Invalid layer: " + ctx.getText());
                         } else {
-                           if (!"speaker".equals(layer.get("class_id"))) {
+                           if ("speaker".equals(layer.get("class_id"))) {
+                              String attribute = attribute(layerId);
+                              conditions.push(
+                                 "(SELECT label"
+                                 +" FROM annotation_participant"
+                                 +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+                                 +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                                 +" LIMIT 1)");
+                           } else {
                               errors.add(
                                  "Can only get labels for participant attributes: " + ctx.getText());
                            }
-                           String attribute = attribute(layerId);
-                           conditions.push(
-                              "(SELECT label"
-                              +" FROM annotation_participant"
-                              +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
-                              +" AND annotation_participant.speaker_number = speaker.speaker_number"
-                              +" LIMIT 1)");
                         } // valid layer
                      } // other layer
                   } // got layerId
@@ -202,6 +212,18 @@ public class ParticipantAgqlToSql {
                            +" FROM annotation_participant"
                            +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
                            +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                           +")");
+                           } else if (schema.getEpisodeLayerId().equals(layer.getId())) {
+                        // ad-hockery: can list episodes of transcripts that include the participant
+                        conditions.push(
+                           "(SELECT DISTINCT transcript_family.name"
+                           +" FROM transcript_family"
+                           +" INNER JOIN transcript"
+                           +" ON transcript_family.family_id = transcript.family_id"
+                           +" INNER JOIN transcript_speaker"
+                           +" ON transcript.ag_id = transcript_speaker.ag_id"
+                           +" WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+                           +" ORDER BY transcript_family.name"
                            +")");
                      } else {
                         errors.add("Can only get labels list for participant or transcript attributes: "
@@ -329,19 +351,41 @@ public class ParticipantAgqlToSql {
                conditions.push(operator);
             }
             @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx) {
+               boolean needsClosingParentheses = false;
+               if (ctx.listOperand != null) {
+                  // ad-hockery: operand for pattern match can also be a list,
+                  // meaning 'any member matches'
+
+                  // pop the operand
+                  String listOperand = conditions.pop();
+                  // something like "(SELECT DISTINCT field FROM query)"
+                  Pattern listQuery = Pattern.compile(
+                     "\\(SELECT( DISTINCT)? (.+) FROM (.+)( ORDER BY .+)\\)");
+                  Matcher matcher = listQuery.matcher(listOperand); 
+                  if (!matcher.matches()) {
+                     // dunno what this is, just push it back
+                     conditions.push(listOperand);
+                  } else {
+                     needsClosingParentheses = true;
+                     String field = matcher.group(2);
+                     String query = matcher.group(3);
+                     conditions.push(
+                        "(EXISTS (SELECT *"
+                        +" FROM " + query
+                        +" AND " + field);
+                  }                  
+               }
                if (ctx.negation != null) {
                   conditions.push(" NOT REGEXP ");
                } else {
                   conditions.push(" REGEXP ");
                }
-               try
-               { // ensure string literals use single, not double, quotes
+               try { // ensure string literals use single, not double, quotes
                   conditions.push("'"+unquote(ctx.patternOperand.getText())+"'");
-               }
-               catch(Exception exception)
-               { // not a string literal
+               } catch(Exception exception) { // not a string literal
                   conditions.push(ctx.patternOperand.getText());
                }
+               if (needsClosingParentheses) conditions.push("))");
             }
             @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx) {
                if (ctx.IN() != null) {

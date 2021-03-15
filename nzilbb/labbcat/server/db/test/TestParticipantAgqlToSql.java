@@ -328,6 +328,41 @@ public class TestParticipantAgqlToSql {
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
+   @Test public void episodeMatch() throws AGQLException {
+      ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+      ParticipantAgqlToSql.Query q = transformer.sqlFor(
+         "/Ada.+/.test(first('episode').label)", "speaker_number, name", null, "ORDER BY speaker.name");
+      assertEquals("SQL",
+                   "SELECT speaker_number, name FROM speaker"
+                   +" WHERE (SELECT DISTINCT transcript_family.name"
+                   +" FROM transcript_family"
+                   +" INNER JOIN transcript"
+                   +" ON transcript_family.family_id = transcript.family_id"
+                   +" INNER JOIN transcript_speaker"
+                   +" ON transcript.ag_id = transcript_speaker.ag_id"
+                   +" WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+                   +" ORDER BY transcript_family.name LIMIT 1)"
+                   +" REGEXP 'Ada.+'"
+                   +" ORDER BY speaker.name",
+                   q.sql);
+      assertEquals("Parameter count", 0, q.parameters.size());
+      
+      q = transformer.sqlFor(         
+         // RegExp.test(Array) is a kludge that allows matching *any* of the annotation layers
+         "/Ada.+/.test(labels('episode'))", "speaker_number, name", null, "ORDER BY speaker.name");
+      assertEquals("SQL",
+                   "SELECT speaker_number, name FROM speaker"
+                   +" WHERE (EXISTS (SELECT *"
+                   +" FROM transcript_family"
+                   +" INNER JOIN transcript ON transcript_family.family_id = transcript.family_id"
+                   +" INNER JOIN transcript_speaker ON transcript.ag_id = transcript_speaker.ag_id"
+                   +" WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+                   +" AND transcript_family.name REGEXP 'Ada.+'))"
+                   +" ORDER BY speaker.name",
+                   q.sql);
+      assertEquals("Parameter count", 0, q.parameters.size());
+   }
+
    @Test public void annotators() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(

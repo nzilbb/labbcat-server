@@ -1010,7 +1010,7 @@ public class SqlGraphStore implements GraphStore {
                   Layer layer = schema.getLayer(layerId);
                   if (layer == null) continue;
                   // participant tag layers
-                  if (layer.getParentId().equals(schema.getParticipantLayerId())
+                  if (schema.getParticipantLayerId().equals(layer.getParentId())
                       && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
                      if ("speaker".equals(layer.get("class_id"))) {
                         sqlValue.setString(1, layer.get("attribute").toString());
@@ -1036,7 +1036,7 @@ public class SqlGraphStore implements GraphStore {
                         } // next annotation
                         rsValue.close();
                      } // class_id set
-                  } else if (layerId.equals(schema.getCorpusLayerId())) {
+                  } else if (layerId.equals(schema.getCorpusLayerId())) { // ad-hockery
                      // participant corpora
                      PreparedStatement sqlCorpora = getConnection().prepareStatement(
                         "SELECT c.corpus_id, c.corpus_name"
@@ -1055,9 +1055,47 @@ public class SqlGraphStore implements GraphStore {
                      } // next corpus
                      rsCorpora.close();
                      sqlCorpora.close();
+                  } else if (layerId.equals(schema.getRoot().getId())) { // ad-hockery
+                     // transcripts which the participant is in
+                     PreparedStatement sqlTranscripts = getConnection().prepareStatement(
+                        "SELECT DISTINCT t.transcript_id, t.family_sequence"
+                        +" FROM transcript t"
+                        +" INNER JOIN transcript_speaker ts ON t.ag_id = ts.ag_id"
+                        +" WHERE ts.speaker_number = ?"
+                        +" ORDER BY t.family_sequence");
+                     sqlTranscripts.setString(1, speakerNumber);
+                     ResultSet rsTranscripts = sqlTranscripts.executeQuery();
+                     while (rsTranscripts.next()) {                     
+                        Annotation transcript = new Annotation(
+                           rsTranscripts.getString("transcript_id"), 
+                           rsTranscripts.getString("transcript_id"), layer.getId());
+                        transcript.setOrdinal(rsTranscripts.getInt("family_sequence"));
+                        participant.addAnnotation(transcript);
+                     } // next corpus
+                     rsTranscripts.close();
+                     sqlTranscripts.close();
+                  } else if (layerId.equals(schema.getEpisodeLayerId())) { // ad-hockery
+                     // episodes of the transcripts which the participant is in
+                     PreparedStatement sqlEpisodes = getConnection().prepareStatement(
+                        "SELECT DISTINCT e.family_id, e.name"
+                        +" FROM transcript_family e"
+                        +" INNER JOIN transcript t ON e.family_id = t.family_id"
+                        +" INNER JOIN transcript_speaker ts ON t.ag_id = ts.ag_id"
+                        +" WHERE ts.speaker_number = ?"
+                        +" ORDER BY e.name");
+                     sqlEpisodes.setString(1, speakerNumber);
+                     ResultSet rsEpisodes = sqlEpisodes.executeQuery();
+                     while (rsEpisodes.next()) {                     
+                        Object[] annotationIdParts = {
+                           layer.get("layer_id"), rsEpisodes.getString("family_id")};
+                        Annotation episode = new Annotation(
+                           fmtMetaAnnotationId.format(annotationIdParts), 
+                           rsEpisodes.getString("name"), layer.getId());
+                        participant.addAnnotation(episode);
+                     } // next corpus
+                     rsEpisodes.close();
+                     sqlEpisodes.close();
                   }
-                  // TODO "transcript" layer to list transcripts they're in
-                  // TODO "episode" layer to list episodes they're in
                } // next layerId
                sqlValue.close();
             } // there are layerIds specified
