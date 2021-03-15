@@ -33,6 +33,8 @@ export class ParticipantsComponent implements OnInit {
     ) { }
     
     ngOnInit(): void {
+        this.filterLayers = [];
+        this.selectedIds = [];
         this.readUserInfo();
         this.readBaseUrl();
         this.readSchema().then(()=> {
@@ -54,12 +56,21 @@ export class ParticipantsComponent implements OnInit {
                 this.participantAttributes = [];
                 this.filterLayers = [];
                 // allow filtering by corpus and participant ID
-                // TODO and transcript count
-                // TODO and episode?
                 this.filterLayers.push(schema.layers[schema.participantLayerId]);
                 this.filterValues[schema.participantLayerId] = [];
                 this.filterLayers.push(schema.layers[schema.corpusLayerId]);
                 this.filterValues[schema.corpusLayerId] = [];
+                // and transcript count
+                schema.layers["@transcript-count"] = {
+                    id: "@transcript-count", description: "Transcript count",
+                    parentId: schema.participantLayerId,                    
+                    alignment: 0,
+                    peers: false, peersOverlap: false, parentIncludes: true, saturated: true,
+                    type: "number", subtype: "integer"
+                }
+                this.filterLayers.push(schema.layers["@transcript-count"]);
+                this.filterValues["@transcript-count"] = [];
+                // TODO and episode?
                 // and by selected participant attributes
                 for (let layerId in schema.layers) {
                     const layer = schema.layers[layerId] as Layer;
@@ -120,6 +131,8 @@ export class ParticipantsComponent implements OnInit {
                 
                 this.query += "/"+this.esc(this.filterValues["participant"][0])+"/.test(id)";
                 
+            } else if (layer.id == "@transcript-count"
+                && this.filterValues[layer.id].length > 0) {
             } else if (layer.validLabels && Object.keys(layer.validLabels).length > 0
                 && this.filterValues[layer.id].length > 0) {
                 // select from possible values
@@ -220,6 +233,17 @@ export class ParticipantsComponent implements OnInit {
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.attributeValues[id] = participant;
+                
+                // get the number of transcripts the participant is in
+                this.labbcatService.labbcat.countMatchingTranscriptIds(
+                    "labels('"+this.schema.participantLayerId+"').includes('"+id.replace(/'/,"\\'")+"')",
+                    (count, errors, messages) => {
+                        if (errors) errors.forEach(m => this.messageService.error(m));
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        this.attributeValues[id].annotations["@transcript-count"] = [{
+                            label : count
+                        }];
+                    });
             });
     }
 

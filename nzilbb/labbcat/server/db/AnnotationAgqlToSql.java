@@ -218,7 +218,7 @@ public class AnnotationAgqlToSql {
                   conditions.push(
                      "CONCAT('e"+scope+"_"+layer.get("layer_id")+"_', annotation.annotation_id)");
                } else { // other.id
-                  if (ctx.other.myMethodCall() == null) {
+                  if (ctx.other.firstMethodCall() == null) {
                      // it might be parent.id...
                      if (ctx.other.parentExpression() != null) {
                         Layer parentLayer = schema.getLayer(layer.getParentId());
@@ -233,7 +233,7 @@ public class AnnotationAgqlToSql {
                      }
                   } else {
                      String layerId = unquote(
-                        ctx.other.myMethodCall().layer.quotedString.getText());
+                        ctx.other.firstMethodCall().layer.quotedString.getText());
                      Layer operandLayer = getSchema().getLayer(layerId);
                      if (operandLayer == null) {
                         errors.add("Invalid layer: " + ctx.getText());
@@ -328,12 +328,12 @@ public class AnnotationAgqlToSql {
                if (ctx.other == null) {
                   conditions.push("annotation.label");
                } else { // other.label
-                  if (ctx.other.myMethodCall() == null) {
+                  if (ctx.other.firstMethodCall() == null) {
                      errors.add("Invalid construction, only my('layer').label is supported: "
                                 + ctx.getText());
                   } else {
                      String layerId = unquote(
-                        ctx.other.myMethodCall().layer.quotedString.getText());
+                        ctx.other.firstMethodCall().layer.quotedString.getText());
                      if (layerId.equals(schema.getCorpusLayerId())) { // corpus
                         conditions.push("graph.corpus_name");
                         flags.transcriptJoin = true;
@@ -597,7 +597,7 @@ public class AnnotationAgqlToSql {
                         .layer.quotedString.getText();
                   }
                } else if (ctx.listExpression().annotationListExpression() != null) {
-                  layerId = ctx.listExpression().annotationListExpression().listMethodCall()
+                  layerId = ctx.listExpression().annotationListExpression().allMethodCall()
                      .layer.quotedString.getText();
                }
                if (layerId == null) {
@@ -682,7 +682,7 @@ public class AnnotationAgqlToSql {
                } // layer identified
                flags.inListLength = false;
             }
-            @Override public void exitListMethodCall(AGQLParser.ListMethodCallContext ctx) {
+            @Override public void exitAllMethodCall(AGQLParser.AllMethodCallContext ctx) {
                if (flags.inListLength) return; // exitListLengthExpression will handle this
                space();
                String layerId = unquote(ctx.layer.getText());

@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1328,7 +1328,7 @@ public class SqlGraphStore implements GraphStore {
     */
    public String[] getTranscriptIdsInCorpus(String id)
       throws StoreException, PermissionException {
-      return getMatchingTranscriptIds("my('corpus').label = '"+esc(id)+"'");
+      return getMatchingTranscriptIds("first('corpus').label = '"+esc(id)+"'");
    }
 
 
@@ -1355,11 +1355,11 @@ public class SqlGraphStore implements GraphStore {
     *  <li><code>labels('corpus').includes('CC')</code></li>
     *  <li><code>labels('participant_languages').includes('en')</code></li>
     *  <li><code>labels('transcript_language').includes('en')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
-    *  <li><code>list('transcript_rating').length &gt; 2</code></li>
-    *  <li><code>list('participant_rating').length = 0</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; first('corpus').label == 'CC'</code></li>
+    *  <li><code>all('transcript_rating').length &gt; 2</code></li>
+    *  <li><code>all('participant_rating').length = 0</code></li>
     *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
-    *  <li><code>my('participant_gender').label == 'NA'</code></li>
+    *  <li><code>first('participant_gender').label == 'NA'</code></li>
     * </ul>
     * @param expression The participant-matching expression.
     * @param sqlSelectClause The expression that is to go between SELECT and FROM.
@@ -1391,11 +1391,11 @@ public class SqlGraphStore implements GraphStore {
     *  <li><code>labels('corpus').includes('CC')</code></li>
     *  <li><code>labels('participant_languages').includes('en')</code></li>
     *  <li><code>labels('transcript_language').includes('en')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
-    *  <li><code>list('transcript_rating').length &gt; 2</code></li>
-    *  <li><code>list('participant_rating').length = 0</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; first('corpus').label == 'CC'</code></li>
+    *  <li><code>all('transcript_rating').length &gt; 2</code></li>
+    *  <li><code>all('participant_rating').length = 0</code></li>
     *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
-    *  <li><code>my('participant_gender').label == 'NA'</code></li>
+    *  <li><code>first('participant_gender').label == 'NA'</code></li>
     * </ul>
     * @return The number of matching participants.
     * @throws StoreException If an error occurs.
@@ -1428,11 +1428,11 @@ public class SqlGraphStore implements GraphStore {
     *  <li><code>labels('corpus').includes('CC')</code></li>
     *  <li><code>labels('participant_languages').includes('en')</code></li>
     *  <li><code>labels('transcript_language').includes('en')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
-    *  <li><code>list('transcript_rating').length &gt; 2</code></li>
-    *  <li><code>list('participant_rating').length = 0</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; first('corpus').label == 'CC'</code></li>
+    *  <li><code>all('transcript_rating').length &gt; 2</code></li>
+    *  <li><code>all('participant_rating').length = 0</code></li>
     *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
-    *  <li><code>my('participant_gender').label == 'NA'</code></li>
+    *  <li><code>first('participant_gender').label == 'NA'</code></li>
     * </ul>
     * @return A list of participant IDs.
     * @throws StoreException If an error occurs.
@@ -1453,11 +1453,11 @@ public class SqlGraphStore implements GraphStore {
     *  <li><code>labels('corpus').includes('CC')</code></li>
     *  <li><code>labels('participant_languages').includes('en')</code></li>
     *  <li><code>labels('transcript_language').includes('en')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
-    *  <li><code>list('transcript_rating').length &gt; 2</code></li>
-    *  <li><code>list('participant_rating').length = 0</code></li>
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; first('corpus').label == 'CC'</code></li>
+    *  <li><code>all('transcript_rating').length &gt; 2</code></li>
+    *  <li><code>all('participant_rating').length = 0</code></li>
     *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
-    *  <li><code>my('participant_gender').label == 'NA'</code></li>
+    *  <li><code>first('participant_gender').label == 'NA'</code></li>
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.
@@ -1497,19 +1497,19 @@ public class SqlGraphStore implements GraphStore {
     * <ul>
     *  <li><code>/Ada.+/.test(id)</code></li>
     *  <li><code>labels('participant').includes('Robert')</code></li>
-    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
-    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label == 'en'</code></li>
-    *  <li><code>my('noise').label == 'bell'</code></li>
+    *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
+    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
+    *  <li><code>first('participant_languages').label == 'en'</code></li>
+    *  <li><code>first('noise').label == 'bell'</code></li>
     *  <li><code>labels('transcript_languages').includes('en')</code></li>
     *  <li><code>labels('participant_languages').includes('en')</code></li>
     *  <li><code>labels('noise').includes('bell')</code></li>
-    *  <li><code>list('transcript_languages').length gt; 1</code></li>
-    *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('word').length &gt; 100</code></li>
+    *  <li><code>all('transcript_languages').length gt; 1</code></li>
+    *  <li><code>all('participant_languages').length gt; 1</code></li>
+    *  <li><code>all('word').length &gt; 100</code></li>
     *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; first('corpus').label == 'CC' &amp;&amp;
     * labels('participant').includes('Robert')</code></li> 
     * </ul>
     * @param expression The graph-matching expression.
@@ -1541,19 +1541,19 @@ public class SqlGraphStore implements GraphStore {
     * <ul>
     *  <li><code>/Ada.+/.test(id)</code></li>
     *  <li><code>labels('participant').includes('Robert')</code></li>
-    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
-    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label == 'en'</code></li>
-    *  <li><code>my('noise').label == 'bell'</code></li>
+    *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
+    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
+    *  <li><code>first('participant_languages').label == 'en'</code></li>
+    *  <li><code>first('noise').label == 'bell'</code></li>
     *  <li><code>labels('transcript_languages').includes('en')</code></li>
     *  <li><code>labels('participant_languages').includes('en')</code></li>
     *  <li><code>labels('noise').includes('bell')</code></li>
-    *  <li><code>list('transcript_languages').length gt; 1</code></li>
-    *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('word').length &gt; 100</code></li>
+    *  <li><code>all('transcript_languages').length gt; 1</code></li>
+    *  <li><code>all('participant_languages').length gt; 1</code></li>
+    *  <li><code>all('word').length &gt; 100</code></li>
     *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; first('corpus').label == 'CC' &amp;&amp;
     * labels('participant').includes('Robert')</code></li> 
     * </ul>
     * @return The number of matching transcripts.
@@ -1585,19 +1585,19 @@ public class SqlGraphStore implements GraphStore {
     * <ul>
     *  <li><code>/Ada.+/.test(id)</code></li>
     *  <li><code>labels('participant').includes('Robert')</code></li>
-    *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
-    *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label == 'en'</code></li>
-    *  <li><code>my('noise').label == 'bell'</code></li>
+    *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
+    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
+    *  <li><code>first('participant_languages').label == 'en'</code></li>
+    *  <li><code>first('noise').label == 'bell'</code></li>
     *  <li><code>labels('transcript_languages').includes('en')</code></li>
     *  <li><code>labels('participant_languages').includes('en')</code></li>
     *  <li><code>labels('noise').includes('bell')</code></li>
-    *  <li><code>list('transcript_languages').length gt; 1</code></li>
-    *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('word').length &gt; 100</code></li>
+    *  <li><code>all('transcript_languages').length gt; 1</code></li>
+    *  <li><code>all('participant_languages').length gt; 1</code></li>
+    *  <li><code>all('word').length &gt; 100</code></li>
     *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
-    *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+    *  <li><code>!/Ada.+/.test(id) &amp;&amp; first('corpus').label == 'CC' &amp;&amp;
     * labels('participant').includes('Robert')</code></li> 
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
@@ -2138,11 +2138,11 @@ public class SqlGraphStore implements GraphStore {
     *  <li><code>id == 'ew_0_456'</code></li>
     *  <li><code>['ew_2_456', 'ew_2_789', 'ew_2_101112'].includes(id)</code></li>
     *  <li><code>layerId == 'orthography' &amp;&amp; !/th[aeiou].+/.test(label)</code></li>
-    *  <li><code>layer.id = 'orthography' AND my('participant').label = 'Robert' AND
-    * my('utterances').start.offset = 12.345</code> - TODO</li> 
+    *  <li><code>layer.id = 'orthography' AND first('participant').label = 'Robert' AND
+    * first('utterances').start.offset = 12.345</code> - TODO</li> 
     *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography' &amp;&amp;
     * start.offset &gt; 10.5</code></li> 
-    *  <li><code>layer.id == 'utterance' &amp;&amp; list('word').includes('ew_0_456')</code></li>
+    *  <li><code>layer.id == 'utterance' &amp;&amp; all('word').includes('ew_0_456')</code></li>
     *  <li><code>previous.id = 'ew_0_456'</code> - TODO</li>
     *  <li><code>layerId = 'utterance' &amp;&amp; labels('orthography').includes('foo')</code></li>
     *  <li><code>layerId = 'utterance' &amp;&amp; labels('participant').includes('Ada')</code></li>

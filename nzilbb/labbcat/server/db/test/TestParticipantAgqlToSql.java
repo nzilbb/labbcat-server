@@ -164,7 +164,7 @@ public class TestParticipantAgqlToSql {
    @Test public void corpusLabel() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "my(\"corpus\").label == \"CC\"", "speaker_number, name", null, "ORDER BY speaker.name");
+         "first(\"corpus\").label == \"CC\"", "speaker_number, name", null, "ORDER BY speaker.name");
       assertEquals("SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT corpus.corpus_name"
@@ -177,10 +177,10 @@ public class TestParticipantAgqlToSql {
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
-   @Test public void literalList() throws AGQLException {
+   @Test public void literalAll() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "[\"CC\", 'IA', 'MU', \"graph\", 'who'].includes(my(\"corpus\").label)",
+         "[\"CC\", 'IA', 'MU', \"graph\", 'who'].includes(first(\"corpus\").label)",
          "speaker_number, name", null, "ORDER BY speaker.name");
       assertEquals("SQL",
                    "SELECT speaker_number, name FROM speaker"
@@ -212,7 +212,7 @@ public class TestParticipantAgqlToSql {
    @Test public void listLength() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "list('transcript_rating').length > 2", "speaker_number, name", null, "ORDER BY speaker.name");
+         "all('transcript_rating').length > 2", "speaker_number, name", null, "ORDER BY speaker.name");
       assertEquals("Transcript attribute - list - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT COUNT(*)"
@@ -227,7 +227,7 @@ public class TestParticipantAgqlToSql {
       assertEquals("Parameter count", 0, q.parameters.size());
 
       q = transformer.sqlFor(
-         "list('participant_gender').length = 0", "speaker_number, name", null, "ORDER BY speaker.name");
+         "all('participant_gender').length = 0", "speaker_number, name", null, "ORDER BY speaker.name");
       assertEquals("Participant attribute - list - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT COUNT(*)"
@@ -300,7 +300,7 @@ public class TestParticipantAgqlToSql {
    @Test public void participantAttributeLabel() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "my('participant_gender').label == 'NA'", "speaker_number, name", null, "ORDER BY speaker.name");
+         "first('participant_gender').label == 'NA'", "speaker_number, name", null, "ORDER BY speaker.name");
       assertEquals("SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT label"
@@ -346,9 +346,9 @@ public class TestParticipantAgqlToSql {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       try {
          ParticipantAgqlToSql.Query q = transformer.sqlFor(
-            "my('invalid layer 1').label == 'NA'"
-            + " AND list('invalid layer 2').length > 2"
-            + " AND my('invalid layer 3').label = 'NA'"
+            "first('invalid layer 1').label == 'NA'"
+            + " AND all('invalid layer 2').length > 2"
+            + " AND first('invalid layer 3').label = 'NA'"
             + " AND 'labbcat' NOT IN annotators('invalid layer 4')",
             "speaker_number, name", null, "ORDER BY speaker.name");
          fail("sqlFor fails: " + q.sql);

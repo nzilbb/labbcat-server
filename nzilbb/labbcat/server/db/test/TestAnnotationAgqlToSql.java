@@ -259,10 +259,10 @@ public class TestAnnotationAgqlToSql {
       } catch(AGQLException exception) {}
    }
 
-   @Test public void inList() throws AGQLException {
+   @Test public void inAll() throws AGQLException {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query q = transformer.sqlFor(
-         "layer.id == 'utterance' && list('word').includes('ew_0_456')",
+         "layer.id == 'utterance' && all('word').includes('ew_0_456')",
          "DISTINCT annotation.*", null, null);
       assertEquals("SQL",
                    "SELECT DISTINCT annotation.*, 'utterance' AS layer, start.offset, end.offset"
@@ -288,7 +288,7 @@ public class TestAnnotationAgqlToSql {
    @Test public void whoLabels() throws AGQLException {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query q = transformer.sqlFor(
-         "layer.id == 'orthography' && my('who').label == 'Robert'",
+         "layer.id == 'orthography' && first('who').label == 'Robert'",
          "DISTINCT annotation.*", null, null);
       assertEquals("Who",
                    "SELECT DISTINCT annotation.*, 'orthography' AS layer"
@@ -306,8 +306,8 @@ public class TestAnnotationAgqlToSql {
    @Test public void episodeLabel() throws AGQLException {
      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
    AnnotationAgqlToSql.Query q = transformer.sqlFor(
-         "layer.id == 'orthography' && my('who').label == 'Robert'"
-         +" && my(\"episode\").label == 'some-episode'",
+         "layer.id == 'orthography' && first('who').label == 'Robert'"
+         +" && first(\"episode\").label == 'some-episode'",
          "DISTINCT annotation.*", null, null);
       assertEquals("SQL",
                    "SELECT DISTINCT annotation.*, 'orthography' AS layer"
@@ -327,8 +327,8 @@ public class TestAnnotationAgqlToSql {
    @Test public void transcriptTypeLabel() throws AGQLException {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query q = transformer.sqlFor(
-         "layer.id == 'utterance' && my('who').label == 'Robert'"
-         +" && my('transcript_type').label == 'wordlist'",
+         "layer.id == 'utterance' && first('who').label == 'Robert'"
+         +" && first('transcript_type').label == 'wordlist'",
          "DISTINCT annotation.*", null, null);
       assertEquals("SQL",
                    "SELECT DISTINCT annotation.*, 'utterance' AS layer"
@@ -347,7 +347,7 @@ public class TestAnnotationAgqlToSql {
    @Test public void startOffset() throws AGQLException {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query q = transformer.sqlFor(
-         "layer.id == 'orthography' && my('who').label == 'Robert'"
+         "layer.id == 'orthography' && first('who').label == 'Robert'"
          +" && start.offset < 12.345",
          "DISTINCT annotation.*", null, null);
       assertEquals("Who",
@@ -365,8 +365,8 @@ public class TestAnnotationAgqlToSql {
                    q.sql);
 
       // q = transformer.sqlFor( TODO
-      //    "layer.id == 'orthography' && my('who').label == 'Robert'"
-      //    +" && my('utterances').start.offset = 12.345",
+      //    "layer.id == 'orthography' && first('who').label == 'Robert'"
+      //    +" && first('utterances').start.offset = 12.345",
       //    "DISTINCT annotation.*", null, null);
       // assertEquals("Who",
       //              "SELECT DISTINCT annotation.*, 'orthography' AS layer"
@@ -494,7 +494,7 @@ public class TestAnnotationAgqlToSql {
    @Test public void attributeLabel() throws AGQLException {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query q = transformer.sqlFor(
-         "layerId = 'utterance' && my('transcript_scribe').label == 'someone'",
+         "layerId = 'utterance' && first('transcript_scribe').label == 'someone'",
          "DISTINCT annotation.*", null, null);
       assertEquals("Transcript attribute - SQL",
                    "SELECT DISTINCT annotation.*, 'utterance' AS layer"
@@ -508,7 +508,7 @@ public class TestAnnotationAgqlToSql {
 
       // TODO add support for participant attributs
       // q = transformer.sqlFor(
-      //    "layerId = 'utterance' && my('participant_gender').label == 'NA'",
+      //    "layerId = 'utterance' && first('participant_gender').label == 'NA'",
       //    "DISTINCT annotation.*", null, null);
       // assertEquals("Participant attribute - SQL",
       //              "SELECT DISTINCT annotation.* FROM transcript"
@@ -527,7 +527,7 @@ public class TestAnnotationAgqlToSql {
    @Test public void listLength() throws AGQLException {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query q = transformer.sqlFor(
-         "layerId = 'utterance' && list('transcript_rating').length > 10",
+         "layerId = 'utterance' && all('transcript_rating').length > 10",
          "DISTINCT annotation.*", null, null);
       assertEquals("Transcript attribute - SQL",
                    "SELECT DISTINCT annotation.*, 'utterance' AS layer"
@@ -540,7 +540,7 @@ public class TestAnnotationAgqlToSql {
                    q.sql);
       
       q = transformer.sqlFor(
-         "layerId = 'utterance' && list('word').length > 100",
+         "layerId = 'utterance' && all('word').length > 100",
          "DISTINCT annotation.*", null, null);
       assertEquals("Annotation - SQL",
                    "SELECT DISTINCT annotation.*, 'utterance' AS layer, start.offset, end.offset"
@@ -640,9 +640,9 @@ public class TestAnnotationAgqlToSql {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       try {
          AnnotationAgqlToSql.Query q = transformer.sqlFor(
-            "layerId = 'utterance' && my('invalid layer 1').label == 'NA'"
-            + " AND list('invalid layer 2').length > 2"
-            + " AND my('invalid layer 3').label = 'NA'"
+            "layerId = 'utterance' && first('invalid layer 1').label == 'NA'"
+            + " AND all('invalid layer 2').length > 2"
+            + " AND first('invalid layer 3').label = 'NA'"
             + " AND 'labbcat' NOT IN annotators('invalid layer 4')",
             "DISTINCT annotation.*", null, null);
          fail("sqlFor fails: " + q.sql);

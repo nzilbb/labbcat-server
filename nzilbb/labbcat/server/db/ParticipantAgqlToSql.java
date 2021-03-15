@@ -136,12 +136,12 @@ public class ParticipantAgqlToSql {
                if (ctx.other == null) {
                   conditions.push("speaker.name");
                } else {
-                  if (ctx.other.myMethodCall() == null) {
+                  if (ctx.other.firstMethodCall() == null) {
                      errors.add("Invalid construction, only my('layer').label is supported: "
                                 + ctx.getText());
                   } else {
                      String layerId = unquote(
-                        ctx.other.myMethodCall().layer.quotedString.getText());
+                        ctx.other.firstMethodCall().layer.quotedString.getText());
                      if (layerId.equals(schema.getCorpusLayerId())) { // corpus
                         conditions.push(
                            // TODO technically, a participant can be in more than one corpus
@@ -225,7 +225,7 @@ public class ParticipantAgqlToSql {
                         .layer.quotedString.getText();
                   }
                } else if (ctx.listExpression().annotationListExpression() != null) {
-                  layerId = ctx.listExpression().annotationListExpression().listMethodCall()
+                  layerId = ctx.listExpression().annotationListExpression().allMethodCall()
                      .layer.quotedString.getText();
                }
                if (layerId == null) {

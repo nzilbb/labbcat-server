@@ -146,12 +146,12 @@ public class GraphAgqlToSql {
                if (ctx.other == null) {
                   conditions.push("transcript.transcript_id");
                } else {
-                  if (ctx.other.myMethodCall() == null) {
+                  if (ctx.other.firstMethodCall() == null) {
                      errors.add("Invalid construction, only my('layer').label is supported: "
                                 + ctx.getText());
                   } else {
                      String layerId = unquote(
-                        ctx.other.myMethodCall().layer.quotedString.getText());
+                        ctx.other.firstMethodCall().layer.quotedString.getText());
                      if (layerId.equals(schema.getCorpusLayerId())) { // corpus
                         conditions.push("transcript.corpus_name");
                      } else if (layerId.equals(schema.getEpisodeLayerId())) { // episode
@@ -292,7 +292,7 @@ public class GraphAgqlToSql {
                         .layer.quotedString.getText();
                   }
                } else if (ctx.listExpression().annotationListExpression() != null) {
-                  layerId = ctx.listExpression().annotationListExpression().listMethodCall()
+                  layerId = ctx.listExpression().annotationListExpression().allMethodCall()
                      .layer.quotedString.getText();
                }
                if (layerId == null) {
