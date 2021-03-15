@@ -1056,6 +1056,8 @@ public class SqlGraphStore implements GraphStore {
                      rsCorpora.close();
                      sqlCorpora.close();
                   }
+                  // TODO "transcript" layer to list transcripts they're in
+                  // TODO "episode" layer to list episodes they're in
                } // next layerId
                sqlValue.close();
             } // there are layerIds specified
@@ -1433,6 +1435,7 @@ public class SqlGraphStore implements GraphStore {
     *  <li><code>all('participant_rating').length = 0</code></li>
     *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
     *  <li><code>first('participant_gender').label == 'NA'</code></li>
+    *  <li><code>all('transcript').length == 0</code></li>
     * </ul>
     * @return A list of participant IDs.
     * @throws StoreException If an error occurs.
@@ -1458,6 +1461,7 @@ public class SqlGraphStore implements GraphStore {
     *  <li><code>all('participant_rating').length = 0</code></li>
     *  <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
     *  <li><code>first('participant_gender').label == 'NA'</code></li>
+    *  <li><code>all('transcript').length == 0</code></li>
     * </ul>
     * @param pageLength The maximum number of IDs to return, or null to return all.
     * @param pageNumber The page number to return, or null to return the first page.

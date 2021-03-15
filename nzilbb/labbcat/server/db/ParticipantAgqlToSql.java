@@ -254,6 +254,14 @@ public class ParticipantAgqlToSql {
                            +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
                            +" AND annotation_participant.speaker_number = speaker.speaker_number"
                            +")");
+                     } else if (layerId.equals("transcript")) { // special case!
+                        // we can query how many transcripts a participant is in by using
+                        // all('transcript').length
+                        conditions.push(
+                           "(SELECT COUNT(*)"
+                           +" FROM transcript_speaker"
+                           +" WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+                           +")");
                      } else {
                         errors.add("Can only get list length for participant or transcript attributes: "
                                    + ctx.getText());

@@ -313,6 +313,21 @@ public class TestParticipantAgqlToSql {
       assertEquals("Parameter count", 0, q.parameters.size());
    }
 
+   @Test public void transcriptCount() throws AGQLException {
+      ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+      ParticipantAgqlToSql.Query q = transformer.sqlFor(
+         "all('transcript').length == 0", "speaker_number, name", null, "ORDER BY speaker.name");
+      assertEquals("SQL",
+                   "SELECT speaker_number, name FROM speaker"
+                   +" WHERE (SELECT COUNT(*)"
+                   +" FROM transcript_speaker"
+                   +" WHERE transcript_speaker.speaker_number = speaker.speaker_number)"
+                   +" = 0"
+                   +" ORDER BY speaker.name",
+                   q.sql);
+      assertEquals("Parameter count", 0, q.parameters.size());
+   }
+
    @Test public void annotators() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
