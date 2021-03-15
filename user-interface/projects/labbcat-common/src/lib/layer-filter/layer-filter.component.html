@@ -53,7 +53,15 @@
                i18n>[other]</label>
       </span>
     </div>
-    <!-- TODO boolean -->
+    
+    <div *ngIf="inputType == 'boolean'" class="boolean">
+      <select
+        (input)="handleTextChange($event.target.value)">
+        <option value=""></option>
+        <option value="1" [selected]="values[0] == '1'">1 - <span i18n="layer filter boolean label">true</span></option>
+        <option value="0" [selected]="values[0] == '0'">0 - <span i18n="layer filter boolean label">false</span></option>
+      </select>
+    </div>
     <!-- TODO date/datetime -->
   </div>
 </fieldset>

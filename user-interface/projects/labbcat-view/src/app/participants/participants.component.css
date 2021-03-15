@@ -4,6 +4,10 @@
 }
 td.participant {
     white-space: nowrap;
+    max-width: 200px;
+}
+tbody td.participant {
+    overflow: hidden;
 }
 tbody td:not(.participant) {
     text-align: center;

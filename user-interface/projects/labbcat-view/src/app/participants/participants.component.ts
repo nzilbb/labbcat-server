@@ -60,7 +60,7 @@ export class ParticipantsComponent implements OnInit {
                 this.filterValues[schema.participantLayerId] = [];
                 this.filterLayers.push(schema.layers[schema.corpusLayerId]);
                 this.filterValues[schema.corpusLayerId] = [];
-                // and transcript count
+                // and transcript count - we use a dummy layer to fool the layer-filter
                 schema.layers["@transcript-count"] = {
                     id: "@transcript-count", description: "Transcript count",
                     parentId: schema.participantLayerId,                    
@@ -123,7 +123,8 @@ export class ParticipantsComponent implements OnInit {
     listParticipants(): void {
         this.query = "";
         for (let layer of this.filterLayers) {
-            
+
+            console.log("layer " + layer.id + " = " + this.filterValues[layer.id][0] + " " + layer.type);
             if (layer.id == this.schema.participantLayerId
                 && this.filterValues[layer.id][0]) {
                 // participant layer
@@ -133,6 +134,26 @@ export class ParticipantsComponent implements OnInit {
                 
             } else if (layer.id == "@transcript-count"
                 && this.filterValues[layer.id].length > 0) {
+                // participant layer
+                if (this.query) this.query += " && ";
+                
+                // from?
+                if (this.filterValues[layer.id][0]) {
+                    if (this.query) this.query += " && ";
+                    const value = (layer.subtype == "integer"?
+                        parseInt:parseFloat)(this.filterValues[layer.id][0])
+                    this.query += "all('transcript').length >= "+ value;
+                }
+                
+                // to?
+                if (this.filterValues[layer.id][1]) {
+                    if (this.query) this.query += " && ";
+                    
+                    const value = (layer.subtype == "integer"?
+                        parseInt:parseFloat)(this.filterValues[layer.id][1])
+                    this.query += "all('transcript').length <= "+ value;
+                }
+                
             } else if (layer.validLabels && Object.keys(layer.validLabels).length > 0
                 && this.filterValues[layer.id].length > 0) {
                 // select from possible values
@@ -143,13 +164,13 @@ export class ParticipantsComponent implements OnInit {
                 if (!this.filterValues[layer.id].includes("!")) {
                     // ordinary positive selection 
                     this.query += JSON.stringify(this.filterValues[layer.id])
-                        +".includes(my('"+this.esc(layer.id)+"').label)"; // TODO my->first
+                        +".includes(first('"+this.esc(layer.id)+"').label)";
                 } else { // "!" 'other' selected
                     // so we *exclude* all values not selected
                     const labelsToExclude = Object.keys(layer.validLabels)
                         .filter(l=>!this.filterValues[layer.id].includes(l));
                     this.query += "!"+JSON.stringify(labelsToExclude)
-                        +".includes(my('"+this.esc(layer.id)+"').label)"; // TODO my->first
+                        +".includes(first('"+this.esc(layer.id)+"').label)";
                 }
             } else if (layer.type == "number"
                 && this.filterValues[layer.id].length > 1) {
@@ -159,7 +180,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.query) this.query += " && ";
                     const value = (layer.subtype == "integer"?
                         parseInt:parseFloat)(this.filterValues[layer.id][0])
-                    this.query += "my('"+this.esc(layer.id)+"').label >= "+ value; // TODO my->first
+                    this.query += "first('"+this.esc(layer.id)+"').label >= "+ value;
                 }
                 
                 // to?
@@ -168,11 +189,16 @@ export class ParticipantsComponent implements OnInit {
                     
                     const value = (layer.subtype == "integer"?
                         parseInt:parseFloat)(this.filterValues[layer.id][1])
-                    this.query += "my('"+this.esc(layer.id)+"').label <= "+ value; // TODO my->first
+                    this.query += "first('"+this.esc(layer.id)+"').label <= "+ value;
                 }
+            } else if (layer.type == "boolean"
+                && this.filterValues[layer.id][0]) {
+                if (this.query) this.query += " && ";
+                
+                this.query += "first('"+this.esc(layer.id)+"').label = "
+                    + this.filterValues[layer.id][0];
             }
             // TODO date/datetime
-            // TODO boolean
         } // next filter layer
         this.loadingList = true;
         // count matches

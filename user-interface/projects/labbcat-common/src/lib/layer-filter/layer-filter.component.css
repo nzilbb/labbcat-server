@@ -3,6 +3,11 @@ fieldset {
     height: 50px;
 }
 
+.regexp input {
+    width: 90%;
+    min-width: 50px;
+}
+
 .range {
     display: flex;
     flex-direction: row;

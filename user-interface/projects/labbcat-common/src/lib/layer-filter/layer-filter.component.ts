@@ -33,6 +33,8 @@ export class LayerFilterComponent implements OnInit {
             } else if (this.values.length == 1) {
                 this.values = [this.values[0],""];
             }
+        } else if (this.layer.type == "boolean") {
+            this.inputType = "boolean";
         } else {
             this.inputType = "regexp";
         }
