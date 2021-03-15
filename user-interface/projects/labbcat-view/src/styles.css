@@ -251,6 +251,14 @@ lib-task progress, lib-task .progress-container, lib-task .progress-container .p
     }
 }
 
+/* odd/even rows for data tables */
+table {
+    border-collapse: collapse;
+}
+tbody tr:nth-child(odd) {
+    background: #EEEEEE;
+}
+
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
