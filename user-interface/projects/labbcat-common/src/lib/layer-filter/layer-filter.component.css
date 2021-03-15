@@ -3,6 +3,13 @@ fieldset {
     height: 50px;
 }
 
+fieldset > div {
+    height: 100%;
+}
+fieldset > div > input {
+    height: 75%;
+}
+
 .regexp input {
     width: 90%;
     min-width: 50px;
@@ -65,9 +72,11 @@ fieldset {
 }
 
 .select .few {
+    height: 100%;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
+    align-items: center;
 }
 .select .few input {
     display: none;
