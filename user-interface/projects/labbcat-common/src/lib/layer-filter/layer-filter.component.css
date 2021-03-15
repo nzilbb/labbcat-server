@@ -20,6 +20,18 @@ fieldset {
     width: 45%;
 }
 
+.date-range {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    min-width: 200px;
+    max-width: 380px;
+}
+.date-range input {
+    text-align: right;
+    width: 45%;
+}
+
 .select .many {
     display: flex;
     flex-direction: column;

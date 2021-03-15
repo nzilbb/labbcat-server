@@ -55,11 +55,13 @@ export class ParticipantsComponent implements OnInit {
                 this.schema = schema;
                 this.participantAttributes = [];
                 this.filterLayers = [];
-                // allow filtering by corpus and participant ID
+                // allow filtering by participant ID, corpus, and episode
                 this.filterLayers.push(schema.layers[schema.participantLayerId]);
                 this.filterValues[schema.participantLayerId] = [];
                 this.filterLayers.push(schema.layers[schema.corpusLayerId]);
                 this.filterValues[schema.corpusLayerId] = [];
+                this.filterLayers.push(schema.layers[schema.episodeLayerId]);
+                this.filterValues[schema.episodeLayerId] = [];
                 // and transcript count - we use a dummy layer to fool the layer-filter
                 schema.layers["@transcript-count"] = {
                     id: "@transcript-count", description: "Transcript count",
@@ -70,7 +72,8 @@ export class ParticipantsComponent implements OnInit {
                 }
                 this.filterLayers.push(schema.layers["@transcript-count"]);
                 this.filterValues["@transcript-count"] = [];
-                // TODO and episode?
+                this.filterLayers.push(schema.layers["@transcript-count"]);
+                this.filterValues["@transcript-count"] = [];
                 // and by selected participant attributes
                 for (let layerId in schema.layers) {
                     const layer = schema.layers[layerId] as Layer;
@@ -124,7 +127,6 @@ export class ParticipantsComponent implements OnInit {
         this.query = "";
         for (let layer of this.filterLayers) {
 
-            console.log("layer " + layer.id + " = " + this.filterValues[layer.id][0] + " " + layer.type);
             if (layer.id == this.schema.participantLayerId
                 && this.filterValues[layer.id][0]) {
                 // participant layer
@@ -191,12 +193,38 @@ export class ParticipantsComponent implements OnInit {
                         parseInt:parseFloat)(this.filterValues[layer.id][1])
                     this.query += "first('"+this.esc(layer.id)+"').label <= "+ value;
                 }
+            } else if ((layer.subtype == "date" || layer.subtype == "datetime")
+                && this.filterValues[layer.id].length > 1) {
+                
+                // from?
+                if (this.filterValues[layer.id][0]) {
+                    if (this.query) this.query += " && ";
+                    const value = this.filterValues[layer.id][0];
+                    this.query += "first('"+this.esc(layer.id)+"').label"
+                    +" >= '"+this.esc(value)+"'";
+                }
+                
+                // to?
+                if (this.filterValues[layer.id][1]) {
+                    if (this.query) this.query += " && ";
+                    
+                    const value = this.filterValues[layer.id][1];
+                    this.query += "first('"+this.esc(layer.id)+"').label"
+                    +" <= '"+value+" 23:59:59'";
+                }
             } else if (layer.type == "boolean"
                 && this.filterValues[layer.id][0]) {
                 if (this.query) this.query += " && ";
                 
                 this.query += "first('"+this.esc(layer.id)+"').label = "
                     + this.filterValues[layer.id][0];
+                
+            } else if (this.filterValues[layer.id][0]) { // assume regexp match
+                if (this.query) this.query += " && ";
+                
+                this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/"
+                    +".test(labels('" +this.esc(layer.id)+"'))";
+                
             }
             // TODO date/datetime
         } // next filter layer
@@ -326,6 +354,6 @@ export class ParticipantsComponent implements OnInit {
 
     /** Add escapes for query string values */
     esc(value: string): string {
-        return value; // TODO
+        return value.replace(/'/,"\\'");
     }
 }

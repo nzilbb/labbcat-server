@@ -33,6 +33,13 @@ export class LayerFilterComponent implements OnInit {
             } else if (this.values.length == 1) {
                 this.values = [this.values[0],""];
             }
+        } else if (this.layer.subtype == "date" || this.layer.subtype == "datetime") {
+            this.inputType = "date-range";
+            if (!this.values || !this.values.length) {
+                this.values = ["",""];
+            } else if (this.values.length == 1) {
+                this.values = [this.values[0],""];
+            }
         } else if (this.layer.type == "boolean") {
             this.inputType = "boolean";
         } else {

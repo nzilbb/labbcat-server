@@ -14,7 +14,7 @@
     <ng-container *ngIf="inputType == 'range'">
       <input
         type="number"
-        i18n-placeholder="range lower bound" placeholder="From  "
+        i18n-placeholder="range lower bound" placeholder="From"
         i18n-title="range lower bound" title="Lower bound (inclusive)"
         value="{{values[0]}}"
         (input)="handleRangeChange(0, $event.target.value)"
@@ -22,8 +22,26 @@
       <span>&mdash;</span>
       <input
         type="number"
-        i18n-placeholder="range upper bound" placeholder="To  "
+        i18n-placeholder="range upper bound" placeholder="To"
         i18n-title="range upper bound" title="Upper bound (inclusive)"
+        value="{{values[1]}}"
+        (input)="handleRangeChange(1, $event.target.value)"
+        >
+    </ng-container>
+
+    <ng-container *ngIf="inputType == 'date-range'">
+      <input
+        type="text"
+        i18n-placeholder="date range lower bound" placeholder="From"
+        i18n-title="date range lower bound" title="From (inclusive)"
+        value="{{values[0]}}"
+        (input)="handleRangeChange(0, $event.target.value)"
+        >
+      <span>&mdash;</span>
+      <input
+        type="text"
+        i18n-placeholder="date range upper bound" placeholder="To"
+        i18n-title="date range upper bound" title="To (inclusive)"
         value="{{values[1]}}"
         (input)="handleRangeChange(1, $event.target.value)"
         >
@@ -62,6 +80,5 @@
         <option value="0" [selected]="values[0] == '0'">0 - <span i18n="layer filter boolean label">false</span></option>
       </select>
     </div>
-    <!-- TODO date/datetime -->
   </div>
 </fieldset>

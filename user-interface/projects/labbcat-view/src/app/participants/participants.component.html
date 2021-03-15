@@ -36,12 +36,14 @@
             ></lib-button>
           <lib-button
             (press)="exportAttributes()"
+            [disabled]="participantIds.length == 0"
             img="csv.svg" icon=",a,"
             i18n-label label="Export Attributes"
             i18n-title title="Export attributes to CSV"
             ></lib-button>
           <lib-button
             (press)="layeredSearch()"
+            [disabled]="participantIds.length == 0"
             img="magnifying-glass.svg" icon="🔍"
             i18n-label label="Layered Search"
             i18n-title title="Search transcripts including these participants"
@@ -63,8 +65,18 @@
           </span>
           <span class="attribute" *ngIf="layer.id != schema.participantLayerId && attributeValues[id].annotations">
 
-            <span class="value" *ngFor="let annotation of attributeValues[id].annotations[layer.id]">
-              {{annotation.label}}
+            <span class="value" *ngFor="let annotation of attributeValues[id].annotations[layer.id]" title="{{annotation.label}}">
+              <span class="{{layer.subtype}}"
+                    *ngIf="layer.subtype != 'datetime' && layer.subtype != 'date'">
+                {{annotation.label}}</span>
+              <span class="{{layer.subtype}}"
+                    *ngIf="layer.subtype == 'date'"
+                    title="{{annotation.label | date : 'fullDate' }}">
+                {{annotation.label}}</span>
+              <span class="{{layer.subtype}}"
+                    *ngIf="layer.subtype == 'datetime'"
+                    title="{{annotation.label | date : 'full' }}">
+                {{annotation.label}}</span>
             </span>
           </span>
         </td>
