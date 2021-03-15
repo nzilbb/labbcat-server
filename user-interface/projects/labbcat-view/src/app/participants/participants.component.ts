@@ -63,17 +63,15 @@ export class ParticipantsComponent implements OnInit {
                 this.filterLayers.push(schema.layers[schema.episodeLayerId]);
                 this.filterValues[schema.episodeLayerId] = [];
                 // and transcript count - we use a dummy layer to fool the layer-filter
-                schema.layers["@transcript-count"] = {
-                    id: "@transcript-count", description: "Transcript count",
+                schema.layers[" transcript-count"] = {
+                    id: " transcript-count", description: "Transcript count", // TODO i18n
                     parentId: schema.participantLayerId,                    
                     alignment: 0,
                     peers: false, peersOverlap: false, parentIncludes: true, saturated: true,
                     type: "number", subtype: "integer"
                 }
-                this.filterLayers.push(schema.layers["@transcript-count"]);
-                this.filterValues["@transcript-count"] = [];
-                this.filterLayers.push(schema.layers["@transcript-count"]);
-                this.filterValues["@transcript-count"] = [];
+                this.filterLayers.push(schema.layers[" transcript-count"]);
+                this.filterValues[" transcript-count"] = [];
                 // and by selected participant attributes
                 for (let layerId in schema.layers) {
                     const layer = schema.layers[layerId] as Layer;
@@ -134,7 +132,7 @@ export class ParticipantsComponent implements OnInit {
                 
                 this.query += "/"+this.esc(this.filterValues["participant"][0])+"/.test(id)";
                 
-            } else if (layer.id == "@transcript-count"
+            } else if (layer.id == " transcript-count"
                 && this.filterValues[layer.id].length > 0) {
                 // participant layer
                 if (this.query) this.query += " && ";
@@ -294,7 +292,7 @@ export class ParticipantsComponent implements OnInit {
                     (count, errors, messages) => {
                         if (errors) errors.forEach(m => this.messageService.error(m));
                         if (messages) messages.forEach(m => this.messageService.info(m));
-                        this.attributeValues[id].annotations["@transcript-count"] = [{
+                        this.attributeValues[id].annotations[" transcript-count"] = [{
                             label : count
                         }];
                     });
@@ -307,7 +305,17 @@ export class ParticipantsComponent implements OnInit {
         return false;
     }
 
+    /** Button action */
+    newParticipant(): void {
+        var name = prompt(
+            "Please enter the new participant's name\nor leave this blank to generate a name automatically", ""); // TODO i18n
+        if (name != null) { 
+            window.location.href = this.baseUrl + "edit/participants/new?newSpeakerName="+name;
+        }
+    }
+    
     deleting = false;
+    /** Button action */
     deleteParticipants(): void {
         alert("TODO delete participant");
     }

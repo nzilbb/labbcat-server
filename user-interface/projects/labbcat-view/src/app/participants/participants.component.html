@@ -14,6 +14,13 @@
       <tr class="controls">
         <td colSpan="{{filterLayers.length}}">
           <lib-button
+            *ngIf="user.roles.includes('edit')"
+            action="create"
+            (press)="newParticipant()"
+            i18n-title title="New record"
+            ></lib-button>
+          <lib-button
+            *ngIf="user.roles.includes('edit')"
             action="delete"
             (press)="deleteParticipants()" [processing]="deleting"
             [disabled]="selectedIds.length == 0"
@@ -65,7 +72,7 @@
           </span>
           <span class="attribute" *ngIf="layer.id != schema.participantLayerId && attributeValues[id].annotations">
 
-            <span class="value" *ngFor="let annotation of attributeValues[id].annotations[layer.id]" title="{{annotation.label}}">
+            <span class="value" *ngFor="let annotation of attributeValues[id].annotations[layer.id]" title="{{layer.id}}: {{annotation.label}}">
               <span class="{{layer.subtype}}"
                     *ngIf="layer.subtype != 'datetime' && layer.subtype != 'date'">
                 {{annotation.label}}</span>
