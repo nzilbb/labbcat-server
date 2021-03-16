@@ -224,7 +224,6 @@ export class ParticipantsComponent implements OnInit {
                     +".test(labels('" +this.esc(layer.id)+"'))";
                 
             }
-            // TODO date/datetime
         } // next filter layer
         this.loadingList = true;
         // count matches
@@ -317,7 +316,34 @@ export class ParticipantsComponent implements OnInit {
     deleting = false;
     /** Button action */
     deleteParticipants(): void {
-        alert("TODO delete participant");
+        const deletions = [];
+        // delete each selected participant
+        for (let id of this.selectedIds) {
+            const participantId = id;
+            const component = this;
+            deletions.push(new Promise<null>((accept, reject) => {
+                this.labbcatService.labbcat.deleteParticipant(
+                    participantId, (nothing, errors, messages) => {
+                        if (errors) errors.forEach(m => this.messageService.error(m));
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        if (!errors) {
+                            // remove the participant from the model
+                            component.participantIds = component.participantIds.filter(
+                                p => p != participantId);
+                        }
+                        // either way, deselect it
+                        component.selectedIds = component.selectedIds.filter(
+                            p => p != participantId);
+                        accept();
+                    });
+            }));
+        } // next selected participant
+        
+        // once all the requests have finished
+        Promise.all(deletions).then(ids => {
+            // reload the page to fill up removed slots
+            this.listParticipants();
+        });
     }
 
     /** Button action */

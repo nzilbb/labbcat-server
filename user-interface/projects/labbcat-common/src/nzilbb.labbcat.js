@@ -1985,12 +1985,27 @@
         }
         
         /**
-         * Deletes the given transcript, and all assciated media, from the graph store.
+         * Deletes the given transcript, and all associated media, from the graph store.
          * @param {string} id The transcript ID
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteTranscript(id, onResult) {
-	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST", this.storeEditUrl).send();
+	    this.createRequest(
+                "deleteTranscript", null, onResult, null, "POST",
+                this.storeEditUrl, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({id : id}));
+        }
+
+        /**
+         * Deletes the given participan, and all assciated meta-data, from the graph store.
+         * @param {string} id The participant ID
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteParticipant(id, onResult) {
+	    this.createRequest(
+                "deleteParticipant", null, onResult, null, "POST",
+                this.storeEditUrl, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({id : id}));
         }
 
         /**
