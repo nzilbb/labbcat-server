@@ -7196,6 +7196,80 @@ public class SqlGraphStore implements GraphStore {
    }
    
    /**
+    * Deletes the given participant, and all associated meta-data.
+    * @param id The ID participant to delete.
+    * @throws StoreException If an error prevents the transcript from being saved.
+    * @throws PermissionException If saving the transcript is not permitted.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
+    */
+   public void deleteParticipant(String id)
+      throws StoreException, PermissionException, GraphNotFoundException {
+      if (id == null) {
+	 throw new StoreException("No participant specified"); // TODO i18n
+      } else {
+         try {
+            PreparedStatement sql = connection.prepareStatement(
+               "SELECT speaker.speaker_number, COUNT(ag_id) AS transcript_count"
+               +" FROM speaker"
+               +" LEFT OUTER JOIN transcript_speaker"
+               +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+               +" WHERE speaker.name = ?"
+               +" GROUP BY speaker.speaker_number");
+            sql.setString(1, id);
+            if (id.startsWith("m_-2_")) { // we've been given an annotation ID
+               String speaker_number = id.substring("m_-2_".length());
+               sql.close();
+               sql = connection.prepareStatement(
+                  "SELECT speaker.speaker_number, COUNT(ag_id) AS transcript_count"
+                  +" FROM speaker"
+                  +" LEFT OUTER JOIN transcript_speaker"
+                  +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+                  +" WHERE speaker.speaker_number = ?"
+                  +" GROUP BY speaker.speaker_number");
+               sql.setString(1, speaker_number);
+            }
+            ResultSet rs = sql.executeQuery();
+            try {
+               if (!rs.next()) {
+                  throw new StoreException("Invalid participant ID: " + id); // TODO i18n
+               } else {
+                  int speakerNumber = rs.getInt("speaker_number");
+                  int transcriptCount = rs.getInt("transcript_count");
+                  if (transcriptCount > 0) {
+                     throw new StoreException( // TODO need a new exception so that Store cane return 200 instead of 400
+                        id + " is still in " + transcriptCount
+                        + " transcript" + (transcriptCount == 1?"":"s")); // TODO i18n
+                  } else {
+                     PreparedStatement delete = connection.prepareStatement(
+                        "DELETE FROM annotation_participant WHERE speaker_number = ?");
+                     delete.setInt(1, speakerNumber);
+                     delete.executeUpdate();
+                     delete.close();
+                     
+                     delete = connection.prepareStatement(
+                        "DELETE FROM speaker_corpus WHERE speaker_number = ?");
+                     delete.setInt(1, speakerNumber);
+                     delete.executeUpdate();
+                     delete.close();
+                     
+                     delete = connection.prepareStatement(
+                        "DELETE FROM speaker WHERE speaker_number = ?");
+                     delete.setInt(1, speakerNumber);
+                     delete.executeUpdate();
+                     delete.close();
+                  }
+               }
+            } finally {
+               rs.close();
+               sql.close();
+            }
+         } catch(SQLException exception) {
+            throw new StoreException(exception);
+         }
+      }
+   }
+   
+   /**
     * Gets the value of a system attribute.
     * @param name Attribute name.
     * @return The value of the system attribute, or null if there is no value.

@@ -100,6 +100,23 @@ import org.xml.sax.*;
           </dl>
         </li>
       </ul>
+      <a id="deleteParticipant(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/edit/store/deleteParticipant</h4>
+          <pre class="methodSignature">void&nbsp;deleteParticipant&#8203;(String&nbsp;id)
+            throws <a href="StoreException.html" title="class in nzilbb.ag">StoreException</a>,
+            <a href="PermissionException.html" title="class in nzilbb.ag">PermissionException</a>,
+            <a href="GraphNotFoundException.html" title="class in nzilbb.ag">GraphNotFoundException</a></pre>
+          <div class="block">Deletes the given participant, and all associated meta-data.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID participant to delete.</dd>
+          </dl>
+        </li>
+      </ul>
 
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -160,6 +177,8 @@ public class Store extends StoreQuery {
                     // support deprecated name
                     || pathInfo.endsWith("deletegraph")) {
             json = deleteTranscript(request, response, store);
+         } else if (pathInfo.endsWith("deleteparticipant")) {
+            json = deleteParticipant(request, response, store);
          }
       } // only if it's a POST request
       
@@ -169,12 +188,12 @@ public class Store extends StoreQuery {
       return json;
    } // end of invokeFunction()
 
-   // IGraphStore method handlers
+   // GraphStore method handlers
 
    // TODO saveTranscript
    
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#createAnnotation(String,String,String,String,String,Integer,String)}
+    * Implementation of {@link nzilbb.ag.GraphStoreQuery#createAnnotation(String,String,String,String,String,Integer,String)}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
@@ -212,7 +231,7 @@ public class Store extends StoreQuery {
    }      
    
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#destroyAnnotation(String,String)}
+    * Implementation of {@link nzilbb.ag.GraphStoreQuery#destroyAnnotation(String,String)}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
@@ -236,7 +255,7 @@ public class Store extends StoreQuery {
    // TODO saveEpisodeDocument
 
    /**
-    * Implementation of {@link nzilbb.ag.IGraphStoreQuery#deleteGraph(String)}
+    * Implementation of {@link nzilbb.ag.GraphStoreQuery#deleteTranscript(String)}
     * @param request The HTTP request.
     * @param request The HTTP response.
     * @param store A graph store object.
@@ -251,6 +270,24 @@ public class Store extends StoreQuery {
       if (errors.size() > 0) return failureResult(errors);
       store.deleteTranscript(id);
       return successResult(request, null, "Transcript deleted: {0}", id);
+   }
+   
+   /**
+    * Implementation of {@link nzilbb.ag.GraphStoreQuery#deleteParticipant(String)}
+    * @param request The HTTP request.
+    * @param request The HTTP response.
+    * @param store A graph store object.
+    * @return A JSON response for returning to the caller.
+    */
+   protected JsonObject deleteParticipant(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      Vector<String> errors = new Vector<String>();
+      String id = request.getParameter("id");
+      if (id == null) errors.add(localize(request, "No ID specified."));
+      if (errors.size() > 0) return failureResult(errors);
+      store.deleteParticipant(id);
+      return successResult(request, null, "Participant deleted: {0}", id);
    }      
    
    private static final long serialVersionUID = 1;
