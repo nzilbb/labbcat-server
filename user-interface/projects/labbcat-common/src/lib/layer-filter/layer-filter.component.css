@@ -81,6 +81,10 @@ fieldset > div > input {
 .select .few input {
     display: none;
 }
+.select .few label {
+    white-space: nowrap;
+    margin-right: 3px;
+}
 .select .few input + label {
     border: 1px solid transparent;
     display: inline-block;

@@ -56,7 +56,10 @@
           [checked]="values.includes(label)"
           (click)="handleCheckboxClick(label, $event.target.checked)"
           >
-        <label for="{{layer.id}}-{{label}}" title="{{layer.validLabels[label]}}">{{label}}</label>
+        <label for="{{layer.id}}-{{label}}" title="{{layer.validLabels[label]}}">
+          <span class="description">{{layer.validLabels[label]}}</span>
+          <span class="validLabel" *ngIf="label != layer.validLabels[label]">({{label}})</span>
+        </label>
       </span>
       <span *ngIf="otherAllowed">
         <input

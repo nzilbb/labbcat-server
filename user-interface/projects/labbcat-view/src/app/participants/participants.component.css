@@ -12,3 +12,9 @@ tbody td.participant {
 tbody td:not(.participant) {
     text-align: center;
 }
+span.attribute {
+    display: block;
+    max-height: 50px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
