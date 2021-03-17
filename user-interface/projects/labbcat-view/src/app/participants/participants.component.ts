@@ -288,7 +288,8 @@ export class ParticipantsComponent implements OnInit {
                 
                 // get the number of transcripts the participant is in
                 this.labbcatService.labbcat.countMatchingTranscriptIds(
-                    "labels('"+this.schema.participantLayerId+"').includes('"+id.replace(/'/,"\\'")+"')",
+                    "labels('"+this.esc(this.schema.participantLayerId)+"')"
+                    +".includes('"+this.esc(id)+"')",
                     (count, errors, messages) => {
                         if (errors) errors.forEach(m => this.messageService.error(m));
                         if (messages) messages.forEach(m => this.messageService.info(m));
@@ -388,6 +389,6 @@ export class ParticipantsComponent implements OnInit {
 
     /** Add escapes for query string values */
     esc(value: string): string {
-        return value.replace(/'/,"\\'");
+        return value.replace(/\\/,"\\\\").replace(/'/,"\\'");
     }
 }
