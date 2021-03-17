@@ -2624,7 +2624,7 @@ public class SqlGraphStore implements GraphStore {
                         Integer.valueOf(SqlConstants.LAYER_SEGMENT))
                      && (layer.getParentId() != null
                          && layer.getParentId().equals(targetLayer.getParentId()))) {// word child
-             // target is segment layer and layer is segment child
+               // target is segment layer and layer is segment child
                Integer layer_id = (Integer)layer.get("layer_id");
                String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
                   // these required for ORDER BY
@@ -2656,7 +2656,7 @@ public class SqlGraphStore implements GraphStore {
                      +" annotation_end.offset - annotation_start.offset AS annotation_length"
                      +" FROM annotation_layer_"+layer_id+" annotation"
                      +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
-                     +" ON annotation.segment_annotation_id = target.annotation_id"
+                     +" ON annotation.word_annotation_id = target.word_annotation_id"
                      +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" token"
                      +" ON target.word_annotation_id = token.word_annotation_id"
                      +" AND target.ordinal_in_word = token.ordinal_in_word + "+targetOffset
