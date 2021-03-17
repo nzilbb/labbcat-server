@@ -17,6 +17,7 @@ import { LinkComponent } from './link/link.component';
 import { LoginComponent } from './login/login.component';
 import { AutofocusDirective } from './autofocus.directive';
 import { LayerFilterComponent } from './layer-filter/layer-filter.component';
+import { PaginationComponent } from './pagination/pagination.component';
 
 @NgModule({
     declarations: [
@@ -34,7 +35,8 @@ import { LayerFilterComponent } from './layer-filter/layer-filter.component';
         LinkComponent,
         LoginComponent,
         AutofocusDirective,
-        LayerFilterComponent
+        LayerFilterComponent,
+        PaginationComponent
     ],
     imports: [
         RouterModule, CommonModule, FormsModule
@@ -54,7 +56,8 @@ import { LayerFilterComponent } from './layer-filter/layer-filter.component';
         LinkComponent,
         LoginComponent,
         AutofocusDirective,
-        LayerFilterComponent
+        LayerFilterComponent,
+        PaginationComponent
     ]
 })
 export class LabbcatCommonModule {

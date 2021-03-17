@@ -23,6 +23,7 @@ export * from './lib/about/about.component';
 export * from './lib/link/link.component';
 export * from './lib/login/login.component';
 export * from './lib/layer-filter/layer-filter.component';
+export * from './lib/pagination/pagination.component';
 export * from './lib/pending-changes.guard';
 export * from './lib/autofocus.directive';
 export * from './lib/labbcat-common.module';

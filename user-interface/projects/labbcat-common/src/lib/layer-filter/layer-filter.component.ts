@@ -18,7 +18,6 @@ export class LayerFilterComponent implements OnInit {
     constructor() { }
     
     ngOnInit(): void {
-        console.log("this.values = " + JSON.stringify(this.values));
         this.determineInputType();
     }
 

@@ -15,20 +15,20 @@
       <tr class="controls">
         <td colSpan="{{filterLayers.length}}">
           <lib-button
-            *ngIf="user.roles.includes('edit')"
+            *ngIf="user && user.roles.includes('edit')"
             action="create"
             (press)="newParticipant()"
             i18n-title title="New record"
             ></lib-button>
           <lib-button
-            *ngIf="user.roles.includes('edit')"
+            *ngIf="user && user.roles.includes('edit')"
             action="delete"
             (press)="deleteParticipants()" [processing]="deleting"
             [disabled]="selectedIds.length == 0"
             i18n-title title="Delete record"
             ></lib-button>
           <lib-button
-            *ngIf="user.roles.includes('edit')"
+            *ngIf="user && user.roles.includes('edit')"
             (press)="mergeParticipants()"
             [disabled]="selectedIds.length < 2"
             img="people.svg" icon="👥"
@@ -44,14 +44,14 @@
             ></lib-button>
           <lib-button
             (press)="exportAttributes()"
-            [disabled]="participantIds.length == 0"
+            [disabled]="!participantIds || participantIds.length == 0"
             img="csv.svg" icon=",a,"
             i18n-label label="Export Attributes"
             i18n-title title="Export attributes to CSV"
             ></lib-button>
           <lib-button
             (press)="layeredSearch()"
-            [disabled]="participantIds.length == 0"
+            [disabled]="!participantIds || participantIds.length == 0"
             img="magnifying-glass.svg" icon="🔍"
             i18n-label label="Layered Search"
             i18n-title title="Search transcripts including these participants"
@@ -92,15 +92,8 @@
     </tbody>
   </table>
 </div>
-<div class="pagination"
-     i18n-title title="Page links">
-  <span *ngFor="let hint of pageLinks; let pg = index" class="page">
-    <span *ngIf="pg+1 == p"
-          class="current"
-          i18n-title title="Current page">{{pg+1}}</span>
-    <a *ngIf="pg+1 != p"
-       title="{{hint}}"
-       (click)="goToPage(pg+1)"
-       href="#">{{pg+1}}</a>
-  </span>
-</div>
+<lib-pagination
+  i18n-title title="Page links"
+  [currentPage]="p"
+  [pageLinks]="pageLinks"
+  (goToPage)="goToPage($event)"></lib-pagination>

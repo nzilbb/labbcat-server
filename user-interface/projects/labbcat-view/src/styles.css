@@ -290,15 +290,16 @@ tbody tr:nth-child(odd) {
     font-style: italic;
 }
 
-.pagination {
+lib-pagination {
+    display: block;
     text-align: center;
     font-weight: normal;
     font-size: 9pt;
 }
-.pagination > * {
+lib-pagination > * {
     padding: 3px;
 }
-.pagination .current {
+lib-pagination .current {
     font-weight: bold;
     padding: 3px;
     border: inset 2px;

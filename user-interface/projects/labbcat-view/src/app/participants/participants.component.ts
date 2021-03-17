@@ -114,6 +114,7 @@ export class ParticipantsComponent implements OnInit {
             window.clearTimeout(this.listParticipantsTimer);
         }
         this.listParticipantsTimer = window.setTimeout(()=>{
+            this.p = 1;
             this.listParticipants();
             this.listParticipantsTimer = -1;
         }, 2000);
@@ -298,10 +299,9 @@ export class ParticipantsComponent implements OnInit {
             });
     }
 
-    goToPage(p: number): boolean {
+    goToPage(p: number): void {
         this.p = p;
         this.listParticipants();
-        return false;
     }
 
     /** Button action */
