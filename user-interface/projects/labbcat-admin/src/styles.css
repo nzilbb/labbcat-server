@@ -264,6 +264,8 @@ lib-task progress, lib-task .progress-container, lib-task .progress-container .p
 @media all and (min-width: 640px) {
     app-root nav { min-height: 100px; max-width: min-content; }
     app-root aside { max-width: min-content; }
+    app-admin-menu li:first-child { border-top: 1px solid var(--theme-text-color); }
+    app-admin-menu li { border-left: 1px solid var(--theme-text-color); }
     .list { display: table; }
     .list > .item {
         display: table-row;
