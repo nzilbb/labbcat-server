@@ -62,6 +62,8 @@ import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.ql.AGQLException;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.IconHelper;
+import nzilbb.ag.stt.Transcriber;
+import nzilbb.ag.stt.util.TranscriberDescriptor;
 import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.Validator;
@@ -150,6 +152,16 @@ public class SqlGraphStore implements GraphStore {
       if (!dir.exists()) dir.mkdir();
       return dir;
    } // end of getAnnotatorDir()   
+   
+   /**
+    * Returns the location of the automatic transcribers directory.
+    * @return The automatic transcriber installation directory.
+    */
+   public File getTranscriberDir() {
+      File dir = new File(getFiles(), "transcribers");
+      if (!dir.exists()) dir.mkdir();
+      return dir;
+   } // end of getTranscriberDir()   
    
    /**
     * Database connection.
@@ -7644,6 +7656,83 @@ public class SqlGraphStore implements GraphStore {
       } // next possible jar
       return null;
    } // end of getAnnotatorDescriptor()
+
+   /**
+    * Lists descriptors of all transcribers that are installed.
+    * @return A list of descriptors of all transcribers that are installed.
+    */
+   public TranscriberDescriptor[] getTranscriberDescriptors() {
+      TreeMap<String,TranscriberDescriptor> descriptors = new TreeMap<String,TranscriberDescriptor>();
+      File dir = getTranscriberDir();
+      for (File jar : dir.listFiles(new FileFilter() {
+            public boolean accept(File f) {
+               return !f.isDirectory() && f.getName().endsWith(".jar");
+            }})) {
+         try {
+            TranscriberDescriptor descriptor = new TranscriberDescriptor(jar);
+            Transcriber transcriber = descriptor.getInstance();
+            
+            // give the transcriber the resources it needs
+            transcriber.setSchema(getSchema());            
+            File transcriberDir = new File(dir, transcriber.getTranscriberId());
+            if (!transcriberDir.exists()) transcriberDir.mkdir();
+            transcriber.setWorkingDirectory(transcriberDir);
+            
+            descriptors.put(transcriber.getTranscriberId(), descriptor);
+         } catch(Exception exception) {
+         }
+      } // next possible jar
+      return descriptors.values().toArray(new TranscriberDescriptor[0]);
+   } // end of getTranscriberDescriptor()
+   
+   /**
+    * Gets an instance of the transcriber with the given ID.
+    * @param transcriberId
+    * @return An instance of the given transcriber, or null if there is no registered
+    * transcriber with the given ID. 
+    */
+   public Transcriber getTranscriber(String transcriberId) {
+      TranscriberDescriptor descriptor = getTranscriberDescriptor(transcriberId);
+      if (descriptor != null) {
+         return descriptor.getInstance();
+      }
+      return null;
+   } // end of getTranscriber()
+
+   /**
+    * Gets a descriptor of the transcriber with the given ID.
+    * @param transcriberId
+    * @return A descriptor of the given transcriber, or null if there is no registered
+    * transcriber with the given ID. 
+    */
+   public TranscriberDescriptor getTranscriberDescriptor(String transcriberId) {
+      File dir = getTranscriberDir();
+      for (File jar : dir.listFiles(new FileFilter() {
+            public boolean accept(File f) {
+               return !f.isDirectory() && f.getName().startsWith(transcriberId + "-")
+                  && f.getName().endsWith(".jar");
+            }})) {
+         try {
+            TranscriberDescriptor descriptor = new TranscriberDescriptor(jar);
+            Transcriber transcriber = descriptor.getInstance();
+            if (transcriber.getTranscriberId().equals(transcriberId)) {
+
+               // give the transcriber the resources it needs
+               transcriber.setSchema(getSchema());
+               
+               if (transcriber.getClass().isAnnotationPresent(UsesFileSystem.class)) {
+                  File transcriberDir = new File(dir, transcriber.getTranscriberId());
+                  if (!transcriberDir.exists()) transcriberDir.mkdir();
+                  transcriber.setWorkingDirectory(transcriberDir);
+               }
+               
+               return descriptor;
+            }
+         } catch(Exception exception) {
+         }
+      } // next possible jar
+      return null;
+   } // end of getTranscriberDescriptor()
 
    /**
     * Gets the deserializer for the given MIME type.

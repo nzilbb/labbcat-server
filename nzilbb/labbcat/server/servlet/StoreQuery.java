@@ -43,6 +43,7 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
+import nzilbb.ag.stt.util.TranscriberDescriptor;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.labbcat.server.db.*;
 import nzilbb.util.IO;
@@ -626,6 +627,22 @@ import org.xml.sax.*;
       </li>
       </ul>
 
+      <a id="getTranscriberDescriptors()">
+      <!--   -->
+      </a>
+      <ul class="blockListLast">
+      <li class="blockList">
+      <h4>/api/store/getTranscriberDescriptors</h4>
+      <div class="block">Lists descriptors of all transcribers that are installed.
+      <p> Transcribers are modules that perform perform automated transcription of recordings
+          that have not alreadye been transcribed.</div>
+      <dl>
+      <dt><span class="returnLabel">Returns:</span></dt>
+      <dd>A list of the descriptors of all registered transcribers.</dd>
+      </dl>
+      </li>
+      </ul>
+
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/api/store/*"} )
@@ -780,6 +797,8 @@ public class StoreQuery extends LabbcatServlet {
             json = getDeserializerDescriptors(request, response, store);
          } else if (pathInfo.endsWith("getannotatordescriptors")) {
             json = getAnnotatorDescriptors(request, response, store);
+         } else if (pathInfo.endsWith("gettranscriberdescriptors")) {
+            json = getTranscriberDescriptors(request, response, store);
          }
       }
       return json;
@@ -1369,6 +1388,22 @@ public class StoreQuery extends LabbcatServlet {
       AnnotatorDescriptor[] descriptors = store.getAnnotatorDescriptors();
       return successResult(
          request, descriptors, descriptors.length == 0?"There are no annotators.":null);
+   }
+
+   /**
+    * Lists descriptors of all transcribers that are installed.
+    * <p> Transcribers are modules that perform automated transcription of recordings
+    * that have not alreadye been transcribed.
+    * @return A list of the descriptors of all registered transcribers.
+    * @throws StoreException If an error prevents the descriptors from being listed.
+    * @throws PermissionException If listing the deserializers is not permitted.
+    */
+   protected JsonObject getTranscriberDescriptors(
+      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+      TranscriberDescriptor[] descriptors = store.getTranscriberDescriptors();
+      return successResult(
+         request, descriptors, descriptors.length == 0?"There are no transcribers.":null);
    }
 
    private static final long serialVersionUID = 1;

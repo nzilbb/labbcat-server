@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -19,7 +19,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet.annotator;
+package nzilbb.labbcat.server.servlet.transcriber;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -45,8 +45,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import nzilbb.ag.PermissionException;
-import nzilbb.ag.automation.*;
-import nzilbb.ag.automation.util.AnnotatorDescriptor;
+import nzilbb.ag.StoreException;
+import nzilbb.ag.stt.*;
+import nzilbb.ag.stt.util.TranscriberDescriptor;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.servlet.*;
 import nzilbb.util.IO;
@@ -55,28 +56,26 @@ import org.apache.commons.fileupload.disk.*;
 import org.apache.commons.fileupload.servlet.*;
 
 /**
- * Servlet that manages installation/upgrade/uninstallation of annotators.
- * <h4>/api/admin/annotator</h4>
- * <p> Only the POST method is accepted. The protocol for installation of an annotator
+ * Servlet that manages installation/upgrade/uninstallation of automatic Transcribers.
+ * <h4>/api/admin/transcriber</h4>
+ * <p> Only the POST method is accepted. The protocol for installation of an transcriber
  * module is:
  * <ol>
  *
- *  <li> Upload the annotator .jar file with a multipart POST request (the first file
+ *  <li> Upload the transcriber .jar file with a multipart POST request (the first file
  *       parameter encountered is taken, regardless of its name). The response is a
  *       JSON-encoded envelope with a "model" object with the following attributes:
  *   <dl>
  *     <dt> jar </dt><dd> The name of the .jar file uploaded (this must be used in the
  *                        subsequent request). </dd>
- *     <dt> annotatorId </dt><dd> The ID of the annotator found in the .jar file. </dd>
- *     <dt> version </dt><dd> The version of the annotator implementation. </dd>
- *     <dt> installedVersion </dt><dd> The version of the already-installed annotator
+ *     <dt> transcriberId </dt><dd> The ID of the transcriber found in the .jar file. </dd>
+ *     <dt> version </dt><dd> The version of the transcriber implementation. </dd>
+ *     <dt> installedVersion </dt><dd> The version of the already-installed transcriber
  *                        implementation, if any. </dd>
- *     <dt> hasConfigWebapp </dt><dd> Whether or not the annotator implements a 'config'
+ *     <dt> hasConfigWebapp </dt><dd> Whether or not the transcriber implements a 'config'
  *                        webapp </dd> 
- *     <dt> hasTaskWebapp </dt><dd> Whether or not the annotator implements a 'task' webapp </dd>
- *     <dt> hasExtWebapp </dt><dd> Whether or not the annotator implements an 'ext' webapp </dd>
  *     <dt> info </dt><dd> A complete HTML document containing a description of the
- *                        annotator. </dd>
+ *                        transcriber. </dd>
  *   </dl>
  *  </li>
  *
@@ -92,9 +91,9 @@ import org.apache.commons.fileupload.servlet.*;
  *   <dl>
  *     <dt> jar </dt><dd> The name of the .jar file, as returned in the response to the
  *                        preovious request. </dd>
- *     <dt> annotatorId </dt><dd> The ID of the annotator found in the .jar file. </dd>
+ *     <dt> transcriberId </dt><dd> The ID of the transcriber found in the .jar file. </dd>
  *     <dt> url </dt><dd> The URL that must be visited next in order to complete the
- *                        installation by configuring the annotator. This may be the URL
+ *                        installation by configuring the transcriber. This may be the URL
  *                        of the 'config' webapp if there is one, or the 'setConfig'
  *                        request if not.</dd>
  *   </dl>
@@ -105,17 +104,17 @@ import org.apache.commons.fileupload.servlet.*;
  *  
  * </ol>
  * 
- * <p> Annotators can be uninstalled by making a POST request with the following
+ * <p> Transcribers can be uninstalled by making a POST request with the following
  * application/x-www-form-urlencoded parameters:
  *   <dl>
  *     <dt> action </dt><dd> <q>uninstall</q> </dd>
- *     <dt> annotatorId </dt><dd> The ID of the annotator. </dd>
+ *     <dt> transcriberId </dt><dd> The ID of the transcriber. </dd>
  *   </dl>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet({"/admin/annotator", "/api/admin/annotator"})
+@WebServlet({"/admin/transcriber", "/api/admin/transcriber"})
 @RequiredRole("admin")
-public class AdminAnnotators extends LabbcatServlet {
+public class AdminTranscribers extends LabbcatServlet {
 
    private File tempDir;
 
@@ -130,7 +129,7 @@ public class AdminAnnotators extends LabbcatServlet {
    /**
     * Default constructor.
     */
-   public AdminAnnotators() {
+   public AdminTranscribers() {
    } // end of constructor
    
    /** 
@@ -141,7 +140,7 @@ public class AdminAnnotators extends LabbcatServlet {
       try {
          tempDir = Files.createTempDirectory(getClass().getSimpleName()).toFile();
       } catch (IOException x) {
-         System.err.println("AdminAnnotators.init: " + x);
+         System.err.println("AdminTranscribers.init: " + x);
       }
    }
    
@@ -193,32 +192,33 @@ public class AdminAnnotators extends LabbcatServlet {
                      uploadedJarFile.deleteOnExit();
                      fileItem.write(uploadedJarFile);
                      
-                     // find the annotator
+                     // find the transcriber
                      try {
-                        AnnotatorDescriptor descriptor = new AnnotatorDescriptor(uploadedJarFile);
-                        Annotator annotator = descriptor.getInstance();
-
+                        TranscriberDescriptor descriptor
+                           = new TranscriberDescriptor(uploadedJarFile);
+                        Transcriber transcriber = descriptor.getInstance();
+                        
                         // return information
                         JsonObjectBuilder jsonResult = Json.createObjectBuilder()
                            .add("jar", uploadedJarFile.getName())
-                           .add("annotatorId", annotator.getAnnotatorId())
-                           .add("version", annotator.getVersion());
+                           .add("transcriberId", transcriber.getTranscriberId())
+                           .add("version", transcriber.getVersion());
 
-                        Annotator installed = store.getAnnotator(annotator.getAnnotatorId());
+                        Transcriber installed = store.getTranscriber(
+                           transcriber.getTranscriberId());
                         if (installed != null) {
                            jsonResult.add("installedVersion", installed.getVersion());
                         }
                         
                         jsonResult
                            .add("hasConfigWebapp", descriptor.hasConfigWebapp())
-                           .add("hasTaskWebapp", descriptor.hasTaskWebapp())
-                           .add("hasExtWebapp", descriptor.hasExtWebapp())
                            .add("info", descriptor.getInfo());
                         writeResponse(
-                           response, successResult(request, jsonResult.build(), "Annotator received."));
-                     } catch (ClassNotFoundException noAnnotator) {
+                           response, successResult(
+                              request, jsonResult.build(), "Transcriber received."));
+                     } catch (ClassNotFoundException noTranscriber) {
                         writeResponse(response, failureResult(
-                                         request, "No annotator found in {0}", fileName));
+                                         request, "No transcriber found in {0}", fileName));
                      }
                   }
                } catch(Exception exception) {
@@ -236,33 +236,33 @@ public class AdminAnnotators extends LabbcatServlet {
                }
                
                if (action.equals("uninstall")) { // uninstall
-                  String annotatorId = request.getParameter("annotatorId");
-                  if (annotatorId == null) {
+                  String transcriberId = request.getParameter("transcriberId");
+                  if (transcriberId == null) {
                      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                      writeResponse(response, failureResult(
-                                      request, "Missing parameter: {0}", "annotatorId"));
+                                      request, "Missing parameter: {0}", "transcriberId"));
                   }
 
                   // execute uninstall()
-                  AnnotatorDescriptor descriptor = store.getAnnotatorDescriptor(annotatorId);
+                  TranscriberDescriptor descriptor = store.getTranscriberDescriptor(transcriberId);
                   if (descriptor == null) {
                      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                      writeResponse(response, failureResult(
-                                      request, "Invalid ID: {0}", annotatorId));
+                                      request, "Invalid ID: {0}", transcriberId));
                      return;
                   }
                   descriptor.getInstance().uninstall();
 
                   // delete jar file
                   try {
-                     deleteAllJars(annotatorId);
+                     deleteAllJars(transcriberId);
                      writeResponse(
                         response, successResult(
-                           request, null, "Annotator uninstalled."));
+                           request, null, "Transcriber uninstalled."));
                   } catch(CouldNotDeleteFileException x) {
                      writeResponse(
                         response, failureResult(
-                           request, "Could not uninstall annotator {0}",
+                           request, "Could not uninstall transcriber {0}",
                            x.file.getName()));
                      return;
                   }
@@ -276,18 +276,19 @@ public class AdminAnnotators extends LabbcatServlet {
                   } else { // uploadedJarFile exists
                      
                      if (action.equals("install")) { // install
-                        // find the annotator
+                        // find the transcriber
                         try {
-                           AnnotatorDescriptor descriptor = new AnnotatorDescriptor(uploadedJarFile);
-                           Annotator annotator = descriptor.getInstance();
+                           TranscriberDescriptor descriptor
+                              = new TranscriberDescriptor(uploadedJarFile);
+                           Transcriber transcriber = descriptor.getInstance();
                            
                            File installedFile = new File(
-                              getAnnotatorDir(), annotator.getAnnotatorId()
-                              + "-" + annotator.getVersion() + ".jar");
+                              getTranscriberDir(), transcriber.getTranscriberId()
+                              + "-" + transcriber.getVersion() + ".jar");
                            
-                           // delete all other versions of the annotator
+                           // delete all other versions of the transcriber
                            try {
-                              deleteAllJars(annotator.getAnnotatorId());
+                              deleteAllJars(transcriber.getTranscriberId());
                            }
                            catch(CouldNotDeleteFileException x) {
                               writeResponse(
@@ -302,26 +303,45 @@ public class AdminAnnotators extends LabbcatServlet {
                            // return information
                            JsonObjectBuilder jsonResult = Json.createObjectBuilder()
                               .add("jar", installedFile.getName())
-                              .add("annotatorId", annotator.getAnnotatorId());
+                              .add("transcriberId", transcriber.getTranscriberId());
                            // if there's a configuration webapp...
                            if (descriptor.hasConfigWebapp()) {
-                              // the next step is to configure the annotator
+                              // the next step is to configure the transcriber
                               jsonResult.add(
                                  "url", baseUrl(request) + request.getServletPath()
-                                 + "/config/" + annotator.getAnnotatorId() + "/");
+                                 + "/config/" + transcriber.getTranscriberId() + "/");
                            } else {
                               // no configuration is required, so set the configuration directly
                               jsonResult.add(
                                  "url", baseUrl(request) + request.getServletPath()
-                                 + "/config/" + annotator.getAnnotatorId() + "/setConfig");
+                                 + "/config/" + transcriber.getTranscriberId() + "/setConfig");
+
+                              try {
+                                 transcriber.setSchema(store.getSchema());
+                              } catch(StoreException exception) {
+                                 log("Could not getSchema: " + exception);
+                              }
+                              File workingDir = new File(
+                                 getTranscriberDir(), transcriber.getTranscriberId());
+                              if (!workingDir.exists()) {
+                                 if (!workingDir.mkdir()) {
+                                    log("Could not mkdir: " + workingDir.getPath());
+                                 }
+                              }
+                              transcriber.setWorkingDirectory(workingDir);
+                              try {
+                                 transcriber.setConfig(transcriber.getConfig());
+                              } catch(InvalidConfigurationException exception) {
+                                 log("Could setConfig: " + exception);
+                              }
                            }                        
                            
                            writeResponse(
                               response, successResult(
-                                 request, jsonResult.build(), "Annotator installed."));
-                        } catch (ClassNotFoundException noAnnotator) {
+                                 request, jsonResult.build(), "Transcriber installed."));
+                        } catch (ClassNotFoundException noTranscriber) {
                            writeResponse(response, failureResult(
-                                            request, "No annotator found in {0}", fileName));
+                                            request, "No transcriber found in {0}", fileName));
                            
                         }
                      } else { // cancel
@@ -349,17 +369,17 @@ public class AdminAnnotators extends LabbcatServlet {
    }
    
    /**
-    * Deletes all .jar files for the given annotatorId (there should be only one).
-    * @param annotatorId
+    * Deletes all .jar files for the given transcriberId (there should be only one).
+    * @param transcriberId
     * @return The number of files deleted.
     * @throws Exception
     */
-   private int deleteAllJars(String annotatorId) throws CouldNotDeleteFileException {
+   private int deleteAllJars(String transcriberId) throws CouldNotDeleteFileException {
       int fileCount = 0;
-      for (File jar : getAnnotatorDir().listFiles(new FileFilter() {
+      for (File jar : getTranscriberDir().listFiles(new FileFilter() {
             public boolean accept(File f) {
                return !f.isDirectory()
-                  && f.getName().startsWith(annotatorId + "-")
+                  && f.getName().startsWith(transcriberId + "-")
                   && f.getName().endsWith(".jar");
             }})) {
          if (!jar.delete()) {
@@ -371,7 +391,7 @@ public class AdminAnnotators extends LabbcatServlet {
    } // end of deleteAllJars()
 
    /**
-    * GET handler: lists currently installed annotators.
+    * GET handler: lists currently installed transcribers.
     */
    @Override
    protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -386,7 +406,7 @@ public class AdminAnnotators extends LabbcatServlet {
             connection.close();
          }
       } catch(SQLException exception) {
-         log("AdminAnnotators: Couldn't connect to database: " + exception);
+         log("AdminTranscribers: Couldn't connect to database: " + exception);
          writeResponse(response, failureResult(exception));
          return;
       }
@@ -399,16 +419,16 @@ public class AdminAnnotators extends LabbcatServlet {
       writer.println("<!DOCTYPE html>");
       writer.println("<html>");
       writer.println(" <head>");
-      writer.println("  <title>LaBB-CAT Annotator installer</title>");
+      writer.println("  <title>LaBB-CAT Transcriber installer</title>");
       writer.println(" </head>");
       writer.println(" <body>");
-      writer.println("  <h1>LaBB-CAT Annotator installer</h1>");
-      writer.println("  <h2>Upload Annotator</h2>");
+      writer.println("  <h1>LaBB-CAT Transcriber installer</h1>");
+      writer.println("  <h2>Upload Transcriber</h2>");
       writer.println("  <form method=\"POST\" enctype=\"multipart/form-data\"><table>");
       
       // jar file
-      writer.println("   <tr title=\"The annotator module (.jar file)\">");
-      writer.println("    <td><label for=\"jar\">Annotator .jar file</label></td>");
+      writer.println("   <tr title=\"The transcriber module (.jar file)\">");
+      writer.println("    <td><label for=\"jar\">Transcriber .jar file</label></td>");
       writer.println("    <td><input id=\"jar\" name=\"jar\" type=\"file\""
                      +" onchange=\"if (!this.files[0].name.match('\\.jar$'))"
                      +" { alert('Please choose a .jar file'); this.value = null; }"
@@ -421,17 +441,17 @@ public class AdminAnnotators extends LabbcatServlet {
       writer.println("  <form method=\"POST\"><table>");
       
       // confirmation
-      writer.println("   <tr title=\"The annotator jar file name just uploaded\">");
+      writer.println("   <tr title=\"The transcriber jar file name just uploaded\">");
       writer.println("    <td><label for=\"jarName\">.jar file name</label></td>");
       writer.println("    <td><input id=\"jarName\" name=\"jar\" type=\"text\""
                      +" onchange=\"if (!this.value.match('\\.jar$'))"
                      +" { alert('Please enter a .jar file name'); this.value = null; }\""
                      +"/></td></tr>");
-      writer.println("   <tr title=\"Confirm installation of the annotator\">");
+      writer.println("   <tr title=\"Confirm installation of the transcriber\">");
       writer.println("    <td><label for=\"install\">"
                      +"<input type=\"radio\" name=\"action\" id=\"install\" value=\"install\""
                      +" checked>Install</label></td></tr>");
-      writer.println("   <tr title=\"Cancel installation of the annotator\">");
+      writer.println("   <tr title=\"Cancel installation of the transcriber\">");
       writer.println("    <td><label for=\"cancel\">"
                      +"<input type=\"radio\" name=\"action\" id=\"cancel\" value=\"cancel\">"
                      + "Cancel</label></td></tr>");
@@ -445,4 +465,4 @@ public class AdminAnnotators extends LabbcatServlet {
    }
 
    private static final long serialVersionUID = 1;
-} // end of class AdminAnnotators
+} // end of class AdminTranscribers

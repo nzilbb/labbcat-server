@@ -1,0 +1,32 @@
+<h2 i18n="page header">Transcribers</h2>
+
+<div id="new-transcriber">
+  <a [routerLink]="['..','transcriber']"
+     i18n-title="menu title" title="Install or upgrade transcriber module"
+     i18n>Upload Transcriber Module</a>
+</div>
+
+<div class="list transcriber-list">
+  
+  <lib-wait *ngIf="!rows"></lib-wait>
+  <div class="item" *ngFor="let transcriber of rows">
+    <div class="transcriber-id" i18n-title title="ID">
+      <a class="info"
+         (click)="transcriber._showInfo = !transcriber._showInfo"
+         i18n-title title="Show information"
+         >{{transcriber.transcriberId}}</a> ({{transcriber.version}})
+      <span class="buttons">
+        <lib-link 
+                  i18n-title title="Transcriber configuration"
+                  img="wrench.svg" icon="🔧"
+                  href="admin/transcriber?transcriberId={{transcriber.transcriberId}}"></lib-link>
+        <lib-button action="delete"
+                    (press)="uninstall(transcriber);" [processing]="transcriber._deleting"
+                    i18n-title title="Uninstall"></lib-button>
+      </span>
+    </div>
+    <div [innerHTML]="transcriber.info"
+         id="#info-{{transcriber.transcriberId}}"
+         class="{{transcriber._showInfo?'unhidden-panel':'hidden-panel'}}"></div>
+  </div>
+</div>

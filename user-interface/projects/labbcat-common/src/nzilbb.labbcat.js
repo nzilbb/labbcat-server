@@ -1776,6 +1776,18 @@
         }
 
         /**
+         * Lists the descriptors of all registered transcribers.
+         * <p> Transcribers are modules that perform automated transcription of recordings
+         * that have not alreadye been transcribed.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A list of the descriptors of all registered
+         * transcribers. 
+         */
+        getTranscriberDescriptors(onResult) {
+	    this.createRequest("getTranscriberDescriptors", null, onResult).send();
+        }
+        
+        /**
          * Gets the value of the given system attribute.
          * @param {string} attribute Name of the attribute.
          * @param {resultCallback} onResult Invoked when the request has returned a
@@ -3264,6 +3276,160 @@
                 }));
         }
         
+        /**
+         * Uploads an transcriber module in preparation for installing it.
+         * @param {string|file} jarFile Transcriber .jar file.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An object describing the attributes of the
+         * transcriber found in the jar file:
+         * <dl>
+         *  <dt> jar </dt><dd> The name of the file uploaded. </dd>
+         *  <dt> transcriberId </dt><dd> The ID of the transcriber. </dd>
+         *  <dt> version </dt><dd> The version of the transcriber implementation. </dd>
+         *  <dt> installedVersion </dt><dd> The version of the transcriber that this one will 
+         *         replace, if the transcriber ID has already been installed. </dd> 
+         *  <dt> hasConfigWebapp </dt><dd> Whether the transcriber has a
+         *         installation/configuration web-app. </dd>
+         *  <dt> info </dt><dd> HTML document describing the transcriber. </dd>
+         * </dl>
+         * @param onProgress Invoked on XMLHttpRequest progress.
+         */
+        uploadTranscriber(jarFile, onResult, onProgress) {
+
+            // create form
+            var fd = new FormData();
+
+            // TODO nzibb/labbcat-server/user-interface thinks it's running on Node when actually
+            // it's running in a browser, so we need a better test for runningOnNode
+            if (runningOnNode || true) {                
+                
+	        fd.append("jarFile", jarFile);
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "uploadTranscriber";
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);
+	        xhr.upload.addEventListener("progress", onProgress, false);
+	        
+	        xhr.open("POST", this.baseUrl + "admin/transcriber");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+
+	        var jarName = jarFile.replace(/.*\//g, "");
+                if (exports.verbose) console.log("jarName: " + jarName);
+            	fd.append(
+                    "jarFile", 
+		    fs.createReadStream(jarFile).on('error', function(){
+		        onResult(null, ["Invalid jar: " + jarFile], [], "uploadTranscriber", jarFile);
+		    }), jarName);
+                
+	        var urlParts = parseUrl(this.baseUrl + "admin/transcriber");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username && password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+                                // for this call, the result is an object with one key, whose
+                                // value is the threadId - so just return that
+			        onResult(
+                                    result[jarName], errors, messages, "uploadTranscriber", jarName);
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadTranscriber", jarName);
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
+        
+        /**
+         * Uploads an transcriber module in preparation for installing it.
+         * @param {string} jar Name of the transcriber .jar file already uploaded, as
+         * specified by the "jar" attribute of the uploadTranscriber() response. 
+         * @param {boolean} install true to install the transcriber, false to cancel the
+         * installation. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: the transcriber ID if it was installed, and null 
+         * otherwise.
+         */
+        installTranscriber(jar, install, onResult) {
+            this.createRequest(
+                "installTranscriber", null, onResult, this.baseUrl+"admin/transcriber",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    jar : jar,
+                    action : install?"install":"cancel"
+                }));
+        }
+
+        /**
+         * Uploads an transcriber module in preparation for installing it.
+         * @param {string} transcriberId ID of the transcriber to uninstall.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>.
+         */
+        uninstallTranscriber(transcriberId, onResult) {
+            this.createRequest(
+                "uninstallTranscriber", null, onResult, this.baseUrl+"admin/transcriber",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    transcriberId : transcriberId,
+                    action : "uninstall"
+                }));
+        }
+
         /**
          * Saves the store's information document.
          * @param {string} html An HTML document with information about the corpus as a whole.

@@ -27,6 +27,8 @@ import { AdminInfoComponent } from './admin-info/admin-info.component';
 import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AdminLayersComponent } from './admin-layers/admin-layers.component';
+import { AdminTranscribersComponent } from './admin-transcribers/admin-transcribers.component';
+import { AdminTranscriberComponent } from './admin-transcriber/admin-transcriber.component';
 
 @NgModule({
     declarations: [
@@ -48,7 +50,9 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
         AdminRoleUsersComponent,
         AdminUsersComponent,
         AdminChangePasswordComponent,
-        AdminLayersComponent
+        AdminLayersComponent,
+        AdminTranscribersComponent,
+        AdminTranscriberComponent
     ],
     imports: [
         BrowserModule,
@@ -86,6 +90,8 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
             { path: 'admin/annotators', component: AdminAnnotatorsComponent },
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
             { path: 'admin/info', component: AdminInfoComponent },
+            { path: 'admin/transcribers', component: AdminTranscribersComponent },
+            { path: 'admin/transcriber', component: AdminTranscriberComponent },
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)

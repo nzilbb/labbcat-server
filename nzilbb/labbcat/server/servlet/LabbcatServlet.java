@@ -596,7 +596,7 @@ public class LabbcatServlet extends HttpServlet {
     */
    public File getFilesDir() {
       return new File(getServletContext().getRealPath("files"));
-   } // end of getAnnotatorDir()
+   } // end of getFilesDir()
    
    /**
     * Returns the location of the annotators directory.
@@ -607,6 +607,16 @@ public class LabbcatServlet extends HttpServlet {
       if (!dir.exists()) dir.mkdir();
       return dir;
    } // end of getAnnotatorDir()   
+
+   /**
+    * Returns the location of the transcribers directory.
+    * @return The transcriber installation directory.
+    */
+   public File getTranscriberDir() {
+      File dir = new File(getFilesDir(), "transcribers");
+      if (!dir.exists()) dir.mkdir();
+      return dir;
+   } // end of getTranscriberDir()   
 
    private static final long serialVersionUID = 1;
 } // end of class LabbcatServlet
