@@ -244,6 +244,7 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
                
                IO.Pump(stream.getStream(), response.getOutputStream());
             } else { /// multiple files
+               response.setContentType("application/zip");
                response.addHeader("Content-Disposition", "attachment; filename=" 
                                   + IO.SafeFileNameUrl(name) + ".zip");
                
