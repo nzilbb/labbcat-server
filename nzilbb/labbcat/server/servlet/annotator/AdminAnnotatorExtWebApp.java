@@ -188,6 +188,14 @@ public class AdminAnnotatorExtWebApp extends LabbcatServlet {
             if (resource.equals("/getSchema")) {
                stream = new ByteArrayInputStream(
                   annotator.getSchema().toJson().toString().getBytes());
+            } else if (resource.equals("/util.js")) {
+              URL url = descriptor.getClass().getResource("util.js");
+              if (url != null) {
+                try {
+                  stream = url.openConnection().getInputStream();
+                  response.setContentType("text/javascript");
+                } catch(IOException exception) {}
+              }
                
             } else {            
                if (resource.indexOf('.') > 0) {

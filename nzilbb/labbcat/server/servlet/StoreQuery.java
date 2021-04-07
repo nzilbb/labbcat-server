@@ -43,7 +43,6 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
-import nzilbb.ag.stt.util.TranscriberDescriptor;
 import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.labbcat.server.db.*;
 import nzilbb.util.IO;
@@ -1401,7 +1400,7 @@ public class StoreQuery extends LabbcatServlet {
    protected JsonObject getTranscriberDescriptors(
       HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
-      TranscriberDescriptor[] descriptors = store.getTranscriberDescriptors();
+      AnnotatorDescriptor[] descriptors = store.getTranscriberDescriptors();
       return successResult(
          request, descriptors, descriptors.length == 0?"There are no transcribers.":null);
    }

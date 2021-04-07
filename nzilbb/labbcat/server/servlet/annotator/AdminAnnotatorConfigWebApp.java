@@ -247,15 +247,22 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
                         }
                      }
                   }).start();
-               
+            } else if (resource.equals("/util.js")) {
+              URL url = descriptor.getClass().getResource("util.js");
+              if (url != null) {
+                try {
+                  stream = url.openConnection().getInputStream();
+                  response.setContentType("text/javascript");
+                } catch(IOException exception) {}
+              }
             } else {            
                if (resource.indexOf('.') > 0) {
                   // requests with a dot are taken to be resources for the webapp,
                   // e.g. index.html
                   try {
-                     log("about to get config" + resource);
+                     log("about to get " + resource);
                      stream = descriptor.getResource("config"+resource);
-                     log("got config" +resource);
+                     log("got " +resource);
                   } catch(Throwable exception) {
                      log(request.getPathInfo() + " - Could not getResource: "+exception);
                   }

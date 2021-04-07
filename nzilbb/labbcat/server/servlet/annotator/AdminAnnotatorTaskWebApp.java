@@ -242,6 +242,14 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
                
                // store task parameters in DB
                store.saveAnnotatorTaskParameters(taskId, parameters);
+            } else if (resource.equals("/util.js")) {
+              URL url = descriptor.getClass().getResource("util.js");
+              if (url != null) {
+                try {
+                  stream = url.openConnection().getInputStream();
+                  response.setContentType("text/javascript");
+                } catch(IOException exception) {}
+              }
                   
             } else {            
                if (resource.indexOf('.') > 0) {
