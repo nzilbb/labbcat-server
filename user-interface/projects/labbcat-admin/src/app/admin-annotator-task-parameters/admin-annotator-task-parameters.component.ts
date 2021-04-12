@@ -37,7 +37,6 @@ export class AdminAnnotatorTaskParametersComponent implements OnInit, AfterViewI
     }
     
     onSetTaskParameters(event) {
-        console.log("admin-annotator-task-paramaters message received: " + JSON.stringify(event.data))
         if (event.data.resource == "setTaskParameters") {
             if (event.data.error) {
                 this.messageService.error(event.data.error);
