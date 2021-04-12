@@ -68,11 +68,11 @@ import org.apache.commons.fileupload.servlet.*;
  * given annotator's 'task' web-app, if there is one, and accepting a <q>setTaskParameters</q>
  * request to finalize task configuration (whether there's a 'task' web-app or not).
  * <p> If there's a 'task' web-app, the first request should be to a path structured: <br>
- * <tt>/api/admin/annotator/config/<var>annotatorId</var>/?<var>taskId</var></tt>
+ * <tt>/api/admin/annotator/task/<var>annotatorId</var>/?<var>taskId</var></tt>
  * <p> The resulting HTML document will then implement the web-app by requesting resources
  * as required.
  * <p> Once ready (or if the annotator implements no 'task' web-app) a request to <br>
- * <tt>/api/admin/annotator/config/<var>annotatorId</var>/setTaskParameters</tt>
+ * <tt>/api/admin/annotator/task/<var>annotatorId</var>/setTaskParameters</tt>
  * <br>... with the body of the request representing the task parameters, if any.
  * <p> The response to the <tt>setTaskParameters</tt> request will be an HTML document for
  * display to the user. However, no further interaction with the user is expected.
