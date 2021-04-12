@@ -842,6 +842,25 @@ public class SqlGraphStoreAdministration
          sql.executeUpdate();
          sql.close();
 
+         // delete any annotation tasks named after the layer
+         try {
+           deleteAnnotatorTask(layer.getId());
+         } catch(StoreException exception) {}
+         
+         // if there are auxiliary configurations...
+         sql = getConnection().prepareStatement(
+           "SELECT description FROM layer_auxiliary_manager WHERE layer_id = ?");
+         sql.setInt(1, layer_id);
+         ResultSet rs = sql.executeQuery();
+         while (rs.next()) {
+           // delete any annotation tasks for the auxiliary configuration
+           try {
+             deleteAnnotatorTask(layer.getId() + "-" + rs.getString(1));
+           } catch(StoreException exception) {}
+         } // next auxiliary configuration
+         rs.close();
+         sql.close();
+
          // delete any auxiliary configurations
          sql = getConnection().prepareStatement(
             "DELETE FROM layer_auxiliary_manager WHERE layer_id = ?");
