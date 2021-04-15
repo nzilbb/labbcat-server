@@ -6815,6 +6815,7 @@ public class SqlGraphStore implements GraphStore {
             // run the censor
             MediaThread thread
                = censor.start(mediaFile.getMimeType(), source, boundaries, destination);
+            thread.join();
 
          } // censorship required
 
@@ -7133,7 +7134,8 @@ public class SqlGraphStore implements GraphStore {
 
          // media
          for (MediaFile media : getAvailableMedia(graph.getId())) {
-            if (!media.getFile().delete()) {
+            if (media.getFile().exists() // it might be 'available' because it can be generated
+               && !media.getFile().delete()) {
                System.err.println("Could not delete " + media.getFile().getPath());
             }
          } // next media file
