@@ -6562,7 +6562,7 @@ public class SqlGraphStore implements GraphStore {
                extractor.setEnd(endOffset);
                try {
                   File fragment = File.createTempFile(
-                     "SqlGraphStore.saveMedia_",
+                     "SqlGraphStore.getMedia_",
                      Graph.FragmentId(id, startOffset, endOffset) + "." + IO.Extension(file));
                   fragment.deleteOnExit();
                   MediaThread thread = extractor.start(mimeType, file, mimeType, fragment);
@@ -7016,6 +7016,7 @@ public class SqlGraphStore implements GraphStore {
          HashMap<String,HashMap<String,MediaFile>> tracks
             = new HashMap<String,HashMap<String,MediaFile>>();
          for (MediaFile file : availableMedia) {
+            if (file.getGenerateFrom() != null) continue; // we don't have it yet
             if (!tracks.containsKey(file.getTrackSuffix())) {
                tracks.put(file.getTrackSuffix(), new HashMap<String,MediaFile>());
             }
