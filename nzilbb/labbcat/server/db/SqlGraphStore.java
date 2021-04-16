@@ -2580,10 +2580,16 @@ public class SqlGraphStore implements GraphStore {
       // we'll create a list of prepared queries, one for each layerId, corresponding to the
       // method for getting that layer's annotations.
       Vector<PreparedStatement> queries = new Vector<PreparedStatement>();
+      // in some cases, if the main query reqturns no results, there's an alternative query to
+      // try, e.g. for 'next segment', if the target is the last segment of the word, we can
+      // return the first segment of the next word.
+      Vector<PreparedStatement> altQueries = new Vector<PreparedStatement>();
 
       // we'll also need, for each query, a list of query parameters
       // String are literal, Integers are match group numbers
       Vector<Object[]> parameterGroups = new Vector<Object[]>();
+      // ...and parameters for altQueries
+      Vector<Object[]> altParameterGroups = new Vector<Object[]>();
 
       // track the layers too
       Vector<Layer> layers = new Vector<Layer>();
@@ -2621,6 +2627,38 @@ public class SqlGraphStore implements GraphStore {
                Object[] groups = { layer.getId(), target_annotation_id_group };
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
+               if (targetOffset != 0 // if we're looking for neighboring segments
+                   && layer.get("layer_id").equals( // and we're after the segment itself
+                     Integer.valueOf(SqlConstants.LAYER_SEGMENT))) {
+                 // and the query above doesn't return rows, it's because we hit the word boundary
+                 // but we can look into the neighboring word
+                 if (targetOffset > 0) { // following segment
+                   sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
+                     +" FROM annotation_layer_"+targetLayer.get("layer_id")+" token"
+                     +" INNER JOIN annotation_layer_0 word"
+                     +" ON token.word_annotation_id = word.annotation_id"
+                     +" INNER JOIN annotation_layer_0 next_word"
+                     +" ON next_word.turn_annotation_id = word.turn_annotation_id"
+                     +" AND next_word.ordinal_in_turn = word.ordinal_in_turn + 1"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
+                     +" ON next_word.word_annotation_id = target.word_annotation_id"
+                     +" AND target.ordinal_in_word = "+targetOffset
+                     +" INNER JOIN annotation_layer_"+layer_id+" annotation"
+                     +" ON annotation.segment_annotation_id = target.annotation_id"
+                     +" WHERE token.annotation_id = ?"
+                     +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                     +" LIMIT 0, " + annotationsPerLayer;
+                   Object[] altGroups = { layer.getId(), target_annotation_id_group };
+                   altQueries.add(getConnection().prepareStatement(sql));
+                   altParameterGroups.add(altGroups);
+                 } else { // prior segment
+                   altQueries.add(null); // TODO
+                   altParameterGroups.add(null);
+                 }
+               } else {
+                 altQueries.add(null); // there is no alternative query
+                 altParameterGroups.add(null);
+               }
             } else if (targetLayer.containsKey("layer_id") // target is segment
                      && targetLayer.get("layer_id").equals(
                         Integer.valueOf(SqlConstants.LAYER_SEGMENT))
@@ -2682,6 +2720,8 @@ public class SqlGraphStore implements GraphStore {
                Object[] groups = { layer.getId(), target_annotation_id_group };
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
+               altQueries.add(null); // there is no alternative query
+               altParameterGroups.add(null);
             } else if (layer.equals(schema.getRoot())) { // graph itself
                if (ag_id_group != null) { // the MatchId includes to ag_id
                   String sql = "SELECT graph.transcript_id AS label,"
@@ -2695,6 +2735,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), ag_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } else { // the MatchId doesn't include to ag_id
                   // get the ag_id from the target
                   String sql = "SELECT graph.transcript_id AS label,"
@@ -2710,6 +2752,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } // the MatchId doesn't include to ag_id
             } else if (layer.isAncestor(schema.getWordLayerId())
                      || layer.getId().equals(schema.getWordLayerId())) { // the transcript layer itself
@@ -2737,6 +2781,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                }  else if (targetLayer.isAncestor(schema.getWordLayerId())) { // word layer
                   // target table has word_annotation_id field
                   String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
@@ -2763,10 +2809,14 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } else { // can't process this layer
                   queries.add(null);
                   Object[] reason = { "Could get " + layer + " for targets from " + targetLayer };
                   parameterGroups.add(reason);
+                  altQueries.add(null);
+                  altParameterGroups.add(null);
                }
             } else if ("transcript".equals(layer.get("class_id"))) { // transcript attribute
                if (ag_id_group != null) { // the MatchId includes to ag_id
@@ -2784,6 +2834,8 @@ public class SqlGraphStore implements GraphStore {
                      layer.getId(), ag_id_group, layer.get("attribute") };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                }  else { // the MatchId doesn't include to ag_id
                   // get the ag_id from the target
                   String sql = "SELECT DISTINCT annotation.annotation_id, annotation.ag_id,"
@@ -2802,6 +2854,8 @@ public class SqlGraphStore implements GraphStore {
                      layer.getId(), target_annotation_id_group, layer.get("attribute") };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } // the MatchId doesn't include to ag_id
             }  else if ("speaker".equals(layer.get("class_id"))) { // participant attribute
                if (participant_speaker_number_group != null) {
@@ -2820,6 +2874,8 @@ public class SqlGraphStore implements GraphStore {
                      layer.getId(), participant_speaker_number_group, layer.get("attribute") };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                }  else { // the MatchId doesn't include the speaker number
                   // use the turn label to get the speaker of the token instead
                   String sql = "SELECT DISTINCT"
@@ -2841,6 +2897,8 @@ public class SqlGraphStore implements GraphStore {
                      layer.getId(), layer.get("attribute"), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } // the MatchId doesn't include the speaker number
             }  else if (layer.getId().equals(schema.getParticipantLayerId())) { // participant
                if (participant_speaker_number_group != null) { // the MatchId includes the speaker number
@@ -2856,6 +2914,8 @@ public class SqlGraphStore implements GraphStore {
                      layer.getId(), participant_speaker_number_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } else { // the MatchId doesn't include the speaker number
                   // use the turn label to get the speaker of the token instead
                   String sql  = "SELECT annotation.speaker_number AS annotation_id,"
@@ -2875,6 +2935,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = {layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } // the MatchId doesn't include the speaker number
             } else if (layer.getId().equals(schema.getCorpusLayerId())) { // corpus
                if (ag_id_group != null) { // the MatchId includes to ag_id
@@ -2890,6 +2952,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), ag_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } else { // the MatchId doesn't include to ag_id
                   // get the ag_id from the target
                   String sql = "SELECT graph.corpus_name AS label,"
@@ -2906,6 +2970,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } // the MatchId doesn't include to ag_id
             } else if (layer.getId().equals(schema.getEpisodeLayerId())) { // episode
                if (ag_id_group != null) { // the MatchId includes to ag_id
@@ -2921,6 +2987,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), ag_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } else { // the MatchId doesn't include to ag_id
                   // get the ag_id from the target
                   String sql = "SELECT e.name AS label,"
@@ -2937,6 +3005,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } // the MatchId doesn't include to ag_id
             }  else if (layer.getId().equals(schema.getTurnLayerId())) { // turn
                Integer layer_id = (Integer)layer.get("layer_id");
@@ -2960,10 +3030,14 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                }  else { // can't process this layer
                   queries.add(null);
                   Object[] reason = { "Could get " + layer + " for targets from " + targetLayer };
                   parameterGroups.add(reason);
+                  altQueries.add(null);
+                  altParameterGroups.add(null);
                }
             } else if (layer.getId().equals(schema.getUtteranceLayerId())) { // utterance
                Integer layer_id = (Integer)layer.get("layer_id");
@@ -3045,10 +3119,14 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } else { // can't process this layer
                   queries.add(null);
                   Object[] reason = { "Could get " + layer + " for targets from " + targetLayer };
                   parameterGroups.add(reason);
+                  altQueries.add(null);
+                  altParameterGroups.add(null);
                }
             } // utterance
             else if (layer.getParentId() != null
@@ -3121,10 +3199,14 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } else { // can't process this layer
                   queries.add(null);
                   Object[] reason = { "Could get " + layer + " for targets from " + targetLayer };
                   parameterGroups.add(reason);
+                  altQueries.add(null);
+                  altParameterGroups.add(null);
                }
             }  else if ((layer.getParentId() == null
                       || layer.getParentId().equals(schema.getRoot().getId()))
@@ -3195,6 +3277,8 @@ public class SqlGraphStore implements GraphStore {
                Object[] groups = { layer.getId(), target_annotation_id_group };
                queries.add(getConnection().prepareStatement(sql));
                parameterGroups.add(groups);
+               altQueries.add(null); // there is no alternative query
+               altParameterGroups.add(null);
             } else if (layer.getId().equals("transcript_type")) { // TODO one day this will be a vanilla transcript attribute 
                // transcript type
                if (ag_id_group != null) { // the MatchId includes to ag_id
@@ -3210,6 +3294,8 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), ag_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } else { // the MatchId doesn't include to ag_id
                   // get the ag_id from the target
                   String sql = "SELECT transcript_type.transcript_type AS label,"
@@ -3226,11 +3312,15 @@ public class SqlGraphStore implements GraphStore {
                   Object[] groups = { layer.getId(), target_annotation_id_group };
                   queries.add(getConnection().prepareStatement(sql));
                   parameterGroups.add(groups);
+                  altQueries.add(null); // there is no alternative query
+                  altParameterGroups.add(null);
                } // the MatchId doesn't include to ag_id
             } else { // can't process this layer
                queries.add(null);
                Object[] reason = { "Could not process layer: " + layer };
                parameterGroups.add(reason);
+               altQueries.add(null);
+               altParameterGroups.add(null);
             }
 
          } // next layer
@@ -3267,7 +3357,7 @@ public class SqlGraphStore implements GraphStore {
                } // layer/sql missing
                
                try {
-                  // set request parameters
+                  // set query parameters
                   int p = 1;
                   for (Object parameter : parameters) {
                      String value = parameter.toString();
@@ -3279,10 +3369,35 @@ public class SqlGraphStore implements GraphStore {
                   
                   // run query
                   ResultSet rs = sql.executeQuery();
+                  boolean matched = false;
                   while (rs.next()) { // there won't be more than annotationsPerLayer results
-                     annotations[a++] = annotationFromResult(rs, layer, null);
+                    matched = true;
+                    annotations[a++] = annotationFromResult(rs, layer, null);
                   }
                   rs.close();
+                  if (!matched) { // no results from query
+                    // is there an alternative query?
+                    sql = altQueries.elementAt(l);
+                    parameters = altParameterGroups.elementAt(l);
+                    if (sql != null) {
+                      // set query parameters
+                      p = 1;
+                      for (Object parameter : parameters) {
+                        String value = parameter.toString();
+                        if (parameter instanceof Integer) {
+                          value = idMatcher.group((Integer)parameter);
+                        }
+                        sql.setString(p++, value);
+                      } // next parameter
+                      
+                      // run alternative query
+                      rs = sql.executeQuery();
+                      while (rs.next()) {
+                        annotations[a++] = annotationFromResult(rs, layer, null);
+                      }
+                      rs.close();
+                    } // there is an alternative query
+                  } // no matches for query
                } catch (SQLException sqlX) {
                   System.err.println("Query error for layer: " + layerIds[l] + ": " + sqlX);
                   if (firstRow) { // give feedback about the failure reason (once) 
@@ -3300,7 +3415,12 @@ public class SqlGraphStore implements GraphStore {
       } while (matchId != null);
 
       // close all the statements we prepared
-      for (PreparedStatement sql : queries) try { sql.close(); } catch(SQLException x) {}
+      for (PreparedStatement sql : queries) {
+        try { if (sql != null) sql.close(); } catch(SQLException x) {}
+      }
+      for (PreparedStatement sql : altQueries) {
+        try { if (sql != null) sql.close(); } catch(SQLException x) {}
+      }
        
    } // getMatchAnnotations
    
