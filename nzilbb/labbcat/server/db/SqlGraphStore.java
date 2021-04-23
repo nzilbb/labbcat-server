@@ -2635,24 +2635,50 @@ public class SqlGraphStore implements GraphStore {
                  if (targetOffset > 0) { // following segment
                    sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
                      +" FROM annotation_layer_"+targetLayer.get("layer_id")+" token"
+                     // word = the matching segment's word
                      +" INNER JOIN annotation_layer_0 word"
                      +" ON token.word_annotation_id = word.annotation_id"
+                     // next_word = the word after that in the same turn
                      +" INNER JOIN annotation_layer_0 next_word"
                      +" ON next_word.turn_annotation_id = word.turn_annotation_id"
+                     // next word in the turn
                      +" AND next_word.ordinal_in_turn = word.ordinal_in_turn + 1"
-                     +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
-                     +" ON next_word.word_annotation_id = target.word_annotation_id"
-                     +" AND target.ordinal_in_word = "+targetOffset
-                     +" INNER JOIN annotation_layer_"+layer_id+" annotation"
-                     +" ON annotation.segment_annotation_id = target.annotation_id"
+                     // annotation = the segment in next_word that we're going to return
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" annotation"
+                     +" ON next_word.word_annotation_id = annotation.word_annotation_id"
+                     // segment.ordinal is the annotation offset
+                     // (if targetOffset > next_word.all("segment").length,
+                     //  i.e. if there are fewer segments in the next word than targetOffset,
+                     // then we get no result, but that's ok, because currently targetOffset
+                     // is only ever 1)
+                     +" AND annotation.ordinal_in_word = "+targetOffset
                      +" WHERE token.annotation_id = ?"
                      +" ORDER BY annotation.ordinal, annotation.annotation_id"
                      +" LIMIT 0, " + annotationsPerLayer;
                    Object[] altGroups = { layer.getId(), target_annotation_id_group };
                    altQueries.add(getConnection().prepareStatement(sql));
                    altParameterGroups.add(altGroups);
-                 } else { // prior segment
-                   altQueries.add(null); // TODO
+                 } else if (targetOffset == -1) { // immediately prior segment
+                   sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
+                     +" FROM annotation_layer_"+targetLayer.get("layer_id")+" token"
+                     +" INNER JOIN annotation_layer_0 word"
+                     +" ON token.word_annotation_id = word.annotation_id"
+                     +" INNER JOIN annotation_layer_0 next_word"
+                     +" ON next_word.turn_annotation_id = word.turn_annotation_id"
+                     // previous word in the turn
+                     +" AND next_word.ordinal_in_turn = word.ordinal_in_turn - 1"
+                     +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" annotation"
+                     +" ON next_word.word_annotation_id = annotation.word_annotation_id"
+                    +" WHERE token.annotation_id = ?"
+                     // list segments in reverse order
+                     +" ORDER BY annotation.ordinal DESC, annotation.annotation_id"
+                     // and take the first one - i.e. the last segment of the previous word
+                     +" LIMIT 1"; // segment.peers == false, so there's only one
+                   Object[] altGroups = { layer.getId(), target_annotation_id_group };
+                   altQueries.add(getConnection().prepareStatement(sql));
+                   altParameterGroups.add(altGroups);
+                 } else { // more distant previous segment TODO
+                   altQueries.add(null);
                    altParameterGroups.add(null);
                  }
                } else {
