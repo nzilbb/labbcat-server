@@ -1,0 +1,154 @@
+.header {
+    font-weight: bold;
+}
+.small-number {
+    width: 60px;
+}
+.hz {
+    width: 60px;
+}
+.regex {
+    width: 150px;
+}
+.unhidden-panel {
+    border: 1px solid silver;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#samplePoints {
+    text-align: center;
+}
+/* Praat custom script styles */
+#customScript {
+    width: 100%;
+    min-height: 300px;
+}
+.praat-prelude, .praat-postlude, #customScript {
+    font-size: 10pt;
+}
+.praat-comment {
+    color: green;
+}
+.praat-line-disabled {
+    color: green;
+}
+.praat-line-disabled:before {
+    content: '#';
+}
+#load-controls div {
+    display: inline-block;
+}
+
+.item > .viz {
+    display: none;
+}
+frameset {
+    width: 90%;
+}
+label[for=formantDifferentiateParticipants] {
+    padding-right: 1ch;
+}
+label[for=formantOtherPattern] {
+    padding-left: 1ch;
+    padding-right: 1ch;
+}
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    .item > * {
+        width: 25%;
+        display: inline-block;
+    }
+    .item > .viz {
+        width: 35%;
+        background-image: url('/assets/sine.svg');
+        background-size: auto 100%;
+        display: inline-table;
+        padding: 0px;
+        margin: 0px;
+        height: 15px;
+    }
+    .item > .script {
+        width: 50%;
+    }
+    .item > .long {
+        width: 70%;
+        display: inline-block;
+    }
+    .script input {
+        width: 100%;
+    }
+    .viz > div {
+        display: table-cell;
+        white-space: nowrap;
+        padding: 0px;
+        margin: 0px;
+    }
+    .viz .before {
+        width: 10%;    
+    }
+    .viz .before-context {
+        width: 20%;
+    }
+    .viz .segment {
+        width: 40%;
+        background-color: rgba(150,163,57,0.2);
+    }
+    .viz .after-context {
+        width: 20%;
+    }
+    .viz .after {
+        width: 10%;
+    }
+    
+    .r { float: right; white-space: nowrap; }
+    .l { float: left; white-space: nowrap; }
+    
+    .viz .before {
+        background: linear-gradient(to right, rgba(255, 255, 255,1), transparent);
+    }
+    .viz .after {
+        background: linear-gradient(to left, rgba(255, 255, 255,1), transparent);
+    }
+    .viz .before-context, .viz .after-context {
+        background-color: rgba(200,200,200,0.3);
+    }
+    #start-time .segment {
+        border-left: solid black 1px;
+        background: linear-gradient(to right, rgba(150,163,57,1), rgba(200,200,200,0.3));
+    }
+    #end-time .segment {
+        border-right: solid black 1px;
+        background: linear-gradient(to left, rgba(150,163,57,1), rgba(200,200,200,0.3));
+    }
+    #window-offset .before-context, #window-offset .after-context {
+        border-left: solid black 1px;
+        border-right: solid black 1px;
+        background-color: rgba(200,200,200,0.7);
+        text-align: center;
+        font-size: 9pt;
+    }
+    #advanced-formants .segment {
+        /* positioned so that sample-point is relative to this */
+        position: relative; 
+        left: 0px;
+    }
+    #advanced-formants .sample-point {
+        /* each sample point has its left position set to a percentage */
+        position: absolute;
+        font-weight: bold;
+    }
+    #advanced-formants .sample-point span {
+        /* we want the centre of the arrow lining up with the percentage, 
+           so shift it left a little */
+        position: relative;
+        left: -0.5ch;
+    }
+    .item input, .item select {
+        /* ensure that, on narrow windows, the visualization doesn't obscure any controls */
+        position: relative;
+        z-index: 2;
+    }
+}

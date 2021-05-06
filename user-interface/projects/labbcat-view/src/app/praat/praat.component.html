@@ -1,0 +1,415 @@
+<h1 i18n>Process with Praat</h1>
+
+<div id="file-chooser">
+  <label for="csv" i18n>Results File</label>
+  <input type="file" id="csv" (change)="selectFile($event.target.files)" autofocus>
+  <span *ngIf="rowCount" i18n>{{rowCount}} rows</span>
+</div>
+
+<div id="settings-form" *ngIf="headers">
+  <div class="header" i18n="CSV column selector">Columns</div>
+  <div class="item" id="transcript"
+       i18n-title title="Which field identifies the name of the transcript">
+    <label for="transcriptColumn" i18n>Transcript Name column</label>
+    <span>
+      <select id="transcriptColumn" [(ngModel)]="transcriptColumn">
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+  </div>
+  <div class="item" id="participant"
+       i18n-title title="Which field identifies the name of the participant speaking">
+    <label for="participantColumn" i18n>Participant column</label>
+    <span>
+      <select id="participantColumn" [(ngModel)]="participantColumn">
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+  </div>
+  <div class="item" id="start-time"
+       i18n-title title="Which field identifies the start time of the phone">
+    <label for="startTimeColumn" i18n>Start Time column</label>
+    <span>
+      <select id="startTimeColumn" [(ngModel)]="startTimeColumn">
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+    <div class="viz">
+      <div class="before">&nbsp;</div>
+      <div class="before-context">&nbsp;</div>
+      <div class="segment"><div class="l">→</div></div>
+      <div class="after-context">&nbsp;</div>
+      <div class="after">&nbsp;</div>
+    </div>
+  </div>
+  <div class="item" id="end-time"
+       i18n-title title="Which field identifies the end time of the phone">
+    <label for="endTimeColumn" i18n>End Time column</label>
+    <span>
+      <select id="endTimeColumn" [(ngModel)]="endTimeColumn">
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+    <div class="viz">
+      <div class="before">&nbsp;</div>
+      <div class="before-context">&nbsp;</div>
+      <div class="segment"><span class="r">→</span></div>
+      <div class="after-context">&nbsp;</div>
+      <div class="after">&nbsp;</div>
+    </div>
+  </div>
+  
+  <div class="header" i18n>Praat Processing</div>
+  
+  <div class="item" id="window-offset"
+       i18n-title title="How much context, in seconds, to extract from the audio surrounding the segment">
+    <label for="windowOffset" i18n>Context</label>
+    <span>
+      ±<input id="windowOffset"
+              [(ngModel)]="windowOffset"
+              class="small-number"
+              type="number" min="0" step="0.001">s
+    </span>
+    <div class="viz">
+      <div class="before">&nbsp;</div>
+      <div class="before-context"><span class="l">←</span><span class="r">→</span>{{windowOffset}}s</div>
+      <div class="segment">&nbsp;</div>
+      <div class="after-context"><span class="l">←</span><span class="r">→</span>{{windowOffset}}s</div>
+      <div class="after">&nbsp;</div>
+    </div>
+  </div>
+  
+  <div class="item" id="formants"
+       i18n-title title="Whether to extract formant measures">
+    <label>
+      <lib-button (press)="showAdvancedFormantSettings = !showAdvancedFormantSettings"
+                  img="down-triangle.png" icon="▼"
+                  i18n-title title="Show advanced options"
+                  ></lib-button>
+      &nbsp;<span i18n>Formants</span>
+    </label>
+    <span>
+      <input id="extractF1" [(ngModel)]="extractF1" type="checkbox"
+             i18n-title title="Whether to extract the first formant">
+      <label for="extractF1"
+             i18n-title title="Whether to extract the first formant" i18n="Formant">F1</label>
+      <input id="extractF2" [(ngModel)]="extractF2" type="checkbox"
+             i18n-title title="Whether to extract the second formant">
+      <label for="extractF2"
+             i18n-title title="Whether to extract the second formant" i18n="Formant">F2</label>
+      <input id="extractF3" [(ngModel)]="extractF3" type="checkbox"
+             i18n-title title="Whether to extract the third formant">
+      <label for="extractF3" 
+             i18n-title title="Whether to extract the third formant" i18n="Formant">F3</label>
+    </span>    
+  </div>
+  <div class="{{showAdvancedFormantSettings?'unhidden-panel':'hidden-panel'}}"
+       id="advanced-formants">
+    <div class="item"
+         i18n-title title="Command Praat will use to extract formants">
+      <label for="scriptFormant" i18n>Praat Formant command</label>
+      <span class="script"><input id="scriptFormant" [(ngModel)]="scriptFormant" type="text"></span>
+    </div>
+    <div class="item"
+         i18n-title title="At which points in the duration of the segment at which to take measurements">
+      <label for="samplePoints" i18n>Sample Points</label>
+      <span><input id="samplePoints" [(ngModel)]="samplePoints" type="text"></span>
+      <div class="viz">
+        <div class="before">&nbsp;</div>
+        <div class="before-context">&nbsp;</div>
+        <div class="segment">
+          <ng-container *ngFor="let p of samplePoints.split(' ')">
+            <span class="sample-point" style="left: {{p*100}}%"><span>↑</span></span>
+          </ng-container>
+        </div>
+        <div class="after-context">&nbsp;</div>
+        <div class="after">&nbsp;</div>
+      </div>
+    </div>
+    <div class="item"
+         i18n-title title="Formant ceiling - subsituted for {max_formant} in the Praat command">
+      <label for="formantCeilingDefault" i18n>Formant Ceiling</label>
+      <span class="long">
+        <input id="formantCeilingDefault"
+               [(ngModel)]="formantCeilingDefault"
+               class="hz"
+               type="number" min="0" step="1">
+      </span>
+    </div>
+    <fieldset class="alternatives">
+      <legend>
+        <input id="formantDifferentiateParticipants" type="checkbox"
+               [(ngModel)]="formantDifferentiateParticipants">
+        <label for="formantDifferentiateParticipants" i18n>Except participants whose</label>
+        <select id="formantDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
+                i18n-title title="Attribute for differentiating participants"
+                [disabled]="!formantDifferentiateParticipants">
+          <option value="" i18n="No gender attribute selected">[none]</option>
+          <ng-container *ngFor="let layer of participantAttributeLayers">
+            <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
+        </select>
+      </legend>
+      <fieldset *ngFor="let pattern of formantOtherPattern; let o = index; trackBy: trackByFn">
+        <legend>
+          <label><span i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
+            <input [(ngModel)]="formantOtherPattern[o]"
+                   class="regex"
+                   type="text"
+                   i18n-title title="Regular expression to match against the layer above"
+                   i18n-placeholder placeholder="Regular Expression"
+                   [disabled]="!formantDifferentiateParticipants">
+          </label>
+        </legend>
+        <div class="item"
+             i18n-title title="Maximum formant value - subsituted for {max_formant} in the Praat command">
+          <label for="{{'formantCeilingOther'+o}}" i18n>Formant Ceiling</label>
+          <span class="long">
+            <input id="{{'formantCeilingOther'+o}}"
+                   [(ngModel)]="formantCeilingOther[o]"
+                   class="hz"
+                   type="number" min="0" step="1"
+                   i18n-placeholder placeholder="Hertz"
+                   [disabled]="!formantDifferentiateParticipants">        
+          </span>
+        </div>
+      </fieldset>
+      <lib-button (press)="formantAddOther()"
+                  img="add.svg" icon="+"
+                  i18n-title title="Add alternative settings"
+                  ></lib-button>
+      <lib-button *ngIf="formantOtherPattern.length > 1"
+                  (press)="formantRemoveOther()"
+                  img="remove.svg" icon="-"
+                  i18n-title title="Remove alternative settings"
+                  ></lib-button>
+    </fieldset>
+  </div>
+
+  <div class="item" id="pitch"
+       i18n-title title="Whether to extract F0 (pitch) measures">
+    <label>
+      <lib-button (press)="showAdvancedPitchSettings = !showAdvancedPitchSettings"
+                  img="down-triangle.png" icon="▼"
+                  i18n-title title="Show advanced options"
+                  ></lib-button>
+      &nbsp;<span i18n>Pitch</span>
+    </label>
+    <span class="long">
+      <input id="extractMinimumPitch" [(ngModel)]="extractMinimumPitch" type="checkbox">
+      <label for="extractMinimumPitch" i18n="Minimum pitch">Minimum</label>
+      <input id="extractMeanPitch" [(ngModel)]="extractMeanPitch" type="checkbox">
+      <label for="extractMeanPitch" i18n="Mean pitch">Mean</label>
+      <input id="extractMaximumPitch" [(ngModel)]="extractMaximumPitch" type="checkbox">
+      <label for="extractMaximumPitch" i18n="Maximum pitch">Maximum</label>
+    </span>    
+  </div>
+  <div class="{{showAdvancedPitchSettings?'unhidden-panel':'hidden-panel'}}"
+       id="advanced-pitch">
+    <div class="item"
+         i18n-title title="Command Praat will use to extract pitch">
+      <label for="scriptPitch" i18n>Praat Pitch command</label>
+      <span class="script"><input id="scriptPitch" [(ngModel)]="scriptPitch" type="text"></span>
+    </div>
+    <div class="item"
+         i18n-title title="Pitch floor - subsituted for {pitch_floor} in the Praat command">
+      <label for="pitchFloorDefault" i18n>Pitch Floor</label>
+      <span class="long">
+        <input id="pitchFloorDefault"
+               [(ngModel)]="pitchFloorDefault"
+               class="hz"
+               type="number" min="0" step="1">
+      </span>
+    </div>
+    <div class="item"
+         i18n-title title="Pitch ceiling - subsituted for {pitch_ceiling} in the Praat command">
+      <label for="pitchCeilingDefault" i18n>Pitch Ceiling</label>
+      <span class="long">
+        <input id="pitchCeilingDefault"
+               [(ngModel)]="pitchCeilingDefault"
+               class="hz"
+               type="number" min="0" step="1">
+      </span>
+    </div>
+    <div class="item"
+         i18n-title title="Voicing Threshold - subsituted for {voicing_threshold} in the Praat command">
+      <label for="voicingThresholdDefault" i18n>Voicing Threshold</label>
+      <span class="long">
+        <input id="voicingThresholdDefault"
+               [(ngModel)]="voicingThresholdDefault"
+               class="small-number"
+               type="number" min="0" step="0.01">
+      </span>
+    </div>
+    <fieldset class="alternatives">
+      <legend>
+        <input id="pitchDifferentiateParticipants" type="checkbox"
+               [(ngModel)]="pitchDifferentiateParticipants">
+        <label for="pitchDifferentiateParticipants" i18n>Except participants whose</label>
+        <select id="pitchDifferentiationLayerId" [(ngModel)]="pitchDifferentiationLayerId"
+                i18n-title title="Attribute for differentiating participants"
+                [disabled]="!pitchDifferentiateParticipants">
+          <option value="" i18n="No gender attribute selected">[none]</option>
+          <ng-container *ngFor="let layer of participantAttributeLayers">
+            <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
+        </select>
+      </legend>
+      <fieldset *ngFor="let pattern of pitchOtherPattern; let o = index; trackBy: trackByFn">
+        <legend>
+          <label><span i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
+            <input [(ngModel)]="pitchOtherPattern[o]"
+                   class="regex"
+                   type="text"
+                   i18n-title title="Regular expression to match against the layer above"
+                   i18n-placeholder placeholder="Regular Expression"
+                   [disabled]="!pitchDifferentiateParticipants">
+          </label>
+        </legend>
+        <div class="item"
+             i18n-title title="Pitch floor - subsituted for {pitch_floor} in the Praat command">
+          <label for="{{'pitchFloorOther'+o}}" i18n>Pitch Floor</label>
+          <span class="long">
+            <input id="{{'pitchFloorOther'+o}}"
+                   [(ngModel)]="pitchFloorOther[o]"
+                   class="hz"
+                   type="number" min="0" step="1"
+                   [disabled]="!pitchDifferentiateParticipants">
+          </span>
+        </div>
+        <div class="item"
+             i18n-title title="Pitch ceiling - subsituted for {pitch_ceiling} in the Praat command">
+          <label for="{{'pitchCeilingOther'+o}}" i18n>Pitch Ceiling</label>
+          <span class="long">
+            <input id="{{'pitchCeilingOther'+o}}"
+                   [(ngModel)]="pitchCeilingOther[o]"
+                   class="hz"
+                   type="number" min="0" step="1"
+                   [disabled]="!pitchDifferentiateParticipants">
+          </span>
+        </div>
+        <div class="item"
+             i18n-title title="Voicing Threshold - subsituted for {voicing_threshold} in the Praat command">
+          <label for="{{'voicingThresholdOther'+o}}" i18n>Voicing Threshold</label>
+          <span class="long">
+            <input id="{{'voicingThresholdOther'+o}}"
+                   [(ngModel)]="voicingThresholdOther[o]"
+                   class="small-number"
+                   type="number" min="0" step="0.01"
+                   [disabled]="!pitchDifferentiateParticipants">
+          </span>
+        </div>
+      </fieldset>
+      <lib-button (press)="pitchAddOther()"
+                  img="add.svg" icon="+"
+                  i18n-title title="Add alternative settings"
+                  ></lib-button>
+      <lib-button *ngIf="pitchOtherPattern.length > 1"
+                  (press)="pitchRemoveOther()"
+                  img="remove.svg" icon="-"
+                  i18n-title title="Remove alternative settings"
+                  ></lib-button>
+    </fieldset>
+  </div>
+  <div class="item" id="intensity"
+       i18n-title title="Whether to extract intensity measures">
+    <label>
+      <lib-button (press)="showAdvancedIntensitySettings = !showAdvancedIntensitySettings"
+                  img="down-triangle.png" icon="▼"
+                  i18n-title title="Show advanced options"
+                  ></lib-button>
+      &nbsp;<span i18n>Intensity</span>
+    </label>
+    <span>
+      <input id="extractMaximumIntensity" [(ngModel)]="extractMaximumIntensity" type="checkbox">
+      <label for="extractMaximumIntensity" i18n="Maximum intensity">Maximum</label>
+    </span>    
+  </div>
+  <div class="{{showAdvancedIntensitySettings?'unhidden-panel':'hidden-panel'}}"
+       id="advanced-intensity">
+    <div class="item"
+         i18n-title title="Command Praat will use to extract intensity">
+      <label for="scriptIntensity" i18n>Praat Intensity command</label>
+      <span class="script"><input id="scriptIntensity" [(ngModel)]="scriptIntensity" type="text"></span>
+    </div>
+  </div>
+
+  <div class="item" id="cog"
+       i18n-title title="Whether to extract centre of gravity (COG) measures">
+    <label i18n>Centre of Gravity</label>
+    <span>
+      <input id="extractCOG2" [(ngModel)]="extractCOG2" type="checkbox">
+      <label for="extractCOG2" i18n="Centre of gravity (COG)">p=2</label>
+      <input id="extractCOG1" [(ngModel)]="extractCOG1" type="checkbox">
+      <label for="extractCOG1" i18n="Centre of gravity (COG)">p=1</label>
+      <input id="extractCOG23" [(ngModel)]="extractCOG23" type="checkbox">
+      <label for="extractCOG23" i18n="Centre of gravity (COG)">p=⅔</label>
+    </span>    
+  </div>
+  
+  <div class="item" id="custom"
+       i18n-title title="Write your own Praat script to execute for each segment">
+    <label>
+      <lib-button (press)="showCustomScript = !showCustomScript"
+                  img="down-triangle.png" icon="▼"
+                  i18n-title title="Show custom Praat script"
+                  ></lib-button>
+      &nbsp;<span i18n>Custom Praat Script</span>
+    </label>
+  </div>
+  <div class="{{showCustomScript?'unhidden-panel':'hidden-panel'}}"
+       id="show-script">
+    <div id="load-controls">
+      <label for="load-local-script" i18n>Load script from file</label>
+      <input type="file" id="load-local-script" 
+	     (change)="loadScript($event.target.files)"
+	     i18n title="Praat Script File"/>
+    </div>	      
+    <pre class="praat-prelude"><span class="praat-comment"># LaBB-CAT prefixes this script with code to open a sound file and extract a defined part
+# of it into a Sound object which is then selected.
+# LaBB-CAT 'Remove's this Sound object after the script finishes executing; any other objects
+# created by the script must be 'Remove'd before the end of the script (otherwise Praat runs out
+# of memory during very large batches)
+#
+# LaBB-CAT assumes that all calls to the function 'print' correspond to fields for export
+# and each field must be printed on its own line.
+# 
+# Variables that can be assumed in the context of the script are:</span>
+windowOffset = &hellip; <span class="praat-comment"># the value used for the Window Offset; how much context to include</span>
+windowAbsoluteStart = &hellip; <span class="praat-comment"># the start time of the window extracted relative to the start of the original audio file</span>
+windowAbsoluteEnd = &hellip; <span class="praat-comment"># the end time of the window extracted relative to the start of the original audio file</span>
+windowDuration = &hellip; <span class="praat-comment"># the duration of the window extracted (including window offset)</span>
+targetAbsoluteStart = &hellip; <span class="praat-comment"># the start time of the target interval relative to the start of the original audio file</span>
+targetAbsoluteEnd = &hellip; <span class="praat-comment"># the end time of the target interval relative to the start of the original audio file</span>
+targetStart = &hellip; <span class="praat-comment"># the start time of the target interval relative to the start of the window extracted</span>
+targetEnd = &hellip; <span class="praat-comment"># the end time of the target interval relative to the start of the window extracted</span>
+targetDuration = &hellip; <span class="praat-comment"># the duration of the target interval</span>
+sampleNumber = &hellip; <span class="praat-comment"># the number of the sample within the set of samples being processed</span>
+sampleName$ = &hellip; <span class="praat-comment"># the name of the extracted/selected Sound object</span>
+select Sound sampleName$
+<ng-container *ngFor="let layer of participantAttributeLayers">
+<span id="{{'line_'+layer.id}}"
+      class="{{customScriptLayers.includes(layer.id)?'praat-line-enabled':'praat-line-disabled'}}"
+      i18n-title title="Tick to make attribute accessible to the script"
+      ><input type="checkbox" (click)="toggleCustomScriptLayer(layer.id)"
+              >{{layer.id}}$ = "&hellip;"</span> <span class="praat-comment"># {{layer.id}} - {{layer.description}} ({{layer.category}})</span></ng-container>
+</pre>
+    <textarea [(ngModel)]="customScript"
+              id="customScript"
+              i18n-placeholder placeholder="Your Praat script code goes here"
+              i18n-title title="Your Praat script code"></textarea>
+    <pre class="praat-postlude"><span class="praat-comment">## Don't forget to Remove any objects you created!
+# Finally, LaBB-CAT will remove the sample sound object</span>
+select Sound sampleName$
+Remove</pre>
+    <div id="save-controls">
+      <lib-button (press)="saveScript()"
+                  img="download.svg" icon="💾"
+                  i18n-label label="Save script to file"
+                  i18n-title title="Save script to file">
+      </lib-button>
+    </div>
+  </div>
+</div>
