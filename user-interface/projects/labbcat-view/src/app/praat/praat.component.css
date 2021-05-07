@@ -8,18 +8,21 @@
     width: 60px;
 }
 .regex {
-    width: 150px;
+    width: 50px;
 }
 .unhidden-panel {
     border: 1px solid silver;
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
     border-bottom-left-radius: 8px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px;
 }
 #samplePoints {
     text-align: center;
+}
+.settings-sets, .alternatives {
+    display: flex;
+    flex-direction: column;
 }
 /* Praat custom script styles */
 #customScript {
@@ -45,8 +48,8 @@
 .item > .viz {
     display: none;
 }
-frameset {
-    width: 90%;
+fieldset {
+    border: 1px solid silver;
 }
 label[for=formantDifferentiateParticipants] {
     padding-right: 1ch;
@@ -55,6 +58,15 @@ label[for=formantOtherPattern] {
     padding-left: 1ch;
     padding-right: 1ch;
 }
+.settings-set .item > * {
+    width: 50%;
+    display: inline-block;
+}
+.settings-set.other .item > * {
+    width: 50%;
+    display: inline-block;
+}
+
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
     .item > * {
@@ -150,5 +162,43 @@ label[for=formantOtherPattern] {
         /* ensure that, on narrow windows, the visualization doesn't obscure any controls */
         position: relative;
         z-index: 2;
+    }
+    .settings-sets, .alternatives {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+        padding-bottom: 4px;
+    }
+    .settings-sets {
+        width: 100%;
+    }
+    .alternatives legend, .settings-set legend label {
+        white-space: nowrap;
+    }
+    .settings-set.other > .item > label {
+        display: none;
+    }
+    .settings-sets { /* this is relative so that .except can be positioned relative to it */
+        position: relative;
+    }
+    .except { /* move up above the first other setting */
+        position: absolute;
+        top: 0.5em;
+        left: 25%;
+    }
+    .alternatives {
+        width: 77%;
+    }
+    .settings-set.default {
+        width: 23%;
+        min-width: 250px;
+        padding-bottom: 15px;
+    }
+    .settings-set.default > div > label {
+        width: 60%;
+    }
+    .settings-set.default > div > span {
+        width: 35%;
     }
 }

@@ -130,65 +130,71 @@
         <div class="after">&nbsp;</div>
       </div>
     </div>
-    <div class="item"
-         i18n-title title="Formant ceiling - subsituted for {max_formant} in the Praat command">
-      <label for="formantCeilingDefault" i18n>Formant Ceiling</label>
-      <span class="long">
-        <input id="formantCeilingDefault"
-               [(ngModel)]="formantCeilingDefault"
-               class="hz"
-               type="number" min="0" step="1">
-      </span>
-    </div>
-    <fieldset class="alternatives">
-      <legend>
-        <input id="formantDifferentiateParticipants" type="checkbox"
-               [(ngModel)]="formantDifferentiateParticipants">
-        <label for="formantDifferentiateParticipants" i18n>Except participants whose</label>
-        <select id="formantDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
-                i18n-title title="Attribute for differentiating participants"
-                [disabled]="!formantDifferentiateParticipants">
-          <option value="" i18n="No gender attribute selected">[none]</option>
-          <ng-container *ngFor="let layer of participantAttributeLayers">
-            <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
-        </select>
-      </legend>
-      <fieldset *ngFor="let pattern of formantOtherPattern; let o = index; trackBy: trackByFn">
-        <legend>
-          <label><span i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
-            <input [(ngModel)]="formantOtherPattern[o]"
-                   class="regex"
-                   type="text"
-                   i18n-title title="Regular expression to match against the layer above"
-                   i18n-placeholder placeholder="Regular Expression"
-                   [disabled]="!formantDifferentiateParticipants">
-          </label>
-        </legend>
+    <div class="settings-sets">
+      <fieldset class="settings-set default">
+        <legend i18n>Default Settings</legend>
         <div class="item"
-             i18n-title title="Maximum formant value - subsituted for {max_formant} in the Praat command">
-          <label for="{{'formantCeilingOther'+o}}" i18n>Formant Ceiling</label>
-          <span class="long">
-            <input id="{{'formantCeilingOther'+o}}"
-                   [(ngModel)]="formantCeilingOther[o]"
+             i18n-title title="Formant ceiling - subsituted for {max_formant} in the Praat command">
+          <label for="formantCeilingDefault" i18n>Formant Ceiling</label>
+          <span>
+            <input id="formantCeilingDefault"
+                   [(ngModel)]="formantCeilingDefault"
                    class="hz"
-                   type="number" min="0" step="1"
-                   i18n-placeholder placeholder="Hertz"
-                   [disabled]="!formantDifferentiateParticipants">        
+                   type="number" min="0" step="1">
           </span>
         </div>
       </fieldset>
-      <lib-button (press)="formantAddOther()"
-                  img="add.svg" icon="+"
-                  i18n-title title="Add alternative settings"
-                  ></lib-button>
-      <lib-button *ngIf="formantOtherPattern.length > 1"
-                  (press)="formantRemoveOther()"
-                  img="remove.svg" icon="-"
-                  i18n-title title="Remove alternative settings"
-                  ></lib-button>
-    </fieldset>
+      <fieldset class="alternatives">
+        <legend>
+          <input id="formantDifferentiateParticipants" type="checkbox"
+                 [(ngModel)]="formantDifferentiateParticipants">
+          <label for="formantDifferentiateParticipants" i18n>Except participants whose</label>
+          <select id="formantDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
+                  i18n-title title="Attribute for differentiating participants"
+                  [disabled]="!formantDifferentiateParticipants">
+            <option value="" i18n="No gender attribute selected">[none]</option>
+            <ng-container *ngFor="let layer of participantAttributeLayers">
+              <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
+          </select>
+        </legend>        
+        <fieldset class="settings-set other"
+                  *ngFor="let pattern of formantOtherPattern; let o = index; trackBy: trackByFn">
+          <legend>
+            <label><span i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
+              <input [(ngModel)]="formantOtherPattern[o]"
+                     class="regex"
+                     type="text"
+                     i18n-title title="Regular expression to match against the layer above"
+                     i18n-placeholder placeholder="Regular Expression"
+                     [disabled]="!formantDifferentiateParticipants">
+            </label>
+          </legend>
+          <div class="item"
+               i18n-title title="Maximum formant value - subsituted for {max_formant} in the Praat command">
+            <label for="{{'formantCeilingOther'+o}}" i18n>Formant Ceiling</label>
+            <span>
+              <input id="{{'formantCeilingOther'+o}}"
+                     [(ngModel)]="formantCeilingOther[o]"
+                     class="hz"
+                     type="number" min="0" step="1"
+                     i18n-placeholder placeholder="Hertz"
+                     [disabled]="!formantDifferentiateParticipants">        
+            </span>
+          </div>
+        </fieldset>
+        <lib-button (press)="formantAddOther()"
+                    img="add.svg" icon="+"
+                    i18n-title title="Add alternative settings"
+                    ></lib-button>
+        <lib-button *ngIf="formantOtherPattern.length > 1"
+                    (press)="formantRemoveOther()"
+                    img="remove.svg" icon="-"
+                    i18n-title title="Remove alternative settings"
+                    ></lib-button>
+      </fieldset>
+    </div>
   </div>
-
+  
   <div class="item" id="pitch"
        i18n-title title="Whether to extract F0 (pitch) measures">
     <label>
@@ -214,105 +220,114 @@
       <label for="scriptPitch" i18n>Praat Pitch command</label>
       <span class="script"><input id="scriptPitch" [(ngModel)]="scriptPitch" type="text"></span>
     </div>
-    <div class="item"
-         i18n-title title="Pitch floor - subsituted for {pitch_floor} in the Praat command">
-      <label for="pitchFloorDefault" i18n>Pitch Floor</label>
-      <span class="long">
-        <input id="pitchFloorDefault"
-               [(ngModel)]="pitchFloorDefault"
-               class="hz"
-               type="number" min="0" step="1">
-      </span>
-    </div>
-    <div class="item"
-         i18n-title title="Pitch ceiling - subsituted for {pitch_ceiling} in the Praat command">
-      <label for="pitchCeilingDefault" i18n>Pitch Ceiling</label>
-      <span class="long">
-        <input id="pitchCeilingDefault"
-               [(ngModel)]="pitchCeilingDefault"
-               class="hz"
-               type="number" min="0" step="1">
-      </span>
-    </div>
-    <div class="item"
-         i18n-title title="Voicing Threshold - subsituted for {voicing_threshold} in the Praat command">
-      <label for="voicingThresholdDefault" i18n>Voicing Threshold</label>
-      <span class="long">
-        <input id="voicingThresholdDefault"
-               [(ngModel)]="voicingThresholdDefault"
-               class="small-number"
-               type="number" min="0" step="0.01">
-      </span>
-    </div>
-    <fieldset class="alternatives">
-      <legend>
-        <input id="pitchDifferentiateParticipants" type="checkbox"
-               [(ngModel)]="pitchDifferentiateParticipants">
-        <label for="pitchDifferentiateParticipants" i18n>Except participants whose</label>
-        <select id="pitchDifferentiationLayerId" [(ngModel)]="pitchDifferentiationLayerId"
-                i18n-title title="Attribute for differentiating participants"
-                [disabled]="!pitchDifferentiateParticipants">
-          <option value="" i18n="No gender attribute selected">[none]</option>
-          <ng-container *ngFor="let layer of participantAttributeLayers">
-            <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
-        </select>
-      </legend>
-      <fieldset *ngFor="let pattern of pitchOtherPattern; let o = index; trackBy: trackByFn">
-        <legend>
-          <label><span i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
-            <input [(ngModel)]="pitchOtherPattern[o]"
-                   class="regex"
-                   type="text"
-                   i18n-title title="Regular expression to match against the layer above"
-                   i18n-placeholder placeholder="Regular Expression"
-                   [disabled]="!pitchDifferentiateParticipants">
-          </label>
-        </legend>
+    <div class="settings-sets">
+      <fieldset class="settings-set default">
+        <legend i18n>Default Settings</legend>
         <div class="item"
              i18n-title title="Pitch floor - subsituted for {pitch_floor} in the Praat command">
-          <label for="{{'pitchFloorOther'+o}}" i18n>Pitch Floor</label>
-          <span class="long">
-            <input id="{{'pitchFloorOther'+o}}"
-                   [(ngModel)]="pitchFloorOther[o]"
+          <label for="pitchFloorDefault" i18n>Pitch Floor</label>
+          <span>
+            <input id="pitchFloorDefault"
+                   [(ngModel)]="pitchFloorDefault"
                    class="hz"
-                   type="number" min="0" step="1"
-                   [disabled]="!pitchDifferentiateParticipants">
+                   type="number" min="0" step="1">
           </span>
         </div>
         <div class="item"
              i18n-title title="Pitch ceiling - subsituted for {pitch_ceiling} in the Praat command">
-          <label for="{{'pitchCeilingOther'+o}}" i18n>Pitch Ceiling</label>
-          <span class="long">
-            <input id="{{'pitchCeilingOther'+o}}"
-                   [(ngModel)]="pitchCeilingOther[o]"
+          <label for="pitchCeilingDefault" i18n>Pitch Ceiling</label>
+          <span>
+            <input id="pitchCeilingDefault"
+                   [(ngModel)]="pitchCeilingDefault"
                    class="hz"
-                   type="number" min="0" step="1"
-                   [disabled]="!pitchDifferentiateParticipants">
+                   type="number" min="0" step="1">
           </span>
         </div>
         <div class="item"
              i18n-title title="Voicing Threshold - subsituted for {voicing_threshold} in the Praat command">
-          <label for="{{'voicingThresholdOther'+o}}" i18n>Voicing Threshold</label>
-          <span class="long">
-            <input id="{{'voicingThresholdOther'+o}}"
-                   [(ngModel)]="voicingThresholdOther[o]"
+          <label for="voicingThresholdDefault" i18n>Voicing Threshold</label>
+          <span>
+            <input id="voicingThresholdDefault"
+                   [(ngModel)]="voicingThresholdDefault"
                    class="small-number"
-                   type="number" min="0" step="0.01"
-                   [disabled]="!pitchDifferentiateParticipants">
+                   type="number" min="0" step="0.01">
           </span>
         </div>
       </fieldset>
-      <lib-button (press)="pitchAddOther()"
-                  img="add.svg" icon="+"
-                  i18n-title title="Add alternative settings"
-                  ></lib-button>
-      <lib-button *ngIf="pitchOtherPattern.length > 1"
-                  (press)="pitchRemoveOther()"
-                  img="remove.svg" icon="-"
-                  i18n-title title="Remove alternative settings"
-                  ></lib-button>
-    </fieldset>
+      <fieldset class="alternatives">
+        <legend>
+          <input id="pitchDifferentiateParticipants" type="checkbox"
+                 [(ngModel)]="pitchDifferentiateParticipants">
+          <label for="pitchDifferentiateParticipants" i18n>Except participants whose</label>
+          <select id="pitchDifferentiationLayerId" [(ngModel)]="pitchDifferentiationLayerId"
+                  i18n-title title="Attribute for differentiating participants"
+                  [disabled]="!pitchDifferentiateParticipants">
+            <option value="" i18n="No gender attribute selected">[none]</option>
+            <ng-container *ngFor="let layer of participantAttributeLayers">
+              <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
+          </select>
+        </legend>
+        <fieldset class="settings-set other"
+                  *ngFor="let pattern of pitchOtherPattern; let o = index; trackBy: trackByFn">
+          <legend>
+            <label><span i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
+              <input [(ngModel)]="pitchOtherPattern[o]"
+                     class="regex"
+                     type="text"
+                     i18n-title title="Regular expression to match against the layer above"
+                     i18n-placeholder placeholder="Regular Expression"
+                     [disabled]="!pitchDifferentiateParticipants">
+            </label>
+          </legend>
+          <div class="item"
+               i18n-title title="Pitch floor - subsituted for {pitch_floor} in the Praat command">
+            <label for="pitchFloorDefault" i18n>Pitch Floor</label>
+            <span>
+              <input id="{{'pitchFloorOther'+o}}"
+                     [(ngModel)]="pitchFloorOther[o]"
+                     class="hz"
+                     type="number" min="0" step="1"
+                     [disabled]="!pitchDifferentiateParticipants">
+            </span>
+          </div>
+          <div class="item"
+               i18n-title title="Pitch ceiling - subsituted for {pitch_ceiling} in the Praat command">
+            <label for="pitchCeilingDefault" i18n>Pitch Ceiling</label>
+            <span>
+              <input id="{{'pitchCeilingOther'+o}}"
+                     [(ngModel)]="pitchCeilingOther[o]"
+                     class="hz"
+                     type="number" min="0" step="1"
+                     [disabled]="!pitchDifferentiateParticipants">
+            </span>
+          </div>
+          <div class="item"
+               i18n-title title="Voicing Threshold - subsituted for {voicing_threshold} in the Praat command">
+            <label for="voicingThresholdDefault" i18n>Voicing Threshold</label>
+            <span>
+              <input id="{{'voicingThresholdOther'+o}}"
+                     [(ngModel)]="voicingThresholdOther[o]"
+                     class="small-number"
+                     type="number" min="0" step="0.01"
+                     [disabled]="!pitchDifferentiateParticipants">
+            </span>
+          </div>
+        </fieldset>
+        <div class="controls">
+          <lib-button (press)="pitchAddOther()"
+                      img="add.svg" icon="+"
+                      i18n-title title="Add alternative settings"
+                      ></lib-button>
+          <lib-button *ngIf="pitchOtherPattern.length > 1"
+                      (press)="pitchRemoveOther()"
+                      img="remove.svg" icon="-"
+                      i18n-title title="Remove alternative settings"
+                      ></lib-button>
+        </div>
+      </fieldset>
+    </div>
   </div>
+
   <div class="item" id="intensity"
        i18n-title title="Whether to extract intensity measures">
     <label>
