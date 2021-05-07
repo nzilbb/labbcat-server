@@ -24,11 +24,16 @@ export class PraatComponent implements OnInit {
     endTimeColumn: number;
     
     windowOffset = 0.1;
-    
+
+    showAdvancedFormantSettings = false;
+    showAdvancedPitchSettings = false;
+    showAdvancedIntensitySettings = false;
+    showCustomScript = false;
+    showAttributeVariables = false;
+
     extractF1 = true;
     extractF2 = true;
     extractF3 = false;
-    showAdvancedFormantSettings = false;
     samplePoints = "0.5";
     formantDifferentiateParticipants = true;
     formantCeilingDefault = 5500; // female
@@ -39,7 +44,6 @@ export class PraatComponent implements OnInit {
     extractMinimumPitch = false;
     extractMeanPitch = false;
     extractMaximumPitch = false;
-    showAdvancedPitchSettings = false;
     pitchDifferentiateParticipants = true;
     pitchOtherPattern = [ "M" ];
     pitchFloorDefault = 60; // female
@@ -51,13 +55,11 @@ export class PraatComponent implements OnInit {
     scriptPitch = "To Pitch (ac)...  0 {pitch_floor} 15 no 0.03 {voicing_threshold} 0.01 0.35 0.14 {pitch_ceiling}";
     
     extractMaximumIntensity = false;
-    showAdvancedIntensitySettings = false;
     scriptIntensity = "To Intensity... {pitch_floor} 0 yes";
     extractCOG1 = false;
     extractCOG2 = false;
     extractCOG23 = false;
 
-    showCustomScript = false;
     customScriptLayers = [];
     customScript = "";    
     
@@ -209,6 +211,7 @@ export class PraatComponent implements OnInit {
         reader.readAsText(component.scriptFile);
     }
 
+    /** Save the current script to a local file */
     saveScript(): void {
         try {
             const scriptAsBlob = new Blob([this.customScript], {type:'text/plain'});
@@ -226,5 +229,10 @@ export class PraatComponent implements OnInit {
         } catch(X) {
             this.messageService.error(X);
         }
+    }
+
+    /** Convert a layer ID into a praat script variable name */
+    praatVariableName(id: string): string {
+        return id.replace(/[^A-Za-z0-9]/g, "_");
     }
 }
