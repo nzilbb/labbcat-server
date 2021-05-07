@@ -110,11 +110,6 @@
   <div class="{{showAdvancedFormantSettings?'unhidden-panel':'hidden-panel'}}"
        id="advanced-formants">
     <div class="item"
-         i18n-title title="Command Praat will use to extract formants">
-      <label for="scriptFormant" i18n>Praat Formant command</label>
-      <span class="script"><input id="scriptFormant" [(ngModel)]="scriptFormant" type="text"></span>
-    </div>
-    <div class="item"
          i18n-title title="At which points in the duration of the segment at which to take measurements">
       <label for="samplePoints" i18n>Sample Points</label>
       <span><input id="samplePoints" [(ngModel)]="samplePoints" type="text"></span>
@@ -130,7 +125,19 @@
         <div class="after">&nbsp;</div>
       </div>
     </div>
-    <div class="settings-sets">
+    <div class="item"
+         i18n-title title="Command Praat will use to extract formants">
+      <label for="scriptFormant">
+        <input type="radio" name="formantMethod"  [value]="false" [(ngModel)]="useFastTrack">
+        <span i18n>Praat Formant command</span></label>
+      <span class="script">
+        <input id="scriptFormant"
+               [(ngModel)]="scriptFormant"
+               type="text"
+               [disabled]="useFastTrack">
+      </span>
+    </div>
+    <div class="settings-sets" class="{{useFastTrack?'hidden-panel':'unhidden-panel'}}">
       <fieldset class="settings-set default">
         <legend i18n>Default Settings</legend>
         <div class="item"
@@ -140,18 +147,20 @@
             <input id="formantCeilingDefault"
                    [(ngModel)]="formantCeilingDefault"
                    class="hz"
-                   type="number" min="0" step="1">
+                   type="number" min="0" step="1"
+                   [disabled]="useFastTrack">
           </span>
         </div>
       </fieldset>
       <fieldset class="alternatives">
         <legend>
           <input id="formantDifferentiateParticipants" type="checkbox"
-                 [(ngModel)]="formantDifferentiateParticipants">
+                 [(ngModel)]="formantDifferentiateParticipants"
+                 [disabled]="useFastTrack">
           <label for="formantDifferentiateParticipants" i18n>Except participants whose</label>
           <select id="formantDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
                   i18n-title title="Attribute for differentiating participants"
-                  [disabled]="!formantDifferentiateParticipants">
+                  [disabled]="!formantDifferentiateParticipants || useFastTrack">
             <option value="" i18n="No gender attribute selected">[none]</option>
             <ng-container *ngFor="let layer of participantAttributeLayers">
               <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
@@ -166,7 +175,7 @@
                      type="text"
                      i18n-title title="Regular expression to match against the layer above"
                      i18n-placeholder placeholder="Regular Expression"
-                     [disabled]="!formantDifferentiateParticipants">
+                     [disabled]="!formantDifferentiateParticipants || useFastTrack">
             </label>
           </legend>
           <div class="item"
@@ -178,18 +187,119 @@
                      class="hz"
                      type="number" min="0" step="1"
                      i18n-placeholder placeholder="Hertz"
-                     [disabled]="!formantDifferentiateParticipants">        
+                     [disabled]="!formantDifferentiateParticipants || useFastTrack">
             </span>
           </div>
         </fieldset>
         <lib-button (press)="formantAddOther()"
                     img="add.svg" icon="+"
                     i18n-title title="Add alternative settings"
+                    [disabled]="!formantDifferentiateParticipants || useFastTrack"
                     ></lib-button>
         <lib-button *ngIf="formantOtherPattern.length > 1"
                     (press)="formantRemoveOther()"
                     img="remove.svg" icon="-"
                     i18n-title title="Remove alternative settings"
+                    [disabled]="!formantDifferentiateParticipants || useFastTrack"
+                    ></lib-button>
+      </fieldset>
+    </div>
+    <div class="item"
+         i18n-title title="Whether to use the FastTrack plugin">
+      <label>
+        <input type="radio" name="formantMethod" [value]="true" [(ngModel)]="useFastTrack">
+        <span i18n>FastTrack</span>        
+      </label>
+      <div><a href="https://github.com/santiagobarreda/FastTrack" target="FastTrack"
+              i18n>[more information]</a></div>
+    </div>
+    <div class="settings-sets" class="{{useFastTrack?'unhidden-panel':'hidden-panel'}}">
+      <fieldset class="settings-set default">
+        <legend i18n>Default Settings</legend>
+        <div class="item"
+             i18n-title title="FastTrack lowest snalysis frequency in Hertz">
+          <label for="fastTrackLowestAnalysisFrequencyDefault" i18n>Lowest Ceiling</label>
+          <span>
+            <input id="fastTrackLowestAnalysisFrequencyDefault"
+                   [(ngModel)]="fastTrackLowestAnalysisFrequencyDefault"
+                   class="hz"
+                   type="number" min="0" step="1"
+                   [disabled]="!useFastTrack">
+          </span>
+        </div>
+        <div class="item"
+             i18n-title title="FastTrack highest snalysis frequency in Hertz">
+          <label for="fastTrackHighestAnalysisFrequencyDefault" i18n>Highest Ceiling</label>
+          <span>
+            <input id="fastTrackHighestAnalysisFrequencyDefault"
+                   [(ngModel)]="fastTrackHighestAnalysisFrequencyDefault"
+                   class="hz"
+                   type="number" min="0" step="1"
+                   [disabled]="!useFastTrack">
+          </span>
+        </div>
+      </fieldset>
+      <fieldset class="alternatives">
+        <legend>
+          <input id="fastTrackDifferentiateParticipants" type="checkbox"
+                 [(ngModel)]="fastTrackDifferentiateParticipants"
+                 [disabled]="!useFastTrack">
+          <label for="fastTrackDifferentiateParticipants" i18n>Except participants whose</label>
+          <select id="fastTrackDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
+                  i18n-title title="Attribute for differentiating participants"
+                  [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+            <option value="" i18n="No gender attribute selected">[none]</option>
+            <ng-container *ngFor="let layer of participantAttributeLayers">
+              <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
+          </select>
+        </legend>        
+        <fieldset class="settings-set other"
+                  *ngFor="let pattern of fastTrackOtherPattern; let o = index; trackBy: trackByFn">
+          <legend>
+            <label><span i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
+              <input [(ngModel)]="fastTrackOtherPattern[o]"
+                     class="regex"
+                     type="text"
+                     i18n-title title="Regular expression to match against the layer above"
+                     i18n-placeholder placeholder="Regular Expression"
+                     [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+            </label>
+          </legend>
+          <div class="item"
+               i18n-title title="FastTrack lowest snalysis frequency in Hertz">
+            <label for="{{'fastTrackLowestAnalysisFrequencyOther'+o}}" i18n>Lowest Ceiling</label>
+            <span>
+              <input id="{{'fastTrackLowestAnalysisFrequencyOther'+o}}"
+                     [(ngModel)]="fastTrackLowestAnalysisFrequencyOther[o]"
+                     class="hz"
+                     type="number" min="0" step="1"
+                     i18n-placeholder placeholder="Hertz"
+                     [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+            </span>
+          </div>
+          <div class="item"
+               i18n-title title="FastTrack highest snalysis frequency in Hertz">
+            <label for="{{'fastTrackHighestAnalysisFrequencyOther'+o}}" i18n>Highest Ceiling</label>
+            <span>
+              <input id="{{'fastTrackHighestAnalysisFrequencyOther'+o}}"
+                     [(ngModel)]="fastTrackHighestAnalysisFrequencyOther[o]"
+                     class="hz"
+                     type="number" min="0" step="1"
+                     i18n-placeholder placeholder="Hertz"
+                     [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+            </span>
+          </div>
+        </fieldset>
+        <lib-button (press)="fastTrackAddOther()"
+                    img="add.svg" icon="+"
+                    i18n-title title="Add alternative settings"
+                    [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack"
+                    ></lib-button>
+        <lib-button *ngIf="fastTrackOtherPattern.length > 1"
+                    (press)="fastTrackRemoveOther()"
+                    img="remove.svg" icon="-"
+                    i18n-title title="Remove alternative settings"
+                    [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack"
                     ></lib-button>
       </fieldset>
     </div>
@@ -317,11 +427,13 @@
           <lib-button (press)="pitchAddOther()"
                       img="add.svg" icon="+"
                       i18n-title title="Add alternative settings"
+                      [disabled]="!pitchDifferentiateParticipants"
                       ></lib-button>
           <lib-button *ngIf="pitchOtherPattern.length > 1"
                       (press)="pitchRemoveOther()"
                       img="remove.svg" icon="-"
                       i18n-title title="Remove alternative settings"
+                      [disabled]="!pitchDifferentiateParticipants"
                       ></lib-button>
         </div>
       </fieldset>

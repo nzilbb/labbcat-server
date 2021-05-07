@@ -12,8 +12,6 @@ export class PraatComponent implements OnInit {
 
     schema: any;
     participantAttributeLayers: Layer[];
-    formantDifferentiationLayerId: string;
-    pitchDifferentiationLayerId: string;
     
     csv: File;
     rowCount: number;
@@ -35,16 +33,51 @@ export class PraatComponent implements OnInit {
     extractF2 = true;
     extractF3 = false;
     samplePoints = "0.5";
+    useClassicFormant = true;
     formantDifferentiateParticipants = true;
-    formantCeilingDefault = 5500; // female
+    formantDifferentiationLayerId: string;
     formantOtherPattern = [ "M" ];
+    formantCeilingDefault = 5500; // female
     formantCeilingOther = [ 5000 ]; // male
     scriptFormant = "To Formant (burg)... 0.0025 5 {max_formant} 0.025 50";
+
+    // FastTrack settings:
+    useFastTrack = !this.useClassicFormant;
+    // general settings
+    fastTrackTimeStep = 0.002;
+    fastTrackBasisFunctions = "dct";
+    fastTrackErrorMethod = "mae";
+    fastTrackTrackingMethod = "burg";
+    fastTrackEnableF1FrequencyHeuristic = true;
+    fastTrackMaximumF1FrequencyValue = 1200;
+    fastTrackEnableF1BandwidthHeuristic = true;
+    fastTrackMaximumF1BandwidthValue = 500;
+    fastTrackEnableF2BandwidthHeuristic = true;
+    fastTrackMaximumF2BandwidthValue = 600;
+    fastTrackEnableF3BandwidthHeuristic = true;
+    fastTrackMaximumF3BandwidthValue = 900;
+    fastTrackEnableF4FrequencyHeuristic = true;
+    fastTrackMinimumF4FrequencyValue = 2900;
+    fastTrackEnableRhoticHeuristic = true;
+    fastTrackEnableF3F4ProximityHeuristic = true;
+    // analysis settings
+    fastTrackDifferentiateParticipants = true;
+    fastTrackDifferentiationLayerId: string;
+    fastTrackOtherPattern = [ "M" ];
+    fastTrackLowestAnalysisFrequencyDefault = 5000; // female
+    fastTrackLowestAnalysisFrequencyOther = [ 4500 ]; // male
+    fastTrackHighestAnalysisFrequencyDefault = 7000; // female
+    fastTrackHighestAnalysisFrequencyOther = [ 6500 ]; // male
+    fastTrackNumberOfSteps = 20;
+    fastTrackNumberOfCoefficients = 5;
+    fastTrackNumberOfFormants = 3;
+    fastTrackCoefficients = true;
     
     extractMinimumPitch = false;
     extractMeanPitch = false;
     extractMaximumPitch = false;
     pitchDifferentiateParticipants = true;
+    pitchDifferentiationLayerId: string;
     pitchOtherPattern = [ "M" ];
     pitchFloorDefault = 60; // female
     pitchFloorOther = [ 30 ]; // male
@@ -84,6 +117,7 @@ export class PraatComponent implements OnInit {
                 layer=>/(gender|sex)/i.test(layer.id));
             if (genderLayer) {
                 this.formantDifferentiationLayerId = genderLayer.id;
+                this.fastTrackDifferentiationLayerId = genderLayer.id;
                 this.pitchDifferentiationLayerId = genderLayer.id;
             }
         });
@@ -161,6 +195,19 @@ export class PraatComponent implements OnInit {
     formantRemoveOther(): void {
         this.formantOtherPattern.pop();
         this.formantCeilingOther.pop();
+    }
+    
+    /** Add another fastTrack settings option */
+    fastTrackAddOther(): void {
+        this.fastTrackOtherPattern.push("");
+        this.fastTrackLowestAnalysisFrequencyOther.push(this.fastTrackLowestAnalysisFrequencyDefault);
+        this.fastTrackHighestAnalysisFrequencyOther.push(this.fastTrackHighestAnalysisFrequencyDefault);
+    }
+    /** Remove last fastTrack settings option */
+    fastTrackRemoveOther(): void {
+        this.fastTrackOtherPattern.pop();
+        this.fastTrackLowestAnalysisFrequencyOther.pop();
+        this.fastTrackHighestAnalysisFrequencyOther.pop();
     }
     
     /** Add another pitch settings option */
