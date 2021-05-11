@@ -275,6 +275,11 @@ tbody tr:nth-child(odd) {
     overflow: auto;
     transition: max-height 0.5s;
 }
+.long-unhidden-panel {
+    max-height: 1000px;
+    overflow: auto;
+    transition: max-height 0.5s;
+}
 .header {
     font-style: italic;
 }

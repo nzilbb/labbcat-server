@@ -24,6 +24,7 @@ export class PraatComponent implements OnInit {
     windowOffset = 0.1;
 
     showAdvancedFormantSettings = false;
+    showAdvancedFastTrackSettings = false;
     showAdvancedPitchSettings = false;
     showAdvancedIntensitySettings = false;
     showCustomScript = false;

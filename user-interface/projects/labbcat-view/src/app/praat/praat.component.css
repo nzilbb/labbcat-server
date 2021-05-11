@@ -1,16 +1,17 @@
 .header {
     font-weight: bold;
 }
-.small-number {
+.small {
     width: 60px;
 }
 .hz {
     width: 60px;
 }
+
 .regex {
     width: 50px;
 }
-.unhidden-panel {
+.unhidden-panel, .long-unhidden-panel {
     border: 1px solid silver;
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
@@ -19,6 +20,9 @@
 }
 #samplePoints {
     text-align: center;
+}
+#fastTrackTimeStep:after: {
+    content: "s";
 }
 .settings-sets, .alternatives {
     display: flex;

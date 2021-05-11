@@ -71,7 +71,7 @@
     <span>
       ±<input id="windowOffset"
               [(ngModel)]="windowOffset"
-              class="small-number"
+              class="small"
               type="number" min="0" step="0.001">s
     </span>
     <div class="viz">
@@ -107,7 +107,7 @@
              i18n-title title="Whether to extract the third formant" i18n="Formant">F3</label>
     </span>    
   </div>
-  <div class="{{showAdvancedFormantSettings?'unhidden-panel':'hidden-panel'}}"
+  <div class="{{showAdvancedFormantSettings?'long-unhidden-panel':'hidden-panel'}}"
        id="advanced-formants">
     <div class="item"
          i18n-title title="At which points in the duration of the segment at which to take measurements">
@@ -147,7 +147,7 @@
             <input id="formantCeilingDefault"
                    [(ngModel)]="formantCeilingDefault"
                    class="hz"
-                   type="number" min="0" step="1"
+                   type="number" min="0" step="100"
                    [disabled]="useFastTrack">
           </span>
         </div>
@@ -185,7 +185,7 @@
               <input id="{{'formantCeilingOther'+o}}"
                      [(ngModel)]="formantCeilingOther[o]"
                      class="hz"
-                     type="number" min="0" step="1"
+                     type="number" min="0" step="100"
                      i18n-placeholder placeholder="Hertz"
                      [disabled]="!formantDifferentiateParticipants || useFastTrack">
             </span>
@@ -211,97 +211,295 @@
         <span i18n>FastTrack</span>        
       </label>
       <div><a href="https://github.com/santiagobarreda/FastTrack" target="FastTrack"
+              i18n-title title="The FastTrack source code and wiki"
               i18n>[more information]</a></div>
     </div>
-    <div class="settings-sets" class="{{useFastTrack?'unhidden-panel':'hidden-panel'}}">
-      <fieldset class="settings-set default">
-        <legend i18n>Default Settings</legend>
-        <div class="item"
-             i18n-title title="FastTrack lowest snalysis frequency in Hertz">
-          <label for="fastTrackLowestAnalysisFrequencyDefault" i18n>Lowest Ceiling</label>
-          <span>
-            <input id="fastTrackLowestAnalysisFrequencyDefault"
-                   [(ngModel)]="fastTrackLowestAnalysisFrequencyDefault"
-                   class="hz"
-                   type="number" min="0" step="1"
-                   [disabled]="!useFastTrack">
-          </span>
-        </div>
-        <div class="item"
-             i18n-title title="FastTrack highest snalysis frequency in Hertz">
-          <label for="fastTrackHighestAnalysisFrequencyDefault" i18n>Highest Ceiling</label>
-          <span>
-            <input id="fastTrackHighestAnalysisFrequencyDefault"
-                   [(ngModel)]="fastTrackHighestAnalysisFrequencyDefault"
-                   class="hz"
-                   type="number" min="0" step="1"
-                   [disabled]="!useFastTrack">
-          </span>
-        </div>
-      </fieldset>
-      <fieldset class="alternatives">
-        <legend>
-          <input id="fastTrackDifferentiateParticipants" type="checkbox"
-                 [(ngModel)]="fastTrackDifferentiateParticipants"
-                 [disabled]="!useFastTrack">
-          <label for="fastTrackDifferentiateParticipants" i18n>Except participants whose</label>
-          <select id="fastTrackDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
-                  i18n-title title="Attribute for differentiating participants"
-                  [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
-            <option value="" i18n="No gender attribute selected">[none]</option>
-            <ng-container *ngFor="let layer of participantAttributeLayers">
-              <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
-          </select>
-        </legend>        
-        <fieldset class="settings-set other"
-                  *ngFor="let pattern of fastTrackOtherPattern; let o = index; trackBy: trackByFn">
-          <legend>
-            <label><span i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
-              <input [(ngModel)]="fastTrackOtherPattern[o]"
-                     class="regex"
-                     type="text"
-                     i18n-title title="Regular expression to match against the layer above"
-                     i18n-placeholder placeholder="Regular Expression"
-                     [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
-            </label>
-          </legend>
+    <div class="{{useFastTrack?'long-unhidden-panel':'hidden-panel'}}">
+      <div class="settings-sets">
+        <fieldset class="settings-set default">
+          <legend i18n>Default Settings</legend>
           <div class="item"
                i18n-title title="FastTrack lowest snalysis frequency in Hertz">
-            <label for="{{'fastTrackLowestAnalysisFrequencyOther'+o}}" i18n>Lowest Ceiling</label>
+            <label for="fastTrackLowestAnalysisFrequencyDefault" i18n>Lowest Ceiling</label>
             <span>
-              <input id="{{'fastTrackLowestAnalysisFrequencyOther'+o}}"
-                     [(ngModel)]="fastTrackLowestAnalysisFrequencyOther[o]"
+              <input id="fastTrackLowestAnalysisFrequencyDefault"
+                     [(ngModel)]="fastTrackLowestAnalysisFrequencyDefault"
                      class="hz"
-                     type="number" min="0" step="1"
-                     i18n-placeholder placeholder="Hertz"
-                     [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+                     type="number" min="0" step="100"
+                     [disabled]="!useFastTrack">
             </span>
           </div>
           <div class="item"
                i18n-title title="FastTrack highest snalysis frequency in Hertz">
-            <label for="{{'fastTrackHighestAnalysisFrequencyOther'+o}}" i18n>Highest Ceiling</label>
+            <label for="fastTrackHighestAnalysisFrequencyDefault" i18n>Highest Ceiling</label>
             <span>
-              <input id="{{'fastTrackHighestAnalysisFrequencyOther'+o}}"
-                     [(ngModel)]="fastTrackHighestAnalysisFrequencyOther[o]"
+              <input id="fastTrackHighestAnalysisFrequencyDefault"
+                     [(ngModel)]="fastTrackHighestAnalysisFrequencyDefault"
                      class="hz"
-                     type="number" min="0" step="1"
-                     i18n-placeholder placeholder="Hertz"
-                     [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+                     type="number" min="0" step="100"
+                     [disabled]="!useFastTrack">
             </span>
           </div>
         </fieldset>
-        <lib-button (press)="fastTrackAddOther()"
-                    img="add.svg" icon="+"
-                    i18n-title title="Add alternative settings"
-                    [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack"
-                    ></lib-button>
-        <lib-button *ngIf="fastTrackOtherPattern.length > 1"
-                    (press)="fastTrackRemoveOther()"
-                    img="remove.svg" icon="-"
-                    i18n-title title="Remove alternative settings"
-                    [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack"
-                    ></lib-button>
-      </fieldset>
+        <fieldset class="alternatives">
+          <legend>
+            <input id="fastTrackDifferentiateParticipants" type="checkbox"
+                   [(ngModel)]="fastTrackDifferentiateParticipants"
+                   [disabled]="!useFastTrack">
+            <label for="fastTrackDifferentiateParticipants" i18n>Except participants whose</label>
+            <select id="fastTrackDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
+                    i18n-title title="Attribute for differentiating participants"
+                    [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+              <option value="" i18n="No gender attribute selected">[none]</option>
+              <ng-container *ngFor="let layer of participantAttributeLayers">
+                <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
+            </select>
+          </legend>        
+          <fieldset class="settings-set other"
+                    *ngFor="let pattern of fastTrackOtherPattern; let o = index; trackBy: trackByFn">
+            <legend>
+              <label><span i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
+                <input [(ngModel)]="fastTrackOtherPattern[o]"
+                       class="regex"
+                       type="text"
+                       i18n-title title="Regular expression to match against the layer above"
+                       i18n-placeholder placeholder="Regular Expression"
+                       [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+              </label>
+            </legend>
+            <div class="item"
+                 i18n-title title="FastTrack lowest snalysis frequency in Hertz">
+              <label for="{{'fastTrackLowestAnalysisFrequencyOther'+o}}" i18n>Lowest Ceiling</label>
+              <span>
+                <input id="{{'fastTrackLowestAnalysisFrequencyOther'+o}}"
+                       [(ngModel)]="fastTrackLowestAnalysisFrequencyOther[o]"
+                       class="hz"
+                       type="number" min="0" step="100"
+                       i18n-placeholder placeholder="Hertz"
+                       [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+              </span>
+            </div>
+            <div class="item"
+                 i18n-title title="FastTrack highest snalysis frequency in Hertz">
+              <label for="{{'fastTrackHighestAnalysisFrequencyOther'+o}}" i18n>Highest Ceiling</label>
+              <span>
+                <input id="{{'fastTrackHighestAnalysisFrequencyOther'+o}}"
+                       [(ngModel)]="fastTrackHighestAnalysisFrequencyOther[o]"
+                       class="hz"
+                       type="number" min="0" step="100"
+                       i18n-placeholder placeholder="Hertz"
+                       [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
+              </span>
+            </div>
+          </fieldset>
+          <lib-button (press)="fastTrackAddOther()"
+                      img="add.svg" icon="+"
+                      i18n-title title="Add alternative settings"
+                      [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack"
+                      ></lib-button>
+          <lib-button *ngIf="fastTrackOtherPattern.length > 1"
+                      (press)="fastTrackRemoveOther()"
+                      img="remove.svg" icon="-"
+                      i18n-title title="Remove alternative settings"
+                      [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack"
+                      ></lib-button>
+          
+        </fieldset>
+      </div>
+      <div class="item">
+        <label>
+          <lib-button (press)="showAdvancedFastTrackSettings = !showAdvancedFastTrackSettings"
+                      img="down-triangle.png" icon="▼"
+                      i18n-title title="Show advanced options"
+                      [disabled]="!useFastTrack"
+                      ></lib-button>
+          &nbsp;<span i18n>Advanced</span>
+        </label>
+      </div>
+      <div class="{{showAdvancedFastTrackSettings?'unhidden-panel':'hidden-panel'}}"
+           id="advanced-general">
+        <div class="header" i18n="FastTrack advanced settings">Settings</div>
+        <div class="item" i18n-title title="Number of analyses between low and high analysis limits. More analysis steps may improve results, but will increase analysis time (50% more steps = around 50% longer to analyze).">
+          <label for="fastTrackNumberOfSteps" i18n>Number of Steps</label>
+          <span>
+            <select id="fastTrackNumberOfSteps"
+                    [(ngModel)]="fastTrackNumberOfSteps"
+                    [disabled]="!useFastTrack">
+              <option>8</option>
+              <option>12</option>
+              <option>16</option>
+              <option>20</option>
+              <option>24</option>
+            </select>
+          </span>
+        </div>
+        <div class="item" i18n-title title="FastTrack number of coefficients for formant prediction. More coefficients allow for more sudden, and 'wiggly' formant motion.">
+          <label for="fastTrackNumberOfCoefficients" i18n>Number of Coefficients</label>
+          <span>
+            <input id="fastTrackNumberOfCoefficients"
+                   [(ngModel)]="fastTrackNumberOfCoefficients"
+                   class="small"
+                   type="number" min="0" step="1"
+                   i18n-placeholder="FastTrack number of coefficients hint" placeholder="Number"
+                   [disabled]="!useFastTrack">
+          </span>
+        </div>
+        <div class="item" i18n-title title="FastTrack time step in seconds">
+          <label for="fastTrackTimeStep" i18n>Time Step</label>
+          <span>
+            <input id="fastTrackTimeStep"
+                   [(ngModel)]="fastTrackTimeStep"
+                   class="small"
+                   type="number" min="0" step="0.001"
+                   i18n-placeholder placeholder="Seconds"
+                   [disabled]="!useFastTrack">s
+          </span>
+        </div>
+        <div class="item" i18n-title title="FastTrack tracking method">
+          <label for="fastTrackTrackingMethod" i18n>Tracking Method</label>
+          <span>
+            <select id="fastTrackTrackingMethod"
+                    [(ngModel)]="fastTrackTrackingMethod"
+                    [disabled]="!useFastTrack">
+              <option>burg</option>
+              <option>robust</option>
+            </select>
+          </span>
+        </div>
+        <div class="item" i18n-title title="FastTrack basis functions">
+          <label for="fastTrackBasisFunctions" i18n>Basis Functions</label>
+          <span>
+            <input id="fastTrackBasisFunctions"
+                   [(ngModel)]="fastTrackBasisFunctions"
+                   class="small"
+                   type="text"
+                   [disabled]="!useFastTrack">
+          </span>
+        </div>
+        <div class="item" i18n-title title="FastTrack error method">
+          <label for="fastTrackErrorMethod" i18n>Error Method</label>
+          <span>
+            <input id="fastTrackErrorMethod"
+                   [(ngModel)]="fastTrackErrorMethod"
+                   class="small"
+                   type="text"
+                   [disabled]="!useFastTrack">
+          </span>
+        </div>
+        <div class="header" i18n="FastTrack advanced settings">Heuristics</div>
+        <div class="item"
+             i18n-title title="Median F1 frequency should not be higher than this value">
+          <label>
+            <input type="checkbox"
+                   [(ngModel)]="fastTrackEnableF1FrequencyHeuristic"
+                   i18n-title title="Uncheck to disable this heuristic"
+                   [disabled]="!useFastTrack">
+            <span i18n>Maximum F1 frequency</span>
+          </label>
+          <span>
+            <input id="fastTrackMaximumF1FrequencyValue"
+                   [(ngModel)]="fastTrackMaximumF1FrequencyValue"
+                   class="hz"
+                   type="number" min="0" step="100"
+                   i18n-placeholder placeholder="Hertz"
+                   [disabled]="!fastTrackEnableF1FrequencyHeuristic || !useFastTrack">
+          </span>
+        </div>
+        <div class="item"
+             i18n-title title="Median F1 bandwidth should not be higher than this value">
+          <label>
+            <input type="checkbox"
+                   [(ngModel)]="fastTrackEnableF1BandwidthHeuristic"
+                   i18n-title title="Uncheck to disable this heuristic"
+                   [disabled]="!useFastTrack">
+            <span i18n>Maximum F1 bandwidth</span>
+          </label>
+          <span>
+            <input id="fastTrackMaximumF1BandwidthValue"
+                   [(ngModel)]="fastTrackMaximumF1BandwidthValue"
+                   class="hz"
+                   type="number" min="0" step="100"
+                   i18n-placeholder placeholder="Hertz"
+                   [disabled]="!fastTrackEnableF1BandwidthHeuristic || !useFastTrack">
+          </span>
+        </div>
+        <div class="item"
+             i18n-title title="Median F2 bandwidth should not be higher than this value">
+          <label>
+            <input type="checkbox"
+                   [(ngModel)]="fastTrackEnableF2BandwidthHeuristic"
+                   i18n-title title="Uncheck to disable this heuristic"
+                   [disabled]="!useFastTrack">
+            <span i18n>Maximum F2 bandwidth</span>
+          </label>
+          <span>
+            <input id="fastTrackMaximumF2BandwidthValue"
+                   [(ngModel)]="fastTrackMaximumF2BandwidthValue"
+                   class="hz"
+                   type="number" min="0" step="100"
+                   i18n-placeholder placeholder="Hertz"
+                   [disabled]="!fastTrackEnableF2BandwidthHeuristic || !useFastTrack">
+          </span>
+        </div>
+        <div class="item"
+             i18n-title title="Median F3 bandwidth should not be higher than this value">
+          <label>
+            <input type="checkbox"
+                   [(ngModel)]="fastTrackEnableF3BandwidthHeuristic"
+                   i18n-title title="Uncheck to disable this heuristic"
+                   [disabled]="!useFastTrack">
+            <span i18n>Maximum F3 bandwidth</span>
+          </label>
+          <span>
+            <input id="fastTrackMaximumF3BandwidthValue"
+                   [(ngModel)]="fastTrackMaximumF3BandwidthValue"
+                   class="hz"
+                   type="number" min="0" step="100"
+                   i18n-placeholder placeholder="Hertz"
+                   [disabled]="!fastTrackEnableF3BandwidthHeuristic || !useFastTrack">
+          </span>
+        </div>
+        <div class="item"
+             i18n-title title="Median F4 frequency should not be lower than this value">
+          <label>
+            <input type="checkbox"
+                   [(ngModel)]="fastTrackEnableF4FrequencyHeuristic"
+                   i18n-title title="Uncheck to disable this heuristic"
+                   [disabled]="!useFastTrack">
+            <span i18n>Minimum F4 frequency</span>
+          </label>
+          <span>
+            <input id="fastTrackMinimumF4FrequencyValue"
+                   [(ngModel)]="fastTrackMinimumF4FrequencyValue"
+                   class="hz"
+                   type="number" min="0" step="100"
+                   i18n-placeholder placeholder="Hertz"
+                   [disabled]="!fastTrackEnableF4FrequencyHeuristic || !useFastTrack">
+          </span>
+        </div>
+        <div class="item"
+             i18n-title title="If F3 < 2000 Hz, F1 and F2 should be at least 500 Hz apart">
+          <label>
+            <input type="checkbox"
+                   [(ngModel)]="fastTrackEnableRhoticHeuristic"
+                   i18n-title title="Uncheck to disable this heuristic"
+                   [disabled]="!useFastTrack">
+            <span i18n>Rhotic</span>
+          </label>
+          <span class="long" i18n>If F3 < 2000 Hz, F1 and F2 should be at least 500 Hz apart.</span>
+        </div>
+        <div class="item"
+             i18n-title title="If (F4 - F3) < 500 Hz, F1 and F2 should be at least 1500 Hz apart">
+          <label>
+            <input type="checkbox"
+                   [(ngModel)]="fastTrackEnableF3F4ProximityHeuristic"
+                   i18n-title title="Uncheck to disable this heuristic"
+                   [disabled]="!useFastTrack">
+            <span i18n>F3/F4 Proximity</span>
+          </label>
+          <span class="long" i18n>If (F4 - F3) < 500 Hz, F1 and F2 should be at least 1500 Hz apart.</span>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -340,7 +538,7 @@
             <input id="pitchFloorDefault"
                    [(ngModel)]="pitchFloorDefault"
                    class="hz"
-                   type="number" min="0" step="1">
+                   type="number" min="0" step="100">
           </span>
         </div>
         <div class="item"
@@ -350,7 +548,7 @@
             <input id="pitchCeilingDefault"
                    [(ngModel)]="pitchCeilingDefault"
                    class="hz"
-                   type="number" min="0" step="1">
+                   type="number" min="0" step="100">
           </span>
         </div>
         <div class="item"
@@ -359,7 +557,7 @@
           <span>
             <input id="voicingThresholdDefault"
                    [(ngModel)]="voicingThresholdDefault"
-                   class="small-number"
+                   class="small"
                    type="number" min="0" step="0.01">
           </span>
         </div>
@@ -396,7 +594,7 @@
               <input id="{{'pitchFloorOther'+o}}"
                      [(ngModel)]="pitchFloorOther[o]"
                      class="hz"
-                     type="number" min="0" step="1"
+                     type="number" min="0" step="100"
                      [disabled]="!pitchDifferentiateParticipants">
             </span>
           </div>
@@ -407,7 +605,7 @@
               <input id="{{'pitchCeilingOther'+o}}"
                      [(ngModel)]="pitchCeilingOther[o]"
                      class="hz"
-                     type="number" min="0" step="1"
+                     type="number" min="0" step="100"
                      [disabled]="!pitchDifferentiateParticipants">
             </span>
           </div>
@@ -417,7 +615,7 @@
             <span>
               <input id="{{'voicingThresholdOther'+o}}"
                      [(ngModel)]="voicingThresholdOther[o]"
-                     class="small-number"
+                     class="small"
                      type="number" min="0" step="0.01"
                      [disabled]="!pitchDifferentiateParticipants">
             </span>
