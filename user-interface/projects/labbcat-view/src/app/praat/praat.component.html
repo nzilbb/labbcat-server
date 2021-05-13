@@ -328,15 +328,12 @@
         <div class="item" i18n-title title="Number of analyses between low and high analysis limits. More analysis steps may improve results, but will increase analysis time (50% more steps = around 50% longer to analyze).">
           <label for="fastTrackNumberOfSteps" i18n>Number of Steps</label>
           <span>
-            <select id="fastTrackNumberOfSteps"
-                    [(ngModel)]="fastTrackNumberOfSteps"
-                    [disabled]="!useFastTrack">
-              <option>8</option>
-              <option>12</option>
-              <option>16</option>
-              <option>20</option>
-              <option>24</option>
-            </select>
+            <input id="fastTrackNumberOfSteps"
+                   [(ngModel)]="fastTrackNumberOfSteps"
+                   class="small"
+                   type="number" min="8" step="1"
+                   i18n-placeholder="FastTrack number of steps hint" placeholder="Number"
+                   [disabled]="!useFastTrack">
           </span>
         </div>
         <div class="item" i18n-title title="FastTrack number of coefficients for formant prediction. More coefficients allow for more sudden, and 'wiggly' formant motion.">
@@ -370,26 +367,6 @@
               <option>burg</option>
               <option>robust</option>
             </select>
-          </span>
-        </div>
-        <div class="item" i18n-title title="FastTrack basis functions">
-          <label for="fastTrackBasisFunctions" i18n>Basis Functions</label>
-          <span>
-            <input id="fastTrackBasisFunctions"
-                   [(ngModel)]="fastTrackBasisFunctions"
-                   class="small"
-                   type="text"
-                   [disabled]="!useFastTrack">
-          </span>
-        </div>
-        <div class="item" i18n-title title="FastTrack error method">
-          <label for="fastTrackErrorMethod" i18n>Error Method</label>
-          <span>
-            <input id="fastTrackErrorMethod"
-                   [(ngModel)]="fastTrackErrorMethod"
-                   class="small"
-                   type="text"
-                   [disabled]="!useFastTrack">
           </span>
         </div>
         <div class="header" i18n="FastTrack advanced settings">Heuristics</div>

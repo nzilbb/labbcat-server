@@ -854,7 +854,7 @@ public class ProcessWithPraat extends Task {
    * @see #getFastTrackEnableF1BandwidthHeuristic()
    * @see #setFastTrackEnableF1BandwidthHeuristic(boolean)
    */
-  protected boolean fastTrackEnableF1BandwidthHeuristic = true;
+  protected boolean fastTrackEnableF1BandwidthHeuristic = false;
   /**
    * Getter for {@link #fastTrackEnableF1BandwidthHeuristic}: Fast Track
    * enable_F1_bandwidth_heuristic global setting. 
@@ -894,7 +894,7 @@ public class ProcessWithPraat extends Task {
    * @see #getFastTrackEnableF2BandwidthHeuristic()
    * @see #setFastTrackEnableF2BandwidthHeuristic(boolean)
    */
-  protected boolean fastTrackEnableF2BandwidthHeuristic = true;
+  protected boolean fastTrackEnableF2BandwidthHeuristic = false;
   /**
    * Getter for {@link #fastTrackEnableF2BandwidthHeuristic}: Fast Track
    * enable_F2_bandwidth_heuristic global setting. 
@@ -934,7 +934,7 @@ public class ProcessWithPraat extends Task {
    * @see #getFastTrackEnableF3BandwidthHeuristic()
    * @see #setFastTrackEnableF3BandwidthHeuristic(boolean)
    */
-  protected boolean fastTrackEnableF3BandwidthHeuristic = true;
+  protected boolean fastTrackEnableF3BandwidthHeuristic = false;
   /**
    * Getter for {@link #fastTrackEnableF3BandwidthHeuristic}: Fast Track
    * enable_F3_bandwidth_heuristic global setting. 

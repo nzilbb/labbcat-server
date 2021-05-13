@@ -46,16 +46,16 @@ export class PraatComponent implements OnInit {
     useFastTrack = !this.useClassicFormant;
     // general settings
     fastTrackTimeStep = 0.002;
-    fastTrackBasisFunctions = "dct";
-    fastTrackErrorMethod = "mae";
+    //fastTrackBasisFunctions = "dct";
+    //fastTrackErrorMethod = "mae";
     fastTrackTrackingMethod = "burg";
     fastTrackEnableF1FrequencyHeuristic = true;
     fastTrackMaximumF1FrequencyValue = 1200;
-    fastTrackEnableF1BandwidthHeuristic = true;
+    fastTrackEnableF1BandwidthHeuristic = false;
     fastTrackMaximumF1BandwidthValue = 500;
-    fastTrackEnableF2BandwidthHeuristic = true;
+    fastTrackEnableF2BandwidthHeuristic = false;
     fastTrackMaximumF2BandwidthValue = 600;
-    fastTrackEnableF3BandwidthHeuristic = true;
+    fastTrackEnableF3BandwidthHeuristic = false;
     fastTrackMaximumF3BandwidthValue = 900;
     fastTrackEnableF4FrequencyHeuristic = true;
     fastTrackMinimumF4FrequencyValue = 2900;
@@ -326,8 +326,8 @@ export class PraatComponent implements OnInit {
                 
                 useFastTrack: this.useFastTrack,
                 fastTrackTimeStep: this.fastTrackTimeStep,
-                fastTrackBasisFunctions: this.fastTrackBasisFunctions,
-                fastTrackErrorMethod: this.fastTrackErrorMethod,
+                //fastTrackBasisFunctions: this.fastTrackBasisFunctions,
+                //fastTrackErrorMethod: this.fastTrackErrorMethod,
                 fastTrackTrackingMethod: this.fastTrackTrackingMethod,
                 fastTrackEnableF1FrequencyHeuristic: this.fastTrackEnableF1FrequencyHeuristic,
                 fastTrackMaximumF1FrequencyValue: this.fastTrackMaximumF1FrequencyValue,
