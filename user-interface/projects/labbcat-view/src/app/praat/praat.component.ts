@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { MessageService, LabbcatService } from 'labbcat-common';
-import { Layer } from 'labbcat-common';
+import { Layer, Task } from 'labbcat-common';
 
 @Component({
     selector: 'app-praat',
@@ -96,7 +96,10 @@ export class PraatComponent implements OnInit {
 
     customScriptLayers = [];
     customScript = "";    
-    
+
+    threadId: string;
+    task: Task;
+
     constructor(
         private labbcatService: LabbcatService,
         private messageService: MessageService) { }
@@ -149,6 +152,7 @@ export class PraatComponent implements OnInit {
                 // split the line into fields
                 let delimiter = ",";
                 if (firstLine.match(/.*\t.*/)) delimiter = "\t";
+                else if (firstLine.match(/.;.*/)) delimiter = ";";
                 const fields = firstLine.split(delimiter);
                 // the fields might be quoted, so remove quotes
                 component.headers = fields.map(f=>f.replace(/^"(.*)"$/g, "$1"))
@@ -282,5 +286,42 @@ export class PraatComponent implements OnInit {
     /** Convert a layer ID into a praat script variable name */
     praatVariableName(id: string): string {
         return id.replace(/[^A-Za-z0-9]/g, "_");
+    }
+
+    processing = false;
+    /** start processing */
+    process(): void {
+        this.processing = true;
+        this.labbcatService.labbcat.praat(
+            this.csv, this.transcriptColumn, this.participantColumn, this.startTimeColumn,
+            this.endTimeColumn, this.windowOffset, this.samplePoints,
+            this.formantDifferentiationLayerId, [], true,
+            this.extractF1, this.extractF2, this.extractF3,
+            this.extractMinimumPitch, this.extractMeanPitch, this.extractMaximumPitch,
+            this.extractMaximumIntensity,
+            this.extractCOG1, this.extractCOG2, this.extractCOG23,
+            this.formantCeilingDefault, this.formantCeilingOther[0],
+            this.pitchFloorDefault, this.pitchFloorOther[0],
+            this.pitchCeilingDefault, this.pitchCeilingOther[0],
+            this.voicingThresholdDefault, this.voicingThresholdOther[0],
+            this.scriptFormant, this.scriptPitch, this.scriptIntensity, this.customScript,
+            (response, errors, messages) => {
+                
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
+                this.threadId = response.threadId;
+            }, (evt) => {
+                if (evt.lengthComputable) {
+  	            const percentComplete = Math.round(evt.loaded * 100 / evt.total);
+	            console.log("Uploading: " + percentComplete + "%");
+                }
+            });
+    }
+    /** finished processing */
+    finished(task: Task): void {
+        this.processing = false;
+        if (task.resultUrl) {
+            console.log(task.resultUrl);
+        }
     }
 }

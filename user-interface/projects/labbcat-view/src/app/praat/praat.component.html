@@ -737,4 +737,13 @@ Remove</pre>
       </lib-button>
     </div>
   </div>
+  <div class="controls">
+    <lib-button (press)="process()"
+                [processing]="processing"
+                img="cog.svg" icon="⚙"
+                i18n-title title="Start processing"
+                i18n-label label="Process"
+                ></lib-button>
+  </div>
+  <lib-task *ngIf="threadId" threadId="{{threadId}}" (finished)="finished($event)"></lib-task>
 </div>

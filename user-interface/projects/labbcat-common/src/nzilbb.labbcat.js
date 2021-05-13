@@ -837,7 +837,7 @@
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         releaseTask(id, onResult) {
-            if (exports.verbose) console.log("releaseTask("+threadId+")");
+            if (exports.verbose) console.log("releaseTask("+id+")");
             this.createRequest("releaseTask", {
                 threadId : id,
                 command : "release"
@@ -1059,6 +1059,58 @@
 
             this.createRequest(
                 "search", null, onResult, this.baseUrl+"search",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString(parameters));
+        }
+        
+        /**
+         * Identifies all utterances by the given participants.
+         * @param {string[]} participantIds A list of participant IDs to identify
+         * the utterances of.
+         * @param {string[]} [transcriptTypes=null] An optional list of transcript types to limit
+         * the results to. If null, all transcript types will be searched. 
+         * @param {boolean} [mainParticipant=true] true to search only main-participant
+         * utterances, false to search all utterances. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An object with one attribute, "threadId",
+         * which identifies the resulting task, which can be passed to 
+         * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
+         * {@link LabbcatView#waitForTask}, etc.
+         */
+        allUtterances(participantIds, transcriptTypes, mainParticipant, onResult) {
+            if (typeof transcriptTypes === "function") { // (participantIds, onResult)
+                onResult = transcriptTypes;
+                transcriptTypes = null;
+                mainParticipant = true;
+            } else if (typeof mainParticipant === "function") {
+                // (participantIds, transcriptTypes, onResult)
+                onResult = mainParticipant;
+                mainParticipant = true;
+            } else if (typeof transcriptTypes === "boolean") {
+                // (participantIds, mainParticipant, onResult) 
+                onResult = mainParticipant;
+                mainParticipant = transcriptTypes;
+                transcriptTypes = null;
+            }
+            if (exports.verbose) {
+                console.log("allUtterances("+JSON.stringify(participantIds)
+                            +", "+JSON.stringify(transcriptTypes)
+                            +", "+mainParticipant+")");
+            }
+
+            // first normalize the pattern...
+
+            const parameters = {
+                list : "list",
+                id : participantIds,
+            }
+            if (mainParticipant) parameters.only_main_speaker = true;
+            if (transcriptTypes) parameters.transcript_type = transcriptTypes;
+            if (exports.verbose) console.log(JSON.stringify(parameters));
+
+            this.createRequest(
+                "allUtterances", null, onResult, this.baseUrl+"allUtterances",
                 "POST", // not GET, because the number of parameters can make the URL too long
                 null, "application/x-www-form-urlencoded")
                 .send(this.parametersToQueryString(parameters));
@@ -1414,7 +1466,7 @@
                             }
                         }
                         const filePath = path.join(dir, fileName);
-                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                        fs.writeFile(filePath, Buffer.from(this.response), function(err) {
                             if (err) {
                                 if (exports.verbose) {
                                     console.log("getSoundFragments "+i+" SAVE ERROR: "+err);
@@ -1572,7 +1624,7 @@
                             }
                         }
                         const filePath = path.join(dir, fileName);
-                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                        fs.writeFile(filePath, Buffer.from(this.response), function(err) {
                             if (err) {
                                 if (exports.verbose) {
                                     console.log("getFragments "+i+" SAVE ERROR: "+err);
@@ -1649,7 +1701,7 @@
                 if (exports.verbose) {
                     console.log("getTranscriptAttributes loaded. " + JSON.stringify(this.response));
                 }
-                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                fs.writeFile(fileName, Buffer.from(xhr.responseText), function(err) {
                     if (exports.verbose) {
                         console.log("getTranscriptAttributes wrote file " + fileName);
                     }
@@ -1721,7 +1773,7 @@
                 if (exports.verbose) {
                     console.log("getParticipantAttributes loaded. " + JSON.stringify(this.response));
                 }
-                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                fs.writeFile(fileName, Buffer.from(xhr.responseText), function(err) {
                     if (exports.verbose) {
                         console.log("getParticipantAttributes wrote file " + fileName);
                     }
@@ -1910,6 +1962,194 @@
                 }, onResult, this.baseUrl+"api/dictionary/suggest").send();
         }
 
+        /**
+         * Process with Praat.
+         * @param {file|string} csv The results file to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {int} transcript CSV column index of the transcript name. 
+         * @param {int} participant CSV column index of the participant name. 
+         * @param {int} startTime CSV column index of the start time. 
+         * @param {int} endTime CSV column index of the end time name. 
+         * @param {number} windowOffset How much surrounsing context to include, in seconds..
+         * @param {string} samplePoints Space-delimited series of real numbers between 0
+         * and 1, specifying the proportional time points to measure. e.g. "0.5" will
+         * measure only the mid-point, "0 0.2 0.4 0.6 0.8 1" will measure six points
+         * evenly spread across the duration of the segment, etc. 
+         * @param {string} gender_attribute Gender participant attribute layer ID.
+         * @param {string[]} attribute Participant attribute layer IDs to include in for
+         * the custom script.
+         * @param {boolean} pass_through_data Whether to include all CSV columns from the
+         * input file in the output file. 
+         * @param {boolean} extractF1 Extract F1.
+         * @param {boolean} extractF2 Extract F2.
+         * @param {boolean} extractF3 Extract F3.
+         * @param {boolean} extractMinimumPitch Extract minimum pitch.
+         * @param {boolean} extractMeanPitch Extract mean pitch.
+         * @param {boolean} extractMaximumPitch Extract maximum pitch.
+         * @param {boolean} extractMaximumIntensity Extract maximum intensity.
+         * @param {boolean} extractCOG1 Extract COG 1.
+         * @param {boolean} extractCOG2 Extract COG 2.
+         * @param {boolean} extractCOG3 Extract COG 2/3.
+         * @param {int} maximumFormantFemale Maximum Formant for Females.
+         * @param {int} maximumFormantMale Maximum Formant for Males.
+         * @param {int} pitchFloorFemale Pitch Floor for Females.
+         * @param {int} pitchFloorMale Pitch Floor for Males.
+         * @param {int} pitchCeilingFemale Pitch Ceiling for Females.
+         * @param {int} pitchCeilingMale Pitch Ceiling for Males.
+         * @param {int} voicingThresholdFemale Voicing Threshold for Females.
+         * @param {int} voicingThresholdMale Voicing Threshold for Males.
+         * @param {string} scriptFormant Formant extraction script command.
+         * @param {string} scriptPitch Pitch extraction script command.
+         * @param {string} scriptIntensity Intensity extraction script command.
+         * @param {string} script A user-specified Praat script to execute on each segment.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An object with one attribute,
+         * <var>threadId</var>. 
+         * @param onProgress Invoked on XMLHttpRequest progress.
+         */
+        praat(
+            csv, transcript, participant, startTime, endTime, windowOffset, samplePoints,
+            gender_attribute, attribute, pass_through_data,
+            extractF1, extractF2, extractF3,
+            extractMinimumPitch, extractMeanPitch, extractMaximumPitch, extractMaximumIntensity,
+            extractCOG1, extractCOG2, extractCOG23,
+            maximumFormantFemale, maximumFormantMale,
+            pitchFloorFemale, pitchFloorMale, pitchCeilingFemale, pitchCeilingMale,
+            voicingThresholdFemale, voicingThresholdMale,
+            scriptFormant, scriptPitch, scriptIntensity, script, onResult, onProgress) {
+                        
+            if (exports.verbose) {
+                console.log(
+                    "praat("
+                        +csv+", "+transcript+", "+participant+", "+startTime+", "+endTime+", "
+                        +windowOffset+", "+samplePoints+", "+gender_attribute+", "+attribute+", "
+                        +pass_through_data+", "+extractF1+", "+extractF2+", "+extractF3+", "
+                        +extractMinimumPitch+", "+extractMeanPitch+", "+extractMaximumPitch+", "
+                        +extractMaximumIntensity+", "+extractCOG1+", "+extractCOG2+", "
+                        +extractCOG23+", "+maximumFormantFemale+", "+maximumFormantMale+", "
+                        +pitchFloorFemale+", "+pitchFloorMale+", "+pitchCeilingFemale+", "
+                        +pitchCeilingMale+", "+voicingThresholdFemale+", "
+                        +voicingThresholdMale+", "+scriptFormant+", "+scriptPitch+", "
+                        +scriptIntensity+", "+script+")");
+            }
+
+            // create form
+            var fd = new FormData();
+            fd.append("transcript", transcript);
+            fd.append("participant", participant);
+            fd.append("startTime", startTime);
+            fd.append("endTime", endTime);
+            fd.append("windowOffset", windowOffset);
+            fd.append("samplePoints", samplePoints);
+            fd.append("gender_attribute", gender_attribute);
+            fd.append("attribute", attribute); // TODO array, check this
+            fd.append("pass_through_data", pass_through_data);
+            if (extractF1) fd.append("extractF1", extractF1);
+            if (extractF2) fd.append("extractF2", extractF2);
+            if (extractF3) fd.append("extractF3", extractF3);
+            if (extractMinimumPitch) fd.append("extractMinimumPitch", extractMinimumPitch);
+            if (extractMeanPitch) fd.append("extractMeanPitch", extractMeanPitch);
+            if (extractMaximumPitch) fd.append("extractMaximumPitch", extractMaximumPitch);
+            if (extractMaximumIntensity) fd.append("extractMaximumIntensity", extractMaximumIntensity);
+            if (extractCOG1) fd.append("extractCOG1", extractCOG1);
+            if (extractCOG2) fd.append("extractCOG2", extractCOG2);
+            if (extractCOG23) fd.append("extractCOG23", extractCOG23);
+            fd.append("maximumFormantFemale", maximumFormantFemale);
+            fd.append("maximumFormantMale", maximumFormantMale);
+            fd.append("pitchFloorFemale", pitchFloorFemale);
+            fd.append("pitchFloorMale", pitchFloorMale);
+            fd.append("pitchCeilingFemale", pitchCeilingFemale);
+            fd.append("pitchCeilingMale", pitchCeilingMale);
+            fd.append("voicingThresholdFemale", voicingThresholdFemale);
+            fd.append("voicingThresholdMale", voicingThresholdMale);
+            fd.append("scriptFormant", scriptFormant);
+            fd.append("scriptPitch", scriptPitch);
+            fd.append("scriptIntensity", scriptIntensity);
+            fd.append("script", script);
+
+            if (!runningOnNode) {	
+	        fd.append("csv", csv);
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "praat";
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);	        
+	        xhr.upload.addEventListener("progress", onProgress, false);
+	        xhr.open("POST", this.baseUrl + "api/praat");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+                var csvName = csv.replace(/.*\//g, "");
+                if (exports.verbose) console.log("csvName: " + csvName);
+	        fd.append("csv", 
+		          fs.createReadStream(csv).on('error', function(){
+		              onResult(null, ["Invalid file: " + csvName], [], "praat", csvName);
+		          }), csvName);
+
+	        var urlParts = parseUrl(this.baseUrl + "api/praat");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username && password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "api/praat");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+			        onResult(result, errors, messages, "getMatchAnnotations");
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "praat");
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
