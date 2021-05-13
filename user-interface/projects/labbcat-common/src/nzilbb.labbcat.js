@@ -1966,106 +1966,131 @@
          * Process with Praat.
          * @param {file|string} csv The results file to upload. In a browser, this
          * must be a file object, and in Node, it must be the full path to the file. 
-         * @param {int} transcript CSV column index of the transcript name. 
-         * @param {int} participant CSV column index of the participant name. 
-         * @param {int} startTime CSV column index of the start time. 
-         * @param {int} endTime CSV column index of the end time name. 
-         * @param {number} windowOffset How much surrounsing context to include, in seconds..
-         * @param {string} samplePoints Space-delimited series of real numbers between 0
-         * and 1, specifying the proportional time points to measure. e.g. "0.5" will
-         * measure only the mid-point, "0 0.2 0.4 0.6 0.8 1" will measure six points
-         * evenly spread across the duration of the segment, etc. 
-         * @param {string} gender_attribute Gender participant attribute layer ID.
-         * @param {string[]} attribute Participant attribute layer IDs to include in for
-         * the custom script.
-         * @param {boolean} pass_through_data Whether to include all CSV columns from the
+         * @param {int} transcriptColumn CSV column index of the transcript name. 
+         * @param {int} participantColumn CSV column index of the participant name. 
+         * @param {int} startTimeColumn CSV column index of the start time. 
+         * @param {int} endTimeColumn CSV column index of the end time name. 
+         * @param {number} windowOffset How much surrounsing context to include, in seconds.
+         * @param {boolean} passThroughData Whether to include all CSV columns from the
          * input file in the output file. 
-         * @param {boolean} extractF1 Extract F1.
-         * @param {boolean} extractF2 Extract F2.
-         * @param {boolean} extractF3 Extract F3.
-         * @param {boolean} extractMinimumPitch Extract minimum pitch.
-         * @param {boolean} extractMeanPitch Extract mean pitch.
-         * @param {boolean} extractMaximumPitch Extract maximum pitch.
-         * @param {boolean} extractMaximumIntensity Extract maximum intensity.
-         * @param {boolean} extractCOG1 Extract COG 1.
-         * @param {boolean} extractCOG2 Extract COG 2.
-         * @param {boolean} extractCOG3 Extract COG 2/3.
-         * @param {int} maximumFormantFemale Maximum Formant for Females.
-         * @param {int} maximumFormantMale Maximum Formant for Males.
-         * @param {int} pitchFloorFemale Pitch Floor for Females.
-         * @param {int} pitchFloorMale Pitch Floor for Males.
-         * @param {int} pitchCeilingFemale Pitch Ceiling for Females.
-         * @param {int} pitchCeilingMale Pitch Ceiling for Males.
-         * @param {int} voicingThresholdFemale Voicing Threshold for Females.
-         * @param {int} voicingThresholdMale Voicing Threshold for Males.
-         * @param {string} scriptFormant Formant extraction script command.
-         * @param {string} scriptPitch Pitch extraction script command.
-         * @param {string} scriptIntensity Intensity extraction script command.
-         * @param {string} script A user-specified Praat script to execute on each segment.
+         * @param {object} measurementParameters Parameters that define what to measure
+         * and output. All parameters are optional, and include:
+         * <dl>
+         *
+         * <dt> extractF1 (boolean) </dt><dd> Extract F1. (default: false) </dd>
+         * <dt> extractF2 (boolean) </dt><dd> Extract F2. (default: false) </dd>
+         * <dt> extractF3 (boolean) </dt><dd> Extract F3. (default: false) </dd>
+         * <dt> samplePoints (string) </dt><dd> Space-delimited series of real
+         *   numbers between 0 and 1, specifying the proportional time points to measure
+         *   formant at. e.g. "0.5" will measure only the mid-point, "0 0.2 0.4 0.6 0.8 1"
+         *   will measure six points evenly spread across the duration of the segment,
+         *   etc. (default: "0.5")</dd>
+         * <dt> formantCeilingDefault (int) </dt><dd> Maximum Formant by default. (default:
+         *   550) </dd>
+         * <dt> formantDifferentiationLayerId (string) </dt><dd> Participant attribute
+         *   layer ID for differentiating formant settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. </dd>
+         * <dt> formantOtherPattern (string[]) </dt><dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   <var>formantDifferentiationLayerId</var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   <var>formantCeilingOther</var> will be used for that participant. </dd>
+         * <dt> formantCeilingOther (int[]) </dt><dd> Values to use as the formant ceiling
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>formantOtherPattern</var></dd>
+         * <dt> scriptFormant (string) </dt><dd> Formant extraction script command.
+         *   (default: "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50") </dd>
+         * 
+         * <dt> useFastTrack (boolean) </dt><dd> Use the FastTrack plugin to generate
+         *   optimum, smoothed formant tracks. (default: false)</dd> TODO
+         * 
+         * <dt> extractMinimumPitch (boolean) </dt><dd> Extract minimum pitch. 
+         *   (default: false) </dd>
+         * <dt> extractMeanPitch (boolean) </dt><dd> Extract mean pitch. (default: false) </dd>
+         * <dt> extractMaximumPitch (boolean) </dt><dd> Extract maximum pitch. 
+         *   (default: false) </dd>
+         * <dt> pitchFloorDefault (int) </dt><dd> Pitch Floor by default. (default: 60) </dd>
+         * <dt> pitchCeilingDefault (int) </dt><dd> Pitch Ceiling by default. (default: 500) </dd>
+         * <dt> voicingThresholdDefault (int) </dt><dd> Voicing Threshold by default. 
+         *   (default: 0.5) </dd>
+         * <dt> pitchDifferentiationLayerId (string) </dt><dd> Participant attribute
+         *   layer ID for differentiating pitch settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. </dd>
+         * <dt> pitchOtherPattern (string[]) </dt><dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   <var>pitchDifferentiationLayerId</var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   <var>pitchFloorOther</var>, <var>pitchCeilingOther</var>, and
+         *   <var>voicingThresholdOther</var> will be used for that participant. </dd> 
+         * <dt> pitchFloorOther (int[]) </dt><dd> Values to use as the pitch floor
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>pitchOtherPattern</var></dd>
+         * <dt> pitchCeilingOther (int[]) </dt><dd> Values to use as the pitch ceiling
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>pitchOtherPattern</var></dd>
+         * <dt> voicingThresholdOther (int[]) </dt><dd> Values to use as the voicing threshold
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>pitchOtherPattern</var></dd>
+         * <dt> scriptPitch (string) </dt><dd> Pitch extraction script command.
+         *   (default: 
+         * "To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling") </dd>
+         * 
+         * <dt> extractMaximumIntensity (boolean) </dt><dd> Extract maximum intensity. 
+         *   (default: false) </dd>
+         * <dt> intensityPitchFloorDefault (int) </dt><dd> Pitch Floor by default. 
+         *   (default: 60) </dd>
+         * <dt> intensityDifferentiationLayerId (string) </dt><dd> Participant attribute
+         *   layer ID for differentiating intensity settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. </dd>
+         * <dt> intensityOtherPattern (string[]) </dt><dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   <var>intensityDifferentiationLayerId</var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   <var>intensityPitchFloorOther</var> will be used for that participant. </dd> 
+         * <dt> intensityPitchFloorOther (int[]) </dt><dd> Values to use as the pitch floor
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>intensityPitchOtherPattern</var></dd>
+         * <dt> scriptIntensity (string) </dt><dd> Pitch extraction script command.
+         *   (default: "To Intensity... intensityPitchFloor 0 yes") </dd>
+         * 
+         * <dt> extractCOG1 (boolean) </dt><dd> Extract COG 1. (default: false) </dd>
+         * <dt> extractCOG2 (boolean) </dt><dd> Extract COG 2. (default: false) </dd>
+         * <dt> extractCOG23 (boolean) </dt><dd> Extract COG 2/3. (default: false) </dd>
+         *
+         * <dt> script (string) </dt><dd> A user-specified custom Praat script to execute
+         *   on each segment. </dd> 
+         * <dt> attributes (string[]) </dt><dd> A list of participant attribute layer IDs
+         *   to include as variables for the custom Praat <var>script</var>. </dd> 
+         * </dl>
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: An object with one attribute,
          * <var>threadId</var>. 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         praat(
-            csv, transcript, participant, startTime, endTime, windowOffset, samplePoints,
-            gender_attribute, attribute, pass_through_data,
-            extractF1, extractF2, extractF3,
-            extractMinimumPitch, extractMeanPitch, extractMaximumPitch, extractMaximumIntensity,
-            extractCOG1, extractCOG2, extractCOG23,
-            maximumFormantFemale, maximumFormantMale,
-            pitchFloorFemale, pitchFloorMale, pitchCeilingFemale, pitchCeilingMale,
-            voicingThresholdFemale, voicingThresholdMale,
-            scriptFormant, scriptPitch, scriptIntensity, script, onResult, onProgress) {
+            csv, transcriptColumn, participantColumn, startTimeColumn, endTimeColumn,
+            windowOffset, passThroughData, measurementParameters,
+            onResult, onProgress) {
                         
             if (exports.verbose) {
                 console.log(
                     "praat("
-                        +csv+", "+transcript+", "+participant+", "+startTime+", "+endTime+", "
-                        +windowOffset+", "+samplePoints+", "+gender_attribute+", "+attribute+", "
-                        +pass_through_data+", "+extractF1+", "+extractF2+", "+extractF3+", "
-                        +extractMinimumPitch+", "+extractMeanPitch+", "+extractMaximumPitch+", "
-                        +extractMaximumIntensity+", "+extractCOG1+", "+extractCOG2+", "
-                        +extractCOG23+", "+maximumFormantFemale+", "+maximumFormantMale+", "
-                        +pitchFloorFemale+", "+pitchFloorMale+", "+pitchCeilingFemale+", "
-                        +pitchCeilingMale+", "+voicingThresholdFemale+", "
-                        +voicingThresholdMale+", "+scriptFormant+", "+scriptPitch+", "
-                        +scriptIntensity+", "+script+")");
+                        +csv+", "+transcriptColumn+", "+participantColumn+", "
+                        +startTimeColumn+", "+endTimeColumn+", "+windowOffset+", "
+                        +passThroughData+", "+JSON.stringify(measurementParameters)+")");
             }
 
             // create form
             var fd = new FormData();
-            fd.append("transcript", transcript);
-            fd.append("participant", participant);
-            fd.append("startTime", startTime);
-            fd.append("endTime", endTime);
+            fd.append("transcriptColumn", transcriptColumn);
+            fd.append("participantColumn", participantColumn);
+            fd.append("startTimeColumn", startTimeColumn);
+            fd.append("endTimeColumn", endTimeColumn);
             fd.append("windowOffset", windowOffset);
-            fd.append("samplePoints", samplePoints);
-            fd.append("gender_attribute", gender_attribute);
-            fd.append("attribute", attribute); // TODO array, check this
-            fd.append("pass_through_data", pass_through_data);
-            if (extractF1) fd.append("extractF1", extractF1);
-            if (extractF2) fd.append("extractF2", extractF2);
-            if (extractF3) fd.append("extractF3", extractF3);
-            if (extractMinimumPitch) fd.append("extractMinimumPitch", extractMinimumPitch);
-            if (extractMeanPitch) fd.append("extractMeanPitch", extractMeanPitch);
-            if (extractMaximumPitch) fd.append("extractMaximumPitch", extractMaximumPitch);
-            if (extractMaximumIntensity) fd.append("extractMaximumIntensity", extractMaximumIntensity);
-            if (extractCOG1) fd.append("extractCOG1", extractCOG1);
-            if (extractCOG2) fd.append("extractCOG2", extractCOG2);
-            if (extractCOG23) fd.append("extractCOG23", extractCOG23);
-            fd.append("maximumFormantFemale", maximumFormantFemale);
-            fd.append("maximumFormantMale", maximumFormantMale);
-            fd.append("pitchFloorFemale", pitchFloorFemale);
-            fd.append("pitchFloorMale", pitchFloorMale);
-            fd.append("pitchCeilingFemale", pitchCeilingFemale);
-            fd.append("pitchCeilingMale", pitchCeilingMale);
-            fd.append("voicingThresholdFemale", voicingThresholdFemale);
-            fd.append("voicingThresholdMale", voicingThresholdMale);
-            fd.append("scriptFormant", scriptFormant);
-            fd.append("scriptPitch", scriptPitch);
-            fd.append("scriptIntensity", scriptIntensity);
-            fd.append("script", script);
+            for (var parameter in measurementParameters) {
+                var value = measurementParameters[parameter];
+                fd.append(parameter, value); // TODO need to tease apart arrays?
+            }
 
             if (!runningOnNode) {	
 	        fd.append("csv", csv);

@@ -40,7 +40,7 @@ export class PraatComponent implements OnInit {
     formantOtherPattern = [ "M" ];
     formantCeilingDefault = 5500; // female
     formantCeilingOther = [ 5000 ]; // male
-    scriptFormant = "To Formant (burg)... 0.0025 5 {max_formant} 0.025 50";
+    scriptFormant = "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50";
 
     // FastTrack settings:
     useFastTrack = !this.useClassicFormant;
@@ -72,7 +72,7 @@ export class PraatComponent implements OnInit {
     fastTrackNumberOfSteps = 20;
     fastTrackNumberOfCoefficients = 5;
     fastTrackNumberOfFormants = 3;
-    fastTrackCoefficients = true;
+    fastTrackCoefficients = false;
     
     extractMinimumPitch = false;
     extractMeanPitch = false;
@@ -86,10 +86,16 @@ export class PraatComponent implements OnInit {
     pitchCeilingOther = [ 250 ]; // male
     voicingThresholdDefault = 0.5; // female
     voicingThresholdOther = [ 0.4 ]; // male
-    scriptPitch = "To Pitch (ac)...  0 {pitch_floor} 15 no 0.03 {voicing_threshold} 0.01 0.35 0.14 {pitch_ceiling}";
+    scriptPitch = "To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling";
     
     extractMaximumIntensity = false;
-    scriptIntensity = "To Intensity... {pitch_floor} 0 yes";
+    intensityDifferentiateParticipants = true;
+    intensityDifferentiationLayerId: string;
+    intensityOtherPattern = [ "M" ];
+    intensityPitchFloorDefault = 60; // female
+    intensityPitchFloorOther = [ 30 ]; // male
+    scriptIntensity = "To Intensity... intensityPitchFloor 0 yes";
+    
     extractCOG1 = false;
     extractCOG2 = false;
     extractCOG23 = false;
@@ -123,6 +129,7 @@ export class PraatComponent implements OnInit {
                 this.formantDifferentiationLayerId = genderLayer.id;
                 this.fastTrackDifferentiationLayerId = genderLayer.id;
                 this.pitchDifferentiationLayerId = genderLayer.id;
+                this.intensityDifferentiationLayerId = genderLayer.id;
             }
         });
     }
@@ -230,6 +237,17 @@ export class PraatComponent implements OnInit {
         this.voicingThresholdOther.pop();
     }
 
+    /** Add another intensity settings option */
+    intensityAddOther(): void {
+        this.intensityOtherPattern.push("");
+        this.intensityPitchFloorOther.push(this.pitchFloorDefault);
+    }
+    /** Remove last intensity settings option */
+    intensityRemoveOther(): void {
+        this.intensityOtherPattern.pop();
+        this.intensityPitchFloorOther.pop();
+    }
+
     /** Select participant attribute for inclusion in custom script */
     toggleCustomScriptLayer(id: string): void {
         if (this.customScriptLayers.includes(id)) { // id is in the list
@@ -292,20 +310,72 @@ export class PraatComponent implements OnInit {
     /** start processing */
     process(): void {
         this.processing = true;
+        this.threadId = null;
         this.labbcatService.labbcat.praat(
             this.csv, this.transcriptColumn, this.participantColumn, this.startTimeColumn,
-            this.endTimeColumn, this.windowOffset, this.samplePoints,
-            this.formantDifferentiationLayerId, [], true,
-            this.extractF1, this.extractF2, this.extractF3,
-            this.extractMinimumPitch, this.extractMeanPitch, this.extractMaximumPitch,
-            this.extractMaximumIntensity,
-            this.extractCOG1, this.extractCOG2, this.extractCOG23,
-            this.formantCeilingDefault, this.formantCeilingOther[0],
-            this.pitchFloorDefault, this.pitchFloorOther[0],
-            this.pitchCeilingDefault, this.pitchCeilingOther[0],
-            this.voicingThresholdDefault, this.voicingThresholdOther[0],
-            this.scriptFormant, this.scriptPitch, this.scriptIntensity, this.customScript,
-            (response, errors, messages) => {
+            this.endTimeColumn, this.windowOffset, true, { // measurementParameters:
+                extractF1: this.extractF1,
+                extractF2: this.extractF2,
+                extractF3: this.extractF3,
+                samplePoints: this.samplePoints,
+                formantCeilingDefault: this.formantCeilingDefault,
+                formantDifferentiationLayerId: this.formantDifferentiationLayerId,
+                formantOtherPattern: this.formantOtherPattern,
+                formantCeilingOther: this.formantCeilingOther,
+                scriptFormant: this.scriptFormant,
+                
+                useFastTrack: this.useFastTrack,
+                fastTrackTimeStep: this.fastTrackTimeStep,
+                fastTrackBasisFunctions: this.fastTrackBasisFunctions,
+                fastTrackErrorMethod: this.fastTrackErrorMethod,
+                fastTrackTrackingMethod: this.fastTrackTrackingMethod,
+                fastTrackEnableF1FrequencyHeuristic: this.fastTrackEnableF1FrequencyHeuristic,
+                fastTrackMaximumF1FrequencyValue: this.fastTrackMaximumF1FrequencyValue,
+                fastTrackEnableF1BandwidthHeuristic: this.fastTrackEnableF1BandwidthHeuristic,
+                fastTrackMaximumF1BandwidthValue: this.fastTrackMaximumF1BandwidthValue,
+                fastTrackEnableF2BandwidthHeuristic: this.fastTrackEnableF2BandwidthHeuristic,
+                fastTrackMaximumF2BandwidthValue: this.fastTrackMaximumF2BandwidthValue,
+                fastTrackEnableF3BandwidthHeuristic: this.fastTrackEnableF3BandwidthHeuristic,
+                fastTrackMaximumF3BandwidthValue: this.fastTrackMaximumF3BandwidthValue,
+                fastTrackEnableF4FrequencyHeuristic: this.fastTrackEnableF4FrequencyHeuristic,
+                fastTrackMinimumF4FrequencyValue: this.fastTrackMinimumF4FrequencyValue,
+                fastTrackEnableRhoticHeuristic: this.fastTrackEnableRhoticHeuristic,
+                fastTrackEnableF3F4ProximityHeuristic: this.fastTrackEnableF3F4ProximityHeuristic,
+                fastTrackNumberOfSteps: this.fastTrackNumberOfSteps,
+                fastTrackNumberOfCoefficients: this.fastTrackNumberOfCoefficients,
+                fastTrackNumberOfFormants: this.fastTrackNumberOfFormants,
+                fastTrackCoefficients: this.fastTrackCoefficients,
+                fastTrackDifferentiationLayerId: this.fastTrackDifferentiationLayerId,
+                fastTrackOtherPattern: this.fastTrackOtherPattern,
+                fastTrackLowestAnalysisFrequencyDefault: this.fastTrackLowestAnalysisFrequencyDefault,
+                fastTrackHighestAnalysisFrequencyDefault: this.fastTrackHighestAnalysisFrequencyDefault,
+                fastTrackLowestAnalysisFrequencyOther: this.fastTrackLowestAnalysisFrequencyOther,
+                fastTrackHighestAnalysisFrequencyOther: this.fastTrackHighestAnalysisFrequencyOther,
+                
+                extractMinimumPitch: this.extractMinimumPitch,
+                extractMeanPitch: this.extractMeanPitch,
+                extractMaximumPitch: this.extractMaximumPitch,
+                pitchFloorDefault: this.pitchFloorDefault,
+                pitchCeilingDefault: this.pitchCeilingDefault,
+                voicingThresholdDefault: this.voicingThresholdDefault,
+                pitchDifferentiationLayerId: this.pitchDifferentiationLayerId,
+                pitchOtherPattern: this.pitchOtherPattern,
+                pitchFloorOther: this.pitchFloorOther,
+                pitchCeilingOther: this.pitchCeilingOther,
+                voicingThresholdOther: this.voicingThresholdOther,
+                scriptPitch: this.scriptPitch,
+                extractMaximumIntensity: this.extractMaximumIntensity,
+                intensityPitchFloorDefault: this.intensityPitchFloorDefault,
+                intensityDifferentiationLayerId: this.intensityDifferentiationLayerId,
+                intensityOtherPattern: this.intensityOtherPattern,
+                intensityPitchFloorOther: this.intensityPitchFloorOther,
+                scriptIntensity: this.scriptIntensity,
+                extractCOG1: this.extractCOG1,
+                extractCOG2: this.extractCOG2,
+                extractCOG23: this.extractCOG23,
+                script: this.customScript,
+                attributes: this.customScriptLayers
+            }, (response, errors, messages) => {
                 
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));

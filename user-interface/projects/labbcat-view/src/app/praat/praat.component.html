@@ -3,7 +3,7 @@
 <div id="file-chooser">
   <label for="csv" i18n>Results File</label>
   <input type="file" id="csv" (change)="selectFile($event.target.files)" autofocus>
-  <span *ngIf="rowCount" i18n>{{rowCount}} rows</span>
+  <span *ngIf="rowCount" id="rowCount" i18n>{{rowCount}} rows</span>
 </div>
 
 <div id="settings-form" *ngIf="headers">
@@ -141,7 +141,7 @@
       <fieldset class="settings-set default">
         <legend i18n>Default Settings</legend>
         <div class="item"
-             i18n-title title="Formant ceiling - subsituted for {max_formant} in the Praat command">
+             i18n-title title="Formant ceiling - value for formantCeiling in the Praat command">
           <label for="formantCeilingDefault" i18n>Formant Ceiling</label>
           <span>
             <input id="formantCeilingDefault"
@@ -179,7 +179,7 @@
             </label>
           </legend>
           <div class="item"
-               i18n-title title="Maximum formant value - subsituted for {max_formant} in the Praat command">
+               i18n-title title="Maximum formant value - value for formantCeiling in the Praat command">
             <label for="{{'formantCeilingOther'+o}}" i18n>Formant Ceiling</label>
             <span>
               <input id="{{'formantCeilingOther'+o}}"
@@ -210,9 +210,15 @@
         <input type="radio" name="formantMethod" [value]="true" [(ngModel)]="useFastTrack">
         <span i18n>FastTrack</span>        
       </label>
-      <div><a href="https://github.com/santiagobarreda/FastTrack" target="FastTrack"
-              i18n-title title="The FastTrack source code and wiki"
-              i18n>[more information]</a></div>
+      <div class="long">
+        <input id="fastTrackCoefficients" [(ngModel)]="fastTrackCoefficients" type="checkbox"
+               i18n-title title="Whether to return the regression coefficients from FastTrack">
+        <label for="fastTrackCoefficients"
+               i18n-title title="Whether to return the regression coefficients from FastTrack" i18n="FastTrack coefficients">Coefficients</label>
+        <a href="https://github.com/santiagobarreda/FastTrack" target="FastTrack"
+           i18n-title title="The FastTrack source code and wiki"
+           i18n>[more information]</a>
+      </div>
     </div>
     <div class="{{useFastTrack?'long-unhidden-panel':'hidden-panel'}}">
       <div class="settings-sets">
@@ -532,7 +538,7 @@
       <fieldset class="settings-set default">
         <legend i18n>Default Settings</legend>
         <div class="item"
-             i18n-title title="Pitch floor - subsituted for {pitch_floor} in the Praat command">
+             i18n-title title="Pitch floor - value for pitchFloor in the Praat command">
           <label for="pitchFloorDefault" i18n>Pitch Floor</label>
           <span>
             <input id="pitchFloorDefault"
@@ -542,7 +548,7 @@
           </span>
         </div>
         <div class="item"
-             i18n-title title="Pitch ceiling - subsituted for {pitch_ceiling} in the Praat command">
+             i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
           <label for="pitchCeilingDefault" i18n>Pitch Ceiling</label>
           <span>
             <input id="pitchCeilingDefault"
@@ -552,7 +558,7 @@
           </span>
         </div>
         <div class="item"
-             i18n-title title="Voicing Threshold - subsituted for {voicing_threshold} in the Praat command">
+             i18n-title title="Voicing Threshold - value for voicingThreshold in the Praat command">
           <label for="voicingThresholdDefault" i18n>Voicing Threshold</label>
           <span>
             <input id="voicingThresholdDefault"
@@ -588,8 +594,8 @@
             </label>
           </legend>
           <div class="item"
-               i18n-title title="Pitch floor - subsituted for {pitch_floor} in the Praat command">
-            <label for="pitchFloorDefault" i18n>Pitch Floor</label>
+               i18n-title title="Pitch floor - value for pitchFloor in the Praat command">
+            <label for="{{'pitchFloorOther'+o}}" i18n>Pitch Floor</label>
             <span>
               <input id="{{'pitchFloorOther'+o}}"
                      [(ngModel)]="pitchFloorOther[o]"
@@ -599,7 +605,7 @@
             </span>
           </div>
           <div class="item"
-               i18n-title title="Pitch ceiling - subsituted for {pitch_ceiling} in the Praat command">
+               i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
             <label for="pitchCeilingDefault" i18n>Pitch Ceiling</label>
             <span>
               <input id="{{'pitchCeilingOther'+o}}"
@@ -610,7 +616,7 @@
             </span>
           </div>
           <div class="item"
-               i18n-title title="Voicing Threshold - subsituted for {voicing_threshold} in the Praat command">
+               i18n-title title="Voicing Threshold - value for voicingThreshold in the Praat command">
             <label for="voicingThresholdDefault" i18n>Voicing Threshold</label>
             <span>
               <input id="{{'voicingThresholdOther'+o}}"
@@ -658,6 +664,72 @@
          i18n-title title="Command Praat will use to extract intensity">
       <label for="scriptIntensity" i18n>Praat Intensity command</label>
       <span class="script"><input id="scriptIntensity" [(ngModel)]="scriptIntensity" type="text"></span>
+    </div>
+    <div class="settings-sets">
+      <fieldset class="settings-set default">
+        <legend i18n>Default Settings</legend>
+        <div class="item"
+             i18n-title title="Pitch floor - value for intensityPitchFloor in the Praat command">
+          <label for="intensityPitchFloorDefault" i18n>Pitch Floor</label>
+          <span>
+            <input id="intensityPitchFloorDefault"
+                   [(ngModel)]="intensityPitchFloorDefault"
+                   class="hz"
+                   type="number" min="0" step="100">
+          </span>
+        </div>
+      </fieldset>
+      <fieldset class="alternatives">
+        <legend>
+          <input id="intensityDifferentiateParticipants" type="checkbox"
+                 [(ngModel)]="intensityDifferentiateParticipants">
+          <label for="intensityDifferentiateParticipants" i18n>Except participants whose</label>
+          <select id="intensityDifferentiationLayerId"
+                  [(ngModel)]="intensityDifferentiationLayerId"
+                  i18n-title title="Attribute for differentiating participants"
+                  [disabled]="!intensityDifferentiateParticipants">
+            <ng-container *ngFor="let layer of participantAttributeLayers">
+              <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
+          </select>
+        </legend>
+        <fieldset class="settings-set other"
+                  *ngFor="let pattern of intensityOtherPattern; let o = index; trackBy: trackByFn">
+          <legend>
+            <label><span i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
+              <input [(ngModel)]="intensityOtherPattern[o]"
+                     class="regex"
+                     type="text"
+                     i18n-title title="Regular expression to match against the layer above"
+                     i18n-placeholder placeholder="Regular Expression"
+                     [disabled]="!intensityDifferentiateParticipants">
+            </label>
+          </legend>
+          <div class="item"
+               i18n-title title="Pitch floor - value for intensityPitchFloor in the Praat command">
+            <label for="{{'intensityPitchFloorOther'+o}}" i18n>Pitch Floor</label>
+            <span>
+              <input id="{{'intensityPitchFloorOther'+o}}"
+                     [(ngModel)]="intensityPitchFloorOther[o]"
+                     class="hz"
+                     type="number" min="0" step="100"
+                     [disabled]="!intensityDifferentiateParticipants">
+            </span>
+          </div>
+        </fieldset>
+        <div class="controls">
+          <lib-button (press)="intensityAddOther()"
+                      img="add.svg" icon="+"
+                      i18n-title title="Add alternative settings"
+                      [disabled]="!intensityDifferentiateParticipants"
+                      ></lib-button>
+          <lib-button *ngIf="intensityOtherPattern.length > 1"
+                      (press)="intensityRemoveOther()"
+                      img="remove.svg" icon="-"
+                      i18n-title title="Remove alternative settings"
+                      [disabled]="!intensityDifferentiateParticipants"
+                      ></lib-button>
+        </div>
+      </fieldset>
     </div>
   </div>
 

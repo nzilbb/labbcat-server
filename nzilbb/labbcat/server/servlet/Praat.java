@@ -60,47 +60,164 @@ import org.apache.commons.fileupload.FileItem;
  * to extract given acoustic measurements.
  * <p> The request method must be <b> POST </b>
  * <p> The multipart-encoded parameters are:
- *   <dl>
- *     <dd><code>csv</code> - CSV results file containing tokens to measure.</dd>
- *     <dd><code>transcript</code> - CSV column index of the transcript name.</dd>
- *     <dd><code>participant</code> - CSV column index of the participant name.</dd>
- *     <dd><code>startTime</code> - CSV column index of the start time.</dd>
- *     <dd><code>endTime</code> - CSV column index of the end time name.</dd>
- *     <dd><code>windowOffset</code> - How much surrounsing context to include, in seconds.</dd>
- *     <dd><code>samplePoints</code> - Space-delimited series of real numbers between 0
- *                                     and 1, specifying the proportional time points to
- *                                     measure. e.g. "0.5" will measure only the
- *                                     mid-point, "0 0.2 0.4 0.6 0.8 1" will measure six
- *                                     points evenly spread across the duration of the
- *                                     segment, etc.</dd> 
- *     <dd><code>gender_attribute</code> - Gender participant attribute layer ID.</dd>
- *     <dd><code>attribute</code> - Participant attribute layer IDs to include in for the
- *                                  custom script.</dd>
- *     <dd><code>pass_through_data</code> - Whether to include all CSV columns from the
- *                                          input file in the output file - "false" if not.</dd>
- *     <dd><code>extractF1</code> - Extract F1.</dd>
- *     <dd><code>extractF2</code> - Extract F2.</dd>
- *     <dd><code>extractF3</code> - Extract F3.</dd>
- *     <dd><code>extractMinimumPitch</code> - Extract minimum pitch.</dd>
- *     <dd><code>extractMeanPitch</code> - Extract mean pitch.</dd>
- *     <dd><code>extractMaximumPitch</code> - Extract maximum pitch.</dd>
- *     <dd><code>extractMaximumIntensity</code> - Extract maximum intensity.</dd>
- *     <dd><code>extractCOG1</code> - Extract COG 1.</dd>
- *     <dd><code>extractCOG2</code> - Extract COG 2.</dd>
- *     <dd><code>extractCOG23</code> - Extract COG 2/3.</dd>
- *     <dd><code>maximumFormantFemale</code> - Maximum Formant for Females.</dd>
- *     <dd><code>maximumFormantMale</code> - Maximum Formant for Males.</dd>
- *     <dd><code>pitchFloorFemale</code> - Pitch Floor for Females.</dd>
- *     <dd><code>pitchFloorMale</code> - Pitch Floor for Males.</dd>
- *     <dd><code>pitchCeilingFemale</code> - Pitch Ceiling for Females.</dd>
- *     <dd><code>pitchCeilingMale</code> - Pitch Ceiling for Males.</dd>
- *     <dd><code>voicingThresholdFemale</code> - Voicing Threshold for Females.</dd>
- *     <dd><code>voicingThresholdMale</code> - Voicing Threshold for Males.</dd>
- *     <dd><code>scriptFormant</code> - Formant extraction script command.</dd>
- *     <dd><code>scriptPitch</code> - Pitch extraction script command.</dd>
- *     <dd><code>scriptIntensity</code> - Intensity extraction script command.</dd>
- *     <dd><code>script</code> - A user-specified Praat script to execute on each segment.</dd>
- *   </dl>
+ *  <dl>
+ *   <dt> csv </dt>
+ *       <dd> CSV results file containing tokens to measure. </dd>
+ *   <dt> transcriptColumn </dt>
+ *       <dd> CSV column index of the transcript name.</dd>
+ *   <dt> participantColumn </dt>
+ *       <dd> CSV column index of the participant name.</dd>
+ *   <dt> startTimeColumn </dt>
+ *       <dd> CSV column index of the start time.</dd>
+ *   <dt> endTimeColumn </dt>
+ *       <dd> CSV column index of the end time name.</dd>
+ *   <dt> windowOffset </dt>
+ *       <dd> How much surrounsing context to include, in seconds.</dd>
+ *   <dt> passThroughData </dt>
+ *       <dd> Whether to include all CSV columns from the input file in the output file -
+ *            "false" if not.</dd> 
+ *   <dt> extractF1 </dt>
+ *       <dd> Extract F1.</dd>
+ *   <dt> extractF2 </dt>
+ *       <dd> Extract F2.</dd>
+ *   <dt> extractF3 </dt>
+ *       <dd> Extract F3.</dd>
+ *   <dt> samplePoints </dt>
+ *       <dd> Space-delimited series of real numbers between 0 and 1, specifying the
+ *            proportional time points to measure formants. e.g. "0.5" will measure only
+ *            the mid-point, "0 0.2 0.4 0.6 0.8 1" will measure six points evenly spread
+ *            across the duration of the segment, etc.</dd> 
+ *   <dt> formantDifferentiationLayerId </dt>
+ *       <dd> Participant attribute
+ *            layer ID for differentiating formant settings; this will typically be
+ *            "participant_gender" but can be any participant attribute layer. </dd> 
+ *   <dt> formantOtherPattern (multiple values) </dt>
+ *       <dd> Array of regular expression strings to match against the value of that
+ *            attribute identified by <var>formantDifferentiationLayerId</var>. If the
+ *            participant's attribute value matches the pattern for an element in this
+ *            array, the corresponding element in <var>formantCeilingOther</var> will be
+ *            used for that participant. </dd> 
+ *   <dt> formantCeilingOther (multiple values) </dt>
+ *       <dd> Values to use as the formant ceiling for participants who's attribute value
+ *            matches the corresponding regular expression in <var>formantOtherPattern</var></dd>
+ *   <dt> scriptFormant </dt>
+ *       <dd> Formant extraction script command.
+ *   (default: "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50") </dd>
+ * 
+ *   <dt> useFastTrack ("true" or "false") </dt>
+ *       <dd> Use the FastTrack plugin to generate optimum, smoothed formant
+ *       tracks. (default: false)</dd>
+ *   <dt> fastTrackTimeStep </dt>
+ *       <dd> Fast Track time_step global setting. </dd>
+ *   <dt> fastTrackBasisFunctions </dt>
+ *       <dd> Fast Track basis_functions global setting - "dct". </dd>
+ *   <dt> fastTrackErrorMethod </dt>
+ *       <dd> Fast Track error_method global setting - "mae". </dd>
+ *   <dt> fastTrackTrackingMethod </dt>
+ *       <dd> Fast Track tracking_method parameter for trackAutoselectProcedure; "burg" or
+ *       "robust". </dd> 
+ *   <dt> fastTrackEnableF1FrequencyHeuristic ("true" or "false") </dt>
+ *       <dd> Fast Track enable_F1_frequency_heuristic global setting. </dd>
+ *   <dt> fastTrackMaximumF1FrequencyValue </dt>
+ *       <dd> Fast Track maximum_F1_frequency_value global setting. </dd>
+ *   <dt> fastTrackEnableF1BandwidthHeuristic </dt>
+ *       <dd> Fast Track enable_F1_bandwidth_heuristic global setting. </dd>
+ *   <dt> fastTrackMaximumF1BandwidthValue </dt>
+ *       <dd> Fast Track maximum_F1_bandwidth_value global setting. </dd>
+ *   <dt> fastTrackEnableF2BandwidthHeuristic ("true" or "false") </dt>
+ *       <dd> Fast Track enable_F2_bandwidth_heuristic global setting. </dd>
+ *   <dt> fastTrackMaximumF2BandwidthValue </dt>
+ *       <dd> Fast Track maximum_F2_bandwidth_value global setting. </dd>
+ *   <dt> fastTrackEnableF3BandwidthHeuristic ("true" or "false") </dt>
+ *       <dd> Fast Track enable_F3_bandwidth_heuristic global setting.. </dd>
+ *   <dt> fastTrackMaximumF3BandwidthValue </dt>
+ *       <dd> Fast Track maximum_F3_bandwidth_value global setting. </dd>
+ *   <dt> fastTrackEnableF4FrequencyHeuristic ("true" or "false") </dt>
+ *       <dd> Fast Track enable_F4_frequency_heuristic global setting. </dd>
+ *   <dt> fastTrackMinimumF4FrequencyValue </dt>
+ *       <dd> Fast Track minimum_F4_frequency_value global setting. </dd>
+ *   <dt> fastTrackEnableRhoticHeuristic ("true" of "false") </dt>
+ *       <dd> Fast Track enable_rhotic_heuristic global setting. </dd>
+ *   <dt> fastTrackEnableF3F4ProximityHeuristic </dt>
+ *       <dd> Fast Track enable_F3F4_proximity_heuristic global setting. </dd>
+ *   <dt> fastTrackNumberOfSteps </dt>
+ *       <dd> Fast Track number of steps. </dd>
+ *   <dt> fastTrackNumberOfCoefficients </dt>
+ *       <dd> Fast Track number of coefficients for the regression function. </dd>
+ *   <dt> fastTrackNumberOfFormants </dt>
+ *       <dd> Fast Track number of formants. </dd>
+ *   <dt> fastTrackCoefficients ("true" or "false") </dt>
+ *       <dd> Whether to return the regression coefficients from FastTrack. </dd>
+ * 
+ *   <dt> extractMinimumPitch ("true" or "false") </dt>
+ *       <dd> Extract minimum pitch. (default: false) </dd>
+ *   <dt> extractMeanPitch ("true" or "false") </dt>
+ *       <dd> Extract mean pitch. (default: false) </dd>
+ *   <dt> extractMaximumPitch ("true" or "false") </dt>
+ *       <dd> Extract maximum pitch. (default: false) </dd>
+ *   <dt> pitchFloorDefault (int) </dt>
+ *       <dd> Pitch Floor by default. (default: 60) </dd>
+ *   <dt> pitchCeilingDefault (int) </dt>
+ *       <dd> Pitch Ceiling by default. (default: 500) </dd>
+ *   <dt> voicingThresholdDefault (int) </dt>
+ *       <dd> Voicing Threshold by default. (default: 0.5) </dd>
+ *   <dt> pitchDifferentiationLayerId (string) </dt>
+ *       <dd> Participant attribute layer ID for differentiating pitch settings; this will
+ *            typically be "participant_gender" but can be any participant attribute layer. </dd>
+ *   <dt> pitchOtherPattern (string[]) </dt>
+ *       <dd> Array of regular expression strings to match against the value of that
+ *       attribute identified by <var>pitchDifferentiationLayerId</var>. If the
+ *       participant's attribute value matches the pattern for an element in this array,
+ *       the corresponding element in <var>pitchFloorOther</var>,
+ *       <var>pitchCeilingOther</var>, and <var>voicingThresholdOther</var> will be used
+ *       for that participant. </dd>  
+ *   <dt> pitchFloorOther (int[]) </dt>
+ *       <dd> Values to use as the pitch floor for participants who's attribute value
+ *       matches the corresponding regular expression in <var>pitchOtherPattern</var></dd>
+ *   <dt> pitchCeilingOther (int[]) </dt>
+ *       <dd> Values to use as the pitch ceiling for participants who's attribute value
+ *       matches the corresponding regular expression in <var>pitchOtherPattern</var></dd>
+ *   <dt> voicingThresholdOther (int[]) </dt>
+ *       <dd> Values to use as the voicing threshold for participants who's attribute
+ *       value matches the corresponding regular expression in <var>pitchOtherPattern</var></dd>
+ *   <dt> scriptPitch (string) </dt>
+ *       <dd> Pitch extraction script command. (default: 
+ * "To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling") </dd>
+ * 
+ *   <dt> extractMaximumIntensity ("true" or "false") </dt>
+ *       <dd> Extract maximum intensity.  (default: false) </dd>
+ *   <dt> intensityPitchFloorDefault </dt>
+ *       <dd> Pitch Floor by default. (default: 60) </dd>
+ *   <dt> intensityDifferentiationLayerId </dt>
+ *       <dd> Participant attribute layer ID for differentiating intensity settings; this
+ *       will typically be "participant_gender" but can be any participant attribute layer. </dd>
+ *   <dt> intensityOtherPattern (multiple values) </dt>
+ *       <dd> Array of regular expression strings to match against the value of that
+ *       attribute identified by <var>intensityDifferentiationLayerId</var>. If the
+ *       participant's attribute value matches the pattern for an element in this array,
+ *       the corresponding element in <var>intensityPitchFloorOther</var> will be used for
+ *       that participant. </dd>  
+ *   <dt> intensityPitchFloorOther (multiple values) </dt>
+ *       <dd> Values to use as the pitch floor for participants who's attribute value
+ *       matches the corresponding regular expression in
+ *       <var>intensityPitchOtherPattern</var></dd> 
+ *   <dt> scriptIntensity </dt>
+ *       <dd> Pitch extraction script command. 
+ *       (default: "To Intensity... intensityPitchFloor 0 yes") </dd>
+ * 
+ *   <dt> extractCOG1 ("true" or "false") </dt>
+ *       <dd> Extract COG 1. (default: false) </dd>
+ *   <dt> extractCOG2 ("true" or "false") </dt>
+ *       <dd> Extract COG 2. (default: false) </dd>
+ *   <dt> extractCOG23 ("true" or "false") </dt>
+ *       <dd> Extract COG 2/3. (default: false) </dd>
+ *
+ *   <dt> script </dt>
+ *       <dd> A user-specified custom Praat script to execute on each segment. </dd> 
+ *   <dt> attributes (multiple values) </dt>
+ *       <dd> A list of participant attribute layer IDs to include as variables for the
+ *       custom Praat <var>script</var>. </dd>  
+ *  </dl>
  * <p><b>Output</b>: A JSON-encoded response containing the threadId of a task that is
  * processing the request. The task, when finished, will output a CSV files with one line
  * for each line of the input file, and fields containing the selected acoustic
@@ -164,13 +281,14 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setStore(store); // TODO check this doesn't leak!
           task.setDataFile(uploadedCsvFile);
           
-          if (parameters.getString("transcript") != null) {
+          if (parameters.getString("transcriptColumn") != null) {
             try {
-              task.setTranscriptIdColumn(Integer.parseInt(parameters.getString("transcript")));
+              task.setTranscriptIdColumn(
+                Integer.parseInt(parameters.getString("transcriptColumn")));
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "Transcript column \""+parameters.getString("transcript")
+                  request, "Transcript column \""+parameters.getString("transcriptColumn")
                   +"\" is not an integer.")); // TODO i18n
               return;
             }
@@ -180,14 +298,14 @@ public class Praat extends LabbcatServlet { // TODO unit test
                 request, "Transcript column not supplied.")); // TODO i18n
           }
           
-          if (parameters.getString("participant") != null) {
+          if (parameters.getString("participantColumn") != null) {
             try {
               task.setParticipantNameColumn(
-                Integer.parseInt(parameters.getString("participant")));
+                Integer.parseInt(parameters.getString("participantColumn")));
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "Participant column \""+parameters.getString("participant")
+                  request, "Participant column \""+parameters.getString("participantColumn")
                   +"\" is not an integer.")); // TODO i18n
               return;
             }
@@ -197,13 +315,13 @@ public class Praat extends LabbcatServlet { // TODO unit test
                 request, "Participant column not supplied.")); // TODO i18n
           }
           
-          if (parameters.getString("startTime") != null) {
+          if (parameters.getString("startTimeColumn") != null) {
             try {
-              task.setMarkColumn(Integer.parseInt(parameters.getString("startTime")));
+              task.setMarkColumn(Integer.parseInt(parameters.getString("startTimeColumn")));
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "Start time column \""+parameters.getString("startTime")
+                  request, "Start time column \""+parameters.getString("startTimeColumn")
                   +"\" is not an integer.")); // TODO i18n
               return;
             }
@@ -213,13 +331,13 @@ public class Praat extends LabbcatServlet { // TODO unit test
                 request, "Start time column not supplied.")); // TODO i18n
           }
           
-          if (parameters.getString("endTime") != null) {
+          if (parameters.getString("endTimeColumn") != null) {
             try {
-              task.setMarkEndColumn(Integer.parseInt(parameters.getString("endTime")));
+              task.setMarkEndColumn(Integer.parseInt(parameters.getString("endTimeColumn")));
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "End time column \""+parameters.getString("endTime")
+                  request, "End time column \""+parameters.getString("endTimeColumn")
                   +"\" is not an integer.")); // TODO i18n
               return;
             }
@@ -241,6 +359,15 @@ public class Praat extends LabbcatServlet { // TODO unit test
             }
           }
           
+          if (parameters.getString("passThroughData") != null
+              && parameters.getString("passThroughData").equalsIgnoreCase("false")) {
+            task.setPassThroughData(false);
+          }
+
+          task.setExtractF1("true".equalsIgnoreCase(parameters.getString("extractF1")));
+          task.setExtractF2("true".equalsIgnoreCase(parameters.getString("extractF2")));
+          task.setExtractF3("true".equalsIgnoreCase(parameters.getString("extractF3")));
+
           if (parameters.getString("samplePoints") != null) {
             StringTokenizer tokens = new StringTokenizer(
               parameters.getString("samplePoints"), " ,;:-");
@@ -250,47 +377,25 @@ public class Praat extends LabbcatServlet { // TODO unit test
             }            
           }
           
-          if (parameters.getString("gender_attribute") != null) {
-            task.setGenderAttribute(parameters.getString("gender_attribute")); // TODO deprecate
-          }
-
-          // TODO other participant attributes
-          
-          if (parameters.getString("pass_through_data") != null
-              && parameters.getString("pass_through_data").equalsIgnoreCase("false")) {
-            task.setPassThroughData(false);
-          }
-          task.setExtractF1("true".equalsIgnoreCase(parameters.getString("extractF1")));
-          task.setExtractF2("true".equalsIgnoreCase(parameters.getString("extractF2")));
-          task.setExtractF3("true".equalsIgnoreCase(parameters.getString("extractF3")));
-          task.setExtractMinimumPitch(
-            "true".equalsIgnoreCase(parameters.getString("extractMinimumPitch")));
-          task.setExtractMeanPitch(
-            "true".equalsIgnoreCase(parameters.getString("extractMeanPitch")));
-          task.setExtractMaximumPitch(
-            "true".equalsIgnoreCase(parameters.getString("extractMaximumPitch")));
-          task.setExtractMaximumIntensity(
-            "true".equalsIgnoreCase(parameters.getString("extractMaximumIntensity")));
-          task.setExtractCOG1("true".equalsIgnoreCase(parameters.getString("extractCOG1")));
-          task.setExtractCOG2("true".equalsIgnoreCase(parameters.getString("extractCOG2")));
-          task.setExtractCOG23("true".equalsIgnoreCase(parameters.getString("extractCOG23")));
-          
-          if (parameters.getString("maximumFormantFemale") != null) {
+          if (parameters.getString("formantCeilingDefault") != null) {
             try {
-              task.setMaximumFormantFemale(
-                Integer.parseInt(parameters.getString("maximumFormantFemale")));
+              task.setMaximumFormantFemale( // TODO formantCeilingDefault
+                Integer.parseInt(parameters.getString("formantCeilingDefault")));
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "maximumFormantFemale \""+parameters.getString("maximumFormantFemale")
+                  request,
+                  "formantCeilingDefault \""+parameters.getString("formantCeilingDefault")
                   +"\" is not an integer.")); // TODO i18n
               return;
             }
           }
-          if (parameters.getString("maximumFormantMale") != null) {
+          // TODO formantDifferentiationLayerId
+          // TODO formantOtherPattern
+          if (parameters.getString("formantCeilingOther") != null) {
             try {
-              task.setMaximumFormantMale(
-                Integer.parseInt(parameters.getString("maximumFormantMale")));
+              task.setMaximumFormantMale( // TODO formantCeilingOther
+                Integer.parseInt(parameters.getString("formantCeilingOther")));
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
@@ -300,99 +405,274 @@ public class Praat extends LabbcatServlet { // TODO unit test
             }
           }
           
-          if (parameters.getString("pitchFloorFemale") != null) {
-            try {
-              task.setPitchFloorFemale(
-                Integer.parseInt(parameters.getString("pitchFloorFemale")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "pitchFloorFemale \""+parameters.getString("pitchFloorFemale")
-                  +"\" is not an integer.")); // TODO i18n
-              return;
-            }
-          }
-          if (parameters.getString("pitchFloorMale") != null) {
-            try {
-              task.setPitchFloorMale(
-                Integer.parseInt(parameters.getString("pitchFloorMale")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "pitchFloorMale \""+parameters.getString("pitchFloorMale")
-                  +"\" is not an integer.")); // TODO i18n
-              return;
-            }
-          }
-          
-          if (parameters.getString("pitchCeilingFemale") != null) {
-            try {
-              task.setPitchCeilingFemale(
-                Integer.parseInt(parameters.getString("pitchCeilingFemale")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "pitchCeilingFemale \""+parameters.getString("pitchCeilingFemale")
-                  +"\" is not an integer.")); // TODO i18n
-              return;
-            }
-          }
-          if (parameters.getString("pitchCeilingMale") != null) {
-            try {
-              task.setPitchCeilingMale(
-                Integer.parseInt(parameters.getString("pitchCeilingMale")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "pitchCeilingMale \""+parameters.getString("pitchCeilingMale")
-                  +"\" is not an integer.")); // TODO i18n
-              return;
-            }
-          }
-          
-          if (parameters.getString("voicingThresholdFemale") != null) {
-            try {
-              task.setVoicingThresholdFemale(
-                Double.parseDouble(parameters.getString("voicingThresholdFemale")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "voicingThresholdFemale \""+parameters.getString("voicingThresholdFemale")
-                  +"\" is not a number.")); // TODO i18n
-              return;
-            }
-          }
-          if (parameters.getString("voicingThresholdMale") != null) {
-            try {
-              task.setVoicingThresholdMale(
-                Double.parseDouble(parameters.getString("voicingThresholdMale")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "voicingThresholdMale \""+parameters.getString("voicingThresholdMale")
-                  +"\" is not a number.")); // TODO i18n
-              return;
-            }
-          }
-          
           if (parameters.getString("scriptFormant") != null
               && parameters.getString("scriptFormant").length() > 0) {
             task.setScriptFormant(parameters.getString("scriptFormant"));
           }
+
+          task.setUseFastTrack(
+            "true".equalsIgnoreCase(parameters.getString("useFastTrack")));
+          if (parameters.getString("fastTrackTimeStep") != null) {
+            try {
+              task.setFastTrackTimeStep(
+                Double.parseDouble(parameters.getString("fastTrackTimeStep")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request,
+                  "fastTrackTimeStep \""+parameters.getString("fastTrackTimeStep")
+                  +"\" is not a number.")); // TODO i18n
+              return;
+            }
+          }
+          if (parameters.getString("fastTrackBasisFunctions") != null
+              && parameters.getString("fastTrackBasisFunctions").length() > 0) {
+            task.setFastTrackBasisFunctions(parameters.getString("fastTrackBasisFunctions"));
+          }
+          if (parameters.getString("fastTrackErrorMethod") != null
+              && parameters.getString("fastTrackErrorMethod").length() > 0) {
+            task.setFastTrackErrorMethod(parameters.getString("fastTrackErrorMethod"));
+          }
+          if (parameters.getString("fastTrackTrackingMethod") != null
+              && parameters.getString("fastTrackTrackingMethod").length() > 0) {
+            task.setFastTrackTrackingMethod(parameters.getString("fastTrackTrackingMethod"));
+          }
+          if (parameters.getString("fastTrackBasisFunctions") != null
+              && parameters.getString("fastTrackBasisFunctions").length() > 0) {
+            task.setFastTrackBasisFunctions(parameters.getString("fastTrackBasisFunctions"));
+          }
+          task.setFastTrackEnableF1FrequencyHeuristic(
+            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF1FrequencyHeuristic")));
+          if (parameters.getString("fastTrackMaximumF1FrequencyValue") != null) {
+            try {
+              task.setFastTrackMaximumF1FrequencyValue(
+                Integer.parseInt(parameters.getString("fastTrackMaximumF1FrequencyValue")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackMaximumF1FrequencyValue \""
+                  +parameters.getString("fastTrackMaximumF1FrequencyValue")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.setFastTrackEnableF1BandwidthHeuristic(
+            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF1BandwidthHeuristic")));
+          if (parameters.getString("fastTrackMaximumF1BandwidthValue") != null) {
+            try {
+              task.setFastTrackMaximumF1BandwidthValue(
+                Integer.parseInt(parameters.getString("fastTrackMaximumF1BandwidthValue")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackMaximumF1BandwidthValue \""
+                  +parameters.getString("fastTrackMaximumF1BandwidthValue")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.setFastTrackEnableF2BandwidthHeuristic(
+            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF2BandwidthHeuristic")));
+          if (parameters.getString("fastTrackMaximumF2BandwidthValue") != null) {
+            try {
+              task.setFastTrackMaximumF2BandwidthValue(
+                Integer.parseInt(parameters.getString("fastTrackMaximumF2BandwidthValue")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackMaximumF2BandwidthValue \""
+                  +parameters.getString("fastTrackMaximumF2BandwidthValue")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.setFastTrackEnableF3BandwidthHeuristic(
+            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF3BandwidthHeuristic")));
+          if (parameters.getString("fastTrackMaximumF3BandwidthValue") != null) {
+            try {
+              task.setFastTrackMaximumF3BandwidthValue(
+                Integer.parseInt(parameters.getString("fastTrackMaximumF3BandwidthValue")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackMaximumF3BandwidthValue \""
+                  +parameters.getString("fastTrackMaximumF3BandwidthValue")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.setFastTrackEnableF4FrequencyHeuristic(
+            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF4FrequencyHeuristic")));
+          if (parameters.getString("fastTrackMinimumF4FrequencyValue") != null) {
+            try {
+              task.setFastTrackMinimumF4FrequencyValue(
+                Integer.parseInt(parameters.getString("fastTrackMinimumF4FrequencyValue")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackMinimumF4FrequencyValue \""
+                  +parameters.getString("fastTrackMinimumF4FrequencyValue")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.setFastTrackEnableRhoticHeuristic(
+            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableRhoticHeuristic")));
+          task.setFastTrackEnableF3F4ProximityHeuristic(
+            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF3F4ProximityHeuristic")));
+          if (parameters.getString("fastTrackNumberOfSteps") != null) {
+            try {
+              task.setFastTrackNumberOfSteps(
+                Integer.parseInt(parameters.getString("fastTrackNumberOfSteps")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackNumberOfSteps \""
+                  +parameters.getString("fastTrackNumberOfSteps")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          if (parameters.getString("fastTrackNumberOfCoefficients") != null) {
+            try {
+              task.setFastTrackNumberOfCoefficients(
+                Integer.parseInt(parameters.getString("fastTrackNumberOfCoefficients")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackNumberOfCoefficients \""
+                  +parameters.getString("fastTrackNumberOfCoefficients")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          if (parameters.getString("fastTrackNumberOfFormants") != null) {
+            try {
+              task.setFastTrackNumberOfFormants(
+                Integer.parseInt(parameters.getString("fastTrackNumberOfFormants")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackNumberOfFormants \""
+                  +parameters.getString("fastTrackNumberOfFormants")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.setFastTrackCoefficients(
+            "true".equalsIgnoreCase(parameters.getString("fastTrackCoefficients")));
+
+          task.setExtractMinimumPitch(
+            "true".equalsIgnoreCase(parameters.getString("extractMinimumPitch")));
+          task.setExtractMeanPitch(
+            "true".equalsIgnoreCase(parameters.getString("extractMeanPitch")));
+          task.setExtractMaximumPitch(
+            "true".equalsIgnoreCase(parameters.getString("extractMaximumPitch")));
+          
+          if (parameters.getString("pitchFloorDefault") != null) {
+            try {
+              task.setPitchFloorFemale( // TODO pitchFloorDefault
+                Integer.parseInt(parameters.getString("pitchFloorDefault")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "pitchFloorDefault \""+parameters.getString("pitchFloorDefault")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          if (parameters.getString("pitchCeilingDefault") != null) {
+            try {
+              task.setPitchCeilingFemale( // TODO pitchCeilingDefault
+                Integer.parseInt(parameters.getString("pitchCeilingDefault")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "pitchCeilingDefault \""+parameters.getString("pitchCeilingDefault")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          if (parameters.getString("voicingThresholdDefault") != null) {
+            try {
+              task.setVoicingThresholdFemale( // TODO voicingThresholdDefault
+                Double.parseDouble(parameters.getString("voicingThresholdDefault")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request,
+                  "voicingThresholdDefault \""+parameters.getString("voicingThresholdDefault")
+                  +"\" is not a number.")); // TODO i18n
+              return;
+            }
+          }
+          // pitchDifferentiationLayerId TODO
+          // pitchOtherPattern TODO
+          
+          if (parameters.getString("pitchFloorOther") != null) {
+            try {
+              task.setPitchFloorMale( // TODO pitchFloorOther
+                Integer.parseInt(parameters.getString("pitchFloorOther")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "pitchFloorOther \""+parameters.getString("pitchFloorOther")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }          
+          if (parameters.getString("pitchCeilingOther") != null) {
+            try {
+              task.setPitchCeilingMale( // TODO pitchCeilingOther
+                Integer.parseInt(parameters.getString("pitchCeilingOther")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "pitchCeilingOther \""+parameters.getString("pitchCeilingOther")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }          
+          if (parameters.getString("voicingThresholdOther") != null) {
+            try {
+              task.setVoicingThresholdMale( // voicingThresholdOther TODO
+                Double.parseDouble(parameters.getString("voicingThresholdOther")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request,
+                  "voicingThresholdOther \""+parameters.getString("voicingThresholdOther")
+                  +"\" is not a number.")); // TODO i18n
+              return;
+            }
+          }          
           if (parameters.getString("scriptPitch") != null
               && parameters.getString("scriptPitch").length() > 0) {
             task.setScriptPitch(parameters.getString("scriptPitch"));
           }
+
+          task.setExtractMaximumIntensity(
+            "true".equalsIgnoreCase(parameters.getString("extractMaximumIntensity")));
+          // intensityPitchFloorDefault TODO
+          // intensityDifferentiationLayerId TODO
+          // intensityOtherPattern TODO
+          // intensityPitchFloorOther TODO
+
           if (parameters.getString("scriptIntensity") != null
               && parameters.getString("scriptIntensity").length() > 0) {
             task.setScriptIntensity(parameters.getString("scriptIntensity"));
           }
+          
+          task.setExtractCOG1("true".equalsIgnoreCase(parameters.getString("extractCOG1")));
+          task.setExtractCOG2("true".equalsIgnoreCase(parameters.getString("extractCOG2")));
+          task.setExtractCOG23("true".equalsIgnoreCase(parameters.getString("extractCOG23")));
+          
           if (parameters.getString("script") != null
               && parameters.getString("script").length() > 0) {
             task.setCustomScript(parameters.getString("script"));
           }
           
-          // TODO fasttrack
+          // TODO attributes
 
           // start the task
           task.setName(uploadedCsvFile.getName());

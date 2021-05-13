@@ -24,6 +24,12 @@
 #fastTrackTimeStep:after: {
     content: "s";
 }
+#rowCount {
+    padding-left: 1ch;
+}
+a[target=FastTrack] {
+    float: right;
+}
 .settings-sets, .alternatives {
     display: flex;
     flex-direction: column;

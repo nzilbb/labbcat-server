@@ -395,7 +395,7 @@ public class ProcessWithPraat extends Task {
    * @see #getScriptFormant()
    * @see #setScriptFormant(String)
    */
-  protected String scriptFormant = "To Formant (burg)... 0.0025 5 {max_formant} 0.025 50";
+  protected String scriptFormant = "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50";
   /**
    * Getter for {@link #scriptFormant}: Command to send to Praat for creating a formant track.
    * @return Command to send to Praat for creating a formant track.
@@ -479,7 +479,7 @@ public class ProcessWithPraat extends Task {
    * @see #getScriptPitch()
    * @see #setScriptPitch(String)
    */
-  protected String scriptPitch = "To Pitch (ac)...  0 {pitch_floor} 15 no 0.03 {voicing_threshold} 0.01 0.35 0.14 {pitch_ceiling}";
+  protected String scriptPitch = "To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling";
   /**
    * Getter for {@link #scriptPitch}: Command to send to Praat for creating a pitch track.
    * @return Command to send to Praat for creating a pitch track.
@@ -496,7 +496,7 @@ public class ProcessWithPraat extends Task {
    * @see #getScriptIntensity()
    * @see #setScriptIntensity(String)
    */
-  protected String scriptIntensity = "To Intensity... {pitch_floor} 0 yes";
+  protected String scriptIntensity = "To Intensity... intensityPitchFloor 0 yes";
   /**
    * Getter for {@link #scriptIntensity}: Command to send to Praat for creating an
    * intensity track. 
@@ -1107,7 +1107,7 @@ public class ProcessWithPraat extends Task {
    * @see #getFastTrackCoefficients()
    * @see #setFastTrackCoefficients(boolean)
    */
-  protected boolean fastTrackCoefficients = true;
+  protected boolean fastTrackCoefficients = false;
   /**
    * Getter for {@link #fastTrackCoefficients}: Whether to return the regression coefficients from FastTrack.
    * @return Whether to return the regression coefficients from FastTrack.
@@ -1463,6 +1463,8 @@ public class ProcessWithPraat extends Task {
       FileWriter scriptWriter = new FileWriter(script);
       scriptWriter.write("Open long sound file... " + wav.getPath());
       scriptWriter.write("\nRename... soundfile");
+      // variables: formantCeiling, pitchFloor, voicingThreshold, pitchCeiling, intensityPitchFloor
+     
       File tempDirectory = null;
       if (useFastTrack) {
         scriptWriter.write("\n# FastTrack:");
@@ -1597,31 +1599,34 @@ public class ProcessWithPraat extends Task {
                  +"\nendfor"
                  :"")
                :"")
-             :getScriptFormant().replaceAll("\\{max_formant\\}", "\\{2,number,#0\\}")):"")
+             // !useFastTrack:
+             :"formantCeiling = {2,number,#0}"
+             +"\n"+getScriptFormant()):"")
         +"{3}" // from fmtFormantScript
         +(extractF3 || extractF2 || extractF1 || fastTrackCoefficients?"\nRemove":"") // formant object
         +(extractMinimumPitch || extractMeanPitch || extractMaximumPitch?
           "\nselect Sound sample{10,number,#0}"
+          +"\npitchFloor = {4,number,#0}"
+          +"\nvoicingThreshold = {6,number,#.#}"
+          +"\npitchCeiling = {5,number,#0}"
           +"\n" + getScriptPitch()
-          .replaceAll("\\{pitch_floor\\}", "\\{4,number,#0\\}")
-          .replaceAll("\\{voicing_threshold\\}", "\\{6,number,#.#\\}")
-          .replaceAll("\\{pitch_ceiling\\}", "\\{5,number,#0\\}"):"")
-        +(extractMinimumPitch?
-          "\nresult = Get minimum... {8,number,#.###} {9,number,#.###} Hertz Parabolic"
-          +"\nprint ''result:0''"
-          +"\nprintline":"")
-        +(extractMeanPitch?
-          "\nresult = Get mean... {8,number,#.###} {9,number,#.###} Hertz"
-          +"\nprint ''result:0''"
-          +"\nprintline":"")
-        +(extractMaximumPitch?
-          "\nresult = Get maximum... {8,number,#.###} {9,number,#.###} Hertz Parabolic"
-          +"\nprint ''result:0''"
-          +"\nprintline":"")
-        +(extractMinimumPitch || extractMeanPitch || extractMaximumPitch?"\nRemove":"") // pitch object
+          +(extractMinimumPitch?
+            "\nresult = Get minimum... {8,number,#.###} {9,number,#.###} Hertz Parabolic"
+            +"\nprint ''result:0''"
+            +"\nprintline":"")
+          +(extractMeanPitch?
+            "\nresult = Get mean... {8,number,#.###} {9,number,#.###} Hertz"
+            +"\nprint ''result:0''"
+            +"\nprintline":"")
+          +(extractMaximumPitch?
+            "\nresult = Get maximum... {8,number,#.###} {9,number,#.###} Hertz Parabolic"
+            +"\nprint ''result:0''"
+            +"\nprintline":"")
+          +"\nRemove":"") // pitch object
         +(extractMaximumIntensity?
           "\nselect Sound sample{10,number,#0}"
-          +"\n"+getScriptIntensity().replaceAll("\\{pitch_floor\\}", "\\{4,number,#0\\}")
+          +"\nintensityPitchFloor = {4,number,#0}" // TODO intensityPitchFloor
+          +"\n"+getScriptIntensity()
           +"\nresult = Get maximum... {8,number,#.###} {9,number,#.###} Parabolic"
           +"\nprint ''result''"
           +"\nprintline"
