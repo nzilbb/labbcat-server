@@ -148,7 +148,9 @@ export class PraatComponent implements OnInit {
         const component = this;
         reader.onload = () => {  
             const csvData = reader.result;  
-            const csvRecordsArray = (<string>csvData).split(/\r\n|\n/);
+            let csvRecordsArray = (<string>csvData).split(/\r\n|\n/);
+            // remove blank lines
+            csvRecordsArray = csvRecordsArray.filter(l=>l.length>0);
             if (csvRecordsArray.length == 0) {
                 component.messageService.error("File is empty: " + component.csv.name);
             } else {
