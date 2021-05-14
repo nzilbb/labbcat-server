@@ -2162,7 +2162,7 @@ public class ProcessWithPraat extends Task {
           IO.RecursivelyDelete(tempDirectory);
         }
       } finally {
-        //script.delete();
+        script.delete();
       }
     } else { // no media file - return a well-formed result anyway
       for (Vector<Double> tuple : targets) {
