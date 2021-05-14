@@ -24,33 +24,35 @@ package nzilbb.labbcat.server.servlet;
 
 import java.io.*;
 import java.net.*;
-import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
-import javax.servlet.http.*;
-import javax.servlet.annotation.WebServlet;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.zip.*;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import nzilbb.configure.ParameterSet;
+import nzilbb.ag.Graph;
 import nzilbb.ag.GraphStoreAdministration;
 import nzilbb.ag.Schema;
-import nzilbb.ag.Graph;
 import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.util.ConfigurationHelper;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.task.ProcessWithPraat;
 import nzilbb.util.IO;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import org.apache.commons.fileupload.FileItem;
+import org.w3c.dom.*;
+import org.xml.sax.*;
 
 /**
  * <tt>/api/praat</tt>
@@ -87,6 +89,8 @@ import org.apache.commons.fileupload.FileItem;
  *            proportional time points to measure formants. e.g. "0.5" will measure only
  *            the mid-point, "0 0.2 0.4 0.6 0.8 1" will measure six points evenly spread
  *            across the duration of the segment, etc.</dd> 
+ *   <dt> formantCeilingDefault </dt>
+ *       <dd> Value to use as the formant ceiling by default</dd>
  *   <dt> formantDifferentiationLayerId </dt>
  *       <dd> Participant attribute
  *            layer ID for differentiating formant settings; this will typically be
@@ -377,9 +381,26 @@ public class Praat extends LabbcatServlet { // TODO unit test
             }            
           }
           
+          if (parameters.getString("formantDifferentiationLayerId") != null) {
+            task.setFormantDifferentiationLayerId(
+              parameters.getString("formantDifferentiationLayerId"));
+          }
+          task.getFormantOtherPattern().clear();
+          for (String value : parameters.getStrings("formantOtherPattern")) {
+            try {
+              task.getFormantOtherPattern().add(Pattern.compile(value));
+            } catch(PatternSyntaxException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "formantOtherPattern \""+value
+                  +"\" is not a valid regular expression: "
+                  + exception.getMessage())); // TODO i18n
+              return;
+            }
+          } // next value
           if (parameters.getString("formantCeilingDefault") != null) {
             try {
-              task.setMaximumFormantFemale( // TODO formantCeilingDefault
+              task.setFormantCeilingDefault(
                 Integer.parseInt(parameters.getString("formantCeilingDefault")));
             } catch(NumberFormatException exception) {
               writeResponse(
@@ -390,21 +411,17 @@ public class Praat extends LabbcatServlet { // TODO unit test
               return;
             }
           }
-          // TODO formantDifferentiationLayerId
-          // TODO formantOtherPattern
-          if (parameters.getString("formantCeilingOther") != null) {
+          task.getFormantCeilingOther().clear();
+          for (String value : parameters.getStrings("formantCeilingOther")) {
             try {
-              task.setMaximumFormantMale( // TODO formantCeilingOther
-                Integer.parseInt(parameters.getString("formantCeilingOther")));
+              task.getFormantCeilingOther().add(Integer.valueOf(value));
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "maximumFormantMale \""+parameters.getString("maximumFormantMale")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "formantCeilingOther \""+value+"\" is not an integer.")); // TODO i18n
               return;
             }
-          }
-          
+          } // next value          
           if (parameters.getString("scriptFormant") != null
               && parameters.getString("scriptFormant").length() > 0) {
             task.setScriptFormant(parameters.getString("scriptFormant"));
@@ -412,6 +429,75 @@ public class Praat extends LabbcatServlet { // TODO unit test
 
           task.setUseFastTrack(
             "true".equalsIgnoreCase(parameters.getString("useFastTrack")));
+          if (parameters.getString("fastTrackDifferentiationLayerId") != null) {
+            task.setFastTrackDifferentiationLayerId(
+              parameters.getString("fastTrackDifferentiationLayerId"));
+          }
+          task.getFastTrackOtherPattern().clear();
+          for (String value : parameters.getStrings("fastTrackOtherPattern")) {
+            try {
+              task.getFastTrackOtherPattern().add(Pattern.compile(value));
+            } catch(PatternSyntaxException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackOtherPattern \""+value
+                  +"\" is not a valid regular expression: "
+                  + exception.getMessage())); // TODO i18n
+              return;
+            }
+          } // next value
+          if (parameters.getString("fastTrackLowestAnalysisFrequencyDefault") != null) {
+            try {
+              task.setFastTrackLowestAnalysisFrequencyDefault(
+                Integer.parseInt(parameters.getString("fastTrackLowestAnalysisFrequencyDefault")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request,
+                  "fastTrackLowestAnalysisFrequencyDefault \""
+                  +parameters.getString("fastTrackLowestAnalysisFrequencyDefault")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.getFastTrackLowestAnalysisFrequencyOther().clear();
+          for (String value : parameters.getStrings("fastTrackLowestAnalysisFrequencyOther")) {
+            try {
+              task.getFastTrackLowestAnalysisFrequencyOther().add(Integer.valueOf(value));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackLowestAnalysisFrequencyOther \""
+                  +value+"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          } // next value
+          if (parameters.getString("fastTrackHighestAnalysisFrequencyDefault") != null) {
+            try {
+              task.setFastTrackHighestAnalysisFrequencyDefault(
+                Integer.parseInt(parameters.getString("fastTrackHighestAnalysisFrequencyDefault")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request,
+                  "fastTrackHighestAnalysisFrequencyDefault \""
+                  +parameters.getString("fastTrackHighestAnalysisFrequencyDefault")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.getFastTrackHighestAnalysisFrequencyOther().clear();
+          for (String value : parameters.getStrings("fastTrackHighestAnalysisFrequencyOther")) {
+            try {
+              task.getFastTrackHighestAnalysisFrequencyOther().add(Integer.valueOf(value));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "fastTrackHighestAnalysisFrequencyOther \""
+                  +value+"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          } // next value
           if (parameters.getString("fastTrackTimeStep") != null) {
             try {
               task.setFastTrackTimeStep(
@@ -569,9 +655,26 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setExtractMaximumPitch(
             "true".equalsIgnoreCase(parameters.getString("extractMaximumPitch")));
           
+          if (parameters.getString("pitchDifferentiationLayerId") != null) {
+            task.setPitchDifferentiationLayerId(
+              parameters.getString("pitchDifferentiationLayerId"));
+          }
+          task.getPitchOtherPattern().clear();
+          for (String value : parameters.getStrings("pitchOtherPattern")) {
+            try {
+              task.getPitchOtherPattern().add(Pattern.compile(value));
+            } catch(PatternSyntaxException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "pitchOtherPattern \""+value
+                  +"\" is not a valid regular expression: "
+                  + exception.getMessage())); // TODO i18n
+              return;
+            }
+          } // next value
           if (parameters.getString("pitchFloorDefault") != null) {
             try {
-              task.setPitchFloorFemale( // TODO pitchFloorDefault
+              task.setPitchFloorDefault(
                 Integer.parseInt(parameters.getString("pitchFloorDefault")));
             } catch(NumberFormatException exception) {
               writeResponse(
@@ -581,9 +684,20 @@ public class Praat extends LabbcatServlet { // TODO unit test
               return;
             }
           }
+          task.getPitchFloorOther().clear();
+          for (String value : parameters.getStrings("pitchFloorOther")) {
+            try {
+              task.getPitchFloorOther().add(Integer.valueOf(value));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "pitchFloorOther \""+value+"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          } // next value
           if (parameters.getString("pitchCeilingDefault") != null) {
             try {
-              task.setPitchCeilingFemale( // TODO pitchCeilingDefault
+              task.setPitchCeilingDefault(
                 Integer.parseInt(parameters.getString("pitchCeilingDefault")));
             } catch(NumberFormatException exception) {
               writeResponse(
@@ -593,9 +707,20 @@ public class Praat extends LabbcatServlet { // TODO unit test
               return;
             }
           }
+          task.getPitchCeilingOther().clear();
+          for (String value : parameters.getStrings("pitchCeilingOther")) {
+            try {
+              task.getPitchCeilingOther().add(Integer.valueOf(value));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "pitchCeilingOther \""+value+"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          } // next value
           if (parameters.getString("voicingThresholdDefault") != null) {
             try {
-              task.setVoicingThresholdFemale( // TODO voicingThresholdDefault
+              task.setVoicingThresholdDefault(
                 Double.parseDouble(parameters.getString("voicingThresholdDefault")));
             } catch(NumberFormatException exception) {
               writeResponse(
@@ -606,46 +731,17 @@ public class Praat extends LabbcatServlet { // TODO unit test
               return;
             }
           }
-          // pitchDifferentiationLayerId TODO
-          // pitchOtherPattern TODO
-          
-          if (parameters.getString("pitchFloorOther") != null) {
+          task.getVoicingThresholdOther().clear();
+          for (String value : parameters.getStrings("voicingThresholdOther")) {
             try {
-              task.setPitchFloorMale( // TODO pitchFloorOther
-                Integer.parseInt(parameters.getString("pitchFloorOther")));
+              task.getVoicingThresholdOther().add(Double.valueOf(value));
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "pitchFloorOther \""+parameters.getString("pitchFloorOther")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "voicingThresholdOther \""+value+"\" is not a number.")); // TODO i18n
               return;
             }
-          }          
-          if (parameters.getString("pitchCeilingOther") != null) {
-            try {
-              task.setPitchCeilingMale( // TODO pitchCeilingOther
-                Integer.parseInt(parameters.getString("pitchCeilingOther")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "pitchCeilingOther \""+parameters.getString("pitchCeilingOther")
-                  +"\" is not an integer.")); // TODO i18n
-              return;
-            }
-          }          
-          if (parameters.getString("voicingThresholdOther") != null) {
-            try {
-              task.setVoicingThresholdMale( // voicingThresholdOther TODO
-                Double.parseDouble(parameters.getString("voicingThresholdOther")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request,
-                  "voicingThresholdOther \""+parameters.getString("voicingThresholdOther")
-                  +"\" is not a number.")); // TODO i18n
-              return;
-            }
-          }          
+          } // next value
           if (parameters.getString("scriptPitch") != null
               && parameters.getString("scriptPitch").length() > 0) {
             task.setScriptPitch(parameters.getString("scriptPitch"));
@@ -653,11 +749,49 @@ public class Praat extends LabbcatServlet { // TODO unit test
 
           task.setExtractMaximumIntensity(
             "true".equalsIgnoreCase(parameters.getString("extractMaximumIntensity")));
-          // intensityPitchFloorDefault TODO
-          // intensityDifferentiationLayerId TODO
-          // intensityOtherPattern TODO
-          // intensityPitchFloorOther TODO
-
+          if (parameters.getString("intensityDifferentiationLayerId") != null) {
+            task.setIntensityDifferentiationLayerId(
+              parameters.getString("intensityDifferentiationLayerId"));
+          }
+          task.getIntensityOtherPattern().clear();
+          for (String value : parameters.getStrings("intensityOtherPattern")) {
+            try {
+              task.getIntensityOtherPattern().add(Pattern.compile(value));
+            } catch(PatternSyntaxException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "intensityOtherPattern \""+value
+                  +"\" is not a valid regular expression: "
+                  + exception.getMessage())); // TODO i18n
+              return;
+            }
+          } // next value
+          if (parameters.getString("intensityPitchFloorDefault") != null) {
+            try {
+              task.setIntensityPitchFloorDefault(
+                Integer.parseInt(parameters.getString("intensityPitchFloorDefault")));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request,
+                  "intensityPitchFloorDefault \""
+                  +parameters.getString("intensityPitchFloorDefault")
+                  +"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          }
+          task.getIntensityPitchFloorOther().clear();
+          for (String value : parameters.getStrings("intensityPitchFloorOther")) {
+            try {
+              task.getIntensityPitchFloorOther().add(Integer.valueOf(value));
+            } catch(NumberFormatException exception) {
+              writeResponse(
+                response, failureResult(
+                  request, "intensityPitchFloorOther \""
+                  +value+"\" is not an integer.")); // TODO i18n
+              return;
+            }
+          } // next value
           if (parameters.getString("scriptIntensity") != null
               && parameters.getString("scriptIntensity").length() > 0) {
             task.setScriptIntensity(parameters.getString("scriptIntensity"));
@@ -672,7 +806,60 @@ public class Praat extends LabbcatServlet { // TODO unit test
             task.setCustomScript(parameters.getString("script"));
           }
           
-          // TODO attributes
+          for (String value : parameters.getStrings("attributes")) {
+            task.getAttributes().add(value);
+          }
+
+          // ensure number of patterns match values
+          if (task.getFormantOtherPattern().size() != task.getFormantCeilingOther().size()) {
+            writeResponse(
+              response, failureResult(
+                request,
+                "formantOtherPattern and formantCeilingOther must have the same number of values.")); // TODO i18n
+            return;
+          }
+          if (task.getPitchOtherPattern().size() != task.getPitchFloorOther().size()) {
+            writeResponse(
+              response, failureResult(
+                request,
+                "pitchOtherPattern and pitchFloorOther must have the same number of values.")); // TODO i18n
+            return;
+          }
+          if (task.getPitchOtherPattern().size() != task.getPitchCeilingOther().size()) {
+            writeResponse(
+              response, failureResult(
+                request,
+                "pitchOtherPattern and pitchCeilingOther must have the same number of values.")); // TODO i18n
+            return;
+          }
+          if (task.getPitchOtherPattern().size() != task.getVoicingThresholdOther().size()) {
+            writeResponse(
+              response, failureResult(
+                request,
+                "pitchOtherPattern and voicingThresholdOther must have the same number of values.")); // TODO i18n
+            return;
+          }
+          if (task.getIntensityOtherPattern().size() != task.getIntensityPitchFloorOther().size()) {
+            writeResponse(
+              response, failureResult(
+                request,
+                "intensityOtherPattern and intensityPitchFloorOther must have the same number of values.")); // TODO i18n
+            return;
+          }
+          if (task.getFastTrackOtherPattern().size() != task.getFastTrackLowestAnalysisFrequencyOther().size()) {
+            writeResponse(
+              response, failureResult(
+                request,
+                "fastTrackOtherPattern and fastTrackLowestAnalysisFrequencyOther must have the same number of values.")); // TODO i18n
+            return;
+          }
+          if (task.getFastTrackOtherPattern().size() != task.getFastTrackHighestAnalysisFrequencyOther().size()) {
+            writeResponse(
+              response, failureResult(
+                request,
+                "fastTrackOtherPattern and fastTrackHighestAnalysisFrequencyOther must have the same number of values.")); // TODO i18n
+            return;
+          }
 
           // start the task
           task.setName(uploadedCsvFile.getName());

@@ -35,12 +35,12 @@ export class PraatComponent implements OnInit {
     extractF3 = false;
     samplePoints = "0.5";
     useClassicFormant = true;
+    scriptFormant = "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50";
     formantDifferentiateParticipants = true;
     formantDifferentiationLayerId: string;
     formantOtherPattern = [ "M" ];
     formantCeilingDefault = 5500; // female
     formantCeilingOther = [ 5000 ]; // male
-    scriptFormant = "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50";
 
     // FastTrack settings:
     useFastTrack = !this.useClassicFormant;
@@ -320,8 +320,10 @@ export class PraatComponent implements OnInit {
                 samplePoints: this.samplePoints,
                 formantCeilingDefault: this.formantCeilingDefault,
                 formantDifferentiationLayerId: this.formantDifferentiationLayerId,
-                formantOtherPattern: this.formantOtherPattern,
-                formantCeilingOther: this.formantCeilingOther,
+                formantOtherPattern: !this.formantDifferentiateParticipants?[]
+                    :this.formantOtherPattern,
+                formantCeilingOther: !this.formantDifferentiateParticipants?[]
+                    :this.formantCeilingOther,
                 scriptFormant: this.scriptFormant,
                 
                 useFastTrack: this.useFastTrack,
@@ -346,11 +348,14 @@ export class PraatComponent implements OnInit {
                 fastTrackNumberOfFormants: this.fastTrackNumberOfFormants,
                 fastTrackCoefficients: this.fastTrackCoefficients,
                 fastTrackDifferentiationLayerId: this.fastTrackDifferentiationLayerId,
-                fastTrackOtherPattern: this.fastTrackOtherPattern,
+                fastTrackOtherPattern: !this.fastTrackDifferentiateParticipants?[]
+                    :this.fastTrackOtherPattern,
                 fastTrackLowestAnalysisFrequencyDefault: this.fastTrackLowestAnalysisFrequencyDefault,
                 fastTrackHighestAnalysisFrequencyDefault: this.fastTrackHighestAnalysisFrequencyDefault,
-                fastTrackLowestAnalysisFrequencyOther: this.fastTrackLowestAnalysisFrequencyOther,
-                fastTrackHighestAnalysisFrequencyOther: this.fastTrackHighestAnalysisFrequencyOther,
+                fastTrackLowestAnalysisFrequencyOther: !this.fastTrackDifferentiateParticipants?[]
+                    :this.fastTrackLowestAnalysisFrequencyOther,
+                fastTrackHighestAnalysisFrequencyOther: !this.fastTrackDifferentiateParticipants?[]
+                    :this.fastTrackHighestAnalysisFrequencyOther,
                 
                 extractMinimumPitch: this.extractMinimumPitch,
                 extractMeanPitch: this.extractMeanPitch,
@@ -359,16 +364,22 @@ export class PraatComponent implements OnInit {
                 pitchCeilingDefault: this.pitchCeilingDefault,
                 voicingThresholdDefault: this.voicingThresholdDefault,
                 pitchDifferentiationLayerId: this.pitchDifferentiationLayerId,
-                pitchOtherPattern: this.pitchOtherPattern,
-                pitchFloorOther: this.pitchFloorOther,
-                pitchCeilingOther: this.pitchCeilingOther,
-                voicingThresholdOther: this.voicingThresholdOther,
+                pitchOtherPattern: !this.pitchDifferentiateParticipants?[]
+                    :this.pitchOtherPattern,
+                pitchFloorOther: !this.pitchDifferentiateParticipants?[]
+                    :this.pitchFloorOther,
+                pitchCeilingOther: !this.pitchDifferentiateParticipants?[]
+                    :this.pitchCeilingOther,
+                voicingThresholdOther: !this.pitchDifferentiateParticipants?[]
+                    :this.voicingThresholdOther,
                 scriptPitch: this.scriptPitch,
                 extractMaximumIntensity: this.extractMaximumIntensity,
                 intensityPitchFloorDefault: this.intensityPitchFloorDefault,
                 intensityDifferentiationLayerId: this.intensityDifferentiationLayerId,
-                intensityOtherPattern: this.intensityOtherPattern,
-                intensityPitchFloorOther: this.intensityPitchFloorOther,
+                intensityOtherPattern: !this.intensityDifferentiateParticipants?[]
+                    :this.intensityOtherPattern,
+                intensityPitchFloorOther: !this.intensityDifferentiateParticipants?[]
+                    :this.intensityPitchFloorOther,
                 scriptIntensity: this.scriptIntensity,
                 extractCOG1: this.extractCOG1,
                 extractCOG2: this.extractCOG2,

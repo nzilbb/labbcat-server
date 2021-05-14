@@ -44,6 +44,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 import org.apache.commons.csv.CSVFormat;
@@ -414,52 +417,114 @@ public class ProcessWithPraat extends Task {
    * @param sNewScriptFormant Command to send to Praat for creating a formant track.
    */
   public ProcessWithPraat setScriptFormant(String sNewScriptFormant) { scriptFormant = sNewScriptFormant; return this; }
-      
+  
   /**
-   * {max_formant} value for female speakers
-   * @see #getMaximumFormantFemale()
-   * @see #setMaximumFormantFemale(int)
+   * Formant ceiling by default. Default value is 5500.
+   * @see #getFormantCeilingDefault()
+   * @see #setFormantCeilingDefault(int)
    */
-  protected int maximumFormantFemale = 5500;
+  protected int formantCeilingDefault = 5500;
   /**
-   * Getter for {@link #maximumFormantFemale}: {max_formant} value for female speakers
-   * @return {max_formant} value for female speakers
+   * Getter for {@link #formantCeilingDefault}: Formant ceiling by default. Default value
+   * is 5500.
+   * @return Formant ceiling by default.
    */
-  public int getMaximumFormantFemale() { return maximumFormantFemale; }
+  public int getFormantCeilingDefault() { return formantCeilingDefault; }
   /**
-   * Setter for {@link #maximumFormantFemale}: {max_formant} value for female speakers
-   * @param iNewMaximumFormantFemale {max_formant} value for female speakers
+   * Setter for {@link #formantCeilingDefault}: Formant ceiling by default.
+   * @param newFormantCeilingDefault Formant ceiling by default.
    */
-  public ProcessWithPraat setMaximumFormantFemale(int iNewMaximumFormantFemale) { maximumFormantFemale = iNewMaximumFormantFemale; return this; }
+  public ProcessWithPraat setFormantCeilingDefault(int newFormantCeilingDefault) { formantCeilingDefault = newFormantCeilingDefault; return this; }
 
   /**
-   * {max_formant} value for male speakers
-   * @see #getMaximumFormantMale()
-   * @see #setMaximumFormantMale(int)
+   * Participant attribute layer ID for differentiating formant settings. This will
+   * typically be "participant_gender" but can be any participant attribute layer. 
+   * @see #getFormantDifferentiationLayerId()
+   * @see #setFormantDifferentiationLayerId(String)
    */
-  protected int maximumFormantMale = 5000;
+  protected String formantDifferentiationLayerId = "participant_gender";
   /**
-   * Getter for {@link #maximumFormantMale}: {max_formant} value for male speakers
-   * @return {max_formant} value for male speakers
+   * Getter for {@link #formantDifferentiationLayerId}: Participant attribute layer ID
+   * for differentiating formant settings. This will typically be "participant_gender"
+   * but can be any participant attribute layer. 
+   * @return Participant attribute layer ID for differentiating formant settings. This
+   * will typically be "participant_gender" but can be any participant attribute layer. 
    */
-  public int getMaximumFormantMale() { return maximumFormantMale; }
+  public String getFormantDifferentiationLayerId() { return formantDifferentiationLayerId; }
   /**
-   * Setter for {@link #maximumFormantMale}: {max_formant} value for male speakers
-   * @param iNewMaximumFormantMale {max_formant} value for male speakers
+   * Setter for {@link #formantDifferentiationLayerId}: Participant attribute layer ID
+   * for differentiating formant settings. This will typically be "participant_gender"
+   * but can be any participant attribute layer. 
+   * @param newFormantDifferentiationLayerId Participant attribute layer ID for
+   * differentiating formant settings. This will typically be "participant_gender" but
+   * can be any participant attribute layer. 
    */
-  public ProcessWithPraat setMaximumFormantMale(int iNewMaximumFormantMale) { maximumFormantMale = iNewMaximumFormantMale; return this; }
+  public ProcessWithPraat setFormantDifferentiationLayerId(String newFormantDifferentiationLayerId) { formantDifferentiationLayerId = newFormantDifferentiationLayerId; return this; }
+  
+  /**
+   * List of regular expression strings to match against the value of that attribute
+   * identified by {@link #formantDifferentiationLayerId}. If the participant's
+   * attribute value matches the pattern for an element in this array, the corresponding
+   * element in {@link #formantCeilingOther} will be used for that participant. 
+   * <p> By default, it includes one entry: "M" to match male participants.
+   * @see #getFormantOtherPattern()
+   */
+  protected Vector<Pattern> formantOtherPattern = new Vector<Pattern>() {{ add(Pattern.compile("M")); }};
+  /**
+   * Getter for {@link #formantOtherPattern}: List of regular expression strings to match
+   * against the value of that attribute identified by
+   * {@link #formantDifferentiationLayerId}. If the participant's attribute value
+   * matches the pattern for an element in this array, the corresponding element in
+   * {@link #formantCeilingOther} will be used for that participant. 
+   * <p> By default, it includes one entry: "M" to match male participants.
+   * @return List of regular expression strings to match against the value of that
+   * attribute identified by {@link #formantDifferentiationLayerId}. If the
+   * participant's attribute value matches the pattern for an element in this array, the
+   * corresponding element in {@link #formantCeilingOther} will be used for that
+   * participant. 
+   */
+  public Vector<Pattern> getFormantOtherPattern() { return formantOtherPattern; }
+  
+  /**
+   * Values to use as the formant ceiling for participants who's attribute value matches
+   * the corresponding regular expression in {@link #formantOtherPattern}. 
+   * <p> By default, it includes one entry: 5000 for male participants.
+   * @see #getFormantCeilingOther()
+   * @see #setFormantCeilingOther(Vector<Integer>)
+   */
+  protected Vector<Integer> formantCeilingOther = new Vector<Integer>() {{ add(5000); }};;
+  /**
+   * Getter for {@link #formantCeilingOther}: Values to use as the formant ceiling for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #formantOtherPattern}. 
+   * <p> By default, it includes one entry: 5000 for male participants.
+   * @return Values to use as the formant ceiling for participants who's attribute value
+   * matches the corresponding regular expression in {@link #formantOtherPattern}. 
+   */
+  public Vector<Integer> getFormantCeilingOther() { return formantCeilingOther; }
+  /**
+   * Setter for {@link #formantCeilingOther}: Values to use as the formant ceiling for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #formantOtherPattern}. 
+   * @param newFormantCeilingOther Values to use as the formant ceiling for participants
+   * who's attribute value matches the corresponding regular expression in
+   * {@link #formantOtherPattern}. 
+   */
+  public ProcessWithPraat setFormantCeilingOther(Vector<Integer> newFormantCeilingOther) { formantCeilingOther = newFormantCeilingOther; return this; }  
 
   /**
    * List of positions in the segment to take values - 0.0 = at the beginning of the
    * intervale, 1.0 = at the end of the interval, 0.5 in the middle, etc. 
+   * <p> By default, it includes one entry: 0.5 to measure at the mid-point.
    * @see #getSamplePoints()
    * @see #setSamplePoints(Vector)
    */
-  protected Vector<Double> samplePoints = new Vector<Double>();
+  protected Vector<Double> samplePoints = new Vector<Double>() {{ add(0.5); }};
   /**
    * Getter for {@link #samplePoints}: List of positions in the segment to take values -
    * 0.0 = at the beginning of the intervale, 1.0 = at the end of the interval, 0.5 in the
    * middle, etc. 
+   * <p> By default, it includes one entry: 0.5 to measure at the mid-point.
    * @return List of positions in the segment to take values - 0.0 = at the beginning of
    * the intervale, 1.0 = at the end of the interval, 0.5 in the middle, etc. 
    */
@@ -492,6 +557,187 @@ public class ProcessWithPraat extends Task {
   public ProcessWithPraat setScriptPitch(String sNewScriptPitch) { scriptPitch = sNewScriptPitch; return this; }
 
   /**
+   * Participant attribute layer ID for differentiating pitch settings. This will
+   * typically be "participant_gender" but can be any participant attribute layer. 
+   * @see #getPitchDifferentiationLayerId()
+   * @see #setPitchDifferentiationLayerId(String)
+   */
+  protected String pitchDifferentiationLayerId = "participant_gender";
+  /**
+   * Getter for {@link #pitchDifferentiationLayerId}: Participant attribute layer ID
+   * for differentiating pitch settings. This will typically be "participant_gender"
+   * but can be any participant attribute layer. 
+   * @return Participant attribute layer ID for differentiating pitch settings. This
+   * will typically be "participant_gender" but can be any participant attribute layer. 
+   */
+  public String getPitchDifferentiationLayerId() { return pitchDifferentiationLayerId; }
+  /**
+   * Setter for {@link #pitchDifferentiationLayerId}: Participant attribute layer ID
+   * for differentiating pitch settings. This will typically be "participant_gender"
+   * but can be any participant attribute layer. 
+   * @param newPitchDifferentiationLayerId Participant attribute layer ID for
+   * differentiating pitch settings. This will typically be "participant_gender" but
+   * can be any participant attribute layer. 
+   */
+  public ProcessWithPraat setPitchDifferentiationLayerId(String newPitchDifferentiationLayerId) { pitchDifferentiationLayerId = newPitchDifferentiationLayerId; return this; }
+  
+  /**
+   * List of regular expression strings to match against the value of that attribute
+   * identified by {@link #pitchDifferentiationLayerId}. If the participant's
+   * attribute value matches the pattern for an element in this array, the corresponding
+   * element in {@link #pitchCeilingOther} will be used for that participant. 
+   * <p> By default, it includes one entry: "M" to match male participants.
+   * @see #getPitchOtherPattern()
+   */
+  protected Vector<Pattern> pitchOtherPattern = new Vector<Pattern>() {{ add(Pattern.compile("M")); }};
+  /**
+   * Getter for {@link #pitchOtherPattern}: List of regular expression strings to match
+   * against the value of that attribute identified by
+   * {@link #pitchDifferentiationLayerId}. If the participant's attribute value
+   * matches the pattern for an element in this array, the corresponding element in
+   * {@link #pitchCeilingOther} will be used for that participant. 
+   * <p> By default, it includes one entry: "M" to match male participants.
+   * @return List of regular expression strings to match against the value of that
+   * attribute identified by {@link #pitchDifferentiationLayerId}. If the
+   * participant's attribute value matches the pattern for an element in this array, the
+   * corresponding element in {@link #pitchCeilingOther} will be used for that
+   * participant. 
+   */
+  public Vector<Pattern> getPitchOtherPattern() { return pitchOtherPattern; }
+
+  /**
+   * Pitch Floor by default. Default value is 60.
+   * @see #getPitchFloorDefault()
+   * @see #setPitchFloorDefault(int)
+   */
+  protected int pitchFloorDefault = 60;
+  /**
+   * Getter for {@link #pitchFloorDefault}: Pitch Floor by default. Default value is 60.
+   * @return Pitch Floor by default.
+   */
+  public int getPitchFloorDefault() { return pitchFloorDefault; }
+  /**
+   * Setter for {@link #pitchFloorDefault}: Pitch Floor by default.
+   * @param newPitchFloorDefault Pitch Floor by default.
+   */
+  public ProcessWithPraat setPitchFloorDefault(int newPitchFloorDefault) { pitchFloorDefault = newPitchFloorDefault; return this; }
+  
+  /**
+   * Values to use as the pitch floor for participants who's attribute value matches the
+   * corresponding regular expression in {@link #pitchOtherPattern}. 
+   * <p> By default, it includes one entry: 30 for male participants.
+   * @see #getPitchFloorOther()
+   * @see #setPitchFloorOther(Vector<Integer>)
+   */
+  protected Vector<Integer> pitchFloorOther = new Vector<Integer>() {{ add(30); }};
+  /**
+   * Getter for {@link #pitchFloorOther}: Values to use as the pitch floor for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #pitchOtherPattern}. 
+   * <p> By default, it includes one entry: 30 for male participants.
+   * @return Values to use as the pitch floor for participants who's attribute value
+   * matches the corresponding regular expression in {@link #pitchOtherPattern}. 
+   */
+  public Vector<Integer> getPitchFloorOther() { return pitchFloorOther; }
+  /**
+   * Setter for {@link #pitchFloorOther}: Values to use as the pitch floor for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #pitchOtherPattern}. 
+   * @param newPitchFloorOther Values to use as the pitch floor for participants who's
+   * attribute value matches the corresponding regular expression in 
+   * {@link #pitchOtherPattern}. 
+   */
+  public ProcessWithPraat setPitchFloorOther(Vector<Integer> newPitchFloorOther) { pitchFloorOther = newPitchFloorOther; return this; }
+
+  /**
+   * Pitch Ceiling by default. Default value is 500.
+   * @see #getPitchCeilingDefault()
+   * @see #setPitchCeilingDefault(int)
+   */
+  protected int pitchCeilingDefault = 500;
+  /**
+   * Getter for {@link #pitchCeilingDefault}: Pitch Ceiling by default. Default value is 500.
+   * @return Pitch Ceiling by default.
+   */
+  public int getPitchCeilingDefault() { return pitchCeilingDefault; }
+  /**
+   * Setter for {@link #pitchCeilingDefault}: Pitch Ceiling by default.
+   * @param newPitchCeilingDefault Pitch Ceiling by default.
+   */
+  public ProcessWithPraat setPitchCeilingDefault(int newPitchCeilingDefault) { pitchCeilingDefault = newPitchCeilingDefault; return this; }
+
+  /**
+   * Values to use as the pitch ceiling for participants who's attribute value matches the
+   * corresponding regular expression in {@link #pitchOtherPattern}. 
+   * <p> By default, it includes one entry: 250 for male participants.
+   * @see #getPitchCeilingOther()
+   * @see #setPitchCeilingOther(Vector<Integer>)
+   */
+  protected Vector<Integer> pitchCeilingOther = new Vector<Integer>(){{ add(250); }};
+  /**
+   * Getter for {@link #pitchCeilingOther}: Values to use as the pitch ceiling for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #pitchOtherPattern}. 
+   * <p> By default, it includes one entry: 250 for male participants.
+   * @return Values to use as the pitch ceiling for participants who's attribute value
+   * matches the corresponding regular expression in {@link #pitchOtherPattern}. 
+   */
+  public Vector<Integer> getPitchCeilingOther() { return pitchCeilingOther; }
+  /**
+   * Setter for {@link #pitchCeilingOther}: Values to use as the pitch ceiling for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #pitchOtherPattern}. 
+   * @param newPitchCeilingOther Values to use as the pitch ceiling for participants who's
+   * attribute value matches the corresponding regular expression in
+   * {@link #pitchOtherPattern}. 
+   */
+  public ProcessWithPraat setPitchCeilingOther(Vector<Integer> newPitchCeilingOther) { pitchCeilingOther = newPitchCeilingOther; return this; }
+
+  /**
+   * Voicing Threshold by default. Default value is 0.5.
+   * @see #getVoicingThresholdDefault()
+   * @see #setVoicingThresholdDefault(double)
+   */
+  protected double voicingThresholdDefault = 0.5;
+  /**
+   * Getter for {@link #voicingThresholdDefault}: Voicing Threshold by default. Default value 0.5.
+   * @return Voicing Threshold by default.
+   */
+  public double getVoicingThresholdDefault() { return voicingThresholdDefault; }
+  /**
+   * Setter for {@link #voicingThresholdDefault}: Voicing Threshold by default.
+   * @param newVoicingThresholdDefault Voicing Threshold by default.
+   */
+  public ProcessWithPraat setVoicingThresholdDefault(double newVoicingThresholdDefault) { voicingThresholdDefault = newVoicingThresholdDefault; return this; }
+
+  /**
+   * Values to use as the voicing threshold for participants who's attribute value matches
+   * the corresponding regular expression in {@link #pitchOtherPattern}. 
+   * <p> By default, it includes one entry: 0.4 for male participants.
+   * @see #getVoicingThresholdOther()
+   * @see #setVoicingThresholdOther(Vector<Double>)
+   */
+  protected Vector<Double> voicingThresholdOther = new Vector<Double>(){{ add(0.4); }};
+  /**
+   * Getter for {@link #voicingThresholdOther}: Values to use as the voicing threshold for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #pitchOtherPattern}. 
+   * <p> By default, it includes one entry: 0.4 for male participants.
+   * @return Values to use as the voicing threshold for participants who's attribute value
+   * matches the corresponding regular expression in {@link #pitchOtherPattern}. 
+   */
+  public Vector<Double> getVoicingThresholdOther() { return voicingThresholdOther; }
+  /**
+   * Setter for {@link #voicingThresholdOther}: Values to use as the voicing threshold for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #pitchOtherPattern}. 
+   * @param newVoicingThresholdOther Values to use as the voicing threshold for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #pitchOtherPattern}. 
+   */
+  public ProcessWithPraat setVoicingThresholdOther(Vector<Double> newVoicingThresholdOther) { voicingThresholdOther = newVoicingThresholdOther; return this; }
+
+  /**
    * Command to send to Praat for creating an intensity track.
    * @see #getScriptIntensity()
    * @see #setScriptIntensity(String)
@@ -509,109 +755,100 @@ public class ProcessWithPraat extends Task {
    * @param sNewScriptIntensity Command to send to Praat for creating an intensity track.
    */
   public ProcessWithPraat setScriptIntensity(String sNewScriptIntensity) { scriptIntensity = sNewScriptIntensity; return this; }
+  
+  /**
+   * Participant attribute layer ID for differentiating intensity settings. This will
+   * typically be "participant_gender" but can be any participant attribute layer. 
+   * @see #getIntensityDifferentiationLayerId()
+   * @see #setIntensityDifferentiationLayerId(String)
+   */
+  protected String intensityDifferentiationLayerId = "participant_gender";
+  /**
+   * Getter for {@link #intensityDifferentiationLayerId}: Participant attribute layer ID
+   * for differentiating intensity settings. This will typically be "participant_gender"
+   * but can be any participant attribute layer. 
+   * @return Participant attribute layer ID for differentiating intensity settings. This
+   * will typically be "participant_gender" but can be any participant attribute layer. 
+   */
+  public String getIntensityDifferentiationLayerId() { return intensityDifferentiationLayerId; }
+  /**
+   * Setter for {@link #intensityDifferentiationLayerId}: Participant attribute layer ID
+   * for differentiating intensity settings. This will typically be "participant_gender"
+   * but can be any participant attribute layer. 
+   * @param newIntensityDifferentiationLayerId Participant attribute layer ID for
+   * differentiating intensity settings. This will typically be "participant_gender" but
+   * can be any participant attribute layer. 
+   */
+  public ProcessWithPraat setIntensityDifferentiationLayerId(String newIntensityDifferentiationLayerId) { intensityDifferentiationLayerId = newIntensityDifferentiationLayerId; return this; }
+  
+  /**
+   * List of regular expression strings to match against the value of that attribute
+   * identified by {@link #intensityDifferentiationLayerId}. If the participant's
+   * attribute value matches the pattern for an element in this array, the corresponding
+   * element in {@link #intensityCeilingOther} will be used for that participant. 
+   * <p> By default, it includes one entry: "M" to match male participants.
+   * @see #getIntensityOtherPattern()
+   */
+  protected Vector<Pattern> intensityOtherPattern = new Vector<Pattern>() {{ add(Pattern.compile("M")); }};
+  /**
+   * Getter for {@link #intensityOtherPattern}: List of regular expression strings to match
+   * against the value of that attribute identified by
+   * {@link #intensityDifferentiationLayerId}. If the participant's attribute value
+   * matches the pattern for an element in this array, the corresponding element in
+   * {@link #intensityCeilingOther} will be used for that participant. 
+   * <p> By default, it includes one entry: "M" to match male participants.
+   * @return List of regular expression strings to match against the value of that
+   * attribute identified by {@link #intensityDifferentiationLayerId}. If the
+   * participant's attribute value matches the pattern for an element in this array, the
+   * corresponding element in {@link #intensityCeilingOther} will be used for that
+   * participant. 
+   */
+  public Vector<Pattern> getIntensityOtherPattern() { return intensityOtherPattern; }
 
   /**
-   * Pitch floor for female speakers
-   * @see #getPitchFloorFemale()
-   * @see #setPitchFloorFemale(int)
+   * Intensity Pitch Floor by default. Default value is 60.
+   * @see #getIntensityPitchFloorDefault()
+   * @see #setIntensityPitchFloorDefault(int)
    */
-  protected int pitchFloorFemale = 60;
+  protected int intensityPitchFloorDefault = 60;
   /**
-   * Getter for {@link #pitchFloorFemale}: Pitch floor for female speakers
-   * @return Pitch floor for female speakers
+   * Getter for {@link #intensityPitchFloorDefault}: Intensity Pitch Floor by default. Default value is 60.
+   * @return Intensity Pitch Floor by default.
    */
-  public int getPitchFloorFemale() { return pitchFloorFemale; }
+  public int getIntensityPitchFloorDefault() { return intensityPitchFloorDefault; }
   /**
-   * Setter for {@link #pitchFloorFemale}: Pitch floor for female speakers
-   * @param iNewPitchFloorFemale Pitch floor for female speakers
+   * Setter for {@link #intensityPitchFloorDefault}: Intensity Pitch Floor by default.
+   * @param newIntensityPitchFloorDefault Intensity Pitch Floor by default.
    */
-  public ProcessWithPraat setPitchFloorFemale(int iNewPitchFloorFemale) { pitchFloorFemale = iNewPitchFloorFemale; return this; }
-
+  public ProcessWithPraat setIntensityPitchFloorDefault(int newIntensityPitchFloorDefault) { intensityPitchFloorDefault = newIntensityPitchFloorDefault; return this; }
+  
   /**
-   * Pitch ceiling for female speakers
-   * @see #getPitchCeilingFemale()
-   * @see #setPitchCeilingFemale(int)
+   * Values to use as the intensity pitch floor for participants who's attribute value matches the
+   * corresponding regular expression in {@link #intensityPitchOtherPattern}. 
+   * <p> By default, it includes one entry: 30 for male participants.
+   * @see #getIntensityPitchFloorOther()
+   * @see #setIntensityPitchFloorOther(Vector<Integer>)
    */
-  protected int pitchCeilingFemale = 500;
+  protected Vector<Integer> intensityPitchFloorOther = new Vector<Integer>() {{ add(30); }};
   /**
-   * Getter for {@link #pitchCeilingFemale}: Pitch ceiling for female speakers
-   * @return Pitch ceiling for female speakers
+   * Getter for {@link #intensityPitchFloorOther}: Values to use as the intensity pitch floor for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #intensityPitchOtherPattern}. 
+   * <p> By default, it includes one entry: 30 for male participants.
+   * @return Values to use as the intensity pitch floor for participants who's attribute value
+   * matches the corresponding regular expression in {@link #intensityPitchOtherPattern}. 
    */
-  public int getPitchCeilingFemale() { return pitchCeilingFemale; }
+  public Vector<Integer> getIntensityPitchFloorOther() { return intensityPitchFloorOther; }
   /**
-   * Setter for {@link #pitchCeilingFemale}: Pitch ceiling for female speakers
-   * @param iNewPitchCeilingFemale Pitch ceiling for female speakers
+   * Setter for {@link #intensityPitchFloorOther}: Values to use as the intensity pitch floor for
+   * participants who's attribute value matches the corresponding regular expression in
+   * {@link #intensityPitchOtherPattern}. 
+   * @param newIntensityPitchFloorOther Values to use as the intensity pitch floor for
+   * participants who's attribute value matches the corresponding regular expression in 
+   * {@link #intensityPitchOtherPattern}. 
    */
-  public ProcessWithPraat setPitchCeilingFemale(int iNewPitchCeilingFemale) { pitchCeilingFemale = iNewPitchCeilingFemale; return this; }
-
-  /**
-   * Pitch floor for male speakers
-   * @see #getPitchFloorMale()
-   * @see #setPitchFloorMale(int)
-   */
-  protected int pitchFloorMale = 30;
-  /**
-   * Getter for {@link #pitchFloorMale}: Pitch floor for male speakers
-   * @return Pitch floor for male speakers
-   */
-  public int getPitchFloorMale() { return pitchFloorMale; }
-  /**
-   * Setter for {@link #pitchFloorMale}: Pitch floor for male speakers
-   * @param iNewPitchFloorMale Pitch floor for male speakers
-   */
-  public ProcessWithPraat setPitchFloorMale(int iNewPitchFloorMale) { pitchFloorMale = iNewPitchFloorMale; return this; }
-
-  /**
-   * Pitch ceiling for male speakers
-   * @see #getPitchCeilingMale()
-   * @see #setPitchCeilingMale(int)
-   */
-  protected int pitchCeilingMale = 250;
-  /**
-   * Getter for {@link #pitchCeilingMale}: Pitch ceiling for male speakers
-   * @return Pitch ceiling for male speakers
-   */
-  public int getPitchCeilingMale() { return pitchCeilingMale; }
-  /**
-   * Setter for {@link #pitchCeilingMale}: Pitch ceiling for male speakers
-   * @param iNewPitchCeilingMale Pitch ceiling for male speakers
-   */
-  public ProcessWithPraat setPitchCeilingMale(int iNewPitchCeilingMale) { pitchCeilingMale = iNewPitchCeilingMale; return this; }
-
-  /**
-   * Voicing threshold for female speakers
-   * @see #getVoicingThresholdFemale()
-   * @see #setVoicingThresholdFemale(double)
-   */
-  protected double voicingThresholdFemale = 0.5;
-  /**
-   * Getter for {@link #voicingThresholdFemale}: Voicing threshold for female speakers
-   * @return Voicing threshold for female speakers
-   */
-  public double getVoicingThresholdFemale() { return voicingThresholdFemale; }
-  /**
-   * Setter for {@link #voicingThresholdFemale}: Voicing threshold for female speakers
-   * @param dNewVoicingThresholdFemale Voicing threshold for female speakers
-   */
-  public ProcessWithPraat setVoicingThresholdFemale(double dNewVoicingThresholdFemale) { voicingThresholdFemale = dNewVoicingThresholdFemale; return this; }
-
-  /**
-   * Voicing threshold for male speakers
-   * @see #getVoicingThresholdMale()
-   * @see #setVoicingThresholdMale(double)
-   */
-  protected double voicingThresholdMale = 0.4;
-  /**
-   * Getter for {@link #voicingThresholdMale}: Voicing threshold for male speakers
-   * @return Voicing threshold for male speakers
-   */
-  public double getVoicingThresholdMale() { return voicingThresholdMale; }
-  /**
-   * Setter for {@link #voicingThresholdMale}: Voicing threshold for male speakers
-   * @param dNewVoicingThresholdMale Voicing threshold for male speakers
-   */
-  public ProcessWithPraat setVoicingThresholdMale(double dNewVoicingThresholdMale) { voicingThresholdMale = dNewVoicingThresholdMale; return this; }
-
+  public ProcessWithPraat setIntensityPitchFloorOther(Vector<Integer> newIntensityPitchFloorOther) { intensityPitchFloorOther = newIntensityPitchFloorOther; return this; }
+  
   /**
    * Command to send to Praat for creating a spectrum object.
    * @see #getScriptSpectrum()
@@ -651,7 +888,6 @@ public class ProcessWithPraat extends Task {
   /**
    * Headers for custom script outputs.
    * @see #getCustomScriptHeaders()
-   * @see #setCustomScriptHeaders(Vector<String>)
    */
   protected Vector<String> customScriptHeaders = new Vector<String>();
   /**
@@ -676,28 +912,6 @@ public class ProcessWithPraat extends Task {
    * to be made available. 
    */
   public HashSet<String> getAttributes() { return attributes; }
-   
-  /**
-   * Participant gender attribute.
-   * @see #getGenderAttribute()
-   * @see #setGenderAttribute(String)
-   */
-  protected String genderAttribute = "participant_gender";
-  /**
-   * Getter for {@link #genderAttribute}: Participant gender attribute.
-   * @return Participant gender attribute.
-   */
-  public String getGenderAttribute() { return genderAttribute; }
-  /**
-   * Setter for {@link #genderAttribute}: Participant gender attribute.
-   * <p>This method also adds the given attribute to {@link #attributes}.
-   * @param newGenderAttribute Participant gender attribute.
-   */
-  public ProcessWithPraat setGenderAttribute(String newGenderAttribute) {
-    genderAttribute = newGenderAttribute;
-    attributes.add(genderAttribute);
-    return this;
-  }
    
   /**
    * Whether to pass data in the original CSV file to the output. Default is true.
@@ -1049,13 +1263,13 @@ public class ProcessWithPraat extends Task {
   public ProcessWithPraat setFastTrackEnableF3F4ProximityHeuristic(boolean newFastTrackEnableF3F4ProximityHeuristic) { fastTrackEnableF3F4ProximityHeuristic = newFastTrackEnableF3F4ProximityHeuristic; return this; }
 
   /**
-   * Fast Track number of steps.
+   * Fast Track number of steps. Default value is 20.
    * @see #getFastTrackNumberOfSteps()
    * @see #setFastTrackNumberOfSteps(int)
    */
   protected int fastTrackNumberOfSteps = 20;
   /**
-   * Getter for {@link #fastTrackNumberOfSteps}: Fast Track number of steps.
+   * Getter for {@link #fastTrackNumberOfSteps}: Fast Track number of steps. Default value is 20.
    * @return Fast Track number of steps.
    */
   public int getFastTrackNumberOfSteps() { return fastTrackNumberOfSteps; }
@@ -1066,14 +1280,14 @@ public class ProcessWithPraat extends Task {
   public ProcessWithPraat setFastTrackNumberOfSteps(int newFastTrackNumberOfSteps) { fastTrackNumberOfSteps = newFastTrackNumberOfSteps; return this; }
   
   /**
-   * Fast Track number of coefficients for the regression function.
+   * Fast Track number of coefficients for the regression function. Default value is 5.
    * @see #getFastTrackNumberOfCoefficients()
    * @see #setFastTrackNumberOfCoefficients(int)
    */
   protected int fastTrackNumberOfCoefficients = 5;
   /**
    * Getter for {@link #fastTrackNumberOfCoefficients}: Fast Track number of coefficients
-   * for the regression function. 
+   * for the regression function.  Default value is 5.
    * @return Fast Track number of coefficients for the regression function.
    */
   public int getFastTrackNumberOfCoefficients() { return fastTrackNumberOfCoefficients; }
@@ -1086,13 +1300,14 @@ public class ProcessWithPraat extends Task {
   public ProcessWithPraat setFastTrackNumberOfCoefficients(int newFastTrackNumberOfCoefficients) { fastTrackNumberOfCoefficients = newFastTrackNumberOfCoefficients; return this; }
   
   /**
-   * Fast Track number of formants.
+   * Fast Track number of formants. Default value is 3.
    * @see #getFastTrackNumberOfFormants()
    * @see #setFastTrackNumberOfFormants(int)
    */
   protected int fastTrackNumberOfFormants = 3;
   /**
-   * Getter for {@link #fastTrackNumberOfFormants}: Fast Track number of formants.
+   * Getter for {@link #fastTrackNumberOfFormants}: Fast Track number of formants. Default
+   * value is 3. 
    * @return Fast Track number of formants.
    */
   public int getFastTrackNumberOfFormants() { return fastTrackNumberOfFormants; }
@@ -1118,6 +1333,151 @@ public class ProcessWithPraat extends Task {
    * @param newFastTrackCoefficients Whether to return the regression coefficients from FastTrack.
    */
   public ProcessWithPraat setFastTrackCoefficients(boolean newFastTrackCoefficients) { fastTrackCoefficients = newFastTrackCoefficients; return this; }
+  
+  /**
+   * Participant attribute layer ID for differentiating fastTrack settings. This will
+   * typically be "participant_gender" but can be any participant attribute layer. 
+   * @see #getFastTrackDifferentiationLayerId()
+   * @see #setFastTrackDifferentiationLayerId(String)
+   */
+  protected String fastTrackDifferentiationLayerId = "participant_gender";
+  /**
+   * Getter for {@link #fastTrackDifferentiationLayerId}: Participant attribute layer ID
+   * for differentiating fastTrack settings. This will typically be "participant_gender"
+   * but can be any participant attribute layer. 
+   * @return Participant attribute layer ID for differentiating fastTrack settings. This
+   * will typically be "participant_gender" but can be any participant attribute layer. 
+   */
+  public String getFastTrackDifferentiationLayerId() { return fastTrackDifferentiationLayerId; }
+  /**
+   * Setter for {@link #fastTrackDifferentiationLayerId}: Participant attribute layer ID
+   * for differentiating fastTrack settings. This will typically be "participant_gender"
+   * but can be any participant attribute layer. 
+   * @param newFastTrackDifferentiationLayerId Participant attribute layer ID for
+   * differentiating fastTrack settings. This will typically be "participant_gender" but
+   * can be any participant attribute layer. 
+   */
+  public ProcessWithPraat setFastTrackDifferentiationLayerId(String newFastTrackDifferentiationLayerId) { fastTrackDifferentiationLayerId = newFastTrackDifferentiationLayerId; return this; }
+  
+  /**
+   * List of regular expression strings to match against the value of that attribute
+   * identified by {@link #fastTrackDifferentiationLayerId}. If the participant's
+   * attribute value matches the pattern for an element in this array, the corresponding
+   * element in {@link #fastTrackCeilingOther} will be used for that participant. 
+   * <p> By default, it includes one entry: "M" to match male participants.
+   * @see #getFastTrackOtherPattern()
+   */
+  protected Vector<Pattern> fastTrackOtherPattern = new Vector<Pattern>() {{ add(Pattern.compile("M")); }};
+  /**
+   * Getter for {@link #fastTrackOtherPattern}: List of regular expression strings to match
+   * against the value of that attribute identified by
+   * {@link #fastTrackDifferentiationLayerId}. If the participant's attribute value
+   * matches the pattern for an element in this array, the corresponding element in
+   * {@link #fastTrackCeilingOther} will be used for that participant. 
+   * <p> By default, it includes one entry: "M" to match male participants.
+   * @return List of regular expression strings to match against the value of that
+   * attribute identified by {@link #fastTrackDifferentiationLayerId}. If the
+   * participant's attribute value matches the pattern for an element in this array, the
+   * corresponding element in {@link #fastTrackCeilingOther} will be used for that
+   * participant. 
+   */
+  public Vector<Pattern> getFastTrackOtherPattern() { return fastTrackOtherPattern; }
+
+  /**
+   * Fast Track lowest analysis frequency by default.
+   * <p> The default value is 5000.
+   * @see #getFastTrackLowestAnalysisFrequencyDefault()
+   * @see #setFastTrackLowestAnalysisFrequencyDefault(int)
+   */
+  protected int fastTrackLowestAnalysisFrequencyDefault = 5000;
+  /**
+   * Getter for {@link #fastTrackLowestAnalysisFrequencyDefault}: Fast Track lowest
+   * analysis frequency by default. 
+   * <p> The default value is 5000.
+   * @return Fast Track lowest analysis frequency by default.
+   */
+  public int getFastTrackLowestAnalysisFrequencyDefault() { return fastTrackLowestAnalysisFrequencyDefault; }
+  /**
+   * Setter for {@link #fastTrackLowestAnalysisFrequencyDefault}: Fast Track lowest
+   * analysis frequency by default. 
+   * @param newFastTrackLowestAnalysisFrequencyDefault Fast Track lowest analysis frequency by default.
+   */
+  public ProcessWithPraat setFastTrackLowestAnalysisFrequencyDefault(int newFastTrackLowestAnalysisFrequencyDefault) { fastTrackLowestAnalysisFrequencyDefault = newFastTrackLowestAnalysisFrequencyDefault; return this; }
+  
+  /**
+   * Values to use as the Fast Track lowest analysis frequency for participants who's
+   * attribute value matches the corresponding regular expression in
+   * {@link #fastTrackOtherPattern}. 
+   * <p> By default, it includes one entry: 4500 for male participants.
+   * @see #getFastTrackLowestAnalysisFrequencyOther()
+   * @see #setFastTrackLowestAnalysisFrequencyOther(Vector<Integer>)
+   */
+  protected Vector<Integer> fastTrackLowestAnalysisFrequencyOther = new Vector<Integer>(){{ add(4500); }};
+  /**
+   * Getter for {@link #fastTrackLowestAnalysisFrequencyOther}: Values to use as the Fast
+   * Track lowest analysis frequency for participants who's attribute value matches the
+   * corresponding regular expression in {@link #fastTrackOtherPattern}. 
+   * <p> By default, it includes one entry: 4500 for male participants.
+   * @return Values to use as the Fast Track lowest analysis frequency for participants who's attribute value matches the corresponding regular expression in {@link #fastTrackOtherPattern}.
+   */
+  public Vector<Integer> getFastTrackLowestAnalysisFrequencyOther() { return fastTrackLowestAnalysisFrequencyOther; }
+  /**
+   * Setter for {@link #fastTrackLowestAnalysisFrequencyOther}: Values to use as the Fast
+   * Track lowest analysis frequency for participants who's attribute value matches the
+   * corresponding regular expression in {@link #fastTrackOtherPattern}. 
+   * @param newFastTrackLowestAnalysisFrequencyOther Values to use as the Fast Track
+   * lowest analysis frequency for participants who's attribute value matches the
+   * corresponding regular expression in {@link #fastTrackOtherPattern}. 
+   */
+  public ProcessWithPraat setFastTrackLowestAnalysisFrequencyOther(Vector<Integer> newFastTrackLowestAnalysisFrequencyOther) { fastTrackLowestAnalysisFrequencyOther = newFastTrackLowestAnalysisFrequencyOther; return this; }
+
+  /**
+   * Fast Track highest analysis frequency by default.
+   * <p> The default value is 4500.
+   * @see #getFastTrackHighestAnalysisFrequencyDefault()
+   * @see #setFastTrackHighestAnalysisFrequencyDefault(int)
+   */
+  protected int fastTrackHighestAnalysisFrequencyDefault = 4500;
+  /**
+   * Getter for {@link #fastTrackHighestAnalysisFrequencyDefault}: Fast Track highest
+   * analysis frequency by default. 
+   * <p> The default value is 4500.
+   * @return Fast Track highest analysis frequency by default.
+   */
+  public int getFastTrackHighestAnalysisFrequencyDefault() { return fastTrackHighestAnalysisFrequencyDefault; }
+  /**
+   * Setter for {@link #fastTrackHighestAnalysisFrequencyDefault}: Fast Track highest
+   * analysis frequency by default. 
+   * @param newFastTrackHighestAnalysisFrequencyDefault Fast Track highest analysis frequency by default.
+   */
+  public ProcessWithPraat setFastTrackHighestAnalysisFrequencyDefault(int newFastTrackHighestAnalysisFrequencyDefault) { fastTrackHighestAnalysisFrequencyDefault = newFastTrackHighestAnalysisFrequencyDefault; return this; }
+  
+  /**
+   * Values to use as the Fast Track highest analysis frequency for participants who's
+   * attribute value matches the corresponding regular expression in
+   * {@link #formantOtherPattern}. 
+   * <p> By default, it includes one entry: 6500 for male participants.
+   * @see #getFastTrackHighestAnalysisFrequencyOther()
+   * @see #setFastTrackHighestAnalysisFrequencyOther(Vector<Integer>)
+   */
+  protected Vector<Integer> fastTrackHighestAnalysisFrequencyOther = new Vector<Integer>(){{ add(6500); }};
+  /**
+   * Getter for {@link #fastTrackHighestAnalysisFrequencyOther}: Values to use as the Fast
+   * Track highest analysis frequency for participants who's attribute value matches the
+   * corresponding regular expression in {@link #formantOtherPattern}. 
+   * <p> By default, it includes one entry: 6500 for male participants.
+   * @return Values to use as the Fast Track highest analysis frequency for participants who's attribute value matches the corresponding regular expression in {@link #formantOtherPattern}.
+   */
+  public Vector<Integer> getFastTrackHighestAnalysisFrequencyOther() { return fastTrackHighestAnalysisFrequencyOther; }
+  /**
+   * Setter for {@link #fastTrackHighestAnalysisFrequencyOther}: Values to use as the Fast
+   * Track highest analysis frequency for participants who's attribute value matches the
+   * corresponding regular expression in {@link #formantOtherPattern}. 
+   * @param newFastTrackHighestAnalysisFrequencyOther Values to use as the Fast Track
+   * highest analysis frequency for participants who's attribute value matches the
+   * corresponding regular expression in {@link #formantOtherPattern}. 
+   */
+  public ProcessWithPraat setFastTrackHighestAnalysisFrequencyOther(Vector<Integer> newFastTrackHighestAnalysisFrequencyOther) { fastTrackHighestAnalysisFrequencyOther = newFastTrackHighestAnalysisFrequencyOther; return this; }
 
   // Methods:
       
@@ -1172,8 +1532,15 @@ public class ProcessWithPraat extends Task {
         +"  ON annotation_participant.speaker_number = speaker.speaker_number"
         +"  AND annotation_participant.layer = ?"
         +" WHERE speaker.name = ?");
+      if (formantDifferentiationLayerId != null)
+        attributes.add(formantDifferentiationLayerId);
+      if (pitchDifferentiationLayerId != null)
+        attributes.add(pitchDifferentiationLayerId);
+      if (intensityDifferentiationLayerId != null)
+        attributes.add(intensityDifferentiationLayerId);
+      if (fastTrackDifferentiationLayerId != null)
+        attributes.add(fastTrackDifferentiationLayerId);
 
-      // TODO one script per sound file
       outputFile = File.createTempFile(fileName + "-", ".csv", store.getFiles());
       CSVFormat format = CSVFormat.EXCEL.withDelimiter(fieldDelimiter);
       out = new CSVPrinter(new FileWriter(outputFile), format);
@@ -1315,10 +1682,6 @@ public class ProcessWithPraat extends Task {
     File wav = null;
     String sWav = store.getMedia(transcript, "", "audio/wav");
     if (sWav != null) wav = new File(new URI(sWav));
-    int maximumFormantHz = maximumFormantFemale;
-    int pitchFloor = pitchFloorFemale;
-    int pitchCeiling = pitchCeilingFemale;
-    double voicingThreshold = voicingThresholdFemale;
       
     // get participant attribute values we will need
     HashMap<String,String> attributeValues = new HashMap<String,String>();
@@ -1341,26 +1704,59 @@ public class ProcessWithPraat extends Task {
         }	    
       } // next attribute
     }
-    // ensure we have gender
-    if (!attributeValues.containsKey(getGenderAttribute())) {
-      sqlSpeakerAttribute.setString(1, getGenderAttribute().replaceAll("^participant_",""));
-      ResultSet rs = sqlSpeakerAttribute.executeQuery();
-      try {
-        rs.next();
-        attributeValues.put("participant_gender", rs.getString("label"));
-      } catch(Throwable exception) {
-      } finally {
-        rs.close();
-      }	    
-    }
-    // set the gender-based parameters to male if appropriate
-    if (attributeValues.containsKey(getGenderAttribute())
-        && attributeValues.get(getGenderAttribute()).toLowerCase().startsWith("m")) {
-      maximumFormantHz = maximumFormantMale;
-      pitchFloor = pitchFloorMale;
-      pitchCeiling = pitchCeilingMale;
-      voicingThreshold = voicingThresholdMale;
-    }
+    
+    // participant-differentiatable parameters...
+    int formantCeiling = formantCeilingDefault;
+    if (formantDifferentiationLayerId != null && formantDifferentiationLayerId.length() > 0) {
+      for (int i = 0; i < formantOtherPattern.size(); i++) {
+        Pattern pattern = formantOtherPattern.elementAt(i);
+        String value = attributeValues.get(formantDifferentiationLayerId);
+        if (pattern.matcher(value).matches()) {
+          formantCeiling = formantCeilingOther.get(i);
+          break;
+        }
+      } // next pattern
+    } // differentiate by participant attribute
+    int pitchFloor = pitchFloorDefault;
+    int pitchCeiling = pitchCeilingDefault;
+    double voicingThreshold = voicingThresholdDefault;
+    if (pitchDifferentiationLayerId != null && pitchDifferentiationLayerId.length() > 0) {
+      for (int i = 0; i < pitchOtherPattern.size(); i++) {
+        Pattern pattern = pitchOtherPattern.elementAt(i);
+        String value = attributeValues.get(pitchDifferentiationLayerId);
+        if (pattern.matcher(value).matches()) {
+          pitchCeiling = pitchCeilingOther.get(i);
+          pitchFloor = pitchFloorOther.get(i);
+          pitchCeiling = pitchCeilingOther.get(i);
+          voicingThreshold = voicingThresholdOther.get(i);
+          break;
+        }
+      } // next pattern
+    } // differentiate by participant attribute
+    int intensityPitchFloor = intensityPitchFloorDefault;
+    if (intensityDifferentiationLayerId != null && intensityDifferentiationLayerId.length() > 0) {
+      for (int i = 0; i < intensityOtherPattern.size(); i++) {
+        Pattern pattern = intensityOtherPattern.elementAt(i);
+        String value = attributeValues.get(intensityDifferentiationLayerId);
+        if (pattern.matcher(value).matches()) {
+          intensityPitchFloor = intensityPitchFloorOther.get(i);
+          break;
+        }
+      } // next pattern
+    } // differentiate by participant attribute
+    int fastTrackLowestAnalysisFrequency = fastTrackLowestAnalysisFrequencyDefault;
+    int fastTrackHighestAnalysisFrequency = fastTrackHighestAnalysisFrequencyDefault;
+    if (fastTrackDifferentiationLayerId != null && fastTrackDifferentiationLayerId.length() > 0) {
+      for (int i = 0; i < fastTrackOtherPattern.size(); i++) {
+        Pattern pattern = fastTrackOtherPattern.elementAt(i);
+        String value = attributeValues.get(fastTrackDifferentiationLayerId);
+        if (pattern.matcher(value).matches()) {
+          fastTrackLowestAnalysisFrequency = fastTrackLowestAnalysisFrequencyOther.get(i);
+          fastTrackHighestAnalysisFrequency = fastTrackHighestAnalysisFrequencyOther.get(i);
+          break;
+        }
+      } // next pattern
+    } // differentiate by participant attribute
       
     Vector<Vector<Double>> vTargets = new Vector<Vector<Double>>();
     Vector<String> vErrors = new Vector<String>();
@@ -1393,9 +1789,10 @@ public class ProcessWithPraat extends Task {
 
       // run praat
     Vector<Vector<String>> results = formantsFromFile(
-      wav, vTargets, maximumFormantHz, pitchFloor, pitchCeiling, voicingThreshold,
+      wav, vTargets, formantCeiling, pitchFloor, pitchCeiling, voicingThreshold,
+      intensityPitchFloor, fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency,
       attributeValues);
-	 
+    
     // collate the results
     Enumeration<Vector<Double>> enTargets = vTargets.elements();
     Enumeration<String> enErrors = vErrors.elements();
@@ -1430,21 +1827,25 @@ public class ProcessWithPraat extends Task {
    * Extracts the formants at the given times for the given WAV file
    * @param wav
    * @param vTargets
-   * @param maximumFormantHz
+   * @param formantCeiling
    * @param pitchFloor
    * @param pitchCeiling
    * @param voicingThreshold
+   * @param intensityPitchFloor
+   * @param fastTrackLowestAnalysisFrequency
+   * @param fastTrackHighestAnalysisFrequency
    * @param attributeValues Attribute names (keys) and values for this batch.
    * @return An array lines, where each line contains a string for each extraction
    * datum. e.g. two strings - F1 and F2 
    * @throws Exception
    */
   protected Vector<Vector<String>> formantsFromFile(
-    File wav, Vector<Vector<Double>> targets, Integer maximumFormantHz,
+    File wav, Vector<Vector<Double>> targets, Integer formantCeiling,
     Integer pitchFloor, Integer pitchCeiling, Double voicingThreshold,
+    Integer intensityPitchFloor, Integer fastTrackLowestAnalysisFrequency,
+    Integer fastTrackHighestAnalysisFrequency,
     HashMap<String,String> attributeValues)
     throws Exception {
-    int minimumFormantHz = 4700; // TODO make this a parameter
     Vector<Vector<String>> results = new Vector<Vector<String>>();
     if (wav != null)
     {
@@ -1459,7 +1860,7 @@ public class ProcessWithPraat extends Task {
       File functions = new File(
         new File(new File(store.getFiles(), "FastTrack-master"), "Fast Track"), "functions");
       
-      File script = File.createTempFile("PraatConsole-", ".praat", functions);
+      File script = File.createTempFile("ProcessWithPraat-", ".praat", functions);
       FileWriter scriptWriter = new FileWriter(script);
       scriptWriter.write("Open long sound file... " + wav.getPath());
       scriptWriter.write("\nRename... soundfile");
@@ -1568,7 +1969,7 @@ public class ProcessWithPraat extends Task {
           "\nselect Sound sample{10,number,#0}"
           +"\n"
           + (useFastTrack?
-             "@trackAutoselect: selected(), dir$, {16,number,#0}, {2,number,#0},"
+             "@trackAutoselect: selected(), dir$, {17,number,#0}, {18,number,#0},"
              +" steps, coefficients, formants, method$, image, selected(), current_view, max_plot,"
              +" out_formant, out_table, out_all"
              +(fastTrackCoefficients?
@@ -1625,7 +2026,7 @@ public class ProcessWithPraat extends Task {
           +"\nRemove":"") // pitch object
         +(extractMaximumIntensity?
           "\nselect Sound sample{10,number,#0}"
-          +"\nintensityPitchFloor = {4,number,#0}" // TODO intensityPitchFloor
+          +"\nintensityPitchFloor = {16,number,#0}"
           +"\n"+getScriptIntensity()
           +"\nresult = Get maximum... {8,number,#.###} {9,number,#.###} Parabolic"
           +"\nprint ''result''"
@@ -1680,14 +2081,15 @@ public class ProcessWithPraat extends Task {
           } // extracting formants
 		  
           Object[] oArgs = {
-            startWindow, endWindow, maximumFormantHz, 
-            sFormantScript, 
-            pitchFloor, pitchCeiling, voicingThreshold, 
-            relativeEndWindow, relativeStartTime, relativeEndTime,
-            Integer.valueOf(count++),
-            customScript,
-            startTime, endTime, (endTime - startTime), windowOffset,
-            minimumFormantHz
+            /* 0=*/ startWindow, endWindow, formantCeiling, 
+            /* 3=*/ sFormantScript, 
+            /* 4=*/ pitchFloor, pitchCeiling, voicingThreshold, 
+            /* 7=*/ relativeEndWindow, relativeStartTime, relativeEndTime,
+            /*10=*/ Integer.valueOf(count++),
+            /*11=*/ customScript,
+            /*12=*/ startTime, endTime, (endTime - startTime), windowOffset,
+            /*16=*/ intensityPitchFloor, 
+            /*17=*/ fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency
           };
           scriptWriter.write(fmtScript.format(oArgs));
         } // valid interval

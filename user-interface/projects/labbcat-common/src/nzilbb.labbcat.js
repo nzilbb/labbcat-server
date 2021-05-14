@@ -2002,7 +2002,68 @@
          *   (default: "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50") </dd>
          * 
          * <dt> useFastTrack (boolean) </dt><dd> Use the FastTrack plugin to generate
-         *   optimum, smoothed formant tracks. (default: false)</dd> TODO
+         *   optimum, smoothed formant tracks. (default: false)</dd>
+         * <dt> fastTrackDifferentiationLayerId (string) </dt><dd> Participant attribute
+         *   layer ID for differentiating fastTrack settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. </dd>
+         * <dt> fastTrackOtherPattern (string[]) </dt><dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   <var>fastTrackDifferentiationLayerId</var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   <var>fastTrackCeilingOther</var> will be used for that participant. </dd>
+         * <dt> fastTrackLowestAnalysisFrequencyDefault (int) </dt><dd> Fast Track lowest
+         *   analysis frequency by default. </dd>
+         * <dt> fastTrackLowestAnalysisFrequencyOther (int[]) </dt><dd> Values to use as
+         *   the Fast Track lowest analysis frequency for participants who's attribute
+         *   value matches the corresponding regular expression in
+         *   <var>fastTrackOtherPattern</var>.</dd> 
+         * <dt> fastTrackHighestAnalysisFrequencyDefault (int) </dt><dd> Fast Track highest
+         *   analysis frequency by default. </dd>
+         * <dt> fastTrackHighestAnalysisFrequencyOther (int[]) </dt><dd> Values to use as
+         *   the Fast Track highest analysis frequency for participants who's attribute
+         *   value matches the corresponding regular expression in
+         *   <var>fastTrackOtherPattern</var>.</dd> 
+         * <dt> fastTrackTimeStep </dt>
+         *       <dd> Fast Track time_step global setting. </dd>
+         * <dt> fastTrackBasisFunctions </dt>
+         *       <dd> Fast Track basis_functions global setting - "dct". </dd>
+         * <dt> fastTrackErrorMethod </dt>
+         *       <dd> Fast Track error_method global setting - "mae". </dd>
+         * <dt> fastTrackTrackingMethod </dt>
+         *       <dd> Fast Track tracking_method parameter for trackAutoselectProcedure; "burg" or
+         *       "robust". </dd> 
+         * <dt> fastTrackEnableF1FrequencyHeuristic ("true" or "false") </dt>
+         *       <dd> Fast Track enable_F1_frequency_heuristic global setting. </dd>
+         * <dt> fastTrackMaximumF1FrequencyValue </dt>
+         *       <dd> Fast Track maximum_F1_frequency_value global setting. </dd>
+         * <dt> fastTrackEnableF1BandwidthHeuristic </dt>
+         *       <dd> Fast Track enable_F1_bandwidth_heuristic global setting. </dd>
+         * <dt> fastTrackMaximumF1BandwidthValue </dt>
+         *       <dd> Fast Track maximum_F1_bandwidth_value global setting. </dd>
+         * <dt> fastTrackEnableF2BandwidthHeuristic ("true" or "false") </dt>
+         *       <dd> Fast Track enable_F2_bandwidth_heuristic global setting. </dd>
+         * <dt> fastTrackMaximumF2BandwidthValue </dt>
+         *       <dd> Fast Track maximum_F2_bandwidth_value global setting. </dd>
+         * <dt> fastTrackEnableF3BandwidthHeuristic ("true" or "false") </dt>
+         *       <dd> Fast Track enable_F3_bandwidth_heuristic global setting.. </dd>
+         * <dt> fastTrackMaximumF3BandwidthValue </dt>
+         *       <dd> Fast Track maximum_F3_bandwidth_value global setting. </dd>
+         * <dt> fastTrackEnableF4FrequencyHeuristic ("true" or "false") </dt>
+         *       <dd> Fast Track enable_F4_frequency_heuristic global setting. </dd>
+         * <dt> fastTrackMinimumF4FrequencyValue </dt>
+         *       <dd> Fast Track minimum_F4_frequency_value global setting. </dd>
+         * <dt> fastTrackEnableRhoticHeuristic ("true" of "false") </dt>
+         *       <dd> Fast Track enable_rhotic_heuristic global setting. </dd>
+         * <dt> fastTrackEnableF3F4ProximityHeuristic </dt>
+         *       <dd> Fast Track enable_F3F4_proximity_heuristic global setting. </dd>
+         * <dt> fastTrackNumberOfSteps </dt>
+         *       <dd> Fast Track number of steps. </dd>
+         * <dt> fastTrackNumberOfCoefficients </dt>
+         *       <dd> Fast Track number of coefficients for the regression function. </dd>
+         * <dt> fastTrackNumberOfFormants </dt>
+         *       <dd> Fast Track number of formants. </dd>
+         * <dt> fastTrackCoefficients ("true" or "false") </dt>
+         *       <dd> Whether to return the regression coefficients from FastTrack. </dd>
          * 
          * <dt> extractMinimumPitch (boolean) </dt><dd> Extract minimum pitch. 
          *   (default: false) </dd>
@@ -2011,7 +2072,7 @@
          *   (default: false) </dd>
          * <dt> pitchFloorDefault (int) </dt><dd> Pitch Floor by default. (default: 60) </dd>
          * <dt> pitchCeilingDefault (int) </dt><dd> Pitch Ceiling by default. (default: 500) </dd>
-         * <dt> voicingThresholdDefault (int) </dt><dd> Voicing Threshold by default. 
+         * <dt> voicingThresholdDefault (number) </dt><dd> Voicing Threshold by default. 
          *   (default: 0.5) </dd>
          * <dt> pitchDifferentiationLayerId (string) </dt><dd> Participant attribute
          *   layer ID for differentiating pitch settings; this will typically be
@@ -2089,8 +2150,14 @@
             fd.append("windowOffset", windowOffset);
             for (var parameter in measurementParameters) {
                 var value = measurementParameters[parameter];
-                fd.append(parameter, value); // TODO need to tease apart arrays?
-            }
+                if (Array.isArray(value)) {
+                    for (var element of value) {
+                        fd.append(parameter, element);
+                    } // next element
+                } else { // simple value
+                    fd.append(parameter, value);
+                }
+            } // next parameter
 
             if (!runningOnNode) {	
 	        fd.append("csv", csv);

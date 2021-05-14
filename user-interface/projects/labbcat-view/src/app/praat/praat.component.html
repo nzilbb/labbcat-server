@@ -521,7 +521,7 @@
             <input id="pitchFloorDefault"
                    [(ngModel)]="pitchFloorDefault"
                    class="hz"
-                   type="number" min="0" step="100">
+                   type="number" min="0" step="10">
           </span>
         </div>
         <div class="item"
@@ -531,7 +531,7 @@
             <input id="pitchCeilingDefault"
                    [(ngModel)]="pitchCeilingDefault"
                    class="hz"
-                   type="number" min="0" step="100">
+                   type="number" min="0" step="10">
           </span>
         </div>
         <div class="item"
@@ -577,7 +577,7 @@
               <input id="{{'pitchFloorOther'+o}}"
                      [(ngModel)]="pitchFloorOther[o]"
                      class="hz"
-                     type="number" min="0" step="100"
+                     type="number" min="0" step="10"
                      [disabled]="!pitchDifferentiateParticipants">
             </span>
           </div>
@@ -733,14 +733,8 @@
       &nbsp;<span i18n>Custom Praat Script</span>
     </label>
   </div>
-  <div class="{{showCustomScript?'unhidden-panel':'hidden-panel'}}"
+  <div class="{{showCustomScript?'long-unhidden-panel':'hidden-panel'}}"
        id="show-script">
-    <div id="load-controls">
-      <label for="load-local-script" i18n>Load script from file</label>
-      <input type="file" id="load-local-script" 
-	     (change)="loadScript($event.target.files)"
-	     i18n title="Praat Script File"/>
-    </div>	      
     <pre class="praat-prelude"><span class="praat-comment"># LaBB-CAT prefixes this script with code to open a sound file and extract a defined part
 # of it into a Sound object which is then selected.
 # LaBB-CAT 'Remove's this Sound object after the script finishes executing; any other objects
@@ -770,6 +764,12 @@ sampleName$ = &hellip; <span class="praat-comment"># the name of the extracted/s
               >{{praatVariableName(layer.id)}}$ = "&hellip;"</span> <span class="praat-comment"># {{layer.id}} - {{layer.description}} ({{layer.category}})</span></ng-container></details>
 select Sound sampleName$
 </pre>
+    <div id="load-controls">
+      <label for="load-local-script" i18n>Load script from file</label>
+      <input type="file" id="load-local-script" 
+	     (change)="loadScript($event.target.files)"
+	     i18n title="Praat Script File"/>
+    </div>	      
     <textarea [(ngModel)]="customScript"
               id="customScript"
               i18n-placeholder placeholder="Your Praat script code goes here"

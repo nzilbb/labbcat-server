@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, ElementRef, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, EventEmitter, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Task } from '../task';
@@ -10,7 +10,7 @@ import { LabbcatService } from '../labbcat.service';
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.css']
 })
-export class TaskComponent implements OnInit {
+export class TaskComponent implements OnInit, OnDestroy {
     @Input() threadId: string;
     @Input() cancelButton = true;
     @Input() showStatus = true;
@@ -38,6 +38,9 @@ export class TaskComponent implements OnInit {
             this.readTaskStatus();
         }
     }
+    ngOnDestroy(): void {
+        clearTimeout(this.timeout);
+    }
 
     readTaskStatus(): void {
         if (!this.cancelling) { // only update status if we're not cancelling...
@@ -45,10 +48,10 @@ export class TaskComponent implements OnInit {
                 // show messages
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
-                
+
                 // update model
                 this.task = task || this.task;
-
+                
                 // if finished and there's a result URL, open the results
                 if (!this.task.running && this.task.resultUrl) {
                     this.finished.emit(this.task);
@@ -63,7 +66,10 @@ export class TaskComponent implements OnInit {
                 
                 // set timeout for next check...
                 this.timeout = setTimeout(()=>{
-                    this.readTaskStatus();
+                    // has the thread we're monitoring changed?
+                    if (task.threadId == this.threadId) { // the same thread
+                        this.readTaskStatus();
+                    }
                 }, this.task.refreshSeconds*1000 || 5000);
             });
         }

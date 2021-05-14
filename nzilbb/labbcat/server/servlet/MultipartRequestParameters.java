@@ -117,7 +117,7 @@ public class MultipartRequestParameters extends Hashtable {
   /**
    * Gets all parameters with the given name.
    * @param key The parameter name.
-   * @return All parmeter String values.
+   * @return All parameter String values, or an empty array if there are none.
    */
   public String[] getStrings(String key) {
     Object value = get(key);
@@ -129,7 +129,7 @@ public class MultipartRequestParameters extends Hashtable {
         return ((Vector<String>)value).toArray(new String[0]);
       }
     } else {
-      return null;
+      return new String[0];
     }
   } // end of getString()
   
