@@ -11,12 +11,16 @@
 .regex {
     width: 50px;
 }
-.unhidden-panel, .long-unhidden-panel {
+.unhidden-panel, .long-unhidden-panel, details > .advanced {
     border: 1px solid silver;
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
     border-bottom-left-radius: 8px;
     padding: 10px;
+}
+details[open] > div {
+    animation-name: roll-down;
+    animation-duration: 1s;
 }
 #samplePoints {
     text-align: center;
@@ -76,6 +80,10 @@ label[for=formantOtherPattern] {
     width: 50%;
     display: inline-block;
 }
+fieldset.other {
+    animation-name: fade-right;
+    animation-duration: 0.5s;
+}
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
@@ -83,14 +91,20 @@ label[for=formantOtherPattern] {
         width: 25%;
         display: inline-block;
     }
+    summary > label {
+        width: 23%;
+        display: inline-block;
+    }
     .item > .viz {
-        width: 35%;
+        width: 50%;
         background-image: url('/assets/sine.svg');
         background-size: auto 100%;
         display: inline-table;
         padding: 0px;
         margin: 0px;
-        height: 15px;
+    }
+    .item, .item > .viz {
+        min-height: 25px;
     }
     .item > .script {
         width: 50%;
@@ -179,9 +193,6 @@ label[for=formantOtherPattern] {
         flex-wrap: nowrap;
         align-items: flex-end;
         padding-bottom: 4px;
-    }
-    .settings-sets {
-        width: 100%;
     }
     .alternatives legend, .settings-set legend label {
         white-space: nowrap;

@@ -30,6 +30,42 @@
         top: 0px;
     }
 }
+@keyframes fade-right {
+    from {
+        opacity: 0;
+        position: relative;
+        left: -50px;
+    }
+    to {
+        end: 1;
+        position: relative;
+        left: 0px;
+    }
+}
+@keyframes roll-down {
+    from {
+        opacity: 0;
+        overflow: auto;
+        max-height: 0px;
+    }
+    to {
+        end: 1;
+        overflow: auto;
+        max-height: 1000px;
+    }
+}
+@keyframes roll-up {
+    from {
+        opacity: 1;
+        overflow: auto;
+        max-height: 1000px;
+    }
+    to {
+        end: 0;
+        overflow: auto;
+        max-height: 0px;
+    }
+}
 
 /* general look and feel */
 h1 { font-size: 17pt; color: black; }
