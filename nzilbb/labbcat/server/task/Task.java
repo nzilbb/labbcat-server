@@ -373,6 +373,11 @@ public class Task extends Thread implements MonitorableTask {
   } // end of waitToDie()
   
   protected long lStartTime = 0;
+  /**
+   * The creation time of the task.
+   * @return the creation time of the task
+   */
+  public Date getCreationTime() { return new Date(lStartTime); }
   protected long lDuration;
   /**
    * The duration of the tasks execution so far.

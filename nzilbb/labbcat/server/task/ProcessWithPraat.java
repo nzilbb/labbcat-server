@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -1574,7 +1575,7 @@ public class ProcessWithPraat extends Task {
       if (extractCOG1) out.print("COG1");
       if (extractCOG2) out.print("COG2");
       if (extractCOG23) out.print("COG2/3");
-      if (customScript != null)
+      if (customScript != null && customScript.trim().length() > 0)
       { // figure out headers for the custom script output
         customScriptHeaders = new Vector<String>();
         // for each line	    
@@ -1861,12 +1862,145 @@ public class ProcessWithPraat extends Task {
         new File(new File(store.getFiles(), "FastTrack-master"), "Fast Track"), "functions");
       
       File script = File.createTempFile("ProcessWithPraat-", ".praat", functions);
-      FileWriter scriptWriter = new FileWriter(script);
+      PrintWriter scriptWriter = new PrintWriter(script, "UTF-8");
+      File tempDirectory = Files.createTempDirectory("ProcessWithPraat-").toFile();
+      generateScript(
+        scriptWriter, tempDirectory, wav, targets, formantCeiling,
+        pitchFloor, pitchCeiling, voicingThreshold,
+        intensityPitchFloor, fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency,
+        attributeValues);
+      scriptWriter.close();      
+      //setStatus(script);
+      
+      try {
+        String sResult = executeScript(script);
+        
+        BufferedReader reader = new BufferedReader(
+          new StringReader(sResult));
+        for (Vector<Double> tuple : targets) {
+          Double startTime = tuple.elementAt(0);
+          Double endTime = tuple.elementAt(1);
+          Vector<String> result = new Vector<String>();
+          if (startTime >= 0.0) {
+            if (extractF1 || extractF2 || extractF3) {
+              if (useFastTrack && fastTrackCoefficients) {
+                for (int f = 1; f <= Math.max(3, fastTrackNumberOfFormants); f++) {
+                  for (int c = 0; c <= fastTrackNumberOfCoefficients; c++) {
+                    result.add(reader.readLine());
+                  }
+                }
+              }
+              for (Double point : getSamplePoints()) {
+                Double targetTime = Double.valueOf(
+                  startTime + ((endTime - startTime) * point));
+                result.add(targetTime.toString());
+                if (extractF1) result.add(reader.readLine());
+                if (extractF2) result.add(reader.readLine());
+                if (extractF3) result.add(reader.readLine());
+              } // next sample point
+            } // extracting formants
+            if (extractMinimumPitch) result.add(reader.readLine());
+            if (extractMeanPitch) result.add(reader.readLine());
+            if (extractMaximumPitch) result.add(reader.readLine());
+            if (extractMaximumIntensity) result.add(reader.readLine());
+            if (extractCOG1) result.add(reader.readLine());
+            if (extractCOG2) result.add(reader.readLine());
+            if (extractCOG23) result.add(reader.readLine());
+            for (String field : customScriptHeaders) result.add(reader.readLine());
+          } else {
+            if (extractF1 || extractF2 || extractF3) {
+              if (useFastTrack && fastTrackCoefficients) {
+                for (int f = 1; f <= Math.max(3, fastTrackNumberOfFormants); f++) {
+                  for (int c = 0; c <= fastTrackNumberOfCoefficients; c++) {
+                    result.add("");
+                  }
+                }
+              }
+              for (Double point : getSamplePoints()) {
+                result.add("");
+                if (extractF1) result.add("");
+                if (extractF2) result.add("");
+                if (extractF3) result.add("");
+              } // next sample point
+            } // extracting formants
+            if (extractMinimumPitch) result.add("");
+            if (extractMeanPitch) result.add("");
+            if (extractMaximumPitch) result.add("");
+            if (extractMaximumIntensity) result.add("");
+            if (extractCOG1) result.add("");
+            if (extractCOG2) result.add("");
+            if (extractCOG23) result.add("");
+            for (String field : customScriptHeaders) result.add("");
+          }
+          results.add(result);
+        } // next target
+        IO.RecursivelyDelete(tempDirectory);
+      } finally {
+        script.delete();
+      }
+    } else { // no media file - return a well-formed result anyway
+      for (Vector<Double> tuple : targets) {
+        Vector<String> result = new Vector<String>();
+        if (extractF1 || extractF2 || extractF3) {
+          if (useFastTrack && fastTrackCoefficients) {
+            for (int f = 1; f <= Math.max(3, fastTrackNumberOfFormants); f++) {
+              for (int c = 0; c <= fastTrackNumberOfCoefficients; c++) {
+                result.add("");
+              }
+            }
+          }
+          for (Double point : getSamplePoints()) {
+            result.add("");
+            if (extractF1) result.add("");
+            if (extractF2) result.add("");
+            if (extractF3) result.add("");
+          } // next sample point
+        } // extracting formants
+        if (extractMinimumPitch) result.add("");
+        if (extractMeanPitch) result.add("");
+        if (extractMaximumPitch) result.add("");
+        if (extractMaximumIntensity) result.add("");
+        if (extractCOG1) result.add("");
+        if (extractCOG2) result.add("");
+        if (extractCOG23) result.add("");
+        for (String field : customScriptHeaders) result.add("");
+        results.add(result);
+      } // next target
+    }
+    return results;
+  } // end of formantsFromFile()
+  
+  /**
+   * Extracts the formants at the given times for the given WAV file
+   * @param scriptWriter Writer to write the script to.
+   * @param tempDirectory A directory that can be used for temporary files generated by the script.
+   * @param wav WAV file to analyse.
+   * @param vTargets 
+   * @param formantCeiling
+   * @param pitchFloor
+   * @param pitchCeiling
+   * @param voicingThreshold
+   * @param intensityPitchFloor
+   * @param fastTrackLowestAnalysisFrequency
+   * @param fastTrackHighestAnalysisFrequency
+   * @param attributeValues Attribute names (keys) and values for this batch.
+   * @return An array lines, where each line contains a string for each extraction
+   * datum. e.g. two strings - F1 and F2 
+   * @throws Exception
+   */
+  public void generateScript(
+    PrintWriter scriptWriter, File tempDirectory,
+    File wav, Vector<Vector<Double>> targets, Integer formantCeiling,
+    Integer pitchFloor, Integer pitchCeiling, Double voicingThreshold,
+    Integer intensityPitchFloor, Integer fastTrackLowestAnalysisFrequency,
+    Integer fastTrackHighestAnalysisFrequency,
+    HashMap<String,String> attributeValues)
+    throws Exception {
+    
       scriptWriter.write("Open long sound file... " + wav.getPath());
       scriptWriter.write("\nRename... soundfile");
       // variables: formantCeiling, pitchFloor, voicingThreshold, pitchCeiling, intensityPitchFloor
      
-      File tempDirectory = null;
       if (useFastTrack) {
         scriptWriter.write("\n# FastTrack:");
         scriptWriter.write("\ninclude utils/trackAutoselectProcedure.praat");
@@ -1902,7 +2036,6 @@ public class ProcessWithPraat extends Task {
         scriptWriter.write("\noutput_intensity = 1");
         scriptWriter.write("\noutput_harmonicity = 1");
         scriptWriter.write("\noutput_normalized_time = 1");
-        tempDirectory = Files.createTempDirectory("ProcessWithPraat-").toFile();
         scriptWriter.write("\ndir$ = \"");
         scriptWriter.write(tempDirectory.getPath());
         scriptWriter.write("\"");
@@ -2048,7 +2181,7 @@ public class ProcessWithPraat extends Task {
             +"\nprint ''result:0''"
             +"\nprintline":"")
           +"\nRemove":"") // spectrum object
-        +(customScript!=null?customScriptSnippet:"")
+        +(customScript != null && customScript.trim().length() > 0?customScriptSnippet:"")
         +"\nselect Sound sample{10,number,#0}"
         +"\nRemove", // sound sample
         Locale.UK);
@@ -2094,107 +2227,7 @@ public class ProcessWithPraat extends Task {
           scriptWriter.write(fmtScript.format(oArgs));
         } // valid interval
       } // next target
-      scriptWriter.close();
-      //setStatus(script);
-      try {
-        String sResult = executeScript(script);
-        
-        BufferedReader reader = new BufferedReader(
-          new StringReader(sResult));
-        for (Vector<Double> tuple : targets) {
-          Double startTime = tuple.elementAt(0);
-          Double endTime = tuple.elementAt(1);
-          Vector<String> result = new Vector<String>();
-          if (startTime >= 0.0) {
-            if (extractF1 || extractF2 || extractF3) {
-              if (useFastTrack && fastTrackCoefficients) {
-                for (int f = 1; f <= Math.max(3, fastTrackNumberOfFormants); f++) {
-                  for (int c = 0; c <= fastTrackNumberOfCoefficients; c++) {
-                    result.add(reader.readLine());
-                  }
-                }
-              }
-              for (Double point : getSamplePoints()) {
-                Double targetTime = Double.valueOf(
-                  startTime + ((endTime - startTime) * point));
-                result.add(targetTime.toString());
-                if (extractF1) result.add(reader.readLine());
-                if (extractF2) result.add(reader.readLine());
-                if (extractF3) result.add(reader.readLine());
-              } // next sample point
-            } // extracting formants
-            if (extractMinimumPitch) result.add(reader.readLine());
-            if (extractMeanPitch) result.add(reader.readLine());
-            if (extractMaximumPitch) result.add(reader.readLine());
-            if (extractMaximumIntensity) result.add(reader.readLine());
-            if (extractCOG1) result.add(reader.readLine());
-            if (extractCOG2) result.add(reader.readLine());
-            if (extractCOG23) result.add(reader.readLine());
-            for (String field : customScriptHeaders) result.add(reader.readLine());
-          } else {
-            if (extractF1 || extractF2 || extractF3) {
-              if (useFastTrack && fastTrackCoefficients) {
-                for (int f = 1; f <= Math.max(3, fastTrackNumberOfFormants); f++) {
-                  for (int c = 0; c <= fastTrackNumberOfCoefficients; c++) {
-                    result.add("");
-                  }
-                }
-              }
-              for (Double point : getSamplePoints()) {
-                result.add("");
-                if (extractF1) result.add("");
-                if (extractF2) result.add("");
-                if (extractF3) result.add("");
-              } // next sample point
-            } // extracting formants
-            if (extractMinimumPitch) result.add("");
-            if (extractMeanPitch) result.add("");
-            if (extractMaximumPitch) result.add("");
-            if (extractMaximumIntensity) result.add("");
-            if (extractCOG1) result.add("");
-            if (extractCOG2) result.add("");
-            if (extractCOG23) result.add("");
-            for (String field : customScriptHeaders) result.add("");
-          }
-          results.add(result);
-        } // next target
-        if (tempDirectory != null) {
-          IO.RecursivelyDelete(tempDirectory);
-        }
-      } finally {
-        script.delete();
-      }
-    } else { // no media file - return a well-formed result anyway
-      for (Vector<Double> tuple : targets) {
-        Vector<String> result = new Vector<String>();
-        if (extractF1 || extractF2 || extractF3) {
-          if (useFastTrack && fastTrackCoefficients) {
-            for (int f = 1; f <= Math.max(3, fastTrackNumberOfFormants); f++) {
-              for (int c = 0; c <= fastTrackNumberOfCoefficients; c++) {
-                result.add("");
-              }
-            }
-          }
-          for (Double point : getSamplePoints()) {
-            result.add("");
-            if (extractF1) result.add("");
-            if (extractF2) result.add("");
-            if (extractF3) result.add("");
-          } // next sample point
-        } // extracting formants
-        if (extractMinimumPitch) result.add("");
-        if (extractMeanPitch) result.add("");
-        if (extractMaximumPitch) result.add("");
-        if (extractMaximumIntensity) result.add("");
-        if (extractCOG1) result.add("");
-        if (extractCOG2) result.add("");
-        if (extractCOG23) result.add("");
-        for (String field : customScriptHeaders) result.add("");
-        results.add(result);
-      } // next target
-    }
-    return results;
-  } // end of formantsFromFile()
+  }
   
   /**
    * Executes the given script in Praat.
