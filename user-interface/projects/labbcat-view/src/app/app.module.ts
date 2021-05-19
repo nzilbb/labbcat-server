@@ -10,13 +10,15 @@ import { LabbcatCommonModule, TaskComponent, GroupedCheckboxComponent, PendingCh
 import { MatchesComponent } from './matches/matches.component';
 import { ParticipantsComponent } from './participants/participants.component';
 import { PraatComponent } from './praat/praat.component';
+import { TranscriptsComponent } from './transcripts/transcripts.component';
 
 @NgModule({
   declarations: [
       AppComponent,
       MatchesComponent,
       ParticipantsComponent,
-      PraatComponent
+      PraatComponent,
+      TranscriptsComponent
   ],
   imports: [
       BrowserModule,
@@ -27,6 +29,7 @@ import { PraatComponent } from './praat/praat.component';
           { path: 'task', component: TaskComponent },
           { path: 'praat', component: PraatComponent },
           { path: 'participants', component: ParticipantsComponent },
+          { path: 'transcripts', component: TranscriptsComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

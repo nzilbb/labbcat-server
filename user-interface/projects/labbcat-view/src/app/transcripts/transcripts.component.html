@@ -1,0 +1,162 @@
+<h1 i18n>Transcripts</h1>
+<div id="spinner"><lib-wait *ngIf="loadingList || listTranscriptsTimer >= 0"></lib-wait></div>
+<div class="transcripts">
+  <form #form method="post" action="{{baseUrl + 'transcripts'}}">
+    <input #todo type="hidden" name="todo" value="">
+    <input #exportType type="hidden" name="exportType" value="csv">
+    <input type="hidden" name="query" [(ngModel)]="query">
+    <table>
+      <caption *ngIf="matchCount >= 0"><span i18n="Match count: {n}">Match count:</span>&nbsp;<span id="matchCount">{{matchCount}}</span></caption>
+      <thead>
+        <tr class="filters">
+          <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
+            <lib-layer-filter            
+              [layer]="layer"
+              [values]="filterValues[layer.id]"
+              (changeValues)="filterChange(layer, $event)"
+              ></lib-layer-filter>
+          </td>
+        </tr><!-- Select from file -->
+        <tr class="controls">
+          <td colSpan="{{filterLayers.length}}">
+            <lib-button
+              *ngIf="user && user.roles.includes('edit')"
+              action="delete"
+              (press)="deleteTranscripts()" [processing]="deleting"
+              [disabled]="selectedIds.length == 0"
+              i18n-title title="Delete record"
+              ></lib-button>
+            <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
+              <select name="layer_id"
+                      i18n-title title="Which layer to generate">
+                <option value="" i18n>All layers</option>
+                <ng-container *ngFor="let layer of generableLayers">
+                  <option value="{{layer.layer_id}}">{{layer.id}}</option>
+                </ng-container>
+              </select>
+            </div>
+            <lib-button
+              *ngIf="user && user.roles.includes('edit')"
+              (press)="generate()"
+              [disabled]="selectedIds.length == 0"
+              img="cog.svg" icon="⚙"
+              i18n-label label="Generate"
+              i18n-title title="Regenerate layers for all selected transcripts"
+              ></lib-button>
+            <lib-button
+              (press)="exportMedia()"
+              [disabled]="!transcriptIds || transcriptIds.length == 0"
+              img="audio.svg" icon="🔊"
+              i18n-label label="Export Media"
+              i18n-title title="Save media files of all selected transcripts"
+            ></lib-button>
+            <lib-button
+              (press)="exportTranscripts()"
+              [disabled]="!transcriptIds || transcriptIds.length == 0"
+              img="document.svg" icon="📄"
+              i18n-label label="Export Transcripts"
+              i18n-title title="Save original transcript of all selected transcripts"
+              ></lib-button>
+            <span id="attributesSelection" *ngIf="showAttributesSelection">
+              <lib-layer-checkboxes
+                name="layer"
+                transcript="{{true}}"
+                selected="{{[schema.root.id]}}"
+                excludeMainParticipant="{{true}}"
+                ></lib-layer-checkboxes>
+            </span>
+            <lib-button
+              (press)="exportAttributes()"
+              [disabled]="!transcriptIds || transcriptIds.length == 0"
+              img="csv.svg" icon=",a,"
+              i18n-label label="Export Attributes"
+              i18n-title title="Export attributes to CSV"
+              ></lib-button>
+            <div id="serializationOptions" *ngIf="showSerializationOptions">
+              <fieldset i18n-title title="Annotation layers to include in the exported files">
+                <legend i18n>Layers</legend>
+                <lib-layer-checkboxes
+                  name="serialize_layer"
+                  participant="{{true}}" transcript="{{true}}"
+                  span="{{true}}" phrase="{{true}}" word="{{true}}" segment="{{true}}"
+                  selected="{{[schema.wordLayerId]}}"
+                  ></lib-layer-checkboxes>
+              </fieldset>
+              <select name="mimetype"
+                      i18n-title title="Format to convert to"
+                      [(ngModel)]="mimeType"
+                      (change)="onChangeMimeType()">
+                <option *ngFor="let serializer of serializers"
+                        value="{{serializer.mimeType}}">{{serializer.name}}</option>
+              </select>
+            </div>
+            <lib-button
+              (press)="exportFormat()"
+              [disabled]="!transcriptIds || transcriptIds.length == 0"
+              img="{{serializeImg}}" icon="⚙"
+              i18n-label label="Export Format"
+              i18n-title title="Convert to selected format"
+              ></lib-button>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let id of transcriptIds">
+          <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
+            <span class="id" *ngIf="layer.id == schema.root.id">
+              <lib-grouped-checkbox
+                group="transcript"
+                name="id"
+                value="{{id}}"
+                [checked]="selectedIds.includes(id)"
+                (checkedChange)="selectedIds.includes(id)?selectedIds.splice(selectedIds.indexOf(id),1):selectedIds.push(id)"></lib-grouped-checkbox>
+              <a href="transcript?transcript={{id | urlEncode}}" title="{{id}}">{{id}}</a>
+            </span>
+            <span class="attribute"
+                  *ngIf="layer.id != schema.root.id && attributeValues[id].annotations">
+              
+              <span class="value"
+                    *ngFor="let annotation of attributeValues[id].annotations[layer.id]"
+                    title="{{layer.id}}: {{annotation.label}}">
+                <span class="{{layer.subtype}}"
+                      *ngIf="layer.subtype != 'datetime' && layer.subtype != 'date'">
+                  {{annotation.label}}</span>
+                <span class="{{layer.subtype}}"
+                      *ngIf="layer.subtype == 'date'"
+                      title="{{annotation.label | date : 'fullDate' }}">
+                  {{annotation.label}}</span>
+                <span class="{{layer.subtype}}"
+                      *ngIf="layer.subtype == 'datetime'"
+                      title="{{annotation.label | date : 'full' }}">
+                  {{annotation.label}}</span>
+              </span>
+            </span>
+          </td>
+          <td class="links">
+            <lib-link *ngIf="user && user.roles.includes('edit')"
+                      i18n-title title="Main Participants"
+                      img="people.svg" icon="👥"
+                      href="edit/transcripts/mainPartipants?id={{id}}"></lib-link>
+            <lib-link *ngIf="user && user.roles.includes('edit')"
+                      i18n-title title="Media"
+                      img="audio.svg" icon="🔊"
+                      href="edit/transcripts/media?id={{id}}"></lib-link>
+            <lib-link *ngIf="user && user.roles.includes('edit')"
+                      i18n-title title="Attributes"
+                      img="wrench.svg" icon="🔧"
+                      href="edit/transcripts/attributes?id={{id}}"></lib-link>
+            <lib-link *ngIf="!user || !user.roles.includes('edit')"
+                      i18n-title title="Attributes"
+                      img="wrench.svg" icon="🔧"
+                      href="transcripts/attributes?id={{id}}"></lib-link>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+</div>
+<lib-pagination
+  i18n-title title="Page links"
+  [currentPage]="p"
+  [pageLinks]="pageLinks"
+  (goToPage)="goToPage($event)"></lib-pagination>
