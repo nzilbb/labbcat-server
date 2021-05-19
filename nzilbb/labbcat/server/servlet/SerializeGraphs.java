@@ -59,6 +59,8 @@ import nzilbb.util.IO;
  *     <dd><code>mimeType</code> - Content-type of the format to serialize to.</dd>
  *     <dd><code>layerId</code> - A list of layer IDs to include in the serialization.</dd>
  *     <dd><code>id</code> - One or more graph IDs.</dd>
+ *     <dd><code>query</code> - Graph QL expression to identify the graph IDs, if no
+ *         <var>id</var> parameter is supplied.</dd>
  *     <dd><code>name</code> - Optional name of the collection.</dd>
  *   </dl>
  * <p><b>Output</b>: A each of the transcript fragments specified by the input parameters
@@ -108,6 +110,8 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
    *  <li><i>mimeType</i> - content-type of the format to serialize to. </li>
    *  <li><i>layerId</i> - a list of layer IDs to include in the serialization. </li>
    *  <li><i>id</i> - one or more graph IDs. </li>
+   *  <li><i>query</i> - Graph QL expression to identify the graph IDs, if no <i>id</i>
+   *                     parameter is supplied.</li> 
    *  <li><i>name</i> - (optional) name of the collection.</li>
    * </ul>
    * <br><b>Output</b>: A each of the transcript fragments 
@@ -129,7 +133,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
       
     // check parameters
     String name = request.getParameter("name");
-    if (name == null || name.trim().length() == 0) name = "fragments";
+    if (name == null || name.trim().length() == 0) name = "transcripts";
     name = name.trim();
       
     String mimeType = request.getParameter("mimeType");
@@ -145,17 +149,22 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
       return;
     }
       
-    // arrays of transcripts and delimiters
-    String[] id = request.getParameterValues("id");
-    if (id == null) {
-      response.sendError(400, "No graph IDs specified");
-      return;
-    }
-      
     File zipFile = null;
     try {
          
       SqlGraphStoreAdministration store = getStore(request);
+      // arrays of transcripts and delimiters
+      String[] id = request.getParameterValues("id");
+      if (id == null) {
+        // have they specified a query?
+        String query = request.getParameter("query");
+        id = store.getMatchingTranscriptIds(query);
+        if (id.length == 0) {
+          response.sendError(400, "No graph IDs specified");
+          return;
+        }
+      } // no "id" parameter values
+      
       try {
             
         LinkedHashSet<String> layers = new LinkedHashSet<String>();
