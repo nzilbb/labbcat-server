@@ -48,19 +48,21 @@
     </ng-container>
 
     <div *ngIf="inputType == 'select'" class="{{validLabelKeys().length < 4?'few':'many'}}">
-      <span *ngFor="let label of validLabelKeys()">
-        <input
-          id="{{layer.id}}-{{label}}"
-          type="checkbox"
-          value="{{label}}"
-          [checked]="values.includes(label)"
-          (click)="handleCheckboxClick(label, $event.target.checked)"
-          >
-        <label for="{{layer.id}}-{{label}}" title="{{layer.validLabels[label]}}">
-          <span class="description">{{layer.validLabels[label]}}</span>
-          <span class="validLabel" *ngIf="label != layer.validLabels[label]">({{label}})</span>
-        </label>
-      </span>
+      <ng-container *ngFor="let label of validLabelKeys()">
+        <span class="{{values.includes(label)?'checked':'unchecked'}}">
+          <input
+            id="{{layer.id}}-{{label}}"
+            type="checkbox"
+            value="{{label}}"
+            [checked]="values.includes(label)"
+            (click)="handleCheckboxClick(label, $event.target.checked)"
+            >
+          <label for="{{layer.id}}-{{label}}" title="{{layer.validLabels[label]}}">
+            <span class="description">{{layer.validLabels[label]}}</span>
+            <span class="validLabel" *ngIf="label != layer.validLabels[label]">({{label}})</span>
+          </label>
+        </span>
+      </ng-container>
       <span *ngIf="otherAllowed">
         <input
           id="{{layer.id}}_other"

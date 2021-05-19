@@ -92,3 +92,11 @@ fieldset > div > input {
 .select .few input:checked + label {
     border: 1px solid silver;
 }
+/* float checked boxes to the top */
+.many .checked {
+    order: 0;
+}
+.many .unchecked {
+    order: 1;
+}
+
