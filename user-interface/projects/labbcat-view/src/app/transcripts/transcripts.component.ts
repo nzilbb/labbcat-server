@@ -372,8 +372,6 @@ export class TranscriptsComponent implements OnInit {
     showAttributesSelection = false;
     /** Button action */
     exportAttributes(): void {
-        this.showAttributesSelection = this.showSerializationOptions
-            = this.showGenerateLayerSelection = false;
         if (!this.showAttributesSelection) { // show options
             this.showAttributesSelection = true;
             this.showSerializationOptions = this.showGenerateLayerSelection = false;
