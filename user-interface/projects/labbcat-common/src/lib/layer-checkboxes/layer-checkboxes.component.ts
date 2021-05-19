@@ -33,6 +33,7 @@ export class LayerCheckboxesComponent implements OnInit {
     segmentLayers: Layer[];
     @Input() selected: string[];
     schema;
+    scopeCount = 0;
 
     constructor(
         private labbcatService: LabbcatService
@@ -40,6 +41,13 @@ export class LayerCheckboxesComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadSchema();
+        this.scopeCount = 0;
+        if (this.participant) this.scopeCount++;
+        if (this.transcript) this.scopeCount++;
+        if (this.span) this.scopeCount++;
+        if (this.phrase) this.scopeCount++;
+        if (this.word) this.scopeCount++;
+        if (this.segment) this.scopeCount++;
     }
 
     loadSchema(): void {
@@ -90,12 +98,16 @@ export class LayerCheckboxesComponent implements OnInit {
     }
 
     ParticipantLayerLabel(id): string {
-        if (id == this.schema.participantLayerId) return "Name";
+        if (id == this.schema.participantLayerId && this.scopeCount > 1) {
+            return "Name"; // TODO i18n
+        }
         else return id.replace(/^participant_/,"");
     }
     TranscriptLayerLabel(id): string {
-        if (id == this.schema.root.id) return "Name";
-        else return id.replace(/^transcript_/,"");
+        if (id == this.schema.root.id && this.scopeCount > 1) {
+            return "Name"; // TODO i18n
+        }
+        return id.replace(/^transcript_/,"");
     }
 
 }

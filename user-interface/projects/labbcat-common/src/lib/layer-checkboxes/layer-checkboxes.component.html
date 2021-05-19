@@ -1,5 +1,8 @@
 <div *ngIf="participant" class="layers participant-layers">
-  <div class="header" i18n-title title="Participant Attributes" i18n="layer type header">Participant</div>
+  <div class="header"
+       i18n-title title="Participant Attributes"
+       *ngIf="scopeCount > 1"
+       i18n="layer type header">Participant</div>
   <label *ngFor="let layer of participantAttributes" title="{{layer.description}}">
     <lib-grouped-checkbox
       group="{{name}}"
@@ -17,7 +20,10 @@
   </label>
 </div>
 <div *ngIf="transcript" class="layers transcript-layers">
-  <div class="header" i18n-title title="Transcript Attributes" i18n="layer type header">Transcript</div>
+  <div class="header"
+       i18n-title title="Transcript Attributes"
+       *ngIf="scopeCount > 1"
+       i18n="layer type header">Transcript</div>
   <label *ngFor="let layer of transcriptAttributes" title="{{layer.description}}">
     <lib-grouped-checkbox
       group="{{name}}"
@@ -35,7 +41,10 @@
   </label>
 </div>
 <div *ngIf="span" class="layers span-layers">
-  <div class="header" i18n-title title="Span Layers" i18n="layer type header">Span</div>
+  <div class="header"
+       i18n-title title="Span Layers"
+       *ngIf="scopeCount > 1"
+       i18n="layer type header">Span</div>
   <label *ngFor="let layer of spanLayers" title="{{layer.description}}">
     <lib-grouped-checkbox
       group="{{name}}"
@@ -57,7 +66,10 @@
   </label>
 </div>
 <div *ngIf="phrase" class="layers phrase-layers">
-  <div class="header" i18n-title title="Phrase Layers" i18n="layer type header">Phrase</div>
+  <div class="header"
+       i18n-title title="Phrase Layers"
+       *ngIf="scopeCount > 1"
+       i18n="layer type header">Phrase</div>
   <label *ngFor="let layer of phraseLayers" title="{{layer.description}}">
     <lib-grouped-checkbox
       group="{{name}}"
@@ -71,6 +83,7 @@
              class="share-start"
              id="{{name+'-'+layer.id+'-start'}}" style="display: none;">
       <label for="{{name+'-'+layer.id+'-start'}}"
+             *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
              class="anchor"
              title-i18n title="Click to select annotations that start when the target starts"
              >⚓</label>
@@ -83,6 +96,7 @@
              class="share-end"
              id="{{name+'-'+layer.id+'-end'}}" style="display: none;">
       <label for="{{name+'-'+layer.id+'-end'}}"
+             *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
              class="anchor"
              title-i18n title="Click to select annotations that end when the target ends"
              >⚓</label>
@@ -91,7 +105,10 @@
   </label>
 </div>
 <div *ngIf="word" class="layers word-layers">
-  <div class="header" i18n-title title="Word Layers" i18n="layer type header">Word</div>
+  <div class="header"
+       i18n-title title="Word Layers"
+       *ngIf="scopeCount > 1"
+       i18n="layer type header">Word</div>
   <label *ngFor="let layer of wordLayers" title="{{layer.description}}">
     <lib-grouped-checkbox
       group="{{name}}"
@@ -109,7 +126,10 @@
   </label>
 </div>
 <div *ngIf="segment" class="layers segment-layers">
-  <div class="header" i18n-title title="Segment Layers" i18n="layer type header" >Segment</div>
+  <div class="header"
+       i18n-title title="Segment Layers"
+       *ngIf="scopeCount > 1"
+       i18n="layer type header" >Segment</div>
   <label *ngFor="let layer of segmentLayers" title="{{layer.description}}">
     <lib-grouped-checkbox
       group="{{name}}"
