@@ -709,13 +709,13 @@
         /**
          * Gets a transcript given its ID, containing only the given layers.
          * @param {string} id The given transcript ID.
-         * @param {string[]} layerId The IDs of the layers to load, or null for all
+         * @param {string[]} layerIds The IDs of the layers to load, or null for all
          * layers. If only transcript data is required, set this to ["graph"]. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:  The identified transcript.
          */
-        getTranscript (id, layerId, onResult) {
-	    this.createRequest("getTranscript", { id : id, layerId : layerId }, onResult).send();
+        getTranscript(id, layerIds, onResult) {
+	    this.createRequest("getTranscript", { id : id, layerIds : layerIds }, onResult).send();
         }
         
         /**
@@ -725,7 +725,7 @@
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:  The identified transcript.
          */
-        getAnchors (id, anchorIds, onResult) {
+        getAnchors(id, anchorIds, onResult) {
 	    this.createRequest("getAnchors", { id : id, anchorIds : anchorIds }, onResult).send();
         }
         
