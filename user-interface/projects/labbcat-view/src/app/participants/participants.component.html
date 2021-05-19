@@ -2,6 +2,7 @@
 <div id="spinner"><lib-wait *ngIf="loadingList || listParticipantsTimer >= 0"></lib-wait></div>
 <div class="participants">
   <table>
+    <caption *ngIf="matchCount >= 0"><span i18n="Match count: {n}">Match count:</span>&nbsp;<span id="matchCount">{{matchCount}}</span></caption>
     <thead>
       <tr class="filters">
         <td *ngFor="let layer of filterLayers" class="{{layer.id}}">

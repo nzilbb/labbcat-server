@@ -16,6 +16,7 @@ export class ParticipantsComponent implements OnInit {
     participantAttributes: Layer[];
     user: User;
     baseUrl: string;
+    matchCount: -1;
     pageLength = 20;
     pageCount = 0;
     p = 1; // current page number
@@ -131,7 +132,7 @@ export class ParticipantsComponent implements OnInit {
                 // participant layer
                 if (this.query) this.query += " && ";
                 
-                this.query += "/"+this.esc(this.filterValues["participant"][0])+"/.test(id)";
+                this.query += "/"+this.esc(this.filterValues[this.schema.participantLayerId][0])+"/.test(id)";
                 
             } else if (layer.id == " transcript-count"
                 && this.filterValues[layer.id].length > 0) {
@@ -230,6 +231,7 @@ export class ParticipantsComponent implements OnInit {
         // count matches
         this.labbcatService.labbcat.countMatchingParticipantIds(
             this.query, (matchCount, errors, messages) => {
+                this.matchCount = matchCount;
                 if (errors) {
                     errors.forEach(m => this.messageService.error(m));
                     this.loadingList = false;
@@ -381,8 +383,9 @@ export class ParticipantsComponent implements OnInit {
     /** Query to append to href for links to other pages */
     queryString(): string {
         let q = "";
-        if (this.filterValues["participant"][0]) {
-            q += "&participant="+this.filterValues["participant"][0];
+        if (this.filterValues[this.schema.participantLayerId][0]) {
+            q += "&"+this.schema.participantLayerId
+                +"="+this.filterValues[this.schema.participantLayerId][0];
         }
         return q;
     }
