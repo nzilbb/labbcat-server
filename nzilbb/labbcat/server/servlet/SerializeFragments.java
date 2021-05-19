@@ -145,7 +145,7 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
       // check parameters
       String name = request.getParameter("name");
       if (name == null || name.trim().length() == 0) name = "fragments";
-      name = name.trim();
+      name = IO.SafeFileNameUrl(name.trim());
       
       String mimeType = request.getParameter("mimeType");
       if (mimeType == null) mimeType = request.getParameter("content-type");

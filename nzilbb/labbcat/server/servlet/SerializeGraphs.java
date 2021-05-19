@@ -1,5 +1,5 @@
 //
-// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -52,8 +52,6 @@ import nzilbb.util.IO;
  * : Converts transcripts to specific formats.
  * <p> Converts transcripts to annotation file formats. 
  * <p> The request method can be <b> GET </b> or <b> POST </b>
- * <p> This expects an array of graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
- *  a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
  *   <dl>
  *     <dt><span class="paramLabel">Parameters:</span></dt>
  *     <dd><code>mimeType</code> - Content-type of the format to serialize to.</dd>
@@ -63,11 +61,11 @@ import nzilbb.util.IO;
  *         <var>id</var> parameter is supplied.</dd>
  *     <dd><code>name</code> - Optional name of the collection.</dd>
  *   </dl>
- * <p><b>Output</b>: A each of the transcript fragments specified by the input parameters
- * converted to the given format.  
+ * <p><b>Output</b>: Each of the transcripts specified by the input parameters converted
+ * to the given format.
  * <p> This may be a single file or multiple files, depending on the converter behaviour
  * and how many fragments are specified. If there is only one, the file in returned as the
- * response to  the request.  If there are more than one, the response is a zipfile
+ * response to  the request.  If there are more than one, the response is a zip file
  * containing the output files. 
  * @author Robert Fromont
  */
@@ -134,7 +132,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
     // check parameters
     String name = request.getParameter("name");
     if (name == null || name.trim().length() == 0) name = "transcripts";
-    name = name.trim();
+    name = IO.SafeFileNameUrl(name.trim());
       
     String mimeType = request.getParameter("mimeType");
     if (mimeType == null) {

@@ -7034,6 +7034,37 @@ public class SqlGraphStore implements GraphStore {
    }
 
    /**
+    * Gets the source file for the given transcript.
+    * @param id The transcript ID
+    * @return A URL to the transcript.
+    * @throws StoreException If an error prevents the media from being saved.
+    * @throws PermissionException If saving the media is not permitted.
+    * @throws GraphNotFoundException If the transcript doesn't exist.
+    */
+   public String getSource(String id)
+      throws StoreException, PermissionException, GraphNotFoundException {
+      try {
+         String[] layers = { "corpus", "episode" };
+         Graph graph = getTranscript(id, layers);
+         File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
+         File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
+         File sourceDir = new File(episodeDir, "trs");
+         File source = new File(sourceDir, graph.getId());
+         if (!source.exists()) throw new GraphNotFoundException(source.getPath());
+
+         if (baseUrl == null) {
+           return source.toURI().toString();
+         } else {
+           return baseUrl + getFiles().getName() + "/" + corpusDir.getName() + "/" + episodeDir.getName() + "/" + sourceDir.getName() + "/" + source.getName();
+         } // not file URL
+      } catch (GraphNotFoundException x) {
+        throw x;
+      } catch (Throwable t) {
+        throw new StoreException(t);
+      }
+   }
+
+   /**
     * Saves the given document for the episode of the given transcript.
     * @param id The transcript ID
     * @param url A URL to the document.

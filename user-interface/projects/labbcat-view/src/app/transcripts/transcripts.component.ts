@@ -12,8 +12,6 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 })
 export class TranscriptsComponent implements OnInit {
     @ViewChild("form") form;
-    @ViewChild("todo") todo;
-    @ViewChild("exportType") exportType;
     
     schema: any;
     filterLayers: Layer[];
@@ -330,50 +328,62 @@ export class TranscriptsComponent implements OnInit {
     generate(): void {
         if (!this.showGenerateLayerSelection) { // show options
             this.showGenerateLayerSelection = true;
+            this.showAttributesSelection = this.showSerializationOptions = false;
         } else { // options selected, so go ahead and do it
-            this.todo.nativeElement.value = "generate";
-            this.exportType.nativeElement.value = "";
+            this.form.nativeElement.action = this.baseUrl + "edit/layers/regenerate";
             this.form.nativeElement.submit();
         }
     }
 
     /** Button action */
     exportMedia(): void {
-        if (this.selectedIds.length == 0) {
-            if (!confirm("This will export all transcripts in the corpus.\nAre you sure?")) {
+        this.showAttributesSelection = this.showSerializationOptions
+            = this.showGenerateLayerSelection = false;
+        if (this.selectedIds.length == 0 && this.matchCount > 10) {
+            if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
                 return;
             }
         }
-        this.todo.nativeElement.value = "export";
-        this.exportType.nativeElement.value = "media";
-        this.form.nativeElement.submit();
+        this.mimeType = "audio/wav";
+        // give the form binding a chance to update
+        setTimeout(()=>{
+            this.form.nativeElement.action = this.baseUrl + "api/files";
+            this.form.nativeElement.submit();
+        }, 100);
     }
 
     /** Button action */
     exportTranscripts(): void {
-        if (this.selectedIds.length == 0) {
-            if (!confirm("This will export all transcripts in the corpus.\nAre you sure?")) {
+        this.showAttributesSelection = this.showSerializationOptions
+            = this.showGenerateLayerSelection = false;
+        if (this.selectedIds.length == 0 && this.matchCount > 10) {
+            if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
                 return;
             }
         }
-        this.todo.nativeElement.value = "export";
-        this.exportType.nativeElement.value = "transcript";
-        this.form.nativeElement.submit();
+        this.mimeType = ""; // no media type = source transcript files
+        // give the form binding a chance to update
+        setTimeout(()=>{
+            this.form.nativeElement.action = this.baseUrl + "api/files";
+            this.form.nativeElement.submit();
+        }, 100);
     }
 
     showAttributesSelection = false;
     /** Button action */
     exportAttributes(): void {
+        this.showAttributesSelection = this.showSerializationOptions
+            = this.showGenerateLayerSelection = false;
         if (!this.showAttributesSelection) { // show options
             this.showAttributesSelection = true;
+            this.showSerializationOptions = this.showGenerateLayerSelection = false;
         } else { // options selected, so go ahead and do it            
-            if (this.selectedIds.length == 0) {
-                if (!confirm("This will export all transcripts in the corpus.\nAre you sure?")) {
+            if (this.selectedIds.length == 0 && this.matchCount > 10) {
+                if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
                     return;
                 }
             }
-            this.todo.nativeElement.value = "export";
-            this.exportType.nativeElement.value = "csv";
+            this.form.nativeElement.action = this.baseUrl + "api/attributes";
             this.form.nativeElement.submit();
         }
     }
@@ -384,16 +394,18 @@ export class TranscriptsComponent implements OnInit {
     exportFormat(): void {
         if (!this.showSerializationOptions) { // show options
             this.showSerializationOptions = true;
+            this.showAttributesSelection = this.showGenerateLayerSelection = false;
+            // default to Praat TextGrid
+            this.mimeType = "text/praat-textgrid";
             // display format icon on button:
             this.onChangeMimeType();
         } else { // options selected, so go ahead and do it
-            if (this.selectedIds.length == 0) {
-                if (!confirm("This will export all transcripts in the corpus.\nAre you sure?")) {
+            if (this.selectedIds.length == 0 && this.matchCount > 10) {
+                if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
                     return;
                 }
             }
-            this.todo.nativeElement.value = "export";
-            this.exportType.nativeElement.value = "serialize";
+            this.form.nativeElement.action = this.baseUrl + "api/serialize/graphs";
             this.form.nativeElement.submit();
         }
     }
