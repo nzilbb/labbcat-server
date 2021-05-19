@@ -135,15 +135,15 @@
             <lib-link *ngIf="user && user.roles.includes('edit')"
                       i18n-title title="Main Participants"
                       img="people.svg" icon="👥"
-                      href="edit/transcripts/mainPartipants?id={{id}}"></lib-link>
+                      href="edit/transcript/mainPartipants?id={{id}}"></lib-link>
             <lib-link *ngIf="user && user.roles.includes('edit')"
                       i18n-title title="Media"
                       img="audio.svg" icon="🔊"
-                      href="edit/transcripts/media?id={{id}}"></lib-link>
+                      href="edit/transcript/media?id={{id}}"></lib-link>
             <lib-link *ngIf="user && user.roles.includes('edit')"
                       i18n-title title="Attributes"
                       img="wrench.svg" icon="🔧"
-                      href="edit/transcripts/attributes?id={{id}}"></lib-link>
+                      href="edit/transcript/attributes?id={{id}}"></lib-link>
             <lib-link *ngIf="!user || !user.roles.includes('edit')"
                       i18n-title title="Attributes"
                       img="wrench.svg" icon="🔧"
