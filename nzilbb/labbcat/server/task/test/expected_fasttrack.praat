@@ -35,55 +35,70 @@ max_plot = 4000
 out_table = 0
 out_all = 0
 current_view = 0
+fastTrackMinimumDuration = 0.030000000000001
 select LongSound soundfile
 Extract part... 0 0.3 0
 Rename... sample0
 select Sound sample0
-@trackAutoselect: selected(), dir$, 5000, 4500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
-result = Get value at time... 1 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 2 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 3 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 1 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 2 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 3 0.15 Hertz Linear
-print 'result:0'
-printline
-Remove
+windowDuration = 0.3 - 0
+if windowDuration >= fastTrackMinimumDuration
+  @trackAutoselect: selected(), dir$, 5000, 4500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
+endif
+if windowDuration >= fastTrackMinimumDuration
+  result = Get value at time... 1 0.15 Hertz Linear
+  print 'result:0'
+  printline
+  result = Get value at time... 2 0.15 Hertz Linear
+  print 'result:0'
+  printline
+  result = Get value at time... 3 0.15 Hertz Linear
+  print 'result:0'
+  printline
+else
+  # sample is too short, output blank values
+  result$ = ""
+  print 'result$'
+  printline
+  print 'result$'
+  printline
+  print 'result$'
+  printline
+endif
+if windowDuration >= fastTrackMinimumDuration
+  Remove
+endif
 select Sound sample0
 Remove
 select LongSound soundfile
 Extract part... 2.9 4.1 0
 Rename... sample1
 select Sound sample1
-@trackAutoselect: selected(), dir$, 5000, 4500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
-result = Get value at time... 1 0.6 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 2 0.6 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 3 0.6 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 1 0.6 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 2 0.6 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 3 0.6 Hertz Linear
-print 'result:0'
-printline
-Remove
+windowDuration = 4.1 - 2.9
+if windowDuration >= fastTrackMinimumDuration
+  @trackAutoselect: selected(), dir$, 5000, 4500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
+endif
+if windowDuration >= fastTrackMinimumDuration
+  result = Get value at time... 1 0.6 Hertz Linear
+  print 'result:0'
+  printline
+  result = Get value at time... 2 0.6 Hertz Linear
+  print 'result:0'
+  printline
+  result = Get value at time... 3 0.6 Hertz Linear
+  print 'result:0'
+  printline
+else
+  # sample is too short, output blank values
+  result$ = ""
+  print 'result$'
+  printline
+  print 'result$'
+  printline
+  print 'result$'
+  printline
+endif
+if windowDuration >= fastTrackMinimumDuration
+  Remove
+endif
 select Sound sample1
 Remove

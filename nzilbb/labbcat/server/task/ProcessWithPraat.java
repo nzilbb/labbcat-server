@@ -374,14 +374,14 @@ public class ProcessWithPraat extends Task {
 
   /**
    * How long before in seconds before the start and after the end times to take as a
-   * sample window. 
+   * sample window. Default is 0.025s (25ms).
    * @see #getWindowOffset()
    * @see #setWindowOffset(double)
    */
-  protected double windowOffset = 0.5;
+  protected double windowOffset = 0.025;
   /**
    * Getter for {@link #windowOffset}: How long before in seconds before the start and
-   * after the end times to take as a sample window. 
+   * after the end times to take as a sample window. Default is 0.025s (25ms).
    * @return How long before in seconds before the start and after the end times to take
    * as a sample window. 
    */
@@ -1480,14 +1480,42 @@ public class ProcessWithPraat extends Task {
    */
   public ProcessWithPraat setFastTrackHighestAnalysisFrequencyOther(Vector<Integer> newFastTrackHighestAnalysisFrequencyOther) { fastTrackHighestAnalysisFrequencyOther = newFastTrackHighestAnalysisFrequencyOther; return this; }
 
+  
+  /**
+   * Minimum duration of a segment for FastTrack analysis. Default is 0.030000000000001s. Segments
+   * shorter than this will be ignored, and empty values returned.
+   * <p> <em>NB</em> The FastTrack limit is 0.03s (30ms), but because of possible rounding
+   * errors in Praat arithemitic, the default is set slightly higher than this.
+   * @see #getFastTrackMinimumDuration()
+   * @see #setFastTrackMinimumDuration(double)
+   */
+  protected double fastTrackMinimumDuration = 0.030000000000001;
+  /**
+   * Getter for {@link #fastTrackMinimumDuration}: Minimum duration of a segment for
+   * FastTrack analysis. Default is 0.030000000000001s. Segments shorter than this will be
+   * ignored, and empty values returned. 
+   * <p> <em>NB</em> The FastTrack limit is 0.03s (30ms), but because of possible rounding
+   * errors in Praat arithemitic, the default is set slightly higher than this.
+   * @return Minimum duration of a segment for FastTrack analysis. Segments shorter than
+   * this will be ignored, and empty values returned. 
+   */
+  public double getFastTrackMinimumDuration() { return fastTrackMinimumDuration; }
+  /**
+   * Setter for {@link #fastTrackMinimumDuration}: Minimum duration of a segment for
+   * FastTrack analysis. Segments shorter than this will be ignored, and empty values
+   * returned. 
+   * @param newFastTrackMinimumDuration Minimum duration of a segment for FastTrack
+   * analysis. Segments shorter than this will be ignored, and empty values returned. 
+   */
+  public ProcessWithPraat setFastTrackMinimumDuration(double newFastTrackMinimumDuration) { fastTrackMinimumDuration = newFastTrackMinimumDuration; return this; }
+
+
   // Methods:
       
   /**
    * Default constructor.
    */
   public ProcessWithPraat() {
-    // by default, sample the mid point of the interval
-    samplePoints.add(0.5);
   } // end of constructor
    
   /**
@@ -1775,6 +1803,11 @@ public class ProcessWithPraat extends Task {
         tuple.add(startTime);
         tuple.add(endTime);
         vTargets.add(tuple);
+        if (useFastTrack
+            && (endTime+windowOffset)-(startTime-windowOffset) < fastTrackMinimumDuration) {
+          // we know this will be skipped, so add an error
+          error = "Duration too short for FastTrack";
+        }
       } catch (Exception x) {
         error = "ERROR: " + x.getClass().getSimpleName() + ": " + x.getMessage();
         Vector<Double> tuple = new Vector<Double>();
@@ -1789,7 +1822,7 @@ public class ProcessWithPraat extends Task {
     } // next batch line
 
       // run praat
-    Vector<Vector<String>> results = formantsFromFile(
+    Vector<Vector<String>> results = measurementsFromFile(
       wav, vTargets, formantCeiling, pitchFloor, pitchCeiling, voicingThreshold,
       intensityPitchFloor, fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency,
       attributeValues);
@@ -1840,7 +1873,7 @@ public class ProcessWithPraat extends Task {
    * datum. e.g. two strings - F1 and F2 
    * @throws Exception
    */
-  protected Vector<Vector<String>> formantsFromFile(
+  protected Vector<Vector<String>> measurementsFromFile(
     File wav, Vector<Vector<Double>> targets, Integer formantCeiling,
     Integer pitchFloor, Integer pitchCeiling, Double voicingThreshold,
     Integer intensityPitchFloor, Integer fastTrackLowestAnalysisFrequency,
@@ -1968,7 +2001,7 @@ public class ProcessWithPraat extends Task {
       } // next target
     }
     return results;
-  } // end of formantsFromFile()
+  } // end of measurementsFromFile()
   
   /**
    * Extracts the formants at the given times for the given WAV file
@@ -2048,20 +2081,38 @@ public class ProcessWithPraat extends Task {
         scriptWriter.write("\nout_table = 0");
         scriptWriter.write("\nout_all = 0");
         scriptWriter.write("\ncurrent_view = 0");
+        scriptWriter.write("\nfastTrackMinimumDuration = " + fastTrackMinimumDuration);        
       }
       MessageFormat fmtFormantScript = new MessageFormat(
-        ""+(extractF1?
-            "\nresult = Get value at time... 1 {0,number,#.###} Hertz Linear"
-            +"\nprint ''result:0''"
-            +"\nprintline":"")
+        (useFastTrack?
+         // FastTrack has a limit of 30ms, below which it throws errors
+         "\nif windowDuration >= fastTrackMinimumDuration":"")
+        +(extractF1?
+          "\n  result = Get value at time... 1 {0,number,#.###} Hertz Linear"
+          +"\n  print ''result:0''"
+          +"\n  printline":"")
         +(extractF2?
-          "\nresult = Get value at time... 2 {0,number,#.###} Hertz Linear"
-          +"\nprint ''result:0''"
-          +"\nprintline":"")
+          "\n  result = Get value at time... 2 {0,number,#.###} Hertz Linear"
+          +"\n  print ''result:0''"
+          +"\n  printline":"")
         +(extractF3?
-          "\nresult = Get value at time... 3 {0,number,#.###} Hertz Linear"
-          +"\nprint ''result:0''"
-          +"\nprintline":""), 
+          "\n  result = Get value at time... 3 {0,number,#.###} Hertz Linear"
+          +"\n  print ''result:0''"
+          +"\n  printline":"")
+        +(useFastTrack?
+          "\nelse"
+          +"\n  # sample is too short, output blank values"
+          +"\n  result$ = \"\""
+          +(extractF1?
+            "\n  print ''result$''"
+            +"\n  printline":"")
+          +(extractF2?
+            "\n  print ''result$''"
+            +"\n  printline":"")
+          +(extractF3?
+            "\n  print ''result$''"
+            +"\n  printline":"")
+          +"\nendif":""), 
         Locale.UK);
       StringBuilder customAttributes = new StringBuilder();
       for (String attribute : attributeValues.keySet()) {
@@ -2102,42 +2153,74 @@ public class ProcessWithPraat extends Task {
           "\nselect Sound sample{10,number,#0}"
           +"\n"
           + (useFastTrack?
-             "@trackAutoselect: selected(), dir$, {17,number,#0}, {18,number,#0},"
+             "windowDuration = {1,number,#.###} - {0,number,#.###}"
+             // FastTrack has a limit of 30ms, below which it throws errors
+             +"\nif windowDuration >= fastTrackMinimumDuration"
+             +"\n  @trackAutoselect: selected(), dir$, {17,number,#0}, {18,number,#0},"
              +" steps, coefficients, formants, method$, image, selected(), current_view, max_plot,"
              +" out_formant, out_table, out_all"
              +(fastTrackCoefficients?
                // F1
-               "\nfor c from 1 to coefficients + 1"
-               +"\n  coeff = trackAutoselect.f1coeffs#[c]"
-               +"\n  print ''coeff:0''"
-               +"\n  printline"
-               +"\nendfor"
+               "\n  for c from 1 to coefficients + 1"
+               +"\n    coeff = trackAutoselect.f1coeffs#[c]"
+               +"\n    print ''coeff:0''"
+               +"\n    printline"
+               +"\n  endfor"
                // F2
-               +"\nfor c from 1 to coefficients + 1"
-               +"\n  coeff = trackAutoselect.f2coeffs#[c]"
-               +"\n  print ''coeff:0''"
-               +"\n  printline"
-               +"\nendfor"
+               +"\n  for c from 1 to coefficients + 1"
+               +"\n    coeff = trackAutoselect.f2coeffs#[c]"
+               +"\n    print ''coeff:0''"
+               +"\n    printline"
+               +"\n  endfor"
                // F3
-               +"\nfor c from 1 to coefficients + 1"
-               +"\n  coeff = trackAutoselect.f3coeffs#[c]"
-               +"\n  print ''coeff:0''"
-               +"\n  printline"
-               +"\nendfor"
+               +"\n  for c from 1 to coefficients + 1"
+               +"\n    coeff = trackAutoselect.f3coeffs#[c]"
+               +"\n    print ''coeff:0''"
+               +"\n    printline"
+               +"\n  endfor"
                +(fastTrackNumberOfFormants>=4?
                  // F4
-                 "\nfor c from 1 to coefficients + 1"
-                 +"\n  coeff = trackAutoselect.f4coeffs#[c]"
-                 +"\n  print ''coeff:0''"
-                 +"\n  printline"
-                 +"\nendfor"
+                 "\n  for c from 1 to coefficients + 1"
+                 +"\n    coeff = trackAutoselect.f4coeffs#[c]"
+                 +"\n    print ''coeff:0''"
+                 +"\n    printline"
+                 +"\n  endfor"
                  :"")
                :"")
+             +(fastTrackCoefficients?
+               "\nelse"
+               +"\n  # sample is too short, output blank values"
+               +"\n  coeff$ = \"\""
+               +"\n  for c from 1 to coefficients + 1"
+               +"\n    print ''coeff$''"
+               +"\n    printline"
+               +"\n  endfor"
+               +"\n  for c from 1 to coefficients + 1"
+               +"\n    print ''coeff$''"
+               +"\n    printline"
+               +"\n  endfor"
+               +"\n  for c from 1 to coefficients + 1"
+               +"\n    print ''coeff$''"
+               +"\n    printline"
+               +"\n  endfor"
+               +(fastTrackNumberOfFormants>=4?
+                 // F4
+                 "\n  for c from 1 to coefficients + 1"
+                 +"\n    print ''coeff$''"
+                 +"\n    printline"
+                 +"\n  endfor"
+                 :"")
+               :"")
+             +"\nendif" // sample too short
              // !useFastTrack:
              :"formantCeiling = {2,number,#0}"
              +"\n"+getScriptFormant()):"")
         +"{3}" // from fmtFormantScript
-        +(extractF3 || extractF2 || extractF1 || fastTrackCoefficients?"\nRemove":"") // formant object
+        +(extractF3 || extractF2 || extractF1 || fastTrackCoefficients?
+          (useFastTrack?"\nif windowDuration >= fastTrackMinimumDuration":"")
+          +"\n  Remove" // formant object
+          +(useFastTrack?"\nendif":"")
+          :"")
         +(extractMinimumPitch || extractMeanPitch || extractMaximumPitch?
           "\nselect Sound sample{10,number,#0}"
           +"\npitchFloor = {4,number,#0}"

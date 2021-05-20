@@ -21,7 +21,7 @@ export class PraatComponent implements OnInit {
     startTimeColumn: number;
     endTimeColumn: number;
     
-    windowOffset = 0.1;
+    windowOffset = 0.025;
 
     showAdvancedFormantSettings = false;
     showAdvancedFastTrackSettings = false;

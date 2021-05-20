@@ -292,6 +292,7 @@ public class TestProcessWithPraat {
     ProcessWithPraat p = new ProcessWithPraat()
       .setExtractF1(false)
       .setExtractF2(false)
+      .setWindowOffset(0.5)
       .setCustomScript(
         "# get centre of gravity and spread from spectrum"
         +"\nspectrum = To Spectrum... yes"
@@ -342,6 +343,7 @@ public class TestProcessWithPraat {
       .setExtractF2(true)
       .setExtractF3(true)
       .setUseFastTrack(true)
+      .setFastTrackCoefficients(true)
       .setExtractMinimumPitch(true)
       .setExtractMeanPitch(true)
       .setExtractMaximumPitch(true)

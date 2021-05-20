@@ -35,49 +35,87 @@ max_plot = 4000
 out_table = 0
 out_all = 0
 current_view = 0
+fastTrackMinimumDuration = 0.030000000000001
 select LongSound soundfile
-Extract part... 0 0.7 0
+Extract part... 0.075 0.225 0
 Rename... sample0
 select Sound sample0
-@trackAutoselect: selected(), dir$, 450, 6500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
-result = Get value at time... 1 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 2 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 3 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 1 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 2 0.15 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 3 0.15 Hertz Linear
-print 'result:0'
-printline
-Remove
+windowDuration = 0.225 - 0.075
+if windowDuration >= fastTrackMinimumDuration
+  @trackAutoselect: selected(), dir$, 450, 6500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
+  for c from 1 to coefficients + 1
+    coeff = trackAutoselect.f1coeffs#[c]
+    print 'coeff:0'
+    printline
+  endfor
+  for c from 1 to coefficients + 1
+    coeff = trackAutoselect.f2coeffs#[c]
+    print 'coeff:0'
+    printline
+  endfor
+  for c from 1 to coefficients + 1
+    coeff = trackAutoselect.f3coeffs#[c]
+    print 'coeff:0'
+    printline
+  endfor
+else
+  # sample is too short, output blank values
+  coeff$ = ""
+  for c from 1 to coefficients + 1
+    print 'coeff$'
+    printline
+  endfor
+  for c from 1 to coefficients + 1
+    print 'coeff$'
+    printline
+  endfor
+  for c from 1 to coefficients + 1
+    print 'coeff$'
+    printline
+  endfor
+endif
+if windowDuration >= fastTrackMinimumDuration
+  result = Get value at time... 1 0.075 Hertz Linear
+  print 'result:0'
+  printline
+  result = Get value at time... 2 0.075 Hertz Linear
+  print 'result:0'
+  printline
+  result = Get value at time... 3 0.075 Hertz Linear
+  print 'result:0'
+  printline
+else
+  # sample is too short, output blank values
+  result$ = ""
+  print 'result$'
+  printline
+  print 'result$'
+  printline
+  print 'result$'
+  printline
+endif
+if windowDuration >= fastTrackMinimumDuration
+  Remove
+endif
 select Sound sample0
 pitchFloor = 30
 voicingThreshold = 0.4
 pitchCeiling = 250
 To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling
-result = Get minimum... 0.1 0.2 Hertz Parabolic
+result = Get minimum... 0.025 0.125 Hertz Parabolic
 print 'result:0'
 printline
-result = Get mean... 0.1 0.2 Hertz
+result = Get mean... 0.025 0.125 Hertz
 print 'result:0'
 printline
-result = Get maximum... 0.1 0.2 Hertz Parabolic
+result = Get maximum... 0.025 0.125 Hertz Parabolic
 print 'result:0'
 printline
 Remove
 select Sound sample0
 intensityPitchFloor = 40
 To Intensity... intensityPitchFloor 0 yes
-result = Get maximum... 0.1 0.2 Parabolic
+result = Get maximum... 0.025 0.125 Parabolic
 print 'result'
 printline
 Remove
@@ -94,17 +132,17 @@ print 'result:0'
 printline
 Remove
 ######### CUSTOM SCRIPT STARTS HERE #########
-sampleStartTime = 0
-sampleEndTime = 0.7
-sampleDuration = 0.7
-windowOffset = 0.5
-windowAbsoluteStart = 0
-windowAbsoluteEnd = 0.7
-windowDuration = 0.7
+sampleStartTime = 0.075
+sampleEndTime = 0.225
+sampleDuration = 0.15
+windowOffset = 0.025
+windowAbsoluteStart = 0.075
+windowAbsoluteEnd = 0.225
+windowDuration = 0.15
 targetAbsoluteStart = 0.1
 targetAbsoluteEnd = 0.2
-targetStart = 0.1
-targetEnd = 0.2
+targetStart = 0.025
+targetEnd = 0.125
 targetDuration = 0.1
 sampleNumber = 0
 sampleName$ = "sample0"
@@ -125,48 +163,85 @@ Remove
 select Sound sample0
 Remove
 select LongSound soundfile
-Extract part... 2.5 4.5 0
+Extract part... 2.975 4.025 0
 Rename... sample1
 select Sound sample1
-@trackAutoselect: selected(), dir$, 450, 6500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
-result = Get value at time... 1 1 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 2 1 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 3 1 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 1 1 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 2 1 Hertz Linear
-print 'result:0'
-printline
-result = Get value at time... 3 1 Hertz Linear
-print 'result:0'
-printline
-Remove
+windowDuration = 4.025 - 2.975
+if windowDuration >= fastTrackMinimumDuration
+  @trackAutoselect: selected(), dir$, 450, 6500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
+  for c from 1 to coefficients + 1
+    coeff = trackAutoselect.f1coeffs#[c]
+    print 'coeff:0'
+    printline
+  endfor
+  for c from 1 to coefficients + 1
+    coeff = trackAutoselect.f2coeffs#[c]
+    print 'coeff:0'
+    printline
+  endfor
+  for c from 1 to coefficients + 1
+    coeff = trackAutoselect.f3coeffs#[c]
+    print 'coeff:0'
+    printline
+  endfor
+else
+  # sample is too short, output blank values
+  coeff$ = ""
+  for c from 1 to coefficients + 1
+    print 'coeff$'
+    printline
+  endfor
+  for c from 1 to coefficients + 1
+    print 'coeff$'
+    printline
+  endfor
+  for c from 1 to coefficients + 1
+    print 'coeff$'
+    printline
+  endfor
+endif
+if windowDuration >= fastTrackMinimumDuration
+  result = Get value at time... 1 0.525 Hertz Linear
+  print 'result:0'
+  printline
+  result = Get value at time... 2 0.525 Hertz Linear
+  print 'result:0'
+  printline
+  result = Get value at time... 3 0.525 Hertz Linear
+  print 'result:0'
+  printline
+else
+  # sample is too short, output blank values
+  result$ = ""
+  print 'result$'
+  printline
+  print 'result$'
+  printline
+  print 'result$'
+  printline
+endif
+if windowDuration >= fastTrackMinimumDuration
+  Remove
+endif
 select Sound sample1
 pitchFloor = 30
 voicingThreshold = 0.4
 pitchCeiling = 250
 To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling
-result = Get minimum... 0.5 1.5 Hertz Parabolic
+result = Get minimum... 0.025 1.025 Hertz Parabolic
 print 'result:0'
 printline
-result = Get mean... 0.5 1.5 Hertz
+result = Get mean... 0.025 1.025 Hertz
 print 'result:0'
 printline
-result = Get maximum... 0.5 1.5 Hertz Parabolic
+result = Get maximum... 0.025 1.025 Hertz Parabolic
 print 'result:0'
 printline
 Remove
 select Sound sample1
 intensityPitchFloor = 40
 To Intensity... intensityPitchFloor 0 yes
-result = Get maximum... 0.5 1.5 Parabolic
+result = Get maximum... 0.025 1.025 Parabolic
 print 'result'
 printline
 Remove
@@ -183,17 +258,17 @@ print 'result:0'
 printline
 Remove
 ######### CUSTOM SCRIPT STARTS HERE #########
-sampleStartTime = 2.5
-sampleEndTime = 4.5
-sampleDuration = 2
-windowOffset = 0.5
-windowAbsoluteStart = 2.5
-windowAbsoluteEnd = 4.5
-windowDuration = 2
+sampleStartTime = 2.975
+sampleEndTime = 4.025
+sampleDuration = 1.05
+windowOffset = 0.025
+windowAbsoluteStart = 2.975
+windowAbsoluteEnd = 4.025
+windowDuration = 1.05
 targetAbsoluteStart = 3
 targetAbsoluteEnd = 4
-targetStart = 0.5
-targetEnd = 1.5
+targetStart = 0.025
+targetEnd = 1.025
 targetDuration = 1
 sampleNumber = 1
 sampleName$ = "sample1"
