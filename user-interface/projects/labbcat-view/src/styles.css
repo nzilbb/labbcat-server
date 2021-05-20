@@ -363,5 +363,11 @@ lib-pagination .current {
     .list > .item > span.header-only { display: table-cell; }
     .list > .item > span > legend { display: none; }
     .list > .item > label { display: block; }
+
+    /* Process with Praat background image URL here to ensure it works from the server */
+    #settings-form .item > .viz {
+        background-image: url('assets/sine.svg');
+        background-size: auto 100%;
+    }
 }
 

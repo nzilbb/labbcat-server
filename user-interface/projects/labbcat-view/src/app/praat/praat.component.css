@@ -96,9 +96,7 @@ fieldset.other {
         display: inline-block;
     }
     .item > .viz {
-        width: 50%;
-        background-image: url('/assets/sine.svg');
-        background-size: auto 100%;
+        width: 33vw;
         display: inline-table;
         padding: 0px;
         margin: 0px;
