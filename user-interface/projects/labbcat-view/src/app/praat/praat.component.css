@@ -84,6 +84,12 @@ fieldset.other {
     animation-name: fade-right;
     animation-duration: 0.5s;
 }
+#load-controls {
+    font-style: italic;
+}
+#load-controls label {
+    padding-right: 10px;
+}
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
