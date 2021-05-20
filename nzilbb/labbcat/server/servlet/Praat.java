@@ -284,6 +284,7 @@ public class Praat extends LabbcatServlet { // TODO unit test
           ProcessWithPraat task = new ProcessWithPraat();
           task.setStore(store); // TODO check this doesn't leak!
           task.setDataFile(uploadedCsvFile);
+          task.setFileName(fileName);
           
           if (parameters.getString("transcriptColumn") != null) {
             try {

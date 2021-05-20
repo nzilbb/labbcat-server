@@ -1570,7 +1570,8 @@ public class ProcessWithPraat extends Task {
       if (fastTrackDifferentiationLayerId != null)
         attributes.add(fastTrackDifferentiationLayerId);
 
-      outputFile = File.createTempFile(fileName + "-", ".csv", store.getFiles());
+      outputFile = File.createTempFile(
+        IO.WithoutExtension(fileName) + "-", ".csv", store.getFiles());
       CSVFormat format = CSVFormat.EXCEL.withDelimiter(fieldDelimiter);
       out = new CSVPrinter(new FileWriter(outputFile), format);
       in = new CSVParser(new FileReader(dataFile), format);
