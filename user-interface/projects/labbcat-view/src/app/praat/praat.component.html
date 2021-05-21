@@ -155,7 +155,6 @@
             <select id="formantDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
                     i18n-title title="Attribute for differentiating participants"
                     [disabled]="!formantDifferentiateParticipants || useFastTrack">
-              <option value="" i18n="No gender attribute selected">[none]</option>
               <ng-container *ngFor="let layer of participantAttributeLayers">
                 <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
             </select>
@@ -212,6 +211,9 @@
           <a href="https://github.com/santiagobarreda/FastTrack" target="FastTrack"
              i18n-title title="The FastTrack source code and wiki"
              i18n>[more information]</a>
+          <a href="https://doi.org/10.1515/lingvan-2020-0051" target="FastTrack"
+             i18n-title title="Reference for citing FastTrack"
+             i18n>[cite]</a>
         </div>
       </div>
       <div class="{{useFastTrack?'long-unhidden-panel':'hidden-panel'}}">
@@ -247,10 +249,9 @@
                      [(ngModel)]="fastTrackDifferentiateParticipants"
                      [disabled]="!useFastTrack">
               <label for="fastTrackDifferentiateParticipants" i18n>Except participants whose</label>
-              <select id="fastTrackDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
+              <select id="fastTrackDifferentiationLayerId" [(ngModel)]="fastTrackDifferentiationLayerId"
                       i18n-title title="Attribute for differentiating participants"
                       [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
-                <option value="" i18n="No gender attribute selected">[none]</option>
                 <ng-container *ngFor="let layer of participantAttributeLayers">
                   <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
               </select>
@@ -534,7 +535,6 @@
             <select id="pitchDifferentiationLayerId" [(ngModel)]="pitchDifferentiationLayerId"
                     i18n-title title="Attribute for differentiating participants"
                     [disabled]="!pitchDifferentiateParticipants">
-              <option value="" i18n="No gender attribute selected">[none]</option>
               <ng-container *ngFor="let layer of participantAttributeLayers">
                 <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
             </select>
