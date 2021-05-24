@@ -157,7 +157,7 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
             if (taskId == null || taskId.length() == 0) {            
                String referer = request.getHeader("Referer");
                if (referer != null) {
-                  taskId = new URL(referer).getQuery();
+                 taskId = java.net.URLDecoder.decode(new URL(referer).getQuery(), "UTF-8");
                }
             }
             if (taskId == null || taskId.length() == 0) {
