@@ -112,7 +112,7 @@
         </select>
       </span>
       <span class="buttons">
-        <lib-link *ngIf="layer.layer_manager_id"
+        <lib-link *ngIf="layer.layer_manager_id && layer.id != 'orthography'"
                   i18n-title title="Layer configuration"
                   img="wrench.svg" icon="🔧"
                   href="admin/layers/configure?layer_id={{layer.layer_id}}"></lib-link>
