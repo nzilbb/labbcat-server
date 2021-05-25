@@ -1,3 +1,6 @@
+h1 {
+    margin-bottom: 0px; /* to make space for the spinner */
+}
 table {
     width: 100%;
 }
