@@ -293,8 +293,6 @@ export class ParticipantsComponent implements OnInit {
                     "labels('"+this.esc(this.schema.participantLayerId)+"')"
                     +".includes('"+this.esc(id)+"')",
                     (count, errors, messages) => {
-                        if (errors) errors.forEach(m => this.messageService.error(m));
-                        if (messages) messages.forEach(m => this.messageService.info(m));
                         this.attributeValues[id].annotations[" transcript-count"] = [{
                             label : count
                         }];
@@ -363,21 +361,31 @@ export class ParticipantsComponent implements OnInit {
     exportAttributes(): void {
         window.location.href = this.baseUrl
             + "participantsExport?"
-            + this.selectedIds.map(id=>"participantId="+id).join("&");
+            + this.selectedParticipantsQueryString("participantId");
     }
 
     /** Button action */
     allUtterances(): void {
         window.location.href = this.baseUrl
             + "allUtterances?"
-            + this.selectedIds.map(id=>"id="+id).join("&");
+            + this.selectedParticipantsQueryString("id");
     }
     
     /** Button action */
     layeredSearch(): void {
         window.location.href = this.baseUrl
             + "search?"
-            + this.selectedIds.map(id=>"participant_id="+id).join("&");
+            + this.selectedParticipantsQueryString("participant_id");
+    }
+
+    /** Query string for selected participants */
+    selectedParticipantsQueryString(participantIdParameter: string): string {
+        if (this.selectedIds.length > 0) {
+            return this.selectedIds.map(id=>participantIdParameter+"="+id).join("&");
+        } else if (this.query) {
+            return "query="+encodeURI(this.query);
+        }
+        return "";
     }
 
     /** Query to append to href for links to other pages */
