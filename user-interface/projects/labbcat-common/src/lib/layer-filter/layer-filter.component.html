@@ -47,7 +47,7 @@
         >
     </ng-container>
 
-    <div *ngIf="inputType == 'select'" class="{{validLabelKeys().length < 4?'few':'many'}}">
+    <div *ngIf="inputType == 'select'" class="{{selectClass()}}">
       <ng-container *ngFor="let label of validLabelKeys()">
         <span class="{{values.includes(label)?'checked':'unchecked'}}">
           <input
@@ -58,8 +58,7 @@
             (click)="handleCheckboxClick(label, $event.target.checked)"
             >
           <label for="{{layer.id}}-{{label}}" title="{{layer.validLabels[label]}}">
-            <span class="description">{{layer.validLabels[label]}}</span>
-            <span class="validLabel" *ngIf="label != layer.validLabels[label]">({{label}})</span>
+            <span class="validLabel">{{label}}</span>
           </label>
         </span>
       </ng-container>

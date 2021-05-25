@@ -1,6 +1,9 @@
 fieldset {
     display: inline-block;
     height: 50px;
+    width: 90%; /* fallback option */
+    width: -webkit-fill-available;
+    width: -moz-available;
 }
 
 fieldset > div {
@@ -41,7 +44,7 @@ fieldset > div > input {
     width: 45%;
 }
 
-.select .many {
+.select .large {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -49,54 +52,54 @@ fieldset > div > input {
     max-height: 24px;
     border: 1px solid transparent;
 }
-.select .many > span:first-child::after {
+.select .large > span:first-child::after {
     content: '▼';
     opacity: 0.7;
 }
-.select .many:hover {
+.select .large:hover {
     position: relative;
     overflow-y: auto; 
     max-height: 120px;
     background: white;
     border: 1px solid silver;
 }
-.select .many:hover > span:first-child::after {
+.select .large:hover > span:first-child::after {
     content: '';
 }
-.select .many span {
+.select .large span {
     white-space: nowrap;
 }
-.select .many label {
+.select .large label {
     white-space: nowrap;
     padding: 3px;
 }
 
-.select .few {
+.select .small {
     height: 100%;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
 }
-.select .few input {
+.select .small input {
     display: none;
 }
-.select .few label {
+.select .small label {
     white-space: nowrap;
     margin-right: 3px;
 }
-.select .few input + label {
+.select .small input + label {
     border: 1px solid transparent;
     display: inline-block;
 }
-.select .few input:checked + label {
+.select .small input:checked + label {
     border: 1px solid silver;
 }
 /* float checked boxes to the top */
-.many .checked {
+.large .checked {
     order: 0;
 }
-.many .unchecked {
+.large .unchecked {
     order: 1;
 }
 

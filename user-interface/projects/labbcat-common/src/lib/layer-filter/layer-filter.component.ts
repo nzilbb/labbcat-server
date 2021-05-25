@@ -72,4 +72,15 @@ export class LayerFilterComponent implements OnInit {
             .filter(k=>k.length > 0);
     }
 
+    selectClass(): string {
+        let totalLabelLength = 0;
+        for (let k of this.validLabelKeys()) {
+            totalLabelLength += k.length + 1;
+        }
+        if (totalLabelLength < 10) {
+            return "small";
+        } else {
+            return "large";
+        }
+    }
 }
