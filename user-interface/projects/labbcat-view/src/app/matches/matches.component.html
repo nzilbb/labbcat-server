@@ -155,22 +155,6 @@
       </div>
     </fieldset>
   </div>
-  <div id="serialize" class="controls">
-    <lib-button (press)="serialize();"
-                img="{{serializeImg}}" icon="📦"
-                i18n-label label="Utterance Export"></lib-button>
-    <select #mimetype name="mimetype"
-            [(ngModel)]="mimeType"
-            (change)="onChangeMimeType()">
-      <option *ngFor="let serializer of serializers"
-              value="{{serializer.mimeType}}">{{serializer.name}}</option>
-    </select>
-  </div>
-  <div id="export-audio" class="controls">
-    <lib-button (press)="exportAudio();"
-                img="audio.svg" icon="🔊"
-                i18n-label label="Audio Export"></lib-button>
-  </div>
   <div id="emu-webapp" class="controls" *ngIf="emuWebApp">
     <lib-button (press)="emuWebapp();"
                 img="emu.png" icon="eμ"
@@ -187,6 +171,22 @@
                             word="true" segment="true"
                             selected="{{emuLayers}}"></lib-layer-checkboxes>
     </fieldset>
+  </div>
+  <div id="serialize" class="controls">
+    <lib-button (press)="serialize();"
+                img="{{serializeImg}}" icon="📦"
+                i18n-label label="Utterance Export"></lib-button>
+    <select #mimetype name="mimetype"
+            [(ngModel)]="mimeType"
+            (change)="onChangeMimeType()">
+      <option *ngFor="let serializer of serializers"
+              value="{{serializer.mimeType}}">{{serializer.name}}</option>
+    </select>
+  </div>
+  <div id="export-audio" class="controls">
+    <lib-button (press)="exportAudio();"
+                img="audio.svg" icon="🔊"
+                i18n-label label="Audio Export"></lib-button>
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayer">
     <input #generate_layer type="hidden" name="generate_layer" value="">
