@@ -405,13 +405,7 @@ public class ProcessWithPraat extends Task {
    * @return Command to send to Praat for creating a formant track.
    */
   public String getScriptFormant() {
-    if (!useFastTrack) {
-      return scriptFormant;
-    } else {
-      return "min = 4700"
-        +"\nmax = 7550"
-        +"\n@trackAutoselect: selected(), dir$, min, max, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all";
-    }
+    return scriptFormant;
   }
   /**
    * Setter for {@link #scriptFormant}: Command to send to Praat for creating a formant track.
@@ -953,13 +947,14 @@ public class ProcessWithPraat extends Task {
   public ProcessWithPraat setUseFastTrack(boolean newUseFastTrack) { useFastTrack = newUseFastTrack; return this; }
   
   /**
-   * Fast Track time_step global setting.
+   * Fast Track time_step global setting - time step in seconds.
    * @see #getFastTrackTimeStep()
    * @see #setFastTrackTimeStep(double)
    */
   protected double fastTrackTimeStep = 0.002;
   /**
-   * Getter for {@link #fastTrackTimeStep}: Fast Track time_step global setting.
+   * Getter for {@link #fastTrackTimeStep}: Fast Track time_step global setting - time
+   * step in seconds. 
    * @return Fast Track time_step global setting.
    */
   public double getFastTrackTimeStep() { return fastTrackTimeStep; }
@@ -1028,12 +1023,14 @@ public class ProcessWithPraat extends Task {
    * Fast Track enable_F1_frequency_heuristic global setting.
    * @see #getFastTrackEnableF1FrequencyHeuristic()
    * @see #setFastTrackEnableF1FrequencyHeuristic(boolean)
+   * @see #getFastTrackMaximumF1FrequencyValue()
    */
   protected boolean fastTrackEnableF1FrequencyHeuristic = true;
   /**
    * Getter for {@link #fastTrackEnableF1FrequencyHeuristic}: Fast Track
    * enable_F1_frequency_heuristic global setting. 
    * @return Fast Track enable_F1_frequency_heuristic global setting.
+   * @see #getFastTrackMaximumF1FrequencyValue()
    */
   public boolean getFastTrackEnableF1FrequencyHeuristic() { return fastTrackEnableF1FrequencyHeuristic; }
   /**
@@ -1041,24 +1038,28 @@ public class ProcessWithPraat extends Task {
    * enable_F1_frequency_heuristic global setting. 
    * @param newFastTrackEnableF1FrequencyHeuristic Fast Track
    * enable_F1_frequency_heuristic global setting. 
+   * @see #getFastTrackMaximumF1FrequencyValue()
    */
   public ProcessWithPraat setFastTrackEnableF1FrequencyHeuristic(boolean newFastTrackEnableF1FrequencyHeuristic) { fastTrackEnableF1FrequencyHeuristic = newFastTrackEnableF1FrequencyHeuristic; return this; }
 
   /**
-   * Fast Track maximum_F1_frequency_value global setting.
+   * Fast Track maximum_F1_frequency_value global setting; Median F1 frequency should not
+   * be higher than this value.
    * @see #getFastTrackMaximumF1FrequencyValue()
    * @see #setFastTrackMaximumF1FrequencyValue(int)
    */
   protected int fastTrackMaximumF1FrequencyValue = 1200;
   /**
    * Getter for {@link #fastTrackMaximumF1FrequencyValue}: Fast Track
-   * maximum_F1_frequency_value global setting. 
+   * maximum_F1_frequency_value global setting. Median F1 frequency should not be higher
+   * than this value. 
    * @return Fast Track maximum_F1_frequency_value global setting.
    */
   public int getFastTrackMaximumF1FrequencyValue() { return fastTrackMaximumF1FrequencyValue; }
   /**
    * Setter for {@link #fastTrackMaximumF1FrequencyValue}: Fast Track
-   * maximum_F1_frequency_value global setting. 
+   * maximum_F1_frequency_value global setting. Median F1 frequency should not be higher
+   * than this value. 
    * @param newFastTrackMaximumF1FrequencyValue Fast Track maximum_F1_frequency_value
    * global setting. 
    */
@@ -1068,12 +1069,14 @@ public class ProcessWithPraat extends Task {
    * Fast Track enable_F1_bandwidth_heuristic global setting.
    * @see #getFastTrackEnableF1BandwidthHeuristic()
    * @see #setFastTrackEnableF1BandwidthHeuristic(boolean)
+   * @see #getFastTrackMaximumF1BandwidthValue()
    */
   protected boolean fastTrackEnableF1BandwidthHeuristic = false;
   /**
    * Getter for {@link #fastTrackEnableF1BandwidthHeuristic}: Fast Track
    * enable_F1_bandwidth_heuristic global setting. 
    * @return Fast Track enable_F1_bandwidth_heuristic global setting.
+   * @see #getFastTrackMaximumF1BandwidthValue()
    */
   public boolean getFastTrackEnableF1BandwidthHeuristic() { return fastTrackEnableF1BandwidthHeuristic; }
   /**
@@ -1081,24 +1084,28 @@ public class ProcessWithPraat extends Task {
    * enable_F1_bandwidth_heuristic global setting. 
    * @param newFastTrackEnableF1BandwidthHeuristic Fast Track
    * enable_F1_bandwidth_heuristic global setting. 
+   * @see #getFastTrackMaximumF1BandwidthValue()
    */
   public ProcessWithPraat setFastTrackEnableF1BandwidthHeuristic(boolean newFastTrackEnableF1BandwidthHeuristic) { fastTrackEnableF1BandwidthHeuristic = newFastTrackEnableF1BandwidthHeuristic; return this; }
   
   /**
-   * Fast Track maximum_F1_bandwidth_value global setting.
+   * Fast Track maximum_F1_bandwidth_value global setting. Median F1 bandwidth should not
+   * be higher than this value. 
    * @see #getFastTrackMaximumF1BandwidthValue()
    * @see #setFastTrackMaximumF1BandwidthValue(int)
    */
   protected int fastTrackMaximumF1BandwidthValue = 500;
   /**
    * Getter for {@link #fastTrackMaximumF1BandwidthValue}: Fast Track
-   * maximum_F1_bandwidth_value global setting. 
+   * maximum_F1_bandwidth_value global setting. Median F1 bandwidth should not
+   * be higher than this value. 
    * @return Fast Track maximum_F1_bandwidth_value global setting.
    */
   public int getFastTrackMaximumF1BandwidthValue() { return fastTrackMaximumF1BandwidthValue; }
   /**
    * Setter for {@link #fastTrackMaximumF1BandwidthValue}: Fast Track
-   * maximum_F1_bandwidth_value global setting. 
+   * maximum_F1_bandwidth_value global setting. Median F1 bandwidth should not
+   * be higher than this value. 
    * @param newFastTrackMaximumF1BandwidthValue Fast Track maximum_F1_bandwidth_value
    * global setting. 
    */
@@ -1108,12 +1115,14 @@ public class ProcessWithPraat extends Task {
    * Fast Track enable_F2_bandwidth_heuristic global setting.
    * @see #getFastTrackEnableF2BandwidthHeuristic()
    * @see #setFastTrackEnableF2BandwidthHeuristic(boolean)
+   * @see #getFastTrackMaximumF2BandwidthValue()
    */
   protected boolean fastTrackEnableF2BandwidthHeuristic = false;
   /**
    * Getter for {@link #fastTrackEnableF2BandwidthHeuristic}: Fast Track
    * enable_F2_bandwidth_heuristic global setting. 
    * @return Fast Track enable_F2_bandwidth_heuristic global setting.
+   * @see #getFastTrackMaximumF2BandwidthValue()
    */
   public boolean getFastTrackEnableF2BandwidthHeuristic() { return fastTrackEnableF2BandwidthHeuristic; }
   /**
@@ -1121,24 +1130,28 @@ public class ProcessWithPraat extends Task {
    * enable_F2_bandwidth_heuristic global setting. 
    * @param newFastTrackEnableF2BandwidthHeuristic Fast Track
    * enable_F2_bandwidth_heuristic global setting. 
+   * @see #getFastTrackMaximumF2BandwidthValue()
    */
   public ProcessWithPraat setFastTrackEnableF2BandwidthHeuristic(boolean newFastTrackEnableF2BandwidthHeuristic) { fastTrackEnableF2BandwidthHeuristic = newFastTrackEnableF2BandwidthHeuristic; return this; }
 
   /**
-   * Fast Track maximum_F2_bandwidth_value global setting.
+   * Fast Track maximum_F2_bandwidth_value global setting. Median F2 bandwidth should not
+   * be higher than this value. Default is 600.
    * @see #getFastTrackMaximumF2BandwidthValue()
    * @see #setFastTrackMaximumF2BandwidthValue(int)
    */
   protected int fastTrackMaximumF2BandwidthValue = 600;
   /**
    * Getter for {@link #fastTrackMaximumF2BandwidthValue}: Fast Track
-   * maximum_F2_bandwidth_value global setting. 
+   * maximum_F2_bandwidth_value global setting. Median F2 bandwidth should not
+   * be higher than this value. Default is 600. 
    * @return Fast Track maximum_F2_bandwidth_value global setting.
    */
   public int getFastTrackMaximumF2BandwidthValue() { return fastTrackMaximumF2BandwidthValue; }
   /**
    * Setter for {@link #fastTrackMaximumF2BandwidthValue}: Fast Track
-   * maximum_F2_bandwidth_value global setting. 
+   * maximum_F2_bandwidth_value global setting. Median F2 bandwidth should not
+   * be higher than this value. Default is 600.
    * @param newFastTrackMaximumF2BandwidthValue Fast Track maximum_F2_bandwidth_value
    * global setting. 
    */
@@ -1148,12 +1161,14 @@ public class ProcessWithPraat extends Task {
    * Fast Track enable_F3_bandwidth_heuristic global setting.
    * @see #getFastTrackEnableF3BandwidthHeuristic()
    * @see #setFastTrackEnableF3BandwidthHeuristic(boolean)
+   * @see #getFastTrackMaximumF3BandwidthValue()
    */
   protected boolean fastTrackEnableF3BandwidthHeuristic = false;
   /**
    * Getter for {@link #fastTrackEnableF3BandwidthHeuristic}: Fast Track
    * enable_F3_bandwidth_heuristic global setting. 
    * @return Fast Track enable_F3_bandwidth_heuristic global setting.
+   * @see #getFastTrackMaximumF3BandwidthValue()
    */
   public boolean getFastTrackEnableF3BandwidthHeuristic() { return fastTrackEnableF3BandwidthHeuristic; }
   /**
@@ -1161,24 +1176,28 @@ public class ProcessWithPraat extends Task {
    * enable_F3_bandwidth_heuristic global setting. 
    * @param newFastTrackEnableF3BandwidthHeuristic Fast Track
    * enable_F3_bandwidth_heuristic global setting. 
+   * @see #getFastTrackMaximumF3BandwidthValue()
    */
   public ProcessWithPraat setFastTrackEnableF3BandwidthHeuristic(boolean newFastTrackEnableF3BandwidthHeuristic) { fastTrackEnableF3BandwidthHeuristic = newFastTrackEnableF3BandwidthHeuristic; return this; }
 
   /**
-   * Fast Track maximum_F3_bandwidth_value global setting.
+   * Fast Track maximum_F3_bandwidth_value global setting. Median F3 bandwidth should not
+   * be higher than this value. Default is 900.
    * @see #getFastTrackMaximumF3BandwidthValue()
    * @see #setFastTrackMaximumF3BandwidthValue(int)
    */
   protected int fastTrackMaximumF3BandwidthValue = 900;
   /**
    * Getter for {@link #fastTrackMaximumF3BandwidthValue}: Fast Track
-   * maximum_F3_bandwidth_value global setting. 
+   * maximum_F3_bandwidth_value global setting. Median F3 bandwidth should not
+   * be higher than this value. Default is 900. 
    * @return Fast Track maximum_F3_bandwidth_value global setting.
    */
   public int getFastTrackMaximumF3BandwidthValue() { return fastTrackMaximumF3BandwidthValue; }
   /**
    * Setter for {@link #fastTrackMaximumF3BandwidthValue}: Fast Track
-   * maximum_F3_bandwidth_value global setting. 
+   * maximum_F3_bandwidth_value global setting. Median F3 bandwidth should not
+   * be higher than this value. Default is 900. 
    * @param newFastTrackMaximumF3BandwidthValue Fast Track maximum_F3_bandwidth_value
    * global setting. 
    */
@@ -1188,12 +1207,14 @@ public class ProcessWithPraat extends Task {
    * Fast Track enable_F4_frequency_heuristic global setting.
    * @see #getFastTrackEnableF4FrequencyHeuristic()
    * @see #setFastTrackEnableF4FrequencyHeuristic(boolean)
+   * @see #getFastTrackMinimumF4FrequencyValue()
    */
   protected boolean fastTrackEnableF4FrequencyHeuristic = true;
   /**
    * Getter for {@link #fastTrackEnableF4FrequencyHeuristic}: Fast Track
    * enable_F4_frequency_heuristic global setting. 
    * @return Fast Track enable_F4_frequency_heuristic global setting.
+   * @see #getFastTrackMinimumF4FrequencyValue()
    */
   public boolean getFastTrackEnableF4FrequencyHeuristic() { return fastTrackEnableF4FrequencyHeuristic; }
   /**
@@ -1201,70 +1222,82 @@ public class ProcessWithPraat extends Task {
    * enable_F4_frequency_heuristic global setting. 
    * @param newFastTrackEnableF4FrequencyHeuristic Fast Track
    * enable_F4_frequency_heuristic global setting. 
+   * @see #getFastTrackMinimumF4FrequencyValue()
    */
   public ProcessWithPraat setFastTrackEnableF4FrequencyHeuristic(boolean newFastTrackEnableF4FrequencyHeuristic) { fastTrackEnableF4FrequencyHeuristic = newFastTrackEnableF4FrequencyHeuristic; return this; }
 
   /**
-   * Fast Track minimum_F4_frequency_value global setting.
+   * Fast Track minimum_F4_frequency_value global setting. Median F4 frequency should not
+   * be lower than this value. Default is 2900.
    * @see #getFastTrackMinimumF4FrequencyValue()
    * @see #setFastTrackMinimumF4FrequencyValue(int)
    */
   protected int fastTrackMinimumF4FrequencyValue = 2900;
   /**
    * Getter for {@link #fastTrackMinimumF4FrequencyValue}: Fast Track
-   * minimum_F4_frequency_value global setting. 
+   * minimum_F4_frequency_value global setting. Median F4 frequency should not
+   * be lower than this value. Default is 2900.
    * @return Fast Track minimum_F4_frequency_value global setting.
    */
   public int getFastTrackMinimumF4FrequencyValue() { return fastTrackMinimumF4FrequencyValue; }
   /**
    * Setter for {@link #fastTrackMinimumF4FrequencyValue}: Fast Track
-   * minimum_F4_frequency_value global setting. 
+   * minimum_F4_frequency_value global setting. Median F4 frequency should not
+   * be lower than this value. Default is 2900. 
    * @param newFastTrackMinimumF4FrequencyValue Fast Track minimum_F4_frequency_value
    * global setting. 
    */
   public ProcessWithPraat setFastTrackMinimumF4FrequencyValue(int newFastTrackMinimumF4FrequencyValue) { fastTrackMinimumF4FrequencyValue = newFastTrackMinimumF4FrequencyValue; return this; }
 
   /**
-   * Fast Track enable_rhotic_heuristic global setting.
+   * Fast Track enable_rhotic_heuristic global setting. If F3 < 2000 Hz, F1 and F2 should
+   * be at least 500 Hz apart. Enabled by default. 
    * @see #getFastTrackEnableRhoticHeuristic()
    * @see #setFastTrackEnableRhoticHeuristic(boolean)
    */
   protected boolean fastTrackEnableRhoticHeuristic = true;
   /**
    * Getter for {@link #fastTrackEnableRhoticHeuristic}: Fast Track
-   * enable_rhotic_heuristic global setting. 
+   * enable_rhotic_heuristic global setting. If F3 < 2000 Hz, F1 and F2 should
+   * be at least 500 Hz apart. Enabled by default. 
    * @return Fast Track enable_rhotic_heuristic global setting.
    */
   public boolean getFastTrackEnableRhoticHeuristic() { return fastTrackEnableRhoticHeuristic; }
   /**
    * Setter for {@link #fastTrackEnableRhoticHeuristic}: Fast Track
-   * enable_rhotic_heuristic global setting. 
+   * enable_rhotic_heuristic global setting. If F3 < 2000 Hz, F1 and F2 should
+   * be at least 500 Hz apart. Enabled by default. 
    * @param newFastTrackEnableRhoticHeuristic Fast Track enable_rhotic_heuristic global setting.
    */
   public ProcessWithPraat setFastTrackEnableRhoticHeuristic(boolean newFastTrackEnableRhoticHeuristic) { fastTrackEnableRhoticHeuristic = newFastTrackEnableRhoticHeuristic; return this; }
 
   /**
-   * Fast Track enable_F3F4_proximity_heuristic global setting.
+   * Fast Track enable_F3F4_proximity_heuristic global setting. If (F4 - F3) < 500 Hz, F1 and F2
+   * should be at least 1500 Hz apart. Enabled by default.
    * @see #getFastTrackEnableF3F4ProximityHeuristic()
    * @see #setFastTrackEnableF3F4ProximityHeuristic(boolean)
    */
   protected boolean fastTrackEnableF3F4ProximityHeuristic = true;
   /**
    * Getter for {@link #fastTrackEnableF3F4ProximityHeuristic}: Fast Track
-   * enable_F3F4_proximity_heuristic global setting. 
+   * enable_F3F4_proximity_heuristic global setting. If (F4 - F3) < 500 Hz, F1 and F2
+   * should be at least 1500 Hz apart. Enabled by default.
    * @return Fast Track enable_F3F4_proximity_heuristic global setting.
    */
   public boolean getFastTrackEnableF3F4ProximityHeuristic() { return fastTrackEnableF3F4ProximityHeuristic; }
   /**
    * Setter for {@link #fastTrackEnableF3F4ProximityHeuristic}: Fast Track
-   * enable_F3F4_proximity_heuristic global setting. 
+   * enable_F3F4_proximity_heuristic global setting. If (F4 - F3) < 500 Hz, F1 and F2
+   * should be at least 1500 Hz apart. Enabled by default.
    * @param newFastTrackEnableF3F4ProximityHeuristic Fast Track
    * enable_F3F4_proximity_heuristic global setting. 
    */
   public ProcessWithPraat setFastTrackEnableF3F4ProximityHeuristic(boolean newFastTrackEnableF3F4ProximityHeuristic) { fastTrackEnableF3F4ProximityHeuristic = newFastTrackEnableF3F4ProximityHeuristic; return this; }
 
   /**
-   * Fast Track number of steps. Default value is 20.
+   * Fast Track number of steps. Default value is 20. Number of analyses between low and
+   * high analysis limits. More analysis steps may improve results, but will increase
+   * analysis time (50% more steps = around 50% longer to analyze). 
    * @see #getFastTrackNumberOfSteps()
    * @see #setFastTrackNumberOfSteps(int)
    */
@@ -1281,7 +1314,9 @@ public class ProcessWithPraat extends Task {
   public ProcessWithPraat setFastTrackNumberOfSteps(int newFastTrackNumberOfSteps) { fastTrackNumberOfSteps = newFastTrackNumberOfSteps; return this; }
   
   /**
-   * Fast Track number of coefficients for the regression function. Default value is 5.
+   * Fast Track number of coefficients for the regression function. Default value is
+   * 5. Number of coefficients for formant prediction. More coefficients allow for more
+   * sudden, and 'wiggly' formant motion. 
    * @see #getFastTrackNumberOfCoefficients()
    * @see #setFastTrackNumberOfCoefficients(int)
    */
@@ -1434,15 +1469,15 @@ public class ProcessWithPraat extends Task {
 
   /**
    * Fast Track highest analysis frequency by default.
-   * <p> The default value is 4500.
+   * <p> The default value is 7000.
    * @see #getFastTrackHighestAnalysisFrequencyDefault()
    * @see #setFastTrackHighestAnalysisFrequencyDefault(int)
    */
-  protected int fastTrackHighestAnalysisFrequencyDefault = 4500;
+  protected int fastTrackHighestAnalysisFrequencyDefault = 7000;
   /**
    * Getter for {@link #fastTrackHighestAnalysisFrequencyDefault}: Fast Track highest
    * analysis frequency by default. 
-   * <p> The default value is 4500.
+   * <p> The default value is 7000.
    * @return Fast Track highest analysis frequency by default.
    */
   public int getFastTrackHighestAnalysisFrequencyDefault() { return fastTrackHighestAnalysisFrequencyDefault; }
@@ -2233,7 +2268,7 @@ public class ProcessWithPraat extends Task {
             +"\nprint ''result:0''"
             +"\nprintline":"")
           +(extractMeanPitch?
-            "\nresult = Get mean... {8,number,#.###} {9,number,#.###} Hertz"
+            "\nresult = Get mean... {8,number,#.###} {9,number,#.###} Hertz" 
             +"\nprint ''result:0''"
             +"\nprintline":"")
           +(extractMaximumPitch?
