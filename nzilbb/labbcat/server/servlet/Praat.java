@@ -112,7 +112,7 @@ import org.xml.sax.*;
  *       <dd> Use the FastTrack plugin to generate optimum, smoothed formant
  *       tracks. (default: false)</dd>
  *   <dt> fastTrackTimeStep </dt>
- *       <dd> Fast Track time_step global setting. </dd>
+ *       <dd> Fast Track time_step global setting - time step in seconds. </dd>
  *   <dt> fastTrackBasisFunctions </dt>
  *       <dd> Fast Track basis_functions global setting - "dct". </dd>
  *   <dt> fastTrackErrorMethod </dt>
@@ -121,29 +121,38 @@ import org.xml.sax.*;
  *       <dd> Fast Track tracking_method parameter for trackAutoselectProcedure; "burg" or
  *       "robust". </dd> 
  *   <dt> fastTrackEnableF1FrequencyHeuristic ("true" or "false") </dt>
- *       <dd> Fast Track enable_F1_frequency_heuristic global setting. </dd>
+ *       <dd> Fast Track enable_F1_frequency_heuristic global setting. Enabled by default.</dd>
  *   <dt> fastTrackMaximumF1FrequencyValue </dt>
- *       <dd> Fast Track maximum_F1_frequency_value global setting. </dd>
+ *       <dd> Fast Track maximum_F1_frequency_value global setting; Median F1 frequency
+ *       should not be higher than this value. </dd> 
  *   <dt> fastTrackEnableF1BandwidthHeuristic </dt>
- *       <dd> Fast Track enable_F1_bandwidth_heuristic global setting. </dd>
+ *       <dd> Fast Track enable_F1_bandwidth_heuristic global setting. Disabled by
+ *       default. </dd>
  *   <dt> fastTrackMaximumF1BandwidthValue </dt>
- *       <dd> Fast Track maximum_F1_bandwidth_value global setting. </dd>
+ *       <dd> Fast Track maximum_F1_bandwidth_value global setting. Median F1 bandwidth
+ *       should not be higher than this value.  </dd>
  *   <dt> fastTrackEnableF2BandwidthHeuristic ("true" or "false") </dt>
- *       <dd> Fast Track enable_F2_bandwidth_heuristic global setting. </dd>
+ *       <dd> Fast Track enable_F2_bandwidth_heuristic global setting.  Disabled by default.</dd>
  *   <dt> fastTrackMaximumF2BandwidthValue </dt>
- *       <dd> Fast Track maximum_F2_bandwidth_value global setting. </dd>
+ *       <dd> Fast Track maximum_F2_bandwidth_value global setting. Median F2 bandwidth
+ *       should not be higher than this value. Default is 600.</dd>
  *   <dt> fastTrackEnableF3BandwidthHeuristic ("true" or "false") </dt>
- *       <dd> Fast Track enable_F3_bandwidth_heuristic global setting.. </dd>
+ *       <dd> Fast Track enable_F3_bandwidth_heuristic global setting.  Disabled by default. </dd>
  *   <dt> fastTrackMaximumF3BandwidthValue </dt>
- *       <dd> Fast Track maximum_F3_bandwidth_value global setting. </dd>
+ *       <dd> Fast Track maximum_F3_bandwidth_value global setting. Median F3 bandwidth
+ *       should not be higher than this value. Default is 900.</dd>
  *   <dt> fastTrackEnableF4FrequencyHeuristic ("true" or "false") </dt>
- *       <dd> Fast Track enable_F4_frequency_heuristic global setting. </dd>
+ *       <dd> Fast Track enable_F4_frequency_heuristic global setting. Enabled by
+ *       default. </dd>
  *   <dt> fastTrackMinimumF4FrequencyValue </dt>
- *       <dd> Fast Track minimum_F4_frequency_value global setting. </dd>
+ *       <dd> Fast Track minimum_F4_frequency_value global setting. Median F4 frequency
+ *       should not be lower than this value. Default is 2900.</dd>
  *   <dt> fastTrackEnableRhoticHeuristic ("true" of "false") </dt>
- *       <dd> Fast Track enable_rhotic_heuristic global setting. </dd>
+ *       <dd> Fast Track enable_rhotic_heuristic global setting. If F3 < 2000 Hz, F1 and
+ *       F2 should be at least 500 Hz apart. Enabled by default. </dd>
  *   <dt> fastTrackEnableF3F4ProximityHeuristic </dt>
- *       <dd> Fast Track enable_F3F4_proximity_heuristic global setting. </dd>
+ *       <dd> Fast Track enable_F3F4_proximity_heuristic global setting. If (F4 - F3) <
+ *       500 Hz, F1 and F2 should be at least 1500 Hz apart. Enabled by default.</dd>
  *   <dt> fastTrackNumberOfSteps </dt>
  *       <dd> Fast Track number of steps. </dd>
  *   <dt> fastTrackNumberOfCoefficients </dt>
