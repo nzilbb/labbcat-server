@@ -136,7 +136,7 @@ public class Attributes extends LabbcatServlet { // TODO unit test
         csvOut.println();
         for (String transcriptId : id) {
           try {
-            Graph graph = store.getGraph(transcriptId, selectedAttributes);
+            Graph graph = store.getTranscript(transcriptId, selectedAttributes);
             for (String layer : selectedAttributes) {
               try {
                 StringBuffer value = new StringBuffer();
