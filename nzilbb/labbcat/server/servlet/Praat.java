@@ -225,7 +225,7 @@ import org.xml.sax.*;
  * <p><b>Output</b>: A JSON-encoded response containing the threadId of a task that is
  * processing the request. The task, when finished, will output a CSV files with one line
  * for each line of the input file, and fields containing the selected acoustic
- * measurements. If <code>pass_through_data</code> is "false", the output will
+ * measurements. If <code>passThroughData</code> is "false", the output will
  * <em>not</em> contain the data from the input file, otherwise the input file data will
  * be passed through into the output file, with the acoustic measurement fields appended
  * to each line. 
