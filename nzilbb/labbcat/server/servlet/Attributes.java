@@ -89,7 +89,7 @@ public class Attributes extends LabbcatServlet { // TODO unit test
     }
 
     String name = request.getParameter("name");
-    if (name == null || name.trim().length() == 0) name ="list";
+    if (name == null || name.trim().length() == 0) name = "list";
     name = IO.SafeFileNameUrl(name.trim());
       
     try {
@@ -98,14 +98,23 @@ public class Attributes extends LabbcatServlet { // TODO unit test
       // arrays of transcripts and delimiters
       String[] id = request.getParameterValues("id");
       if (id == null) {
-        // have they specified a query?
-        String query = request.getParameter("query");
-        id = store.getMatchingTranscriptIds(query);
-        if (id.length == 0) {
-          response.sendError(400, "No graph IDs specified");
-          return;
-        }
+        String ids = request.getParameter("ids");
+        if (ids != null) {
+          // R can't send multiple parameters with the same value, so the workaround is
+          // to send one parameter with the values delimited by newline
+          id = ids.split("\n");
+        } else {
+          // have they specified a query?
+          String query = request.getParameter("query");
+          if (query != null) {
+            id = store.getMatchingTranscriptIds(query);
+          } // "query" parameter
+        } // no "ids" parameter
       } // no "id" parameter values
+      if (id == null || id.length == 0) {
+        response.sendError(400, "No graph IDs specified");
+        return;
+      }
 
       response.setContentType("text/csv");
       response.setHeader("Content-Disposition", "attachment; filename="+name+".csv");
