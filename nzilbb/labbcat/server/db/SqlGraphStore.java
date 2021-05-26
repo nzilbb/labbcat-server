@@ -1741,7 +1741,10 @@ public class SqlGraphStore implements GraphStore {
                try {
                   rs.close();
                   sql.close();
-                  int iAgId = Integer.parseInt(id);
+                  int iAgId = Integer.parseInt(
+                    id
+                    // (could be from a MatchId - i.e. prefixed by "g_")
+                    .replaceAll("^g_","")); 
                   sql = getConnection().prepareStatement(
                      "SELECT transcript.*, COALESCE(transcript_family.name,'') AS series,"
                      +" COALESCE(transcript_type.transcript_type,'') AS transcript_type, divergent.label AS divergent"
