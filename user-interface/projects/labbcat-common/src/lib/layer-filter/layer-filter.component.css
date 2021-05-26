@@ -5,6 +5,9 @@ fieldset {
     width: -webkit-fill-available;
     width: -moz-available;
 }
+legend {
+    white-space: nowrap;
+}
 
 fieldset > div {
     height: 100%;
