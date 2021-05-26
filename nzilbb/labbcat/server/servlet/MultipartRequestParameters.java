@@ -38,11 +38,13 @@ import org.apache.commons.fileupload.servlet.*;
  * Hashtable, but there will be no FileItem values.
  * @author Robert Fromont robert@fromont.net.nz
  */
+@SuppressWarnings({"rawtypes","serial"})
 public class MultipartRequestParameters extends Hashtable {
   
   /**
    * Constructor from request.
    */
+  @SuppressWarnings("unchecked")
   public MultipartRequestParameters(HttpServletRequest request) {
     try {
       ServletFileUpload fileupload = new ServletFileUpload(new DiskFileItemFactory());
@@ -119,6 +121,7 @@ public class MultipartRequestParameters extends Hashtable {
    * @param key The parameter name.
    * @return All parameter String values, or an empty array if there are none.
    */
+  @SuppressWarnings("unchecked")
   public String[] getStrings(String key) {
     Object value = get(key);
     if (value != null) {
@@ -138,6 +141,7 @@ public class MultipartRequestParameters extends Hashtable {
    * @param key The parameter name.
    * @return A list of FileItems.
    */
+  @SuppressWarnings("unchecked")
   public Vector<FileItem> getFiles(String key) {
     Object value = get(key);
     if (value != null) {
