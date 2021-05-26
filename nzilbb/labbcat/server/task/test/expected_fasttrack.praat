@@ -42,7 +42,7 @@ Rename... sample0
 select Sound sample0
 windowDuration = 0.3 - 0
 if windowDuration >= fastTrackMinimumDuration
-  @trackAutoselect: selected(), dir$, 5000, 4500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
+  @trackAutoselect: selected(), dir$, 5000, 7000, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
 endif
 if windowDuration >= fastTrackMinimumDuration
   result = Get value at time... 1 0.15 Hertz Linear
@@ -75,7 +75,7 @@ Rename... sample1
 select Sound sample1
 windowDuration = 4.1 - 2.9
 if windowDuration >= fastTrackMinimumDuration
-  @trackAutoselect: selected(), dir$, 5000, 4500, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
+  @trackAutoselect: selected(), dir$, 5000, 7000, steps, coefficients, formants, method$, image, selected(), current_view, max_plot, out_formant, out_table, out_all
 endif
 if windowDuration >= fastTrackMinimumDuration
   result = Get value at time... 1 0.6 Hertz Linear
