@@ -114,7 +114,7 @@
   <target name="javadoc" depends="init,dist"
           description="Document the source" >
     <javadoc destdir="${javadoc}"
-             classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/commons-csv.jar;${lib}/nzilbb.ag.jar;${lib}/javax.json.jar"
+             classpath="${config.tomcat}/lib/servlet-api.jar;${lib}/commons-csv.jar;${lib}/commons-fileupload.jar;${lib}/nzilbb.ag.jar;${lib}/javax.json.jar"
              packagenames="nzilbb.labbcat.server.servlet nzilbb.labbcat.server.db"
              access="public"
 	     Author="yes"
