@@ -302,14 +302,14 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "Transcript column \""+parameters.getString("transcriptColumn")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "Transcript column \"{0}\" is not an integer.",
+                  parameters.getString("transcriptColumn")));
               return;
             }
           } else {
             writeResponse(
               response, failureResult(
-                request, "Transcript column not supplied.")); // TODO i18n
+                request, "Transcript column not supplied."));
           }
           
           if (parameters.getString("participantColumn") != null) {
@@ -319,14 +319,14 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "Participant column \""+parameters.getString("participantColumn")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "Participant column \"{0}\" is not an integer.",
+                  parameters.getString("participantColumn")));
               return;
             }
           } else {
             writeResponse(
               response, failureResult(
-                request, "Participant column not supplied.")); // TODO i18n
+                request, "Participant column not supplied."));
           }
           
           if (parameters.getString("startTimeColumn") != null) {
@@ -335,14 +335,14 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "Start time column \""+parameters.getString("startTimeColumn")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "Start time column \"{0}\" is not an integer.",
+                  parameters.getString("startTimeColumn")));
               return;
             }
           } else {
             writeResponse(
               response, failureResult(
-                request, "Start time column not supplied.")); // TODO i18n
+                request, "Start time column not supplied."));
           }
           
           if (parameters.getString("endTimeColumn") != null) {
@@ -351,14 +351,14 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "End time column \""+parameters.getString("endTimeColumn")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "End time column \"{0}\" is not an integer.",
+                  parameters.getString("endTimeColumn")));
               return;
             }
           } else {
             writeResponse(
               response, failureResult(
-                request, "End time column not supplied.")); // TODO i18n
+                request, "End time column not supplied."));
           }
           
           if (parameters.getString("windowOffset") != null) {
@@ -367,8 +367,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "Window offset \""+parameters.getString("windowOffset")
-                  +"\" is not a number.")); // TODO i18n
+                  request, "Window offset \"{0}\" is not a number.",
+                  parameters.getString("windowOffset")));
               return;
             }
           }
@@ -402,9 +402,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(PatternSyntaxException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "formantOtherPattern \""+value
-                  +"\" is not a valid regular expression: "
-                  + exception.getMessage())); // TODO i18n
+                  request, "{0} \"{1}\" is not a valid regular expression: {2}",
+                  "formantOtherPattern", value, exception.getMessage()));
               return;
             }
           } // next value
@@ -416,8 +415,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
               writeResponse(
                 response, failureResult(
                   request,
-                  "formantCeilingDefault \""+parameters.getString("formantCeilingDefault")
-                  +"\" is not an integer.")); // TODO i18n
+                  "{0} \"{1}\" is not an integer.",
+                  "formantCeilingDefault", parameters.getString("formantCeilingDefault")));
               return;
             }
           }
@@ -428,7 +427,7 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "formantCeilingOther \""+value+"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.", "formantCeilingOther", value));
               return;
             }
           } // next value          
@@ -450,9 +449,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(PatternSyntaxException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackOtherPattern \""+value
-                  +"\" is not a valid regular expression: "
-                  + exception.getMessage())); // TODO i18n
+                  request, "{0} \"{1}\" is not a valid regular expression: {2}",
+                  "fastTrackOtherPattern", value, exception.getMessage()));
               return;
             }
           } // next value
@@ -464,9 +462,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
               writeResponse(
                 response, failureResult(
                   request,
-                  "fastTrackLowestAnalysisFrequencyDefault \""
-                  +parameters.getString("fastTrackLowestAnalysisFrequencyDefault")
-                  +"\" is not an integer.")); // TODO i18n
+                  "{0} \"{1}\" is not an integer.",
+                  "fastTrackLowestAnalysisFrequencyDefault",
+                  parameters.getString("fastTrackLowestAnalysisFrequencyDefault")));
               return;
             }
           }
@@ -477,8 +475,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackLowestAnalysisFrequencyOther \""
-                  +value+"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackLowestAnalysisFrequencyOther", value));
               return;
             }
           } // next value
@@ -490,9 +488,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
               writeResponse(
                 response, failureResult(
                   request,
-                  "fastTrackHighestAnalysisFrequencyDefault \""
-                  +parameters.getString("fastTrackHighestAnalysisFrequencyDefault")
-                  +"\" is not an integer.")); // TODO i18n
+                  "{0} \"{1}\" is not an integer.",
+                  "fastTrackHighestAnalysisFrequencyDefault",
+                  parameters.getString("fastTrackHighestAnalysisFrequencyDefault")));
               return;
             }
           }
@@ -503,8 +501,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackHighestAnalysisFrequencyOther \""
-                  +value+"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackHighestAnalysisFrequencyOther", value));
               return;
             }
           } // next value
@@ -516,8 +514,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
               writeResponse(
                 response, failureResult(
                   request,
-                  "fastTrackTimeStep \""+parameters.getString("fastTrackTimeStep")
-                  +"\" is not a number.")); // TODO i18n
+                  "{0} \"{1}\" is not a number.",
+                  "fastTrackTimeStep", parameters.getString("fastTrackTimeStep")));
               return;
             }
           }
@@ -546,9 +544,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackMaximumF1FrequencyValue \""
-                  +parameters.getString("fastTrackMaximumF1FrequencyValue")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackMaximumF1FrequencyValue",
+                  parameters.getString("fastTrackMaximumF1FrequencyValue")));
               return;
             }
           }
@@ -561,9 +559,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackMaximumF1BandwidthValue \""
-                  +parameters.getString("fastTrackMaximumF1BandwidthValue")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackMaximumF1BandwidthValue",
+                  parameters.getString("fastTrackMaximumF1BandwidthValue")));
               return;
             }
           }
@@ -576,9 +574,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackMaximumF2BandwidthValue \""
-                  +parameters.getString("fastTrackMaximumF2BandwidthValue")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackMaximumF2BandwidthValue",
+                  parameters.getString("fastTrackMaximumF2BandwidthValue")));
               return;
             }
           }
@@ -591,9 +589,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackMaximumF3BandwidthValue \""
-                  +parameters.getString("fastTrackMaximumF3BandwidthValue")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackMaximumF3BandwidthValue",
+                  parameters.getString("fastTrackMaximumF3BandwidthValue")));
               return;
             }
           }
@@ -606,9 +604,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackMinimumF4FrequencyValue \""
-                  +parameters.getString("fastTrackMinimumF4FrequencyValue")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackMinimumF4FrequencyValue",
+                  parameters.getString("fastTrackMinimumF4FrequencyValue")));
               return;
             }
           }
@@ -623,9 +621,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackNumberOfSteps \""
-                  +parameters.getString("fastTrackNumberOfSteps")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackNumberOfSteps",
+                  parameters.getString("fastTrackNumberOfSteps")));
               return;
             }
           }
@@ -636,9 +634,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackNumberOfCoefficients \""
-                  +parameters.getString("fastTrackNumberOfCoefficients")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackNumberOfCoefficients",
+                  parameters.getString("fastTrackNumberOfCoefficients")));
               return;
             }
           }
@@ -649,9 +647,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "fastTrackNumberOfFormants \""
-                  +parameters.getString("fastTrackNumberOfFormants")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "fastTrackNumberOfFormants",
+                  parameters.getString("fastTrackNumberOfFormants")));
               return;
             }
           }
@@ -676,9 +674,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(PatternSyntaxException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "pitchOtherPattern \""+value
-                  +"\" is not a valid regular expression: "
-                  + exception.getMessage())); // TODO i18n
+                  request, "{0} \"{1}\" is not a valid regular expression: {2}",
+                  "pitchOtherPattern", value, exception.getMessage()));
               return;
             }
           } // next value
@@ -689,8 +686,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "pitchFloorDefault \""+parameters.getString("pitchFloorDefault")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "pitchFloorDefault",
+                  parameters.getString("pitchFloorDefault")));
               return;
             }
           }
@@ -701,7 +699,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "pitchFloorOther \""+value+"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "pitchFloorOther",
+                  parameters.getString("pitchFloorOther")));
               return;
             }
           } // next value
@@ -712,8 +712,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "pitchCeilingDefault \""+parameters.getString("pitchCeilingDefault")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "pitchCeilingDefault",
+                  parameters.getString("pitchCeilingDefault")));
               return;
             }
           }
@@ -724,7 +725,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "pitchCeilingOther \""+value+"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "pitchCeilingOther",
+                  parameters.getString("pitchCeilingOther")));
               return;
             }
           } // next value
@@ -735,9 +738,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request,
-                  "voicingThresholdDefault \""+parameters.getString("voicingThresholdDefault")
-                  +"\" is not a number.")); // TODO i18n
+                  request, "{0} \"{1}\" is not a number.",
+                  "voicingThresholdDefault",
+                  parameters.getString("voicingThresholdDefault")));
               return;
             }
           }
@@ -748,7 +751,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "voicingThresholdOther \""+value+"\" is not a number.")); // TODO i18n
+                  request, "{0} \"{1}\" is not a number.",
+                  "voicingThresholdOther",
+                  parameters.getString("voicingThresholdOther")));
               return;
             }
           } // next value
@@ -770,9 +775,8 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(PatternSyntaxException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "intensityOtherPattern \""+value
-                  +"\" is not a valid regular expression: "
-                  + exception.getMessage())); // TODO i18n
+                  request, "{0} \"{1}\" is not a valid regular expression: {2}",
+                  "intensityOtherPattern", value, exception.getMessage()));
               return;
             }
           } // next value
@@ -783,10 +787,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request,
-                  "intensityPitchFloorDefault \""
-                  +parameters.getString("intensityPitchFloorDefault")
-                  +"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "intensityPitchFloorDefault",
+                  parameters.getString("intensityPitchFloorDefault")));
               return;
             }
           }
@@ -797,8 +800,9 @@ public class Praat extends LabbcatServlet { // TODO unit test
             } catch(NumberFormatException exception) {
               writeResponse(
                 response, failureResult(
-                  request, "intensityPitchFloorOther \""
-                  +value+"\" is not an integer.")); // TODO i18n
+                  request, "{0} \"{1}\" is not an integer.",
+                  "intensityPitchFloorOther",
+                  parameters.getString("intensityPitchFloorOther")));
               return;
             }
           } // next value
@@ -825,49 +829,56 @@ public class Praat extends LabbcatServlet { // TODO unit test
             writeResponse(
               response, failureResult(
                 request,
-                "formantOtherPattern and formantCeilingOther must have the same number of values.")); // TODO i18n
+                "{0} and {1} must have the same number of values.",
+                "formantOtherPattern", "formantCeilingOther"));
             return;
           }
           if (task.getPitchOtherPattern().size() != task.getPitchFloorOther().size()) {
             writeResponse(
               response, failureResult(
                 request,
-                "pitchOtherPattern and pitchFloorOther must have the same number of values.")); // TODO i18n
+                "{0} and {1} must have the same number of values.",
+                "pitchOtherPattern", "pitchFloorOther"));
             return;
           }
           if (task.getPitchOtherPattern().size() != task.getPitchCeilingOther().size()) {
             writeResponse(
               response, failureResult(
                 request,
-                "pitchOtherPattern and pitchCeilingOther must have the same number of values.")); // TODO i18n
+                "{0} and {1} must have the same number of values.",
+                "pitchOtherPattern", "pitchCeilingOther"));
             return;
           }
           if (task.getPitchOtherPattern().size() != task.getVoicingThresholdOther().size()) {
             writeResponse(
               response, failureResult(
                 request,
-                "pitchOtherPattern and voicingThresholdOther must have the same number of values.")); // TODO i18n
+                "{0} and {1} must have the same number of values.",
+                "pitchOtherPattern", "voicingThresholdOther"));
             return;
           }
           if (task.getIntensityOtherPattern().size() != task.getIntensityPitchFloorOther().size()) {
             writeResponse(
               response, failureResult(
                 request,
-                "intensityOtherPattern and intensityPitchFloorOther must have the same number of values.")); // TODO i18n
+                "{0} and {1} must have the same number of values.",
+                "intensityOtherPattern", "intensityPitchFloorOther"));
             return;
           }
           if (task.getFastTrackOtherPattern().size() != task.getFastTrackLowestAnalysisFrequencyOther().size()) {
             writeResponse(
               response, failureResult(
                 request,
-                "fastTrackOtherPattern and fastTrackLowestAnalysisFrequencyOther must have the same number of values.")); // TODO i18n
+                "{0} and {1} must have the same number of values.",
+                "fastTrackOtherPattern", "fastTrackLowestAnalysisFrequencyOther"));
             return;
           }
           if (task.getFastTrackOtherPattern().size() != task.getFastTrackHighestAnalysisFrequencyOther().size()) {
             writeResponse(
               response, failureResult(
                 request,
-                "fastTrackOtherPattern and fastTrackHighestAnalysisFrequencyOther must have the same number of values.")); // TODO i18n
+                "{0} and {1} must have the same number of values.",
+                "fastTrackOtherPattern", "fastTrackHighestAnalysisFrequencyOther"));
             return;
           }
 

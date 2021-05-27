@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -22,6 +22,17 @@
 /**
  * <p> Endpoints providing an HTTP-based API for access to transcripts, annotations,
  * media, and functions that manipulate them.
+ * <p> <em>NB</em> there are SDKs for accessing this API:
+ * <dl>
+ *  <dt><a href="https://github.com/nzilbb/labbcat-java/"> Java </a></dt>
+ *  <dd><a href="https://github.com/nzilbb/labbcat-java/">nzilbb.labbcat</a></dd>
+ *  <dt><a href="https://github.com/nzilbb/labbcat-js/"> JavaScript </a></dt>
+ *  <dd><a href="https://www.npmjs.com/package/@nzilbb/labbcat">@nzilbb/labbcat</a></dd>
+ *  <dt><a href="https://github.com/nzilbb/labbcat-py/"> Python </a></dt>
+ *  <dd><a href="https://pypi.org/project/nzilbb-labbcat/">nzilbb-labbcat</a></dd>
+ *  <dt><a href="https://github.com/nzilbb/labbcat-R/"> R </a></dt>
+ *  <dd><a href="https://cran.r-project.org/web/packages/nzilbb.labbcat/index.html">nzilbb.labbcat</a></dd>
+ * </dl>
  * <p> All LaBB-CAT requests for which the the <q>Accept</q> HTTP header is set to
  *  <q>application/json</q> return a JSON response with the same standard envelope structure:
  * <dl>
