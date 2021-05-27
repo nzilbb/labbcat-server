@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-  <file source-language="en-US" datatype="plaintext" original="ng2.template">
+  <file source-language="en" datatype="plaintext" original="ng2.template">
     <body>
       <trans-unit id="85820574788f07c1b4e432b7044ca18af57f5b5b" datatype="html">
         <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION" equiv-text="{{label}}"/>} }</source>
@@ -35,7 +35,7 @@
         <source>Participant</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">2</context>
+          <context context-type="linenumber">5</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -43,14 +43,14 @@
         <source>Participant Attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">2</context>
+          <context context-type="linenumber">3</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1d59b60ed76b45c0af896705e1f4d8d6339e52c2" datatype="html">
         <source>Transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -58,14 +58,14 @@
         <source>Transcript Attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">24</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7f1fab347fc3f64f7fd812062199329eb28b298a" datatype="html">
         <source>Span</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">47</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -73,14 +73,14 @@
         <source>Span Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">45</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5f5abe15cf9bac583662eb3c99761ab2b15f8891" datatype="html">
         <source>Phrase</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">60</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -88,14 +88,14 @@
         <source>Phrase Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">60</context>
+          <context context-type="linenumber">70</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9b0a085531b3557c1a2c0b98276fb31d6b0682bb" datatype="html">
         <source>Word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -103,14 +103,14 @@
         <source>Word Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">109</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8fbd80a3ad0ce1c5dbc1bb371d3bad810599c51a" datatype="html">
         <source>Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -118,7 +118,7 @@
         <source>Segment Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">130</context>
         </context-group>
       </trans-unit>
       <trans-unit id="873dc7261fcfc098ed881acbb6cb790375a4f074" datatype="html">
@@ -218,6 +218,110 @@
           <context context-type="linenumber">23</context>
         </context-group>
         <note priority="1" from="description">button title</note>
+      </trans-unit>
+      <trans-unit id="acf2a5f88802653ac62de1fbea1dbdff53dc9024" datatype="html">
+        <source>Regular Expression</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d5e0dbc9fd4651759df915cdc6ba26fe3f17475f" datatype="html">
+        <source>From</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <note priority="1" from="description">range lower bound</note>
+      </trans-unit>
+      <trans-unit id="c6afc30614d08746633335d65d76364d0ee04358" datatype="html">
+        <source>Lower bound (inclusive)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <note priority="1" from="description">range lower bound</note>
+      </trans-unit>
+      <trans-unit id="63c9c3aa536dbd11120ae8feab62186c47838028" datatype="html">
+        <source>To</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <note priority="1" from="description">range upper bound</note>
+      </trans-unit>
+      <trans-unit id="bdb06038674a0a212cd8f279985a753e1eb39c0b" datatype="html">
+        <source>Upper bound (inclusive)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <note priority="1" from="description">range upper bound</note>
+      </trans-unit>
+      <trans-unit id="08bf05baa49f05263ee8198d322a82a6e3a75694" datatype="html">
+        <source>yyyy-mm-dd</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <note priority="1" from="description">date range lower bound</note>
+      </trans-unit>
+      <trans-unit id="4f51762cb429d93582199185b2346b1595f0daac" datatype="html">
+        <source>From (inclusive)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <note priority="1" from="description">date range lower bound</note>
+      </trans-unit>
+      <trans-unit id="7461019489f958f92c11e8ded5d823abb74b7d41" datatype="html">
+        <source>To (inclusive)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <note priority="1" from="description">date range upper bound</note>
+      </trans-unit>
+      <trans-unit id="0e688cecb6d7ff062db1ee5c7cc35ff3012d58f2" datatype="html">
+        <source>[other]</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="514f6e12d035a6d9b00de6b3e55c18b73488da07" datatype="html">
+        <source>true</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+        <note priority="1" from="description">layer filter boolean label</note>
+      </trans-unit>
+      <trans-unit id="774f5e6a183dea08393789b6f72e86afad729419" datatype="html">
+        <source>false</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+        <note priority="1" from="description">layer filter boolean label</note>
+      </trans-unit>
+      <trans-unit id="e8252a8d84c837d7a1ae4b57918b79394a3f6606" datatype="html">
+        <source>Show all pages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/pagination/pagination.component.d.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="a2579889302bfb620a6c17c5b5e88d3b292ad744" datatype="html">
+        <source>Current page</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/pagination/pagination.component.d.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="41d0e795d8e9fd2cd97b08c70776da1e58d1dd4e" datatype="html">
         <source>Missing Pronunciations</source>

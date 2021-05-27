@@ -245,6 +245,139 @@
         </context-group>
         <note priority="1" from="description">button title</note>
       </trans-unit>
+      <trans-unit id="acf2a5f88802653ac62de1fbea1dbdff53dc9024" datatype="html">
+        <source>Regular Expression</source>
+        <target state="translated">Expresión Regular</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">170</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">267</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">550</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">656</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="d5e0dbc9fd4651759df915cdc6ba26fe3f17475f" datatype="html">
+        <source>From</source>
+        <target state="translated">De</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <note priority="1" from="description">range lower bound</note>
+      </trans-unit>
+      <trans-unit id="c6afc30614d08746633335d65d76364d0ee04358" datatype="html">
+        <source>Lower bound (inclusive)</source>
+        <target state="translated">Cota inferior (inclusiva)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <note priority="1" from="description">range lower bound</note>
+      </trans-unit>
+      <trans-unit id="63c9c3aa536dbd11120ae8feab62186c47838028" datatype="html">
+        <source>To</source>
+        <target state="translated">A</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <note priority="1" from="description">range upper bound</note>
+      </trans-unit>
+      <trans-unit id="bdb06038674a0a212cd8f279985a753e1eb39c0b" datatype="html">
+        <source>Upper bound (inclusive)</source>
+        <target state="translated">Cota superior (inclusiva)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <note priority="1" from="description">range upper bound</note>
+      </trans-unit>
+      <trans-unit id="08bf05baa49f05263ee8198d322a82a6e3a75694" datatype="html">
+        <source>yyyy-mm-dd</source>
+        <target state="translated">aaaa-mm-dd</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <note priority="1" from="description">date range lower bound</note>
+      </trans-unit>
+      <trans-unit id="4f51762cb429d93582199185b2346b1595f0daac" datatype="html">
+        <source>From (inclusive)</source>
+        <target state="translated">De (inclusiva)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <note priority="1" from="description">date range lower bound</note>
+      </trans-unit>
+      <trans-unit id="7461019489f958f92c11e8ded5d823abb74b7d41" datatype="html">
+        <source>To (inclusive)</source>
+        <target state="translated">A (inclusiva)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <note priority="1" from="description">date range upper bound</note>
+      </trans-unit>
+      <trans-unit id="0e688cecb6d7ff062db1ee5c7cc35ff3012d58f2" datatype="html">
+        <source>[other]</source>
+        <target state="translated">[otro]</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="514f6e12d035a6d9b00de6b3e55c18b73488da07" datatype="html">
+        <source>true</source>
+        <target state="translated">verdadero</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+        <note priority="1" from="description">layer filter boolean label</note>
+      </trans-unit>
+      <trans-unit id="774f5e6a183dea08393789b6f72e86afad729419" datatype="html">
+        <source>false</source>
+        <target state="translated">falso</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-filter/layer-filter.component.d.ts</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+        <note priority="1" from="description">layer filter boolean label</note>
+      </trans-unit>
+      <trans-unit id="e8252a8d84c837d7a1ae4b57918b79394a3f6606" datatype="html">
+        <source>Show all pages</source>
+        <target state="translated">Mostrar todas las páginas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/pagination/pagination.component.d.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="a2579889302bfb620a6c17c5b5e88d3b292ad744" datatype="html">
+        <source>Current page</source>
+        <target state="translated">Página actual</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">../../dist/labbcat-common/lib/pagination/pagination.component.d.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="41d0e795d8e9fd2cd97b08c70776da1e58d1dd4e" datatype="html">
         <source>Missing Pronunciations</source>
         <target state="translated">Pronunciaciones que Faltan</target>
