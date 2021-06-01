@@ -2528,7 +2528,7 @@ public class SqlGraphStore implements GraphStore {
       // - #=es_1_17 identifies the target
       // - [0]=ew_0_12574 identifies the first word in the match
       Pattern matchIdPattern = Pattern.compile(
-         "g_(\\d+);em_12_(\\d+);n_\\d+-n_\\d+;p_(\\d+);#=e.?_(\\d+)_(\\d+);.*\\[0\\]=ew_0_(\\d+)");
+         "g_(\\d+);em_12_(\\d+);n_\\d+-n_\\d+;p_(\\d+);#=e.?_(\\d+)_(\\d+);.*\\[0\\]=ew_0_(\\d+)($|;.*)");
       // so groups are:
       Integer ag_id_group = 1;
       Integer utterance_annotation_id_group = 2;
