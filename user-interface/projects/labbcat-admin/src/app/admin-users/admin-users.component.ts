@@ -95,7 +95,7 @@ export class AdminUsersComponent extends AdminComponent implements OnInit {
 
     deleteRow(row: User) {
         row._deleting = true;
-        if (confirm(`Are you sure you want to delete ${row.user}`)) {
+        if (confirm(`Are you sure you want to delete ${row.user}`)) { // TODO i18n
             this.labbcatService.labbcat.deleteUser(row.user, (model, errors, messages) => {
                 row._deleting = false;
                 if (errors) errors.forEach(m => this.messageService.error(m));
