@@ -9,9 +9,12 @@
              type="email"
              i18n-placeholder placeholder="Email Address">
     </span>
-    <span class="user-roles header-only" i18n-title title="Roles the user has">
-      Roles
-    </span>
+    <span class="user-roles header-only"
+          i18n-title title="Roles the user has"
+          i18n>Roles</span>
+    <span class="user-reset-password header-only"
+          i18n-title title="Whether the user will be asked to change their password next time they log in"
+          i18n>Reset PW</span>
     <span class="buttons">
       <lib-button action="create"
                   (press)="user.reportValidity() && email.reportValidity() && createRow(user.value, email.value) && user.value = email.value = '';" [processing]="creating"
@@ -39,6 +42,12 @@
           {{role.role_id}}
         </label>
       </div>
+    </span>
+    <span class="user-reset-password" i18n-title title="Whether the user will be asked to change their password next time they log in"><legend i18n>Reset Password</legend>
+      <input #resetPassword
+             type="checkbox"
+             [(ngModel)]="user.resetPassword"
+             (input)="onChange(user)">
     </span>
     <span class="buttons">
       <lib-link [routerLink]="['/admin','users',user.user]"
