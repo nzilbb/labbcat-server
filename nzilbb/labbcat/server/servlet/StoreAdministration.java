@@ -24,6 +24,7 @@ package nzilbb.labbcat.server.servlet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
@@ -388,7 +389,8 @@ public class StoreAdministration extends Store {
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       // read the incoming object
-      JsonReader reader = Json.createReader(request.getReader());
+      JsonReader reader = Json.createReader( // ensure we read as UTF-8
+        new InputStreamReader(request.getInputStream(), "UTF-8"));
       // incoming object:
       JsonObject json = reader.readObject();
       Layer layer = new Layer(json);
@@ -410,7 +412,8 @@ public class StoreAdministration extends Store {
       throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
       Vector<String> errors = new Vector<String>();
       // read the incoming object
-      JsonReader reader = Json.createReader(request.getReader());
+      JsonReader reader = Json.createReader( // ensure we read as UTF-8
+        new InputStreamReader(request.getInputStream(), "UTF-8"));
       // incoming object:
       JsonObject json = reader.readObject();
       Layer layer = new Layer(json);

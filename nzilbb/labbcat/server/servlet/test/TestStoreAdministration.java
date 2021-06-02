@@ -619,7 +619,7 @@ public class TestStoreAdministration
    }
    
    @Test public void newSaveDeleteLayer() throws Exception {
-      Layer testLayer = new Layer("unit-test", "Unit test layer")
+     Layer testLayer = new Layer("unit-test", "Unit test layer→") // including non ASCII char
          .setParentId("word")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true)

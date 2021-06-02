@@ -22,8 +22,8 @@
 
 package nzilbb.labbcat.server.servlet;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
 import javax.servlet.http.*;
 import javax.servlet.annotation.WebServlet;
@@ -108,7 +108,8 @@ public class AdminPassword extends LabbcatServlet {
          response.setCharacterEncoding("UTF-8");
          try {
             // read the incoming object
-            JsonReader reader = Json.createReader(request.getReader());
+           JsonReader reader = Json.createReader( // ensure we read as UTF-8
+             new InputStreamReader(request.getInputStream(), "UTF-8"));
             JsonObject json = reader.readObject();
             if (!json.containsKey("user")) {
                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

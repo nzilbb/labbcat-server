@@ -22,6 +22,7 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -211,7 +212,8 @@ public class AdminSystemAttributes extends LabbcatServlet {
           response.setContentType("application/json");
           response.setCharacterEncoding("UTF-8");
                
-          JsonReader reader = Json.createReader(request.getReader());
+          JsonReader reader = Json.createReader( // ensure we read as UTF-8
+            new InputStreamReader(request.getInputStream(), "UTF-8"));
           // incoming object:
           JsonObject json = reader.readObject();
 

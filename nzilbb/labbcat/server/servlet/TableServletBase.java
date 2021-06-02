@@ -22,6 +22,7 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -613,7 +614,8 @@ public class TableServletBase extends LabbcatServlet {
                query.append(")");
          
                // read the incoming object
-               JsonReader reader = Json.createReader(request.getReader());
+               JsonReader reader = Json.createReader( // ensure we read as UTF-8
+                 new InputStreamReader(request.getInputStream(), "UTF-8"));
                // incoming object:
                JsonObject json = reader.readObject();
                
@@ -801,7 +803,8 @@ public class TableServletBase extends LabbcatServlet {
 
                   try {
                      // read the incoming object
-                     JsonReader reader = Json.createReader(request.getReader());
+                    JsonReader reader = Json.createReader( // ensure we read as UTF-8
+                      new InputStreamReader(request.getInputStream(), "UTF-8"));
                      // incoming object:
                      JsonObject json = reader.readObject();
                      
