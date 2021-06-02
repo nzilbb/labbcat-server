@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -229,11 +229,20 @@ public class AdminSystemAttributes extends LabbcatServlet {
                 sql.setString(1, json.getString("value"));
                 sql.setString(2, json.getString("attribute"));
                 int rows = sql.executeUpdate();
-                if (rows == 0) { // shouldn't be possible
-                  response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                  writeResponse(
-                    response, failureResult(
-                      request, "Record not updated: {0}", json.getString("attribute")));
+                if (rows == 0) { // no value row yet
+                  // insert one
+                  sql.close();
+                  sql = connection.prepareStatement(
+                    "INSERT INTO system_attribute (value, name) VALUES (?, ?)");
+                  sql.setString(1, json.getString("value"));
+                  sql.setString(2, json.getString("attribute"));
+                  rows = sql.executeUpdate();
+                  if (rows == 0) { // shouldn't be possible
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    writeResponse(
+                      response, failureResult(
+                        request, "Record not updated: {0}", json.getString("attribute")));
+                  }
                 } else {
                   writeResponse(
                     response, successResult(request, json, "Record updated."));
