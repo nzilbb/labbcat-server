@@ -293,34 +293,36 @@ export class TranscriptsComponent implements OnInit {
     deleting = false;
     /** Button action */
     deleteTranscripts(): void {
-        const deletions = [];
-        // delete each selected transcript
-        for (let id of this.selectedIds) {
-            const transcriptId = id;
-            const component = this;
-            deletions.push(new Promise<null>((accept, reject) => {
-                this.labbcatService.labbcat.deleteTranscript(
-                    transcriptId, (nothing, errors, messages) => {
-                        if (errors) errors.forEach(m => this.messageService.error(m));
-                        if (messages) messages.forEach(m => this.messageService.info(m));
-                        if (!errors) {
-                            // remove the transcript from the model
-                            component.transcriptIds = component.transcriptIds.filter(
+        if (confirm("Are you sure you want to delete selected transcript?")) { // TODO i18n
+            const deletions = [];
+            // delete each selected transcript
+            for (let id of this.selectedIds) {
+                const transcriptId = id;
+                const component = this;
+                deletions.push(new Promise<null>((accept, reject) => {
+                    this.labbcatService.labbcat.deleteTranscript(
+                        transcriptId, (nothing, errors, messages) => {
+                            if (errors) errors.forEach(m => this.messageService.error(m));
+                            if (messages) messages.forEach(m => this.messageService.info(m));
+                            if (!errors) {
+                                // remove the transcript from the model
+                                component.transcriptIds = component.transcriptIds.filter(
+                                    p => p != transcriptId);
+                            }
+                            // either way, deselect it
+                            component.selectedIds = component.selectedIds.filter(
                                 p => p != transcriptId);
-                        }
-                        // either way, deselect it
-                        component.selectedIds = component.selectedIds.filter(
-                            p => p != transcriptId);
-                        accept();
-                    });
-            }));
-        } // next selected transcript
-        
-        // once all the requests have finished
-        Promise.all(deletions).then(ids => {
-            // reload the page to fill up removed slots
-            this.listTranscripts();
-        });
+                            accept();
+                        });
+                }));
+            } // next selected transcript
+            
+            // once all the requests have finished
+            Promise.all(deletions).then(ids => {
+                // reload the page to fill up removed slots
+                this.listTranscripts();
+            });
+        } // are you sure?
     }
 
     showGenerateLayerSelection = false;

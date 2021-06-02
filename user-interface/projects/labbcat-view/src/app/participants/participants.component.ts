@@ -317,34 +317,36 @@ export class ParticipantsComponent implements OnInit {
     deleting = false;
     /** Button action */
     deleteParticipants(): void {
-        const deletions = [];
-        // delete each selected participant
-        for (let id of this.selectedIds) {
-            const participantId = id;
-            const component = this;
-            deletions.push(new Promise<null>((accept, reject) => {
-                this.labbcatService.labbcat.deleteParticipant(
-                    participantId, (nothing, errors, messages) => {
-                        if (errors) errors.forEach(m => this.messageService.error(m));
-                        if (messages) messages.forEach(m => this.messageService.info(m));
-                        if (!errors) {
-                            // remove the participant from the model
-                            component.participantIds = component.participantIds.filter(
+        if (confirm("Are you sure you want to delete selected participants?")) { // TODO i18n
+            const deletions = [];
+            // delete each selected participant
+            for (let id of this.selectedIds) {
+                const participantId = id;
+                const component = this;
+                deletions.push(new Promise<null>((accept, reject) => {
+                    this.labbcatService.labbcat.deleteParticipant(
+                        participantId, (nothing, errors, messages) => {
+                            if (errors) errors.forEach(m => this.messageService.error(m));
+                            if (messages) messages.forEach(m => this.messageService.info(m));
+                            if (!errors) {
+                                // remove the participant from the model
+                                component.participantIds = component.participantIds.filter(
+                                    p => p != participantId);
+                            }
+                            // either way, deselect it
+                            component.selectedIds = component.selectedIds.filter(
                                 p => p != participantId);
-                        }
-                        // either way, deselect it
-                        component.selectedIds = component.selectedIds.filter(
-                            p => p != participantId);
-                        accept();
-                    });
-            }));
-        } // next selected participant
-        
-        // once all the requests have finished
-        Promise.all(deletions).then(ids => {
-            // reload the page to fill up removed slots
-            this.listParticipants();
-        });
+                            accept();
+                        });
+                }));
+            } // next selected participant
+            
+            // once all the requests have finished
+            Promise.all(deletions).then(ids => {
+                // reload the page to fill up removed slots
+                this.listParticipants();
+            });
+        } // are you sure?
     }
 
     /** Button action */
