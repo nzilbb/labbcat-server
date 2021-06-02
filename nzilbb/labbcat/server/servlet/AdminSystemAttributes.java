@@ -90,182 +90,182 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredRole("admin")
 public class AdminSystemAttributes extends LabbcatServlet {
 
-   /**
-    * Default constructor.
-    */
-   public AdminSystemAttributes() {
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public AdminSystemAttributes() {
+  } // end of constructor
    
-   /**
-    * GET handler lists all rows. 
-    * <p> The return is JSON encoded, unless the "Accept" request header, or the "Accept"
-    * request parameter, is "text/csv", in which case CSV is returned.
-    */
-   @Override
-   protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+  /**
+   * GET handler lists all rows. 
+   * <p> The return is JSON encoded, unless the "Accept" request header, or the "Accept"
+   * request parameter, is "text/csv", in which case CSV is returned.
+   */
+  @Override
+  protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException {
+    try {
+      Connection connection = newConnection();
       try {
-         Connection connection = newConnection();
-         try {
-            if (!hasAccess(request, response, connection)) {
-               return;
-            } else {
-               response.setContentType("application/json");               
-               response.setCharacterEncoding("UTF-8");
-               try {
-                  PreparedStatement sql = connection.prepareStatement(
-                     "SELECT attribute, type, style, label, description, value"
-                     +" FROM attribute_definition"
-                     +" LEFT OUTER JOIN system_attribute"
-                     +" ON attribute_definition.attribute = system_attribute.name"
-                     +" WHERE class_id = ''"
-                     +" ORDER BY display_order, attribute");
-                  PreparedStatement sqlOptions = connection.prepareStatement(
-                     "SELECT value, description"
-                     +" FROM attribute_option"
-                     +" WHERE class_id = '' AND attribute = ?"
-                     +" ORDER BY value");
-                  ResultSet rs = sql.executeQuery();
-                  JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
-                  startResult(jsonOut, true);
-                  try {
-                     while (rs.next()) {
-                        jsonOut.writeStartObject();
-                        try {
-                           jsonOut.write("attribute", rs.getString("attribute"));
-                           String type = rs.getString("type");
-                           if (type.startsWith("SELECT ")) type = "select";
-                           jsonOut.write("type", type);
-                           jsonOut.write("style", rs.getString("style"));
-                           jsonOut.write("label", rs.getString("label"));
-                           jsonOut.write("description", rs.getString("description"));
-                           // are there options?
-                           PreparedStatement sqlOptionQuery = null;
+        if (!hasAccess(request, response, connection)) {
+          return;
+        } else {
+          response.setContentType("application/json");               
+          response.setCharacterEncoding("UTF-8");
+          try {
+            PreparedStatement sql = connection.prepareStatement(
+              "SELECT attribute, type, style, label, description, value"
+              +" FROM attribute_definition"
+              +" LEFT OUTER JOIN system_attribute"
+              +" ON attribute_definition.attribute = system_attribute.name"
+              +" WHERE class_id = ''"
+              +" ORDER BY display_order, attribute");
+            PreparedStatement sqlOptions = connection.prepareStatement(
+              "SELECT value, description"
+              +" FROM attribute_option"
+              +" WHERE class_id = '' AND attribute = ?"
+              +" ORDER BY value");
+            ResultSet rs = sql.executeQuery();
+            JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
+            startResult(jsonOut, true);
+            try {
+              while (rs.next()) {
+                jsonOut.writeStartObject();
+                try {
+                  jsonOut.write("attribute", rs.getString("attribute"));
+                  String type = rs.getString("type");
+                  if (type.startsWith("SELECT ")) type = "select";
+                  jsonOut.write("type", type);
+                  jsonOut.write("style", rs.getString("style"));
+                  jsonOut.write("label", rs.getString("label"));
+                  jsonOut.write("description", rs.getString("description"));
+                  // are there options?
+                  PreparedStatement sqlOptionQuery = null;
                            
-                           if ("select".equals(rs.getString("type"))) { // predefined options
-                              sqlOptionQuery = sqlOptions;
-                              sqlOptionQuery.setString(1, rs.getString("attribute"));
-                           } else if (rs.getString("type").startsWith("SELECT ")) { // SQL based
-                              sqlOptionQuery = connection.prepareStatement(rs.getString("type"));
-                           }
-                           if (sqlOptionQuery != null) {
-                              ResultSet rsOptions = sqlOptionQuery.executeQuery();
-                              jsonOut.writeStartObject("options");
-                              try {
-                                 while (rsOptions.next()) {
-                                    jsonOut.write(rsOptions.getString(1), rsOptions.getString(2));
-                                 } // next option
-                              } finally {
-                                 rsOptions.close();
-                                 if (sqlOptionQuery != sqlOptions) {
-                                    sqlOptionQuery.close();
-                                 }
-                                 jsonOut.writeEnd(); // Object
-                              }                              
-                           } // options
-                           if (rs.getString("value") != null) {
-                              jsonOut.write("value", rs.getString("value"));
-                           } else {
-                              jsonOut.write("value", "");
-                           }
-                        } finally {
-                           jsonOut.writeEnd(); // Object
-                        }
-                     } // next attribute
-                  } finally {
-                     rs.close();
-                     sql.close();
-                     sqlOptions.close();
+                  if ("select".equals(rs.getString("type"))) { // predefined options
+                    sqlOptionQuery = sqlOptions;
+                    sqlOptionQuery.setString(1, rs.getString("attribute"));
+                  } else if (rs.getString("type").startsWith("SELECT ")) { // SQL based
+                    sqlOptionQuery = connection.prepareStatement(rs.getString("type"));
                   }
-                  endSuccessResult(request, jsonOut, null);
-               } catch(SQLException exception) {
-                  response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                  log("AdminSystemAttributes GET: ERROR: " + exception);
-                  response.setContentType("application/json");
-                  writeResponse(response, failureResult(exception));
-               }
+                  if (sqlOptionQuery != null) {
+                    ResultSet rsOptions = sqlOptionQuery.executeQuery();
+                    jsonOut.writeStartObject("options");
+                    try {
+                      while (rsOptions.next()) {
+                        jsonOut.write(rsOptions.getString(1), rsOptions.getString(2));
+                      } // next option
+                    } finally {
+                      rsOptions.close();
+                      if (sqlOptionQuery != sqlOptions) {
+                        sqlOptionQuery.close();
+                      }
+                      jsonOut.writeEnd(); // Object
+                    }                              
+                  } // options
+                  if (rs.getString("value") != null) {
+                    jsonOut.write("value", rs.getString("value"));
+                  } else {
+                    jsonOut.write("value", "");
+                  }
+                } finally {
+                  jsonOut.writeEnd(); // Object
+                }
+              } // next attribute
+            } finally {
+              rs.close();
+              sql.close();
+              sqlOptions.close();
             }
-         } finally {
-            connection.close();
-         }
-      } catch(SQLException exception) {
-         log("AdminSystemAttributes GET: Couldn't connect to database: " + exception);
-         response.setContentType("application/json");
-         response.setCharacterEncoding("UTF-8");
-         writeResponse(response, failureResult(exception));
-      }      
-   }
+            endSuccessResult(request, jsonOut, null);
+          } catch(SQLException exception) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log("AdminSystemAttributes GET: ERROR: " + exception);
+            response.setContentType("application/json");
+            writeResponse(response, failureResult(exception));
+          }
+        }
+      } finally {
+        connection.close();
+      }
+    } catch(SQLException exception) {
+      log("AdminSystemAttributes GET: Couldn't connect to database: " + exception);
+      response.setContentType("application/json");
+      response.setCharacterEncoding("UTF-8");
+      writeResponse(response, failureResult(exception));
+    }      
+  }
 
-   /**
-    * PUT handler - update an existing row.
-    */
-   @Override
-   protected void doPut(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+  /**
+   * PUT handler - update an existing row.
+   */
+  @Override
+  protected void doPut(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException {
+    try {
+      Connection connection = newConnection();
       try {
-         Connection connection = newConnection();
-         try {
-            if (!hasAccess(request, response, connection)) {
-               return;
-            } else {
-               response.setContentType("application/json");
-               response.setCharacterEncoding("UTF-8");
+        if (!hasAccess(request, response, connection)) {
+          return;
+        } else {
+          response.setContentType("application/json");
+          response.setCharacterEncoding("UTF-8");
                
-               JsonReader reader = Json.createReader(request.getReader());
-               // incoming object:
-               JsonObject json = reader.readObject();
+          JsonReader reader = Json.createReader(request.getReader());
+          // incoming object:
+          JsonObject json = reader.readObject();
 
-               // check it exists and isn't readonly
-               PreparedStatement sqlCheck = connection.prepareStatement(
-                  "SELECT type FROM attribute_definition"
-                  +" WHERE attribute = ? AND class_id = ''");
-               sqlCheck.setString(1, json.getString("attribute"));
-               ResultSet rsCheck = sqlCheck.executeQuery();
-               try {
-                  if (rsCheck.next()) { // readonly
-                     if (!"readonly".equals(rsCheck.getString("type"))) { // not readonly
-                        PreparedStatement sql = connection.prepareStatement(
-                           "UPDATE system_attribute SET value = ? WHERE name = ?");
-                        sql.setString(1, json.getString("value"));
-                        sql.setString(2, json.getString("attribute"));
-                        int rows = sql.executeUpdate();
-                        if (rows == 0) { // shouldn't be possible
-                           response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                           writeResponse(
-                              response, failureResult(
-                                 request, "Record not updated: {0}", json.getString("attribute")));
-                        } else {
-                           writeResponse(
-                              response, successResult(request, json, "Record updated."));
-                        }
-                        sql.close();
-                     } else { // readonly
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        writeResponse(
-                           response, failureResult(
-                              request, "Read-only record: {0}", json.getString("attribute")));
-                     }
-                  } else { // not found
-                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                     writeResponse(
-                        response, failureResult(
-                           request, "Record not found: {0}", json.getString("attribute")));
-                  }
-               } finally {
-                  rsCheck.close();
-                  sqlCheck.close();
-               }
+          // check it exists and isn't readonly
+          PreparedStatement sqlCheck = connection.prepareStatement(
+            "SELECT type FROM attribute_definition"
+            +" WHERE attribute = ? AND class_id = ''");
+          sqlCheck.setString(1, json.getString("attribute"));
+          ResultSet rsCheck = sqlCheck.executeQuery();
+          try {
+            if (rsCheck.next()) { // readonly
+              if (!"readonly".equals(rsCheck.getString("type"))) { // not readonly
+                PreparedStatement sql = connection.prepareStatement(
+                  "UPDATE system_attribute SET value = ? WHERE name = ?");
+                sql.setString(1, json.getString("value"));
+                sql.setString(2, json.getString("attribute"));
+                int rows = sql.executeUpdate();
+                if (rows == 0) { // shouldn't be possible
+                  response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                  writeResponse(
+                    response, failureResult(
+                      request, "Record not updated: {0}", json.getString("attribute")));
+                } else {
+                  writeResponse(
+                    response, successResult(request, json, "Record updated."));
+                }
+                sql.close();
+              } else { // readonly
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                writeResponse(
+                  response, failureResult(
+                    request, "Read-only record: {0}", json.getString("attribute")));
+              }
+            } else { // not found
+              response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+              writeResponse(
+                response, failureResult(
+                  request, "Record not found: {0}", json.getString("attribute")));
             }
-         } finally {
-            connection.close();
-         }
-      } catch(SQLException exception) {
-         log("TableServletBase PUT: Couldn't connect to database: " + exception);
-         response.setContentType("application/json");
-         response.setCharacterEncoding("UTF-8");
-         writeResponse(response, failureResult(exception));
-      }      
-   }
+          } finally {
+            rsCheck.close();
+            sqlCheck.close();
+          }
+        }
+      } finally {
+        connection.close();
+      }
+    } catch(SQLException exception) {
+      log("TableServletBase PUT: Couldn't connect to database: " + exception);
+      response.setContentType("application/json");
+      response.setCharacterEncoding("UTF-8");
+      writeResponse(response, failureResult(exception));
+    }      
+  }
    
-   private static final long serialVersionUID = 1;
+  private static final long serialVersionUID = 1;
 }
