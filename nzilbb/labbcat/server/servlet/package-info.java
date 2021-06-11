@@ -45,7 +45,7 @@
  *   or a simple type.</dd>
  * </dl>
  * <p> e.g. the response to 
- * <tt>http://localhost:8080/labbcat/api/store/getLayer?id=transcript</tt>
+ * <tt>http://localhost:8080/labbcat/api/store/getLayer?id=word</tt>
  *  might be:
  * <pre>{
  *    "title":"LaBB-CAT",
@@ -54,9 +54,9 @@
  *    "errors":[],
  *    "messages":[],
  *    "model":{
- *        "id":"transcript",
+ *        "id":"word",
  *        "parentId":"turns",
- *        "description":"Original transcription",
+ *        "description":"Word tokens",
  *        "alignment":2,
  *        "peers":true,
  *        "peersOverlap":false,
