@@ -277,7 +277,7 @@ import org.xml.sax.*;
               <p> The expression language is currently not well defined, but expressions such as the following can be used:
                 <ul>
                   <li><code>id MATCHES 'Ada.+'</code></li>
-                  <li><code>'Robert' IN labels('who')</code></li>
+                  <li><code>'Robert' IN labels('participant')</code></li>
                   <li><code>first('corpus').label IN ('CC', 'IA', 'MU')</code></li>
                   <li><code>first('episode').label = 'Ada Aitcheson'</code></li>
                   <li><code>first('transcript_scribe').label = 'Robert'</code></li>
@@ -288,9 +288,9 @@ import org.xml.sax.*;
                   <li><code>'bell' IN labels('noise')</code></li>
                   <li><code>all('transcript_languages').length gt; 1</code></li>
                   <li><code>all('participant_languages').length gt; 1</code></li>
-                  <li><code>all('transcript').length gt; 100</code></li>
+                  <li><code>all('word').length gt; 100</code></li>
                   <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-                  <li><code>id NOT MATCHES 'Ada.+' AND first('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+                  <li><code>id NOT MATCHES 'Ada.+' AND first('corpus').label = 'CC' AND 'Robert' IN labels('participant')</code></li>
             </ul></dd>
             <dt><span class="returnLabel">Returns:</span></dt>
             <dd>The number of matching transcripts.</dd>
@@ -314,7 +314,7 @@ import org.xml.sax.*;
               <p> The expression language is currently not well defined, but expressions such as the following can be used:
                 <ul>
                   <li><code>id MATCHES 'Ada.+'</code></li>
-                  <li><code>'Robert' IN labels('who')</code></li>
+                  <li><code>'Robert' IN labels('participant')</code></li>
                   <li><code>first('corpus').label IN ('CC', 'IA', 'MU')</code></li>
                   <li><code>first('episode').label = 'Ada Aitcheson'</code></li>
                   <li><code>first('transcript_scribe').label = 'Robert'</code></li>
@@ -327,7 +327,7 @@ import org.xml.sax.*;
                   <li><code>all('participant_languages').length gt; 1</code></li>
                   <li><code>all('word').length gt; 100</code></li>
                   <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-                  <li><code>id NOT MATCHES 'Ada.+' AND first('corpus').label = 'CC' AND 'Robert' IN labels('who')</code></li>
+                  <li><code>id NOT MATCHES 'Ada.+' AND first('corpus').label = 'CC' AND 'Robert' IN labels('participant')</code></li>
             </ul></dd>
             <dd><code>pageLength</code> (Optional) - The maximum number of IDs to return, or absent to return all.</dd>
             <dd><code>pageNumber</code> (Optional) - The zero-based page number to return, or absent to return the first page.</dd>
@@ -352,8 +352,8 @@ import org.xml.sax.*;
                 <ul>
                   <li><code>id = 'ew_0_456'</code></li>
                   <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
-                  <li><code>layer.id = 'orthography' AND first('who').label = 'Robert' AND
-                      first('utterances').start.offset = 12.345</code></li> 
+                  <li><code>layer.id = 'orthography' AND first('participant').label = 'Robert' AND
+                      first('utterance').start.offset = 12.345</code></li> 
                   <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
                       &gt; 10.5</code></li> 
                 </ul>
@@ -378,7 +378,7 @@ import org.xml.sax.*;
                 <ul>
                   <li><code>id = 'ew_0_456'</code></li>
                   <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
-                  <li><code>first('who').label = 'Robert' AND first('utterances').start.offset = 12.345</code></li>
+                  <li><code>first('participant').label = 'Robert' AND first('utterance').start.offset = 12.345</code></li>
                   <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
                       &gt; 10.5</code></li> 
                   <li><code>previous.id = 'ew_0_456'</code></li>
@@ -522,8 +522,8 @@ import org.xml.sax.*;
                 <ul>
                   <li><code>id = 'ew_0_456'</code></li>
                   <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
-                  <li><code>layer.id = 'orthography' AND first('who').label = 'Robert' AND
-                      first('utterances').start.offset = 12.345</code></li> 
+                  <li><code>layer.id = 'orthography' AND first('participant').label = 'Robert' AND
+                      first('utterance').start.offset = 12.345</code></li> 
                   <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
                       &gt; 10.5</code></li> 
                 </ul>
@@ -548,7 +548,7 @@ import org.xml.sax.*;
                 <ul>
                   <li><code>id = 'ew_0_456'</code></li>
                   <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
-                  <li><code>first('who').label = 'Robert' AND first('utterances').start.offset = 12.345</code></li>
+                  <li><code>first('participant').label = 'Robert' AND first('utterance').start.offset = 12.345</code></li>
                   <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
                       &gt; 10.5</code></li> 
                   <li><code>previous.id = 'ew_0_456'</code></li>
