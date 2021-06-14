@@ -4366,9 +4366,12 @@ public class SqlGraphStore implements GraphStore {
                         }
                      }
                   } catch(ParseException parseX) {
-                     throw new StoreException(
+                    // if it's for destroying, we don't care
+                    if (change.getObject().getChange() != Change.Operation.Destroy) {
+                      throw new StoreException(
                         "Could not parse annotation ID " + change.getObject().getId()
                         + " : " + change.getObject().toJsonString() + " ("+change.getObject().getChange()+" - "+change.getOperation()+")");
+                    }
                   }
                } // not a participant annotation
             } else {
@@ -5729,8 +5732,7 @@ public class SqlGraphStore implements GraphStore {
                sqlDeleteAnnotation.setLong(2, annotationId);
                sqlDeleteAnnotation.executeUpdate();
             } catch(ParseException exception) {
-               System.err.println("Error parsing ID for "+annotation.getId());
-               throw new StoreException("Error parsing ID for "+annotation.getId(), exception);
+              // ignore the error - if it hasn't got a valid ID, it's not in the DB anyway
             }
             break;
          } // Destroy
