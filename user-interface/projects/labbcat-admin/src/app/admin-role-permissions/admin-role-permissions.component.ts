@@ -55,7 +55,7 @@ export class AdminRolePermissionsComponent extends AdminComponent implements OnI
             this.attributes = [];
             for (let layer of layers) {
                 if (layer.id == "corpus" // corpus
-                    || (layer.parentId == "graph" // or transcript tag
+                    || (layer.parentId == "transcript" // or transcript tag
                         && layer.alignment == 0
                         && layer.saturated
                         && layer.id != "transcript_type" // (not transcript_type TODO fix this)
