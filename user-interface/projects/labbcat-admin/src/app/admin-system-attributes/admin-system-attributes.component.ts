@@ -46,7 +46,7 @@ export class AdminSystemAttributesComponent extends AdminComponent implements On
     updateAttribute(attribute: SystemAttribute) {
         this.updating++;
         this.labbcatService.labbcat.updateSystemAttribute(
-            attribute.attribute, attribute.value,
+            attribute.attribute, ""+attribute.value, // ensure value sent as a string
             (attribute, errors, messages) => {
                 this.updating--;
                 if (errors) errors.forEach(m => this.messageService.error(m));
