@@ -1304,7 +1304,7 @@ public class SqlGraphStore implements GraphStore {
             + " ON access_attribute.layer = role_permission.attribute_name" 
             + " AND access_attribute.label REGEXP role_permission.value_pattern"
             + " AND role_permission.entity REGEXP CONCAT('.*', ? , '.*')" // what they can access
-            + " INNER JOIN transcript ON access_attribute.ag_id = transcript.transcript_id" 
+            + " INNER JOIN transcript ON access_attribute.ag_id = transcript.ag_id" 
             + " WHERE user_id = ?"
             + " AND transcript.transcript_id = ?");
          sqlAccess.setString(1, entity);
