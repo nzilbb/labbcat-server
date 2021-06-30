@@ -453,7 +453,42 @@ import org.xml.sax.*;
             <dd><code>id</code> - The given transcript ID.</dd>
             <dd><code>layerIds</code> - The IDs of the layers to load, passed by specifying the <code>layerIds</code> multiple times, once for each layer, or absent if only transcript data is required.</dd>
             <dt><span class="returnLabel">Returns:</span></dt>
-            <dd>The identified transcript.</dd>
+            <dd>The identified transcript, encoded as JSON.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getFragment(java.lang.String,java.lang.String,java.lang.String[])">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getFragment</h4>
+          <div class="block">Gets a fragment of a transcript, given its ID and the ID of an annotation in it that defines the desired fragment, and containing only the given layers.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the transcript.</dd>
+            <dd><code>annotationId</code> - The ID of an annotation that defines the bounds of the fragment.</dd>
+            <dd><code>layerIds</code> - The IDs of the layers to load, passed by specifying the <code>layerIds</code> multiple times, once for each layer, or absent if only transcript data is required.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The identified transcript fragment, encoded as JSON.</dd>
+          </dl>
+        </li>
+      </ul>
+      <a id="getFragment(java.lang.String,double,double,java.lang.String[])">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/getFragment</h4>
+          <div class="block">Gets a fragment of a transcript, given its ID and the start/end offsets that define the desired fragment, and containing only the given layers.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>id</code> - The ID of the transcript.</dd>
+            <dd><code>start</code> - The start offset of the fragment.</dd>
+            <dd><code>end</code> - The end offset of the fragment.</dd>
+            <dd><code>layerIds</code> - The IDs of the layers to load, passed by specifying the <code>layerIds</code> multiple times, once for each layer, or absent if only transcript data is required.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>The identified transcript fragment, encoded as JSON.</dd>
           </dl>
         </li>
       </ul>
@@ -786,6 +821,8 @@ public class StoreQuery extends LabbcatServlet {
                  // support deprecated name
                  || pathInfo.endsWith("getgraph")) {
         json = getTranscript(request, response, store);
+      } else if (pathInfo.endsWith("getfragment")) {
+        json = getFragment(request, response, store);
       } else if (pathInfo.endsWith("getmedia")) {
         json = getMedia(request, response, store);
       } else if (pathInfo.endsWith("getepisodedocuments")) {
@@ -1234,6 +1271,53 @@ public class StoreQuery extends LabbcatServlet {
     return successResult(request, store.getTranscript(id, layerIds), null);
   }
 
+  /**
+   * Implementation of {@link nzilbb.ag.GraphStoreQuery#getFragment(String,String,String[])}
+   * and {@link nzilbb.ag.GraphStoreQuery#getFragment(String,double,double,String[])}
+   * @param request The HTTP request.
+   * @param request The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject getFragment(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    
+    Vector<String> errors = new Vector<String>();
+    String id = request.getParameter("id");
+    if (id == null) errors.add(localize(request, "No ID specified."));
+    String[] layerIds = request.getParameterValues("layerIds");
+    if (layerIds == null) layerIds = new String[0];
+    String annotationId = request.getParameter("annotationId");
+    String startParameter = request.getParameter("start");
+    Double start = null;
+    if (startParameter != null) {
+      try {
+        start = Double.valueOf(startParameter);
+      } catch(NumberFormatException x) {
+        errors.add(localize(request, "Invalid start offset: {0}", x.getMessage()));
+      }
+    }
+    String endParameter = request.getParameter("end");
+    Double end = null;
+    if (endParameter != null) {
+      try {
+        end = Double.valueOf(endParameter);
+      } catch(NumberFormatException x) {
+        errors.add(localize(request, "Invalid end offset: {0}", x.getMessage()));
+      }
+    }
+    if (annotationId == null && (start == null || end == null)) {
+      errors.add(localize(request, "Annotation ID not specified.")); // TODO i18n
+    }
+    
+    if (errors.size() > 0) return failureResult(errors);
+    if (annotationId != null) {
+      return successResult(request, store.getFragment(id, annotationId, layerIds), null);
+    } else {
+      return successResult(request, store.getFragment(id, start, end, layerIds), null);
+    }
+  }
   // TODO getFragmentSeries
    
   /**
