@@ -172,13 +172,28 @@
                             selected="{{emuLayers}}"></lib-layer-checkboxes>
     </fieldset>
   </div>
+  <div id="dictionary" class="controls">
+    <lib-button (press)="dictionary();"
+                img="book.svg" icon="📕"
+                i18n-label label="Dictionary"></lib-button>
+    <select name="layer_id"
+            i18n-title title="Layer for definitions of dictionary entries">
+      <option disabled i18n selected>Definition Layer</option>
+      <option *ngFor="let layer of wordLayers"
+              value="{{layer.layer_id}}">
+        <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
+        <ng-container *ngIf="layer.id == 'orthography'" i18n>[word list only]</ng-container>
+      </option>
+    </select>
+  </div>
   <div id="serialize" class="controls">
     <lib-button (press)="serialize();"
                 img="{{serializeImg}}" icon="📦"
                 i18n-label label="Utterance Export"></lib-button>
     <select #mimetype name="mimetype"
             [(ngModel)]="mimeType"
-            (change)="onChangeMimeType()">
+            (change)="onChangeMimeType()"
+            i18n-title title="Export format">
       <option *ngFor="let serializer of serializers"
               value="{{serializer.mimeType}}">{{serializer.name}}</option>
     </select>

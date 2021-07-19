@@ -15,9 +15,9 @@ import { MessageService, LabbcatService } from 'labbcat-common';
   styleUrls: ['./matches.component.css']
 })
 export class MatchesComponent implements OnInit { 
-    @ViewChild("form") form;
-    @ViewChild("todo") todo;
-    @ViewChild("generate_layer") generateLayer;
+    @ViewChild('form', {static: false}) form: ElementRef;
+    @ViewChild('todo', {static: false}) todo: ElementRef;
+    @ViewChild('generate_layer', {static: false}) generateLayer: ElementRef;
     name: string;
     status: string;
     totalMatches: number;
@@ -39,6 +39,7 @@ export class MatchesComponent implements OnInit {
     selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "word", "segment" ];
+    wordLayers = [];
     schema: any;
     htkLayer: Layer; // TODO handle IUtteranceDataGenerator annotators better
     baseUrl: string;
@@ -141,7 +142,10 @@ export class MatchesComponent implements OnInit {
                 const layer = schema.layers[layerId] as Layer;
                 if (layer.layer_manager_id == "HTK") {
                     this.htkLayer = layer;
-                    break; // TODO looks for other layers that are generable from here
+                }
+                if (layer.parentId == schema.wordLayerId
+                    && layer.alignment == 0) {
+                    this.wordLayers.push(layer);
                 }
             }
         });
@@ -152,7 +156,7 @@ export class MatchesComponent implements OnInit {
           this.emuWebApp = attribute && attribute["value"] == "1";
         });
     }
-    
+
     moreMatches(): void {
         this.moreLoading = true;
         this.pageNumber++;
@@ -227,6 +231,12 @@ export class MatchesComponent implements OnInit {
             this.baseUrl+"EMU-webApp/app?autoConnect=true&serverUrl="
                 +encodeURIComponent(serverUrl),
             "EMU-webApp").focus();
+    }
+
+    dictionary(): void {
+        this.todo.nativeElement.value = "dictionary";
+        this.form.nativeElement.action = this.baseUrl + "results";
+        this.form.nativeElement.submit();
     }
 
     onChangeMimeType(): void {
