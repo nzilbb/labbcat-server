@@ -265,8 +265,13 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
                } else {
                   // everything else is routed to the annotator...
                   try {
+                     String uri = request.getRequestURI();
+                     // the request's URI doesn't include the query string, so add it if necessary
+                     if (request.getQueryString() != null) {
+                       uri += "?" + request.getQueryString();
+                     }
                      stream = new RequestRouter(annotator).request(
-                        request.getMethod(), request.getRequestURI(), request.getHeader("Content-Type"),
+                        request.getMethod(), uri, request.getHeader("Content-Type"),
                         request.getInputStream());
                      echoContentType(request, response);
                   } catch(RequestException exception) {

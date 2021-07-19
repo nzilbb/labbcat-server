@@ -64,7 +64,7 @@ import org.apache.commons.fileupload.servlet.*;
 /**
  * Server-side implementation of 'ext' web-apps.
  * <p> This servlet provides access to an annotator's 'ext' web-app, if there is one.
- * <p> If there's an 'ax' web-app, the first request should be to a path structured: <br>
+ * <p> If there's an 'ext' web-app, the first request should be to a path structured: <br>
  * <tt>/api/admin/annotator/ext/<var>annotatorId</var>/</tt>
  * <p> The resulting HTML document will then implement the web-app by requesting resources
  * as required.
@@ -149,8 +149,9 @@ public class AdminAnnotatorExtWebApp extends LabbcatServlet {
             }            
             String annotatorId = path.group(1);
             String resource = path.group(2);
+            String query = request.getQueryString();
             if (resource.equals("/")) resource = "/index.html";
-            log("annotatorId " + annotatorId + " resource " + resource);
+            log("annotatorId " + annotatorId + " resource " + resource + " URI " + request.getRequestURI());
 
             // get annotator descriptor - the same instance as last time if possible
             AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
@@ -211,8 +212,13 @@ public class AdminAnnotatorExtWebApp extends LabbcatServlet {
                } else {
                   // everything else is routed to the annotator...
                   try {
+                     String uri = request.getRequestURI();
+                     // the request's URI doesn't include the query string, so add it if necessary
+                     if (request.getQueryString() != null) {
+                       uri += "?" + request.getQueryString();
+                     }
                      stream = new RequestRouter(annotator).request(
-                        request.getMethod(), request.getRequestURI(), request.getHeader("Content-Type"),
+                        request.getMethod(), uri, request.getHeader("Content-Type"),
                         request.getInputStream());
                      echoContentType(request, response);
                   } catch(RequestException exception) {
