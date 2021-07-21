@@ -74,17 +74,17 @@ import org.apache.commons.fileupload.servlet.*;
  * 'task' web-apps.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet({"/admin/annotator/ext/*", "/api/admin/annotator/ext/*"})
-@RequiredRole("admin")
-public class AdminAnnotatorExtWebApp extends LabbcatServlet {
-
+@WebServlet({"/edit/annotator/ext/*", "/api/edit/annotator/ext/*"})
+@RequiredRole("edit")
+public class EditAnnotatorExtWebApp extends LabbcatServlet {
+  
    HashMap<String,AnnotatorDescriptor> activeAnnotators
    = new HashMap<String,AnnotatorDescriptor>();
 
    /**
     * Default constructor.
     */
-   public AdminAnnotatorExtWebApp() {
+   public EditAnnotatorExtWebApp() {
    } // end of constructor
    
    /** 
@@ -273,4 +273,4 @@ public class AdminAnnotatorExtWebApp extends LabbcatServlet {
    } // end of echoContentType()
 
    private static final long serialVersionUID = 1;
-} // end of class AdminAnnotatorExtWebApp
+} // end of class EditAnnotatorExtWebApp
