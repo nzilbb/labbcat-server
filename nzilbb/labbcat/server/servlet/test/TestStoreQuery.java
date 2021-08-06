@@ -65,7 +65,7 @@ public class TestStoreQuery
       }
    }
    
-   @Test public void store() throws Exception {
+  @Test public void store() throws Exception { // TODO test getTranscript, getFragment
       
       String id = l.getId();
       assertEquals("getId: ID matches the url",
