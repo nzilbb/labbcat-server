@@ -61,7 +61,7 @@ import { PaginationComponent } from './pagination/pagination.component';
     ]
 })
 export class LabbcatCommonModule {
-    public static forRoot(environment: any): ModuleWithProviders {
+    public static forRoot(environment: any): ModuleWithProviders<LabbcatCommonModule> {
         return {
             ngModule: LabbcatCommonModule,
             providers: [

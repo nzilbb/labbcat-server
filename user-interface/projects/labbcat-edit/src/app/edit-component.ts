@@ -1,8 +1,9 @@
-import { HostListener } from '@angular/core';
+import { HostListener, Directive } from '@angular/core';
 
 import { MessageService, LabbcatService, ComponentCanDeactivate } from 'labbcat-common';
 
 // Base class for components that implement any kind of CRUD administration operations
+@Directive()
 export class EditComponent implements ComponentCanDeactivate {
     changed = false;
     
