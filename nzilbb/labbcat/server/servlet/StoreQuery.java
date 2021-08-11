@@ -24,6 +24,7 @@ package nzilbb.labbcat.server.servlet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
@@ -33,6 +34,7 @@ import java.util.Collection;
 import java.util.Vector;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 import javax.json.JsonWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -44,6 +46,12 @@ import javax.xml.xpath.*;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.serialize.SerializationDescriptor;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.ag.serialize.SerializerNotConfiguredException;
+import nzilbb.ag.serialize.json.JSONSerialization;
+import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
+import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.db.*;
 import nzilbb.util.IO;
 import org.w3c.dom.*;
@@ -1268,7 +1276,25 @@ public class StoreQuery extends LabbcatServlet {
     String[] layerIds = request.getParameterValues("layerIds");
     if (layerIds == null) layerIds = new String[0];
     if (errors.size() > 0) return failureResult(errors);
-    return successResult(request, store.getTranscript(id, layerIds), null);
+
+    Graph transcript = store.getTranscript(id, layerIds);
+    // serialize with JSON serialization
+    JSONSerialization s = new JSONSerialization();
+    s.configure(s.configure(new ParameterSet(), transcript.getSchema()), transcript.getSchema());
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    try {
+      s.serialize(Utility.OneGraphSpliterator(transcript), null,
+                  (stream) -> streams.add(stream),
+                  (warning) -> System.out.println(warning),
+                  (exception) -> exceptions.add(exception));
+      JsonReader reader = Json.createReader(
+        new InputStreamReader(streams.elementAt(0).getStream(), "UTF-8"));
+      JsonObject json = reader.readObject();    
+      return successResult(request, json, null);
+    } catch(SerializerNotConfiguredException exception) { // shouldn't happen
+      throw new StoreException(exception);
+    }
   }
 
   /**
@@ -1312,11 +1338,27 @@ public class StoreQuery extends LabbcatServlet {
     }
     
     if (errors.size() > 0) return failureResult(errors);
-    if (annotationId != null) {
-      return successResult(request, store.getFragment(id, annotationId, layerIds), null);
-    } else {
-      return successResult(request, store.getFragment(id, start, end, layerIds), null);
+    Graph fragment = annotationId != null?
+      store.getFragment(id, annotationId, layerIds):
+      store.getFragment(id, start, end, layerIds);
+    // serialize with JSON serialization
+    JSONSerialization s = new JSONSerialization();
+    s.configure(s.configure(new ParameterSet(), fragment.getSchema()), fragment.getSchema());
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    try {
+      s.serialize(Utility.OneGraphSpliterator(fragment), null,
+                  (stream) -> streams.add(stream),
+                  (warning) -> System.out.println(warning),
+                  (exception) -> exceptions.add(exception));
+      JsonReader reader = Json.createReader(
+        new InputStreamReader(streams.elementAt(0).getStream(), "UTF-8"));
+      JsonObject json = reader.readObject();    
+      return successResult(request, json, null);
+    } catch(SerializerNotConfiguredException exception) { // shouldn't happen
+      throw new StoreException(exception);
     }
+
   }
   // TODO getFragmentSeries
    
