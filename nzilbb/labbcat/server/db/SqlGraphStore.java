@@ -66,6 +66,7 @@ import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.IconHelper;
 import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.ag.util.LayerHierarchyTraversal;
+import nzilbb.ag.util.Normalizer;
 import nzilbb.ag.util.Validator;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
@@ -4141,13 +4142,19 @@ public class SqlGraphStore implements GraphStore {
    * @throws GraphNotFoundException If the transcript was not found in the store.
    */
   public boolean saveTranscript(Graph transcript) 
-    throws StoreException, PermissionException, GraphNotFoundException
-  {
+    throws StoreException, PermissionException, GraphNotFoundException {
+    if (graph.getChange() != Change.Operation.NoChange) return false;
+      
     // Timers timers = new Timers();
     // timers.start("saveGraph");
     Schema schema = getSchema();
     Graph graph = transcript;
     try {
+      // normalize
+      new Normalizer()
+        .setMinimumTurnPauseLength(0.5)
+        .transform(transcript);
+      
       // validate the graph before saving it
       // TODO ensure all layers are loaded before validation
       Validator v = new Validator();
@@ -4205,13 +4212,9 @@ public class SqlGraphStore implements GraphStore {
             messages.append("\n");
           }
           System.err.println("Invalid graph: " + graph.getId() + "\n" + messages);
-          if (graph.getChange() == Change.Operation.Create) {
-            throw new StoreException("Invalid graph: " + graph.getId() + "\n" + messages);
-          } else {
-            System.err.println("Saving anyway..."); // TODO don't!
-          }
-        } else {
-          System.err.println("Graph " + graph.getId() + " OK");
+          throw new StoreException("Invalid graph: " + graph.getId() + "\n" + messages);
+          // } else {
+          // System.err.println("Graph " + graph.getId() + " OK");
         }
       }
 
