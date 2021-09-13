@@ -4143,7 +4143,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public boolean saveTranscript(Graph transcript) 
     throws StoreException, PermissionException, GraphNotFoundException {
-    if (graph.getChange() != Change.Operation.NoChange) return false;
+    if (transcript.getChange() == Change.Operation.NoChange) return false;
       
     // Timers timers = new Timers();
     // timers.start("saveGraph");
