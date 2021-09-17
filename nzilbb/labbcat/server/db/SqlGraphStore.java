@@ -1723,7 +1723,7 @@ public class SqlGraphStore implements GraphStore {
         +" WHERE transcript.transcript_id = ?"+userWhereClauseGraph(true, "transcript"));
       sql.setString(1, id);
       ResultSet rs = sql.executeQuery();
-      if (!rs.next()) { // graph not found - maybe we've been given a name with a mismatching extension?
+      if (!rs.next()) { // graph not found - maybe we've been given a name without the extension?
         rs.close();
         sql.close();
         sql = getConnection().prepareStatement(
@@ -1733,33 +1733,50 @@ public class SqlGraphStore implements GraphStore {
           +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
           +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
           +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
-          +" WHERE transcript.transcript_id REGEXP ?"+userWhereClauseGraph(true, "transcript"));
-        sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","")
+          +" WHERE transcript.transcript_id REGEXP ?"
+          +userWhereClauseGraph(true, "transcript"));
+        sql.setString(1, "^" + id
                       .replace("(","\\(").replace(")","\\)") // parentheses are literal
                       + "\\.[^.]+$");
         rs = sql.executeQuery();
-        if (!rs.next()) { // graph not found - maybe we've been given an ag_id?
-          try {
-            rs.close();
-            sql.close();
-            int iAgId = Integer.parseInt(
-              id
-              // (could be from a MatchId - i.e. prefixed by "g_")
-              .replaceAll("^g_","")); 
-            sql = getConnection().prepareStatement(
-              "SELECT transcript.*, COALESCE(transcript_family.name,'') AS series,"
-              +" COALESCE(transcript_type.transcript_type,'') AS transcript_type, divergent.label AS divergent"
-              +" FROM transcript"
-              +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
-              +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
-              +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
-              +" WHERE transcript.ag_id = ?"+userWhereClauseGraph(true, "transcript"));
-            sql.setInt(1, iAgId);
-            rs = sql.executeQuery();
-            if (!rs.next()) throw new GraphNotFoundException(id);
-		  
-          } catch(NumberFormatException exception) {
-            throw new GraphNotFoundException(id);
+        if (!rs.next()) { // graph not found - maybe we've been given a name with a mismatching extension?
+          rs.close();
+          sql.close();
+          sql = getConnection().prepareStatement(
+            "SELECT transcript.*, COALESCE(transcript_family.name,'') AS series,"
+            +" COALESCE(transcript_type.transcript_type,'') AS transcript_type, divergent.label AS divergent"
+            +" FROM transcript"
+            +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
+            +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
+            +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
+            +" WHERE transcript.transcript_id REGEXP ?"
+            +userWhereClauseGraph(true, "transcript"));
+          sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","")
+                        .replace("(","\\(").replace(")","\\)") // parentheses are literal
+                        + "\\.[^.]+$");
+          rs = sql.executeQuery();
+          if (!rs.next()) { // graph not found - maybe we've been given an ag_id?
+            try {
+              rs.close();
+              sql.close();
+              int iAgId = Integer.parseInt(
+                id
+                // (could be from a MatchId - i.e. prefixed by "g_")
+                .replaceAll("^g_","")); 
+              sql = getConnection().prepareStatement(
+                "SELECT transcript.*, COALESCE(transcript_family.name,'') AS series,"
+                +" COALESCE(transcript_type.transcript_type,'') AS transcript_type, divergent.label AS divergent"
+                +" FROM transcript"
+                +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
+                +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
+                +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
+                +" WHERE transcript.ag_id = ?"+userWhereClauseGraph(true, "transcript"));
+              sql.setInt(1, iAgId);
+              rs = sql.executeQuery();
+              if (!rs.next()) throw new GraphNotFoundException(id);
+            } catch(NumberFormatException exception) {
+              throw new GraphNotFoundException(id);
+            }
           }
         }
       }
