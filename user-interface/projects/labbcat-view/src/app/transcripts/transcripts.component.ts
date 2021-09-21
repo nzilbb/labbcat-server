@@ -271,6 +271,9 @@ export class TranscriptsComponent implements OnInit {
 	                            });
                             } // small number of pages
                         } // next page link
+
+                        // revert to 20 per page for next time (in case we listed all this time)
+                        this.pageLength = 20;
                     });
             });
     }
@@ -287,6 +290,18 @@ export class TranscriptsComponent implements OnInit {
 
     goToPage(p: number): void {
         this.p = p;
+        this.listTranscripts();
+    }
+    
+    listAll(): void {
+        if (this.matchCount > 200) {
+            if (!confirm("There are " + this.matchCount + " matches." // TODO i18n
+                         +"\nAre you sure you want to list them all?")) {
+                return;
+            }
+        }
+        this.pageLength = this.matchCount;
+        this.p = 1;
         this.listTranscripts();
     }
     

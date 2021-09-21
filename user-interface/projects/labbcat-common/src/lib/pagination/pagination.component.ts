@@ -10,21 +10,29 @@ export class PaginationComponent implements OnInit {
     @Input() currentPage: number;
     @Input() pageLinks: string[];
     @Output() goToPage = new EventEmitter<number>();
-    showAll = false;
+    @Output() showAllPages = new EventEmitter<number>();
+    showAllLinks = false;
     
     constructor() { }
     
     ngOnInit(): void {
-        this.showAll = this.currentPage > 4;
+        this.showAllLinks = this.currentPage > 4;
     }
     
     go(page: number): boolean {
         this.goToPage.emit(page);
+        this.currentPage = page;
+        if (page > 4) this.showAllLinks = true;
         return false;
     }
     
-    toggleShowAll(): boolean {
-        this.showAll = !this.showAll;
+    all(): boolean {
+        this.showAllPages.emit();
+        return false;
+    }
+    
+    toggleShowAllLinks(): boolean {
+        this.showAllLinks = !this.showAllLinks;
         return false;
     }
     

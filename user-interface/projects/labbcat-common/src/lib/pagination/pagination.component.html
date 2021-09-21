@@ -1,10 +1,26 @@
+<ng-container *ngIf="pageLinks">
+  <lib-button (press)="go(currentPage-1)"
+              [disabled]="currentPage <= 1"
+              img="left-triangle.png" icon="🞀"
+              ></lib-button>
+  <lib-button *ngIf="showAllPages.observers.length"
+              (press)="all()"
+              [disabled]="pageLinks.length <= 1"
+              i18n-title title="Show all"
+              img="down-double-triangle.png" icon="⏬"
+              ></lib-button>
+  <lib-button (press)="go(currentPage+1)"
+              [disabled]="currentPage >= pageLinks.length"
+            img="right-triangle.png" icon="🞂"
+              ></lib-button>
+</ng-container>
 <ng-container *ngFor="let hint of pageLinks; let pg = index" >
   <span *ngIf="pg == 4 && currentPage <= 4"
         class="ellipsis"
         i18n-title title="Show all pages">
-    <a (click)="toggleShowAll();" href="#">&hellip;</a>
+    <a (click)="toggleShowAllLinks();" href="#">&hellip;</a>
   </span>
-  <span class="page" *ngIf="showAll || pg < 4">
+  <span class="page" *ngIf="showAllLinks || pg < 4">
     <span *ngIf="pg+1 == currentPage"
           class="current"
           i18n-title title="Current page">{{pg+1}}</span>
