@@ -6697,6 +6697,13 @@ public class SqlGraphStore implements GraphStore {
     if (trackSuffix == null) trackSuffix = getMediaTracks()[0].getSuffix();
     String fileName = graph.getId().replaceAll("\\.[^.]*$","") + trackSuffix + "." + extension;
     File file = new File(mediaDir, fileName);
+    if (!file.exists()) { // maybe the exension is upper case?
+      extension = extension.toUpperCase();
+      mediaDir = new File(episodeDir, extension);
+      if (trackSuffix == null) trackSuffix = getMediaTracks()[0].getSuffix();
+      fileName = graph.getId().replaceAll("\\.[^.]*$","") + trackSuffix + "." + extension;
+      file = new File(mediaDir, fileName);
+    }
     if (file.exists()) {
       if (startOffset == null && endOffset == null) {
         if (getBaseUrl() == null) // TODO check this isn't a security risk
