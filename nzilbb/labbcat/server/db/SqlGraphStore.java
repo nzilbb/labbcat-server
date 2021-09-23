@@ -4167,11 +4167,6 @@ public class SqlGraphStore implements GraphStore {
     Schema schema = getSchema();
     Graph graph = transcript;
     try {
-      // normalize
-      new Normalizer()
-        .setMinimumTurnPauseLength(0.5)
-        .transform(transcript);
-      
       // validate the graph before saving it
       // TODO ensure all layers are loaded before validation
       Validator v = new Validator();
@@ -4218,6 +4213,12 @@ public class SqlGraphStore implements GraphStore {
       if (graph.containsKey("@valid")) { // TODO remove this workaround
         System.err.println("Graph " + graph.getId() + ": skipping validation");
       } else {
+        
+        // normalize
+        new Normalizer()
+          .setMinimumTurnPauseLength(0.5)
+          .transform(transcript);
+      
         // timers.start("validate");
         v.transform(graph);
         // timers.end("validate");
