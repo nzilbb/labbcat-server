@@ -112,10 +112,10 @@
               <a href="transcript?transcript={{id | urlEncode}}" title="{{id}}">{{id}}</a>
             </span>
             <span class="attribute"
-                  *ngIf="layer.id != schema.root.id && attributeValues[id].annotations">
+                  *ngIf="layer.id != schema.root.id && attributeValues[id]">
               
               <span class="value"
-                    *ngFor="let annotation of attributeValues[id].annotations[layer.id]"
+                    *ngFor="let annotation of attributeValues[id][layer.id]"
                     title="{{layer.id}}: {{annotation.label}}">
                 <span class="{{layer.subtype}}"
                       *ngIf="layer.subtype != 'datetime' && layer.subtype != 'date'">
