@@ -25,7 +25,7 @@ details[open] > div {
 #samplePoints {
     text-align: center;
 }
-#fastTrackTimeStep:after: {
+#fastTrackTimeStep:after {
     content: "s";
 }
 #rowCount {
