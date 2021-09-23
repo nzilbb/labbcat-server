@@ -7,7 +7,7 @@
   <lib-button *ngIf="showAllPages.observers.length"
               (press)="all()"
               [disabled]="pageLinks.length <= 1"
-              i18n-title title="Show all"
+              i18n-title title="Show all pages"
               img="down-double-triangle.png" icon="⏬"
               ></lib-button>
   <lib-button (press)="go(currentPage+1)"
