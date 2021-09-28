@@ -190,13 +190,28 @@
     <lib-button (press)="serialize();"
                 img="{{serializeImg}}" icon="📦"
                 i18n-label label="Utterance Export"></lib-button>
-    <select #mimetype name="mimetype"
-            [(ngModel)]="mimeType"
-            (change)="onChangeMimeType()"
-            i18n-title title="Export format">
-      <option *ngFor="let serializer of serializers"
-              value="{{serializer.mimeType}}">{{serializer.name}}</option>
-    </select>
+    <lib-button (press)="serializationOptions();"
+                img="down-triangle.png" icon="▼"
+                i18n-title title="Utterance Export options"
+                ></lib-button>
+  </div>
+  <div id="serialization-options" class="{{showSerializationOptions?'unhidden-panel':'hidden-panel'}}">
+    <label>
+      <span i18n>Export format</span>
+      <select #mimetype name="mimetype"
+              [(ngModel)]="mimeType"
+              (change)="onChangeMimeType()"
+              i18n-title title="Export format">
+        <option *ngFor="let serializer of serializers"
+                value="{{serializer.mimeType}}">{{serializer.name}}</option>
+      </select>
+    </label>
+    <fieldset>
+    <legend i18n>Layers to export</legend>
+      <lib-layer-checkboxes name="layerIds"
+                            word="true" segment="true" phrase="true" excludeTurn="true"
+                            selected="{{serializationLayers}}"></lib-layer-checkboxes>
+    </fieldset>
   </div>
   <div id="export-audio" class="controls">
     <lib-button (press)="exportAudio();"

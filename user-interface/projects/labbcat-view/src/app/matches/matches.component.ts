@@ -35,6 +35,8 @@ export class MatchesComponent implements OnInit {
     mimeTypeToSerializer = {};
     mimeType = "text/praat-textgrid";
     serializeImg = "zip.png";
+    showSerializationOptions = false;
+    serializationLayers = [ "utterance", "word", "segment" ];
     showCsvOptions = false;
     selectedLayers: string[];
     showEmuOptions = false;
@@ -207,6 +209,9 @@ export class MatchesComponent implements OnInit {
         this.form.nativeElement.submit();
     }
 
+    serializationOptions(): void {
+        this.showSerializationOptions = !this.showSerializationOptions;
+    }
     emuOptions(): void {
         this.showEmuOptions = !this.showEmuOptions;
     }
