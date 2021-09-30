@@ -4932,9 +4932,11 @@ public class SqlGraphStore implements GraphStore {
    */
   protected Anchor anchorFromResult(ResultSet rsAnchor, String prefix) throws SQLException {
     Object[] anchorIdParts = { Long.valueOf(rsAnchor.getLong(prefix + "anchor_id"))};
-    Anchor anchor = new Anchor(
-      fmtAnchorId.format(anchorIdParts), Double.valueOf(rsAnchor.getDouble(prefix + "offset")));
-    anchor.setConfidence(Integer.valueOf(rsAnchor.getInt(prefix + "alignment_status")));
+    Anchor anchor = new Anchor().setId(fmtAnchorId.format(anchorIdParts));
+    if (rsAnchor.getString(prefix + "offset") != null) { // offset not null
+      anchor.setOffset(Double.valueOf(rsAnchor.getDouble(prefix + "offset")));
+      anchor.setConfidence(Integer.valueOf(rsAnchor.getInt(prefix + "alignment_status")));
+    }
     if (rsAnchor.getString(prefix+"annotated_by") != null) {
       anchor.setAnnotator(rsAnchor.getString(prefix+"annotated_by"));
     }
