@@ -21,6 +21,7 @@ export class MatchesComponent implements OnInit {
     name: string;
     status: string;
     totalMatches: number;
+    totalUtteranceDuration: number;
     zeroPad: number;
     searchedLayers: string[];
     matches: Match[];
@@ -97,6 +98,7 @@ export class MatchesComponent implements OnInit {
             this.task = task;
             this.status = task.status;
             this.totalMatches = task.size; // TODO need something more formal
+            this.totalUtteranceDuration = task.totalUtteranceDuration;
             this.zeroPad = (""+task.size).length;
             this.searchedLayers = task.layers || [];
             this.selectedLayers = this.searchedLayers

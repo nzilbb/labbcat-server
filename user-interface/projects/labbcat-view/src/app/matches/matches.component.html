@@ -1,6 +1,6 @@
 <h1>{{name}}</h1>
 
-<p>{{status}}</p>
+<p>{{status}} <span *ngIf="totalUtteranceDuration">(<span i18n>Total utterance duration:</span> {{totalUtteranceDuration | duration}})</span></p>
 
 <lib-wait *ngIf="readingMatches"></lib-wait>
 <form #form method="POST" id="frm" *ngIf="matches.length" target="_blank">

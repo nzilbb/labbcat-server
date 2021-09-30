@@ -9,6 +9,7 @@ export * from './lib/user';
 export * from './lib/labbcat.service';
 export * from './lib/message.service';
 export * from './lib/url-encode.pipe';
+export * from './lib/duration.pipe';
 export * from './lib/messages/messages.component';
 export * from './lib/keep-alive/keep-alive.component';
 export * from './lib/button/button.component';

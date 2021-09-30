@@ -18,6 +18,7 @@ import { LoginComponent } from './login/login.component';
 import { AutofocusDirective } from './autofocus.directive';
 import { LayerFilterComponent } from './layer-filter/layer-filter.component';
 import { PaginationComponent } from './pagination/pagination.component';
+import { DurationPipe } from './duration.pipe';
 
 @NgModule({
     declarations: [
@@ -36,7 +37,8 @@ import { PaginationComponent } from './pagination/pagination.component';
         LoginComponent,
         AutofocusDirective,
         LayerFilterComponent,
-        PaginationComponent
+        PaginationComponent,
+        DurationPipe
     ],
     imports: [
         RouterModule, CommonModule, FormsModule
@@ -57,7 +59,8 @@ import { PaginationComponent } from './pagination/pagination.component';
         LoginComponent,
         AutofocusDirective,
         LayerFilterComponent,
-        PaginationComponent
+        PaginationComponent,
+        DurationPipe
     ]
 })
 export class LabbcatCommonModule {
