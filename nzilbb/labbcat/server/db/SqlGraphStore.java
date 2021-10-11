@@ -1418,6 +1418,54 @@ public class SqlGraphStore implements GraphStore {
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       expression, sqlSelectClause, userWhereClause, sqlOrderClause);
+
+    // special case for participant corpus matching:
+    // for QL expressions like: ["QB2","QB1"].includes(first('corpus').label)
+    // what the user really wants is participants that are in any of the named corpora
+    // so we have to transform SQL like:
+    //   (SELECT corpus.corpus_name FROM speaker_corpus
+    //    INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id
+    //    WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1)
+    //   IN ('QB1','QB2')
+    // into:
+    //   (
+    //    'QB1' IN
+    //     (SELECT corpus.corpus_name FROM speaker_corpus
+    //      INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id
+    //      WHERE speaker_corpus.speaker_number = speaker.speaker_number)
+    //    OR 'QB2' IN
+    //     (SELECT corpus.corpus_name FROM speaker_corpus
+    //      INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id
+    //      WHERE speaker_corpus.speaker_number = speaker.speaker_number)
+    //   )
+    Pattern participantCorpusPattern = Pattern.compile(
+      "\\(SELECT corpus.corpus_name FROM speaker_corpus"
+      + " INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+      + " WHERE speaker_corpus.speaker_number = speaker.speaker_number LIMIT 1\\)"
+      + " IN \\(([^)]+)\\)");
+    Matcher participantCorpusMatch = participantCorpusPattern.matcher(q.sql);
+    if (participantCorpusMatch.find()) { // only process the first match
+      String corporaString = participantCorpusMatch.group(1);
+      // assume corpus names don't include commas
+      String[] corpora = corporaString.split(",");
+      StringBuffer replacement = new StringBuffer();
+      for (String corpus : corpora) {
+        if (replacement.length() == 0) {
+          replacement.append("(");
+        } else {
+          replacement.append(" OR ");
+        }
+        replacement.append(corpus);
+        replacement.append(
+          " IN "
+          + "(SELECT corpus.corpus_name FROM speaker_corpus"
+          + " INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+          + " WHERE speaker_corpus.speaker_number = speaker.speaker_number)");
+      } // next corpus
+      replacement.append(")");
+      q.sql = q.sql.replaceFirst(participantCorpusPattern.pattern(), replacement.toString());
+    } // participant corpus matching
+    
     System.out.println("QL: " + expression);
     System.out.println("SQL: " + q.sql);
     PreparedStatement sql = q.prepareStatement(getConnection());
