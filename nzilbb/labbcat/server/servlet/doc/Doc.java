@@ -310,20 +310,26 @@ public class Doc extends LabbcatServlet {
         path = "";
       }
     }
+    boolean listAsDirectory = false;
+    if (f.isDirectory()) {
+      // check it actually has files in it
+      listAsDirectory = f.listFiles(
+        child -> child.getName().endsWith(".html") || child.isDirectory()).length > 0;
+    }
     String id = path.replaceAll("^/","") // no leading slash
-      .replace("/","--") // no slashes
+      .replace("/","→") // no slashes
       .replace("\"", "$quot;"); // ensure it can be an HTML attribute
-    if (!f.isDirectory()) {
+    if (!listAsDirectory) { // file
       writer.print("<div id=\""+id+"\">");
     } else if (f == root) {
-      writer.print("<details open><summary id=\"--\">");
+      writer.print("<details open><summary id=\"→\">");
     } else {
       writer.print("<details><summary id=\""+id+"\">");
     }
     writer.print("<a href=\""+baseUrl+path+"\">");
     writer.print(title(documentFile));
     writer.print("</a>");
-    if (!f.isDirectory()) {
+    if (!listAsDirectory) { // file
       writer.println("</div>");
     } else { // traverse the directory
       writer.println("</summary>");
