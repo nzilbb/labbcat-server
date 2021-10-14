@@ -327,7 +327,9 @@ public class Doc extends LabbcatServlet {
       writer.println("</div>");
     } else { // traverse the directory
       writer.println("</summary>");
-      for (File child : f.listFiles()) {
+      File[] children = f.listFiles();
+      Arrays.sort(children);
+      for (File child : children) {
         indexDir(root, child, baseUrl, path, writer);
       }
       writer.println("</details>");
