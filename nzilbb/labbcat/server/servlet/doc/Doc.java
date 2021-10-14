@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -72,21 +72,26 @@ public class Doc extends LabbcatServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
     response.setCharacterEncoding("UTF-8");
+    if (request.getPathInfo() == null) { // root directory with no slash
+      // redirect to the slash-ending version
+      response.sendRedirect(baseUrl(request) + "/doc/");
+      return;
+    }
     if (request.getPathInfo() != null && request.getPathInfo().endsWith("/")
-        && !request.getPathInfo().equals("/")) {
-      // redirect to the non-slash-ending version
+        && !request.getPathInfo().equals("/")) { // non-root request ends with a slash
+      // redirect to the non-slash-ending version so we can get the document if any
       response.sendRedirect(
         baseUrl(request) + "/doc"
         +request.getPathInfo().substring(0, request.getPathInfo().length()-1));
       return;
     }
-    File html = file(request);
-    if (request.getHeader("Accept").indexOf("application/json") < 0) { // page request
-      response.setContentType("text/html");               
+    response.setContentType("text/html");               
+    if (!"/index".equals(request.getPathInfo())) {
+      File html = file(request);
       if (!html.exists()) {
         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         // return 404, but also a template for creating a new document
-        html = new File(getServletContext().getRealPath("/doc/template.html"));        
+        html = new File(getServletContext().getRealPath("/doc/template.html"));
       }
       // stream out, line by line, substituting "${baseUrl}"
       String baseUrl = baseUrl(request);
@@ -97,66 +102,10 @@ public class Doc extends LabbcatServlet {
         writer.println(line.replace("${baseUrl}", baseUrl));
         line = reader.readLine();
       }
-    } else { // application/json request for directory structure
-      response.setContentType("application/json");
-
-      File here = html;
-      JsonObjectBuilder hereJson = Json.createObjectBuilder();
-      JsonObjectBuilder hereChildren = Json.createObjectBuilder();
-      File dir = here.getParentFile();
-      JsonObjectBuilder dirJson = null;
-      do {
-        dirJson = Json.createObjectBuilder();
-        File[] files = dir.listFiles(new FileFilter() {
-            public boolean accept(File p) {
-              return !p.getName().equals("template.html")
-                && (p.getName().endsWith(".html") || p.isDirectory());
-            }
-          });
-        // build a map of entries, so that dirs and files with the same name are merged
-        // and entries are sorted
-        TreeMap<String, JsonObjectBuilder> entries = new TreeMap<String, JsonObjectBuilder>();
-        for (File f : files) {
-          String url = f.getName().replaceAll("\\.html$", "");
-          if (!entries.containsKey(url)) entries.put(url, Json.createObjectBuilder());
-          JsonObjectBuilder fileJson = entries.get(url);
-          if (f.getName().endsWith(".html")) { // document
-            // get title from content
-            fileJson.add("title", title(f));
-            if (f.equals(html)) { // this is the current file
-              // add version history
-              JsonArrayBuilder versionsJson = Json.createArrayBuilder();
-              String versionFilePrefix = html.getName() + ".v-";
-              File[] versions = dir.listFiles(new FileFilter() {
-                  public boolean accept(File p) {
-                    return p.getName().startsWith(versionFilePrefix);
-                  }});
-              Arrays.sort(versions);
-              for (File version : versions) {
-                versionsJson.add(version.getName());
-              } // next version file
-              fileJson.add("versions", versionsJson);
-            }
-          } else { // subdirectory
-            if (f.equals(here)) {              
-              fileJson.add("children", hereJson);
-            }
-          }
-          if (f.equals(here)) {              
-            fileJson.add("current", Boolean.TRUE);
-          }
-        } // next file
-        for (String url: entries.keySet()) {
-          dirJson.add(url, entries.get(url));
-        }
-        here = dir;
-        hereJson = dirJson;
-        dir = here.getParentFile();
-      } while (!here.getName().equals("doc")); // TODO detect root better than by name
-      
-      JsonWriter writer = Json.createWriter(response.getWriter());
-      writer.writeObject(successResult(request, dirJson.build(), null));
-      writer.close();
+    } else { // request for directory structure
+      File root = new File(getServletContext().getRealPath("/doc"));
+      StringBuilder html = new StringBuilder();
+      indexDir(root, root, baseUrl(request) + "/doc", "", response.getWriter());
     }
   }
   
@@ -298,8 +247,6 @@ public class Doc extends LabbcatServlet {
     response.addHeader("Allow", allow);
   }
 
-  // TODO doDelete
-  
   /**
    * Translates the request path into a file.
    * @param request
@@ -324,7 +271,69 @@ public class Doc extends LabbcatServlet {
       return null;
     }
   } // end of directory()
-
+  
+  /**
+   * Generate HTML for a recursive listing of the given file/directory.
+   * @param root The root directory.
+   * @param f The file or directory to list.
+   * @param baseUrl Base URL for the servlet.
+   * @param url relative URL for the parent.
+   * @param writer The response writer.
+   */
+  protected void indexDir(File root, File f, String baseUrl, String url, PrintWriter writer) {
+    String nameWithoutExension = IO.WithoutExtension(f);
+    if (f.isFile()) {
+      if (!f.getName().endsWith(".html")) { // only list HTML documents
+        return;
+      }
+      if (f.getName().equals(".html") && f.getParentFile().equals(root)) {
+        // do nothing here - we'll handle the .html file when we get to the dir
+        return;
+      }
+      if (f.getName().equals("template.html") && f.getParentFile().equals(root)) {
+        // We don't list the document template
+        return;
+      }
+      // if there's a directory with the same name
+      File dir = new File(f.getParentFile(), nameWithoutExension);
+      if (dir.exists()) { // do nothing here - we'll handle the .html file when we get to the dir
+        return;
+      }
+    }
+    String urlSuffix = nameWithoutExension;
+    String path = url+"/"+urlSuffix;
+    File documentFile = f;
+    if (f.isDirectory()) { // get the title from the file with the same name, if any
+      documentFile = new File(f.getParentFile(), f.getName() + ".html");
+      if (f == root) { // root directory has a different document file
+        documentFile = new File(f, ".html");
+        path = "";
+      }
+    }
+    String id = path.replaceAll("^/","") // no leading slash
+      .replace("/","--") // no slashes
+      .replace("\"", "$quot;"); // ensure it can be an HTML attribute
+    if (!f.isDirectory()) {
+      writer.print("<div id=\""+id+"\">");
+    } else if (f == root) {
+      writer.print("<details open><summary id=\"--\">");
+    } else {
+      writer.print("<details><summary id=\""+id+"\">");
+    }
+    writer.print("<a href=\""+baseUrl+path+"\">");
+    writer.print(title(documentFile));
+    writer.print("</a>");
+    if (!f.isDirectory()) {
+      writer.println("</div>");
+    } else { // traverse the directory
+      writer.println("</summary>");
+      for (File child : f.listFiles()) {
+        indexDir(root, child, baseUrl, path, writer);
+      }
+      writer.println("</details>");
+    }
+  } // end of indexDir()
+  
   static final Pattern titlePattern = Pattern.compile(".*<title>(.*)</title>.*");
   /**
    * Gets the title of the given document file.
