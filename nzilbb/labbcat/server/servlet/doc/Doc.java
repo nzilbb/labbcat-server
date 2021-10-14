@@ -24,6 +24,7 @@ package nzilbb.labbcat.server.servlet.doc;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -85,7 +86,7 @@ public class Doc extends LabbcatServlet {
         +request.getPathInfo().substring(0, request.getPathInfo().length()-1));
       return;
     }
-    response.setContentType("text/html");               
+    response.setContentType("text/html");
     if (!"/index".equals(request.getPathInfo())) {
       File html = file(request);
       if (!html.exists()) {
@@ -93,16 +94,35 @@ public class Doc extends LabbcatServlet {
         // return 404, but also a template for creating a new document
         html = new File(getServletContext().getRealPath("/doc/template.html"));
       }
-      // stream out, line by line, substituting "${baseUrl}"
-      String baseUrl = baseUrl(request);
-      BufferedReader reader = new BufferedReader(new FileReader(html));
-      PrintWriter writer = response.getWriter();
-      String line = reader.readLine();
-      while (line != null) {
-        writer.println(line.replace("${baseUrl}", baseUrl));
-        line = reader.readLine();
+      if (html.getName().equals("template.html")) { // template
+        // stream out the contents, substituting "${base}" for a path to the root directory
+        String context = request.getPathInfo();
+        if ("/template.html".equals(request.getPathInfo())
+            && request.getHeader("Referer") != null) {
+          context = request.getHeader("Referer")
+            .substring(baseUrl(request).length() + 4); // remove the full URL prefix
+        }
+        log("context " + context);        
+        String[] parts = context.split("/");
+        // stream out, line by line, substituting "${base}" for a path to the root directory
+        String base = ".";
+        if (parts.length > 2) {
+          base = "..";
+          for (int i = 0; i < parts.length - 3; i++) {
+            base += "/..";
+          } // next ancestor
+        } // base is not the root directory
+        BufferedReader reader = new BufferedReader(new FileReader(html));
+        PrintWriter writer = response.getWriter();
+        String line = reader.readLine();
+        while (line != null) {
+          writer.println(line.replace("${base}", base));
+          line = reader.readLine();
+        }
+      } else { // existing document
+        IO.Pump(new FileInputStream(html), response.getOutputStream());
       }
-    } else { // request for directory structure
+    } else { // request for index      
       File root = new File(getServletContext().getRealPath("/doc"));
       StringBuilder html = new StringBuilder();
       indexDir(root, root, baseUrl(request) + "/doc", "", response.getWriter());
