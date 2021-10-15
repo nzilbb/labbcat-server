@@ -8,6 +8,10 @@
       <caption *ngIf="matchCount >= 0"><span i18n="Match count: {n}">Match count:</span>&nbsp;<span id="matchCount">{{matchCount}}</span></caption>
       <thead>
         <tr class="filters">
+          <td class="participant-filter" *ngIf="participantQuery">
+            <img i18n-title title="{{participantDescription}}"
+                 src="{{imagesLocation+'/people.svg'}}" alt="👥">
+          </td>
           <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
             <lib-layer-filter            
               [layer]="layer"
@@ -101,6 +105,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let id of transcriptIds">
+          <td class="participant-filter" *ngIf="participantQuery"></td><!-- participant-filter -->
           <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
             <span class="id" *ngIf="layer.id == schema.root.id">
               <lib-grouped-checkbox

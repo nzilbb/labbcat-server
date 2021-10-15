@@ -24,3 +24,8 @@ span.attribute {
     overflow-y: auto;
     overflow-x: hidden;
 }
+#query-description {
+    white-space: nowrap;
+    overflow: clip;
+    font-style: italic;
+}

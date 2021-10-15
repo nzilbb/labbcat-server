@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { SerializationDescriptor } from '../serialization-descriptor';
@@ -29,6 +29,9 @@ export class TranscriptsComponent implements OnInit {
     selectedIds: string[];
     filterValues = {};
     query = ""; // AGQL query string for matching transcripts
+    participantQuery = ""; // AGQL query string for matching participants
+    participantDescription = ""; // Human readable description of participant query
+    imagesLocation: string;
     
     serializers: SerializationDescriptor[];
     mimeTypeToSerializer = {};
@@ -37,8 +40,11 @@ export class TranscriptsComponent implements OnInit {
     constructor(
         private labbcatService: LabbcatService,
         private messageService: MessageService,
-        private route: ActivatedRoute
-    ) { }
+        private route: ActivatedRoute,
+        @Inject('environment') private environment
+    ) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
         this.filterLayers = [];
@@ -52,6 +58,14 @@ export class TranscriptsComponent implements OnInit {
                 if (this.p < 1) this.p = 1;
                 if (params["transcript"]) {
                     this.filterValues["transcript"] = [params["transcript"]];
+                }
+                if (params["participant"]) {
+                    this.participantQuery = params["participant"];
+                    if (params["participantDescription"]) {
+                        this.participantDescription = params["participantDescription"];
+                    } else {
+                        this.participantDescription = "Selected participants";
+                    }
                 }
                 this.listTranscripts();
             });
@@ -141,7 +155,7 @@ export class TranscriptsComponent implements OnInit {
     loadingList = false;
     /** List transcripts that match the filters */
     listTranscripts(): void {
-        this.query = "";
+        this.query = this.participantQuery; // if any
         for (let layer of this.filterLayers) {
 
             if (layer.id == this.schema.root.id

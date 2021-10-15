@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Response, Layer, User } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
@@ -26,11 +26,13 @@ export class ParticipantsComponent implements OnInit {
     selectedIds: string[];
     filterValues = {};
     query = ""; // AGQL query string for matching participants
+    queryDescription = ""; // Human-readable version of the query
     
     constructor(
         private labbcatService: LabbcatService,
         private messageService: MessageService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private router: Router
     ) { }
     
     ngOnInit(): void {
@@ -125,19 +127,24 @@ export class ParticipantsComponent implements OnInit {
     /** List participants that match the filters */
     listParticipants(): void {
         this.query = "";
+        this.queryDescription = "";
         for (let layer of this.filterLayers) {
 
             if (layer.id == this.schema.participantLayerId
                 && this.filterValues[layer.id][0]) {
                 // participant layer
-                if (this.query) this.query += " && ";
+                if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                 
-                this.query += "/"+this.esc(this.filterValues[this.schema.participantLayerId][0])+"/.test(id)";
+                this.query += "/"+this.esc(this.filterValues[this.schema.participantLayerId][0])
+                    +"/.test(id)";
+                this.queryDescription += "ID matches "
+                    +this.filterValues[this.schema.participantLayerId][0];
                 
             } else if (layer.id == " transcript-count"
                 && this.filterValues[layer.id].length > 0) {
-                // participant layer
-                if (this.query) this.query += " && ";
                 
                 // from?
                 if (this.filterValues[layer.id][0]) {
@@ -156,23 +163,55 @@ export class ParticipantsComponent implements OnInit {
                     this.query += "all('transcript').length <= "+ value;
                 }
                 
+                if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += 
+                        "Transcript count " + this.filterValues[layer.id][0] // TODO i18n
+                        + "-" + this.filterValues[layer.id][1];
+                } else if (this.filterValues[layer.id][0]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription +=
+                        "Transcript count ≥ " + this.filterValues[layer.id][0]; // TODO i18n
+                } else if (this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += 
+                        "Transcript count ≤ " + this.filterValues[layer.id][1]; // TODO i18n
+                }
+                
             } else if (layer.validLabels && Object.keys(layer.validLabels).length > 0
                 && this.filterValues[layer.id].length > 0) {
                 // select from possible values
-                if (this.query) this.query += " && ";
+                if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
 
                 // the value "!" means "a label other than the labels in validLabels"...
                 
                 if (!this.filterValues[layer.id].includes("!")) {
                     // ordinary positive selection 
                     this.query += JSON.stringify(this.filterValues[layer.id])
-                        +".includes(first('"+this.esc(layer.id)+"').label)";
+                        +".includes(first('"+this.esc(layer.id)+"').label)"; // TODO includesAny(labels(
+                    if (this.filterValues[layer.id].length == 1) {
+                        this.queryDescription += layer.description
+                            + " = " + this.filterValues[layer.id][0];
+                    } else {
+                        this.queryDescription += layer.description
+                            + " in " + this.filterValues[layer.id].join(",");
+                    }
                 } else { // "!" 'other' selected
                     // so we *exclude* all values not selected
                     const labelsToExclude = Object.keys(layer.validLabels)
                         .filter(l=>!this.filterValues[layer.id].includes(l));
                     this.query += "!"+JSON.stringify(labelsToExclude)
-                        +".includes(first('"+this.esc(layer.id)+"').label)";
+                        +".includes(first('"+this.esc(layer.id)+"').label)"; // TODO includesAny(labels(
+                    if (labelsToExclude.length == 1) {
+                        this.queryDescription += layer.description
+                            + " ≠ " + this.filterValues[layer.id][0];
+                    } else {
+                        this.queryDescription += layer.description
+                            + " not in " + labelsToExclude.join(",").replace(/^,/,"");
+                    }
                 }
             } else if (layer.type == "number"
                 && this.filterValues[layer.id].length > 1) {
@@ -182,7 +221,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.query) this.query += " && ";
                     const value = (layer.subtype == "integer"?
                         parseInt:parseFloat)(this.filterValues[layer.id][0])
-                    this.query += "first('"+this.esc(layer.id)+"').label >= "+ value;
+                    this.query += "first('"+this.esc(layer.id)+"').label >= "+ value; // TODO includesAny(labels(
                 }
                 
                 // to?
@@ -193,6 +232,22 @@ export class ParticipantsComponent implements OnInit {
                         parseInt:parseFloat)(this.filterValues[layer.id][1])
                     this.query += "first('"+this.esc(layer.id)+"').label <= "+ value;
                 }
+
+                if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" " + this.filterValues[layer.id][0]
+                        + "-" + this.filterValues[layer.id][1];
+                } else if (this.filterValues[layer.id][0]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" ≥ " + this.filterValues[layer.id][0];
+                } else if (this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" ≤ " + this.filterValues[layer.id][1];
+                }
+
             } else if ((layer.subtype == "date" || layer.subtype == "datetime")
                 && this.filterValues[layer.id].length > 1) {
                 
@@ -201,7 +256,8 @@ export class ParticipantsComponent implements OnInit {
                     if (this.query) this.query += " && ";
                     const value = this.filterValues[layer.id][0];
                     this.query += "first('"+this.esc(layer.id)+"').label"
-                    +" >= '"+this.esc(value)+"'";
+                        +" >= '"+this.esc(value)+"'";
+                    this.queryDescription += layer.description
                 }
                 
                 // to?
@@ -210,20 +266,46 @@ export class ParticipantsComponent implements OnInit {
                     
                     const value = this.filterValues[layer.id][1];
                     this.query += "first('"+this.esc(layer.id)+"').label"
-                    +" <= '"+value+" 23:59:59'";
+                        +" <= '"+value+" 23:59:59'";
+                    this.queryDescription += layer.description+" ≤ " + value
+                }
+                
+                if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" " + this.filterValues[layer.id][0]
+                        + "-" + this.filterValues[layer.id][1];
+                } else if (this.filterValues[layer.id][0]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" ≥ " + this.filterValues[layer.id][0];
+                } else if (this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" ≤ " + this.filterValues[layer.id][1];
                 }
             } else if (layer.type == "boolean"
                 && this.filterValues[layer.id][0]) {
-                if (this.query) this.query += " && ";
+                if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                 
                 this.query += "first('"+this.esc(layer.id)+"').label = "
                     + this.filterValues[layer.id][0];
+                this.queryDescription += (this.filterValues[layer.id][0]=="1"?"":"NOT ")
+                    +layer.description;
                 
             } else if (this.filterValues[layer.id][0]) { // assume regexp match
-                if (this.query) this.query += " && ";
+                if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                 
                 this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/"
                     +".test(labels('" +this.esc(layer.id)+"'))";
+                this.queryDescription += layer.description
+                    +" matches " + this.filterValues[layer.id][0]
                 
             }
         } // next filter layer
@@ -386,6 +468,31 @@ export class ParticipantsComponent implements OnInit {
         window.location.href = this.baseUrl
             + "allUtterances?"
             + this.selectedParticipantsQueryString("id");
+    }
+    
+    /** Button action */
+    transcripts(): void {
+        let participantQuery = this.query
+        let participantDescription = this.queryDescription
+        // if we're matching participant ID, it's "id" here
+        // but needs to be "first('participant').label" on the transcripts page 
+            .replace(/\.test\(id\)/, ".test(first('participant').label)"); // TODO .test(labels('participant'))
+        if (this.selectedIds.length > 0) {
+            // query of the form [...].includes(first('participant').label)
+            const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
+            participantQuery = `[${ids}].includes(first('participant').label)`; // TODO includeAny
+            if (this.selectedIds.length == 1) {
+                participantDescription = this.selectedIds[0];
+            } else if (this.selectedIds.length <= 5) {
+                participantDescription = this.selectedIds.join(", ");
+            } else {
+                participantDescription = ""+this.selectedIds.length + " selected participants"; // TODO i18n
+            }
+        }
+        this.router.navigate(["transcripts"], { queryParams: {
+            participant: participantQuery,
+            participantDescription: participantDescription
+        } });
     }
     
     /** Button action */
