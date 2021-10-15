@@ -85,22 +85,22 @@ public class AnnotationAgqlToSql {
     * <ul>
     *  <li><code>id == 'ew_0_456'</code></li>
     *  <li><code>layer.id == 'orthography' &amp;&amp; /th[aeiou].+/.test(label)</code></li>
-    *  <li><code>layer.id == 'orthography' &amp;&amp; my('participant').label == 'Robert' &amp;&amp;
-    * my('utterances').start.offset == 12.345</code></li> 
+    *  <li><code>layer.id == 'orthography' &amp;&amp; first('participant').label == 'Robert' &amp;&amp;
+    * first('utterances').start.offset == 12.345</code></li> 
     *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography' &amp;&amp;
     * start.offset &gt; 10.5</code></li> 
-    *  <li><code>layer.id == 'utterances' &amp;&amp; list('transcript').includes('ew_0_456')</code></li>
+    *  <li><code>layer.id == 'utterances' &amp;&amp; all('transcript').includes('ew_0_456')</code></li>
     *  <li><code>previous.id == 'ew_0_456'</code></li>
     * </ul>
     * Also currently supported are the legacy SQL-style expressions:
     * <ul>
     *  <li><code>id = 'ew_0_456'</code></li>
     *  <li><code>layer.id = 'orthography' AND label NOT MATCHES 'th[aeiou].*'</code></li>
-    *  <li><code>layer.id = 'orthography' AND my('participant').label = 'Robert' AND
-    * my('utterances').start.offset = 12.345</code></li> 
+    *  <li><code>layer.id = 'orthography' AND first('participant').label = 'Robert' AND
+    * first('utterances').start.offset = 12.345</code></li> 
     *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND
     * start.offset &gt; 10.5</code></li> 
-    *  <li><code>layer.id = 'utterances' AND 'ew_0_456' IN list('transcript')</code></li>
+    *  <li><code>layer.id = 'utterances' AND 'ew_0_456' IN all('transcript')</code></li>
     *  <li><code>previous.id = 'ew_0_456'</code></li>
     * </ul>
     * @param sqlSelectClause The SQL expression that is to go between SELECT and FROM.
@@ -150,22 +150,22 @@ public class AnnotationAgqlToSql {
     * <ul>
     *  <li><code>id == 'ew_0_456'</code></li>
     *  <li><code>layer.id == 'orthography' &amp;&amp; /th[aeiou].+/.test(label)</code></li>
-    *  <li><code>layer.id == 'orthography' &amp;&amp; my('participant').label == 'Robert' &amp;&amp;
-    * my('utterances').start.offset == 12.345</code></li> 
+    *  <li><code>layer.id == 'orthography' &amp;&amp; first('participant').label == 'Robert' &amp;&amp;
+    * first('utterances').start.offset == 12.345</code></li> 
     *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography' &amp;&amp;
     * start.offset &gt; 10.5</code></li> 
-    *  <li><code>layer.id == 'utterances' &amp;&amp; list('transcript').includes('ew_0_456')</code></li>
+    *  <li><code>layer.id == 'utterances' &amp;&amp; all('transcript').includes('ew_0_456')</code></li>
     *  <li><code>previous.id == 'ew_0_456'</code></li>
     * </ul>
     * Also currently supported are the legacy SQL-style expressions:
     * <ul>
     *  <li><code>id = 'ew_0_456'</code></li>
     *  <li><code>layer.id = 'orthography' AND label NOT MATCHES 'th[aeiou].*'</code></li>
-    *  <li><code>layer.id = 'orthography' AND my('participant').label = 'Robert' AND
-    * my('utterances').start.offset = 12.345</code></li> 
+    *  <li><code>layer.id = 'orthography' AND first('participant').label = 'Robert' AND
+    * first('utterances').start.offset = 12.345</code></li> 
     *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND
     * start.offset &gt; 10.5</code></li> 
-    *  <li><code>layer.id = 'utterances' AND 'ew_0_456' IN list('transcript')</code></li>
+    *  <li><code>layer.id = 'utterances' AND 'ew_0_456' IN all('transcript')</code></li>
     *  <li><code>previous.id = 'ew_0_456'</code></li>
     * </ul>
     * @param sqlSelectClause The SQL expression that is to go between SELECT and FROM.
@@ -228,7 +228,7 @@ public class AnnotationAgqlToSql {
                            "CONCAT('e"+parentScope+"_"+parentLayer.get("layer_id")+"_',"
                            +" annotation.parent_id)");
                      } else {                     
-                        errors.add("Invalid construction, only my('layer').id is supported: "
+                        errors.add("Invalid construction, only first('layer').id is supported: "
                                    + ctx.getText());
                      }
                   } else {
@@ -320,7 +320,7 @@ public class AnnotationAgqlToSql {
                            if (temporalJoin) flags.anchorsJoin = true;
                         } // temporal layer
                      } // valid layer
-                  } // my(...).id construction
+                  } // first(...).id construction
                } // other annotation
             }
             @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) {
@@ -329,7 +329,7 @@ public class AnnotationAgqlToSql {
                   conditions.push("annotation.label");
                } else { // other.label
                   if (ctx.other.firstMethodCall() == null) {
-                     errors.add("Invalid construction, only my('layer').label is supported: "
+                     errors.add("Invalid construction, only first('layer').label is supported: "
                                 + ctx.getText());
                   } else {
                      String layerId = unquote(
@@ -361,7 +361,7 @@ public class AnnotationAgqlToSql {
                               +")");
                            flags.anchorsJoin = true;
                         } else { // turn based on turn_annotation_id
-                           // (no need to distinguish between my() and list() because there can be only one turn)
+                           // (no need to distinguish between first() and all() because there can be only one turn)
                            conditions.push(
                               "(SELECT speaker.name"
                               +" FROM speaker"
@@ -450,7 +450,7 @@ public class AnnotationAgqlToSql {
                            } // temporal layer
                         } // valid layer
                      } // other layer
-                  } // my(...).label
+                  } // first(...).label
                } // other.label
             }
             @Override public void exitGraphIdExpression(AGQLParser.GraphIdExpressionContext ctx) {
@@ -489,7 +489,7 @@ public class AnnotationAgqlToSql {
                         +")");
                      flags.anchorsJoin = true;
                   } else { // turn based on turn_annotation_id
-                     // (no need to distinguish between my() and list() because there can be only one turn)
+                     // (no need to distinguish between first() and all() because there can be only one turn)
                      conditions.push(
                         "(SELECT speaker.name"
                         +" FROM speaker"

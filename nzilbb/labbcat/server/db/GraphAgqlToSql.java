@@ -83,19 +83,19 @@ public class GraphAgqlToSql {
     * <ul>
     *  <li><code>id MATCHES 'Ada.+'</code></li>
     *  <li><code>'Robert' IN labels('participant')</code></li>
-    *  <li><code>my('corpus').label = 'CC'</code></li>
-    *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
-    *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
-    *  <li><code>my('participant_languages').label = 'en'</code></li>
-    *  <li><code>my('noise').label = 'bell'</code></li>
+    *  <li><code>first('corpus').label = 'CC'</code></li>
+    *  <li><code>first('episode').label = 'Ada Aitcheson'</code></li>
+    *  <li><code>first('transcript_scribe').label = 'Robert'</code></li>
+    *  <li><code>first('participant_languages').label = 'en'</code></li>
+    *  <li><code>first('noise').label = 'bell'</code></li>
     *  <li><code>'en' IN labels('transcript_languages')</code></li>
     *  <li><code>'en' IN labels('participant_languages')</code></li>
     *  <li><code>'bell' IN labels('noise')</code></li>
-    *  <li><code>list('transcript_languages').length gt; 1</code></li>
-    *  <li><code>list('participant_languages').length gt; 1</code></li>
-    *  <li><code>list('transcript').length gt; 100</code></li>
+    *  <li><code>all('transcript_languages').length gt; 1</code></li>
+    *  <li><code>all('participant_languages').length gt; 1</code></li>
+    *  <li><code>all('transcript').length gt; 100</code></li>
     *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
-    *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+    *  <li><code>id NOT MATCHES 'Ada.+' AND first('corpus').label = 'CC' AND 'Robert' IN
     *   labels('participant')</code></li> 
     * </ul>
     * </ul>
@@ -103,7 +103,7 @@ public class GraphAgqlToSql {
     * @param userWhereClause The expression to add to the WHERE clause to ensure the user doesn't
     * get access to data to which they're not entitled, or null.
     * @param orderClause A comma-separated list of AGQL expressions to determine the order of
-    * results; e.g. "my('corpus').label, id", or null. 
+    * results; e.g. "first('corpus').label, id", or null. 
     * @param sqlLimitClause The SQL LIMIT clause to append, or null for no LIMIT clause. 
     * @throws AGQLException If the expression is invalid.
     */
@@ -147,7 +147,7 @@ public class GraphAgqlToSql {
                   conditions.push("transcript.transcript_id");
                } else {
                   if (ctx.other.firstMethodCall() == null) {
-                     errors.add("Invalid construction, only my('layer').label is supported: "
+                     errors.add("Invalid construction, only first('layer').label is supported: "
                                 + ctx.getText());
                   } else {
                      String layerId = unquote(
@@ -214,7 +214,7 @@ public class GraphAgqlToSql {
                            } // regular temporal layer
                         } // valid label
                      } // other layer
-                  } // my(...).label
+                  } // first(...).label
                } // something.label
             }
             @Override public void exitGraphIdExpression(AGQLParser.GraphIdExpressionContext ctx) {
