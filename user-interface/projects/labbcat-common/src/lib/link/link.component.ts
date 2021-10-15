@@ -12,6 +12,7 @@ export class LinkComponent implements OnInit {
     @Input() icon: string;
     @Input() img: string;
     @Input() routerLink: string[];
+    @Input() queryParams: object;
     @Input() href: string;
     processing: false;
     
