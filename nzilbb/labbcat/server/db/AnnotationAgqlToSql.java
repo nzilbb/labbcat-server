@@ -891,7 +891,10 @@ public class AnnotationAgqlToSql {
             @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx) {
                space();
                String operator = ctx.operator.getText().trim();
-               if (operator.equals("==")) operator = "="; // from JS to SQL equality operator
+               if (operator.equals("==")) operator = "=";
+               else if (operator.equals("≠")) operator = "<>";
+               else if (operator.equals("≤")) operator = "<=";
+               else if (operator.equals("≥")) operator = ">=";
                conditions.push(operator);
             }
             @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx) {
@@ -1171,7 +1174,10 @@ public class AnnotationAgqlToSql {
             @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx) {
                space();
                String operator = ctx.operator.getText().trim();
-               if (operator.equals("==")) operator = "="; // from JS to SQL equality operator
+               if (operator.equals("==")) operator = "=";
+               else if (operator.equals("≠")) operator = "<>";
+               else if (operator.equals("≤")) operator = "<=";
+               else if (operator.equals("≥")) operator = ">=";
                conditions.push(operator);
             }
             @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx) {

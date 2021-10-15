@@ -401,10 +401,14 @@ public class GraphAgqlToSql {
             @Override public void enterComparisonOperator(AGQLParser.ComparisonOperatorContext ctx) {
                space();
                String operator = ctx.operator.getText().trim();
-               if (operator.equals("==")) operator = "="; // from JS to SQL equality operator
+               // ensure operators are ok for SQL
+               if (operator.equals("==")) operator = "=";
+               else if (operator.equals("≠")) operator = "<>";
+               else if (operator.equals("≤")) operator = "<=";
+               else if (operator.equals("≥")) operator = ">=";
                conditions.push(operator);
             }
-            @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx) {
+          @Override public void exitPatternMatchExpression(AGQLParser.PatternMatchExpressionContext ctx) { // TODO support for listOperand 
                if (ctx.negation != null) {
                   conditions.push(" NOT REGEXP ");
                } else {
@@ -419,7 +423,7 @@ public class GraphAgqlToSql {
                   conditions.push(ctx.patternOperand.getText());
                }
             }
-            @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx) {
+          @Override public void exitIncludesExpression(AGQLParser.IncludesExpressionContext ctx) { // TODO includesAnyExpression
                if (ctx.IN() != null) {
                   // infix it - i.e. pop the last operand...
                   String listOperand = conditions.pop();
