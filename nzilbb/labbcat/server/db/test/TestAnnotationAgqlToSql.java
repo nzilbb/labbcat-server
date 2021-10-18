@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -487,6 +487,24 @@ public class TestAnnotationAgqlToSql {
                  +" FROM speaker"
                  +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
                  +" WHERE turn.annotation_id = annotation.turn_annotation_id)"
+                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 q.sql);
+    
+    q = transformer.sqlFor(
+      "layerId = 'utterance' && labels('who').includesAny(['Ada','Interviewer'])",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("Transcript attribute - SQL",
+                 "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                 +" FROM annotation_layer_12 annotation"
+                 +" WHERE 'utterance' = 'utterance'"
+                 +" AND ('Ada' IN (SELECT speaker.name"
+                 +" FROM speaker"
+                 +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
+                 +" WHERE turn.annotation_id = annotation.turn_annotation_id)"
+                 +" OR 'Interviewer' IN (SELECT speaker.name"
+                 +" FROM speaker"
+                 +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
+                 +" WHERE turn.annotation_id = annotation.turn_annotation_id))"
                  +" ORDER BY ag_id, parent_id, annotation_id",
                  q.sql);
   }

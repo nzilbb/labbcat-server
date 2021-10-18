@@ -1,5 +1,5 @@
 //
-// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -423,6 +423,47 @@ public class ParticipantAgqlToSql {
             // finally push listOperand
             conditions.push(listOperand);
           }
+        }
+        @Override public void exitIncludesAnyExpression(
+          AGQLParser.IncludesAnyExpressionContext ctx) {
+          // find the operand that is literal
+          String lhs = conditions.pop().trim();
+          String rhs = conditions.pop().trim();
+
+          String literalOperand = null;
+          String subqueryOperand = null;
+          if (lhs.matches("\\('.+'\\)")) {
+            literalOperand = lhs
+              // strip off parentheses
+              .substring(1, lhs.length() - 1);
+            subqueryOperand = rhs;
+          } else if (rhs.matches("\\('.+'\\)")) {
+            literalOperand = rhs
+              // strip off parentheses
+              .substring(1, rhs.length() - 1);
+            subqueryOperand = lhs;
+          } else {
+            errors.add(
+              "includesAny only supported when one operand is a literal list: " + ctx.getText());
+            return;
+          }
+
+          // for each option in the literal list
+          boolean firstOption = true;
+          String junction = ctx.negation == null?" OR ": " AND ";
+          String operator = ctx.negation == null?" IN ": " NOT IN ";
+          conditions.push("(");
+          for (String literal : literalOperand.split(",")) {
+            if (firstOption) {
+              firstOption = false;
+            } else { // disjunction
+              conditions.push(junction);
+            } 
+            conditions.push(literal);
+            conditions.push(operator);
+            conditions.push(subqueryOperand);
+          } // next literal option
+          conditions.push(")");
         }
         @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx) {
           space();

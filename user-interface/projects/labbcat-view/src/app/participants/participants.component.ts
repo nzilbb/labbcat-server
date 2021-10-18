@@ -191,7 +191,7 @@ export class ParticipantsComponent implements OnInit {
                 if (!this.filterValues[layer.id].includes("!")) {
                     // ordinary positive selection 
                     this.query += JSON.stringify(this.filterValues[layer.id])
-                        +".includes(first('"+this.esc(layer.id)+"').label)"; // TODO includesAny(labels(
+                        +".includesAny(labels('"+this.esc(layer.id)+"'))";
                     if (this.filterValues[layer.id].length == 1) {
                         this.queryDescription += layer.description
                             + " = " + this.filterValues[layer.id][0];
@@ -204,7 +204,7 @@ export class ParticipantsComponent implements OnInit {
                     const labelsToExclude = Object.keys(layer.validLabels)
                         .filter(l=>!this.filterValues[layer.id].includes(l));
                     this.query += "!"+JSON.stringify(labelsToExclude)
-                        +".includes(first('"+this.esc(layer.id)+"').label)"; // TODO includesAny(labels(
+                        +".includesAny(labels('"+this.esc(layer.id)+"'))";
                     if (labelsToExclude.length == 1) {
                         this.queryDescription += layer.description
                             + " ≠ " + this.filterValues[layer.id][0];
@@ -221,7 +221,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.query) this.query += " && ";
                     const value = (layer.subtype == "integer"?
                         parseInt:parseFloat)(this.filterValues[layer.id][0])
-                    this.query += "first('"+this.esc(layer.id)+"').label >= "+ value; // TODO includesAny(labels(
+                    this.query += "first('"+this.esc(layer.id)+"').label >= "+ value;
                 }
                 
                 // to?
@@ -480,7 +480,7 @@ export class ParticipantsComponent implements OnInit {
         if (this.selectedIds.length > 0) {
             // query of the form [...].includes(first('participant').label)
             const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
-            participantQuery = `[${ids}].includes(first('participant').label)`; // TODO includeAny
+            participantQuery = `[${ids}].includesAny(labels('participant'))`;
             if (this.selectedIds.length == 1) {
                 participantDescription = this.selectedIds[0];
             } else if (this.selectedIds.length <= 5) {

@@ -175,13 +175,13 @@ export class TranscriptsComponent implements OnInit {
                 if (!this.filterValues[layer.id].includes("!")) {
                     // ordinary positive selection 
                     this.query += JSON.stringify(this.filterValues[layer.id])
-                        +".includes(first('"+this.esc(layer.id)+"').label)";
+                        +".includesAny(labels('"+this.esc(layer.id)+"'))";
                 } else { // "!" 'other' selected
                     // so we *exclude* all values not selected
                     const labelsToExclude = Object.keys(layer.validLabels)
                         .filter(l=>!this.filterValues[layer.id].includes(l));
                     this.query += "!"+JSON.stringify(labelsToExclude)
-                        +".includes(first('"+this.esc(layer.id)+"').label)";
+                        +".includesAny(labels('"+this.esc(layer.id)+"'))";
                 }
             } else if (layer.type == "number"
                 && this.filterValues[layer.id].length > 1) {
