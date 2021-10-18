@@ -31,6 +31,9 @@ export class TranscriptsComponent implements OnInit {
     query = ""; // AGQL query string for matching transcripts
     participantQuery = ""; // AGQL query string for matching participants
     participantDescription = ""; // Human readable description of participant query
+    // track how many queries we're up to, to avoid old long queries updating the UI when
+    // new short queries already have.
+    querySerial = 0; 
     imagesLocation: string;
     
     serializers: SerializationDescriptor[];
@@ -237,9 +240,11 @@ export class TranscriptsComponent implements OnInit {
             }
         } // next filter layer
         this.loadingList = true;
+        const thisQuery = ++this.querySerial;
         // count matches
         this.labbcatService.labbcat.countMatchingTranscriptIds(
             this.query, (matchCount, errors, messages) => {
+                if (thisQuery != this.querySerial) return; // new query already sent
                 this.matchCount = matchCount;
                 if (errors) {
                     errors.forEach(m => this.messageService.error(m));
@@ -254,6 +259,7 @@ export class TranscriptsComponent implements OnInit {
                 this.labbcatService.labbcat.getMatchingTranscriptIds(
                     this.query, this.pageLength, this.p - 1 /* zero-based page numbers */,
                     (transcriptIds, errors, messages) => {
+                        if (thisQuery != this.querySerial) return; // new query already sent
                         if (errors) errors.forEach(m => this.messageService.error(m));
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         
