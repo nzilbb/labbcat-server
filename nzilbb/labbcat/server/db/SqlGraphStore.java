@@ -4213,11 +4213,16 @@ public class SqlGraphStore implements GraphStore {
       if (graph.containsKey("@valid")) { // TODO remove this workaround
         System.err.println("Graph " + graph.getId() + ": skipping validation");
       } else {
-        
-        // normalize
-        new Normalizer()
-          .setMinimumTurnPauseLength(0.5)
-          .transform(transcript);
+
+        if (transcript.getSchema().getParticipantLayer() != null
+            && transcript.getSchema().getTurnLayer() != null
+            && transcript.getSchema().getUtteranceLayer() != null
+            && transcript.getSchema().getWordLayer() != null) { // normalizable
+          // normalize
+          new Normalizer()
+            .setMinimumTurnPauseLength(0.5)
+            .transform(transcript);
+        }
       
         // timers.start("validate");
         v.transform(graph);
