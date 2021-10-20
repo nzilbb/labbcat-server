@@ -2360,6 +2360,39 @@ public class SqlGraphStore implements GraphStore {
       } // table has word_annotation_id, so use it and save a JOIN
     } // optimization for common id/attribute-based queries may be possible
       
+    Pattern wordUtteranceQueryPattern = Pattern.compile(
+      "layer.id +==? +'utterance' +&& +all\\('word'\\)\\.includes\\('ew_0_(\\d+)'\\)");
+    Matcher wordUtteranceQueryMatcher
+      = wordUtteranceQueryPattern.matcher(expression);
+    if (wordUtteranceQueryMatcher.matches()) {
+      // optimization for common id/attribute-based queries may be possible
+      String wordId = wordUtteranceQueryMatcher.group(1);
+      String select = "DISTINCT annotation.annotation_id, annotation.ag_id,"
+        +" annotation.label, annotation.label_status,"
+        +" annotation.annotated_by, annotation.annotated_when,"
+        +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+        +" 'utterance' AS layer, graph.transcript_id AS graph,"
+        +" annotation.turn_annotation_id, annotation.ordinal";
+        if (limit.equals("COUNT(*)")) {
+          select = "COUNT(*), 'utterance' AS layer";
+          limit = "";
+        }
+            
+        sSql = "SELECT " + select
+          +" FROM annotation_layer_12 annotation"
+          +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+          +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+          +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+          +" INNER JOIN annotation_layer_0 word"
+          +" ON annotation.turn_annotation_id = word.turn_annotation_id"
+          +" INNER JOIN anchor word_start ON word.start_anchor_id = word_start.anchor_id"
+          +" WHERE word.annotation_id = '" + wordId + "'"
+          +" AND word_start.offset BETWEEN start.offset AND end.offset"
+          + userWhereClauseGraph(true, "graph")
+          +" ORDER BY annotation_id"
+          + " " + limit; 
+    } // optimization for utterance given word ID query
+      
     if (sSql == null) { // no optimization found
 
       if (limit == null) limit = "";
