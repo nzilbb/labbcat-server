@@ -178,7 +178,7 @@
 
   <target name="user-interface"
           description="Build the user-interface apps"
-          depends="user-interface-common,view-user-interface,edit-user-interface,admin-user-interface">
+          depends="user-interface-common,view-user-interface,edit-user-interface,admin-user-interface,wysiwiki">
   </target>  
   <target name="user-interface-common"
           description="Build the common library used by all three UI apps">
@@ -225,6 +225,19 @@
       <arg value="--prod"/>
       <arg value="--outputPath=${config.local-labbcat-path}/admin/user-interface"/>
     </exec>
+  </target>
+  <target name="wysiwiki"
+          description="Build the custom ckeditor used for wysiwiki">
+    <exec executable="./node_modules/.bin/webpack"
+          dir="wysiwiki"
+          failonerror="true">
+      <arg value="--mode"/>
+      <arg value="development"/>
+    </exec>
+    <copy todir="${config.local-labbcat-path}/wysiwiki">
+      <fileset dir="wysiwiki/dist"/>
+    </copy>
+    <copy file="wysiwiki/wysiwiki.css" tofile="${config.local-labbcat-path}/wysiwiki/wysiwiki.css"/>
   </target>
 
   <target name="clean"

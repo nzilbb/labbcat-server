@@ -1,0 +1,85 @@
+@import url("../skin/classic/style.css");
+@import url("../local.css");
+body, #main {
+    display: flex;
+    flex-direction: column;
+}
+body > header, body > footer, #main > article, #main > nav, #main > aside {
+    /* Return them to document order */
+    order: 0;
+}
+header, footer {
+    display: block;
+}
+#main > article {
+    margin: auto;
+    width: 100%;
+}
+#main > nav details {
+    padding-left: 10px;
+}
+#main > nav div {
+    padding-left: 20px;
+}
+.current > a {
+    font-weight: bold;
+}
+header, footer, aside {
+    text-align: center;
+}
+aside > button > img {
+    height: 20px;
+}
+/* Wide enough to support three columns */
+@media all and (min-width: 640px) {
+    #main { flex-direction: row; }
+    #main > nav     { order: 1; }
+    #main > article { order: 2; }
+    #main > aside   { order: 3; }
+    
+    #main > nav {
+        text-align: left;
+        min-width: 20%;
+    }
+    #main > aside {
+        text-align: left;
+        min-width: 50px;
+    }
+    #main > article {
+        padding: 20px;
+        width: 70%;
+    }
+}
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+.loading {
+    z-index: 2;
+    cursor: wait;
+    background: white;
+    opacity: 0.5;
+}
+.loading:before {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  border-top-color: #859044;
+  animation: spinner .6s linear infinite;
+}
+
+.utterance {
+    border: 1px solid #859044;
+}
+.utterance-audio {
+    width: 100%;
+}
+.utterance-text {
+    margin: 5px;
+    border: 1px solid #859044;
+    text-align: center;
+}
