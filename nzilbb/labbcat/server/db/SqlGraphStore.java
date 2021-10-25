@@ -4245,6 +4245,17 @@ public class SqlGraphStore implements GraphStore {
       //v.setDebug(true);	 
       if (graph.containsKey("@valid")) { // TODO remove this workaround
         System.err.println("Graph " + graph.getId() + ": skipping validation");
+        // but normalize anyway if it's new
+        if (graph.getChange() == Change.Operation.Create
+            && transcript.getSchema().getParticipantLayer() != null
+            && transcript.getSchema().getTurnLayer() != null
+            && transcript.getSchema().getUtteranceLayer() != null
+            && transcript.getSchema().getWordLayer() != null) { // normalizable
+          // normalize
+          new Normalizer()
+            .setMinimumTurnPauseLength(0.5)
+            .transform(transcript);
+        }
       } else {
 
         if (transcript.getSchema().getParticipantLayer() != null
