@@ -8,7 +8,6 @@ export default class LabbcatUtterance extends Plugin {
         this._defineConverters();
         const editor = this.editor;
         this._baseUrl = document.URL.replace(/\/doc\/.*/,"");
-        console.log(`this._baseUrl ${this._baseUrl}`)
         
         editor.ui.componentFactory.add( 'labbcatUtterance', locale => {
             const view = new ButtonView( locale );
@@ -22,6 +21,7 @@ export default class LabbcatUtterance extends Plugin {
             // Callback executed once the image is clicked.
             view.on( 'execute', () => {
                 const utteranceUrl = prompt( 'Utterance URL' );
+                if (!utteranceUrl) return;
                 // layer.id=='utterance' %26%26 'ew_0_705455' IN all('word')
                 const urlPattern = /.*?transcript=(.*)(&.*)?#(.*)$/
                 if (!urlPattern.test(utteranceUrl)) {
@@ -29,9 +29,7 @@ export default class LabbcatUtterance extends Plugin {
                     return;
                 }
                 const transcriptId = utteranceUrl.replace(urlPattern,"$1");
-                console.log(`transcriptId ${transcriptId}`);
                 const wordId = utteranceUrl.replace(urlPattern,"$3");
-                console.log(`wordId ${wordId}`);
                 const query = encodeURIComponent(
                     `layer.id == 'utterance' && all('word').includes('${wordId}')`);
                 const queryUrl
@@ -57,11 +55,12 @@ export default class LabbcatUtterance extends Plugin {
                         const words = fragment.participant[0].turn[0].word
                               .map(annotation=>annotation.label)
                               .join(" ");
+                        const utteranceId = fragment.participant[0].turn[0].utterance[0].id;
                         const idPattern = /.*__([0-9]+\.[0-9]+)-([0-9]+\.[0-9]+)$/;
                         const startOffset = fragment.id.replace(idPattern,"$1")
                         const endOffset = fragment.id.replace(idPattern,"$2")
-                        const audioUrl = `${this._baseUrl}/soundfragment?id=${transcriptId}&start=${startOffset}&end=${endOffset}`
-                        console.log(`audioUrl ${audioUrl}`);
+                        const audioUrl = `${this._baseUrl}/soundfragment?id=${transcriptId}&start=${startOffset}&end=${endOffset}`;
+                        const transcriptUrl = `${this._baseUrl}/transcript?transcript=${transcriptId}#${utteranceId}`;
                         editor.model.change( writer => {
                             const utterance = writer.createElement( 'utterance' );
                             const audio = writer.createElement( 'utteranceAudio', {
@@ -69,7 +68,11 @@ export default class LabbcatUtterance extends Plugin {
                                 controls: true
                             } );
                             const text = writer.createElement( 'utteranceText' );
-                            const transcript = writer.appendText( words, text );
+                            const transcript = writer.createText( words, {
+                                linkHref: transcriptUrl,
+                                linkIsExternal: true
+                            });
+                            writer.append( transcript, text );
                             writer.append( audio, utterance );
                             writer.append( text, utterance );
                             
@@ -89,19 +92,24 @@ export default class LabbcatUtterance extends Plugin {
         const schema = this.editor.model.schema;
         
         schema.register( 'utterance', {
-            isObject: true,            
+            isObject: true,
+            isLimit: true,
+            isInline: true,
             allowWhere: '$block'
         } );
         
         schema.register( 'utteranceAudio', {
             isObject: true,
+            isLimit: true,
             allowIn: 'utterance',
             allowAttributes: ['source','controls']
         } );
 
         schema.register( 'utteranceText', {
             isObject: true,            
+            isLimit: true,
             allowIn: 'utterance',
+            allowContentOf: '$root'
         } );
     }
 
