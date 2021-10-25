@@ -232,7 +232,7 @@
           dir="wysiwiki"
           failonerror="true">
       <arg value="--mode"/>
-      <arg value="development"/>
+      <arg value="production"/>
     </exec>
     <copy todir="${config.local-labbcat-path}/wysiwiki">
       <fileset dir="wysiwiki/dist"/>
