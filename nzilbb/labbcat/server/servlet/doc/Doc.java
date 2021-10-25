@@ -231,7 +231,7 @@ public class Doc extends LabbcatServlet {
           if (!file.getParentFile().exists()) {
             Files.createDirectories(file.getParentFile().toPath());
           }
-          String url = baseUrl(request) + "/doc-assets" + request.getPathInfo();
+          String url = "../doc-assets" + request.getPathInfo(); // relative URL
           if (file.exists()) {
             // get a non-existent file name
             File dir = file.getParentFile();
