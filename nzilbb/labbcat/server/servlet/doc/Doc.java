@@ -151,10 +151,16 @@ public class Doc extends LabbcatServlet {
       backup(html);
       // write the new version
       IO.Pump(request.getInputStream(), new FileOutputStream(html));
+      // send JSON response
+      JsonWriter writer = Json.createWriter(response.getWriter());
+      writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
+      writer.close();
     } catch (Exception x) {
       x.printStackTrace(System.err);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      response.getOutputStream().write(x.getMessage().getBytes());
+      JsonWriter writer = Json.createWriter(response.getWriter());
+      writer.writeObject(failureResult(request, x.getMessage()));
+      writer.close();      
     }
   }
   
