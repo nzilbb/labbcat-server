@@ -127,7 +127,7 @@ printline
 result = Get centre of gravity... 2
 print 'result:0'
 printline
-result = Get centre of gravity... 23
+result = Get centre of gravity... 2/3
 print 'result:0'
 printline
 Remove
@@ -253,7 +253,7 @@ printline
 result = Get centre of gravity... 2
 print 'result:0'
 printline
-result = Get centre of gravity... 23
+result = Get centre of gravity... 2/3
 print 'result:0'
 printline
 Remove
