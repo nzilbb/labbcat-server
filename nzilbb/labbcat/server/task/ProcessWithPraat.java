@@ -2296,7 +2296,7 @@ public class ProcessWithPraat extends Task {
             +"\nprint ''result:0''"
             +"\nprintline":"")
           +(extractCOG23?
-            "\nresult = Get centre of gravity... 23"
+            "\nresult = Get centre of gravity... 2/3"
             +"\nprint ''result:0''"
             +"\nprintline":"")
           +"\nRemove":"") // spectrum object
