@@ -220,6 +220,7 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
           String parameters = store.getAnnotatorTaskParameters(taskId);
           if (parameters != null) {
             stream = new ByteArrayInputStream(parameters.getBytes());
+            echoContentType(request, response);
           }
                
         } else if (resource.equals("/setTaskParameters")) {
