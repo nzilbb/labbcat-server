@@ -59,6 +59,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.Transcriber;
 import nzilbb.ag.automation.UsesFileSystem;
+import nzilbb.ag.automation.UsesGraphStore;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.ql.AGQLException;
@@ -2203,8 +2204,8 @@ public class SqlGraphStore implements GraphStore {
    *  <li><code>id == 'ew_0_456'</code></li>
    *  <li><code>['ew_2_456', 'ew_2_789', 'ew_2_101112'].includes(id)</code></li>
    *  <li><code>layerId == 'orthography' &amp;&amp; !/th[aeiou].+/.test(label)</code></li>
-   *  <li><code>layer.id = 'orthography' AND first('participant').label = 'Robert' AND
-   * first('utterances').start.offset = 12.345</code> - TODO</li> 
+   *  <li><code>layer.id == 'orthography' &amp;&amp; first('participant').label == 'Robert'
+   *            &amp;&amp; first('utterances').start.offset = 12.345</code> - TODO</li> 
    *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography' &amp;&amp;
    * start.offset &gt; 10.5</code></li> 
    *  <li><code>layer.id == 'utterance' &amp;&amp; all('word').includes('ew_0_456')</code></li>
@@ -4754,8 +4755,8 @@ public class SqlGraphStore implements GraphStore {
               }
             } // next child
             sqlFixSegmentTagAnchors.close();
-          }
-        }
+          } // segmentChanges
+        } // not a new graph
 
       } finally {
         sqlInsertAnchor.close();
@@ -7901,6 +7902,10 @@ public class SqlGraphStore implements GraphStore {
                
           if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
             annotator.setRdbConnectionFactory(db);
+          }
+               
+          if (annotator.getClass().isAnnotationPresent(UsesGraphStore.class)) {
+            annotator.setStore(this);
           }
                
           return descriptor;
