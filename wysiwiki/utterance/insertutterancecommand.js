@@ -7,7 +7,7 @@ export default class InsertUtteranceCommand extends Command {
         const utteranceUrl = prompt( 'Utterance URL' );
         if (!utteranceUrl) return;
         // layer.id=='utterance' %26%26 'ew_0_705455' IN all('word')
-        const urlPattern = /.*?transcript=(.*)(&.*)?#(.*)$/
+        const urlPattern = /.*?transcript=([^&?]*)(&.*)?#(.*)$/
         if (!urlPattern.test(utteranceUrl)) {
             alert(`Invalid utterance URL:\n${utteranceUrl}`);
             return;
