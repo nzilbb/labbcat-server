@@ -23,6 +23,7 @@
     "@ckeditor/ckeditor5-typing": "^30.0.0",
     "@ckeditor/ckeditor5-ui": "^30.0.0",
     "@ckeditor/ckeditor5-upload": "^30.0.0",
+    "@ckeditor/ckeditor5-widget": "^30.0.0",
     "btoa": "^1.2.1",
     "postcss-loader": "^3.0.0",
     "raw-loader": "^3.1.0",

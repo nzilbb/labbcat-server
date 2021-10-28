@@ -47,7 +47,9 @@ import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformatio
 import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices';
 
 import LabbcatUploadAdapter from './labbcat-upload-adapter';
-import LabbcatUtterance from './labbcat-utterance'
+//import LabbcatUtterance from './labbcat-utterance'
+
+import Utterance from './utterance/utterance';
 
 // InlineEditor config copied from:
 // https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-build-inline/src/ckeditor.js
@@ -76,7 +78,7 @@ InlineEditor.builtinPlugins = [
     Table,
     TableToolbar,
     TextTransformation,
-    LabbcatUtterance
+    Utterance
 ];
 // Editor configuration.
 InlineEditor.defaultConfig = {
@@ -99,7 +101,7 @@ InlineEditor.defaultConfig = {
 	    'mediaEmbed',
 	    'undo',
 	    'redo',
-            '|', 'labbcatUtterance'
+            '|', 'utterance'
 	]
     },
     image: {
