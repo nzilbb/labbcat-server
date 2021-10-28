@@ -23,7 +23,6 @@ import { AdminAnnotatorsComponent } from './admin-annotators/admin-annotators.co
 import { AdminAnnotatorTasksComponent } from './admin-annotator-tasks/admin-annotator-tasks.component';
 import { AdminAnnotatorTaskParametersComponent } from './admin-annotator-task-parameters/admin-annotator-task-parameters.component';
 import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotator-ext.component';
-import { AdminInfoComponent } from './admin-info/admin-info.component';
 import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AdminLayersComponent } from './admin-layers/admin-layers.component';
@@ -44,7 +43,6 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
         AdminAnnotatorTasksComponent,
         AdminAnnotatorTaskParametersComponent,
         AdminAnnotatorExtComponent,
-        AdminInfoComponent,
         AdminRoleUsersComponent,
         AdminUsersComponent,
         AdminChangePasswordComponent,
@@ -85,7 +83,6 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
             { path: 'admin/annotator/:annotatorId/ext', component: AdminAnnotatorExtComponent },
             { path: 'admin/annotators', component: AdminAnnotatorsComponent },
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
-            { path: 'admin/info', component: AdminInfoComponent },
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)
