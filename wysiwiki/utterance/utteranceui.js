@@ -1,5 +1,6 @@
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import icon from './utterance.svg';
 
 export default class UtteranceUI extends Plugin {
     init() {
@@ -16,8 +17,8 @@ export default class UtteranceUI extends Plugin {
             buttonView.set( {
                 // The t() function helps localize the editor. All strings enclosed in t() can be
                 // translated and change when the language of the editor changes.
-                label: t( 'Utterance' ),
-                withText: true,
+                label: t( 'Insert Utterance' ),
+                icon: icon,
                 tooltip: true
             } );
             
