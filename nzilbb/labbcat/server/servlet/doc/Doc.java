@@ -173,11 +173,15 @@ public class Doc extends LabbcatServlet {
   }
   
   /**
-   * PUT handler: Adds or updates an HTML document.
+   * PUT handler: Adds or updates an HTML document, or if the "move" parameter is specified,
+   * the document's entry is moved in the index (in which case the HTML document itself is
+   * not updated).
    */
   @Override
   protected void doPut(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
     try {
       if ("/template".equals(request.getPathInfo()) // not allowed to edit template
           || "/template.html".equals(request.getPathInfo())
@@ -186,40 +190,72 @@ public class Doc extends LabbcatServlet {
         return;
       }
       File html = file(request);
-      if (!html.getParentFile().exists()) { // file's directory doesn't exist
-        // create all necessary directories
-        Files.createDirectory(html.getParentFile().toPath());
-      }
-      // back up the old version
-      backup(html);
-      
-      // write the new version
-      IO.Pump(request.getInputStream(), new FileOutputStream(html));
-      
-      // ensure it's indexed with the correct title
       String id = IO.WithoutExtension(html);
       if (id.length() == 0) id = "→";
+      
+      // get the file's item in the index
       File root = new File(getServletContext().getRealPath("/doc"));
       Document index = loadIndexXhtml(root, html.getParentFile());
       XPath xpath = XPathFactory.newInstance().newXPath();
       Element item = (Element)xpath.evaluate("//*[@id='"+id+"']", index, XPathConstants.NODE);
-      if (item == null) { // not indexed yet
-        addItemToIndex(index, index.getFirstChild(), html);
-        saveIndexXhtml(index, html.getParentFile());
-      } else { // file is in the index        
-        Element a = (Element)item.getFirstChild();
-        String currentTitle = a.getTextContent();
-        String newTitle = title(html);
-        if (!currentTitle.equals(newTitle)) {
-          a.setTextContent(newTitle);
+      
+      String move = request.getParameter("move");
+      if (move == null) { // PUT full content
+                
+        // back up the old version
+        backup(html);
+        
+        // write the new version
+        IO.Pump(request.getInputStream(), new FileOutputStream(html));
+        
+        // ensure it's indexed with the correct title
+        if (item == null) { // not indexed yet
+          addItemToIndex(index, index.getFirstChild(), html);
           saveIndexXhtml(index, html.getParentFile());
+        } else { // file is in the index        
+          Element a = (Element)item.getFirstChild();
+          String currentTitle = a.getTextContent();
+          String newTitle = title(html);
+          if (!currentTitle.equals(newTitle)) {
+            a.setTextContent(newTitle);
+            saveIndexXhtml(index, html.getParentFile());
+          }
         }
-      }
-
-      // send JSON response
-      JsonWriter writer = Json.createWriter(response.getWriter());
-      writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
-      writer.close();
+        
+        // send JSON response
+        JsonWriter writer = Json.createWriter(response.getWriter());
+        writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
+        writer.close();
+      } else { // move request - only edit the position in the index
+        if (item != null) { // file is in the index
+          if (item.getTagName().equals("summary")) { // it's a directory item
+            // we will move the parent <detail> element
+            item = (Element)item.getParentNode();
+          }
+          // edit the index
+          Node previous = item;
+          Node next = item.getNextSibling();
+          Node parent = item.getParentNode();
+          if (move.equals("up")) { // move up
+            next = item;
+            previous = item.getPreviousSibling();
+          } // move up
+          if (previous != null && next != null) { // swap them
+            parent.removeChild(next);
+            parent.insertBefore(next, previous);
+            saveIndexXhtml(index, html.getParentFile());
+          }
+          // send JSON response
+          JsonWriter writer = Json.createWriter(response.getWriter());
+          writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
+          writer.close();
+        } else { // not in index
+          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+          JsonWriter writer = Json.createWriter(response.getWriter());
+          writer.writeObject(failureResult(request, "Record not found: {0}", id));
+          writer.close();
+        } // not in index
+      } // move request
       
     } catch (Exception x) {
       x.printStackTrace(System.err);
@@ -364,7 +400,7 @@ public class Doc extends LabbcatServlet {
     throws ServletException, IOException {
     String allow = "OPTIONS, GET";
     if (canEdit(request)) {
-      allow += ", PUT, POST, DELETE";
+      allow += ", PUT, POST, PATCH, DELETE";
     }
     response.addHeader("Allow", allow);
   }
@@ -516,7 +552,35 @@ public class Doc extends LabbcatServlet {
    * @param writer The response writer.
    */
   protected void indexDir(File root, File dir) throws Exception {
-    log("indexDir: " + dir.getPath());
+    if (!dir.exists()) { // file's directory doesn't exist
+      XPath xpath = XPathFactory.newInstance().newXPath();
+      // create all necessary directories
+      Files.createDirectory(dir.toPath());
+      // ensure the parent directory is in the grandparent directory's index
+      File parentDir = dir.getParentFile();
+      Document parentIndex = loadIndexXhtml(root, parentDir);
+      Element parentItem = (Element)xpath.evaluate(
+        "//*[@id='"+dir.getName()+"']", parentIndex, XPathConstants.NODE);
+      if (parentItem == null) { // not indexed yet
+        addItemToIndex(parentIndex, parentIndex.getFirstChild(), dir);
+        saveIndexXhtml(parentIndex, parentDir);
+      } else { // dir is in the parentIndex
+        // check that it's a details/summary entry, not a div
+        if (parentItem.getTagName().equals("div")) {
+          // convert item from div to details/summary
+          Element a = (Element)parentItem.getFirstChild();
+          parentItem.removeChild(a);              
+          Element summary = parentIndex.createElement("summary");
+          summary.appendChild(a);
+          summary.setAttribute("id", dir.getName());
+          Element details = parentIndex.createElement("details");
+          details.appendChild(summary);
+          parentItem.getParentNode().insertBefore(details, parentItem);
+          parentItem.getParentNode().removeChild(parentItem);
+          saveIndexXhtml(parentIndex, parentDir);
+        } // parentItem is a div (representing a file)
+      } // dir is in the parentIndex
+    } // file's directory doesn't exist
     DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
     Document index = docBuilder.newDocument();
     Element details = index.createElement("details");
