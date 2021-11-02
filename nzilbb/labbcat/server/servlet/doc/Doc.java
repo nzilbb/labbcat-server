@@ -400,7 +400,7 @@ public class Doc extends LabbcatServlet {
     throws ServletException, IOException {
     String allow = "OPTIONS, GET";
     if (canEdit(request)) {
-      allow += ", PUT, POST, PATCH, DELETE";
+      allow += ", PUT, POST, DELETE";
     }
     response.addHeader("Allow", allow);
   }
