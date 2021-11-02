@@ -23,7 +23,6 @@ package nzilbb.labbcat.server.servlet.doc;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -34,33 +33,66 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.regex.*;
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.servlet.LabbcatServlet;
 import nzilbb.util.IO;
 import org.apache.commons.fileupload.*;
 import org.apache.commons.fileupload.disk.*;
 import org.apache.commons.fileupload.servlet.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Provides CRUD operations for all files/directories under /doc/*.
  * <p> This allows for arbitrary documentation of a corpus, using wysiwiki, which allows
  * admin users to create, edit, and delete pages, providing read-only access to others.
+ * <p> URLs are assumed to identify a file with a ".html" suffix. 
+ * e.g. GETting <q>http://tld/doc/foo/bar</q> with return the contents of the 
+ * <q>docs/foo/bar.html</q> file. PUTting to the same URL updates the contents of that file,
+ * and DELETEing deletes the file.
+ * <p> For files that don't exist, 404 is returned, but also the body of a <q>template.html</q> 
+ * file if the user can edit. This way, the editing user can use the template as a starting point, 
+ * and PUT the body, with their changes, to create the file.
+ * <p> GETting <q>http://tld/doc/index</q> returns an HTML document that represents the whole
+ * tree of documents and subdirectories, with corresponding &lt;a&gt; links.
+ * <p> POSTting a file to any URL results in that file being written in a parallel file structure 
+ * called <q>doc-assets</q> - i.e. POSTing to the file <q>http://tld/doc/foo/bar.png</q> will 
+ * result in the creation of a file called <q>http://tld/doc-assets/foo/bar.png</q>, and this 
+ * URL is returned as part of the JSON-encoded response to the POST request.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/doc/*"})
 public class Doc extends LabbcatServlet {
+
+  DocumentBuilderFactory documentBuilderFactory;
+  TransformerFactory transformerFactory;
   
+  /** Constructor */
+  public Doc() {
+    documentBuilderFactory = DocumentBuilderFactory.newInstance();
+    transformerFactory = TransformerFactory.newInstance();
+  }
+
   /**
    * GET handler: Return the given HTML document, or a blank template if it doesn't exist
    * yet.
@@ -102,7 +134,6 @@ public class Doc extends LabbcatServlet {
           context = request.getHeader("Referer")
             .substring(baseUrl(request).length() + 4); // remove the full URL prefix
         }
-        log("context " + context);        
         String[] parts = context.split("/");
         // stream out, line by line, substituting "${base}" for a path to the root directory
         String base = ".";
@@ -123,9 +154,21 @@ public class Doc extends LabbcatServlet {
         IO.Pump(new FileInputStream(html), response.getOutputStream());
       }
     } else { // request for index      
-      File root = new File(getServletContext().getRealPath("/doc"));
-      StringBuilder html = new StringBuilder();
-      indexDir(root, root, baseUrl(request) + "/doc", "", response.getWriter());
+      try {
+        File root = new File(getServletContext().getRealPath("/doc"));
+        Document index = compileIndex(root, request);
+        DOMSource source = new DOMSource(index);
+        StreamResult result =  new StreamResult(response.getWriter());
+        Transformer xmlTransformer = transformerFactory.newTransformer();
+        xmlTransformer.transform(source, result);
+      } catch (Exception x) {
+        response.setContentType("application/json");
+        x.printStackTrace(System.err);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        JsonWriter writer = Json.createWriter(response.getWriter());
+        writer.writeObject(failureResult(request, x.getMessage()));
+        writer.close();      
+      }
     }
   }
   
@@ -149,12 +192,35 @@ public class Doc extends LabbcatServlet {
       }
       // back up the old version
       backup(html);
+      
       // write the new version
       IO.Pump(request.getInputStream(), new FileOutputStream(html));
+      
+      // ensure it's indexed with the correct title
+      String id = IO.WithoutExtension(html);
+      if (id.length() == 0) id = "→";
+      File root = new File(getServletContext().getRealPath("/doc"));
+      Document index = loadIndexXhtml(root, html.getParentFile());
+      XPath xpath = XPathFactory.newInstance().newXPath();
+      Element item = (Element)xpath.evaluate("//*[@id='"+id+"']", index, XPathConstants.NODE);
+      if (item == null) { // not indexed yet
+        addItemToIndex(index, index.getFirstChild(), html);
+        saveIndexXhtml(index, html.getParentFile());
+      } else { // file is in the index        
+        Element a = (Element)item.getFirstChild();
+        String currentTitle = a.getTextContent();
+        String newTitle = title(html);
+        if (!currentTitle.equals(newTitle)) {
+          a.setTextContent(newTitle);
+          saveIndexXhtml(index, html.getParentFile());
+        }
+      }
+
       // send JSON response
       JsonWriter writer = Json.createWriter(response.getWriter());
       writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
       writer.close();
+      
     } catch (Exception x) {
       x.printStackTrace(System.err);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -186,6 +252,36 @@ public class Doc extends LabbcatServlet {
         backup(html);
         // delete the file
         html.delete();
+
+        // remove from index
+        String id = IO.WithoutExtension(html);
+        if (id.length() > 0) { // but only if it's not the root document
+          File root = new File(getServletContext().getRealPath("/doc"));
+          Document index = loadIndexXhtml(root, html.getParentFile());
+          XPath xpath = XPathFactory.newInstance().newXPath();
+          Element item = (Element)xpath.evaluate("//*[@id='"+id+"']", index, XPathConstants.NODE);
+          if (item != null) { // it's in the index
+            if (item.getTagName().equals("summary")) { // it's a directory item
+              File dir = new File(html.getParentFile(), IO.WithoutExtension(html));
+              if (!dir.exists()
+                  || dir.listFiles(
+                    file -> file.getName().endsWith(".html") || file.isDirectory()).length == 0) {
+                // remove item (technically the parent of the item in this case)              
+                item.getParentNode().getParentNode().removeChild(item.getParentNode());
+                saveIndexXhtml(index, html.getParentFile());
+              }
+            } else { // it's an HTML document item
+              item.getParentNode().removeChild(item);
+              saveIndexXhtml(index, html.getParentFile());
+            }
+          } // it's in the index
+        } // it's not the root document
+
+        // send JSON response
+        JsonWriter writer = Json.createWriter(response.getWriter());
+        writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
+        writer.close();
+        
       } // file exists
     } catch (Exception x) {
       x.printStackTrace(System.err);
@@ -297,76 +393,217 @@ public class Doc extends LabbcatServlet {
       return null;
     }
   } // end of directory()
-  
+
   /**
    * Generate HTML for a recursive listing of the given file/directory.
    * @param root The root directory.
-   * @param f The file or directory to list.
+   * @param request The request.
+   * @return An XML document representing the structure of the documents, where each
+   * document is encosed in an HTML &lt;a&gt; tag, with directory links enclosed in 
+   * &lt;details&gt;&lt;summary&gt; tags, and each file link enclosed in a &lt;div&gt;.
+   */
+  protected Document compileIndex(File root, HttpServletRequest request) throws Exception {
+    XPath xpath = XPathFactory.newInstance().newXPath();
+    // recursively construct the index document
+    Document index = compileIndex(root, root, xpath);
+    // update URLs
+    String baseUrl = baseUrl(request) + "/doc/";
+    NodeList ids = (NodeList)xpath.evaluate("//@id", index, XPathConstants.NODESET);
+    for (int i = 0; i < ids.getLength(); i++) {
+      Attr id = (Attr)ids.item(i);
+      try {
+        Node element = id.getOwnerElement();
+        Node a = element.getFirstChild();
+        Node href = a.getAttributes().getNamedItem("href");
+        if (id.getNodeValue().equals("→")) { // root dir
+          href.setNodeValue(baseUrl);
+        } else {
+          href.setNodeValue(baseUrl + id.getNodeValue().replace("→", "/"));
+        }
+      } catch(Exception x) {
+        log("Couldn't set URL for node with id " + id.getNodeValue() + ": "+x);
+      }
+    } // next ID
+    return index;
+  }
+  /**
+   * Generate HTML for a recursive listing of the given file/directory.
+   * @param root The root directory.
+   * @param dir The directory to list the index of.
+   * @return An XML document representing the structure of the documents, where each
+   * document is encosed in an HTML &lt;a&gt; tag, with directory links enclosed in 
+   * &lt;details&gt;&lt;summary&gt; tags, and each file link enclosed in a &lt;div&gt;.
+   */
+  protected Document compileIndex(File root, File dir, XPath xpath) throws Exception {
+    DocumentBuilder xmlParser = documentBuilderFactory.newDocumentBuilder();
+    // get the index file
+    File xhtml = new File(dir, "index.xhtml");
+    if (!xhtml.exists()) {
+      indexDir(root, dir);
+    } // generate it
+    Document index = xmlParser.parse(xhtml);
+    
+    // for each <summary> entry, which represents a subdirectory
+    NodeList summaries = (NodeList)xpath.evaluate("//summary", index, XPathConstants.NODESET);
+    for (int s = 0; s < summaries.getLength(); s++) {
+      Node summary = summaries.item(s);
+      String id = summary.getAttributes().getNamedItem("id").getNodeValue();
+      if (id.length() == 0) continue; // this (root) directory
+      Node details = summary.getParentNode();
+      
+      // traverse the directory
+      File subDir = new File(dir, id);
+      
+      if (subDir.exists()) {
+        Document subIndex = compileIndex(root, subDir, xpath);
+        
+        // prefix all ids with the path
+        NodeList subIds = (NodeList)xpath.evaluate("//@id", subIndex, XPathConstants.NODESET);
+        for (int i = 0; i < subIds.getLength(); i++) {
+          Node subId = subIds.item(i);
+          subId.setNodeValue(id + "→" + subId.getNodeValue());
+        } // next subdirectory entry
+
+        // insert the entries into this summary
+        Node subDetails = subIndex.getFirstChild();
+        NodeList children = subDetails.getChildNodes();
+        for (int c = 0; c < children.getLength(); c++) {
+          Node child = children.item(c);
+          child = index.importNode(child, true);
+          details.appendChild(child);
+        } // next child        
+      } // subdir exists
+    } // next summary/subdir    
+        
+    return index;
+  }
+  
+  /**
+   * Loads the index.xhtml file for the given directory, creating it if necessary.
+   * @param root The root directory.
+   * @param dir The directory whose index.xhtml file should be loaded.
+   * @return The XHTML document.
+   */
+  protected Document loadIndexXhtml(File root, File dir) throws Exception {
+    File xhtml = new File(dir, "index.xhtml");
+    if (!xhtml.exists()) {
+      // generate it
+      indexDir(root, dir);
+    }
+    DocumentBuilder xmlParser = documentBuilderFactory.newDocumentBuilder();
+    return xmlParser.parse(xhtml);
+  } // end of loadIndexXhtml()
+  
+  /**
+   * Saves the given document as the index.xhtml for the given directory.
+   * @param index
+   * @param dir
+   */
+  protected void saveIndexXhtml(Document index, File dir) throws Exception {
+    File xhtml = new File(dir, "index.xhtml");
+    DOMSource source = new DOMSource(index);
+    StreamResult result =  new StreamResult(xhtml);
+    Transformer xmlTransformer = transformerFactory.newTransformer();
+    xmlTransformer.transform(source, result);    
+  } // end of saveIndexXhtml()
+
+  /**
+   * Generate XHTML index file for the given directory.
+   * @param root The root directory.
+   * @param dir The file or directory to list.
    * @param baseUrl Base URL for the servlet.
    * @param url relative URL for the parent.
    * @param writer The response writer.
    */
-  protected void indexDir(File root, File f, String baseUrl, String url, PrintWriter writer) {
-    String nameWithoutExension = IO.WithoutExtension(f);
-    if (f.isFile()) {
-      if (!f.getName().endsWith(".html")) { // only list HTML documents
-        return;
-      }
-      if (f.getName().equals(".html") && f.getParentFile().equals(root)) {
-        // do nothing here - we'll handle the .html file when we get to the dir
-        return;
-      }
-      if (f.getName().equals("template.html") && f.getParentFile().equals(root)) {
-        // We don't list the document template
-        return;
-      }
-      // if there's a directory with the same name
-      File dir = new File(f.getParentFile(), nameWithoutExension);
-      if (dir.exists()) { // do nothing here - we'll handle the .html file when we get to the dir
-        return;
-      }
+  protected void indexDir(File root, File dir) throws Exception {
+    log("indexDir: " + dir.getPath());
+    DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
+    Document index = docBuilder.newDocument();
+    Element details = index.createElement("details");
+    if (dir.equals(root)) { // details should be open at root
+      details.setAttribute("open", "true");
     }
-    String urlSuffix = nameWithoutExension;
-    String path = url+"/"+urlSuffix;
-    File documentFile = f;
-    if (f.isDirectory()) { // get the title from the file with the same name, if any
-      documentFile = new File(f.getParentFile(), f.getName() + ".html");
-      if (f == root) { // root directory has a different document file
-        documentFile = new File(f, ".html");
-        path = "";
+    index.appendChild(details);
+    File[] children = dir.listFiles();
+    Arrays.sort(children);
+    for (File child : children) {
+      // don't list the template
+      if (dir.equals(root) && child.getName().equals("template.html")) continue;
+      
+      String id = IO.WithoutExtension(child);
+      String title = id;
+      if (id.length() == 0) { // root listing
+        id = "→";
+        title = "Documentation";
       }
+      if (child.isDirectory()) { // subdirectory
+        File directoryDoc = new File(dir, child.getName()+".html");
+        if (directoryDoc.exists()) {
+          title = title(directoryDoc);
+        }
+      } else if (child.getName().endsWith(".html")) { // document        
+        // if there's a dirctory with the same name, skip the file here
+        File correspondingSubdirectory = new File(dir, IO.WithoutExtension(child));
+        if (correspondingSubdirectory.exists()
+            && !child.getName().equals(".html")) { // (but list ".html" which is the root doc)
+          continue;
+        }
+        // otherwise get the title
+        title = title(child);
+      } else { // skip any other files
+        continue;
+      }
+      addItemToIndex(index, details, child);
+    } // next child
+    saveIndexXhtml(index, dir);
+  } // end of indexDir()
+  
+  /**
+   * Adds the given fild as an index item.
+   * @param details
+   * @param item The html file or the directory to add.
+   * @param title
+   */
+  protected void addItemToIndex(Document index, Node details, File item) {
+    File html = item;
+    String id = IO.WithoutExtension(item);
+    File dir = new File(item.getParentFile(), id);
+    if (id.length() == 0) { // root listing
+      id = "→";
+    } else if (item.isDirectory()) {
+      dir = item;
+      html = new File(item.getParentFile(), dir.getName() + ".html");
     }
     boolean listAsDirectory = false;
-    if (f.isDirectory()) {
+    if (dir.exists()) {
       // check it actually has files in it
-      listAsDirectory = f.listFiles(
-        child -> child.getName().endsWith(".html") || child.isDirectory()).length > 0;
+      listAsDirectory = dir.listFiles(
+        file -> file.getName().endsWith(".html") || file.isDirectory()).length > 0;
     }
-    String id = path.replaceAll("^/","") // no leading slash
-      .replace("/","→") // no slashes
-      .replace("\"", "$quot;"); // ensure it can be an HTML attribute
-    if (!listAsDirectory) { // file
-      writer.print("<div id=\""+id+"\">");
-    } else if (f == root) {
-      writer.print("<details open><summary id=\"→\">");
-    } else {
-      writer.print("<details><summary id=\""+id+"\">");
-    }
-    writer.print("<a href=\""+baseUrl+path+"\">");
-    writer.print(title(documentFile));
-    writer.print("</a>");
-    if (!listAsDirectory) { // file
-      writer.println("</div>");
-    } else { // traverse the directory
-      writer.println("</summary>");
-      File[] children = f.listFiles();
-      Arrays.sort(children);
-      for (File child : children) {
-        indexDir(root, child, baseUrl, path, writer);
-      }
-      writer.println("</details>");
-    }
-  } // end of indexDir()
+    Element a = index.createElement("a");
+    a.setTextContent(title(html));
+    a.setAttribute("href","");
+    if (item.getName().equals(".html")) { // root document - just the summary
+      Element summary = index.createElement("summary");
+      summary.appendChild(a);
+      summary.setAttribute("id", id);
+      details.appendChild(summary);
+    } else if (listAsDirectory) {
+      // in details/summary
+      Element summary = index.createElement("summary");
+      summary.appendChild(a);
+      summary.setAttribute("id", id);
+      Element childDetails = index.createElement("details");
+      childDetails.appendChild(summary);
+      details.appendChild(childDetails);
+    } else { // .html file
+      // in div
+      Element div = index.createElement("div");
+      div.appendChild(a);
+      div.setAttribute("id", id);
+      details.appendChild(div);
+    } // .html file
+  } // end of addItemToIndex()
   
   static final Pattern titlePattern = Pattern.compile(".*<title>(.*)</title>.*");
   /**
@@ -404,8 +641,9 @@ public class Doc extends LabbcatServlet {
   /**
    * Copies the current version of the given file, if any.
    * @param html
+   * @return true if the file exists, false otherwise
    */
-  protected void backup(File html) {
+  protected boolean backup(File html) {
     if (html.exists()) {
       // there's and older version of the file, take a backup
       File backup = new File(
@@ -418,7 +656,9 @@ public class Doc extends LabbcatServlet {
           log("Doc.backup("+html.getPath()+"): " + exception.toString());
         }
       }
+      return true;
     }
+    return false;
   } // end of backup()
 
   /**
