@@ -21,6 +21,10 @@ header, footer {
 #main > nav div {
     padding-left: 20px;
 }
+#main > nav span {
+    float: right;
+    cursor: default;
+}
 .current > a {
     font-weight: bold;
 }

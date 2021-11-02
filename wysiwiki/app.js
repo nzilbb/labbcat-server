@@ -138,6 +138,7 @@ const deleteButton = `<img title="Delete" src="${baseUrl}/../user-interface/en/a
 $.get(`${baseUrl}/../header`, (html, status)=>{ $("body>header").html(html); });
 $.get(`${baseUrl}/../footer`, (html, status)=>{ $("body>footer").html(html); });
 
+let canEdit = false;
 function loadNavigation() {
     $.get(`${baseUrl}/index`, (html, status)=>{
         // set the nav content
@@ -152,9 +153,38 @@ function loadNavigation() {
             if (parentId == id) parentId = "→";
             id = parentId;
         } while (id != "→");
+        // add move buttons
+        if (canEdit) {
+            // add ordering buttons...
+
+            // if it's a div (a page) ...
+            
+            // move-up button unless it's already at the top (first-child is <summary>)
+            $(`div[id='${idInMenu}']:not(:nth-child(2))`).append(
+                $("<span title='Move up'>▲</span>").on("click", (e)=>{
+                    move("up", $(e.target).prevAll("a").attr("href"));
+                }));
+            // move-down button unless it's already at the bottom
+            $(`div[id='${idInMenu}']:not(:last-child)`).append(
+                $("<span title='Move down'>▼</span>").on("click", (e)=>{
+                    move("down", $(e.target).prevAll("a").attr("href"));
+                }));
+
+            // if it's a summary (a directory) ...
+            
+            // move-up button unless it's already at the top (first-child is <summary>)
+            $(`details:not(:nth-child(2))>summary[id='${idInMenu}']`).append(
+                $("<span title='Move up'>▲</span>").on("click", (e)=>{
+                    move("up", $(e.target).prevAll("a").attr("href"));
+                }));
+            // move-down button unless it's already at the bottom
+            $(`details:not(:last-child)>summary[id='${idInMenu}']`).append(
+                $("<span title='Move down'>▼</span>").on("click", (e)=>{
+                    move("down", $(e.target).prevAll("a").attr("href"));
+                }));
+        }
     });
 }
-loadNavigation();
 
 let articleEditor = null;
 
@@ -162,7 +192,9 @@ $.ajax({
     type: "OPTIONS",
     url: document.URL
 }).done((data, status, request)=>{
+    loadNavigation();
     if (request.getResponseHeader("Allow").includes("PUT")) {
+        canEdit = true;
         $("#main > aside").append(
             `<button id="edit">${editButton}</button>`);
         if ($("title").text().startsWith("*")) { // new page
@@ -270,6 +302,15 @@ function savePage() {
         }).fail(r=>{
             alert(`${r.status}: ${r.statusText}\n${r.responseText}`);
         });
+    });
+}
+
+function move(direction, url) {
+    $.ajax({
+        type: "PUT",
+        url: url + "?move="+direction
+    }).done(data=>{
+        loadNavigation();
     });
 }
 
