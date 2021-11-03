@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -75,10 +76,10 @@ import org.w3c.dom.NodeList;
  * and PUT the body, with their changes, to create the file.
  * <p> GETting <q>http://tld/doc/index</q> returns an HTML document that represents the whole
  * tree of documents and subdirectories, with corresponding &lt;a&gt; links.
- * <p> POSTting a file to any URL results in that file being written in a parallel file structure 
- * called <q>doc-assets</q> - i.e. POSTing to the file <q>http://tld/doc/foo/bar.png</q> will 
- * result in the creation of a file called <q>http://tld/doc-assets/foo/bar.png</q>, and this 
- * URL is returned as part of the JSON-encoded response to the POST request.
+ * <p> POSTting a file to any URL results in that file being written  
+ * - i.e. POSTing to the file <q>http://tld/doc/foo/bar.png</q> will 
+ * result in the creation of a file called <q>http://tld/doc/foo/bar.png</q>, and a relative 
+ * URL to it is returned as part of the JSON-encoded response to the POST request.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @WebServlet({"/doc/*"})
@@ -121,10 +122,21 @@ public class Doc extends LabbcatServlet {
     response.setContentType("text/html");
     if (!"/index".equals(request.getPathInfo())) {
       File html = file(request);
-      if (!html.exists()) {
-        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        // return 404, but also a template for creating a new document
-        html = new File(getServletContext().getRealPath("/doc/template.html"));
+      if (!html.exists()) { // not an HTML document or directory
+        File asset = new File(getServletContext().getRealPath("/doc"+request.getPathInfo()));
+        if (asset.exists()) { // pass to the 'default' servlet
+          // unfortunately the forward() method doesn't allow "static"
+          // to set the content type, or any headers, so we do it here...		  
+          response.setContentType(
+            URLConnection.guessContentTypeFromName(request.getPathInfo()));
+          response.setDateHeader(
+            "Expires", new java.util.Date().getTime() + (1000*60*60*24*7)); // next week
+          getServletContext().getNamedDispatcher("default").forward(request, response);
+        } else {
+          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+          // return 404, but also a template for creating a new document
+          html = new File(getServletContext().getRealPath("/doc/template.html"));
+        }
       }
       if (html.getName().equals("template.html")) { // template
         // stream out the contents, substituting "${base}" for a path to the root directory
@@ -169,7 +181,7 @@ public class Doc extends LabbcatServlet {
         writer.writeObject(failureResult(request, x.getMessage()));
         writer.close();      
       }
-    }
+    } // request for index
   }
   
   /**
@@ -359,11 +371,10 @@ public class Doc extends LabbcatServlet {
           writeResponse(response, failureResult(request, "No file received."));
         } else { // file found
           
-          File file = new File(getServletContext().getRealPath("/doc-assets"+request.getPathInfo()));
+          File file = new File(getServletContext().getRealPath("/doc"+request.getPathInfo()));
           if (!file.getParentFile().exists()) {
             Files.createDirectories(file.getParentFile().toPath());
           }
-          String url = "../doc-assets" + request.getPathInfo(); // relative URL
           if (file.exists()) {
             // get a non-existent file name
             File dir = file.getParentFile();
@@ -373,13 +384,12 @@ public class Doc extends LabbcatServlet {
             do {
               file = new File(dir, name + "-" + (++i) + "." + ext);
             } while(file.exists());
-            url = url.replaceAll("/[^/]+\\.[^.]+$", "/"+file.getName());
           }
           fileItem.write(file);
 
           JsonWriter writer = Json.createWriter(response.getWriter());
           JsonObjectBuilder model = Json.createObjectBuilder();
-          model.add("url", url);
+          model.add("url", file.getName());
           writer.writeObject(successResult(request, model.build(), null));
           writer.close();
           
