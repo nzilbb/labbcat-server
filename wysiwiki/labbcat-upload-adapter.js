@@ -59,13 +59,9 @@ export default class LabbcatUploadAdapter {
             // at least the "default" URL, pointing to the image on the server.
             // This URL will be used to display the image in the content. Learn more in the
             // UploadAdapter#upload documentation.
-            // TODO for some reason the "default" servlet takes time to realise the file is there - fix this!
-            window.setTimeout(()=>{ 
-                resolve( {
-                    default: response.model.url
-                    //TODO delete                default: response.url
-                } );
-            }, 5000);
+            resolve( {
+                default: response.model.url
+            } );
         } );
         
         // Upload progress when it is supported. The file loader has the #uploadTotal and #uploaded

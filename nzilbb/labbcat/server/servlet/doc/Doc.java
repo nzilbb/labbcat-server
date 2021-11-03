@@ -124,14 +124,13 @@ public class Doc extends LabbcatServlet {
       File html = file(request);
       if (!html.exists()) { // not an HTML document or directory
         File asset = new File(getServletContext().getRealPath("/doc"+request.getPathInfo()));
-        if (asset.exists()) { // pass to the 'default' servlet
-          // unfortunately the forward() method doesn't allow "static"
-          // to set the content type, or any headers, so we do it here...		  
+        if (asset.exists()) { // serve the content directly
           response.setContentType(
             URLConnection.guessContentTypeFromName(request.getPathInfo()));
-          response.setDateHeader(
-            "Expires", new java.util.Date().getTime() + (1000*60*60*24*7)); // next week
-          getServletContext().getNamedDispatcher("default").forward(request, response);
+          response.setDateHeader( // expires in a week
+            "Expires", new java.util.Date().getTime() + (1000*60*60*24*7));
+          IO.Pump(new FileInputStream(asset), response.getOutputStream());
+          return;
         } else {
           response.setStatus(HttpServletResponse.SC_NOT_FOUND);
           // return 404, but also a template for creating a new document
@@ -389,7 +388,7 @@ public class Doc extends LabbcatServlet {
 
           JsonWriter writer = Json.createWriter(response.getWriter());
           JsonObjectBuilder model = Json.createObjectBuilder();
-          model.add("url", file.getName());
+          model.add("url", "."+request.getPathInfo().replaceAll("[^/]+$", file.getName()));
           writer.writeObject(successResult(request, model.build(), null));
           writer.close();
           
