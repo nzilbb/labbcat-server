@@ -22,38 +22,28 @@
 package nzilbb.labbcat.server.servlet.annotator;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.sql.Connection;
+import java.net.URL;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Vector;
 import java.util.regex.*;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nzilbb.ag.Layer;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.StoreException;
 import nzilbb.ag.automation.*;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
-import nzilbb.ag.automation.util.RequestRouter;
 import nzilbb.ag.automation.util.RequestException;
+import nzilbb.ag.automation.util.RequestRouter;
+import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.servlet.*;
 import nzilbb.util.IO;
@@ -243,6 +233,20 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
                
           // store task parameters in DB
           store.saveAnnotatorTaskParameters(taskId, parameters);
+
+          // create any layers that are required
+          final HashSet<String> existingLayers = new HashSet<String>(
+            Arrays.asList(store.getLayerIds()));
+          // traverse top-down through schema, ensuring that all layers exist
+          Vector<Layer> nonexistentLayers = (new LayerHierarchyTraversal<Vector<Layer>>(
+                                               new Vector<Layer>(), annotator.getSchema()) {
+              protected void pre(Layer layer) {
+                if (!existingLayers.contains(layer.getId())) result.add(layer);
+              }
+            }).getResult();
+          for (Layer layer : nonexistentLayers) {
+            store.newLayer(layer);
+          }
         } else if (resource.equals("/util.js")) {
           URL url = descriptor.getClass().getResource("util.js");
           if (url != null) {
