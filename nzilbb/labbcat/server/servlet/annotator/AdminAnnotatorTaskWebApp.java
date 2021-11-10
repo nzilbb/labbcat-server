@@ -218,34 +218,45 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
 
           // check the parameters don't generate an error
           String parameters = IO.InputStreamToString(request.getInputStream());
-          annotator.setTaskParameters(parameters);
-               
-          String finishedResponse
-            ="<html><head><title>"
-            +localize(request, "Task Parameters")+"</title></head><body>"
-            +"<p style='text-align: center;'><big>"+localize(request, "Thanks.")+"</big></p>"
-            +"<script type='text/javascript'>"
-            +"window.parent.postMessage({ resource: 'setTaskParameters' }, '*');"
-            +"</script>"
-            +"</body></html>";
-          stream = new ByteArrayInputStream(finishedResponse.getBytes());
-          response.setContentType("text/html");
-               
-          // store task parameters in DB
-          store.saveAnnotatorTaskParameters(taskId, parameters);
-
-          // create any layers that are required
-          final HashSet<String> existingLayers = new HashSet<String>(
-            Arrays.asList(store.getLayerIds()));
-          // traverse top-down through schema, ensuring that all layers exist
-          Vector<Layer> nonexistentLayers = (new LayerHierarchyTraversal<Vector<Layer>>(
-                                               new Vector<Layer>(), annotator.getSchema()) {
-              protected void pre(Layer layer) {
-                if (!existingLayers.contains(layer.getId())) result.add(layer);
-              }
-            }).getResult();
-          for (Layer layer : nonexistentLayers) {
-            store.newLayer(layer);
+          try {
+            annotator.setTaskParameters(parameters);
+            
+            String finishedResponse
+              ="<html><head><title>"
+              +localize(request, "Task Parameters")+"</title></head><body>"
+              +"<p style='text-align: center;'><big>"+localize(request, "Thanks.")+"</big></p>"
+              +"<script type='text/javascript'>"
+              +"window.parent.postMessage({ resource: 'setTaskParameters' }, '*');"
+              +"</script>"
+              +"</body></html>";
+            stream = new ByteArrayInputStream(finishedResponse.getBytes());
+            response.setContentType("text/html");
+            
+            // store task parameters in DB
+            store.saveAnnotatorTaskParameters(taskId, parameters);
+            
+            // create any layers that are required
+            final HashSet<String> existingLayers = new HashSet<String>(
+              Arrays.asList(store.getLayerIds()));
+            // traverse top-down through schema, ensuring that all layers exist
+            Vector<Layer> nonexistentLayers = (new LayerHierarchyTraversal<Vector<Layer>>(
+                                                 new Vector<Layer>(), annotator.getSchema()) {
+                protected void pre(Layer layer) {
+                  if (!existingLayers.contains(layer.getId())) result.add(layer);
+                }
+              }).getResult();
+            for (Layer layer : nonexistentLayers) {
+              store.newLayer(layer);
+            }
+          } catch (InvalidConfigurationException x) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            String finishedResponse
+              ="<html><head><title>"
+              +localize(request, "Task Parameters")+"</title></head><body>"
+              +"<p style='text-align: center; color: red;'><big>"+x.getMessage()+"</big></p>"
+              +"</body></html>";
+            stream = new ByteArrayInputStream(finishedResponse.getBytes());
+            response.setContentType("text/html");
           }
         } else if (resource.equals("/util.js")) {
           URL url = descriptor.getClass().getResource("util.js");
@@ -302,9 +313,6 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
         cacheStore(store);
       }
     } catch (StoreException x) { // getAnnotatorTaskParameters or saveAnnotatorTaskParameters
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      writeResponse(response, failureResult(x));
-    } catch (InvalidConfigurationException x) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       writeResponse(response, failureResult(x));
     } catch (PermissionException x) {
