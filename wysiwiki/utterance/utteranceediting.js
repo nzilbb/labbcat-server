@@ -42,7 +42,31 @@ export default class UtteranceEditing extends Plugin {
             allowIn: 'utterance',
 
             // Allow content which is allowed in the root (e.g. paragraphs).
-            allowContentOf: '$root'
+            //allowContentOf: '$root'
+        } );
+
+        schema.register( 'token', {
+            // Cannot be split or left by the caret.
+            isLimit: true,
+            
+            allowIn: 'utteranceDescription',
+        } );
+
+        schema.register( 'word', {
+            // Cannot be split or left by the caret.
+            isLimit: true,
+            
+            allowIn: 'token',
+            allowContentOf: '$block'
+        } );
+
+        schema.register( 'tag', {
+            // Cannot be split or left by the caret.
+            isLimit: true,
+            
+            allowIn: 'token',
+            allowContentOf: '$block',
+            allowAttributes: ['layer']
         } );
 
         schema.addChildCheck( ( context, childDefinition ) => {
@@ -126,6 +150,76 @@ export default class UtteranceEditing extends Plugin {
                 // Note: You use a more specialized createEditableElement() method here.
                 const div = viewWriter.createEditableElement( 'div', { class: 'utterance-description' } );
                 
+                return toWidgetEditable( div, viewWriter );
+            }
+        } );
+
+        // <token> converters
+        conversion.for( 'upcast' ).elementToElement( {
+            model: 'token',
+            view: {
+                name: 'div',
+                classes: 'token'
+            }
+        } );
+        conversion.for( 'dataDowncast' ).elementToElement( {
+            model: 'token',
+            view: {
+                name: 'div',
+                classes: 'token'
+            }
+        } );
+        conversion.for( 'editingDowncast' ).elementToElement( {
+            model: 'token',
+            view: ( modelElement, { writer: viewWriter } ) => {
+                const div = viewWriter.createEditableElement( 'div', { class: 'token' } );
+                return toWidgetEditable( div, viewWriter );
+            }
+        } );
+
+        // <word> converters
+        conversion.for( 'upcast' ).elementToElement( {
+            model: 'word',
+            view: {
+                name: 'div',
+                classes: 'word'
+            }
+        } );
+        conversion.for( 'dataDowncast' ).elementToElement( {
+            model: 'word',
+            view: {
+                name: 'div',
+                classes: 'word'
+            }
+        } );
+        conversion.for( 'editingDowncast' ).elementToElement( {
+            model: 'word',
+            view: ( modelElement, { writer: viewWriter } ) => {
+                const div = viewWriter.createEditableElement( 'div', { class: 'word' } );
+                return toWidgetEditable( div, viewWriter );
+            }
+        } );
+
+        // <tag> converters
+        conversion.attributeToAttribute( { model: 'layer', view: 'title' } );
+        conversion.for( 'upcast' ).elementToElement( {
+            model: 'tag',
+            view: {
+                name: 'div',
+                classes: 'tag'
+            }
+        } );
+        conversion.for( 'dataDowncast' ).elementToElement( {
+            model: 'tag',
+            view: {
+                name: 'div',
+                classes: 'tag'
+            }
+        } );
+        conversion.for( 'editingDowncast' ).elementToElement( {
+            model: 'tag',
+            view: ( modelElement, { writer: viewWriter } ) => {
+                const div = viewWriter.createEditableElement( 'div', { class: 'tag' } );
                 return toWidgetEditable( div, viewWriter );
             }
         } );
