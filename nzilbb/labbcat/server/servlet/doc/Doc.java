@@ -685,7 +685,7 @@ public class Doc extends LabbcatServlet {
    * @return The contents of the &lt;title&gt; tag in the file, or the file name without
    * the suffix, if there is none.
    */
-  protected String title(File html) {
+  public static String title(File html) {
     if (html.exists() && html.getName().endsWith(".html")) {
       try {
         BufferedReader reader = new BufferedReader(new FileReader(html));
@@ -704,7 +704,7 @@ public class Doc extends LabbcatServlet {
           return title;
         }
       } catch(Exception exception) {
-        log("Doc.title("+html.getPath()+"): " + exception.toString());
+        //log("Doc.title("+html.getPath()+"): " + exception.toString());
       }
     } // file exists and is .html
     return IO.WithoutExtension(html);
