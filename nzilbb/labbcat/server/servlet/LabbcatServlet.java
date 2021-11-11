@@ -140,7 +140,6 @@ public class LabbcatServlet extends HttpServlet {
     */
    protected synchronized SqlGraphStoreAdministration getStore(HttpServletRequest request)
       throws SQLException, PermissionException {
-      Connection connection = newConnection();
       return new SqlGraphStoreAdministration(
          baseUrl(request), connectionFactory, request.getRemoteUser());
    } // end of getStore()
