@@ -7911,6 +7911,8 @@ public class SqlGraphStore implements GraphStore {
           return descriptor;
         }
       } catch(Exception exception) {
+        System.err.println("getAnnotatorDescriptor " + annotatorId + ": " + exception);
+        exception.printStackTrace(System.err);
       }
     } // next possible jar
     return null;
