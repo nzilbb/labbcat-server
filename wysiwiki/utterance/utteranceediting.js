@@ -17,60 +17,55 @@ export default class UtteranceEditing extends Plugin {
         const schema = this.editor.model.schema;
         
         schema.register( 'utterance', {
-            // Behaves like a self-contained object (e.g. an image).
             isObject: true,
-            
-            // Allow in places where other blocks are allowed (e.g. directly in the root).
             allowWhere: '$block'
         } );
         
         schema.register( 'utteranceAudio', {
-            // Cannot be split or left by the caret.
             isLimit: true,
-            
             allowIn: 'utterance',
             allowAttributes: ['source','controls'],
-            
-            // Allow content which is allowed in blocks (i.e. text with attributes).
             allowContentOf: '$block'
         } );
         
         schema.register( 'utteranceDescription', {
-            // Cannot be split or left by the caret.
             isLimit: true,
-            
             allowIn: 'utterance',
-
-            // Allow content which is allowed in the root (e.g. paragraphs).
-            //allowContentOf: '$root'
         } );
 
-        schema.register( 'token', {
-            // Cannot be split or left by the caret.
+        schema.register( 'phrase', {
             isLimit: true,
-            
+            allowIn: 'utteranceDescription',
+            allowContentOf: '$block',
+            allowAttributes: ['layer']
+        } );
+
+        schema.register( 'words', {
+            isLimit: true,
             allowIn: 'utteranceDescription',
         } );
 
-        schema.register( 'word', {
-            // Cannot be split or left by the caret.
+        schema.register( 'token', {
             isLimit: true,
-            
+            allowIn: 'words',
+        } );
+
+        schema.register( 'word', {
+            isLimit: true,
             allowIn: 'token',
             allowContentOf: '$block'
         } );
 
         schema.register( 'tag', {
-            // Cannot be split or left by the caret.
             isLimit: true,
-            
             allowIn: 'token',
             allowContentOf: '$block',
             allowAttributes: ['layer']
         } );
 
         schema.addChildCheck( ( context, childDefinition ) => {
-            if ( context.endsWith( 'utteranceDescription' ) && childDefinition.name == 'utterance' ) {
+            if ( context.endsWith( 'utteranceDescription' )
+                 && childDefinition.name == 'utterance' ) {
                 return false;
             }
         } );
@@ -150,6 +145,52 @@ export default class UtteranceEditing extends Plugin {
                 // Note: You use a more specialized createEditableElement() method here.
                 const div = viewWriter.createEditableElement( 'div', { class: 'utterance-description' } );
                 
+                return toWidgetEditable( div, viewWriter );
+            }
+        } );
+
+        // <phrase> converters
+        conversion.for( 'upcast' ).elementToElement( {
+            model: 'phrase',
+            view: {
+                name: 'div',
+                classes: 'phrase'
+            }
+        } );
+        conversion.for( 'dataDowncast' ).elementToElement( {
+            model: 'phrase',
+            view: {
+                name: 'div',
+                classes: 'phrase'
+            }
+        } );
+        conversion.for( 'editingDowncast' ).elementToElement( {
+            model: 'phrase',
+            view: ( modelElement, { writer: viewWriter } ) => {
+                const div = viewWriter.createEditableElement( 'div', { class: 'phrase' } );
+                return toWidgetEditable( div, viewWriter );
+            }
+        } );
+
+        // <words> converters
+        conversion.for( 'upcast' ).elementToElement( {
+            model: 'words',
+            view: {
+                name: 'div',
+                classes: 'words'
+            }
+        } );
+        conversion.for( 'dataDowncast' ).elementToElement( {
+            model: 'words',
+            view: {
+                name: 'div',
+                classes: 'words'
+            }
+        } );
+        conversion.for( 'editingDowncast' ).elementToElement( {
+            model: 'words',
+            view: ( modelElement, { writer: viewWriter } ) => {
+                const div = viewWriter.createEditableElement( 'div', { class: 'words' } );
                 return toWidgetEditable( div, viewWriter );
             }
         } );

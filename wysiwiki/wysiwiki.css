@@ -99,11 +99,18 @@ aside > button > img {
     background: #FFFFFF;
     border-radius: 10px;
     display: flex;
+    flex-direction: column;
+}
+.phrase::before {
+    content: attr(title) " : ";
+    font-weight: bold;
+}
+.words {
+    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
 }
-
 .token {
     padding: 2px;
     display: flex;
