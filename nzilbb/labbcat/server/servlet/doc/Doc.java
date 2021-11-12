@@ -124,7 +124,8 @@ public class Doc extends LabbcatServlet {
       File html = file(request);
       if (!html.exists()) { // not an HTML document or directory
         File asset = new File(getServletContext().getRealPath("/doc"+request.getPathInfo()));
-        if (asset.exists()) { // serve the content directly
+        if (asset.exists() && !asset.isDirectory()) {
+          // serve the content directly
           response.setContentType(
             URLConnection.guessContentTypeFromName(request.getPathInfo()));
           response.setDateHeader( // expires in a week
