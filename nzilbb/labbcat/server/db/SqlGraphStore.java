@@ -7919,6 +7919,68 @@ public class SqlGraphStore implements GraphStore {
   } // end of getAnnotatorDescriptor()
 
   /**
+   * Supplies a list of automation tasks for the identified annotator.
+   * @param annotatorId The ID of the annotator.
+   * @return A map of task IDs to descriptions.
+   * @throws StoreException If an error prevents the operation.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public Map<String,String> getAnnotatorTasks(String annotatorId)
+    throws StoreException, PermissionException {
+    
+    try {
+      LinkedHashMap<String,String> tasks = new LinkedHashMap<String,String>();
+      PreparedStatement sql = getConnection().prepareStatement(
+        "SELECT task_id, description FROM automation"
+        +" WHERE annotator_id = ? ORDER BY execution_order, automation_id");
+      sql.setString(1, annotatorId);
+      ResultSet rs = sql.executeQuery();
+      try {
+        while (rs.next()) {
+          tasks.put(rs.getString("task_id"), rs.getString("description"));
+        } // next task
+      } finally {
+        rs.close();
+        sql.close();
+      }
+      return tasks;
+    } catch (SQLException x) {
+      throw new StoreException(x);
+    }
+  } // end of getAnnotatorTasks()   
+   
+  /**
+   * Supplies the given task's parameter string.
+   * @param taskId The ID of the automation task.
+   * @return The task parameters, serialized as a string, or null if the
+   * <var>taskId</var> does not exist. 
+   * @throws StoreException If an error prevents the operation.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public String getAnnotatorTaskParameters(String taskId)
+    throws StoreException, PermissionException {
+    
+    try {
+      PreparedStatement sql = getConnection().prepareStatement(
+        "SELECT parameters FROM automation WHERE task_id = ?");
+      sql.setString(1, taskId);
+      ResultSet rs = sql.executeQuery();
+      try {
+        if (rs.next()) {
+          return rs.getString("parameters");
+        } else {
+          throw new StoreException("No such task: " + taskId);
+        }
+      } finally {
+        rs.close();
+        sql.close();
+      }
+    } catch (SQLException x) {
+      throw new StoreException(x);
+    }
+  } // end of getAnnotatorTaskParameters()
+  
+  /**
    * Lists descriptors of all transcribers that are installed.
    * @return A list of descriptors of all transcribers that are installed.
    */

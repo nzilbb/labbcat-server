@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -199,35 +199,6 @@ import org.xml.sax.*;
         </li>
       </ul>
 
-      <a id="getAnnotatorTasks(java.lang.String)">
-        <!--   -->
-      </a>
-      <ul class="blockListLast">
-        <li class="blockList">
-          <h4>/api/admin/store/getAnnotatorTasks</h4>
-          <div class="block">Supplies a list of automation tasks for the identified annotator.</div>
-          <dl>
-            <dt><span class="paramLabel">Parameters:</span></dt>
-            <dt> annotatorId </dt><dd> The ID of the annotator that performs the tasks. </dd>
-          </dl>
-          <div>The response contains a model which represents a map of <var>taskId</var>s to <var>description</var>s.</div> 
-        </li>
-      </ul>
-
-      <a id="getAnnotatorTaskParameters(java.lang.String)">
-        <!--   -->
-      </a>
-      <ul class="blockListLast">
-        <li class="blockList">
-          <h4>/api/admin/store/getAnnotatorTaskParameters</h4>
-          <div class="block">Supplies the given task's parameter string.</div>
-          <dl>
-            <dt><span class="paramLabel">Parameters:</span></dt>
-            <dt> taskId </dt>     <dd> The ID of the task, which must not already exist. </dd>
-          </dl>
-        </li>
-      </ul>
-
       <a id="saveAnnotatorTaskDescription(java.lang.String,java.lang.String)">
         <!--   -->
       </a>
@@ -350,13 +321,6 @@ public class StoreAdministration extends Store {
          //    json = deleteGraph(request, response, store);
          // }
       } // only if it's a POST request
-
-      // these can be GET or POST
-      if (pathInfo.endsWith("getannotatortasks")) {
-         json = getAnnotatorTasks(request, response, store);
-      } else if (pathInfo.endsWith("getannotatortaskparameters")) {
-         json = getAnnotatorTaskParameters(request, response, store);
-      } 
       
       if (json == null) { // either not POST or not a recognized function
          json = super.invokeFunction(request, response, store);
@@ -479,52 +443,6 @@ public class StoreAdministration extends Store {
          return failureResult(errors);
       }
    }      
-
-   /**
-    * Supplies a list of automation tasks for the identified annotator.
-    * @param request The HTTP request with parameter:
-    * <dl>
-    *  <dt> annotatorId </dt><dd> The ID of the annotator that performs the tasks. </dd>
-    * </dl>
-    * @param response The HTTP response.
-    * @param store A graph store object.
-    * @return A JSON response for returning to the caller.
-    */
-   protected JsonObject getAnnotatorTasks(
-      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
-      Vector<String> errors = new Vector<String>();
-      // get/validate the parameters
-      String annotatorId = request.getParameter("annotatorId");
-      if (annotatorId == null) errors.add(localize(request, "No Annotator ID specified."));
-      if (errors.size() > 0) return failureResult(errors);
-
-      return successResult(
-         request, store.getAnnotatorTasks(annotatorId), null);
-   }      
-
-   /**
-    * Supplies the given task's parameter string.
-    * @param request The HTTP request with parameter:
-    * <dl>
-    *  <dt> taskId </dt><dd> The ID of the automation task. </dd>
-    * </dl>
-    * @param response The HTTP response.
-    * @param store A graph store object.
-    * @return A JSON response for returning to the caller.
-    */
-   protected JsonObject getAnnotatorTaskParameters(
-      HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-      throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
-      Vector<String> errors = new Vector<String>();
-      // get/validate the parameters
-      String taskId = request.getParameter("taskId");
-      if (taskId == null) errors.add(localize(request, "No ID specified."));
-      if (errors.size() > 0) return failureResult(errors);
-
-      return successResult(
-         request, store.getAnnotatorTaskParameters(taskId), null);
-   }
    
    /**
     * Update the annotator task description.

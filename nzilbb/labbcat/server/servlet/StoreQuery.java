@@ -669,6 +669,35 @@ import org.xml.sax.*;
       </li>
       </ul>
 
+      <a id="getAnnotatorTasks(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/admin/store/getAnnotatorTasks</h4>
+          <div class="block">Supplies a list of automation tasks for the identified annotator.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dt> annotatorId </dt><dd> The ID of the annotator that performs the tasks. </dd>
+          </dl>
+          <div>The response contains a model which represents a map of <var>taskId</var>s to <var>description</var>s.</div> 
+        </li>
+      </ul>
+
+      <a id="getAnnotatorTaskParameters(java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockListLast">
+        <li class="blockList">
+          <h4>/api/admin/store/getAnnotatorTaskParameters</h4>
+          <div class="block">Supplies the given task's parameter string.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dt> taskId </dt>     <dd> The ID of the task. </dd>
+          </dl>
+        </li>
+      </ul>
+
       <a id="getTranscriberDescriptors()">
       <!--   -->
       </a>
@@ -841,6 +870,10 @@ public class StoreQuery extends LabbcatServlet {
         json = getDeserializerDescriptors(request, response, store);
       } else if (pathInfo.endsWith("getannotatordescriptors")) {
         json = getAnnotatorDescriptors(request, response, store);
+      } else if (pathInfo.endsWith("getannotatortasks")) {
+         json = getAnnotatorTasks(request, response, store);
+      } else if (pathInfo.endsWith("getannotatortaskparameters")) {
+         json = getAnnotatorTaskParameters(request, response, store);
       } else if (pathInfo.endsWith("gettranscriberdescriptors")) {
         json = getTranscriberDescriptors(request, response, store);
       }
@@ -1514,6 +1547,52 @@ public class StoreQuery extends LabbcatServlet {
       request, descriptors, descriptors.length == 0?"There are no annotators.":null);
   }
 
+  /**
+   * Supplies a list of automation tasks for the identified annotator.
+   * @param request The HTTP request with parameter:
+   * <dl>
+   *  <dt> annotatorId </dt><dd> The ID of the annotator that performs the tasks. </dd>
+   * </dl>
+   * @param response The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject getAnnotatorTasks(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    Vector<String> errors = new Vector<String>();
+    // get/validate the parameters
+    String annotatorId = request.getParameter("annotatorId");
+    if (annotatorId == null) errors.add(localize(request, "No Annotator ID specified."));
+    if (errors.size() > 0) return failureResult(errors);
+    
+    return successResult(
+      request, store.getAnnotatorTasks(annotatorId), null);
+  }      
+  
+  /**
+   * Supplies the given task's parameter string.
+   * @param request The HTTP request with parameter:
+   * <dl>
+   *  <dt> taskId </dt><dd> The ID of the automation task. </dd>
+   * </dl>
+   * @param response The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject getAnnotatorTaskParameters(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    Vector<String> errors = new Vector<String>();
+    // get/validate the parameters
+    String taskId = request.getParameter("taskId");
+    if (taskId == null) errors.add(localize(request, "No ID specified."));
+    if (errors.size() > 0) return failureResult(errors);
+    
+    return successResult(
+      request, store.getAnnotatorTaskParameters(taskId), null);
+  }
+  
   /**
    * Lists descriptors of all transcribers that are installed.
    * <p> Transcribers are modules that perform automated transcription of recordings
