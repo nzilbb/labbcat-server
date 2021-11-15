@@ -340,7 +340,7 @@
             }, false);
 	    xhr.addEventListener("error", callFailed, false);
 	    xhr.addEventListener("abort", callCancelled, false);
-            xhr.open("GET", this.baseUrl + "api/info");
+            xhr.open("GET", this.baseUrl + "doc/");
 	    if (this.username) {
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
@@ -668,7 +668,6 @@
                 onResult = pageLength;
                 pageLength = null;
                 pageNumber = null;
-                order = null;
             }
 	    this.createRequest("getMatchingAnnotations", {
                 expression : expression,
@@ -945,6 +944,8 @@
          * mirrors the Search Matrix in the browser interface.
          * @param {string[]} [participantIds=null] An optional list of participant IDs to search
          * the utterances of. If not null, all utterances in the corpus will be searched.
+         * @param {string[]} [corpora=null] An optional list of transcript corpora to limit
+         * the results to. If null, all corpora will be searched. 
          * @param {string[]} [transcriptTypes=null] An optional list of transcript types to limit
          * the results to. If null, all transcript types will be searched. 
          * @param {boolean} [mainParticipant=true] true to search only main-participant
@@ -962,7 +963,7 @@
          * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
          * {@link LabbcatView#waitForTask}, etc.
          */
-        search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
+        search(pattern, participantIds, corpora, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
             if (typeof participantIds === "function") { // (pattern, onResult)
                 onResult = participantIds;
                 participantIds = null;
@@ -971,8 +972,28 @@
                 aligned = false;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof transcriptTypes === "function") {
+            } else if (typeof corpora === "function") {
                 // (pattern, participantIds, onResult)
+                onResult = corpora;
+                corpora = null;
+                transcriptTypes = null;
+                mainParticipant = true;
+                aligned = false;
+                matchesPerTranscript = null;
+                overlapThreshold = null;
+            } else if (typeof corpora === "boolean") {
+                // (pattern, participantIds, mainParticipant, aligned,
+                // matchesPerTranscript, onResult) 
+                onResult = matchesPerTranscript;
+                overlapThreshold = aligned
+                matchesPerTranscript = mainParticipant;
+                aligned = transcriptTypes;
+                mainParticipant = corpora;
+                corpora = null;
+                transcriptTypes = null;
+                overlapThreshold = null;
+            } else if (typeof transcriptTypes === "function") {
+                // (pattern, participantIds, corpora, onResult)
                 onResult = transcriptTypes;
                 transcriptTypes = null;
                 mainParticipant = true;
@@ -980,7 +1001,7 @@
                 matchesPerTranscript = null;
                 overlapThreshold = null;
             } else if (typeof transcriptTypes === "boolean") {
-                // (pattern, participantIds, mainParticipant, aligned,
+                // (pattern, participantIds, corpora, mainParticipant, aligned,
                 // matchesPerTranscript, onResult) 
                 onResult = matchesPerTranscript;
                 matchesPerTranscript = aligned;
@@ -990,7 +1011,7 @@
                 overlapThreshold = null;
             }
             if (typeof aligned === "function") {
-                // (pattern, participantIds, mainParticipant, onResult)
+                // (pattern, participantIds, corpora, transcriptTypes, mainParticipant, onResult)
                 // i.e. the original signature of this function
                 onResult = aligned;
                 aligned = false;
@@ -1012,6 +1033,7 @@
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
                             +", "+JSON.stringify(participantIds)
+                            +", "+JSON.stringify(corpora)
                             +", "+JSON.stringify(transcriptTypes)
                             +", "+mainParticipant
                             +", "+aligned
@@ -1054,6 +1076,7 @@
             if (aligned) parameters.only_aligned = true;
             if (matchesPerTranscript) parameters.matches_per_transcript = matchesPerTranscript;
             if (participantIds) parameters.participant_id = participantIds;
+            if (transcriptTypes) parameters.corpus = corpora;
             if (transcriptTypes) parameters.transcript_type = transcriptTypes;
             if (overlapThreshold) parameters.overlap_threshold = overlapThreshold;
 
@@ -1430,7 +1453,7 @@
                     if (sampleRate) queryString += "&sampleRate="+sampleRate;
                     
                     if (exports.verbose) {
-                        console.log("GET: "+url + queryString + " as " + lc.username);
+                        console.log("GET: "+url + "?" + queryString + " as " + lc.username);
                     }
 	            xhr.open("GET", url + queryString, true);
 	            if (lc.username) {
@@ -1672,8 +1695,8 @@
                             +JSON.stringify(layerIds)+")");
             }
 	    const xhr = new XMLHttpRequest();            
-            const url = this.baseUrl + "transcripts";            
-	    let queryString = "?todo=export&exportType=csv&layer=graph";
+            const url = this.baseUrl + "api/attributes";            
+	    let queryString = "?layer=transcript";
             for (let id of layerIds) queryString += "&layer="+encodeURIComponent(id);
             for (let id of transcriptIds) queryString += "&id="+encodeURIComponent(id);
             if (exports.verbose) {
@@ -2242,6 +2265,35 @@
 	        }); // got length
             } // runningOnNode
         }
+        
+        /**
+         * Supplies a list of automation tasks for the identified annotator.
+         * @param {string} annotatorId The ID of the annotator that will perform the task.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>, which is a map of task IDs to descriptions.
+         */
+        getAnnotatorTasks(annotatorId, onResult) {
+            this.createRequest(
+                "getAnnotatorTasks", {
+                    annotatorId: annotatorId
+                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTasks")
+                .send();
+        }
+        
+        /**
+         * Supplies the given task's parameter string.
+         * @param {string} taskId The ID of the task, which must not already exist.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>, which is the task parameters, serialized as a string.
+         */
+        getAnnotatorTaskParameters(taskId, onResult) {
+            this.createRequest(
+                "getAnnotatorTaskParameters", {
+                    taskId: taskId
+                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTaskParameters")
+                .send();
+        }
+                
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
@@ -3532,34 +3584,6 @@
         }
         
         /**
-         * Supplies a list of automation tasks for the identified annotator.
-         * @param {string} annotatorId The ID of the annotator that will perform the task.
-         * @param {resultCallback} onResult Invoked when the request has returned a 
-         * <var>result</var>, which is a map of task IDs to descriptions.
-         */
-        getAnnotatorTasks(annotatorId, onResult) {
-            this.createRequest(
-                "getAnnotatorTasks", {
-                    annotatorId: annotatorId
-                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTasks")
-                .send();
-        }
-        
-        /**
-         * Supplies the given task's parameter string.
-         * @param {string} taskId The ID of the task, which must not already exist.
-         * @param {resultCallback} onResult Invoked when the request has returned a 
-         * <var>result</var>, which is the task parameters, serialized as a string.
-         */
-        getAnnotatorTaskParameters(taskId, onResult) {
-            this.createRequest(
-                "getAnnotatorTaskParameters", {
-                    taskId: taskId
-                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTaskParameters")
-                .send();
-        }
-                
-        /**
          * Update the annotator task description.
          * @param {string} taskId The ID of the task, which must not already exist.
          * @param {string} description The description of the task.
@@ -3762,19 +3786,6 @@
                 }));
         }
 
-        /**
-         * Saves the store's information document.
-         * @param {string} html An HTML document with information about the corpus as a whole.
-         * @param {resultCallback} onResult Invoked when the request has returned a 
-         * <var>result</var>.
-         */
-        updateInfo(html, onResult) {
-            this.createRequest(
-                "saveInfo", null, onResult, this.baseUrl + "api/admin/info", "PUT",
-                null, "text/html")
-                .send(html);
-        }
-        
         /**
          * Creates a new user record.
          * @see LabbcatAdmin#readUsers

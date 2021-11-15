@@ -146,6 +146,12 @@ export class MatchesComponent implements OnInit {
                 const layer = schema.layers[layerId] as Layer;
                 if (layer.layer_manager_id == "HTK") {
                     this.htkLayer = layer;
+                    // get layer configuration, so we can identify pronunciationLayerId
+                    this.labbcatService.labbcat.getAnnotatorTaskParameters(
+                        this.htkLayer.id, (htkParameters, errors, messages) => {
+                            const parameters = new URLSearchParams(htkParameters)
+                            this.annotationLayerId = parameters.get("pronunciationLayerId");
+                        });
                 }
                 if (layer.parentId == schema.wordLayerId
                     && layer.alignment == 0) {
@@ -260,16 +266,20 @@ export class MatchesComponent implements OnInit {
                 // TODO api/missingAnnotations -> api/suggest -> api/lookup -> api/edit/dictionary/addentry -> generateLayerUtterances
                 this.tokenLayerId = this.schema.layers["orthography"]?"orthography":this.schema.wordLayerId;
                 // the annotationLayerId is currently specified in the htk layer configuration
-                const PronunciationLayerId = /PronunciationLayerId=([0-9]+)/.exec(
-                    this.htkLayer.extra)[1];
-                // PronunciationLayerId is currently a layer_id number, so convert it to a layerId
-                for (let layerId in this.schema.layers) {
-                    const layer = this.schema.layers[layerId] as Layer;
-                    if (layer.layer_id == PronunciationLayerId) {
-                        this.annotationLayerId = layerId;
-                        break;
-                    }
-                } // next layer
+                // the annotator configuration was loaded above, but if this failed
+                if (!this.annotationLayerId) {
+                    // try to load it from the layer manager "extra" field (which is deprecated)
+                    const PronunciationLayerId = /PronunciationLayerId=([0-9]+)/.exec(
+                        this.htkLayer.extra)[1];
+                    // PronunciationLayerId is currently a layer_id number, so convert it to a layerId
+                    for (let layerId in this.schema.layers) {
+                        const layer = this.schema.layers[layerId] as Layer;
+                        if (layer.layer_id == PronunciationLayerId) {
+                            this.annotationLayerId = layerId;
+                            break;
+                        }
+                    } // next layer
+                }
                 if (this.annotationLayerId) {
                     // this.router.navigate(["missingAnnotations"], {
                     //     queryParams : {
