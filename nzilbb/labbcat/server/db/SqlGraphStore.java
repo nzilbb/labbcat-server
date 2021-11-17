@@ -4327,7 +4327,7 @@ public class SqlGraphStore implements GraphStore {
         if (!graph.containsKey("@ag_id")) {
           PreparedStatement sql = getConnection().prepareStatement(
             "SELECT ag_id FROM transcript WHERE transcript_id = ?");
-          sql.setString(1, graph.getId());
+          sql.setString(1, graph.sourceGraph().getId()); // (sourceGraph in case of fragment)
           ResultSet rs = sql.executeQuery();
           try {		  
             if (!rs.next()) throw new GraphNotFoundException(graph.getId());
