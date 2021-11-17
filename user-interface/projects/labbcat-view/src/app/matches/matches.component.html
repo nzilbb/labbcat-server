@@ -218,12 +218,14 @@
                 img="audio.svg" icon="🔊"
                 i18n-label label="Audio Export"></lib-button>
   </div>
-  <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayer">
+  <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayers.length">
     <input #generate_layer type="hidden" name="generate_layer" value="">
-    <lib-button (press)="runAnnotator(htkLayer.id);"
-                img="cog.svg" icon="⚙"
-                i18n-title title="Generate"
-                label="{{htkLayer.id}}"></lib-button>
+    <div *ngFor="let layerId of htkLayers">
+      <lib-button (press)="runAnnotator(layerId);"
+                  img="cog.svg" icon="⚙"
+                  i18n-title title="Generate"
+                  label="{{layerId}}"></lib-button>
+    </div>
   </div>
   <lib-keep-alive threadId="{{threadId}}"></lib-keep-alive>
 </form>
