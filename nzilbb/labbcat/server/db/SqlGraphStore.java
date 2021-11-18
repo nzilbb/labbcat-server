@@ -6592,51 +6592,56 @@ public class SqlGraphStore implements GraphStore {
       return new MediaFile[0];
     }
 
-    File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
-    File episodeDir = new File(corpusDir, graph.first("episode").getLabel());
-    MediaTrackDefinition[] tracks = getMediaTracks();
-    String baseName = graph.getId().replaceAll("\\.[^.]*$","");
-    File[] aDirs = episodeDir.listFiles(new FileFilter() {
-        public boolean accept(File file) {
-          return file.isDirectory() && !file.getName().equals("trs");
-        }
-      });
-    if (aDirs != null) {
-      for (File dir : aDirs) {
-        // look for a file with the same name as the transcript, and 
-        // an extension that matches the directory name
-        String extension = dir.getName();
-        for (MediaTrackDefinition track : tracks) {
-          String fileName = baseName + track.getSuffix() + "." + extension;
-          File f = new File(dir, fileName);
-          if (f.exists()) {
-            MediaFile mediaFile = new MediaFile(f, track.getSuffix());
-            try {
-              if (hasAccess(id, mediaFile.getType().substring(0,1))) {
-                if (getBaseUrl() == null) { // TODO check this isn't a security risk
-                  mediaFile.setUrl(f.toURI().toString());
-                } else {
-                  StringBuffer url = new StringBuffer(getBaseUrl());
-                  url.append("/files/");
-                  url.append(graph.first("corpus").getLabel());
-                  url.append("/");
-                  url.append(graph.first("episode").getLabel());
-                  url.append("/");
-                  url.append(mediaFile.getExtension());
-                  url.append("/");
-                  url.append(f.getName());
-                  mediaFile.setUrl(url.toString());
-                }
-                files.put(mediaFile.getName(), mediaFile);
-              } // user has access
-            } catch (SQLException x) {
-              throw new StoreException(x);
-            }
-          } // f.exists()
-        } // next track
-      } // next subdir
-    }
-      
+    Annotation corpus = graph.first("corpus");
+    Annotation episode = graph.first("episode");
+    if (corpus != null && episode != null // (shouldn't happen, but let's be fault tolerant)
+        && corpus.getLabel() != null && episode.getLabel() != null) {
+      File corpusDir = new File(getFiles(), corpus.getLabel());
+      File episodeDir = new File(corpusDir, episode.getLabel());
+      MediaTrackDefinition[] tracks = getMediaTracks();
+      String baseName = graph.getId().replaceAll("\\.[^.]*$","");
+      File[] aDirs = episodeDir.listFiles(new FileFilter() {
+          public boolean accept(File file) {
+            return file.isDirectory() && !file.getName().equals("trs");
+          }
+        });
+      if (aDirs != null) {
+        for (File dir : aDirs) {
+          // look for a file with the same name as the transcript, and 
+          // an extension that matches the directory name
+          String extension = dir.getName();
+          for (MediaTrackDefinition track : tracks) {
+            String fileName = baseName + track.getSuffix() + "." + extension;
+            File f = new File(dir, fileName);
+            if (f.exists()) {
+              MediaFile mediaFile = new MediaFile(f, track.getSuffix());
+              try {
+                if (hasAccess(id, mediaFile.getType().substring(0,1))) {
+                  if (getBaseUrl() == null) { // TODO check this isn't a security risk
+                    mediaFile.setUrl(f.toURI().toString());
+                  } else {
+                    StringBuffer url = new StringBuffer(getBaseUrl());
+                    url.append("/files/");
+                    url.append(graph.first("corpus").getLabel());
+                    url.append("/");
+                    url.append(graph.first("episode").getLabel());
+                    url.append("/");
+                    url.append(mediaFile.getExtension());
+                    url.append("/");
+                    url.append(f.getName());
+                    mediaFile.setUrl(url.toString());
+                  }
+                  files.put(mediaFile.getName(), mediaFile);
+                } // user has access
+              } catch (SQLException x) {
+                throw new StoreException(x);
+              }
+            } // f.exists()
+          } // next track
+        } // next subdir
+      } // there are directories
+    } // has corpus/episode
+    
     Map<String,Set<String>> mConversionsFrom = getMediaConversions();
     if (mConversionsFrom.size() > 0) { // conversions are possible
       // for each existing file (traverse a copy of values, to avoid concurrent modification)
