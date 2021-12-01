@@ -44,6 +44,7 @@ export class MatchesComponent implements OnInit {
     emuLayers = [ "word", "segment" ];
     wordLayers = [];
     schema: any;
+    generableLayers = []; // list of layerIds that can be generated from a list of utterances
     htkLayers = []; // list of layerIds managed by HTK
     htkPronuncationLayerIds = {}; // map of HTK layerIds to their pronunciation layer IDs
     baseUrl: string;
@@ -145,30 +146,36 @@ export class MatchesComponent implements OnInit {
             this.schema = schema;
             for (let layerId in schema.layers) {
                 const layer = schema.layers[layerId] as Layer;
-                if (layer.layer_manager_id == "HTK") {
-                    this.htkLayers.push(layer.id);
-                    // try to load it from the layer manager "extra" field (which is deprecated)
-                    if (layer.extra) {
-                        const PronunciationLayerId = /PronunciationLayerId=([0-9]+)/.exec(
-                            layer.extra)[1];
-                        // PronunciationLayerId is currently a layer_id number, so convert it to a layerId
-                        for (let l in this.schema.layers) {
-                            const layer = this.schema.layers[l] as Layer;
-                            if (layer.layer_id == PronunciationLayerId) {
-                                this.htkPronuncationLayerIds[layer.id] = l;
-                                break;
-                            }
-                        } // next layer
-                    } // load from deprecated extra field as a default
+                if (layer.layer_manager_id == "HTK"
+                    || layer.layer_manager_id == "MFA"
+                    || layer.layer_manager_id == "BAS") {
+                    this.generableLayers.push(layer.id);
                     
-                    // get layer annotator configuration, so we can identify pronunciationLayerId
-                    this.labbcatService.labbcat.getAnnotatorTaskParameters(
-                        layer.id, (htkParameters, errors, messages) => {
-                            const parameters = new URLSearchParams(htkParameters)
-                            this.htkPronuncationLayerIds[layer.id]
-                                = parameters.get("pronunciationLayerId");
-                        });
-                } // HTK layer
+                    if (layer.layer_manager_id == "HTK") {
+                        this.htkLayers.push(layer.id);
+                        // try to load it from the layer manager "extra" field (which is deprecated)
+                        if (layer.extra) {
+                            const PronunciationLayerId = /PronunciationLayerId=([0-9]+)/.exec(
+                                layer.extra)[1];
+                            // PronunciationLayerId is currently a layer_id number, so convert it to a layerId
+                            for (let l in this.schema.layers) {
+                                const layer = this.schema.layers[l] as Layer;
+                                if (layer.layer_id == PronunciationLayerId) {
+                                    this.htkPronuncationLayerIds[layer.id] = l;
+                                    break;
+                                }
+                            } // next layer
+                        } // load from deprecated extra field as a default
+                        
+                        // get layer annotator configuration, so we can identify pronunciationLayerId
+                        this.labbcatService.labbcat.getAnnotatorTaskParameters(
+                            layer.id, (htkParameters, errors, messages) => {
+                                const parameters = new URLSearchParams(htkParameters)
+                                this.htkPronuncationLayerIds[layer.id]
+                                    = parameters.get("pronunciationLayerId");
+                            });
+                    } // HTK layer
+                } // generable layer
                 if (layer.parentId == schema.wordLayerId
                     && layer.alignment == 0) {
                     this.wordLayers.push(layer);
@@ -298,7 +305,7 @@ export class MatchesComponent implements OnInit {
             this.form.nativeElement.action = formAction;
             this.form.nativeElement.target = formTarget;
             this.generateLayer.nativeElement.value = layerId;
-            this.todo.nativeElement.value = "generate";
+            this.todo.nativeElement.value = "generate-now";
             this.form.nativeElement.submit();
         }, 500);
     }

@@ -218,9 +218,9 @@
                 img="audio.svg" icon="🔊"
                 i18n-label label="Audio Export"></lib-button>
   </div>
-  <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && htkLayers.length">
+  <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && generableLayers.length">
     <input #generate_layer type="hidden" name="generate_layer" value="">
-    <div *ngFor="let layerId of htkLayers">
+    <div *ngFor="let layerId of generableLayers">
       <lib-button (press)="runAnnotator(layerId);"
                   img="cog.svg" icon="⚙"
                   i18n-title title="Generate"
