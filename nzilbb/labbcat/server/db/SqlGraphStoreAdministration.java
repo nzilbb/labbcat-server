@@ -855,7 +855,7 @@ public class SqlGraphStoreAdministration
       while (rs.next()) {
         // delete any annotation tasks for the auxiliary configuration
         try {
-          deleteAnnotatorTask(layer.getId() + "-" + rs.getString(1));
+          deleteAnnotatorTask(layer.getId() + ":" + rs.getString(1));
         } catch(StoreException exception) {}
       } // next auxiliary configuration
       rs.close();
