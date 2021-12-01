@@ -6961,6 +6961,7 @@ public class SqlGraphStore implements GraphStore {
           throw new StoreException("Censorship is configured, but ffmpeg path is not set");
         }
         File exe = new File(ffmpegPath, "ffmpeg");
+        if (!exe.exists()) exe = new File(ffmpegPath, "ffmpeg.exe");
         if (!exe.exists()) {
           throw new StoreException(
             "Censorship is configured, but ffmpeg path is invalid: " + ffmpegPath);
@@ -7273,6 +7274,7 @@ public class SqlGraphStore implements GraphStore {
         return;
       }
       File exe = new File(ffmpegPath, "ffmpeg");
+      if (!exe.exists()) exe = new File(ffmpegPath, "ffmpeg.exe");
       if (!exe.exists()) {
         System.err.println(
           "SqlGraphStore.generateMissingMedia: ffmpegPath not found: " + exe.getPath());
