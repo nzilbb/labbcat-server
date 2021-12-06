@@ -2004,6 +2004,40 @@ public class ProcessWithPraat extends Task {
           results.add(result);
         } // next target
         IO.RecursivelyDelete(tempDirectory);
+      } catch (Exception stderr) {
+        String error = stderr.getMessage();
+        for (Vector<Double> tuple : targets) {
+          Vector<String> result = new Vector<String>();
+          if (extractF1 || extractF2 || extractF3) {
+            if (useFastTrack && fastTrackCoefficients) {
+              for (int f = 1; f <= Math.max(3, fastTrackNumberOfFormants); f++) {
+                for (int c = 0; c <= fastTrackNumberOfCoefficients; c++) {
+                  result.add("");
+                }
+              }
+            }
+            for (Double point : getSamplePoints()) {
+              result.add("");
+              if (extractF1) result.add("");
+              if (extractF2) result.add("");
+              if (extractF3) result.add("");
+            } // next sample point
+          } // extracting formants
+          if (extractMinimumPitch) result.add("");
+          if (extractMeanPitch) result.add("");
+          if (extractMaximumPitch) result.add("");
+          if (extractMaximumIntensity) result.add("");
+          if (extractCOG1) result.add("");
+          if (extractCOG2) result.add("");
+          if (extractCOG23) result.add("");
+          for (String field : customScriptHeaders) result.add("");
+          // error only once
+          if (error != null) {
+            result.add(error);
+            error = null;
+          }
+          results.add(result);
+        } // next target
       } finally {
         script.delete();
       }
