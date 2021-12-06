@@ -186,6 +186,12 @@
       </option>
     </select>
   </div>
+  <div id="export-settings">
+    <label i18n-title title="Prefix each exported file name with the match number">
+      <span i18n>Prefix Names</span>
+      <input name="prefix" type="checkbox" checked>
+    </label>
+  </div>
   <div id="serialize" class="controls">
     <lib-button (press)="serialize();"
                 img="{{serializeImg}}" icon="📦"

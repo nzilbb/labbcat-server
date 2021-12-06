@@ -133,6 +133,26 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
     * start anchor has an offset of 0.0. 
     */
    public FragmentSeries setShiftAnchors(boolean newShiftAnchors) { shiftAnchors = newShiftAnchors; return this; }
+  
+   /**
+    * Whether to prefix fragment names with a numeric serial number or not.
+    * @see #getPrefixNames()
+    * @see #setPrefixNames(boolean)
+    */
+   protected boolean prefixNames = true;
+   /**
+    * Getter for {@link #prefixNames}: Whether to prefix fragment names with a numeric
+    * serial number or not.
+    * @return Whether to prefix fragment names with a numeric serial number or not.
+    */
+   public boolean getPrefixNames() { return prefixNames; }
+   /**
+    * Setter for {@link #prefixNames}: Whether to prefix fragment names with a numeric
+    * serial number or not.
+    * @param newPrefixNames Whether to prefix fragment names with a numeric serial number or not.
+    */
+   public FragmentSeries setPrefixNames(boolean newPrefixNames) { prefixNames = newPrefixNames; return this; }
+  
    // Methods:
    
    /**
@@ -203,7 +223,7 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
 	 String prefix = "";
 	 String filterId = "";
          for (int p = 1; p < parts.length; p++) {
-            if (parts[p].startsWith("prefix=")) {
+            if (prefixNames && parts[p].startsWith("prefix=")) {
                prefix = parts[p].substring("prefix=".length());
             }
             if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))
