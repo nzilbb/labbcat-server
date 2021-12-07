@@ -222,7 +222,7 @@ public class Task extends Thread implements MonitorableTask {
     setName(defaultThreadName());
   } // end of constructor
   
-    /**
+  /**
    * A default unique name for the thread. Implementors can use or add this this as they like.
    */
   public String defaultThreadName() {
@@ -256,8 +256,7 @@ public class Task extends Thread implements MonitorableTask {
    * @param sName the thread's name
    * @return the named thread, or null if it can't be found.
    */
-  public static Task findTask(String sName)
-  {
+  public static Task findTask(String sName) {
     Task task = null;
     int iThreadCount = taskThreadGroup.activeCount();
     Thread[] threads = new Thread[iThreadCount];
@@ -293,21 +292,18 @@ public class Task extends Thread implements MonitorableTask {
   /**
    * To be run by derived classes at the start of their 'run' method.
    */
-  protected void runStart()
-  {
+  protected void runStart() {
     // cancel any other threads running that have the same name
     Task thread = null;
     int iThreadCount = taskThreadGroup.activeCount();
     Thread[] threads = new Thread[iThreadCount];
     taskThreadGroup.enumerate(threads);
-    for (Thread otherThread : threads)
-    {
+    for (Thread otherThread : threads) {
       if (otherThread == null) continue;
       if (otherThread.getName() != null
           && otherThread.getName().equals(getName())
           && otherThread != this
-          && ((Task)otherThread).getRunning())
-      {
+          && ((Task)otherThread).getRunning()) {
         // cancel the other thread
         setStatus("Cancelling other task: " + otherThread.getId());
         ((Task)otherThread).cancel();
@@ -355,8 +351,7 @@ public class Task extends Thread implements MonitorableTask {
    * keepAlive() 
    * @param lDelay Delay time - i.e. the minimum amount of time to wait before dying.
    */
-  public void waitToDie(long lDelay)
-  {
+  public void waitToDie(long lDelay) {
     if (dtLastKeepAlive.getTime() > 0) { // haven't already been released
       try { 
         synchronized(this) {
