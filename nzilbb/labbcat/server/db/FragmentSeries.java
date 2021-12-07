@@ -153,6 +153,25 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
     */
    public FragmentSeries setPrefixNames(boolean newPrefixNames) { prefixNames = newPrefixNames; return this; }
   
+  /**
+   * Whether to add an tag identifying the target annotation or not.
+   * @see #getTagTarget()
+   * @see #setTagTarget(boolean)
+   */
+  protected boolean tagTarget = false;
+  /**
+   * Getter for {@link #tagTarget}: Whether to add an tag identifying the target
+   * annotation or not. 
+   * @return Whether to add an tag identifying the target annotation or not.
+   */
+  public boolean getTagTarget() { return tagTarget; }
+  /**
+   * Setter for {@link #tagTarget}: Whether to add an tag identifying the target
+   * annotation or not. 
+   * @param newTagTarget Whether to add an tag identifying the target annotation or not.
+   */
+  public FragmentSeries setTagTarget(boolean newTagTarget) { tagTarget = newTagTarget; return this; }
+  
    // Methods:
    
    /**
@@ -178,8 +197,7 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
 
    // Spliterator implementations
    
-   public int characteristics() {
-      
+   public int characteristics() {      
       return ORDERED | DISTINCT | IMMUTABLE | NONNULL | SUBSIZED | SIZED;
    }
    
@@ -201,12 +219,15 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
 	 nextRow++;
          String[] parts = spec.split(";");
 	 String graphId = parts[0];
+         String targetId = null;
          if (graphId.startsWith("g_")) graphId = graphId.substring(2);
          String intervalPart = null;
          for (int p = 1; p < parts.length; p++) {
-            if (parts[p].indexOf("-") > 0) {
+            if (intervalPart == null && parts[p].indexOf("-") > 0) {
                intervalPart = parts[p];
-               break;
+            }
+            if (parts[p].startsWith("#=")) {
+              targetId = parts[p].substring(2); 
             }
          }
 	 String[] interval = intervalPart.split("-");
@@ -223,7 +244,7 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
 	 String prefix = "";
 	 String filterId = "";
          for (int p = 1; p < parts.length; p++) {
-            if (prefixNames && parts[p].startsWith("prefix=")) {
+            if (parts[p].startsWith("prefix=")) {
                prefix = parts[p].substring("prefix=".length());
             }
             if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))
@@ -236,21 +257,41 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
         
          Graph fragment = store.getFragment(graphId, start, end, layers);
          if (shiftAnchors) fragment.shiftAnchors(-start);
-         if (prefix.length() > 0) fragment.setId(prefix + fragment.getId());
+         if (prefixNames && prefix.length() > 0) {
+           fragment.setId(prefix + fragment.getId());
+         }
          if (filterId.length() > 0) { // filter annotation is specified
             // remove annotations that don't belong to the specified filter annotation
-            Annotation targetAncestor = fragment.getAnnotationsById().get(filterId);
-            if (targetAncestor != null) { // target is in the graph
+            Annotation filterAncestor = fragment.getAnnotationsById().get(filterId);
+            if (filterAncestor != null) { // filter is in the graph
                for (Annotation a : fragment.getAnnotationsById().values()) {
-                  if (a.getLayer().isAncestor(targetAncestor.getLayerId())) {
+                  if (a.getLayer().isAncestor(filterAncestor.getLayerId())) {
                      // annotation is a descendent of the participant layer
-                     if (a.first(targetAncestor.getLayerId()) != targetAncestor) {
+                     if (a.first(filterAncestor.getLayerId()) != filterAncestor) {
                         a.destroy();
                      } // annotation has a different ancestor on the same layer
-                  } // annotation is a descendent of the target layer
+                  } // annotation is a descendent of the filter layer
                } // next annotation
             } // participant is in the graph
-         } // target is specified
+         } // filter is specified
+
+         // tag target
+         if (tagTarget && targetId != null) {
+           Annotation target = fragment.getAnnotation(targetId);
+           if (target != null) {
+             fragment.addLayer(
+               new Layer("target")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setParentId(target.getLayerId()));
+             String label = "target";
+             if (prefix != null && prefix.length() > 0 && !prefix.equals("-")) {
+               // remove trailing hyphen for consistency with ResultSeries
+               label = prefix.replaceAll("-$","");
+             }
+             fragment.createTag(target, "target", label);
+           }
+         }
+         
          fragment.commit();
 	 action.accept(fragment);
          return true;

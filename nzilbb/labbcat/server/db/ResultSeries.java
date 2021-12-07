@@ -133,6 +133,25 @@ public class ResultSeries
    */
   public ResultSeries setPrefixNames(boolean newPrefixNames) { prefixNames = newPrefixNames; return this; }
    
+  /**
+   * Whether to add an tag identifying the target annotation or not.
+   * @see #getTagTarget()
+   * @see #setTagTarget(boolean)
+   */
+  protected boolean tagTarget = false;
+  /**
+   * Getter for {@link #tagTarget}: Whether to add an tag identifying the target
+   * annotation or not. 
+   * @return Whether to add an tag identifying the target annotation or not.
+   */
+  public boolean getTagTarget() { return tagTarget; }
+  /**
+   * Setter for {@link #tagTarget}: Whether to add an tag identifying the target
+   * annotation or not. 
+   * @param newTagTarget Whether to add an tag identifying the target annotation or not.
+   */
+  public ResultSeries setTagTarget(boolean newTagTarget) { tagTarget = newTagTarget; return this; }
+
   // Methods:
    
   /**
@@ -161,7 +180,7 @@ public class ResultSeries
       
     sql = store.getConnection().prepareStatement(
       "SELECT match_id, result.ag_id, defining_annotation_id,"
-      +" COALESCE(anchor.offset,0) AS start_offset"
+      +" COALESCE(anchor.offset,0) AS start_offset, target_annotation_uid"
       +" FROM result"
       +" LEFT OUTER JOIN anchor ON anchor.anchor_id = result.start_anchor_id"
       +" WHERE search_id = ?"
@@ -230,6 +249,16 @@ public class ResultSeries
         String prefix = prefixFormatter.format(nextRow);
         fragment.setId(prefix + "-" + fragment.getId());
       }
+      if (tagTarget) {
+        Annotation target = fragment.getAnnotation(rs.getString("target_annotation_uid"));
+        if (target != null) {
+          fragment.addLayer(
+            new Layer("target")
+            .setAlignment(Constants.ALIGNMENT_NONE)
+            .setParentId(target.getLayerId()));
+          fragment.createTag(target, "target", prefixFormatter.format(nextRow));
+        }
+      }      
       action.accept(fragment);
       return true;
     } catch(Exception exception) {
