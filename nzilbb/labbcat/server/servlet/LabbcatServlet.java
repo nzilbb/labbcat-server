@@ -100,7 +100,7 @@ public class LabbcatServlet extends HttpServlet {
          log("init...");
 
          // get version info
-         File versionTxt = new File(getServletContext().getRealPath("version.txt"));
+         File versionTxt = new File(getServletContext().getRealPath("/version.txt"));
          if (versionTxt.exists()) {
             try {
                version = IO.InputStreamToString(new FileInputStream(versionTxt));
@@ -110,7 +110,7 @@ public class LabbcatServlet extends HttpServlet {
          }
 
          // get database connection info
-         File contextXml = new File(getServletContext().getRealPath("META-INF/context.xml"));
+         File contextXml = new File(getServletContext().getRealPath("/META-INF/context.xml"));
          if (contextXml.exists()) { // get database connection configuration from context.xml
             Document doc = DocumentBuilderFactory.newInstance()
                .newDocumentBuilder().parse(new InputSource(new FileInputStream(contextXml)));
@@ -594,7 +594,7 @@ public class LabbcatServlet extends HttpServlet {
     * @return The "files" directory.
     */
    public File getFilesDir() {
-      return new File(getServletContext().getRealPath("files"));
+      return new File(getServletContext().getRealPath("/files"));
    } // end of getFilesDir()
    
    /**
