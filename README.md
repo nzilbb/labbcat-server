@@ -6,14 +6,16 @@ implemented by the [NZILBB](http://www.nzilbb.canterbury.ac.nz).
 The 'classic' [legacy code](https://sourceforge.net/projects/labbcat/) is in the process
 of being deprecated and replaced by the code in this repository.
 
-There currently two components here:
+There currently three components here:
 - servlet implementations, which are implemented in Java and packaged into
-*nzilbb.labbcat.server.jar* which is included as a library in the 'classic'
-distribution. (eventually, the war build will be included here, at which point the entire
-legacy repository will be deprecated)
+  *nzilbb.labbcat.server.jar* which is included as a library in the 'classic'
+  distribution. (eventually, the war build will be included here, at which point the entire
+  legacy repository will be deprecated)
 - parts of the user-interface, which are implemented as components of an Angular app,
-which currently replace certain pages in the 'classic' codebase. (eventually, the entire
-user interface will be replaced by the Angular app)
+  which currently replace certain pages in the 'classic' codebase. (eventually, the entire
+  user interface will be replaced by the Angular app)
+- In-situ wiki-style corpus documentation system with WYSIWYG editor, including embedding
+  of utterances from search results, called 'wysiwiki'
 
 ## Servlets
 
@@ -82,6 +84,15 @@ LaBB-CAT:
 1. Check that the *local-labbcat-path* setting in *config.xml* is correct.
 2. `ant user-interface`
 
+## Wysiwiki
+
+Requires Node and npm.
+
+To build:
+
+1. Esure *local-labbcat-path* is set in `config.xml`
+2. Execute: `ant wysiwiki`
+
 ## Docker image
 
 To build the docker image:
@@ -101,7 +112,6 @@ To release a new version of the docker image:
 The image does not include a MySQL server, which can be supplied from the MySQL docker
 image:
 
-TODO add  option:
 ```
 docker run --name=labbcat-db \
  -e MYSQL_DATABASE=labbcat -e MYSQL_USER=labbcat \
