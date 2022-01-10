@@ -45,6 +45,7 @@ The user interface is broken into three angular apps
 1. Node and npm
 2. Angular CLI
    `npm install -g @angular/cli`
+2. *xmllint*, *head*, and *tail* for collating i18n resources
 
 ### Debugging / Development
 
