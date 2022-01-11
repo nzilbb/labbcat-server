@@ -37,7 +37,7 @@ export class MatchesComponent implements OnInit {
     mimeType = "text/praat-textgrid";
     serializeImg = "zip.png";
     showSerializationOptions = false;
-    serializationLayers = [ "utterance", "word", "segment" ];
+    serializationLayers = [ "utterance", "word" ];
     showCsvOptions = false;
     selectedLayers: string[];
     showEmuOptions = false;
@@ -105,6 +105,11 @@ export class MatchesComponent implements OnInit {
             this.searchedLayers = task.layers || [];
             this.selectedLayers = this.searchedLayers
                 .concat([ "word", "participant", "transcript", "corpus" ]);
+            // if they searched the segment layer
+            if (this.searchedLayers.includes("segment")) {
+                // include segments in serialization by default
+                this.serializationLayers.push("segment")
+            }
             
             this.readMatches();
         });
