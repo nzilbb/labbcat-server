@@ -43,7 +43,7 @@ export class AdminAnnotatorComponent implements OnInit, OnDestroy {
             if (event.data.message) {
                 this.messageService.info(event.data.message);
             }
-            this.messageService.info($localize `Configuration set`); // TODO i18n
+            this.messageService.info($localize `Configuration set`);
             this.uploading = false;
             this.configuring = false;
             this.annotator = null;
