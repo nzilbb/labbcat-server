@@ -48,6 +48,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import nzilbb.ag.GraphNotFoundException;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 import org.apache.commons.csv.CSVFormat;
@@ -1745,8 +1746,17 @@ public class ProcessWithPraat extends Task {
     
     setStatus("processBatch("+transcript+", "+batch.size()+" records)");
     File wav = null;
-    String sWav = store.getMedia(transcript, "", "audio/wav");
-    if (sWav != null) wav = new File(new URI(sWav));
+    String wavError = null;
+    try {
+      String sWav = store.getMedia(transcript, "", "audio/wav");
+      if (sWav != null) {
+        wav = new File(new URI(sWav));
+      } else {
+        wavError = "Transcript has no accessible audio";
+      }
+    } catch (GraphNotFoundException x) {
+      wavError = "Transcript not found";
+    }
       
     // get participant attribute values we will need
     HashMap<String,String> attributeValues = new HashMap<String,String>();
@@ -1852,12 +1862,12 @@ public class ProcessWithPraat extends Task {
         vTargets.add(tuple);
       } 
       if (wav == null) {
-        error = "Transcript has no accessible audio";
+        error = wavError;
       }
       vErrors.add(error);
     } // next batch line
 
-      // run praat
+    // run praat
     Vector<Vector<String>> results = measurementsFromFile(
       wav, vTargets, formantCeiling, pitchFloor, pitchCeiling, voicingThreshold,
       intensityPitchFloor, fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency,
