@@ -163,7 +163,7 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
           activeAnnotators.put(annotatorId, new HashMap<String,AnnotatorDescriptor>());
         }
         AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
-        AnnotatorDescriptor descriptor = activeAnnotators.get(annotatorId).get(annotatorId);
+        AnnotatorDescriptor descriptor = activeAnnotators.get(annotatorId).get(taskId);
         if (descriptor == null // haven't got one of these yet
             || descriptor.getVersion() == null // this version has been uninstalled
             || (newDescriptor != null // or a new one has been installed
@@ -178,6 +178,8 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
           // persist the descriptor between requests
           activeAnnotators.get(annotatorId).put(taskId, descriptor);
           log("new descriptor " + descriptor);
+          descriptor.getInstance().getStatusObservers().add(s->log(s));
+
         }
         if (descriptor == null) {
           response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -242,7 +244,8 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
             Vector<Layer> nonexistentLayers = (new LayerHierarchyTraversal<Vector<Layer>>(
                                                  new Vector<Layer>(), annotator.getSchema()) {
                 protected void pre(Layer layer) {
-                  if (!existingLayers.contains(layer.getId())) result.add(layer);
+                  if (layer.getId() != null
+                      && !existingLayers.contains(layer.getId())) result.add(layer);
                 }
               }).getResult();
             for (Layer layer : nonexistentLayers) {
