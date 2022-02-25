@@ -463,6 +463,7 @@ public class SqlGraphStoreAdministration
       throw new StoreException(x);
     }
   }
+  
   /**
    * Adds a new layer.
    * @param layer A new layer definition.
@@ -526,13 +527,17 @@ public class SqlGraphStoreAdministration
       int layer_id = rs.getInt(1);
       rs.close();
       sql.close();
-            
+
+      // We might create an automation task after adding the layer...
+      String annotatorId = null;
+      String taskParameters = null;
+
       sql = getConnection().prepareStatement(
         "INSERT INTO layer"
         +" (layer_id, short_description, description, notes, alignment," // TODO remove description
         +" peers, peers_overlap, parent_includes, saturated, type,"
-        +" layer_manager_id, enabled, project_id, parent_id, scope)"
-        +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        +" layer_manager_id, enabled, project_id, parent_id, scope, extra)"
+        +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
       sql.setInt(1, layer_id);
       sql.setString(2, layer.getId());
       sql.setString(3, layer.getId()); // 'description', which is deprecated
@@ -546,8 +551,48 @@ public class SqlGraphStoreAdministration
       if (layer.containsKey("layer_manager_id")
           && layer.get("layer_manager_id").toString().length() > 0) {
         sql.setString(11, layer.get("layer_manager_id").toString());
+        if (layer.containsKey("extra")
+            && layer.get("extra").toString().length() > 0) {
+          // if the layer manager is a known subclass of
+          // nz.ac.canterbury.ling.layermanager.AnnotatorWrapperManager
+          // then create an automation instead of saving to the 'extra' field
+          String layerManagerId = layer.get("layer_manager_id").toString();
+          if (layerManagerId.equals("CharacterMapper")) {
+            annotatorId = "PhonemeTranscoder";
+          } else if (layerManagerId.equals("CMUdict")) {
+            annotatorId = "CMUDictionaryTagger";
+          } else if (layerManagerId.equals("FlatFileDictionary")) {
+            annotatorId = "FlatLexiconTagger";
+          } else if (layerManagerId.equals("HTK")) {
+            annotatorId = "HTKAligner";
+          } else if (layerManagerId.equals("labelmapper")) {
+            annotatorId = "LabelMapper";
+          } else if (layerManagerId.equals("MFA")) {
+            annotatorId = "MFA";
+          } else if (layerManagerId.equals("MorTagger")) {
+            annotatorId = "MorTagger";
+          } else if (layerManagerId.equals("PatternMatcher")) {
+            annotatorId = "PatternTagger";
+          } else if (layerManagerId.equals("PorterStemmer")) {
+            annotatorId = "PorterStemmer";
+          } else if (layerManagerId.equals("es-phon")) {
+            annotatorId = "SpanishPhonologyTagger";
+          } else if (layerManagerId.equals("StanfordPosTagger")) {
+            annotatorId = "StanfordPosTagger";
+          }
+          if (annotatorId != null) { // annotator
+            sql.setNull(16, java.sql.Types.VARCHAR); // extra
+            // we will add a task with this configuration afterwards
+            taskParameters = layer.get("extra").toString();
+          } else {
+            sql.setString(16, layer.get("extra").toString()); // extra
+          }
+        } else {
+          sql.setNull(16, java.sql.Types.VARCHAR); // extra
+        }
       } else {
         sql.setNull(11, java.sql.Types.VARCHAR);
+        sql.setNull(16, java.sql.Types.VARCHAR); // extra
       }
       if (layer.containsKey("enabled")
           && layer.get("enabled").toString().length() > 0) {
@@ -788,6 +833,17 @@ public class SqlGraphStoreAdministration
             +" - must be one of: " + schema.getWordLayerId() + ", " + schema.getTurnLayerId()
             + ", " + schema.getRoot().getId());
         }
+
+        if (annotatorId != null && taskParameters != null) {
+          // create an automation task named after the layer
+          try {
+            newAnnotatorTask(annotatorId, layer.getId(), layer.getDescription());
+            saveAnnotatorTaskParameters(layer.getId(), taskParameters);
+          } catch(Exception exception) {
+            System.err.println(
+              "SqlGraphStoreAdministration.newLayer(" + layer + "): " + exception);
+          }
+        }
       } finally {
         sql.close();
       }
@@ -799,11 +855,11 @@ public class SqlGraphStoreAdministration
             
       return getLayer(layer.getId());
     } catch (SQLException sqlX) {
-      System.err.println("SqlGraphStoreAdministration.saveLayer(" + layer + "): " + sqlX);
+      System.err.println("SqlGraphStoreAdministration.newLayer(" + layer + "): " + sqlX);
       sqlX.printStackTrace(System.err);
       throw new StoreException(sqlX);
     } catch (Throwable t) {
-      System.err.println("SqlGraphStoreAdministration.saveLayer(" + layer + "): " + t);
+      System.err.println("SqlGraphStoreAdministration.newLayer(" + layer + "): " + t);
       t.printStackTrace(System.err);
       throw new StoreException(t);
     }
