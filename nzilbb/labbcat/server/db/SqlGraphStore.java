@@ -7882,7 +7882,7 @@ public class SqlGraphStore implements GraphStore {
 
   /**
    * Gets a descriptor of the annotator with the given ID.
-   * @param annotatorId
+   * @param annotatorId The ID of the annotator.
    * @return A descriptor of the given annotator, or null if there is no registered
    * annotator with the given ID. 
    */
