@@ -240,7 +240,7 @@ public class SerializeFragmentsTask extends Task {
   public SerializeFragmentsTask setPrefixNames(boolean newPrefixNames) { prefixNames = newPrefixNames; return this; }
 
   /**
-   * Whether to add an tag identifying the target annotation or not.
+   * Whether to add a tag identifying the target annotation or not.
    * @see #getTagTarget()
    * @see #setTagTarget(boolean)
    */
