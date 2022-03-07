@@ -25,10 +25,14 @@ package nzilbb.labbcat.server.servlet;
 import java.io.*;
 import java.net.*;
 import java.sql.*;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.zip.*;
-import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import nzilbb.ag.Graph;
@@ -40,8 +44,10 @@ import nzilbb.ag.serialize.util.ConfigurationHelper;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.ParameterSet;
+import nzilbb.labbcat.server.db.ConsolidatedGraphSeries;
 import nzilbb.labbcat.server.db.FragmentSeries;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
+import nzilbb.labbcat.server.task.SerializeFragmentsTask;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableSeries;
 
@@ -63,12 +69,42 @@ import nzilbb.util.MonitorableSeries;
  * annotation ID, which would ensure that only words within the specified turn are
  * included, not words from other turns.</li> 
  *  <li><i>name</i> - (optional) name of the collection.</li>
+ *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
+ *  <li><i>tag</i> - (optional) add a tag identifying the target annotation.</li>
+ *  <li><i>async</i> - (optional) "true" to start a serialization server task and
+ *      immediately it's <var>threadId</var> rather than return the actual serialization
+ *      results. </li>
  * </ul>
- * <br><b>Output</b>: A each of the transcript fragments  specified by the input
- * parameters converted to the given  format. This may be a single file or multiple files,
- * depending on the converter behaviour and how many fragments are specified. If there is
- * only one, the file in returned as the response to the request.  If there are more than
- * one, the response is a zip file containing the output files. 
+ * <br><b>Output</b>: if <i>async</i> is ommited, the result is each of the transcript
+ * fragments  specified by the input parameters converted to the given  format. This may
+ * be a single file or multiple files, depending on the converter behaviour and how many
+ * fragments are specified. If there is only one, the file in returned as the response to
+ * the request.  If there are more than one, the response is a zip file containing the
+ * output files.  
+ * <br> If <i>async</i> == true, the result is a JSON-encoded response object of the usual
+ * structure for which the "model" is an object with a "threadId" attribute, which is the
+ * ID of the server task to monitor for results. e.g.
+ * <pre>{
+ *    "title":"SerializeFragments",
+ *    "version" : "20220303.1143",
+ *    "code" : 0,
+ *    "errors" : [],
+ *    "messages" : [],
+ *    "model" : {
+ *        "threadId" : 80
+ *    }
+ * }</pre>
+ * <br> The task, when finished, will output the same as above (a zip or other file with
+ * the fragments in the given format).
+ * <p> In general, <i>async</i> should not be specified, as it uses more resources
+ * (results files must be stored on the server until the whole serialization is
+ * finished). </p>
+ * <p> However, for some serializers (e.g. <q>"text/x-kaldi-text"</q>), it's not
+ * possible to return any content until all fragments are processed anyway. In these
+ * cases, if the set of fragments is very large, the delay between making the request and
+ * receiving the response can be so long that client libraries time out. In such cases,
+ * using <i>async</i>=true is preferable, as the serialization can be monitored with a
+ * long series of short requests, and then the data tranferred when finally ready.</p>
  * @author Robert Fromont
  */
 @WebServlet({"/api/serialize/fragment", "/serialize/fragment"} )
@@ -124,6 +160,8 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
     * annotation ID, which would ensure that only words within the specified turn are
     * included, not words from other turns.</li>
     *  <li><i>name</i> - (optional) name of the collection.</li>
+    *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
+    *  <li><i>tag</i> - (optional) add a tag identifying the target annotation.</li>
     * </ul>
     * <br><b>Output</b>: A each of the transcript fragments 
     * specified by the input parameters converted to the given 
@@ -184,8 +222,57 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
 	 return;
       }
 
-      File zipFile = null;
+      boolean prefixNames = request.getParameter("prefix") != null;
+      boolean tagTarget = request.getParameter("tag") != null;
+      NumberFormat resultNumberFormatter = NumberFormat.getInstance();
+      resultNumberFormatter.setGroupingUsed(false);
+      resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
+      
       try {
+        if ("true".equals(request.getParameter("async"))) { // start a task and return its ID
+          
+          // layers
+          HashSet<String> layers = new HashSet<String>();
+          for (String l : layerId) layers.add(l);
+          
+          // utterances
+          Vector<String> vUtterances = new Vector<String>();
+          if (filter == null) { // not filtering by turn etc.
+            for (int f = 0; f < id.length; f++) {
+              vUtterances.add(
+                id[f]+";"+start[f]+"-"+end[f]
+                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+            }
+          } else { // filtering by turn etc.
+            for (int f = 0; f < id.length; f++) {
+              vUtterances.add(
+                id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+            }
+          }
+          
+          SerializeFragmentsTask task = new SerializeFragmentsTask(
+            name, -1, layers,
+            mimeType, getStore(request))
+            .setIncludeRequiredLayers(true)
+            .setPrefixNames(prefixNames)
+            .setTagTarget(tagTarget);
+          task.setUtterances(vUtterances);
+          if (request.getRemoteUser() != null) {	
+            task.setWho(request.getRemoteUser());
+          } else {
+            task.setWho(request.getRemoteHost());
+          }
+          task.start();
+          // return its ID
+          JsonObjectBuilder jsonResult = Json.createObjectBuilder()
+            .add("threadId", task.getId());
+          writeResponse(
+            response, successResult(request, jsonResult.build(), null));
+          return;
+        } // async
+        
+         File zipFile = null;
          SqlGraphStoreAdministration store = getStore(request);
          try {
             
@@ -195,11 +282,15 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
             Vector<String> vUtterances = new Vector<String>();
             if (filter == null) { // not filtering by turn etc.
                for (int f = 0; f < id.length; f++) {
-                  vUtterances.add(id[f]+";"+start[f]+"-"+end[f]);
+                  vUtterances.add(
+                    id[f]+";"+start[f]+"-"+end[f]
+                    +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
                }
             } else { // filtering by turn etc.
                for (int f = 0; f < id.length; f++) {
-                  vUtterances.add(id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]);
+                  vUtterances.add(
+                    id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                    +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
                }
             }
             
@@ -217,10 +308,21 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
                serializer.getDescriptor(), configuration, store.getSerializersDirectory(), schema);
             serializer.configure(configuration, schema);
             for (String l : serializer.getRequiredLayers()) layersToLoad.add(l);
+            MonitorableSeries<Graph> fragmentSource = new FragmentSeries(
+              vUtterances, store, layersToLoad.toArray(new String[0]))
+              .setPrefixNames(prefixNames)
+              .setTagTarget(tagTarget);
+            // if we're not prefixing names, and we're tagging targets
+            if (!prefixNames && tagTarget) {
+              // then we need to consolidate graphs - i.e. catch consecutive fragments that
+              // are the same ID, and copy the target tags into the winning version of the graph
+              fragmentSource = new ConsolidatedGraphSeries(fragmentSource)
+                .copyLayer("target");
+            }
             
             final Vector<NamedStream> files = new Vector<NamedStream>();
             serializeFragments(
-               name, new FragmentSeries(vUtterances, store, layersToLoad.toArray(new String[0])),
+               name, fragmentSource,
                serializer,
                new Consumer<NamedStream>() {
                      public void accept(NamedStream stream) {
