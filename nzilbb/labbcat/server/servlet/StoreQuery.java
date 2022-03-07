@@ -669,6 +669,23 @@ import org.xml.sax.*;
       </li>
       </ul>
 
+      <a id="getAnnotatorDescriptor()">
+      <!--   -->
+      </a>
+      <ul class="blockListLast">
+      <li class="blockList">
+      <h4>/api/store/getAnnotatorDescriptors</h4>
+      <div class="block">Gets a descriptor of the annotator with the given ID.
+      <p> Annotators are modules that perform automated annations of existing transcripts.</div>
+      <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>annotatorId</code> - The ID of the annotator.</dd>
+      <dt><span class="returnLabel">Returns:</span></dt>
+      <dd>A list of the descriptors of all registered annotators.</dd>
+      </dl>
+      </li>
+      </ul>
+
       <a id="getAnnotatorTasks(java.lang.String)">
         <!--   -->
       </a>
@@ -870,6 +887,8 @@ public class StoreQuery extends LabbcatServlet {
         json = getDeserializerDescriptors(request, response, store);
       } else if (pathInfo.endsWith("getannotatordescriptors")) {
         json = getAnnotatorDescriptors(request, response, store);
+      } else if (pathInfo.endsWith("getannotatordescriptor")) {
+        json = getAnnotatorDescriptor(request, response, store);
       } else if (pathInfo.endsWith("getannotatortasks")) {
          json = getAnnotatorTasks(request, response, store);
       } else if (pathInfo.endsWith("getannotatortaskparameters")) {
@@ -1545,6 +1564,24 @@ public class StoreQuery extends LabbcatServlet {
     AnnotatorDescriptor[] descriptors = store.getAnnotatorDescriptors();
     return successResult(
       request, descriptors, descriptors.length == 0?"There are no annotators.":null);
+  }
+  
+  /**
+   * Gets a descriptor of the annotator with the given ID (annotatorId).
+   * <p> Annotators are modules that perform automated annations of existing transcripts.
+   * @return A list of the descriptors of all registered annotators.
+   * @throws StoreException If an error prevents the descriptors from being listed.
+   * @throws PermissionException If listing the deserializers is not permitted.
+   */
+  protected JsonObject getAnnotatorDescriptor(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    String annotatorId = request.getParameter("annotatorId");
+    if (annotatorId == null) return failureResult(request, "No ID specified.");
+    AnnotatorDescriptor descriptor = store.getAnnotatorDescriptor(annotatorId);
+    if (descriptor == null) return failureResult(request, "Invalid ID: " + annotatorId);
+    return successResult(
+      request, descriptor, null);
   }
 
   /**
