@@ -229,7 +229,8 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
       resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
       
       try {
-        if ("true".equals(request.getParameter("async"))) { // start a task and return its ID
+        if ("true".equalsIgnoreCase(request.getParameter("async"))) {
+          // start a task and return its ID
           
           // layers
           HashSet<String> layers = new HashSet<String>();
@@ -272,127 +273,127 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
           return;
         } // async
         
-         File zipFile = null;
-         SqlGraphStoreAdministration store = getStore(request);
-         try {
+        File zipFile = null;
+        SqlGraphStoreAdministration store = getStore(request);
+        try {
             
-            LinkedHashSet<String> layersToLoad = new LinkedHashSet<String>();
-            for (String l : layerId) layersToLoad.add(l);
+          LinkedHashSet<String> layersToLoad = new LinkedHashSet<String>();
+          for (String l : layerId) layersToLoad.add(l);
             
-            Vector<String> vUtterances = new Vector<String>();
-            if (filter == null) { // not filtering by turn etc.
-               for (int f = 0; f < id.length; f++) {
-                  vUtterances.add(
-                    id[f]+";"+start[f]+"-"+end[f]
-                    +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
-               }
-            } else { // filtering by turn etc.
-               for (int f = 0; f < id.length; f++) {
-                  vUtterances.add(
-                    id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
-                    +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
-               }
+          Vector<String> vUtterances = new Vector<String>();
+          if (filter == null) { // not filtering by turn etc.
+            for (int f = 0; f < id.length; f++) {
+              vUtterances.add(
+                id[f]+";"+start[f]+"-"+end[f]
+                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
             }
-            
-            GraphSerializer serializer = store.serializerForMimeType(mimeType);
-            if (serializer == null) {
-               throw new Exception("Invalid MIME type: " + mimeType);
+          } else { // filtering by turn etc.
+            for (int f = 0; f < id.length; f++) {
+              vUtterances.add(
+                id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
             }
-            Schema schema = store.getSchema();
-            // configure serializer
-            ParameterSet configuration = new ParameterSet();
-            // default values
-            serializer.configure(configuration, schema);
-            // load saved ones
-            ConfigurationHelper.LoadConfiguration(
-               serializer.getDescriptor(), configuration, store.getSerializersDirectory(), schema);
-            serializer.configure(configuration, schema);
-            for (String l : serializer.getRequiredLayers()) layersToLoad.add(l);
-            MonitorableSeries<Graph> fragmentSource = new FragmentSeries(
-              vUtterances, store, layersToLoad.toArray(new String[0]))
-              .setPrefixNames(prefixNames)
-              .setTagTarget(tagTarget);
-            // if we're not prefixing names, and we're tagging targets
-            if (!prefixNames && tagTarget) {
-              // then we need to consolidate graphs - i.e. catch consecutive fragments that
-              // are the same ID, and copy the target tags into the winning version of the graph
-              fragmentSource = new ConsolidatedGraphSeries(fragmentSource)
-                .copyLayer("target");
-            }
+          }
             
-            final Vector<NamedStream> files = new Vector<NamedStream>();
-            serializeFragments(
-               name, fragmentSource,
-               serializer,
-               new Consumer<NamedStream>() {
-                     public void accept(NamedStream stream) {
-                        files.add(stream);
-                     }},
-               new Consumer<SerializationException>() {
-                  public void accept(SerializationException exception) {
-                     System.err.println("SerializeFragments: " + exception);
-                  }},
-               layerId, mimeType, store);
+          GraphSerializer serializer = store.serializerForMimeType(mimeType);
+          if (serializer == null) {
+            throw new Exception("Invalid MIME type: " + mimeType);
+          }
+          Schema schema = store.getSchema();
+          // configure serializer
+          ParameterSet configuration = new ParameterSet();
+          // default values
+          serializer.configure(configuration, schema);
+          // load saved ones
+          ConfigurationHelper.LoadConfiguration(
+            serializer.getDescriptor(), configuration, store.getSerializersDirectory(), schema);
+          serializer.configure(configuration, schema);
+          for (String l : serializer.getRequiredLayers()) layersToLoad.add(l);
+          MonitorableSeries<Graph> fragmentSource = new FragmentSeries(
+            vUtterances, store, layersToLoad.toArray(new String[0]))
+            .setPrefixNames(prefixNames)
+            .setTagTarget(tagTarget);
+          // if we're not prefixing names, and we're tagging targets
+          if (!prefixNames && tagTarget) {
+            // then we need to consolidate graphs - i.e. catch consecutive fragments that
+            // are the same ID, and copy the target tags into the winning version of the graph
+            fragmentSource = new ConsolidatedGraphSeries(fragmentSource)
+              .copyLayer("target");
+          }
             
-            // did we actually find any files?
-            if (files.size() == 0) {
-               response.sendError(404, "no files were generated");
-            } else if (files.size() == 1) { // one file only
-               // don't zip a single file, just return the file
-               response.setContentType(mimeType);
-               NamedStream stream = files.firstElement();
-               response.addHeader(
-                  "Content-Disposition", "attachment; filename=" + stream.getName());
+          final Vector<NamedStream> files = new Vector<NamedStream>();
+          serializeFragments(
+            name, fragmentSource,
+            serializer,
+            new Consumer<NamedStream>() {
+              public void accept(NamedStream stream) {
+                files.add(stream);
+              }},
+            new Consumer<SerializationException>() {
+              public void accept(SerializationException exception) {
+                System.err.println("SerializeFragments: " + exception);
+              }},
+            layerId, mimeType, store);
+            
+          // did we actually find any files?
+          if (files.size() == 0) {
+            response.sendError(404, "no files were generated");
+          } else if (files.size() == 1) { // one file only
+            // don't zip a single file, just return the file
+            response.setContentType(mimeType);
+            NamedStream stream = files.firstElement();
+            response.addHeader(
+              "Content-Disposition", "attachment; filename=" + stream.getName());
                
-               IO.Pump(stream.getStream(), response.getOutputStream());
-            } else { /// multiple files
-               response.setContentType("application/zip");
-               response.addHeader("Content-Disposition", "attachment; filename=" 
-                                  + IO.SafeFileNameUrl(name) + ".zip");
+            IO.Pump(stream.getStream(), response.getOutputStream());
+          } else { /// multiple files
+            response.setContentType("application/zip");
+            response.addHeader("Content-Disposition", "attachment; filename=" 
+                               + IO.SafeFileNameUrl(name) + ".zip");
                
-               // create a stream to pump from
-               PipedInputStream inStream = new PipedInputStream();
-               final PipedOutputStream outStream = new PipedOutputStream(inStream);
+            // create a stream to pump from
+            PipedInputStream inStream = new PipedInputStream();
+            final PipedOutputStream outStream = new PipedOutputStream(inStream);
                
-               // start a new thread to extract the data and stream it back
-               new Thread(new Runnable() {
-                     public void run() {
-                        try {
-                           ZipOutputStream zipOut = new ZipOutputStream(outStream);
+            // start a new thread to extract the data and stream it back
+            new Thread(new Runnable() {
+                public void run() {
+                  try {
+                    ZipOutputStream zipOut = new ZipOutputStream(outStream);
                            
-                           // for each file
-                           for (NamedStream stream : files) {
-                              try {
-                                 // create the zip entry
-                                 zipOut.putNextEntry(
-                                    new ZipEntry(IO.SafeFileNameUrl(stream.getName())));
+                    // for each file
+                    for (NamedStream stream : files) {
+                      try {
+                        // create the zip entry
+                        zipOut.putNextEntry(
+                          new ZipEntry(IO.SafeFileNameUrl(stream.getName())));
                                  
-                                 IO.Pump(stream.getStream(), zipOut, false);
-                              }
-                              catch (ZipException zx) {
-                              } finally {
-                                 stream.getStream().close();
-                              }
-                           } // next file
-                           try {
-                              zipOut.close();
-                           } catch(Exception exception) {
-                              System.err.println("CounvertFragment: Cannot close ZIP file: " + exception);
-                           }
-                        } catch(Exception exception) {
-                           System.err.println("CounvertFragment: open zip stream: " + exception);
-                        }
-                     }
-                  }).start();
+                        IO.Pump(stream.getStream(), zipOut, false);
+                      }
+                      catch (ZipException zx) {
+                      } finally {
+                        stream.getStream().close();
+                      }
+                    } // next file
+                    try {
+                      zipOut.close();
+                    } catch(Exception exception) {
+                      System.err.println("CounvertFragment: Cannot close ZIP file: " + exception);
+                    }
+                  } catch(Exception exception) {
+                    System.err.println("CounvertFragment: open zip stream: " + exception);
+                  }
+                }
+              }).start();
                
-               // send headers immediately, so that the browser shows the 'save' prompt
-               response.getOutputStream().flush();
+            // send headers immediately, so that the browser shows the 'save' prompt
+            response.getOutputStream().flush();
                
-               IO.Pump(inStream, response.getOutputStream());
-            } // multiple files
-         } finally {
-            cacheStore(store);
-         }
+            IO.Pump(inStream, response.getOutputStream());
+          } // multiple files
+        } finally {
+          cacheStore(store);
+        }
       } catch(Exception ex) {
          throw new ServletException(ex);
       }
