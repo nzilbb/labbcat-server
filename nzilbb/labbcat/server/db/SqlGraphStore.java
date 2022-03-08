@@ -4007,6 +4007,15 @@ public class SqlGraphStore implements GraphStore {
       sqlAnnotationsByOffset.setInt(2, ag_id);
       sqlAnnotationsByOffset.setDouble(3, start - granularity);
       sqlAnnotationsByOffset.setDouble(4, end + granularity);
+      
+      final PreparedStatement sqlTranscriptAttribute = getConnection().prepareStatement(
+        "SELECT * FROM annotation_transcript WHERE ag_id = ? AND layer = ?");
+      sqlTranscriptAttribute.setInt(1, ag_id);
+      final PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
+        "SELECT corpus_language FROM corpus"
+        +" INNER JOIN transcript ON transcript.corpus_name = corpus.corpus_name"
+        +" WHERE ag_id = ?");
+      sqlCorpusLanguage.setInt(1, ag_id);
 
       final HashSet<String> layersToLoad = new HashSet<String>(Arrays.asList(layerIds));
       // traverse top-down through the schema, looking for layers to add
@@ -4016,10 +4025,10 @@ public class SqlGraphStore implements GraphStore {
         protected void pre(Layer layer) {
           if (layersToLoad.contains(layer.getId())) { // load this layer
             Integer layer_id = (Integer)layer.get("layer_id");
-            if (layer_id != null && layer_id >= 0) { // a temporal layer
-              fragment.addLayer((Layer)layer.clone());
-              getResult().add(layer.getId());
-              try {
+            try {
+              if (layer_id != null && layer_id >= 0) { // a temporal layer
+                fragment.addLayer((Layer)layer.clone());
+                getResult().add(layer.getId());
                 sqlAnnotationsByOffset.setInt(1, layer_id);
                 ResultSet rs = sqlAnnotationsByOffset.executeQuery();
                 boolean setOrdinalMinimum = true;
@@ -4035,8 +4044,8 @@ public class SqlGraphStore implements GraphStore {
                         annotation.setLabel(participant.getLabel());
                       }
                     }
-                    catch(Exception exception)
-                    {}
+                    catch(Exception exception) {
+                    }
                   }
                   
                   Annotation parent = fragment.getAnnotation(annotation.getParentId());
@@ -4058,14 +4067,67 @@ public class SqlGraphStore implements GraphStore {
                   }
                 } // next annotation
                 rs.close();
-              } catch (SQLException x) {
-                System.err.println(
-                  "SqlGraphStore.getFragment: LayerHierarchyTraversal.pre: " + x);
+              } else if (layer.getId().equals("transcript_type")) { // transcript type
+                fragment.addLayer((Layer)layer.clone());
+                PreparedStatement sqlType = getConnection().prepareStatement(
+                  "SELECT transcript_type, t.type_id FROM transcript t"
+                  +" INNER JOIN transcript_type tt ON tt.type_id = t.type_id"
+                  +" WHERE t.ag_id = ?");
+                sqlType.setInt(1, ag_id);
+                ResultSet rsType = sqlType.executeQuery();
+                if (rsType.next()) {
+                  // add graph-tag annotation
+                  Object[] annotationIdParts = {"type", Integer.valueOf(ag_id)};
+                  Annotation type = new Annotation(
+                    fmtTranscriptAttributeId.format(annotationIdParts), 
+                    rsType.getString("transcript_type"), layer.getId());
+                  type.setParentId(fragment.getId());
+                  fragment.addAnnotation(type);
+                }
+                rsType.close();
+                sqlType.close();
+              } else if (layer.getId().startsWith("transcript_")) {
+                fragment.addLayer((Layer)layer.clone());
+                System.err.println("getFragrment : attribute layer " + layer);
+                // transcript attribute
+                sqlTranscriptAttribute.setString(2, layer.get("attribute").toString());
+                ResultSet rs = sqlTranscriptAttribute.executeQuery();
+                if (rs.next() && rs.getString("label").length() > 0) {
+                  Object[] annotationIdParts = {
+                    layer.get("attribute"),
+                    Integer.valueOf(rs.getInt("annotation_id"))};
+                  Annotation attribute = new Annotation(
+                    fmtTranscriptAttributeId.format(annotationIdParts),
+                    rs.getString("label"), layer.getId());
+                  attribute.setParentId(fragment.getId());
+                  fragment.addAnnotation(attribute);
+                } else if (layer.getId().equals("transcript_language")) {
+                  // transcript_language can magically inherit from corpus
+                  rs.close();
+                  rs = sqlCorpusLanguage.executeQuery();
+                  if (rs.next()) {
+                    Object[] annotationIdParts = {
+                      layer.get("attribute"), Integer.valueOf(ag_id)};
+                    Annotation attribute = new Annotation(
+                      fmtTranscriptAttributeId.format(annotationIdParts),
+                      rs.getString("corpus_language"), layer.getId());
+                    attribute.setParentId(fragment.getId());
+                    fragment.addAnnotation(attribute);
+                  }
+                }			  
+                rs.close();
+              } else if (layer.getId().startsWith("participant_")) {
+                // participant attribute TODO
               }
-            } // temporal layer
+            } catch (SQLException x) {
+              System.err.println(
+                "SqlGraphStore.getFragment: LayerHierarchyTraversal.pre: " + x);
+            }
           } // selected layer
         } // end of pre()
       }; // end of LayerHierarchyTraversal
+      sqlTranscriptAttribute.close();
+      sqlCorpusLanguage.close();
       sqlAnnotationsByOffset.close();
 
       // now load all missing ancestors...
@@ -4141,11 +4203,11 @@ public class SqlGraphStore implements GraphStore {
         } // end of post
       }; // end of LayerHierarchyTraversal
 
-         // if there are no bounding anchors,
-         // add dummy anchors so that media fragment will be correct
+      // if there are no bounding anchors,
+      // add dummy anchors so that media fragment will be correct
       fragment.getOrCreateAnchorAt(start);
       fragment.getOrCreateAnchorAt(end);
-      
+
       fragment.commit();
       return fragment;
     } catch(SQLException exception) {
