@@ -548,10 +548,10 @@ public class SqlGraphStoreAdministration
       sql.setInt(8, layer.getParentIncludes()?1:0);
       sql.setInt(9, layer.getSaturated()?1:0);
       sql.setString(10, subtype);
-      if (layer.containsKey("layer_manager_id")
+      if (layer.containsKey("layer_manager_id") && layer.get("layer_manager_id") != null
           && layer.get("layer_manager_id").toString().length() > 0) {
         sql.setString(11, layer.get("layer_manager_id").toString());
-        if (layer.containsKey("extra")
+        if (layer.containsKey("extra") && layer.get("extra") != null
             && layer.get("extra").toString().length() > 0) {
           // if the layer manager is a known subclass of
           // nz.ac.canterbury.ling.layermanager.AnnotatorWrapperManager
