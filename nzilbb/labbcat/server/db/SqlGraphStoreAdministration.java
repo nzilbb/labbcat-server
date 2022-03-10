@@ -569,6 +569,8 @@ public class SqlGraphStoreAdministration
             annotatorId = "LabelMapper";
           } else if (layerManagerId.equals("MFA")) {
             annotatorId = "MFA";
+          } else if (layerManagerId.equals("BAS")) {
+            annotatorId = "BASAnnotator";
           } else if (layerManagerId.equals("MorTagger")) {
             annotatorId = "MorTagger";
           } else if (layerManagerId.equals("PatternMatcher")) {
