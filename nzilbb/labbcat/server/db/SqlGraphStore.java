@@ -111,6 +111,8 @@ public class SqlGraphStore implements GraphStore {
   /** Format of anchor IDs, where {0} = anchor_id */
   protected MessageFormat fmtAnchorId = new MessageFormat("n_{0,number,0}");
    
+  // Timers timers = new Timers();
+  
   /**
    * URL prefix for file access.
    * @see #getBaseUrl()
@@ -4018,6 +4020,22 @@ public class SqlGraphStore implements GraphStore {
       sqlCorpusLanguage.setInt(1, ag_id);
 
       final HashSet<String> layersToLoad = new HashSet<String>(Arrays.asList(layerIds));
+
+      // loading word tokens with sqlAnnotationsByOffset during the first phase below
+      // is much (>10x!) faster than loading them one at a time with getMatchingAnnotations
+      // in the second phase
+      // if layersToLoad includes any word layers, then add "word" to layersToLoad too
+      if (!layersToLoad.contains(schema.getWordLayerId())) { // "word" not selected
+        for (String layerId : layersToLoad) {
+          Layer layer = schema.getLayer(layerId);
+          if (schema.getWordLayerId().equals(layer.getParentId())) { // word child layer
+            // we need "word" anyway, so add it to layersToLoad
+            layersToLoad.add(schema.getWordLayerId());
+            break; // no need to keep looking
+          }
+        } // next layer to load
+      } // "word" is not selected as a layer
+      
       // traverse top-down through the schema, looking for layers to add
       final HashSet<String> loadedLayers = new HashSet<String>();
       new LayerHierarchyTraversal<HashSet<String>>(loadedLayers, schema) {
@@ -4088,7 +4106,7 @@ public class SqlGraphStore implements GraphStore {
                 sqlType.close();
               } else if (layer.getId().startsWith("transcript_")) {
                 fragment.addLayer((Layer)layer.clone());
-                System.err.println("getFragrment : attribute layer " + layer);
+                System.err.println("getFragment : attribute layer " + layer);
                 // transcript attribute
                 sqlTranscriptAttribute.setString(2, layer.get("attribute").toString());
                 ResultSet rs = sqlTranscriptAttribute.executeQuery();
