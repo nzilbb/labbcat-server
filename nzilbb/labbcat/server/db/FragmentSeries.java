@@ -34,124 +34,123 @@ import nzilbb.util.MonitorableSeries;
  * to a list of selected fragment Ids. 
  * @author Robert Fromont robert@fromont.net.nz
  */
-
 public class FragmentSeries implements MonitorableSeries<Graph> {
    
-   // Attributes:
+  // Attributes:
 
-   private long nextRow = 0;
-   private long rowCount = -1;
-   private Iterator<String> iterator;
-   private boolean cancelling = false;
+  private long nextRow = 0;
+  private long rowCount = -1;
+  private Iterator<String> iterator;
+  private boolean cancelling = false;
 
-   /**
-    * Whether the task is currently running.
-    * @see #getRunning()
-    * @see #setRunning(boolean)
-    */
-   protected boolean running = false;
-   /**
-    * Getter for {@link #running}: Whether the task is currently running.
-    * @return Whether the task is currently running.
-    */
-   public boolean getRunning() { return running; }
-   /**
-    * Setter for {@link #running}: Whether the task is currently running.
-    * @param newRunning Whether the task is currently running.
-    */
-   public void setRunning(boolean newRunning) { running = newRunning; }
+  /**
+   * Whether the task is currently running.
+   * @see #getRunning()
+   * @see #setRunning(boolean)
+   */
+  protected boolean running = false;
+  /**
+   * Getter for {@link #running}: Whether the task is currently running.
+   * @return Whether the task is currently running.
+   */
+  public boolean getRunning() { return running; }
+  /**
+   * Setter for {@link #running}: Whether the task is currently running.
+   * @param newRunning Whether the task is currently running.
+   */
+  public void setRunning(boolean newRunning) { running = newRunning; }
 
-   /**
-    * The graph store object.
-    * @see #getStore()
-    * @see #setStore(SqlGraphStore)
-    */
-   protected SqlGraphStore store;
-   /**
-    * Getter for {@link #store}: The graph store object.
-    * @return The graph store object.
-    */
-   public SqlGraphStore getStore() { return store; }
-   /**
-    * Setter for {@link #store}: The graph store object.
-    * @param newStore The graph store object.
-    */
-   public FragmentSeries setStore(SqlGraphStore newStore) { store = newStore; return this; }
+  /**
+   * The graph store object.
+   * @see #getStore()
+   * @see #setStore(SqlGraphStore)
+   */
+  protected SqlGraphStore store;
+  /**
+   * Getter for {@link #store}: The graph store object.
+   * @return The graph store object.
+   */
+  public SqlGraphStore getStore() { return store; }
+  /**
+   * Setter for {@link #store}: The graph store object.
+   * @param newStore The graph store object.
+   */
+  public FragmentSeries setStore(SqlGraphStore newStore) { store = newStore; return this; }
 
-   /**
-    * A collection of strings that identify a graph fragment.
-    * @see #getFragmentIds()
-    * @see #setFragmentIds(Collection)
-    */
-   protected Collection<String> fragmentIds;
-   /**
-    * Getter for {@link #fragmentIds}: A collection of strings that identify a graph fragment.
-    * @return A collection of strings that identify a graph fragment.
-    */
-   public Collection<String> getFragmentIds() { return fragmentIds; }
-   /**
-    * Setter for {@link #fragmentIds}: A collection of strings that identify a graph fragment.
-    * @param newFragmentIds A collection of strings that identify a graph fragment.
-    */
-   public FragmentSeries setFragmentIds(Collection<String> newFragmentIds) { fragmentIds = newFragmentIds; return this; }
+  /**
+   * A collection of strings that identify a graph fragment.
+   * @see #getFragmentIds()
+   * @see #setFragmentIds(Collection)
+   */
+  protected Collection<String> fragmentIds;
+  /**
+   * Getter for {@link #fragmentIds}: A collection of strings that identify a graph fragment.
+   * @return A collection of strings that identify a graph fragment.
+   */
+  public Collection<String> getFragmentIds() { return fragmentIds; }
+  /**
+   * Setter for {@link #fragmentIds}: A collection of strings that identify a graph fragment.
+   * @param newFragmentIds A collection of strings that identify a graph fragment.
+   */
+  public FragmentSeries setFragmentIds(Collection<String> newFragmentIds) { fragmentIds = newFragmentIds; return this; }
    
-   /**
-    * Layers to load into the fragments.
-    * @see #getLayers()
-    * @see #setLayers(String[])
-    */
-   protected String[] layers;
-   /**
-    * Getter for {@link #layers}: Layers to load into the fragments.
-    * @return Layers to load into the fragments.
-    */
-   public String[] getLayers() { return layers; }
-   /**
-    * Setter for {@link #layers}: Layers to load into the fragments.
-    * @param newLayers Layers to load into the fragments.
-    */
-   public FragmentSeries setLayers(String[] newLayers) { layers = newLayers; return this; }
+  /**
+   * Layers to load into the fragments.
+   * @see #getLayers()
+   * @see #setLayers(String[])
+   */
+  protected String[] layers;
+  /**
+   * Getter for {@link #layers}: Layers to load into the fragments.
+   * @return Layers to load into the fragments.
+   */
+  public String[] getLayers() { return layers; }
+  /**
+   * Setter for {@link #layers}: Layers to load into the fragments.
+   * @param newLayers Layers to load into the fragments.
+   */
+  public FragmentSeries setLayers(String[] newLayers) { layers = newLayers; return this; }
 
-   /**
-    * Whether to shift all anchors in the fragment so that the start anchor has an offset
-    * of 0.0. Default is <code>true</code>.
-    * @see #getShiftAnchors()
-    * @see #setShiftAnchors(boolean)
-    */
-   protected boolean shiftAnchors = true;
-   /**
-    * Getter for {@link #shiftAnchors}: Whether to shift all anchors in the fragment so
-    * that the start anchor has an offset of 0.0. Default is <code>true</code>.
-    * @return Whether to shift all anchors in the fragment so that the start anchor has an
-    * offset of 0.0. 
-    */
-   public boolean getShiftAnchors() { return shiftAnchors; }   
-   /**
-    * Setter for {@link #shiftAnchors}: Whether to shift all anchors in the fragment so
-    * that the start anchor has an offset of 0.0. 
-    * @param newShiftAnchors Whether to shift all anchors in the fragment so that the
-    * start anchor has an offset of 0.0. 
-    */
-   public FragmentSeries setShiftAnchors(boolean newShiftAnchors) { shiftAnchors = newShiftAnchors; return this; }
+  /**
+   * Whether to shift all anchors in the fragment so that the start anchor has an offset
+   * of 0.0. Default is <code>true</code>.
+   * @see #getShiftAnchors()
+   * @see #setShiftAnchors(boolean)
+   */
+  protected boolean shiftAnchors = true;
+  /**
+   * Getter for {@link #shiftAnchors}: Whether to shift all anchors in the fragment so
+   * that the start anchor has an offset of 0.0. Default is <code>true</code>.
+   * @return Whether to shift all anchors in the fragment so that the start anchor has an
+   * offset of 0.0. 
+   */
+  public boolean getShiftAnchors() { return shiftAnchors; }   
+  /**
+   * Setter for {@link #shiftAnchors}: Whether to shift all anchors in the fragment so
+   * that the start anchor has an offset of 0.0. 
+   * @param newShiftAnchors Whether to shift all anchors in the fragment so that the
+   * start anchor has an offset of 0.0. 
+   */
+  public FragmentSeries setShiftAnchors(boolean newShiftAnchors) { shiftAnchors = newShiftAnchors; return this; }
   
-   /**
-    * Whether to prefix fragment names with a numeric serial number or not.
-    * @see #getPrefixNames()
-    * @see #setPrefixNames(boolean)
-    */
-   protected boolean prefixNames = true;
-   /**
-    * Getter for {@link #prefixNames}: Whether to prefix fragment names with a numeric
-    * serial number or not.
-    * @return Whether to prefix fragment names with a numeric serial number or not.
-    */
-   public boolean getPrefixNames() { return prefixNames; }
-   /**
-    * Setter for {@link #prefixNames}: Whether to prefix fragment names with a numeric
-    * serial number or not.
-    * @param newPrefixNames Whether to prefix fragment names with a numeric serial number or not.
-    */
-   public FragmentSeries setPrefixNames(boolean newPrefixNames) { prefixNames = newPrefixNames; return this; }
+  /**
+   * Whether to prefix fragment names with a numeric serial number or not.
+   * @see #getPrefixNames()
+   * @see #setPrefixNames(boolean)
+   */
+  protected boolean prefixNames = true;
+  /**
+   * Getter for {@link #prefixNames}: Whether to prefix fragment names with a numeric
+   * serial number or not.
+   * @return Whether to prefix fragment names with a numeric serial number or not.
+   */
+  public boolean getPrefixNames() { return prefixNames; }
+  /**
+   * Setter for {@link #prefixNames}: Whether to prefix fragment names with a numeric
+   * serial number or not.
+   * @param newPrefixNames Whether to prefix fragment names with a numeric serial number or not.
+   */
+  public FragmentSeries setPrefixNames(boolean newPrefixNames) { prefixNames = newPrefixNames; return this; }
   
   /**
    * Whether to add an tag identifying the target annotation or not.
@@ -172,171 +171,166 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
    */
   public FragmentSeries setTagTarget(boolean newTagTarget) { tagTarget = newTagTarget; return this; }
   
-   // Methods:
+  // Methods:
    
-   /**
-    * Constructor.
-    * @param fragmentIds A collection of strings that identify a graph fragment.
-    * <p>These can be something like:
-    * <ul>
-    * <li><q>g_3;em_11_23;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611</q></li>
-    * <li><q>AgnesShacklock-01.trs;60.897-67.922;prefix=001-</q></li>
-    * <li><q>AgnesShacklock-01.trs;60.897-67.922;m_-1_23-</q></li>
-    * </ul>
-    * @throws SQLException If an error occurs retrieving results.
-    */
-   public FragmentSeries(Collection<String> fragmentIds, SqlGraphStore store, String[] layers)
-      throws SQLException {
+  /**
+   * Constructor.
+   * @param fragmentIds A collection of strings that identify a graph fragment.
+   * <p>These can be something like:
+   * <ul>
+   * <li><q>g_3;em_11_23;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611</q></li>
+   * <li><q>AgnesShacklock-01.trs;60.897-67.922;prefix=001-</q></li>
+   * <li><q>AgnesShacklock-01.trs;60.897-67.922;m_-1_23-</q></li>
+   * </ul>
+   * @throws SQLException If an error occurs retrieving results.
+   */
+  public FragmentSeries(Collection<String> fragmentIds, SqlGraphStore store, String[] layers)
+    throws SQLException {
       
-      setFragmentIds(fragmentIds);
-      setStore(store);
-      setLayers(layers);
-      rowCount = fragmentIds.size();
-      iterator = fragmentIds.iterator();
-   } // end of constructor
+    setFragmentIds(fragmentIds);
+    setStore(store);
+    setLayers(layers);
+    rowCount = fragmentIds.size();
+    iterator = fragmentIds.iterator();
+  } // end of constructor
 
-   // Spliterator implementations
+  // Spliterator implementations
    
-   public int characteristics() {      
-      return ORDERED | DISTINCT | IMMUTABLE | NONNULL | SUBSIZED | SIZED;
-   }
+  public int characteristics() {      
+    return ORDERED | DISTINCT | IMMUTABLE | NONNULL | SUBSIZED | SIZED;
+  }
    
-   /**
-    * Returns the next element of this enumeration if this enumeration object has at least
-    * one more element to provide.
-    */
-   public boolean tryAdvance(Consumer<? super Graph> action) {
+  /**
+   * Returns the next element of this enumeration if this enumeration object has at least
+   * one more element to provide.
+   */
+  public boolean tryAdvance(Consumer<? super Graph> action) {      
+    running = true;
       
+    if (cancelling) {
       running = false;
-      
-      if (cancelling) {
-         running = false;
-         return false;
+      return false;
+    }
+    if (!iterator.hasNext()) return false;
+    String spec = iterator.next();
+    try {
+      nextRow++;
+      String[] parts = spec.split(";");
+      String graphId = parts[0];
+      String targetId = null;
+      if (graphId.startsWith("g_")) graphId = graphId.substring(2);
+      String intervalPart = null;
+      for (int p = 1; p < parts.length; p++) {
+        if (intervalPart == null && parts[p].indexOf("-") > 0) {
+          intervalPart = parts[p];
+        }
+        if (parts[p].startsWith("#=")) {
+          targetId = parts[p].substring(2); 
+        }
       }
-      if (!iterator.hasNext()) return false;
-      String spec = iterator.next();
-      try {
-	 nextRow++;
-         String[] parts = spec.split(";");
-	 String graphId = parts[0];
-         String targetId = null;
-         if (graphId.startsWith("g_")) graphId = graphId.substring(2);
-         String intervalPart = null;
-         for (int p = 1; p < parts.length; p++) {
-            if (intervalPart == null && parts[p].indexOf("-") > 0) {
-               intervalPart = parts[p];
-            }
-            if (parts[p].startsWith("#=")) {
-              targetId = parts[p].substring(2); 
-            }
-         }
-	 String[] interval = intervalPart.split("-");
-	 double start = 0.0;
-	 double end = 0.0;
-         if (interval[0].startsWith("n_")) { // anchor IDs
-            Anchor[] anchors = store.getAnchors(graphId, interval);
-            start = anchors[0].getOffset();
-            end = anchors[1].getOffset();
-         } else { // offsets
-            start = Double.parseDouble(interval[0]);
-            end = Double.parseDouble(interval[1]);
-         }
-	 String prefix = "";
-	 String filterId = "";
-         for (int p = 1; p < parts.length; p++) {
-            if (parts[p].startsWith("prefix=")) {
-               prefix = parts[p].substring("prefix=".length());
-            }
-            if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))
-                // don't filter by utterance - it usually has no descendants, so just makes things
-                // slower without actually discarding anything
-                && !parts[p].startsWith("em_12_")) {
-               filterId = parts[p];
-            }
-         }
+      String[] interval = intervalPart.split("-");
+      double start = 0.0;
+      double end = 0.0;
+      if (interval[0].startsWith("n_")) { // anchor IDs
+        Anchor[] anchors = store.getAnchors(graphId, interval);
+        start = anchors[0].getOffset();
+        end = anchors[1].getOffset();
+      } else { // offsets
+        start = Double.parseDouble(interval[0]);
+        end = Double.parseDouble(interval[1]);
+      }
+      String prefix = "";
+      String filterId = "";
+      for (int p = 1; p < parts.length; p++) {
+        if (parts[p].startsWith("prefix=")) {
+          prefix = parts[p].substring("prefix=".length());
+        }
+        if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))
+            // don't filter by utterance - it usually has no descendants, so just makes things
+            // slower without actually discarding anything
+            && !parts[p].startsWith("em_12_")) {
+          filterId = parts[p];
+        }
+      }
         
-         Graph fragment = store.getFragment(graphId, start, end, layers);
-         if (shiftAnchors) fragment.shiftAnchors(-start);
-         if (prefixNames && prefix.length() > 0) {
-           fragment.setId(prefix + fragment.getId());
-         }
-         if (filterId.length() > 0) { // filter annotation is specified
-            // remove annotations that don't belong to the specified filter annotation
-            Annotation filterAncestor = fragment.getAnnotationsById().get(filterId);
-            if (filterAncestor != null) { // filter is in the graph
-               for (Annotation a : fragment.getAnnotationsById().values()) {
-                  if (a.getLayer().isAncestor(filterAncestor.getLayerId())) {
-                     // annotation is a descendent of the participant layer
-                     if (a.first(filterAncestor.getLayerId()) != filterAncestor) {
-                        a.destroy();
-                     } // annotation has a different ancestor on the same layer
-                  } // annotation is a descendent of the filter layer
-               } // next annotation
-            } // participant is in the graph
-         } // filter is specified
+      Graph fragment = store.getFragment(graphId, start, end, layers);
+      if (shiftAnchors) fragment.shiftAnchors(-start);
+      if (prefixNames && prefix.length() > 0) {
+        fragment.setId(prefix + fragment.getId());
+      }
+      if (filterId.length() > 0) { // filter annotation is specified
+        // remove annotations that don't belong to the specified filter annotation
+        Annotation filterAncestor = fragment.getAnnotationsById().get(filterId);
+        if (filterAncestor != null) { // filter is in the graph
+          for (Annotation a : fragment.getAnnotationsById().values()) {
+            if (a.getLayer().isAncestor(filterAncestor.getLayerId())) {
+              // annotation is a descendent of the participant layer
+              if (a.first(filterAncestor.getLayerId()) != filterAncestor) {
+                a.destroy();
+              } // annotation has a different ancestor on the same layer
+            } // annotation is a descendent of the filter layer
+          } // next annotation
+        } // participant is in the graph
+      } // filter is specified
 
-         // tag target
-         if (tagTarget && targetId != null) {
-           Annotation target = fragment.getAnnotation(targetId);
-           if (target != null) {
-             fragment.addLayer(
-               new Layer("target")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setParentId(target.getLayerId()));
-             String label = "target";
-             if (prefix != null && prefix.length() > 0 && !prefix.equals("-")) {
-               // remove trailing hyphen for consistency with ResultSeries
-               label = prefix.replaceAll("-$","");
-             }
-             fragment.createTag(target, "target", label);
-           }
-         }
+      // tag target
+      if (tagTarget && targetId != null) {
+        Annotation target = fragment.getAnnotation(targetId);
+        if (target != null) {
+          fragment.addLayer(
+            new Layer("target")
+            .setAlignment(Constants.ALIGNMENT_NONE)
+            .setParentId(target.getLayerId()));
+          String label = "target";
+          if (prefix != null && prefix.length() > 0 && !prefix.equals("-")) {
+            // remove trailing hyphen for consistency with ResultSeries
+            label = prefix.replaceAll("-$","");
+          }
+          fragment.createTag(target, "target", label);
+        }
+      }
          
-         fragment.commit();
-	 action.accept(fragment);
-         return true;
-      } catch(Exception exception) {
-         System.err.println("FragmentSeries: Could not get fragment from spec \""+spec+"\": "
-                            + exception);
-         running = false;
-	 return false;
-      }
-   }
+      fragment.commit();
+      action.accept(fragment);
+      return true;
+    } catch(Exception exception) {
+      System.err.println(
+        "FragmentSeries: Could not get fragment from spec \""+spec+"\": " + exception);
+      running = false;
+      return false;
+    }
+  }
 
-   /**
-    * Counts the elements in the series, if possible.
-    * @return The number of elements in the series, or null if the number is unknown.
-    */
-   public long estimateSize() {
-      
-      if (rowCount >= 0) return rowCount;
-      return Long.MAX_VALUE;
-   }
+  /**
+   * Counts the elements in the series, if possible.
+   * @return The number of elements in the series, or null if the number is unknown.
+   */
+  public long estimateSize() {
+    if (rowCount >= 0) return rowCount;
+    return Long.MAX_VALUE;
+  }
 
-   public Spliterator<Graph> trySplit() {
-      
-      return null;
-   }
+  public Spliterator<Graph> trySplit() {
+    return null;
+  }
 
-   // GraphSeries methods
+  // GraphSeries methods
    
-   /**
-    * Determines how far through the serialization is.
-    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
-    */
-   public Integer getPercentComplete() {
-      
-      if (rowCount > 0) {
-	 return (int)((nextRow * 100) / rowCount);
-      }
-      return null;
-   }
+  /**
+   * Determines how far through the serialization is.
+   * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+   */
+  public Integer getPercentComplete() {
+    if (rowCount > 0) {
+      return (int)((nextRow * 100) / rowCount);
+    }
+    return null;
+  }
    
-   /**
-    * Cancels spliteration; the next call to tryAdvance will return false.
-    */
-   public void cancel() {
-      
-      cancelling = true;
-   }
+  /**
+   * Cancels spliteration; the next call to tryAdvance will return false.
+   */
+  public void cancel() {      
+    cancelling = true;
+  }
 } // end of class FragmentSeries
