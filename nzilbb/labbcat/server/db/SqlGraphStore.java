@@ -4021,9 +4021,8 @@ public class SqlGraphStore implements GraphStore {
 
       final HashSet<String> layersToLoad = new HashSet<String>(Arrays.asList(layerIds));
 
-      // loading word tokens with sqlAnnotationsByOffset during the first phase below
-      // is much (>10x!) faster than loading them one at a time with getMatchingAnnotations
-      // in the second phase
+      // loading word tokens with sqlAnnotationsByOffset during the first phase below is
+      // faster than loading them one at a time with getMatchingAnnotations in the second phase
       // if layersToLoad includes any word layers, then add "word" to layersToLoad too
       if (!layersToLoad.contains(schema.getWordLayerId())) { // "word" not selected
         for (String layerId : layersToLoad) {
@@ -4166,56 +4165,81 @@ public class SqlGraphStore implements GraphStore {
               }
 
               // check for orphans
+              HashSet<String> parentsToLoad = new HashSet<String>();
               for (Annotation annotation : fragment.all(layer.getId())) {
                 if (annotation.getParent() == null) { // need to load the parent too
-                  try {
-                    if (layer.getParentId().equals(schema.getParticipantLayerId())) {
-                      // participant
+                  if (layer.getParentId().equals(schema.getParticipantLayerId())) {
+                    // participant
+                    try {
                       Annotation parent = getParticipant(annotation.getParentId());
                       if (parent != null) {
                         fragment.addAnnotation(parent);
                       }
-                    } else { // other layer
-                      Annotation[] match = getMatchingAnnotations(
-                        "id = '"+annotation.getParentId()+"'");
-                      if (match.length > 0) { // found parent
-                        Annotation parent = match[0];
-                        for (String childLayerId
-                               : parentLayer.getChildren().keySet()) {
-                          Annotation firstChild = fragment.first(childLayerId);
-                          if (firstChild != null) {
-                            parent.setOrdinalMinimum(
-                              childLayerId, firstChild.getOrdinal());
-                          }
-                        } // next child layer
-                        fragment.addAnnotation(parent);
-                        Vector<String> anchorsToLoad = new Vector<String>();
-                        // load anchors?
-                        if (fragment.getAnchor(parent.getStartId()) == null) {
-                          // start anchor isn't in graph yet
-                          anchorsToLoad.add(parent.getStartId());
-                        }
-                        if (fragment.getAnchor(parent.getEndId()) == null) {
-                          // end anchor isn't in graph yet
-                          anchorsToLoad.add(parent.getEndId());
-                        }
-                        Anchor[] anchors = getAnchors(
-                          graph.getId(), anchorsToLoad.toArray(new String[0]));
-                        for (Anchor anchor : anchors) {
-                          if (anchor.getOffset() != null
-                              && anchor.getOffset() >= start
-                              && anchor.getOffset() <= end) {
-                            graph.addAnchor(anchor);
-                          }
-                        } // next anchor
-                      } // found parent
-                    } // other layer
-                  } catch (Exception x) {
-                    System.err.println(
-                      "SqlGraphStore.getFragment : LayerHierarchyTraversal.post: "+x);
-                  }
+                    } catch (Exception x) {
+                      System.err.println(
+                        "SqlGraphStore.getFragment : could not load participant: "+x);
+                    }
+                  } else { // other layer
+                    parentsToLoad.add(annotation.getParentId());
+                  } // other layer
                 } // need to load parent
               } // next annotation
+
+              if (parentsToLoad.size() > 0) {
+                // load them all at once, which is quicker than one at a time
+                StringBuilder idList = new StringBuilder();
+
+                for (String id : parentsToLoad) {
+                  if (idList.length() > 0) idList.append("','");
+                  idList.append(id);                                             
+                } // next annotation ID
+
+                // we'll load their anchors too
+                HashSet<String> anchorsToLoad = new HashSet<String>();
+
+                try {
+                  Annotation[] matches = getMatchingAnnotations("id IN ('"+idList+"')");
+                  for (Annotation parent : matches) {
+                    for (String childLayerId : parentLayer.getChildren().keySet()) {
+                      Annotation firstChild = fragment.first(childLayerId);
+                      if (firstChild != null) {
+                        parent.setOrdinalMinimum(
+                          childLayerId, firstChild.getOrdinal());
+                      }
+                    } // next child layer
+                    fragment.addAnnotation(parent);
+                    // load anchors?
+                    if (fragment.getAnchor(parent.getStartId()) == null) {
+                      // start anchor isn't in graph yet
+                      anchorsToLoad.add(parent.getStartId());
+                    }
+                    if (fragment.getAnchor(parent.getEndId()) == null) {
+                      // end anchor isn't in graph yet
+                      anchorsToLoad.add(parent.getEndId());
+                    }
+                  } // next parent
+                  
+                  if (anchorsToLoad.size() > 0) {
+                    try {
+                      Anchor[] anchors = getAnchors(
+                        graph.getId(), anchorsToLoad.toArray(new String[0]));
+                      for (Anchor anchor : anchors) {
+                        if (anchor.getOffset() != null
+                            && anchor.getOffset() >= start
+                            && anchor.getOffset() <= end) {
+                          graph.addAnchor(anchor);
+                        }
+                      } // next anchor to load
+                    } catch (Exception x) {
+                      System.err.println(
+                        "SqlGraphStore.getFragment : could not load parent anchors: "+x);
+                    }
+                  } // there are anchors to load
+                } catch (Exception x) {
+                  System.err.println(
+                    "SqlGraphStore.getFragment : could not load parents: "+x);
+                }
+              } // there are parents to load on this layer
             } // layer parent should be processed
           } // have loaded this layer
         } // end of post
