@@ -1,5 +1,18 @@
 FROM tomcat:9.0.56
 
+# install Praat
+RUN mkdir /opt/praat
+WORKDIR /opt/praat
+RUN wget https://www.fon.hum.uva.nl/praat/praat6210_linux64barren.tar.gz
+RUN tar xvf praat6210_linux64barren.tar.gz
+RUN rm praat6210_linux64barren.tar.gz
+RUN cp praat_barren /usr/bin/praat
+
+# HTK cannot be distributed, but with a registers username/password, the source code can be
+# downloaded and compiled, so set up environment for HTK compilation
+RUN apt update && apt install -y \
+    libc6-dev-i386 libx11-dev gawk python-dev python-pip xorg-dev
+
 # extract the contents of labbcat.war into /labbcat
 RUN mkdir /labbcat
 COPY bin/labbcat.war /labbcat
@@ -20,19 +33,6 @@ RUN sed -i "s/'localhost'/'%'/" WEB-INF/install.jsp
 # password-protect the webapp
 RUN cp WEB-INF/lib/mysql-connector-java-latest.jar /usr/local/tomcat/lib/
 RUN sed -i '/USER-SECURITY/d' WEB-INF/web_install.xml
-
-# install Praat
-RUN mkdir /opt/praat
-WORKDIR /opt/praat
-RUN wget https://www.fon.hum.uva.nl/praat/praat6210_linux64barren.tar.gz
-RUN tar xvf praat6210_linux64barren.tar.gz
-RUN rm praat6210_linux64barren.tar.gz
-RUN cp praat_barren /usr/bin/praat
-
-# HTK cannot be distributed, but with a registers username/password, the source code can be
-# downloaded and compiled, so set up environment for HTK compilation
-RUN apt update && apt install -y \
-    libc6-dev-i386 libx11-dev gawk python-dev python-pip xorg-dev
 
 # Tomcat runs on port 8080
 EXPOSE 8080
