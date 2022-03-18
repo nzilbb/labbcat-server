@@ -158,7 +158,6 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
 
         // get annotator descriptor - the same instance as last time if possible
         AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
-        log("new descriptor " + (newDescriptor==null?"null":newDescriptor.getVersion()));
         AnnotatorDescriptor descriptor = activeAnnotators.get(annotatorId);
         log("descriptor " + (descriptor==null?"null":descriptor.getVersion()));
         if (descriptor == null // haven't got one of these yet
@@ -169,6 +168,8 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
           descriptor = newDescriptor;
           activeAnnotators.put(annotatorId, descriptor);
           log("new descriptor " + descriptor);
+          descriptor.getInstance().getStatusObservers().add(
+            status -> log(annotatorId + ": " + status));
         }
         if (descriptor == null) {
           response.setStatus(HttpServletResponse.SC_NOT_FOUND);
