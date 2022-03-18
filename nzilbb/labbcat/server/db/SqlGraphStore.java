@@ -2606,20 +2606,34 @@ public class SqlGraphStore implements GraphStore {
         target_annotation_id_group = 3;
         first_word_annotation_id_group = 3;
       } else {
-        // not IdMatch or URL - maybe they've passed in annotation UIDs
-        // something like:
-        // "em_12_2671" or "ew_0_16783"
-        matchIdPattern = Pattern.compile("e.?_(\\d+)_(\\d+)");
+        // URL something like:
+        // http://localhost:8080/labbcat/transcript?transcript=foo.trs#ew_0_16783
+        matchIdPattern = Pattern.compile(
+          "https?://.+/transcript\\?transcript=(.+)#e.?_(\\d+)_(\\d+)");
         idMatcher = matchIdPattern.matcher(matchId);
-        if (idMatcher.matches()) { // UID pattern matches
-          ag_id_group = null;
+        if (idMatcher.matches()) { // URL pattern matches
+          ag_id_group = null; // TODO a way to include name!
           utterance_annotation_id_group = null;
           participant_speaker_number_group = null;
-          target_layer_id_group = 1;
-          target_annotation_id_group = 2;
-          first_word_annotation_id_group = 2;
+          target_layer_id_group = 2;
+          target_annotation_id_group = 3;
+          first_word_annotation_id_group = 3;
         } else {
-          throw new StoreException("Malformed ID: " + matchId);
+          // not IdMatch or URL - maybe they've passed in annotation UIDs
+          // something like:
+          // "em_12_2671" or "ew_0_16783"
+          matchIdPattern = Pattern.compile("e.?_(\\d+)_(\\d+)");
+          idMatcher = matchIdPattern.matcher(matchId);
+          if (idMatcher.matches()) { // UID pattern matches
+            ag_id_group = null;
+            utterance_annotation_id_group = null;
+            participant_speaker_number_group = null;
+            target_layer_id_group = 1;
+            target_annotation_id_group = 2;
+            first_word_annotation_id_group = 2;
+          } else {
+            throw new StoreException("Malformed ID: " + matchId);
+          }
         }
       }
     } // MatchId pattern matches
@@ -2747,7 +2761,7 @@ public class SqlGraphStore implements GraphStore {
                      Integer.valueOf(SqlConstants.LAYER_SEGMENT))
                    && (layer.getParentId() != null
                        && layer.getParentId().equals(targetLayer.getParentId()))) {// word child
-          // target is segment layer and layer is segment child
+          // target is segment layer and layer is word child
           Integer layer_id = (Integer)layer.get("layer_id");
           String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
             // these required for ORDER BY
@@ -2778,11 +2792,11 @@ public class SqlGraphStore implements GraphStore {
               +" annotation_start.offset AS annotation_start_offset,"
               +" annotation_end.offset - annotation_start.offset AS annotation_length"
               +" FROM annotation_layer_"+layer_id+" annotation"
-              +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
-              +" ON annotation.word_annotation_id = target.word_annotation_id"
+              +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION+" target"
+              +" ON annotation.word_annotation_id = target.annotation_id"
               +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" token"
-              +" ON target.word_annotation_id = token.word_annotation_id"
-              +" AND target.ordinal_in_word = token.ordinal_in_word + "+targetOffset
+              +" ON target.turn_annotation_id = token.turn_annotation_id"
+              +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
               // annotation anchors
               +" INNER JOIN anchor annotation_start"
               +" ON annotation.start_anchor_id = annotation_start.anchor_id"
@@ -2876,8 +2890,10 @@ public class SqlGraphStore implements GraphStore {
               +" ORDER BY annotation.ordinal, annotation.annotation_id"
               +" LIMIT 0, " + annotationsPerLayer;
             if (targetOffset != 0
-                && SqlConstants.SCOPE_WORD.equalsIgnoreCase(
-                  (String)targetLayer.get("scope"))) { // offset word
+                && (SqlConstants.SCOPE_WORD.equalsIgnoreCase(
+                      (String)targetLayer.get("scope"))
+                    || SqlConstants.SCOPE_SEGMENT.equalsIgnoreCase(
+                      (String)targetLayer.get("scope")))) { // offset word
               sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
                 +" FROM annotation_layer_"+layer_id+" annotation"
                 +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION+" target"
