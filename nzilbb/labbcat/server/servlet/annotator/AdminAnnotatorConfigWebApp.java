@@ -282,7 +282,11 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
             } catch(RequestException exception) {
               log(request.getPathInfo() + " - RequestException: " + exception);
               status = exception.getHttpStatus();
-              stream = new ByteArrayInputStream(exception.getMessage().getBytes());
+              if (exception.getMessage() != null) {
+                stream = new ByteArrayInputStream(exception.getMessage().getBytes());
+              } else {
+                stream = new ByteArrayInputStream(exception.getClass().getName().getBytes());
+              }
             } catch(URISyntaxException exception) {
               log(request.getPathInfo() + " - URISyntaxException: " + exception);
               response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
