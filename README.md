@@ -119,5 +119,5 @@ docker run --name=labbcat-db \
  -e MYSQL_PASSWORD=secret \
  -d mysql/mysql-server:5.6 \
  --skip-log-bin --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
-docker run --name=labbcat --link labbcat-db -d -p 8888:8080 nzilbb/labbcat
+docker run -v /path/to/external/directory:/labbcat/files --name=labbcat --link labbcat-db -d -p 8888:8080 nzilbb/labbcat
 ```
