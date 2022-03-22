@@ -352,7 +352,7 @@ public class SqlGraphStoreAdministration
         }
 
         // ensure schema is reloaded with new layer
-        schema = null;
+        this.schema = null;
 
       } else if (oldVersion.containsKey("layer_id")
                  && (Integer)oldVersion.get("layer_id") >= 0) { // temporal layer
@@ -853,7 +853,7 @@ public class SqlGraphStoreAdministration
       // TODO validLabels
             
       // ensure schema is reloaded with new layer
-      schema = null;
+      this.schema = null;      
             
       return getLayer(layer.getId());
     } catch (SQLException sqlX) {
@@ -944,7 +944,7 @@ public class SqlGraphStoreAdministration
       sql.close();
          
       // ensure schema is reloaded with layer removed
-      schema = null;
+      this.schema = null;
          
     } catch (SQLException x) {
       throw new StoreException(x);
