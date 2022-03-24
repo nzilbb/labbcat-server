@@ -29,6 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
@@ -1698,7 +1699,12 @@ public class ProcessWithPraat extends Task {
       if (out != null) {
         try {
           out.println();
-          out.print(x.getClass().getSimpleName() + ": " + x.getMessage());
+          StringWriter sw = new StringWriter();
+          PrintWriter pw = new PrintWriter(sw);
+          x.printStackTrace(pw);
+          out.print(x.getClass().getSimpleName() + ": " + x.getMessage() + "\n"+sw);
+          sw.close();
+          pw.close();
           out.println();
         } catch(IOException exception) {
           System.err.println("ProcessWithPraat: " + x.toString());
@@ -1884,18 +1890,26 @@ public class ProcessWithPraat extends Task {
       if (passThroughData) for (String sValue : record) out.print(sValue);
 
       // formants etc.
+      String error = "";
       try {
-        Vector<String> vFormants = enResults.nextElement();
-        for (String sDatum : vFormants) {
-          out.print(sDatum);
-        } // next datum
+        Vector<String> rowResults = enResults.nextElement();
+        // last 'result' is always the 'error' if any, so pass through all but the last result
+        for (int r = 0 ; r < rowResults.size() - 1; r++) {
+          out.print(rowResults.elementAt(r));
+        } // next result
+        error = rowResults.lastElement();
       } catch(Exception exception) {
         out.print(exception.getMessage());
       }
 
-      // error
+      // report error if any, and both errors if there was one earlier
       try {
-        out.print(enErrors.nextElement().toString());
+        if (error.length() > 0) {
+          error += "\n" + enErrors.nextElement().toString();
+        } else {
+          error = enErrors.nextElement().toString();
+        }
+        out.print(error);
       } catch(Exception exception) {
         out.print("missing");
       }
@@ -2011,6 +2025,8 @@ public class ProcessWithPraat extends Task {
             if (extractCOG23) result.add("");
             for (String field : customScriptHeaders) result.add("");
           }
+          // no error
+          result.add("");
           results.add(result);
         } // next target
         IO.RecursivelyDelete(tempDirectory);
@@ -2045,6 +2061,8 @@ public class ProcessWithPraat extends Task {
           if (error != null) {
             result.add(error);
             error = null;
+          } else {
+            result.add("");
           }
           results.add(result);
         } // next target
