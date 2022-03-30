@@ -377,11 +377,24 @@ public class AnnotationAgqlToSql {
                 } else {
                   String attribute = attribute(layerId);
                   if ("transcript".equals(operandLayer.get("class_id"))) {
-                    conditions.push(
-                      "(SELECT label"
-                      +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                      +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                      +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1)");
+                    if (layerId.equals("transcript_language")) { // transcript language
+                      // ... can inherit from corpus language, so include that as a possibility
+                      conditions.push(
+                        "COALESCE("
+                        +"(SELECT label" // transcript language attribute
+                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                        +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1),"
+                        +"(SELECT corpus_language FROM corpus" // or if not, corpus language
+                        +" WHERE corpus.corpus_name = graph.corpus_name)"
+                        +")");
+                    } else { // non-language transcript attribute
+                      conditions.push(
+                        "(SELECT label"
+                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                        +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1)");
+                    }
                   } else if ("speaker".equals(operandLayer.get("class_id"))) {
                     errors.add("Cannot get participant attribute labels: " + ctx.getText()); // TODO
                     return;

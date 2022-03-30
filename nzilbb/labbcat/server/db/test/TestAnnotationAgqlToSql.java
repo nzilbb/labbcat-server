@@ -542,6 +542,26 @@ public class TestAnnotationAgqlToSql {
     //              q.sql);
   }
 
+  @Test public void languageLabel() throws AGQLException {
+    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+    AnnotationAgqlToSql.Query q = transformer.sqlFor(
+      "layerId = 'utterance' && first('transcript_language').label == 'en'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("Transcript attribute - SQL",
+                 "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+                 +" FROM annotation_layer_12 annotation"
+                 +" WHERE 'utterance' = 'utterance'"
+                 +" AND COALESCE("
+                 +"(SELECT label FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                 +" WHERE annotation_transcript.layer = 'language'"
+                 +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1),"
+                 +"(SELECT corpus_language FROM corpus"
+                 +" WHERE corpus.corpus_name = graph.corpus_name)"
+                 +") = 'en'"
+                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 q.sql);
+  }
+
   @Test public void listLength() throws AGQLException {
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
     AnnotationAgqlToSql.Query q = transformer.sqlFor(
