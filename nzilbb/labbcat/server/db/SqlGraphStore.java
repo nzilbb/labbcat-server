@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1377,7 +1377,6 @@ public class SqlGraphStore implements GraphStore {
     return getMatchingTranscriptIds("first('corpus').label = '"+esc(id)+"'");
   }
 
-
   /**
    * Gets a list of IDs of transcripts that include the given participant.
    * @param id A participant ID.
@@ -1389,7 +1388,6 @@ public class SqlGraphStore implements GraphStore {
     throws StoreException, PermissionException {
     return getMatchingTranscriptIds("'"+esc(id)+"' IN labels('participant')");
   }
-
    
   /**
    * Converts a participant-matching expression into a resultset (SELECT selectedClause
@@ -2217,7 +2215,8 @@ public class SqlGraphStore implements GraphStore {
    * </ul>
    * <p><em>NB</em> all expressions must match by either id or layer.id.
    * @param expression The annotation-matching expression.
-   * @param limit SQL LIMIT clause, if any.
+   * @param limit SQL LIMIT clause, if any. If this is "COUNT(*)" then the returned query
+   * counts matches instead of listing them.
    * @return A PreparedStatement for the given expression, with parameters already set.
    * @throws SQLException
    * @throws StoreException If the expression is invalid.
@@ -2485,6 +2484,23 @@ public class SqlGraphStore implements GraphStore {
   public Annotation[] getMatchingAnnotations(
     String expression, Integer pageLength, Integer pageNumber)
     throws StoreException, PermissionException {
+    return getMatchingAnnotations(expression, pageLength, pageNumber, false);
+  }
+
+  /**
+   * Gets a list of annotations that match a particular pattern.
+   * @param expression An expression that determines which transcripts match.
+   * @param pageLength The maximum number of annotations to return, or null to return all.
+   * @param pageNumber The page number to return, or null to return the first page.
+   * @param setGraph true to include the graph of all returned annotations, false otherwise.
+   * @return A list of matching {@link Annotation}s.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public Annotation[] getMatchingAnnotations(
+    String expression, Integer pageLength, Integer pageNumber, boolean setGraph)
+    throws StoreException, PermissionException {
+
     Schema schema = getSchema();
     try {
       String limit = "";
@@ -2502,7 +2518,8 @@ public class SqlGraphStore implements GraphStore {
         if (layer == null) { // they'll all be on the same layer
           layer = schema.getLayer(rsAnnotation.getString("layer"));
         }
-        if ("F".equals(layer.get("scope")) // freeform layer
+        if (setGraph // the caller wants the graph
+            || "F".equals(layer.get("scope")) // freeform layer
             || layer.getId().equals(schema.getUtteranceLayerId())
             || layer.getId().equals(schema.getTurnLayerId())
             || layer.getId().equals(schema.getParticipantLayerId())
@@ -3522,7 +3539,100 @@ public class SqlGraphStore implements GraphStore {
     }
        
   } // getMatchAnnotations
-   
+
+  /**
+   * Deletes all annotations that match a particular pattern.
+   * @param expression An expression that determines which annotations match.
+   * <p> The expression language is loosely based on JavaScript; expressions such as the
+   * following can be used: 
+   * <ul>
+   *  <li><code>layer.id == 'pronunciation' 
+   *       &amp;&amp; first('orthography').label == 'the'</code></li>
+   *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'pronunciation' 
+   *       &amp;&amp; first('orthography').label == 'the'</code></li> 
+   * </ul>
+   * <p><em>NB</em> all expressions must match by either id or layer.id.
+   * @return The number of new annotations deleted.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public int deleteMatchingAnnotations(String expression)
+    throws StoreException, PermissionException {
+    try {
+      
+      AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+      AnnotationAgqlToSql.Query query = transformer.sqlFor(
+        expression, "annotation_id", userWhereClauseGraph(true, "graph"), "");
+      String delete = query.sql
+        .replaceAll("SELECT .* FROM", "DELETE annotation.* FROM")
+        .replaceAll("ORDER BY [^)]+$","");
+      System.out.println("QL: " + expression);
+      System.out.println("SQL: " + delete);
+      PreparedStatement sql = getConnection().prepareStatement(delete);
+      try {
+        return sql.executeUpdate();
+      } finally {
+        sql.close();
+      }
+    } catch(SQLException exception) {
+      throw new StoreException(exception);
+    }
+  }
+  
+  /**
+   * Identifies a list of annotations that match a particular pattern, and tags them on
+   * the given layer with the given label. If the specified layer ID does not allow peers,
+   * all existing tags will be deleted. Otherwise, tagging does not affect any existing tags on
+   * the matching annotations.
+   * @param expression An expression that determines which annotations match.
+   * <p> The expression language is loosely based on JavaScript; expressions such as the
+   * following can be used: 
+   * <ul>
+   *  <li><code>layer.id == 'orthography' &amp;&amp; label == 'word'</code></li>
+   *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'orthography'
+   *       &amp;&amp; label == 'word'</code></li> 
+   * </ul>
+   * <p><em>NB</em> all expressions must match by either id or layer.id.
+   * @param layerId The layer ID of the resulting annotation.
+   * @param label The label of the resulting annotation.
+   * @param confidence The confidence rating.
+   * @return The number of new annotations added.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public int tagMatchingAnnotations(
+    String expression, String layerId, String label, Integer confidence)
+    throws StoreException, PermissionException {
+    try {
+      Layer layer = getLayer(layerId);
+      Annotation[] toTag = getMatchingAnnotations(expression, null, null, true);
+      if (toTag.length == 0) return 0; // nothing to tag
+      boolean toTagIsParent = toTag[0].getLayerId().equals(layer.getParentId());
+      if (!toTagIsParent) { // ensure they share a parent layer
+        Layer toTagLayer = getLayer(toTag[0].getLayerId());
+        if (!layer.getParentId().equals(toTagLayer.getParentId())) {
+          throw new StoreException(
+            "Tag layer \""+layerId+"\" is not a child or peer layer of the layer to tag \""
+            +toTag[0].getLayerId()+"\"");
+        }
+      }
+      for (Annotation token : toTag) {
+        if (!layer.getPeers()) {
+          deleteMatchingAnnotations(
+            "layerId == '"+esc(layerId)+"'"
+            +" && first('"+esc(token.getLayerId())+"').id == '"+token.getId()+"'");
+        }
+        createAnnotation(
+          token.getGraph().getId(), token.getStartId(), token.getEndId(),
+          layerId, label, confidence,
+          toTagIsParent? token.getId() : token.getParentId());
+      } // next token to tag
+      return toTag.length;
+    } catch(GraphNotFoundException exception) {
+      throw new StoreException(exception);
+    }
+  }
+  
   /**
    * Gets the given anchors in the given transcript.
    * @param id The ID of the transcript.
@@ -4930,8 +5040,7 @@ public class SqlGraphStore implements GraphStore {
   protected void saveGraphChanges(Graph graph) throws SQLException {
     // TODO save ordinal as episode index
     // TODO update offset in episode
-  }   
-
+  }
 
   /**
    * Constructs an Annotation from the given query result row.
@@ -6492,6 +6601,7 @@ public class SqlGraphStore implements GraphStore {
 
   /**
    * Creates an annotation starting at <var>fromId</var> and ending at <var>toId</var>.
+   * @param id The ID of the transcript.
    * @param fromId The start anchor's ID, which can be null if the layer is a tag layer.
    * @param toId The end anchor's ID, which can be null if the layer is a tag layer.
    * @param layerId The layer ID of the resulting annotation.
