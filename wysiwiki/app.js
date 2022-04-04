@@ -126,7 +126,7 @@ InlineEditor.defaultConfig = {
 };
 
 const baseUrl = document.URL.replace(/\/doc\/.*/,"/doc");
-const urlRelativeToBase = document.URL.replace(/.*\/doc\//,"");
+const urlRelativeToBase = document.URL.replace(/.*\/doc\//,"").replace(/#.*/,"");
 const idInMenu = urlRelativeToBase
       .replace(/\//g,"→") // slashes become double-hyphens
       ||"--"; // empty string means the root page, whose id is "--"
