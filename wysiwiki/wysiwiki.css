@@ -21,9 +21,16 @@ header, footer {
 #main > nav div {
     padding-left: 20px;
 }
-#main > nav span {
+#main > nav button { /* index menu buttons */
     float: right;
     cursor: default;
+    color: #859044;
+    margin-left: 3px;
+    font-weight: bold;
+}
+#main > nav details > button { /* new child/peer page buttons */
+    float: none;
+    margin-left: 10px;
 }
 .current > a {
     font-weight: bold;

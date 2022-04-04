@@ -126,7 +126,8 @@ InlineEditor.defaultConfig = {
 };
 
 const baseUrl = document.URL.replace(/\/doc\/.*/,"/doc");
-const idInMenu = document.URL.replace(/.*\/doc\//,"")
+const urlRelativeToBase = document.URL.replace(/.*\/doc\//,"");
+const idInMenu = urlRelativeToBase
       .replace(/\//g,"→") // slashes become double-hyphens
       ||"--"; // empty string means the root page, whose id is "--"
 const createButton = `<img title="Create" src="${baseUrl}/../user-interface/en/assets/add.svg">`;
@@ -153,33 +154,64 @@ function loadNavigation() {
             if (parentId == id) parentId = "→";
             id = parentId;
         } while (id != "→");
-        // add move buttons
+        // add menu buttons
         if (canEdit) {
-            // add ordering buttons...
+            // add ordering/new page buttons...
+            let parentUrlRelativeToBase = urlRelativeToBase.replace(/\/[^/]+$/,"");
+            if (parentUrlRelativeToBase == urlRelativeToBase) parentUrlRelativeToBase = "";
 
             // if it's a div (a page) ...
             
+            // add peer page button at the end of current children
+            if (urlRelativeToBase) { // not root page
+                $(`div[id='${idInMenu}']`).parent().append(
+                    $("<button title='New peer page'>+</button>").on("click", (e)=>{
+                        newPage(parentUrlRelativeToBase);
+                    }));
+            }
+            // add child page button
+            $(`div[id='${idInMenu}']`).append(
+                $("<button title='New child page'>+</button>").on("click", (e)=>{
+                    newPage(urlRelativeToBase);
+                }));
             // move-up button unless it's already at the top (first-child is <summary>)
             $(`div[id='${idInMenu}']:not(:nth-child(2))`).append(
-                $("<span title='Move up'>▲</span>").on("click", (e)=>{
+                $("<button title='Move up'>▲</button>").on("click", (e)=>{
                     move("up", $(e.target).prevAll("a").attr("href"));
                 }));
             // move-down button unless it's already at the bottom
-            $(`div[id='${idInMenu}']:not(:last-child)`).append(
-                $("<span title='Move down'>▼</span>").on("click", (e)=>{
+            $(`div[id='${idInMenu}']:not(:nth-last-child(2))`).append(
+                $("<button title='Move down'>▼</button>").on("click", (e)=>{
                     move("down", $(e.target).prevAll("a").attr("href"));
                 }));
-
+            
             // if it's a summary (a directory) ...
             
+            // add peer page button at the end of current children
+            if (urlRelativeToBase) { // not root page
+                $(`details>summary[id='${idInMenu}']`).parent().parent().append(
+                    $("<button title='New peer page'>+</button>").on("click", (e)=>{
+                        newPage(parentUrlRelativeToBase);
+                    }));
+                // add child page button at the end of current children
+                $(`details>summary[id='${idInMenu}']`).parent().append(
+                    $("<button title='New child page'>+</button>").on("click", (e)=>{
+                        newPage(urlRelativeToBase);
+                    }));
+            } else { // root page, so add new child page button only
+                $(`details>summary[id='→']`).parent().append(
+                    $("<button title='New child page'>+</button>").on("click", (e)=>{
+                        newPage(urlRelativeToBase);
+                    }));
+            }
             // move-up button unless it's already at the top (first-child is <summary>)
             $(`details:not(:nth-child(2))>summary[id='${idInMenu}']`).append(
-                $("<span title='Move up'>▲</span>").on("click", (e)=>{
+                $("<button title='Move up'>▲</button>").on("click", (e)=>{
                     move("up", $(e.target).prevAll("a").attr("href"));
                 }));
             // move-down button unless it's already at the bottom
-            $(`details:not(:last-child)>summary[id='${idInMenu}']`).append(
-                $("<span title='Move down'>▼</span>").on("click", (e)=>{
+            $(`details:not(:nth-last-child(2))>summary[id='${idInMenu}']`).append(
+                $("<button title='Move down'>▼</button>").on("click", (e)=>{
                     move("down", $(e.target).prevAll("a").attr("href"));
                 }));
         }
@@ -199,7 +231,12 @@ $.ajax({
             `<button id="edit">${editButton}</button>`);
         if ($("title").text().startsWith("*")) { // new page
             // add a default title
-            const defaultTitle = decodeURIComponent(document.URL.replace(/.*\//, ""));
+            let defaultTitle = decodeURIComponent(document.URL.replace(/.*\//, ""));
+            if (document.location.hash && document.location.hash != "#") {
+                defaultTitle = decodeURI( // Convert %20 to space, etc.
+                    document.location.hash
+                        .replace(/^#/,"")); // remove initial #
+            }
             $("#main>article").html(`<h2>${defaultTitle}</h2>`);
             // start editing the page immediately
             editPage();
@@ -312,6 +349,42 @@ function move(direction, url) {
     }).done(data=>{
         loadNavigation();
     });
+}
+
+function newPage(parentId) {
+    const title = prompt("New Page Title");
+    if (title) {
+        const documentName = slugify(title);
+        if (parentId) parentId = `/${parentId}`;
+        let url = `${baseUrl}${parentId}/${documentName}`;
+        if (title != documentName) url += `#${title}`;
+        window.top.location = url;
+    }
+}
+
+// Slugify a string
+// thanks to https://lucidar.me/en/web-dev/how-to-slugify-a-string-in-javascript/
+function slugify(str) {
+    str = str.replace(/^\s+|\s+$/g, '');
+
+    // Make the string lowercase
+    str = str.toLowerCase();
+
+    // Remove accents, swap ñ for n, etc
+    var from = "ÁÄÂÀÃÅČÇĆĎÉĚËÈÊẼĔȆÍÌÎÏŇÑÓÖÒÔÕØŘŔŠŤÚŮÜÙÛÝŸŽáäâàãåčçćďéěëèêẽĕȇíìîïňñóöòôõøðřŕšťúůüùûýÿžþÞĐđßÆa·/_,:;";
+    var to   = "AAAAAACCCDEEEEEEEEIIIINNOOOOOORRSTUUUUUYYZaaaaaacccdeeeeeeeeiiiinnooooooorrstuuuuuyyzbBDdBAa------";
+    for (var i=0, l=from.length ; i<l ; i++) {
+        str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+    }
+
+    // Remove invalid chars
+    str = str.replace(/[^a-z0-9 -]/g, '') 
+    // Collapse whitespace and replace by -
+    .replace(/\s+/g, '-') 
+    // Collapse dashes
+    .replace(/-+/g, '-'); 
+
+    return str;
 }
 
 function deletePage() {
