@@ -5,7 +5,7 @@
       <input #name type="text" required i18n-placeholder placeholder="Name"></span>
     <span class="corpus-language" i18n-title title="Language"><legend i18n>Language</legend>
       <select #language type="text" required>
-        <option *ngIf="languages" disabled selected i18n>Language</option>
+        <option *ngIf="languages" value="" disabled selected i18n>Language</option>
         <option *ngFor="let language of languages" value="{{language.label}}">{{language.description}}</option>
       </select>
     </span>
