@@ -155,9 +155,7 @@ public class EditAnnotatorExtWebApp extends LabbcatServlet {
 
         // get annotator descriptor - the same instance as last time if possible
         AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
-        log("new descriptor " + (newDescriptor==null?"null":newDescriptor.getVersion()));
         AnnotatorDescriptor descriptor = activeAnnotators.get(annotatorId);
-        log("descriptor " + (descriptor==null?"null":descriptor.getVersion()));
         if (descriptor == null // haven't got one of these yet
             || descriptor.getVersion() == null // this version has been uninstalled
             || (newDescriptor != null // or a new one has been installed
