@@ -11,7 +11,8 @@ RUN cp praat_barren /usr/bin/praat
 # HTK cannot be distributed, but with a registers username/password, the source code can be
 # downloaded and compiled, so set up environment for HTK compilation
 RUN apt update && apt install -y \
-    make libc6-dev-i386 libx11-dev gawk xorg-dev
+    make libc6-dev-i386 libx11-dev gawk xorg-dev \
+    ffmpeg
 
 # extract the contents of labbcat.war into /labbcat
 RUN mkdir /labbcat
