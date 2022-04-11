@@ -20,20 +20,20 @@
       <tr class="controls">
         <td colSpan="{{filterLayers.length}}">
           <lib-button
-            *ngIf="user && user.roles.includes('edit')"
+            *ngIf="user && user.roles.includes('edit') && !nextPage"
             action="create"
             (press)="newParticipant()"
             i18n-title title="New record"
             ></lib-button>
           <lib-button
-            *ngIf="user && user.roles.includes('edit')"
+            *ngIf="user && user.roles.includes('edit') && !nextPage"
             action="delete"
             (press)="deleteParticipants()" [processing]="deleting"
             [disabled]="selectedIds.length == 0"
             i18n-title title="Delete record"
             ></lib-button>
           <lib-button
-            *ngIf="user && user.roles.includes('edit')"
+            *ngIf="user && user.roles.includes('edit') && !nextPage"
             (press)="mergeParticipants()"
             [disabled]="selectedIds.length < 2"
             img="people.svg" icon="👥"
@@ -41,6 +41,7 @@
             i18n-title title="Merge selected participant records into one record"
             ></lib-button>
           <lib-button
+            *ngIf="!nextPage"
             (press)="allUtterances()"
             [disabled]="selectedIds.length == 0"
             img="all-utterances.svg" icon="“"
@@ -48,6 +49,7 @@
             i18n-title title="List all utterances by these participants"
             ></lib-button>
           <lib-button
+            *ngIf="!nextPage"
             (press)="exportAttributes()"
             [disabled]="!participantIds || participantIds.length == 0"
             img="csv.svg" icon=",a,"
@@ -55,6 +57,7 @@
             i18n-title title="Export attributes to CSV"
             ></lib-button>
           <lib-button
+            *ngIf="!nextPage"
             (press)="transcripts()"
             [disabled]="!participantIds || participantIds.length == 0"
             img="document.svg" icon="📄"
@@ -62,6 +65,7 @@
             i18n-title title="List transcripts including these participants"
             ></lib-button>
           <lib-button
+            *ngIf="!nextPage || nextPage == 'search'"
             (press)="layeredSearch()"
             [disabled]="!participantIds || participantIds.length == 0"
             img="magnifying-glass.svg" icon="🔍"

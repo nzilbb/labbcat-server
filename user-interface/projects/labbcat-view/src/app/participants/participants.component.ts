@@ -29,7 +29,8 @@ export class ParticipantsComponent implements OnInit {
     queryDescription = ""; // Human-readable version of the query
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
-    querySerial = 0; 
+    querySerial = 0;
+    nextPage: string;
     
     constructor(
         private labbcatService: LabbcatService,
@@ -49,6 +50,9 @@ export class ParticipantsComponent implements OnInit {
                 if (this.p < 1) this.p = 1;
                 if (params["participant"]) {
                     this.filterValues["participant"] = [params["participant"]];
+                }
+                if (params["to"]) {
+                    this.nextPage = params["to"];
                 }
                 this.listParticipants();
             });
