@@ -4231,7 +4231,6 @@ public class SqlGraphStore implements GraphStore {
                 sqlType.close();
               } else if (layer.getId().startsWith("transcript_")) {
                 fragment.addLayer((Layer)layer.clone());
-                System.err.println("getFragment : attribute layer " + layer);
                 // transcript attribute
                 sqlTranscriptAttribute.setString(2, layer.get("attribute").toString());
                 ResultSet rs = sqlTranscriptAttribute.executeQuery();
@@ -4578,6 +4577,15 @@ public class SqlGraphStore implements GraphStore {
 
       boolean wordChanges = false;
       boolean segmentChanges = false;
+      // forced-alignment to a phrase layer can lead to the phrase annotation ordinals
+      // starting at 1 at the beginning of each utterance
+      // we need to track the phrase layers with new annotations,
+      // and the corresponding turn parents, so we can correct the ordinals based on previous
+      // peers that are not in the fragment
+      boolean updatingFragment = graph.isFragment();
+      // the key is the layer_id, the value is a set of parent IDs of annotations to fix:
+      HashMap<Integer,HashSet<String>> adjustPhraseOrdinals
+        = new HashMap<Integer,HashSet<String>>();
 
       // timers.start("changes");
       Object lastObject = graph;
@@ -4630,14 +4638,34 @@ public class SqlGraphStore implements GraphStore {
                                        + change.getObject().getId());
             }
           } else {
-            if (((Annotation)change.getObject()).getLayerId()
-                .equals(schema.getWordLayerId())) {
-              wordChanges = true;
-            } else if (((Annotation)change.getObject()).getLayerId()
-                       .equals("segment")) {
-              segmentChanges = true;
-            }
-                  
+            Layer layer = getLayer(((Annotation)change.getObject()).getLayerId());
+            if (layer != null) {
+              if (layer.getId() .equals(schema.getWordLayerId())) {
+                wordChanges = true;
+              } else if (layer.getId().equals("segment")) {
+                segmentChanges = true;
+              } else if (updatingFragment
+                         && change.getObject().getChange() == Change.Operation.Create
+                         && layer.getParentId().equals(schema.getTurnLayerId())
+                         && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL
+                         && layer.getPeers()
+                         /* technically, peers shouldn't overlap, but in reality
+                            layer created with the current LaBB-CAT UI have peersOverlap = true
+                            && !layer.getPeersOverlap()*/) {
+                // we're updating a span layer from within a fragment (e.g. forced alignment),
+                // so the ordinals might incorrecty start at 1
+                // so we'll fix them up later
+                Integer layer_id = (Integer)layer.get("layer_id");
+                if (layer_id != null && !adjustPhraseOrdinals.containsKey(layer_id)) {
+                  // haven't noticed this layer yet, so add it to the collection
+                  adjustPhraseOrdinals.put(layer_id, new HashSet<String>());
+                }
+                // ensure the turn_annotation_id is included in the ordinal fix below
+                adjustPhraseOrdinals.get(layer_id)
+                  .add(((Annotation)change.getObject()).getParentId());
+              }
+            } // layer isn't null
+            
             try {
               if (change.getObject().getChange() != Change.Operation.Create) {
                 Object[] o = fmtAnnotationId.parse(change.getObject().getId());
@@ -4986,6 +5014,46 @@ public class SqlGraphStore implements GraphStore {
             } // next child
             sqlFixSegmentTagAnchors.close();
           } // segmentChanges
+
+          // forced-alignment to a phrase layer can lead to the phrase annotation ordinals
+          // starting at 1 at the beginning of each utterance
+          // so we update the ordinals to be chronological
+          for (Integer layer_id : adjustPhraseOrdinals.keySet()) {
+            String turnIdList = adjustPhraseOrdinals.get(layer_id).stream()
+              .map(uid -> uid.replace("em_11_", "")) // convert uid to turn_annotation_id
+              .collect(Collectors.joining(","));
+            if (turnIdList.length() > 0) {
+              String sqlCreate = "CREATE TEMPORARY TABLE annotation_ordinal"
+                +" SELECT u.annotation_id,"
+                +" (SELECT COUNT(*)"
+                +"  FROM annotation_layer_"+layer_id+" o"
+                +"  INNER JOIN anchor o_start"
+                +"  ON o.start_anchor_id = o_start.anchor_id"
+                +"  WHERE o.turn_annotation_id = u.turn_annotation_id"
+                +"   AND o_start.offset <= start.offset) ordinal"
+                +"  FROM annotation_layer_"+layer_id+" u"
+                +" INNER JOIN anchor start ON u.start_anchor_id = start.anchor_id"
+                +" WHERE u.turn_annotation_id IN ("+turnIdList+")";
+              PreparedStatement sql = connection.prepareStatement(sqlCreate);
+              sql.executeUpdate();
+              sql.close();
+
+              String sqlUpdate = "UPDATE annotation_layer_"+layer_id+" u"
+                +" INNER JOIN annotation_ordinal on u.annotation_id"
+                +"  = annotation_ordinal.annotation_id"
+                +" SET u.ordinal = annotation_ordinal.ordinal";
+              sql = connection.prepareStatement(sqlUpdate);
+              sql.executeUpdate();
+              sql.close();
+
+              String sqlDrop = "DROP TEMPORARY TABLE annotation_ordinal";
+              sql = connection.prepareStatement(sqlDrop);
+              sql.executeUpdate();
+              sql.close();
+              
+            } // there are turn IDs
+              
+          } // next updating phrase layer
         } // not a new graph
 
       } finally {
