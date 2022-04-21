@@ -519,7 +519,7 @@ export class ParticipantsComponent implements OnInit {
         } else if (this.query) {
             return "query="+encodeURI(
                 // & causes enocding headaches we don't need, and AND works just as well...
-                this.query.replace(/ && /," AND "));
+                this.query.replace(/ && /g," AND "));
         }
         return "";
     }
