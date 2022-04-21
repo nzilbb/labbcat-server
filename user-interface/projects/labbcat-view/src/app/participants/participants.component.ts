@@ -517,7 +517,9 @@ export class ParticipantsComponent implements OnInit {
         if (this.selectedIds.length > 0) {
             return this.selectedIds.map(id=>participantIdParameter+"="+id).join("&");
         } else if (this.query) {
-            return "query="+encodeURI(this.query);
+            return "query="+encodeURI(
+                // & causes enocding headaches we don't need, and AND works just as well...
+                this.query.replace(/ && /," AND "));
         }
         return "";
     }
