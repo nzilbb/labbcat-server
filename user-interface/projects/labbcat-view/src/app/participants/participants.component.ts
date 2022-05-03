@@ -500,8 +500,8 @@ export class ParticipantsComponent implements OnInit {
             }
         }
         this.router.navigate(["transcripts"], { queryParams: {
-            participant: participantQuery,
-            participantDescription: participantDescription
+            participant_expression: participantQuery,
+            participants: participantDescription
         } });
     }
     
@@ -515,11 +515,11 @@ export class ParticipantsComponent implements OnInit {
     /** Query string for selected participants */
     selectedParticipantsQueryString(participantIdParameter: string): string {
         if (this.selectedIds.length > 0) {
-            return this.selectedIds.map(id=>participantIdParameter+"="+id).join("&");
+            return "participant_expression="+encodeURIComponent("["
+                + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                + "].includes(id)");
         } else if (this.query) {
-            return "query="+encodeURI(
-                // & causes enocding headaches we don't need, and AND works just as well...
-                this.query.replace(/ && /g," AND "));
+            return "participant_expression="+encodeURIComponent(this.query);
         }
         return "";
     }

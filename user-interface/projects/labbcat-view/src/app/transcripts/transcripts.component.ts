@@ -29,11 +29,13 @@ export class TranscriptsComponent implements OnInit {
     selectedIds: string[];
     filterValues = {};
     query = ""; // AGQL query string for matching transcripts
+    queryDescription = ""; // Human-readable version of the query
     participantQuery = ""; // AGQL query string for matching participants
     participantDescription = ""; // Human readable description of participant query
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0; 
+    nextPage: string;
     imagesLocation: string;
     
     serializers: SerializationDescriptor[];
@@ -62,10 +64,10 @@ export class TranscriptsComponent implements OnInit {
                 if (params["transcript"]) {
                     this.filterValues["transcript"] = [params["transcript"]];
                 }
-                if (params["participant"]) {
-                    this.participantQuery = params["participant"];
-                    if (params["participantDescription"]) {
-                        this.participantDescription = params["participantDescription"];
+                if (params["participant_expression"]) {
+                    this.participantQuery = params["participant_expression"];
+                    if (params["participants"]) {
+                        this.participantDescription = params["participants"];
                     } else {
                         this.participantDescription = "Selected participants";
                     }
@@ -158,20 +160,28 @@ export class TranscriptsComponent implements OnInit {
     loadingList = false;
     /** List transcripts that match the filters */
     listTranscripts(): void {
-        this.query = this.participantQuery; // if any
+        this.query = ""; // if any
+        this.queryDescription = "";        
         for (let layer of this.filterLayers) {
 
             if (layer.id == this.schema.root.id
                 && this.filterValues[layer.id][0]) {
                 // transcript layer
-                if (this.query) this.query += " && ";
+                if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                 
                 this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/.test(id)";
+                this.queryDescription += "ID matches " +this.filterValues[layer.id][0];
                 
             } else if (layer.validLabels && Object.keys(layer.validLabels).length > 0
                 && this.filterValues[layer.id].length > 0) {
                 // select from possible values
-                if (this.query) this.query += " && ";
+                if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
 
                 // the value "!" means "a label other than the labels in validLabels"...
                 
@@ -179,19 +189,36 @@ export class TranscriptsComponent implements OnInit {
                     // ordinary positive selection 
                     this.query += JSON.stringify(this.filterValues[layer.id])
                         +".includesAny(labels('"+this.esc(layer.id)+"'))";
+                    if (this.filterValues[layer.id].length == 1) {
+                        this.queryDescription += layer.description
+                            + " = " + this.filterValues[layer.id][0];
+                    } else {
+                        this.queryDescription += layer.description
+                            + " in " + this.filterValues[layer.id].join(",");
+                    }
                 } else { // "!" 'other' selected
                     // so we *exclude* all values not selected
                     const labelsToExclude = Object.keys(layer.validLabels)
                         .filter(l=>!this.filterValues[layer.id].includes(l));
                     this.query += "!"+JSON.stringify(labelsToExclude)
                         +".includesAny(labels('"+this.esc(layer.id)+"'))";
+                    if (labelsToExclude.length == 1) {
+                        this.queryDescription += layer.description
+                            + " ≠ " + this.filterValues[layer.id][0];
+                    } else {
+                        this.queryDescription += layer.description
+                            + " not in " + labelsToExclude.join(",").replace(/^,/,"");
+                    }
                 }
             } else if (layer.type == "number"
                 && this.filterValues[layer.id].length > 1) {
                 
                 // from?
                 if (this.filterValues[layer.id][0]) {
-                    if (this.query) this.query += " && ";
+                    if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                     const value = (layer.subtype == "integer"?
                         parseInt:parseFloat)(this.filterValues[layer.id][0])
                     this.query += "first('"+this.esc(layer.id)+"').label >= "+ value;
@@ -199,18 +226,40 @@ export class TranscriptsComponent implements OnInit {
                 
                 // to?
                 if (this.filterValues[layer.id][1]) {
-                    if (this.query) this.query += " && ";
+                    if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                     
                     const value = (layer.subtype == "integer"?
                         parseInt:parseFloat)(this.filterValues[layer.id][1])
                     this.query += "first('"+this.esc(layer.id)+"').label <= "+ value;
                 }
+                
+                if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" " + this.filterValues[layer.id][0]
+                        + "-" + this.filterValues[layer.id][1];
+                } else if (this.filterValues[layer.id][0]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" ≥ " + this.filterValues[layer.id][0];
+                } else if (this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" ≤ " + this.filterValues[layer.id][1];
+                }
+
             } else if ((layer.subtype == "date" || layer.subtype == "datetime")
                 && this.filterValues[layer.id].length > 1) {
                 
                 // from?
                 if (this.filterValues[layer.id][0]) {
-                    if (this.query) this.query += " && ";
+                    if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                     const value = this.filterValues[layer.id][0];
                     this.query += "first('"+this.esc(layer.id)+"').label"
                     +" >= '"+this.esc(value)+"'";
@@ -218,32 +267,65 @@ export class TranscriptsComponent implements OnInit {
                 
                 // to?
                 if (this.filterValues[layer.id][1]) {
-                    if (this.query) this.query += " && ";
+                    if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                     
                     const value = this.filterValues[layer.id][1];
                     this.query += "first('"+this.esc(layer.id)+"').label"
                     +" <= '"+value+" 23:59:59'";
                 }
+                
+                if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" " + this.filterValues[layer.id][0]
+                        + "-" + this.filterValues[layer.id][1];
+                } else if (this.filterValues[layer.id][0]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" ≥ " + this.filterValues[layer.id][0];
+                } else if (this.filterValues[layer.id][1]) {
+                    if (this.queryDescription) this.queryDescription += ", ";
+                    this.queryDescription += layer.description
+                        +" ≤ " + this.filterValues[layer.id][1];
+                }
             } else if (layer.type == "boolean"
                 && this.filterValues[layer.id][0]) {
-                if (this.query) this.query += " && ";
+                if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                 
                 this.query += "first('"+this.esc(layer.id)+"').label = "
                     + this.filterValues[layer.id][0];
+                this.queryDescription += (this.filterValues[layer.id][0]=="1"?"":"NOT ")
+                    +layer.description;
                 
             } else if (this.filterValues[layer.id][0]) { // assume regexp match
-                if (this.query) this.query += " && ";
+                if (this.query) {
+                    this.query += " && ";
+                    this.queryDescription += ", ";
+                }
                 
                 this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/"
                     +".test(labels('" +this.esc(layer.id)+"'))";
+                this.queryDescription += layer.description
+                    +" matches " + this.filterValues[layer.id][0]
                 
             }
         } // next filter layer
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
+        let queryExpression = this.query;
+        if (this.participantQuery) {
+            if (queryExpression) queryExpression += " && ";
+            queryExpression += this.participantQuery;
+        }
         // count matches
         this.labbcatService.labbcat.countMatchingTranscriptIds(
-            this.query, (matchCount, errors, messages) => {
+            queryExpression, (matchCount, errors, messages) => {
                 if (thisQuery != this.querySerial) return; // new query already sent
                 this.matchCount = matchCount;
                 if (errors) {
@@ -257,7 +339,7 @@ export class TranscriptsComponent implements OnInit {
                 
                 // now get the matches for this page
                 this.labbcatService.labbcat.getMatchingTranscriptIds(
-                    this.query, this.pageLength, this.p - 1 /* zero-based page numbers */,
+                    queryExpression, this.pageLength, this.p - 1 /* zero-based page numbers */,
                     (transcriptIds, errors, messages) => {
                         if (thisQuery != this.querySerial) return; // new query already sent
                         if (errors) errors.forEach(m => this.messageService.error(m));
@@ -285,7 +367,7 @@ export class TranscriptsComponent implements OnInit {
                                 const hintIndex = pg - 1;
                                 // the hint for the page is the first ID on that page
 	                        this.labbcatService.labbcat.getMatchingTranscriptIds(
-                                    this.query, 1, this.pageLength * (pg-1),
+                                    queryExpression, 1, this.pageLength * (pg-1),
                                     (pgIds, errors, messages) => {
                                         this.pageLinks[hintIndex] = pgIds[0];
 	                            });
@@ -447,6 +529,33 @@ export class TranscriptsComponent implements OnInit {
     onChangeMimeType(): void {
         this.serializeImg = this.mimeTypeToSerializer[this.mimeType].icon;
     }
+    
+    /** Button action */
+    layeredSearch(): void {
+        window.location.href = this.baseUrl
+            + "search?"
+            + this.selectedTranscriptsQueryString("participant_id");
+    }
+    /** Query string for selected transcripts */
+    selectedTranscriptsQueryString(transcriptIdParameter: string): string {
+        let queryString = "";
+        if (this.selectedIds.length > 0) {
+            queryString = "transcript_expression="+encodeURIComponent("["
+                + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                + "].includes(id)")
+                +"&transcripts="+this.selectedIds.length+" selected transcript"
+                +(this.selectedIds.length==1?"":"s");
+        } else if (this.query) {
+            queryString = "transcript_expression="+encodeURIComponent(this.query)
+                +"&transcripts="+encodeURIComponent(this.queryDescription);
+        }
+        if (this.participantQuery) {
+            if (queryString) queryString += "&";
+            queryString += "participant_expression="+encodeURIComponent(this.participantQuery);
+        }
+        return queryString;
+    }
+
 
     /** Query to append to href for links to other pages */
     queryString(): string {

@@ -5,7 +5,10 @@
     <input type="hidden" name="query" [(ngModel)]="query">
     <input *ngIf="!showSerializationOptions" type="hidden" name="mimeType" [(ngModel)]="mimeType">
     <table>
-      <caption *ngIf="matchCount >= 0"><span i18n="Match count: {n}">Match count:</span>&nbsp;<span id="matchCount">{{matchCount}}</span></caption>
+      <caption *ngIf="matchCount >= 0">
+        <span i18n="Match count: {n}">Match count:</span>&nbsp;<span id="matchCount">{{matchCount}}</span>
+        <span id="query-description" *ngIf="queryDescription" title="{{queryDescription}}"> - {{queryDescription}} </span>
+      </caption>
       <thead>
         <tr class="filters">
           <td class="participant-filter" *ngIf="participantQuery">
@@ -99,6 +102,14 @@
               img="{{serializeImg}}" icon="⚙"
               i18n-label label="Export Format"
               i18n-title title="Convert to selected format"
+              ></lib-button>
+            <lib-button
+              *ngIf="!nextPage || nextPage == 'search'"
+              (press)="layeredSearch()"
+              [disabled]="!transcriptIds || transcriptIds.length == 0"
+              img="magnifying-glass.svg" icon="🔍"
+              i18n-label label="Layered Search"
+              i18n-title title="Search transcripts including these transcripts"
               ></lib-button>
           </td>
         </tr>
