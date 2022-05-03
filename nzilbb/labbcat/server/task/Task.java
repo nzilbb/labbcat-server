@@ -116,9 +116,16 @@ public class Task extends Thread implements MonitorableTask {
   public String getResultUrl() { return sResultUrl; }
   /**
    * ResultUrl mutator
-   * @param sNewResultUrl Full URL to the final results of the task, or null if the task isn't finished or has no URL for final results.
+   * @param sNewResultUrl Full URL to the final results of the task, or null if the task isn't finished or has no URL for final results. Instances of "+" in the string will be replaced with "%20".
    */
-  public void setResultUrl(String sNewResultUrl) { sResultUrl = sNewResultUrl; }
+  public void setResultUrl(String sNewResultUrl) {
+    sResultUrl = sNewResultUrl;
+    if (sResultUrl != null) {
+      // use %20 instead of + for spaces
+      // because the "default" servlet doesn't handle + well
+      sResultUrl = sResultUrl.replace("+","%20");
+    }
+  }
 
   /**
    * Text to describe the link to the ResultUrl. This will be the contents of the
