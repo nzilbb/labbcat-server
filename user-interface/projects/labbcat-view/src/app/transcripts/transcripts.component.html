@@ -26,7 +26,7 @@
         <tr class="controls">
           <td colSpan="{{filterLayers.length}}">
             <lib-button
-              *ngIf="user && user.roles.includes('edit')"
+              *ngIf="user && user.roles.includes('edit') && !nextPage"
               action="delete"
               (press)="deleteTranscripts()" [processing]="deleting"
               [disabled]="selectedIds.length == 0"
@@ -42,7 +42,7 @@
               </select>
             </div>
             <lib-button
-              *ngIf="user && user.roles.includes('edit')"
+              *ngIf="user && user.roles.includes('edit') && !nextPage"
               (press)="generate()"
               [disabled]="selectedIds.length == 0"
               img="cog.svg" icon="⚙"
@@ -50,6 +50,7 @@
               i18n-title title="Regenerate layers for all selected transcripts"
               ></lib-button>
             <lib-button
+              *ngIf="!nextPage"
               (press)="exportMedia()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
               img="audio.svg" icon="🔊"
@@ -57,6 +58,7 @@
               i18n-title title="Save media files of all selected transcripts"
             ></lib-button>
             <lib-button
+              *ngIf="!nextPage"
               (press)="exportTranscripts()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
               img="document.svg" icon="📄"
@@ -72,6 +74,7 @@
                 ></lib-layer-checkboxes>
             </span>
             <lib-button
+              *ngIf="!nextPage"
               (press)="exportAttributes()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
               img="csv.svg" icon=",a,"
@@ -97,6 +100,7 @@
               </select>
             </div>
             <lib-button
+              *ngIf="!nextPage"
               (press)="exportFormat()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
               img="{{serializeImg}}" icon="⚙"

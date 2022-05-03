@@ -72,6 +72,9 @@ export class TranscriptsComponent implements OnInit {
                         this.participantDescription = "Selected participants";
                     }
                 }
+                if (params["to"]) {
+                    this.nextPage = params["to"];
+                }
                 this.listTranscripts();
             });
         });
