@@ -2199,7 +2199,7 @@ public class SqlGraphStore implements GraphStore {
   }
 
   /**
-   * Converts an annotionat-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
+   * Converts an annotation-matching expression into a resultset (SELECT selectedClause FROM... WHERE... orderClause).
    * <ul>
    *  <li><code>id == 'ew_0_456'</code></li>
    *  <li><code>['ew_2_456', 'ew_2_789', 'ew_2_101112'].includes(id)</code></li>
@@ -5085,13 +5085,14 @@ public class SqlGraphStore implements GraphStore {
         sqlDeleteAllParticipantAttributesOnLayer.close();
       }
     } catch(SQLException exception) {
-      System.err.println(exception.toString());
+      System.err.println("saveTranscript: " + exception.toString());
       throw new StoreException(exception);
     } catch(TransformationException invalid) {
-      System.err.println(invalid.toString());
+      System.err.println("saveTranscript: " + invalid.toString());
       throw new StoreException("Graph was not valid", invalid);
     } catch(Throwable exception) {
-      System.err.println(exception.toString());
+      System.err.println("saveTranscript: " + exception.toString());
+      exception.printStackTrace(System.err);
       throw new StoreException(exception);
     }
     // System.err.println("saveGraph finished.");
@@ -7178,7 +7179,7 @@ public class SqlGraphStore implements GraphStore {
         } catch(IOException exception) {
           throw new StoreException(
             "Could not save " + url + " to " + source.getPath(), exception);
-        }	    
+        }
       } else { // file URL
         // rename/take a copy of the file, so the caller can delete it with impunity
         File mediaFile = new File(new URI(mediaUrl));
