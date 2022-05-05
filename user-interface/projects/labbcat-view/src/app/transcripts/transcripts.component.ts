@@ -543,11 +543,28 @@ export class TranscriptsComponent implements OnInit {
     selectedTranscriptsQueryString(transcriptIdParameter: string): string {
         let queryString = "";
         if (this.selectedIds.length > 0) {
+            let description = `${this.selectedIds.length} selected transcripts`; // TODO i18n
+            switch (this.selectedIds.length) {
+                case 1:
+                    description = this.selectedIds[0];
+                    break;
+                case 2:
+                    description = `${this.selectedIds[0]} and ${this.selectedIds[1]}`; // TODO i18n
+                    break;
+                case 3:
+                    description = `${this.selectedIds[0]}, ${this.selectedIds[1]}, and ${this.selectedIds[2]}`; // TODO i18n
+                    break;
+                default:
+                    description = this.selectedIds[0]
+                        + " ... "
+                        + this.selectedIds[this.selectedIds.length - 1]
+                        + " ("+this.selectedIds.length+" selected transcripts)"; // TODO i18n
+                    break;
+            }
             queryString = "transcript_expression="+encodeURIComponent("["
                 + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
                 + "].includes(id)")
-                +"&transcripts="+this.selectedIds.length+" selected transcript"
-                +(this.selectedIds.length==1?"":"s");
+                +"&transcripts="+encodeURIComponent(description);
         } else if (this.query) {
             queryString = "transcript_expression="+encodeURIComponent(this.query)
                 +"&transcripts="+encodeURIComponent(this.queryDescription);
