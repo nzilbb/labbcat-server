@@ -88,13 +88,15 @@ export class TranscriptsComponent implements OnInit {
                 this.transcriptAttributes = [];
                 this.filterLayers = [];
                 this.generableLayers = [];
-                // allow filtering by transcript ID, corpus, and episode
+                // allow filtering by transcript ID, corpus, episode, and type
                 this.filterLayers.push(schema.root);
                 this.filterValues[schema.root.id] = [];
                 this.filterLayers.push(schema.layers[schema.corpusLayerId]);
                 this.filterValues[schema.corpusLayerId] = [];
-                //this.filterLayers.push(schema.layers[schema.episodeLayerId]);
-                //this.filterValues[schema.episodeLayerId] = [];
+                //TODO this.filterLayers.push(schema.layers[schema.episodeLayerId]);
+                //TODO this.filterValues[schema.episodeLayerId] = [];
+                this.filterLayers.push(schema.layers["transcript_type"]);
+                this.filterValues["transcript_type"] = [];
                 // and by selected transcript attributes
                 for (let layerId in schema.layers) {
                     const layer = schema.layers[layerId] as Layer;
