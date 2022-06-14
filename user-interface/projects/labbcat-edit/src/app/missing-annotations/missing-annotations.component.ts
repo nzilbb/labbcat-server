@@ -234,7 +234,10 @@ export class MissingAnnotationsComponent extends EditComponent implements OnInit
         if (!this.labels[this.lastLookup] || !append) {
             this.labels[this.lastLookup] = label;
         } else { // append to the current one
-            this.labels[this.lastLookup] += "-" + label;
+            // add hyphen syllable boundary only if it's an ipa layer
+            this.labels[this.lastLookup] += (this.annotationLayer.type == "ipa"?"-":" ")
+            // append label
+                + label;
         }
         // set focus to the input so they can immediately eit the label
         document.getElementById("pron-"+this.lastLookup).focus();

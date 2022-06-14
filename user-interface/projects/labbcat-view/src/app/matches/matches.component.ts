@@ -45,8 +45,8 @@ export class MatchesComponent implements OnInit {
     wordLayers = [];
     schema: any;
     generableLayers = []; // list of layerIds that can be generated from a list of utterances
-    htkLayers = []; // list of layerIds managed by HTK
-    htkPronuncationLayerIds = {}; // map of HTK layerIds to their pronunciation layer IDs
+    dictionaryDependentLayers = []; // list of layerIds managed by HTK
+    dictionaryLayerIds = {}; // map of HTK layerIds to their pronunciation layer IDs
     baseUrl: string;
     emuWebApp = false;
     user: User;
@@ -157,7 +157,7 @@ export class MatchesComponent implements OnInit {
                     this.generableLayers.push(layer.id);
                     
                     if (layer.layer_manager_id == "HTK") {
-                        this.htkLayers.push(layer.id);
+                        this.dictionaryDependentLayers.push(layer.id);
                         // try to load it from the layer manager "extra" field (which is deprecated)
                         if (layer.extra) {
                             const PronunciationLayerId = /PronunciationLayerId=([0-9]+)/.exec(
@@ -166,7 +166,7 @@ export class MatchesComponent implements OnInit {
                             for (let l in this.schema.layers) {
                                 const layer = this.schema.layers[l] as Layer;
                                 if (layer.layer_id == PronunciationLayerId) {
-                                    this.htkPronuncationLayerIds[layer.id] = l;
+                                    this.dictionaryLayerIds[layer.id] = l;
                                     break;
                                 }
                             } // next layer
@@ -176,10 +176,25 @@ export class MatchesComponent implements OnInit {
                         this.labbcatService.labbcat.getAnnotatorTaskParameters(
                             layer.id, (htkParameters, errors, messages) => {
                                 const parameters = new URLSearchParams(htkParameters)
-                                this.htkPronuncationLayerIds[layer.id]
+                                this.dictionaryLayerIds[layer.id]
                                     = parameters.get("pronunciationLayerId");
                             });
                     } // HTK layer
+                    if (layer.layer_manager_id == "MFA") {
+                        // get layer annotator configuration, so we can identify pronunciationLayerId
+                        this.labbcatService.labbcat.getAnnotatorTaskParameters(
+                            layer.id, (mfaParameters, errors, messages) => {
+                                const parameters = new URLSearchParams(mfaParameters)
+                                const pronunciationLayerId = parameters.get("pronunciationLayerId");
+                                // if a pronunciation layer is specified
+                                if (pronunciationLayerId) {
+                                    // then we can do dictionary filling before alignment
+                                    this.dictionaryDependentLayers.push(layer.id);
+                                    this.dictionaryLayerIds[layer.id]
+                                        = parameters.get("pronunciationLayerId");
+                                }
+                            });
+                    } // MFA layer
                 } // generable layer
                 if (layer.parentId == schema.wordLayerId
                     && layer.alignment == 0) {
@@ -289,10 +304,10 @@ export class MatchesComponent implements OnInit {
         let formAction = this.baseUrl + "generateLayerUtterances";
         let formMethod = "POST";
         let formTarget = "_blank";
-        if (this.htkLayers.includes(layerId)) {
+        if (this.dictionaryDependentLayers.includes(layerId)) {
             try {
                 this.tokenLayerId = this.schema.layers["orthography"]?"orthography":this.schema.wordLayerId;
-                this.annotationLayerId = this.htkPronuncationLayerIds[layerId];
+                this.annotationLayerId = this.dictionaryLayerIds[layerId];
                 if (this.annotationLayerId) {
                     this.generateLayerId = layerId;
                     formAction = "edit/missingAnnotations";
