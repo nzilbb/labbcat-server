@@ -2869,11 +2869,11 @@ public class SqlGraphStore implements GraphStore {
             altQueries.add(null); // there is no alternative query
             altParameterGroups.add(null);
           } // the MatchId doesn't include to ag_id
-        } else if (layer.isAncestor(schema.getWordLayerId())
-                   || layer.getId().equals(schema.getWordLayerId())) { // the transcript layer itself
+        } else if (layer.isAncestor(schema.getWordLayerId()) // a word child layer
+                   || layer.getId().equals(schema.getWordLayerId())) { // or the word layer itself
           // layer table has word_annotation_id            
           Integer layer_id = (Integer)layer.get("layer_id");
-          if (targetLayer.getId().equals(schema.getWordLayerId())) {
+          if (targetLayer.getId().equals(schema.getWordLayerId())) { // target is word layer
             // target is transcript layer
             String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
               +" FROM annotation_layer_"+layer_id+" annotation"
@@ -2897,7 +2897,19 @@ public class SqlGraphStore implements GraphStore {
             parameterGroups.add(groups);
             altQueries.add(null); // there is no alternative query
             altParameterGroups.add(null);
-          }  else if (targetLayer.isAncestor(schema.getWordLayerId())) { // word layer
+          } else if (targetLayer.getId().equals(layer.getId()) // target is selected layer
+                     && targetOffset == 0) { // and we're after our own details
+            String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
+              +" FROM annotation_layer_"+layer_id+" annotation"
+              +" WHERE annotation.annotation_id = ?"
+              +" ORDER BY annotation.ordinal, annotation.annotation_id"
+              +" LIMIT 1"; // there can be only one match 
+            Object[] groups = { layer.getId(), target_annotation_id_group };
+            queries.add(getConnection().prepareStatement(sql));
+            parameterGroups.add(groups);
+            altQueries.add(null); // there is no alternative query
+            altParameterGroups.add(null);
+          } else if (targetLayer.isAncestor(schema.getWordLayerId())) { // word layer
             // target table has word_annotation_id field
             String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
               +" FROM annotation_layer_"+layer_id+" annotation"
