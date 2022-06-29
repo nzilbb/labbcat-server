@@ -32,7 +32,7 @@
                  >
         </span>
         <span class="helper">
-          <button *ngIf="annotationLayer && annotationLayer.type == 'ipa'"
+          <button *ngIf="(annotationLayer && annotationLayer.type == 'ipa') || (phoneAlignmentLayer && phoneAlignmentLayer.validLabels)"
                   class="icon-only"
                   i18n-title title="Phoneme symbol selector"
                   (click)="ipaHelperWord = (ipaHelperWord == word?null:word)">«</button>
@@ -41,9 +41,13 @@
           <lib-wait class="row-pending" *ngIf="wordsPending[word]"
                     i18n-title title="Generating suggestions..."></lib-wait>
         </span>
-        <lib-disc-helper *ngIf="ipaHelperWord == word"
+        <lib-disc-helper *ngIf="ipaHelperWord == word && annotationLayer.type == 'ipa'"
                          (symbolSelected)="symbolSelected(word, $event)"
                          ></lib-disc-helper>
+        <lib-valid-label-helper *ngIf="ipaHelperWord == word && annotationLayer.type != 'ipa' && phoneAlignmentLayer != null"
+                                [layer]="phoneAlignmentLayer"
+                                (symbolSelected)="symbolSelected(word, $event)"
+                         ></lib-valid-label-helper>
         <fieldset class="lookup" *ngIf="lookupWord == word && lookupWordsResult">
           <legend>{{lookupWords}}</legend>
           <lib-wait *ngIf="lookupPending"></lib-wait>

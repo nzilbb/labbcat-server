@@ -19,6 +19,7 @@ import { AutofocusDirective } from './autofocus.directive';
 import { LayerFilterComponent } from './layer-filter/layer-filter.component';
 import { PaginationComponent } from './pagination/pagination.component';
 import { DurationPipe } from './duration.pipe';
+import { ValidLabelHelperComponent } from './valid-label-helper/valid-label-helper.component';
 
 @NgModule({
     declarations: [
@@ -38,7 +39,8 @@ import { DurationPipe } from './duration.pipe';
         AutofocusDirective,
         LayerFilterComponent,
         PaginationComponent,
-        DurationPipe
+        DurationPipe,
+        ValidLabelHelperComponent
     ],
     imports: [
         RouterModule, CommonModule, FormsModule
@@ -54,6 +56,7 @@ import { DurationPipe } from './duration.pipe';
         LayerCheckboxesComponent,
         DiscHelperComponent,
         IpaHelperComponent,
+        ValidLabelHelperComponent,
         AboutComponent,
         LinkComponent,
         LoginComponent,

@@ -1,0 +1,5 @@
+<div class="valid-label-helper">
+  <span *ngFor="let label of Object.keys(layer.validLabels)">
+    <a href="#" class="valid-label" title="{{layer.validLabels[label]}}" (click)="select(label)">{{label}}</a>
+  </span>
+</div>

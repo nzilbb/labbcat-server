@@ -47,6 +47,7 @@ export class MatchesComponent implements OnInit {
     generableLayers = []; // list of layerIds that can be generated from a list of utterances
     dictionaryDependentLayers = []; // list of layerIds managed by HTK
     dictionaryLayerIds = {}; // map of HTK layerIds to their pronunciation layer IDs
+    phoneAlignmentLayerIds = {}; // map of HTK layerIds to their phone layer IDs
     baseUrl: string;
     emuWebApp = false;
     user: User;
@@ -59,6 +60,7 @@ export class MatchesComponent implements OnInit {
     generateLayerId: string;
     tokenLayerId: string;
     annotationLayerId: string;
+    phoneAlignmentLayerId: string;
     
     constructor(
         private labbcatService: LabbcatService,
@@ -178,6 +180,8 @@ export class MatchesComponent implements OnInit {
                                 const parameters = new URLSearchParams(htkParameters)
                                 this.dictionaryLayerIds[layer.id]
                                     = parameters.get("pronunciationLayerId");
+                                this.phoneAlignmentLayerIds[layer.id]
+                                    = parameters.get("phoneAlignmentLayerId");
                             });
                     } // HTK layer
                     if (layer.layer_manager_id == "MFA") {
@@ -192,6 +196,8 @@ export class MatchesComponent implements OnInit {
                                     this.dictionaryDependentLayers.push(layer.id);
                                     this.dictionaryLayerIds[layer.id]
                                         = parameters.get("pronunciationLayerId");
+                                    this.phoneAlignmentLayerIds[layer.id]
+                                        = parameters.get("phoneAlignmentLayerId");
                                 }
                             });
                     } // MFA layer
@@ -308,6 +314,7 @@ export class MatchesComponent implements OnInit {
             try {
                 this.tokenLayerId = this.schema.layers["orthography"]?"orthography":this.schema.wordLayerId;
                 this.annotationLayerId = this.dictionaryLayerIds[layerId];
+                this.phoneAlignmentLayerId = this.phoneAlignmentLayerIds[layerId];
                 if (this.annotationLayerId) {
                     this.generateLayerId = layerId;
                     formAction = "edit/missingAnnotations";

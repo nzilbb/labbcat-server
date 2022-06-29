@@ -1,0 +1,32 @@
+<h2><span i18n="page header">Valid Labels</span> - {{layer.id}}</h2>
+
+<div class="list valid-label-list">
+  <div class="item add-new">
+    <span class="valid-label"
+          i18n-title="Valid label" title="Label"><legend i18n="Valid label">Label</legend>
+      <input #newType type="text" required i18n-placeholder="Valid label" placeholder="Label"></span>
+    <span class="buttons">
+      <lib-button action="create"
+                  (press)="newType.reportValidity() && createRow(newType.value) && newType.value = '';"
+                  i18n-title title="Add new record"></lib-button>
+    </span>
+  </div>
+  
+  <lib-wait *ngIf="!labels"></lib-wait>
+  <div class="item" *ngFor="let label of labels">
+    <span class="valid-label"
+          i18n-title="Valid label" title="Label"><legend i18n="Valid label">Label</legend>
+      {{label}}</span>
+    <span class="buttons">
+      <lib-button action="delete"
+                  (press)="deleteRow(label);"
+                  i18n-title title="Delete record"></lib-button>
+    </span>
+  </div>
+</div>
+<div class="buttons">
+  <lib-button action="save"
+              (press)="updateChangedRows();"  [processing]="updating"
+              *ngIf="changed"
+              i18n-title title="Save all changed records"></lib-button>
+</div>

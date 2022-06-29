@@ -26,6 +26,7 @@ import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotato
 import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AdminLayersComponent } from './admin-layers/admin-layers.component';
+import { AdminLayerLabelsComponent } from './admin-layer-labels/admin-layer-labels.component';
 
 @NgModule({
     declarations: [
@@ -46,7 +47,8 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
         AdminRoleUsersComponent,
         AdminUsersComponent,
         AdminChangePasswordComponent,
-        AdminLayersComponent
+        AdminLayersComponent,
+        AdminLayerLabelsComponent
     ],
     imports: [
         BrowserModule,
@@ -82,6 +84,8 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
             { path: 'admin/annotator/:annotatorId/tasks/:taskId', component: AdminAnnotatorTaskParametersComponent },
             { path: 'admin/annotator/:annotatorId/ext', component: AdminAnnotatorExtComponent },
             { path: 'admin/annotators', component: AdminAnnotatorsComponent },
+            { path: 'admin/layers/validLabels/:layerId', component: AdminLayerLabelsComponent,
+              canDeactivate: [PendingChangesGuard] },
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,

@@ -20,6 +20,7 @@ export * from './lib/layer-checkboxes/layer-checkboxes.component';
 export * from './lib/pending-changes.guard';
 export * from './lib/disc-helper/disc-helper.component';
 export * from './lib/ipa-helper/ipa-helper.component';
+export * from './lib/valid-label-helper/valid-label-helper.component';
 export * from './lib/about/about.component';
 export * from './lib/link/link.component';
 export * from './lib/login/login.component';

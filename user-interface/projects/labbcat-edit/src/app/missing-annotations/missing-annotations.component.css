@@ -25,8 +25,11 @@ fieldset.lookup {
 }
 .no-matches:before { content: "["; }
 .no-matches:after { content: "]"; }
-app-disc-helper {
+lib-disc-helper, lib-valid-label-helper {
     grid-column: 3 / -1;
+}
+lib-valid-label-helper > div {
+    min-width: 200px;
 }
 app-wait.row-pending { /* never taller than the row */
     height: 30px;

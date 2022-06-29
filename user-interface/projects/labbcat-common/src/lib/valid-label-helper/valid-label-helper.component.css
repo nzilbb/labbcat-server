@@ -1,0 +1,14 @@
+.valid-label-helper {
+    text-align: left;
+    position: absolute;
+    background: white;
+    border: 1px solid var(--theme-text-color);
+    padding: 10px;
+    animation-name: fade-in;
+    animation-duration: 500ms;
+}
+.valid-label-helper a {
+    padding-left: 4px;
+    color: var(--theme-color);
+    text-decoration: none;
+}

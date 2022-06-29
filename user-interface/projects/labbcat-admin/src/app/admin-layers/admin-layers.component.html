@@ -112,6 +112,10 @@
         </select>
       </span>
       <span class="buttons">
+        <lib-link *ngIf="layer.id == 'segment'"
+                  i18n-title title="Valid labels"
+                  img="tag.svg" icon="🏷"
+                  href="admin/layers/validLabels/{{layer.id}}"></lib-link>
         <lib-link *ngIf="layer.layer_manager_id && layer.id != 'orthography'"
                   i18n-title title="Layer configuration"
                   img="wrench.svg" icon="🔧"

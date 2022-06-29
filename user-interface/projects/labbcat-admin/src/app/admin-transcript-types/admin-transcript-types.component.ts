@@ -91,5 +91,4 @@ export class AdminTranscriptTypesComponent extends AdminComponent implements OnI
                 }
             });
     }
-
 }

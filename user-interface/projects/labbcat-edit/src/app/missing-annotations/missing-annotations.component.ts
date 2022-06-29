@@ -17,11 +17,13 @@ export class MissingAnnotationsComponent extends EditComponent implements OnInit
     seriesId: string;          // parameter for missingAnnotations
     tokenLayerId: string;      // parameter for missingAnnotations
     annotationLayerId: string; // parameter for missingAnnotations
+    phoneAlignmentLayerId: string; // layerId for validLabels
     utterances: string[];      // parameter for selected utterances, if any
     
     baseUrl: string;
     generateLayer: Layer;
     annotationLayer: Layer;
+    phoneAlignmentLayer: Layer;
     seriesName: string;
     missingAnnotationsThreadId: string;
     Object = Object; // so we can call Object.keys in the template
@@ -47,13 +49,16 @@ export class MissingAnnotationsComponent extends EditComponent implements OnInit
             this.seriesId = params["seriesId"];
             this.tokenLayerId = params["tokenLayerId"];
             this.annotationLayerId = params["annotationLayerId"];
+            this.phoneAlignmentLayerId = params["phoneAlignmentLayerId"];
             this.utterances = params["utterance"];
 
             this.getBaseUrl().then(()=>{
                 this.getGenerateLayer().then(()=>{
                     this.getAnnotationLayer().then(()=>{
-                        this.getSourceTaskName().then(()=>{
-                            this.startMissingAnnotationsTask();
+                        this.getPhoneAlignmentLayer().then(()=>{
+                            this.getSourceTaskName().then(()=>{
+                                this.startMissingAnnotationsTask();
+                            });
                         });
                     });
                 });
@@ -92,6 +97,22 @@ export class MissingAnnotationsComponent extends EditComponent implements OnInit
                     this.annotationLayer = layer;
                     resolve(this.annotationLayer);
                 });
+        });
+    }
+
+    getPhoneAlignmentLayer(): Promise<Layer> {
+        return new Promise((resolve, reject) => {
+            if (!this.phoneAlignmentLayerId) {
+                resolve(null);
+            } else {
+                this.labbcatService.labbcat.getLayer(
+                    this.phoneAlignmentLayerId, (layer, errors, messages) => {
+                        if (errors) errors.forEach(m => this.messageService.error(m));
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        this.phoneAlignmentLayer = layer;
+                        resolve(this.phoneAlignmentLayer);
+                    });
+            }
         });
     }
 
@@ -245,7 +266,12 @@ export class MissingAnnotationsComponent extends EditComponent implements OnInit
     }
 
     symbolSelected(word: string, symbol: string) {
-        this.labels[word] += symbol;
+        if (this.labels[word] && this.annotationLayer.type != "ipa") {
+            // space separator
+            this.labels[word] += " " + symbol;
+        } else {
+            this.labels[word] += symbol;
+        }
         document.getElementById("pron-"+word).focus();
         this.changed = true;
     }
