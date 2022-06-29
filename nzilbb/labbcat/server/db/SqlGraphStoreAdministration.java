@@ -452,7 +452,45 @@ public class SqlGraphStoreAdministration
                
         } // non-system layer
 
-        // TODO validLabels
+        // validLabels
+        HashSet<String> toDelete = new HashSet<String>(oldVersion.getValidLabels().keySet());
+        toDelete.removeAll(layer.getValidLabels().keySet());
+        if (toDelete.size() > 0) {
+          // delete missing options
+          PreparedStatement sql = getConnection().prepareStatement(
+            "DELETE FROM label_option WHERE layer_id = ? AND value = ?");
+          sql.setInt(1, layer_id);
+          for (String option : toDelete) {
+            sql.setString(2, option);
+            sql.executeUpdate();
+          }
+          sql.close();
+        }
+            
+        HashSet<String> toCreate = new HashSet<String>(layer.getValidLabels().keySet());
+        toCreate.removeAll(oldVersion.getValidLabels().keySet());            
+        if (toCreate.size() > 0) {
+          // insert new options
+          PreparedStatement sql = getConnection().prepareStatement(
+            "SELECT COALESCE(MAX(display_order + 1), 1) FROM label_option WHERE layer_id = ?");
+          sql.setInt(1, layer_id);
+          ResultSet rs = sql.executeQuery();
+          rs.next();
+          int order = rs.getInt(1);
+          rs.close();
+          sql.close();
+          sql = getConnection().prepareStatement(
+            "INSERT INTO label_option (layer_id, value, description, display_order)"
+            +" VALUES (?,?,?,?)");
+          sql.setInt(1, layer_id);
+          for (String option : toCreate) {
+            sql.setString(2, option);
+            sql.setString(3, layer.getValidLabels().get(option));
+            sql.setInt(4, order++);
+            sql.executeUpdate();
+          }
+          sql.close();
+        }
       } else {
         throw new StoreException("Updating layer " + layer.getId() + " not yet implemented"); // TODO
       }
@@ -507,6 +545,8 @@ public class SqlGraphStoreAdministration
       throw new StoreException(
         "Invalid parent ("+layer.getParentId()+") for: " + layer.getId());
     }
+
+    // TODO add support for participant/transcript attributes
 
     try {
       int project_id = -1;
@@ -850,7 +890,22 @@ public class SqlGraphStoreAdministration
         sql.close();
       }
 
-      // TODO validLabels
+      // validLabels
+      int order = 1;
+      sql = getConnection().prepareStatement(
+        "INSERT INTO label_option (layer_id, value, description, display_order)"
+        +" VALUES (?,?,?,?)");
+      try {
+        sql.setInt(1, layer_id);
+        for (String option : layer.getValidLabels().keySet()) {
+          sql.setString(2, option);
+          sql.setString(3, layer.getValidLabels().get(option));
+          sql.setInt(4, order++);
+          sql.executeUpdate();
+        }
+      } finally {
+        sql.close();
+      }
             
       // ensure schema is reloaded with new layer
       this.schema = null;      
@@ -934,7 +989,13 @@ public class SqlGraphStoreAdministration
       sql = getConnection().prepareStatement(
         "DROP TABLE IF EXISTS corpus_layer_" + layer_id);
       sql.executeUpdate();
-      sql.close();            
+      sql.close();
+
+      // delete validLabels
+      sql = getConnection().prepareStatement(
+        "DELETE FROM label_option WHERE layer_id = ?");
+      sql.executeUpdate();
+      sql.close();
 
       // delete the layer row
       sql = getConnection().prepareStatement(

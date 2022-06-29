@@ -661,6 +661,21 @@ public class SqlGraphStore implements GraphStore {
         corpora.put(corpus, corpus);
       }
       layer.setValidLabels(corpora);
+    } else { // not corpus layer
+      // check for validLabels in label_option
+      PreparedStatement sql = getConnection().prepareStatement(
+        "SELECT value, description FROM label_option WHERE layer_id = ? ORDER BY display_order");
+      sql.setInt(1, Integer.valueOf(rs.getInt("layer_id")));
+      ResultSet rsOption = sql.executeQuery();
+      while(rsOption.next()) {
+        if (layer.getValidLabels() == null ) {
+          layer.setValidLabels(new LinkedHashMap<String,String>());
+        }
+        layer.getValidLabels().put(
+          rsOption.getString("value"), rsOption.getString("description"));
+      } // next validLabel
+      rsOption.close();
+      sql.close();
     }
     return layer;
   }
@@ -2909,6 +2924,10 @@ public class SqlGraphStore implements GraphStore {
             parameterGroups.add(groups);
             altQueries.add(null); // there is no alternative query
             altParameterGroups.add(null);
+            // TODO if targetLayer is an aligned word child, and layer is too, order matches
+            // TODO so that the layer annotations most temporally near the target are first
+            // TODO this ensures that by default (annotationsPerLayer=1)
+            // TODO tags of the target are returned
           } else if (targetLayer.isAncestor(schema.getWordLayerId())) { // word layer
             // target table has word_annotation_id field
             String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
