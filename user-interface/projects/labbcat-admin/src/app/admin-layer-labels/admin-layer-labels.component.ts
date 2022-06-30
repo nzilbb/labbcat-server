@@ -48,7 +48,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         let labels = [ newLabel ];        
         // if the label is actually lots of labels, add them all
         let possibleLabels = newLabel.split("\n");
-        if (possibleLabels.length > 3) {
+        if (possibleLabels.length > 1) {
             labels = possibleLabels;
         } else {
             possibleLabels = newLabel.split(" ");
@@ -58,6 +58,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         }
         let somethingAdded = false;
         for (let label of labels) {
+            if (!label) continue; // skip blank labels
             if (this.labels.indexOf(label) >= 0) {
                 this.messageService.error("Already exists: " + label); // TODO i18n
             } else {
