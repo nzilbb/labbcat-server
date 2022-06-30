@@ -112,7 +112,7 @@
         </select>
       </span>
       <span class="buttons">
-        <lib-link *ngIf="layer.id == 'segment'"
+        <lib-link *ngIf="layer.id == 'segment' && layer.subtype != 'D'"
                   i18n-title title="Valid labels"
                   img="tag.svg" icon="🏷"
                   href="admin/layers/validLabels/{{layer.id}}"></lib-link>
