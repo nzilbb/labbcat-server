@@ -994,6 +994,7 @@ public class SqlGraphStoreAdministration
       // delete validLabels
       sql = getConnection().prepareStatement(
         "DELETE FROM label_option WHERE layer_id = ?");
+      sql.setInt(1, layer_id);
       sql.executeUpdate();
       sql.close();
 
