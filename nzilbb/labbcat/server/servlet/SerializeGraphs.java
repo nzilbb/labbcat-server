@@ -64,7 +64,7 @@ import nzilbb.util.IO;
  * <p><b>Output</b>: Each of the transcripts specified by the input parameters converted
  * to the given format.
  * <p> This may be a single file or multiple files, depending on the converter behaviour
- * and how many fragments are specified. If there is only one, the file in returned as the
+ * and how many graphs are specified. If there is only one, the file in returned as the
  * response to  the request.  If there are more than one, the response is a zip file
  * containing the output files. 
  * @author Robert Fromont
