@@ -7182,6 +7182,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public void saveMedia(String id, String trackSuffix, String mediaUrl)
     throws StoreException, PermissionException, GraphNotFoundException {
+    if (trackSuffix == null) trackSuffix = "";
     Vector<File> toDelete = new Vector<File>();
     try {
       String[] layers = { "corpus", "episode" };
@@ -7229,8 +7230,7 @@ public class SqlGraphStore implements GraphStore {
 
       // determine the destination path
       MediaFile mediaFile = new MediaFile(source, trackSuffix);
-      File mediaDir = new File(
-        episodeDir, mediaFile.getType().equals("other")?"doc":mediaFile.getExtension());
+      File mediaDir = new File(episodeDir, mediaFile.getExtension());
       if (!mediaDir.exists()) mediaDir.mkdir();
       String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
         + trackSuffix + "." + mediaFile.getExtension();
