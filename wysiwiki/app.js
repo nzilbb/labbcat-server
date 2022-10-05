@@ -307,8 +307,12 @@ function savePage() {
         
         // insert the article content into it
         html = html
-            .replace(/<article>.*<\/article>/, "<article>"+article+"</article>")
-            .replace(/<title>[^<]*<\/title>/, "<title>"+title+"</title>");
+            .replace(/<article>.*<\/article>/,
+                     // use a function so that special sequences like "$'" are meaningless
+                     ()=>"<article>"+article+"</article>")
+            .replace(/<title>[^<]*<\/title>/,
+                     // use a function so that special sequences like "$'" are meaningless
+                     ()=>"<title>"+title+"</title>");
         
         // save the result to the server
         $.ajax({
