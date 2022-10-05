@@ -26,6 +26,9 @@ import UploadAdapter from '@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapte
 import Autoformat from '@ckeditor/ckeditor5-autoformat/src/autoformat';
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
+import Strikethrough from '@ckeditor/ckeditor5-basic-styles/src/strikethrough';
+import Superscript from '@ckeditor/ckeditor5-basic-styles/src/superscript';
+import HorizontalLine from '@ckeditor/ckeditor5-horizontal-line/src/horizontalline';
 import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
 import CKFinder from '@ckeditor/ckeditor5-ckfinder/src/ckfinder';
 import EasyImage from '@ckeditor/ckeditor5-easy-image/src/easyimage';
@@ -45,6 +48,7 @@ import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation';
 import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices';
+import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
 
 import LabbcatUploadAdapter from './labbcat-upload-adapter';
 //import LabbcatUtterance from './labbcat-utterance'
@@ -59,6 +63,10 @@ InlineEditor.builtinPlugins = [
     Autoformat,
     Bold,
     Italic,
+    Strikethrough,
+    Superscript,
+    HorizontalLine,
+    Alignment,
     BlockQuote,
     CKFinder,
     CloudServices,
@@ -88,9 +96,13 @@ InlineEditor.defaultConfig = {
 	    '|',
 	    'bold',
 	    'italic',
+	    'strikethrough',
+	    'superscript',
 	    'link',
 	    'bulletedList',
 	    'numberedList',
+            'alignment',
+            'horizontalLine',
 	    '|',
 	    'outdent',
 	    'indent',
