@@ -38,7 +38,7 @@
              i18n-placeholder placeholder="Description"></textarea>
     </span>
     <span class="buttons">
-      <lib-link [routerLink]="['corpus?corpus_id='+corpus.corpus_id]"
+      <lib-link [href]="'corpus?corpus_id='+corpus.corpus_id"
                 i18n-title title="Information about this corpus"
                 img="info.svg" icon="🛈"></lib-link>
       <lib-button  action="delete" [processing]="corpus._deleting"
