@@ -17,6 +17,12 @@
     <span class="valid-label"
           i18n-title="Valid label" title="Label"><legend i18n="Valid label">Label</legend>
       {{label}}</span>
+    <span class="valid-label-description"
+          i18n-title="Valid label description" title="Description"><legend i18n="Valid label description">Description</legend>
+      <input #description
+             [(ngModel)]="layer.validLabels[label]"             
+             (input)="onChange()"
+             i18n-placeholder placeholder="Description"></span>
     <span class="buttons">
       <lib-button action="delete"
                   (press)="deleteRow(label);"

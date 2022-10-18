@@ -38,7 +38,6 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         this.layer = layer as Layer;
         this.labels = [];
         for (let label in layer.validLabels) {
-            // for tanscript_type, label and description are the same
             this.labels.push(label);
         }
         this.changed = false;
@@ -62,6 +61,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
             if (this.labels.indexOf(label) >= 0) {
                 this.messageService.error("Already exists: " + label); // TODO i18n
             } else {
+                this.layer.validLabels[label] = label;
                 this.labels.push(label);
                 somethingAdded = true;
             }
@@ -88,11 +88,12 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
     updating = false;
     updateChangedRows() {
         this.updating = true;
-        this.layer.validLabels = {};
+        const newValidLabels = {};
         for (let label of this.labels) {
             // for tanscript_type, label and description are the same
-            this.layer.validLabels[label] = label;
+            newValidLabels[label] = this.layer.validLabels[label] || label;
         }
+        this.layer.validLabels = newValidLabels;
         this.labbcatService.labbcat.saveLayer(
             this.layer, (layer, errors, messages) => {
                 this.updating = false;
