@@ -957,7 +957,9 @@ public class SqlGraphStore implements GraphStore {
   public String[] getParticipantIds() throws StoreException, PermissionException {
     try {
       PreparedStatement sql = getConnection().prepareStatement(
-        "SELECT name FROM speaker WHERE COALESCE(name,'') <> ''  ORDER BY name");
+        "SELECT name FROM speaker WHERE COALESCE(name,'') <> ''"
+        +userWhereClauseParticipant(true)
+        +" ORDER BY name");
       ResultSet rs = sql.executeQuery();
       Vector<String> participants = new Vector<String>();
       while (rs.next()) {
