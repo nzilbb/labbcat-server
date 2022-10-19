@@ -491,6 +491,23 @@ public class SqlGraphStoreAdministration
           }
           sql.close();
         }
+
+        // update the rest
+        HashSet<String> toUpdate = new HashSet<String>(layer.getValidLabels().keySet());
+        toCreate.removeAll(toDelete);
+        toCreate.removeAll(toCreate);
+        if (toUpdate.size() > 0) {
+          // insert new options
+          PreparedStatement sql = getConnection().prepareStatement(
+            "UPDATE label_option SET description = ? WHERE layer_id = ? AND value = ?");
+          sql.setInt(2, layer_id);
+          for (String option : toUpdate) {
+            sql.setString(1, layer.getValidLabels().get(option));
+            sql.setString(3, option);
+            sql.executeUpdate();
+          }
+          sql.close();
+        }
       } else {
         throw new StoreException("Updating layer " + layer.getId() + " not yet implemented"); // TODO
       }
