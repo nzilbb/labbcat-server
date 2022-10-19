@@ -4356,7 +4356,7 @@ public class SqlGraphStore implements GraphStore {
                 HashSet<String> anchorsToLoad = new HashSet<String>();
 
                 try {
-                  Annotation[] matches = getMatchingAnnotations("'"+idList+"'.includes(id)");
+                  Annotation[] matches = getMatchingAnnotations("id IN ('"+idList+"')");
                   for (Annotation parent : matches) {
                     for (String childLayerId : parentLayer.getChildren().keySet()) {
                       Annotation firstChild = fragment.first(childLayerId);
