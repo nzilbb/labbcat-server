@@ -958,7 +958,7 @@ public class SqlGraphStore implements GraphStore {
     try {
       PreparedStatement sql = getConnection().prepareStatement(
         "SELECT name FROM speaker WHERE COALESCE(name,'') <> ''"
-        +userWhereClauseParticipant(true)
+        +userWhereClauseParticipant("AND")
         +" ORDER BY name");
       ResultSet rs = sql.executeQuery();
       Vector<String> participants = new Vector<String>();
@@ -989,7 +989,7 @@ public class SqlGraphStore implements GraphStore {
     try {
       String speakerNumber = null;
       String name = null;
-      String userWhereClause = userWhereClauseParticipant(true);
+      String userWhereClause = userWhereClauseParticipant("AND");
       if (id.startsWith("m_-2_")) {
         speakerNumber = id.substring("m_-2_".length());
         PreparedStatement sqlParticipant = getConnection().prepareStatement(
@@ -1223,13 +1223,13 @@ public class SqlGraphStore implements GraphStore {
    * Returns an SQL WHERE clause for restricting access by user ID, if the user is set.
    * <p>Assumes that the <tt>transcript</tt> table (with no alias) is in the FROM clause
    * of the query into which the WHERE clause will be embedded.
-   * @param prefixWithAnd Whether to prefix the clause with "AND" or "WHERE".
+   * @param prefix What to prefix the clause with, e.g. "AND" or "WHERE".
    * @param transcriptTableAlias The alias for the transcript table.
    * @return A WHERE clause if appropriate, or an empty string if not.
    */
-  private String userWhereClauseGraph(boolean prefixWithAnd, String transcriptTableAlias) {
+  private String userWhereClauseGraph(String prefix, String transcriptTableAlias) {
     if (getUser() != null && !getUserRoles().contains("admin") && getPermissionsSpecified()) {
-      return (prefixWithAnd?" AND":" WHERE")
+      return " " + prefix
         +" (("+transcriptTableAlias+".create_user = '"+esc(getUser())+"')"
         +" OR EXISTS (SELECT * FROM role"
         + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
@@ -1253,12 +1253,12 @@ public class SqlGraphStore implements GraphStore {
    * Returns an SQL WHERE clauser for restricting access by userID, if the user is set.
    * <p>Assumes that the <tt>speaker</tt> table (with no alias) is in the FROM clause
    * of the query into which the WHERE clause will be embedded.
-   * @param prefixWithAnd Whether to prefix the clause with "AND" or "WHERE".
+   * @param prefix What to prefix the clause with, e.g. "AND" or "WHERE".
    * @return A WHERE clause if appropriate, or an empty string if not.
    */
-  private String userWhereClauseParticipant(boolean prefixWithAnd) {
+  private String userWhereClauseParticipant(String prefix) {
     String userWhereClauseSpeaker = "";
-    String userWhereClause = userWhereClauseGraph(prefixWithAnd, "transcript");
+    String userWhereClause = userWhereClauseGraph(prefix, "transcript");
     if (userWhereClause.length() > 0) {
       // insert links to speaker table
       userWhereClauseSpeaker = userWhereClause
@@ -1367,7 +1367,7 @@ public class SqlGraphStore implements GraphStore {
   public String[] getTranscriptIds() throws StoreException, PermissionException {
     try {
       PreparedStatement sql = getConnection().prepareStatement(
-        "SELECT transcript_id FROM transcript " + userWhereClauseGraph(false, "transcript")
+        "SELECT transcript_id FROM transcript " + userWhereClauseGraph("WHERE", "transcript")
         +" ORDER BY transcript_id");
       ResultSet rs = sql.executeQuery();
       Vector<String> graphs = new Vector<String>();
@@ -1432,7 +1432,7 @@ public class SqlGraphStore implements GraphStore {
   private PreparedStatement participantMatchSql(
     String expression, String sqlSelectClause, String sqlOrderClause)
     throws SQLException, StoreException, PermissionException {
-    String userWhereClause = userWhereClauseParticipant(true).replaceAll("^ AND ","");
+    String userWhereClause = userWhereClauseParticipant("");
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       expression, sqlSelectClause, userWhereClause, sqlOrderClause);
@@ -1586,7 +1586,7 @@ public class SqlGraphStore implements GraphStore {
   private PreparedStatement graphMatchSql(
     String expression, String selectClause, String order, String limit)
     throws SQLException, StoreException, PermissionException {
-    String userWhereClause = userWhereClauseGraph(true, "transcript").replaceAll("^ AND ","");
+    String userWhereClause = userWhereClauseGraph("", "transcript");
     GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
     GraphAgqlToSql.Query q = transformer.sqlFor(
       expression, selectClause, userWhereClause, order, limit);
@@ -1738,7 +1738,7 @@ public class SqlGraphStore implements GraphStore {
         +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
         +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
         +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
-        +" WHERE transcript.transcript_id = ?"+userWhereClauseGraph(true, "transcript"));
+        +" WHERE transcript.transcript_id = ?"+userWhereClauseGraph("AND", "transcript"));
       sql.setString(1, id);
       ResultSet rs = sql.executeQuery();
       if (!rs.next()) { // graph not found - maybe we've been given a name without the extension?
@@ -1752,7 +1752,7 @@ public class SqlGraphStore implements GraphStore {
           +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
           +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
           +" WHERE transcript.transcript_id REGEXP ?"
-          +userWhereClauseGraph(true, "transcript"));
+          +userWhereClauseGraph("AND", "transcript"));
         sql.setString(1, "^" + id
                       .replace("(","\\(").replace(")","\\)") // parentheses are literal
                       + "\\.[^.]+$");
@@ -1768,7 +1768,7 @@ public class SqlGraphStore implements GraphStore {
             +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
             +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
             +" WHERE transcript.transcript_id REGEXP ?"
-            +userWhereClauseGraph(true, "transcript"));
+            +userWhereClauseGraph("AND", "transcript"));
           sql.setString(1, "^" + id.replaceAll("\\.[^.]+$","")
                         .replace("(","\\(").replace(")","\\)") // parentheses are literal
                         + "\\.[^.]+$");
@@ -1788,7 +1788,7 @@ public class SqlGraphStore implements GraphStore {
                 +" LEFT OUTER JOIN transcript_family ON transcript.family_id = transcript_family.family_id"
                 +" LEFT OUTER JOIN transcript_type ON transcript.type_id = transcript_type.type_id"
                 +" LEFT OUTER JOIN annotation_transcript divergent ON transcript.ag_id = divergent.ag_id AND divergent.layer = 'divergent'"
-                +" WHERE transcript.ag_id = ?"+userWhereClauseGraph(true, "transcript"));
+                +" WHERE transcript.ag_id = ?"+userWhereClauseGraph("AND", "transcript"));
               sql.setInt(1, iAgId);
               rs = sql.executeQuery();
               if (!rs.next()) throw new GraphNotFoundException(id);
@@ -2270,7 +2270,7 @@ public class SqlGraphStore implements GraphStore {
           +" FROM annotation_layer_"+layer.get("layer_id")+" annotation"
           +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
           +" WHERE word_annotation_id = " + word_annotation_id
-          + userWhereClauseGraph(true, "graph")
+          + userWhereClauseGraph("AND", "graph")
           +" ORDER BY annotation_id"
           + " " + limit;
       } else if ("transcript".equals(layer.get("class_id"))) { // transcript attribute
@@ -2290,7 +2290,7 @@ public class SqlGraphStore implements GraphStore {
           +" INNER JOIN annotation_layer_0 word ON word.ag_id = graph.ag_id"
           +" WHERE word.annotation_id = " + word_annotation_id
           +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
-          + userWhereClauseGraph(true, "graph")
+          + userWhereClauseGraph("AND", "graph")
           +" ORDER BY annotation_id"
           + " " + limit;
       } else if ("speaker".equals(layer.get("class_id"))) { // participant attribute
@@ -2310,7 +2310,7 @@ public class SqlGraphStore implements GraphStore {
           +" INNER JOIN annotation_participant annotation ON turn.label = annotation.speaker_number"
           +" WHERE word.annotation_id = " + word_annotation_id
           +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
-          + userWhereClauseGraph(true, "graph")
+          + userWhereClauseGraph("AND", "graph")
           +" ORDER BY annotation_id"
           + " " + limit;
       } else if (layer.getParentId().equals(schema.getRoot().getId())
@@ -2341,7 +2341,7 @@ public class SqlGraphStore implements GraphStore {
           +" WHERE word.ag_id = annotation.ag_id"
           +" AND word_start.offset <= end.offset"
           +" AND start.offset <= word_end.offset)"
-          + userWhereClauseGraph(true, "graph")
+          + userWhereClauseGraph("AND", "graph")
           + order
           + " " + limit;
       } // freeform layer
@@ -2373,7 +2373,7 @@ public class SqlGraphStore implements GraphStore {
           +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
           +" WHERE graph.transcript_id = '" + esc(transcriptId) + "'"
           +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
-          + userWhereClauseGraph(true, "graph")
+          + userWhereClauseGraph("AND", "graph")
           +" ORDER BY annotation_id"
           + " " + limit;
       } // table has word_annotation_id, so use it and save a JOIN
@@ -2407,7 +2407,7 @@ public class SqlGraphStore implements GraphStore {
           +" INNER JOIN anchor word_start ON word.start_anchor_id = word_start.anchor_id"
           +" WHERE word.annotation_id = '" + wordId + "'"
           +" AND word_start.offset BETWEEN start.offset AND end.offset"
-          + userWhereClauseGraph(true, "graph")
+          + userWhereClauseGraph("AND", "graph")
           +" ORDER BY annotation_id"
           + " " + limit; 
     } // optimization for utterance given word ID query
@@ -2422,7 +2422,7 @@ public class SqlGraphStore implements GraphStore {
       }
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query query = transformer.sqlFor(
-        expression, select, userWhereClauseGraph(true, "graph"), limit);
+        expression, select, userWhereClauseGraph("", "graph"), limit);
       sSql = query.sql;
     } // no optimization found
       
@@ -3595,7 +3595,7 @@ public class SqlGraphStore implements GraphStore {
       
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query query = transformer.sqlFor(
-        expression, "annotation_id", userWhereClauseGraph(true, "graph"), "");
+        expression, "annotation_id", userWhereClauseGraph("", "graph"), "");
       String delete = query.sql
         .replaceAll("SELECT .* FROM", "DELETE annotation.* FROM")
         .replaceAll("ORDER BY [^)]+$","");
@@ -4356,7 +4356,7 @@ public class SqlGraphStore implements GraphStore {
                 HashSet<String> anchorsToLoad = new HashSet<String>();
 
                 try {
-                  Annotation[] matches = getMatchingAnnotations("id IN ('"+idList+"')");
+                  Annotation[] matches = getMatchingAnnotations("'"+idList+"'.includes(id)");
                   for (Annotation parent : matches) {
                     for (String childLayerId : parentLayer.getChildren().keySet()) {
                       Annotation firstChild = fragment.first(childLayerId);
