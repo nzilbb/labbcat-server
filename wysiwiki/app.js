@@ -52,9 +52,8 @@ import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices'
 import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
 
 import LabbcatUploadAdapter from './labbcat-upload-adapter';
-//import LabbcatUtterance from './labbcat-utterance'
-
 import Utterance from './utterance/utterance';
+import InsertFile from './insertfile/insertfile';
 
 // InlineEditor config copied from:
 // https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-build-inline/src/ckeditor.js
@@ -88,7 +87,8 @@ InlineEditor.builtinPlugins = [
     Table,
     TableToolbar,
     TextTransformation,
-    Utterance
+    Utterance,
+    InsertFile
 ];
 // Editor configuration.
 InlineEditor.defaultConfig = {
@@ -111,6 +111,7 @@ InlineEditor.defaultConfig = {
 	    'indent',
 	    '|',
 	    'uploadImage',
+            'insertFile',
 	    'blockQuote',
 	    'insertTable',
 	    'mediaEmbed',
