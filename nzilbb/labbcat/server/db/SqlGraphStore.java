@@ -7082,7 +7082,13 @@ public class SqlGraphStore implements GraphStore {
     } // next parameter
     mimeType = mimeTypeParts[0];
     String extension = MediaFile.MimeTypeToSuffix().get(mimeType);
-    if (extension == null) throw new StoreException("Unknown MIME type: " + mimeType);
+    if (extension == null) {
+      if (mimeType.startsWith("application/")) { // the extension is most likely the rest
+        extension = mimeType.substring("application/".length());
+      } else {
+        throw new StoreException("Unknown MIME type: " + mimeType);
+      }
+    }
     File mediaDir = new File(episodeDir, extension);
     if (trackSuffix == null) trackSuffix = getMediaTracks()[0].getSuffix();
     String fileName = graph.getId().replaceAll("\\.[^.]*$","") + trackSuffix + "." + extension;
