@@ -7,7 +7,7 @@
     "@ckeditor/ckeditor5-block-quote": "^30.0.0",
     "@ckeditor/ckeditor5-ckfinder": "^30.0.0",
     "@ckeditor/ckeditor5-cloud-services": "^30.0.0",
-    "@ckeditor/ckeditor5-dev-utils": "^25.4.4",
+    "@ckeditor/ckeditor5-dev-utils": "^31.1.8",
     "@ckeditor/ckeditor5-easy-image": "^30.0.0",
     "@ckeditor/ckeditor5-editor-inline": "^30.0.0",
     "@ckeditor/ckeditor5-essentials": "^30.0.0",
