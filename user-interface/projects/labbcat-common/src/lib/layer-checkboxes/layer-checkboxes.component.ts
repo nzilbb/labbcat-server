@@ -82,7 +82,8 @@ export class LayerCheckboxesComponent implements OnInit {
                 } else if (layer.id == "main_participant") {
                     if (!this.excludeMainParticipant) this.participantAttributes.push(layer);
                 } else if (layer.parentId == schema.participantLayerId
-                    && layer.alignment == 0) {
+                    && layer.alignment == 0
+                    && layer.access == "1") { // only 'public' attributes
                     this.participantAttributes.push(layer);
                 } else if (layer.id == schema.corpusLayerId) {
                     if (!this.excludeCorpus) this.transcriptAttributes.push(layer);

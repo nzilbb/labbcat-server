@@ -13,6 +13,7 @@ export interface Layer {
     validLabels: object;
     style: string;
     hint: string;
+    access: string;
 
     layer_id: string; // TODO - remove this once new automation API is live
     layer_manager_id: string; // TODO - remove this once new automation API is live

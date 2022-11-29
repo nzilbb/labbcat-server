@@ -201,7 +201,6 @@ input[type=number] {
 /* Copied styles from legacy stylesheet - TODO revise these when migration complete */
 button {
     white-space: nowrap;
-    padding: 0px;
     min-width: 80px;
     height: 45px;
     background: #DDDDDD;
