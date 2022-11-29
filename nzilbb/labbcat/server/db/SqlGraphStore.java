@@ -465,6 +465,7 @@ public class SqlGraphStore implements GraphStore {
         +" ON attribute_definition.class_id = attribute_category.class_id"
         +" AND attribute_definition.category = attribute_category.category"
         +" WHERE attribute_definition.class_id = 'transcript'"
+        +(getUserRoles().contains("edit")?"":" AND access = '1'")
         +" ORDER BY attribute_category.display_order, attribute_definition.display_order, attribute");
       rs = sql.executeQuery();
       // in order to get category ordering right, "transcript_type" is added as the first
@@ -535,7 +536,9 @@ public class SqlGraphStore implements GraphStore {
       layerLookup.put("transcript_type", getLayer("transcript_type"));
       sql = getConnection().prepareStatement(
         "SELECT * FROM attribute_definition"
-        +" WHERE class_id = 'transcript' ORDER BY display_order");
+        +" WHERE class_id = 'transcript'"
+        +(getUserRoles().contains("edit")?"":" AND access = '1'")
+        +" ORDER BY display_order");
       rs = sql.executeQuery();
       try {
         while (rs.next()) {
@@ -870,7 +873,8 @@ public class SqlGraphStore implements GraphStore {
         // maybe a transcript attribute
         sql = getConnection().prepareStatement(
           "SELECT * FROM attribute_definition WHERE CONCAT('transcript_', attribute) = ?"
-          +" AND class_id = 'transcript'");
+          +" AND class_id = 'transcript'"
+          +(getUserRoles().contains("edit")?"":" AND access = '1'"));
         sql.setString(1, id);
         rs = sql.executeQuery();
         if (rs.next()) {
@@ -1823,6 +1827,9 @@ public class SqlGraphStore implements GraphStore {
       Vector<String> setStartEndLayers = new Vector<String>();
 
       if (layerIds != null) {
+        // read-only users get access to only public attributes
+        boolean publicOnly = !getUserRoles().contains("edit");
+        
         // for each layer specified, all ancestor layers must also be loaded, to
         // ensure the graph is well structured.
         final LinkedHashSet<String> layersToLoad = new LinkedHashSet<String>();
@@ -2053,98 +2060,102 @@ public class SqlGraphStore implements GraphStore {
 	       
           if (layerId.startsWith("transcript_")) { // probably a transcript attribute layer
             if ("transcript".equals(layer.get("class_id"))) {
-              // definitedly a transcript attribute layer
-              graph.addLayer(layer);
-              PreparedStatement sqlValue = getConnection().prepareStatement(
-                "SELECT annotation_id, label, annotated_by, annotated_when"
-                +" FROM annotation_transcript"
-                +" WHERE ag_id = ? AND layer = ?");
-              sqlValue.setInt(1, iAgId);
-              sqlValue.setString(2, layer.get("attribute").toString());
-              ResultSet rsValue = sqlValue.executeQuery();
-              boolean attributeFound = false;
-              while (rsValue.next()) {
-                attributeFound = true;
-                // add graph-tag annotation
-                Object[] annotationIdParts = {
-                  layer.get("attribute"),
-                  Integer.valueOf(rsValue.getInt("annotation_id"))};
-                Annotation attribute = new Annotation(
-                  fmtTranscriptAttributeId.format(annotationIdParts), 
-                  rsValue.getString("label"), layer.getId());
-                if (rsValue.getString("annotated_by") != null) {
-                  attribute.setAnnotator(rsValue.getString("annotated_by"));
-                }
-                if (rsValue.getTimestamp("annotated_when") != null) {
-                  attribute.setWhen(rsValue.getTimestamp("annotated_when"));
-                }
-                attribute.setParentId(graph.getId());
-                graph.addAnnotation(attribute);
-              } 
-              if (!attributeFound && layer.getId().equals("transcript_language")) {
-                // transcript_language can magically inherit from corpus
-                PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
-                  "SELECT corpus_language FROM corpus"
-                  +" INNER JOIN transcript ON transcript.corpus_name = corpus.corpus_name"
-                  +" WHERE ag_id = ?");
-                sqlCorpusLanguage.setInt(1, iAgId);
-                ResultSet rsCorpusLanguage = sqlCorpusLanguage.executeQuery();
-                if (rsCorpusLanguage.next()) {
+              if (!publicOnly || "1".equals(layer.get("access"))) {
+                // definitedly a transcript attribute layer
+                graph.addLayer(layer);
+                PreparedStatement sqlValue = getConnection().prepareStatement(
+                  "SELECT annotation_id, label, annotated_by, annotated_when"
+                  +" FROM annotation_transcript"
+                  +" WHERE ag_id = ? AND layer = ?");
+                sqlValue.setInt(1, iAgId);
+                sqlValue.setString(2, layer.get("attribute").toString());
+                ResultSet rsValue = sqlValue.executeQuery();
+                boolean attributeFound = false;
+                while (rsValue.next()) {
+                  attributeFound = true;
+                  // add graph-tag annotation
                   Object[] annotationIdParts = {
-                    layer.get("attribute"), Integer.valueOf(iAgId)};
+                    layer.get("attribute"),
+                    Integer.valueOf(rsValue.getInt("annotation_id"))};
                   Annotation attribute = new Annotation(
-                    fmtTranscriptAttributeId.format(annotationIdParts),
-                    rsCorpusLanguage.getString("corpus_language"), 
-                    layer.getId());
+                    fmtTranscriptAttributeId.format(annotationIdParts), 
+                    rsValue.getString("label"), layer.getId());
+                  if (rsValue.getString("annotated_by") != null) {
+                    attribute.setAnnotator(rsValue.getString("annotated_by"));
+                  }
+                  if (rsValue.getTimestamp("annotated_when") != null) {
+                    attribute.setWhen(rsValue.getTimestamp("annotated_when"));
+                  }
                   attribute.setParentId(graph.getId());
                   graph.addAnnotation(attribute);
+                } 
+                if (!attributeFound && layer.getId().equals("transcript_language")) {
+                  // transcript_language can magically inherit from corpus
+                  PreparedStatement sqlCorpusLanguage = getConnection().prepareStatement(
+                    "SELECT corpus_language FROM corpus"
+                    +" INNER JOIN transcript ON transcript.corpus_name = corpus.corpus_name"
+                    +" WHERE ag_id = ?");
+                  sqlCorpusLanguage.setInt(1, iAgId);
+                  ResultSet rsCorpusLanguage = sqlCorpusLanguage.executeQuery();
+                  if (rsCorpusLanguage.next()) {
+                    Object[] annotationIdParts = {
+                      layer.get("attribute"), Integer.valueOf(iAgId)};
+                    Annotation attribute = new Annotation(
+                      fmtTranscriptAttributeId.format(annotationIdParts),
+                      rsCorpusLanguage.getString("corpus_language"), 
+                      layer.getId());
+                    attribute.setParentId(graph.getId());
+                    graph.addAnnotation(attribute);
+                  }
+                  rsCorpusLanguage.close();
+                  sqlCorpusLanguage.close();
                 }
-                rsCorpusLanguage.close();
-                sqlCorpusLanguage.close();
-              }
-              rsValue.close();
-              sqlValue.close();
-              setStartEndLayers.add(layerId);
+                rsValue.close();
+                sqlValue.close();
+                setStartEndLayers.add(layerId);
+              } // has access
               continue;
             } // definitely a transcript attribute layer
           } // probably a transcript attribute layer
 	       
-          if (layerId.startsWith("participant_")) { // probably a transcript attribute layer
+          if (layerId.startsWith("participant_")) { // probably a participant attribute layer
             if ("speaker".equals(layer.get("class_id"))) { // definitedly a participant attribute layer
-              graph.addLayer(layer);
-              PreparedStatement sqlValue = getConnection().prepareStatement(
-                "SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
-                +" FROM annotation_participant a"
-                +" INNER JOIN transcript_speaker ts ON ts.speaker_number = a.speaker_number"
-                +" WHERE ts.ag_id = ? AND a.layer = ?");
-              sqlValue.setInt(1, iAgId);
-              sqlValue.setString(2, layer.get("attribute").toString());
-              ResultSet rsValue = sqlValue.executeQuery();
-              int ordinal = 1;
-              while (rsValue.next()) {
-                // add graph-tag annotation
-                Object[] annotationIdParts = {
-                  layer.get("attribute"),
-                  Integer.valueOf(rsValue.getInt("annotation_id"))};
-                Annotation attribute = new Annotation(
-                  fmtParticipantAttributeId.format(annotationIdParts), 
-                  rsValue.getString("label"), layer.getId());
-                if (rsValue.getString("annotated_by") != null) {
-                  attribute.setAnnotator(rsValue.getString("annotated_by"));
+              if (!publicOnly || "1".equals(layer.get("access"))) {
+                graph.addLayer(layer);
+                PreparedStatement sqlValue = getConnection().prepareStatement(
+                  "SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
+                  +" FROM annotation_participant a"
+                  +" INNER JOIN transcript_speaker ts ON ts.speaker_number = a.speaker_number"
+                  +" WHERE ts.ag_id = ? AND a.layer = ?");
+                sqlValue.setInt(1, iAgId);
+                sqlValue.setString(2, layer.get("attribute").toString());
+                ResultSet rsValue = sqlValue.executeQuery();
+                int ordinal = 1;
+                while (rsValue.next()) {
+                  // add graph-tag annotation
+                  Object[] annotationIdParts = {
+                    layer.get("attribute"),
+                    Integer.valueOf(rsValue.getInt("annotation_id"))};
+                  Annotation attribute = new Annotation(
+                    fmtParticipantAttributeId.format(annotationIdParts), 
+                    rsValue.getString("label"), layer.getId());
+                  if (rsValue.getString("annotated_by") != null) {
+                    attribute.setAnnotator(rsValue.getString("annotated_by"));
+                  }
+                  if (rsValue.getTimestamp("annotated_when") != null) {
+                    attribute.setWhen(rsValue.getTimestamp("annotated_when"));
+                  }
+                  attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
+                  attribute.setOrdinal(ordinal++);
+                  graph.addAnnotation(attribute);
                 }
-                if (rsValue.getTimestamp("annotated_when") != null) {
-                  attribute.setWhen(rsValue.getTimestamp("annotated_when"));
-                }
-                attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
-                attribute.setOrdinal(ordinal++);
-                graph.addAnnotation(attribute);
-              }
-              rsValue.close();
-              sqlValue.close();
-              setStartEndLayers.add(layerId);
+                rsValue.close();
+                sqlValue.close();
+                setStartEndLayers.add(layerId);
+              } // has access
               continue;
-            } // definitely a transcript attribute layer
-          } // probably a transcript attribute layer
+            } // definitely a particiapant attribute layer
+          } // probably a participant attribute layer
 
           graph.addLayer(layer);
           int iLayerId = ((Integer)layer.get("layer_id")).intValue();
@@ -2248,6 +2259,8 @@ public class SqlGraphStore implements GraphStore {
    */
   private PreparedStatement annotationMatchSql(String expression, String limit)
     throws SQLException, StoreException, PermissionException {
+    // read-only users get access to only public attributes
+    boolean publicOnly = !getUserRoles().contains("edit");
     Schema schema = getSchema();
     String sSql = null;
     Layer layer = null;
@@ -2282,45 +2295,69 @@ public class SqlGraphStore implements GraphStore {
           +" ORDER BY annotation_id"
           + " " + limit;
       } else if ("transcript".equals(layer.get("class_id"))) { // transcript attribute
-        String select = "DISTINCT annotation.annotation_id, annotation.ag_id,"
-          +" annotation.label, annotation.label_status,"
-          +" annotation.annotated_by, annotation.annotated_when,"
-          +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-          +" '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph";
-        if (limit.equals("COUNT(*)")) {
-          select = "COUNT(*), '"+esc(layerId)+"' AS layer";
-          limit = "";
+        if (!publicOnly || "1".equals(layer.get("access"))) {
+          String select = "DISTINCT annotation.annotation_id, annotation.ag_id,"
+            +" annotation.label, annotation.label_status,"
+            +" annotation.annotated_by, annotation.annotated_when,"
+            +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+            +" '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph";
+          if (limit.equals("COUNT(*)")) {
+            select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+            limit = "";
+          }
+          
+          sSql = "SELECT " + select
+            +" FROM annotation_transcript annotation"
+            +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+            +" INNER JOIN annotation_layer_0 word ON word.ag_id = graph.ag_id"
+            +" WHERE word.annotation_id = " + word_annotation_id
+            +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
+            + userWhereClauseGraph("AND", "graph")
+            +" ORDER BY annotation_id"
+            + " " + limit;
+        } else { // no access to layer
+          if (limit.equals("COUNT(*)")) {
+            sSql = "SELECT 0, '"+esc(layerId)+"' AS layer";
+          } else {
+            sSql = "SELECT NULL AS annotation_id, NULL AS speaker_number,"
+              +" NULL AS label, NULL AS label_status,"
+              +" NULL AS annotated_by, NULL AS annotated_when,"
+              +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+              +" '"+esc(layerId)+"' AS layer, NULL AS graph";
+          }
         }
-            
-        sSql = "SELECT " + select
-          +" FROM annotation_transcript annotation"
-          +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
-          +" INNER JOIN annotation_layer_0 word ON word.ag_id = graph.ag_id"
-          +" WHERE word.annotation_id = " + word_annotation_id
-          +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
-          + userWhereClauseGraph("AND", "graph")
-          +" ORDER BY annotation_id"
-          + " " + limit;
       } else if ("speaker".equals(layer.get("class_id"))) { // participant attribute
-        String select = "DISTINCT annotation.annotation_id, annotation.speaker_number,"
-          +" annotation.label, annotation.label_status,"
-          +" annotation.annotated_by, annotation.annotated_when,"
-          +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-          +" '"+esc(layerId)+"' AS layer, NULL AS graph";
-        if (limit.equals("COUNT(*)")) {
-          select = "COUNT(*), '"+esc(layerId)+"' AS layer";
-          limit = "";
+        if (!publicOnly || "1".equals(layer.get("access"))) {
+          String select = "DISTINCT annotation.annotation_id, annotation.speaker_number,"
+            +" annotation.label, annotation.label_status,"
+            +" annotation.annotated_by, annotation.annotated_when,"
+            +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+            +" '"+esc(layerId)+"' AS layer, NULL AS graph";
+          if (limit.equals("COUNT(*)")) {
+            select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+            limit = "";
+          }
+          
+          sSql = "SELECT " + select
+            +" FROM annotation_layer_0 word"
+            +" INNER JOIN annotation_layer_11 turn ON turn.annotation_id = word.turn_annotation_id"
+            +" INNER JOIN annotation_participant annotation ON turn.label = annotation.speaker_number"
+            +" WHERE word.annotation_id = " + word_annotation_id
+            +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
+            + userWhereClauseGraph("AND", "graph")
+            +" ORDER BY annotation_id"
+            + " " + limit;
+        } else { // no access to layer
+          if (limit.equals("COUNT(*)")) {
+            sSql = "SELECT 0, '"+esc(layerId)+"' AS layer";
+          } else {
+            sSql = "SELECT NULL AS annotation_id, NULL AS speaker_number,"
+              +" NULL AS label, NULL AS label_status,"
+              +" NULL AS annotated_by, NULL AS annotated_when,"
+              +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+              +" '"+esc(layerId)+"' AS layer, NULL AS graph";
+          }
         }
-            
-        sSql = "SELECT " + select
-          +" FROM annotation_layer_0 word"
-          +" INNER JOIN annotation_layer_11 turn ON turn.annotation_id = word.turn_annotation_id"
-          +" INNER JOIN annotation_participant annotation ON turn.label = annotation.speaker_number"
-          +" WHERE word.annotation_id = " + word_annotation_id
-          +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
-          + userWhereClauseGraph("AND", "graph")
-          +" ORDER BY annotation_id"
-          + " " + limit;
       } else if (layer.getParentId().equals(schema.getRoot().getId())
                  && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // freeform layer
         String select =
@@ -2364,8 +2401,11 @@ public class SqlGraphStore implements GraphStore {
       String transcriptId = transcriptAttributeQueryMatcher.group(1);
       String layerId = transcriptAttributeQueryMatcher.group(3);
       layer = schema.getLayer(layerId);
-      if ("transcript".equals(layer.get("class_id"))) // transcript attribute
+      if ("transcript".equals(layer.get("class_id")) // transcript attribute
+          // read-only users get access to only public attributes
+          && ("1".equals(layer.get("access")) || getUserRoles().contains("edit")))
       {
+
         String select = "DISTINCT annotation.annotation_id, annotation.ag_id,"
           +" annotation.label, annotation.label_status,"
           +" annotation.annotated_by, annotation.annotated_when,"
@@ -2976,87 +3016,105 @@ public class SqlGraphStore implements GraphStore {
             altParameterGroups.add(null);
           }
         } else if ("transcript".equals(layer.get("class_id"))) { // transcript attribute
-          if (ag_id_group != null) { // the MatchId includes to ag_id
-            String sql = "SELECT DISTINCT annotation.annotation_id, annotation.ag_id,"
-              +" annotation.label, annotation.label_status,"
-              +" annotation.annotated_by, annotation.annotated_when,"
-              +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
-              +" ? AS layer, annotation.ag_id AS graph"
-              +" FROM annotation_transcript annotation"
-              +" WHERE annotation.ag_id = ?"
-              +" AND layer = ?"
-              +" ORDER BY annotation_id"
-              +" LIMIT 0, " + annotationsPerLayer;
-            Object[] groups = {
-              layer.getId(), ag_id_group, layer.get("attribute") };
-            queries.add(getConnection().prepareStatement(sql));
-            parameterGroups.add(groups);
-            altQueries.add(null); // there is no alternative query
+          // read-only users get access to only public attributes
+          if (!"1".equals(layer.get("access")) && !getUserRoles().contains("edit")) { // no access
+            queries.add(null);
+            Object[] reason = { "" };
+            parameterGroups.add(reason);
+            altQueries.add(null);
             altParameterGroups.add(null);
-          }  else { // the MatchId doesn't include to ag_id
-            // get the ag_id from the target
-            String sql = "SELECT DISTINCT annotation.annotation_id, annotation.ag_id,"
-              +" annotation.label, annotation.label_status,"
-              +" annotation.annotated_by, annotation.annotated_when,"
-              +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
-              +" ? AS layer, annotation.ag_id AS graph"
-              +" FROM annotation_transcript annotation"
-              +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
-              +" ON annotation.ag_id = target.ag_id"
-              +" WHERE target.annotation_id = ?"
-              +" AND layer = ?"
-              +" ORDER BY annotation_id"
-              +" LIMIT 0, " + annotationsPerLayer;
-            Object[] groups = {
-              layer.getId(), target_annotation_id_group, layer.get("attribute") };
-            queries.add(getConnection().prepareStatement(sql));
-            parameterGroups.add(groups);
-            altQueries.add(null); // there is no alternative query
-            altParameterGroups.add(null);
-          } // the MatchId doesn't include to ag_id
+          } else { // has access to attribute          
+            if (ag_id_group != null) { // the MatchId includes to ag_id
+              String sql = "SELECT DISTINCT annotation.annotation_id, annotation.ag_id,"
+                +" annotation.label, annotation.label_status,"
+                +" annotation.annotated_by, annotation.annotated_when,"
+                +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                +" ? AS layer, annotation.ag_id AS graph"
+                +" FROM annotation_transcript annotation"
+                +" WHERE annotation.ag_id = ?"
+                +" AND layer = ?"
+                +" ORDER BY annotation_id"
+                +" LIMIT 0, " + annotationsPerLayer;
+              Object[] groups = {
+                layer.getId(), ag_id_group, layer.get("attribute") };
+              queries.add(getConnection().prepareStatement(sql));
+              parameterGroups.add(groups);
+              altQueries.add(null); // there is no alternative query
+              altParameterGroups.add(null);
+            }  else { // the MatchId doesn't include to ag_id
+              // get the ag_id from the target
+              String sql = "SELECT DISTINCT annotation.annotation_id, annotation.ag_id,"
+                +" annotation.label, annotation.label_status,"
+                +" annotation.annotated_by, annotation.annotated_when,"
+                +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                +" ? AS layer, annotation.ag_id AS graph"
+                +" FROM annotation_transcript annotation"
+                +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
+                +" ON annotation.ag_id = target.ag_id"
+                +" WHERE target.annotation_id = ?"
+                +" AND layer = ?"
+                +" ORDER BY annotation_id"
+                +" LIMIT 0, " + annotationsPerLayer;
+              Object[] groups = {
+                layer.getId(), target_annotation_id_group, layer.get("attribute") };
+              queries.add(getConnection().prepareStatement(sql));
+              parameterGroups.add(groups);
+              altQueries.add(null); // there is no alternative query
+              altParameterGroups.add(null);
+            } // the MatchId doesn't include to ag_id
+          } // has access to attribute
         }  else if ("speaker".equals(layer.get("class_id"))) { // participant attribute
-          if (participant_speaker_number_group != null) {
-            // the MatchId includes the speaker number
-            String sql  = "SELECT DISTINCT"+
-              " annotation.annotation_id, annotation.speaker_number,"
-              +" annotation.label, annotation.label_status,"
-              +" annotation.annotated_by, annotation.annotated_when,"
-              +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
-              +" ? AS layer, NULL AS graph"
-              +" FROM annotation_participant annotation"
-              +" WHERE annotation.speaker_number = ? AND layer = ?"
-              +" ORDER BY annotation_id"
-              +" LIMIT 0, " + annotationsPerLayer;
-            Object[] groups = {
-              layer.getId(), participant_speaker_number_group, layer.get("attribute") };
-            queries.add(getConnection().prepareStatement(sql));
-            parameterGroups.add(groups);
-            altQueries.add(null); // there is no alternative query
+          // read-only users get access to only public attributes
+          if (!"1".equals(layer.get("access")) && !getUserRoles().contains("edit")) { // no access
+            queries.add(null);
+            Object[] reason = { "" };
+            parameterGroups.add(reason);
+            altQueries.add(null);
             altParameterGroups.add(null);
-          }  else { // the MatchId doesn't include the speaker number
-            // use the turn label to get the speaker of the token instead
-            String sql = "SELECT DISTINCT"
-              +" annotation.annotation_id, annotation.speaker_number,"
-              +" annotation.label, annotation.label_status,"
-              +" annotation.annotated_by, annotation.annotated_when,"
-              +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
-              +" ? AS layer, NULL AS graph"
-              +" FROM annotation_layer_"+SqlConstants.LAYER_TURN+" turn"
-              // same turn as target
-              +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
-              +" ON turn.turn_annotation_id = target.turn_annotation_id"
-              +" INNER JOIN annotation_participant annotation"
-              +" ON annotation.speaker_number = turn.label AND layer = ?"
-              +" WHERE target.annotation_id = ?"
-              +" ORDER BY annotation.annotation_id"
-              +" LIMIT 0, " + annotationsPerLayer;
-            Object[] groups = {
-              layer.getId(), layer.get("attribute"), target_annotation_id_group };
-            queries.add(getConnection().prepareStatement(sql));
-            parameterGroups.add(groups);
-            altQueries.add(null); // there is no alternative query
-            altParameterGroups.add(null);
-          } // the MatchId doesn't include the speaker number
+          } else { // has access to attribute
+            if (participant_speaker_number_group != null) {
+              // the MatchId includes the speaker number
+              String sql  = "SELECT DISTINCT"+
+                " annotation.annotation_id, annotation.speaker_number,"
+                +" annotation.label, annotation.label_status,"
+                +" annotation.annotated_by, annotation.annotated_when,"
+                +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                +" ? AS layer, NULL AS graph"
+                +" FROM annotation_participant annotation"
+                +" WHERE annotation.speaker_number = ? AND layer = ?"
+                +" ORDER BY annotation_id"
+                +" LIMIT 0, " + annotationsPerLayer;
+              Object[] groups = {
+                layer.getId(), participant_speaker_number_group, layer.get("attribute") };
+              queries.add(getConnection().prepareStatement(sql));
+              parameterGroups.add(groups);
+              altQueries.add(null); // there is no alternative query
+              altParameterGroups.add(null);
+            } else { // the MatchId doesn't include the speaker number
+              // use the turn label to get the speaker of the token instead
+              String sql = "SELECT DISTINCT"
+                +" annotation.annotation_id, annotation.speaker_number,"
+                +" annotation.label, annotation.label_status,"
+                +" annotation.annotated_by, annotation.annotated_when,"
+                +" 0 AS ordinal, NULL AS start_anchor_id, NULL AS end_anchor_id,"
+                +" ? AS layer, NULL AS graph"
+                +" FROM annotation_layer_"+SqlConstants.LAYER_TURN+" turn"
+                // same turn as target
+                +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
+                +" ON turn.turn_annotation_id = target.turn_annotation_id"
+                +" INNER JOIN annotation_participant annotation"
+                +" ON annotation.speaker_number = turn.label AND layer = ?"
+                +" WHERE target.annotation_id = ?"
+                +" ORDER BY annotation.annotation_id"
+                +" LIMIT 0, " + annotationsPerLayer;
+              Object[] groups = {
+                layer.getId(), layer.get("attribute"), target_annotation_id_group };
+              queries.add(getConnection().prepareStatement(sql));
+              parameterGroups.add(groups);
+              altQueries.add(null); // there is no alternative query
+              altParameterGroups.add(null);
+            } // the MatchId doesn't include the speaker number
+          } // has access to attribute
         }  else if (layer.getId().equals(schema.getParticipantLayerId())) { // participant
           if (participant_speaker_number_group != null) { // the MatchId includes the speaker number
             String sql  = "SELECT annotation.speaker_number AS annotation_id,"
@@ -5262,6 +5320,10 @@ public class SqlGraphStore implements GraphStore {
             
       return annotation;
     }  else if ("transcript".equals(layer.get("class_id"))) { // transcript attribute
+      // read-only users get access to only public attributes
+      if (!getUserRoles().contains("edit") && !"1".equals(layer.get("access"))) {
+        return null;
+      }
       Object[] annotationIdParts = {
         layer.get("attribute"), Integer.valueOf(rsAnnotation.getInt("annotation_id"))};
       Annotation attribute = new Annotation(
@@ -5278,6 +5340,10 @@ public class SqlGraphStore implements GraphStore {
       }
       return attribute;
     } else if ("speaker".equals(layer.get("class_id"))) { // participant attribute
+      // read-only users get access to only public attributes
+      if (!getUserRoles().contains("edit") && !"1".equals(layer.get("access"))) {
+        return null;
+      }
       Object[] annotationIdParts = {
         layer.get("attribute"), Integer.valueOf(rsAnnotation.getInt("annotation_id"))};
       Annotation attribute = new Annotation(
