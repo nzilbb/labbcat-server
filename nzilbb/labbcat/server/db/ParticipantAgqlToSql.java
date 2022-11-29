@@ -96,12 +96,15 @@ public class ParticipantAgqlToSql {
    * e.g. "speaker.name, speaker.speaker_number".
    * @param userWhereClause The expression to add to the WHERE clause to ensure the user doesn't
    * get access to data to which they're not entitled, or null.
+   * @param publicAttributesOnly Whether to restrict participant attribute values to only
+   * attributes marked as 'public'.
    * @param sqlOrderClause The SQL expression that appended to the end of the SQL query,
    * e.g. "ORDER BY speaker.name LIMIT 150, 200, or null" 
    * @throws AGQLException If the expression is invalid.
    */
   public Query sqlFor(
-    String expression, String sqlSelectClause, String userWhereClause, String sqlOrderClause)
+    String expression, String sqlSelectClause, String userWhereClause,
+    boolean publicAttributesOnly, String sqlOrderClause)
     throws AGQLException {
       
     final Query q = new Query();
@@ -166,13 +169,17 @@ public class ParticipantAgqlToSql {
                   errors.add("Invalid layer: " + ctx.getText());
                 } else {
                   if ("speaker".equals(layer.get("class_id"))) {
-                    String attribute = attribute(layerId);
-                    conditions.push(
-                      "(SELECT label"
-                      +" FROM annotation_participant"
-                      +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
-                      +" AND annotation_participant.speaker_number = speaker.speaker_number"
-                      +" LIMIT 1)");
+                    if (publicAttributesOnly && !"1".equals(layer.get("access"))) {
+                      conditions.push("(SELECT '' AS label)");
+                    } else {
+                      String attribute = attribute(layerId);
+                      conditions.push(
+                        "(SELECT label"
+                        +" FROM annotation_participant"
+                        +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+                        +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                        +" LIMIT 1)");
+                    }
                   } else {
                     errors.add(
                       "Can only get labels for participant attributes: " + ctx.getText());
@@ -208,12 +215,16 @@ public class ParticipantAgqlToSql {
                   +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                   +")");
               } else if ("speaker".equals(layer.get("class_id"))) {
-                conditions.push(
-                  "(SELECT DISTINCT label"
-                  +" FROM annotation_participant"
-                  +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
-                  +" AND annotation_participant.speaker_number = speaker.speaker_number"
-                  +")");
+                if (publicAttributesOnly && !"1".equals(layer.get("access"))) {
+                  conditions.push("(SELECT '' AS label)");
+                } else {
+                  conditions.push(
+                    "(SELECT DISTINCT label"
+                    +" FROM annotation_participant"
+                    +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+                    +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                    +")");
+                }
               } else if (schema.getEpisodeLayerId().equals(layer.getId())) {
                 // ad-hockery: can list episodes of transcripts that include the participant
                 conditions.push(
@@ -273,12 +284,16 @@ public class ParticipantAgqlToSql {
                   +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                   +")");
               } else if ("speaker".equals(layer.get("class_id"))) {
-                conditions.push(
-                  "(SELECT COUNT(*)"
-                  +" FROM annotation_participant"
-                  +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
-                  +" AND annotation_participant.speaker_number = speaker.speaker_number"
-                  +")");
+                if (publicAttributesOnly && !"1".equals(layer.get("access"))) {
+                  conditions.push("(SELECT 0)");
+                } else {
+                  conditions.push(
+                    "(SELECT COUNT(*)"
+                    +" FROM annotation_participant"
+                    +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+                    +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                    +")");
+                }
               } else if (layerId.equals("transcript")) { // special case!
                 // we can query how many transcripts a participant is in by using
                 // all('transcript').length
@@ -315,12 +330,16 @@ public class ParticipantAgqlToSql {
                 +" AND transcript_speaker.speaker_number = speaker.speaker_number"
                 +")");
             } else if ("speaker".equals(layer.get("class_id"))) {
-              conditions.push(
-                "(SELECT annotated_by"
-                +" FROM annotation_participant"
-                +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
-                +" AND annotation_participant.speaker_number = speaker.speaker_number"
-                +")");
+              if (publicAttributesOnly && !"1".equals(layer.get("access"))) {
+                conditions.push("(SELECT '' AS annotated_by)");
+              } else {
+                conditions.push(
+                  "(SELECT annotated_by"
+                  +" FROM annotation_participant"
+                  +" WHERE annotation_participant.layer = '"+escape(attribute)+"'"
+                  +" AND annotation_participant.speaker_number = speaker.speaker_number"
+                  +")");
+              }
             } else {
               errors.add("Can only get annotators for participant or transcript attributes: "
                          + ctx.getText());

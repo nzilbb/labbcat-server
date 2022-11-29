@@ -550,7 +550,9 @@ public class SqlGraphStore implements GraphStore {
       // participant attributes
       sql = getConnection().prepareStatement(
         "SELECT * FROM attribute_definition"
-        +" WHERE class_id = 'speaker' ORDER BY display_order");
+        +" WHERE class_id = 'speaker'"
+        +(getUserRoles().contains("edit")?"":" AND access = '1'")
+        +" ORDER BY display_order");
       rs = sql.executeQuery();
       try {
         while (rs.next()) {
@@ -1438,9 +1440,10 @@ public class SqlGraphStore implements GraphStore {
     String expression, String sqlSelectClause, String sqlOrderClause)
     throws SQLException, StoreException, PermissionException {
     String userWhereClause = userWhereClauseParticipant("");
+    boolean publicAttributesOnly = getUser() != null && !getUserRoles().contains("edit");
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
-      expression, sqlSelectClause, userWhereClause, sqlOrderClause);
+      expression, sqlSelectClause, userWhereClause, publicAttributesOnly, sqlOrderClause);
     System.out.println("QL: " + expression);
     System.out.println("SQL: " + q.sql);
     PreparedStatement sql = q.prepareStatement(getConnection());
