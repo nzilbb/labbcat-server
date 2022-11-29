@@ -71,8 +71,8 @@ public class Task extends Thread implements MonitorableTask {
    */
   public String getStatus() { return sStatus; }
   /**
-   * Sets the thread status, and adds the satus to the task's log.
-   * @param sMessage a status message to display to anyone who'swatching the thread.
+   * Sets the thread status.
+   * @param sMessage a status message to display to anyone who's watching the thread.
    */
   public void setStatus(String sMessage) {
     sStatus = sMessage;
@@ -105,7 +105,7 @@ public class Task extends Thread implements MonitorableTask {
     lastException = ex; 
   }
 
-    /**
+  /**
    * Full URL to the final results of the task, or null if the task isn't finished or has no URL for final results.
    */
   private String sResultUrl;
