@@ -1022,6 +1022,9 @@ public class SqlGraphStore implements GraphStore {
           "m_-2_" + speakerNumber, name, schema.getParticipantLayerId());
 
         if (layerIds != null && layerIds.length > 0) {
+          // read-only users get access to only public attributes
+          boolean publicOnly = !getUserRoles().contains("edit");
+          
           PreparedStatement sqlValue = getConnection().prepareStatement(
             "SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
             +" FROM annotation_participant a"
@@ -1037,27 +1040,29 @@ public class SqlGraphStore implements GraphStore {
                 && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
               if ("speaker".equals(layer.get("class_id"))) {
                 sqlValue.setString(1, layer.get("attribute").toString());
-                ResultSet rsValue = sqlValue.executeQuery();
-                int ordinal = 1;
-                while (rsValue.next()) {
-                  // add graph-tag annotation
-                  Object[] annotationIdParts = {
-                    layer.get("attribute"),
-                    Integer.valueOf(rsValue.getInt("annotation_id"))};
-                  Annotation attribute = new Annotation(
-                    fmtParticipantAttributeId.format(annotationIdParts), 
-                    rsValue.getString("label"), layerId);
-                  if (rsValue.getString("annotated_by") != null) {
-                    attribute.setAnnotator(rsValue.getString("annotated_by"));
-                  }
-                  if (rsValue.getTimestamp("annotated_when") != null) {
-                    attribute.setWhen(rsValue.getTimestamp("annotated_when"));
-                  }
-                  attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
-                  attribute.setOrdinal(ordinal++);
-                  participant.addAnnotation(attribute);
-                } // next annotation
-                rsValue.close();
+                if (!publicOnly || "1".equals(layer.get("access"))) {
+                  ResultSet rsValue = sqlValue.executeQuery();
+                  int ordinal = 1;
+                  while (rsValue.next()) {
+                    // add graph-tag annotation
+                    Object[] annotationIdParts = {
+                      layer.get("attribute"),
+                      Integer.valueOf(rsValue.getInt("annotation_id"))};
+                    Annotation attribute = new Annotation(
+                      fmtParticipantAttributeId.format(annotationIdParts), 
+                      rsValue.getString("label"), layerId);
+                    if (rsValue.getString("annotated_by") != null) {
+                      attribute.setAnnotator(rsValue.getString("annotated_by"));
+                    }
+                    if (rsValue.getTimestamp("annotated_when") != null) {
+                      attribute.setWhen(rsValue.getTimestamp("annotated_when"));
+                    }
+                    attribute.setParentId("m_-2_"+rsValue.getString("speaker_number"));
+                    attribute.setOrdinal(ordinal++);
+                    participant.addAnnotation(attribute);
+                  } // next annotation
+                  rsValue.close();
+                } // access granted
               } // class_id set
             } else if (layerId.equals(schema.getCorpusLayerId())) { // ad-hockery
               // participant corpora
