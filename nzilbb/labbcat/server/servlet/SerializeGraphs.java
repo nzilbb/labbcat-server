@@ -271,7 +271,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
       throw new Exception("Invalid MIME type: " + sMimeType);
     }
     Schema schema = store.getSchema();
-    // configure deserializer
+    // configure serializer
     ParameterSet configuration = new ParameterSet();
     // default values
     serializer.configure(configuration, schema);
