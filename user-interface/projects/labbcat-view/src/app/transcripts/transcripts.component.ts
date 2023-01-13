@@ -351,8 +351,12 @@ export class TranscriptsComponent implements OnInit {
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         
                         this.loadingList = false;
-                        this.transcriptIds = transcriptIds;
-                        this.selectedIds = [];
+                        // selected IDs first ...
+                        this.transcriptIds = this.selectedIds
+                        // ... then listed IDs ...
+                            .concat(transcriptIds
+                                    // ... that aren't already selected
+                            .filter(id => !this.selectedIds.includes(id)));
                         
                         // attribute values
                         for (let id of this.transcriptIds) {

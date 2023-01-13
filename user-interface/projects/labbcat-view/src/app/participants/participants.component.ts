@@ -341,9 +341,13 @@ export class ParticipantsComponent implements OnInit {
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         
                         this.loadingList = false;
-                        this.participantIds = participantIds;
-                        this.selectedIds = [];
-
+                        // selected IDs first ...
+                        this.participantIds = this.selectedIds
+                        // ... then listed IDs ...
+                            .concat(participantIds
+                                    // ... that aren't already selected
+                            .filter(id => !this.selectedIds.includes(id)));
+                        
                         // attribute values
                         for (let id of this.participantIds) {
                             // if we don't already have their attributes
