@@ -1005,6 +1005,10 @@
           <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
           <context context-type="linenumber">68</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="4c33e806fe0569fa3e30c2ff48f1b7be0c36f7a1" datatype="html">
         <source>Search transcripts including these participants</source>
@@ -2250,6 +2254,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
           <context context-type="linenumber">101</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="913e93ef333e5aaa7a1b998c136d9f42d4fd2890" datatype="html">
+        <source>Search transcripts including these transcripts</source>
+        <target state="translated">Buscar transcripciones incluyendo estas transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">116</context>
         </context-group>
       </trans-unit>
       <trans-unit id="d75a1c76ad936a593f5aa31940cbfe5b5c00b473" datatype="html">
@@ -4444,6 +4456,52 @@
           <context context-type="linenumber">40</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="83c4b58ab45398af03adc9575e36df52f427bfa8" datatype="html">
+        <source>Valid Labels</source>
+        <target state="translated">Etiquetas válidas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <note priority="1" from="description">page header</note>
+      </trans-unit>
+      <trans-unit id="863226cffd5b66a6fee9810a9282a5006d6ef576" datatype="html">
+        <source>Label</source>
+        <target state="translated">Etiqueta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <note priority="1" from="description">Valid label</note>
+      </trans-unit>
+      <trans-unit id="e1f568fb9b7bbf16b46bf4f52646663f97a8d7b4" datatype="html">
+        <source>Delete record</source>
+        <target state="translated">Eliminar registro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-transcript-types/admin-transcript-types.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="70a6364233bd066ed15901f6603a1226b2dcd926" datatype="html">
         <source>Layer ID</source>
         <target state="translated">Nombre de Capa</target>
@@ -4733,6 +4791,14 @@
           <context context-type="linenumber">110</context>
         </context-group>
         <note priority="1" from="description">No category</note>
+      </trans-unit>
+      <trans-unit id="188604bcdf827f1d1743b2f787b3ef741d3083b2" datatype="html">
+        <source>Valid labels</source>
+        <target state="translated">Etiquetas válidas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="d9177398e7aea8be38ead28296324850bde3d1a8" datatype="html">
         <source>Layer configuration</source>
