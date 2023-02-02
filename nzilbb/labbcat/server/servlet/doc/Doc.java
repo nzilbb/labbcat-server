@@ -682,7 +682,7 @@ public class Doc extends LabbcatServlet {
   static final Pattern titlePattern = Pattern.compile(".*<title>(.*)</title>.*");
   /**
    * Gets the title of the given document file.
-   * @param doc A .html document.
+   * @param html A .html document.
    * @return The contents of the &lt;title&gt; tag in the file, or the file name without
    * the suffix, if there is none.
    */

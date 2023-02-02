@@ -148,10 +148,10 @@ import org.xml.sax.*;
  *       <dd> Fast Track minimum_F4_frequency_value global setting. Median F4 frequency
  *       should not be lower than this value. Default is 2900.</dd>
  *   <dt> fastTrackEnableRhoticHeuristic ("true" of "false") </dt>
- *       <dd> Fast Track enable_rhotic_heuristic global setting. If F3 < 2000 Hz, F1 and
+ *       <dd> Fast Track enable_rhotic_heuristic global setting. If F3 &lt; 2000 Hz, F1 and
  *       F2 should be at least 500 Hz apart. Enabled by default. </dd>
  *   <dt> fastTrackEnableF3F4ProximityHeuristic </dt>
- *       <dd> Fast Track enable_F3F4_proximity_heuristic global setting. If (F4 - F3) <
+ *       <dd> Fast Track enable_F3F4_proximity_heuristic global setting. If (F4 - F3) &lt;
  *       500 Hz, F1 and F2 should be at least 1500 Hz apart. Enabled by default.</dd>
  *   <dt> fastTrackNumberOfSteps </dt>
  *       <dd> Fast Track number of steps. </dd>

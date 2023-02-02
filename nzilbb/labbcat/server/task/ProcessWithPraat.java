@@ -792,12 +792,12 @@ public class ProcessWithPraat extends Task {
    * against the value of that attribute identified by
    * {@link #intensityDifferentiationLayerId}. If the participant's attribute value
    * matches the pattern for an element in this array, the corresponding element in
-   * {@link #intensityCeilingOther} will be used for that participant. 
+   * {@link #intensityPitchFloorOther} etc. will be used for that participant. 
    * <p> By default, it includes one entry: "M" to match male participants.
    * @return List of regular expression strings to match against the value of that
    * attribute identified by {@link #intensityDifferentiationLayerId}. If the
    * participant's attribute value matches the pattern for an element in this array, the
-   * corresponding element in {@link #intensityCeilingOther} will be used for that
+   * corresponding element in {@link #intensityPitchFloorOther} etc. will be used for that
    * participant. 
    */
   public Vector<Pattern> getIntensityOtherPattern() { return intensityOtherPattern; }
@@ -830,19 +830,19 @@ public class ProcessWithPraat extends Task {
   /**
    * Getter for {@link #intensityPitchFloorOther}: Values to use as the intensity pitch floor for
    * participants who's attribute value matches the corresponding regular expression in
-   * {@link #intensityPitchOtherPattern}. 
+   * {@link #intensityOtherPattern}. 
    * <p> By default, it includes one entry: 30 for male participants.
    * @return Values to use as the intensity pitch floor for participants who's attribute value
-   * matches the corresponding regular expression in {@link #intensityPitchOtherPattern}. 
+   * matches the corresponding regular expression in {@link #intensityOtherPattern}. 
    */
   public Vector<Integer> getIntensityPitchFloorOther() { return intensityPitchFloorOther; }
   /**
    * Setter for {@link #intensityPitchFloorOther}: Values to use as the intensity pitch floor for
    * participants who's attribute value matches the corresponding regular expression in
-   * {@link #intensityPitchOtherPattern}. 
+   * {@link #intensityOtherPattern}. 
    * @param newIntensityPitchFloorOther Values to use as the intensity pitch floor for
    * participants who's attribute value matches the corresponding regular expression in 
-   * {@link #intensityPitchOtherPattern}. 
+   * {@link #intensityOtherPattern}. 
    */
   public ProcessWithPraat setIntensityPitchFloorOther(Vector<Integer> newIntensityPitchFloorOther) { intensityPitchFloorOther = newIntensityPitchFloorOther; return this; }
   
@@ -853,12 +853,12 @@ public class ProcessWithPraat extends Task {
    */
   protected String scriptSpectrum = "To Spectrum... yes";
   /**
-   * Getter for {@link #ScriptSpectrum}: Command to send to Praat for creating a spectrum object.
+   * Getter for {@link #scriptSpectrum}: Command to send to Praat for creating a spectrum object.
    * @return Command to send to Praat for creating a spectrum object.
    */
   public String getScriptSpectrum() { return scriptSpectrum; }
   /**
-   * Setter for {@link #ScriptSpectrum}: Command to send to Praat for creating a spectrum object.
+   * Setter for {@link #scriptSpectrum}: Command to send to Praat for creating a spectrum object.
    * @param newScriptSpectrum Command to send to Praat for creating a spectrum object.
    */
   public ProcessWithPraat setScriptSpectrum(String newScriptSpectrum) { scriptSpectrum = newScriptSpectrum; return this; }
@@ -1260,14 +1260,14 @@ public class ProcessWithPraat extends Task {
   protected boolean fastTrackEnableRhoticHeuristic = true;
   /**
    * Getter for {@link #fastTrackEnableRhoticHeuristic}: Fast Track
-   * enable_rhotic_heuristic global setting. If F3 < 2000 Hz, F1 and F2 should
+   * enable_rhotic_heuristic global setting. If F3 &lt; 2000 Hz, F1 and F2 should
    * be at least 500 Hz apart. Enabled by default. 
    * @return Fast Track enable_rhotic_heuristic global setting.
    */
   public boolean getFastTrackEnableRhoticHeuristic() { return fastTrackEnableRhoticHeuristic; }
   /**
    * Setter for {@link #fastTrackEnableRhoticHeuristic}: Fast Track
-   * enable_rhotic_heuristic global setting. If F3 < 2000 Hz, F1 and F2 should
+   * enable_rhotic_heuristic global setting. If F3 &lt; 2000 Hz, F1 and F2 should
    * be at least 500 Hz apart. Enabled by default. 
    * @param newFastTrackEnableRhoticHeuristic Fast Track enable_rhotic_heuristic global setting.
    */
@@ -1282,14 +1282,14 @@ public class ProcessWithPraat extends Task {
   protected boolean fastTrackEnableF3F4ProximityHeuristic = true;
   /**
    * Getter for {@link #fastTrackEnableF3F4ProximityHeuristic}: Fast Track
-   * enable_F3F4_proximity_heuristic global setting. If (F4 - F3) < 500 Hz, F1 and F2
+   * enable_F3F4_proximity_heuristic global setting. If (F4 - F3) &lt; 500 Hz, F1 and F2
    * should be at least 1500 Hz apart. Enabled by default.
    * @return Fast Track enable_F3F4_proximity_heuristic global setting.
    */
   public boolean getFastTrackEnableF3F4ProximityHeuristic() { return fastTrackEnableF3F4ProximityHeuristic; }
   /**
    * Setter for {@link #fastTrackEnableF3F4ProximityHeuristic}: Fast Track
-   * enable_F3F4_proximity_heuristic global setting. If (F4 - F3) < 500 Hz, F1 and F2
+   * enable_F3F4_proximity_heuristic global setting. If (F4 - F3) &lt; 500 Hz, F1 and F2
    * should be at least 1500 Hz apart. Enabled by default.
    * @param newFastTrackEnableF3F4ProximityHeuristic Fast Track
    * enable_F3F4_proximity_heuristic global setting. 
@@ -1411,13 +1411,13 @@ public class ProcessWithPraat extends Task {
    * against the value of that attribute identified by
    * {@link #fastTrackDifferentiationLayerId}. If the participant's attribute value
    * matches the pattern for an element in this array, the corresponding element in
-   * {@link #fastTrackCeilingOther} will be used for that participant. 
+   * {@link #fastTrackLowestAnalysisFrequencyOther} etc. will be used for that participant. 
    * <p> By default, it includes one entry: "M" to match male participants.
    * @return List of regular expression strings to match against the value of that
    * attribute identified by {@link #fastTrackDifferentiationLayerId}. If the
    * participant's attribute value matches the pattern for an element in this array, the
-   * corresponding element in {@link #fastTrackCeilingOther} will be used for that
-   * participant. 
+   * corresponding element in {@link #fastTrackLowestAnalysisFrequencyOther} etc. will be
+   * used for that participant. 
    */
   public Vector<Pattern> getFastTrackOtherPattern() { return fastTrackOtherPattern; }
 
@@ -2106,7 +2106,7 @@ public class ProcessWithPraat extends Task {
    * @param scriptWriter Writer to write the script to.
    * @param tempDirectory A directory that can be used for temporary files generated by the script.
    * @param wav WAV file to analyse.
-   * @param vTargets 
+   * @param targets 
    * @param formantCeiling
    * @param pitchFloor
    * @param pitchCeiling
@@ -2115,8 +2115,6 @@ public class ProcessWithPraat extends Task {
    * @param fastTrackLowestAnalysisFrequency
    * @param fastTrackHighestAnalysisFrequency
    * @param attributeValues Attribute names (keys) and values for this batch.
-   * @return An array lines, where each line contains a string for each extraction
-   * datum. e.g. two strings - F1 and F2 
    * @throws Exception
    */
   public void generateScript(

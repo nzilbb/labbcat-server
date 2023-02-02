@@ -562,7 +562,7 @@ public class ParticipantAgqlToSql {
   }
    
   /** 
-   * Encapsulates the results of {@link #sqlFor(String,String,String,String)} including the SQL.
+   * Encapsulates the results of {@link #sqlFor(String,String,String,boolean,String)} including the SQL.
    * string and the parameters to set.
    */
   public static class Query {

@@ -279,7 +279,7 @@ public class Task extends Thread implements MonitorableTask {
 
   /**
    * Finds the named task.
-   * @param lThreadId the thread's ID
+   * @param id the thread's ID
    * @return The identified thread, or null if it can't be found.
    */
   public static Task findTask(long id) {
