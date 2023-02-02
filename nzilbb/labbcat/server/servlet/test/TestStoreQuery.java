@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -146,12 +146,18 @@ public class TestStoreQuery
                       2, ids.length);
       }         
       
-      count = l.countAnnotations(graphId, "orthography");
+      long countAll = l.countAnnotations(graphId, "phonemes");
       assertTrue("countAnnotations: There are some matches",
-                 count > 0);
+                 countAll > 0);
+
+      long countFirsts = l.countAnnotations(graphId, "phonemes", 1);
+      assertTrue("countAnnotations: There are some matches with maxOrdinal = 1",
+                 countFirsts > 0);
+      assertTrue("countAnnotations: maxOrdinal = 1 are not fewer than maxOrdinal = null",
+                 countFirsts < countAll);
       
-      Annotation[] annotations = l.getAnnotations(graphId, "orthography", 2, 0);
-      if (count < 2)
+      Annotation[] annotations = l.getAnnotations(graphId, "phonemes", 2, 0);
+      if (countAll < 2)
       {
          System.out.println("getAnnotations: Too few annotations to test pagination");
       }
@@ -174,6 +180,18 @@ public class TestStoreQuery
          Anchor[] anchors = l.getAnchors(graphId, anchorIds);         
          assertEquals("getAnchors: Correct number of anchors is returned",
                       anchorIds.length, anchors.length);
+      }
+
+      annotations = l.getAnnotations(graphId, "phonemes", 1);
+      assertTrue("getAnnotations: There are some matches with maxOrdinal = 1",
+                 annotations.length > 0);
+      assertEquals("getAnnotations and countAnnotations don't match with maxOrdinal = 1",
+                   countFirsts, annotations.length);
+      for (Annotation annotation : annotations) {
+        assertEquals(
+          "getAnnotations: maxOrdinal = 1 but annotaton " + annotation.getId()
+          + "("+annotation.getLabel()+") has ordinal " + annotation.getOrdinal(),
+          1, annotation.getOrdinal());
       }
 
       String url = l.getMedia(graphId, "", "audio/wav");

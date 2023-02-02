@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -410,6 +410,10 @@ import org.xml.sax.*;
             <dt><span class="paramLabel">Parameters:</span></dt>
             <dd><code>id</code> - The ID of the transcript.</dd>
             <dd><code>layerId</code> - The ID of the layer.</dd>
+            <dd><code>maxOrdinal</code> - (Optional) The maximum ordinal for the counted annotations.
+             e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+             parent is counted. If <var>maxOrdinal</var> is null, then all annotations are
+             counted, regardless of their ordinal.</dd>
             <dt><span class="returnLabel">Returns:</span></dt>
             <dd>A (possibly empty) array of annotations.</dd>
           </dl>
@@ -426,6 +430,10 @@ import org.xml.sax.*;
             <dt><span class="paramLabel">Parameters:</span></dt>
             <dd><code>id</code> - The ID of the transcript.</dd>
             <dd><code>layerId</code> - The ID of the layer.</dd>
+            <dd><code>maxOrdinal</code> - (Optional) The maximum ordinal for the returned annotations.
+             e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+             parent is returned. If <var>maxOrdinal</var> is null, then all annotations are
+             counted, regardless of their ordinal.</dd>
             <dd><code>pageLength</code> (Optional) - The maximum number of IDs to return, or absent to return all.</dd>
             <dd><code>pageNumber</code> (Optional) - The zero-based page number to return, or absent to return the first page.</dd>
             <dt><span class="returnLabel">Returns:</span></dt>
@@ -1232,9 +1240,9 @@ public class StoreQuery extends LabbcatServlet {
   }         
 
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countAnnotations(String,String)}
+   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countAnnotations(String,String,Integer)}
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
@@ -1247,13 +1255,21 @@ public class StoreQuery extends LabbcatServlet {
     if (id == null) errors.add(localize(request, "No ID specified."));
     String layerId = request.getParameter("layerId");
     if (layerId == null) errors.add(localize(request, "No layer ID specified."));
+    Integer maxOrdinal = null;
+    if (request.getParameter("maxOrdinal") != null) {
+      try {
+        maxOrdinal = Integer.valueOf(request.getParameter("maxOrdinal"));
+      } catch(NumberFormatException x) {
+        errors.add(localize(request, "Invalid maximum ordinal: {0}", x.getMessage()));
+      }
+    }
     if (errors.size() > 0) return failureResult(errors);
-    return successResult(request, store.countAnnotations(id, layerId), null);
+    return successResult(request, store.countAnnotations(id, layerId, maxOrdinal), null);
   }
    
   /**
    * Implementation of
-   * {@link nzilbb.ag.IGraphStoreQuery#getAnnotations(String,String,Integer,Integer)}
+   * {@link nzilbb.ag.IGraphStoreQuery#getAnnotations(String,String,Integer,Integer,Integer)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
@@ -1284,8 +1300,16 @@ public class StoreQuery extends LabbcatServlet {
         errors.add(localize(request, "Invalid page number: {0}", x.getMessage()));
       }
     }
+    Integer maxOrdinal = null;
+    if (request.getParameter("maxOrdinal") != null) {
+      try {
+        maxOrdinal = Integer.valueOf(request.getParameter("maxOrdinal"));
+      } catch(NumberFormatException x) {
+        errors.add(localize(request, "Invalid maximum ordinal: {0}", x.getMessage()));
+      }
+    }
     if (errors.size() > 0) return failureResult(errors);
-    Annotation[] annotations = store.getAnnotations(id, layerId, pageLength, pageNumber);
+    Annotation[] annotations = store.getAnnotations(id, layerId, maxOrdinal, pageLength, pageNumber);
     return successResult(request, annotations, annotations.length == 0?"There are no annotations.":null);
   }
 
