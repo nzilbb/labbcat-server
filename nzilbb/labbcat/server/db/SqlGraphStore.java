@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -2481,23 +2481,34 @@ public class SqlGraphStore implements GraphStore {
   } // end of annotationMatchSql()
 
   /**
-   * Gets the number of annotations on the given layer of the given transcript.
+   * Gets the number of annotations on the given layer of the given transcript, but only
+   * those with an ordinal less than or equal to the given maximum. 
    * @param id The ID of the transcript.
    * @param layerId The ID of the layer.
+   * @param maxOrdinal The maximum ordinal for the counted annotations.
+   * e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+   * parent is couned. If <var>maxOrdinal</var> is null, then all annotations are
+   * counted, regardless of their ordinal.
    * @return A (possibly empty) array of annotations.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the transcript was not found in the store.
    */
-  public long countAnnotations(String id, String layerId)
+  public long countAnnotations(String id, String layerId, Integer maxOrdinal)
     throws StoreException, PermissionException, GraphNotFoundException {
     return countMatchingAnnotations(
-      "graph.id = '" + esc(id) + "' AND layer.id = '" + esc(layerId) + "'");
+      "graph.id = '" + esc(id) + "' AND layer.id = '" + esc(layerId) + "'"
+      +(maxOrdinal==null?"":" AND ordinal <= " + maxOrdinal));
   }
   /**
-   * Gets the annotations on the given layer of the given transcript.
+   * Gets the annotations on the given layer of the given transcript, but only those with
+   * an ordinal less than or equal to the given maximum..
    * @param id The ID of the transcript.
    * @param layerId The ID of the layer.
+   * @param maxOrdinal The maximum ordinal for the returned annotations.
+   * e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+   * parent is returned. If <var>maxOrdinal</var> is null, then all annotations are
+   * returned, regardless of their ordinal.
    * @param pageLength The maximum number of IDs to return, or null to return all.
    * @param pageNumber The page number to return, or null to return the first page.
    * @return A (possibly empty) array of annotations.
@@ -2506,11 +2517,11 @@ public class SqlGraphStore implements GraphStore {
    * @throws GraphNotFoundException If the transcript was not found in the store.
    */
   public Annotation[] getAnnotations(
-    String id, String layerId, Integer pageLength, Integer pageNumber)
+    String id, String layerId, Integer maxOrdinal, Integer pageLength, Integer pageNumber)
     throws StoreException, PermissionException, GraphNotFoundException {
     return getMatchingAnnotations(
-      "graph.id = '" + esc(id) + "' AND layer.id = '" + esc(layerId) + "'",
-      pageLength, pageNumber);
+      "graph.id = '" + esc(id) + "' AND layer.id = '" + esc(layerId) + "'"
+      +(maxOrdinal==null?"":" AND ordinal <= " + maxOrdinal), pageLength, pageNumber);
   }
    
   /**
