@@ -127,7 +127,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
    @Test public void idMatch() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "label MATCHES \"Ada.+\"", "speaker_number, name", null, "ORDER BY speaker.name");
+         "label MATCHES \"Ada.+\"", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("SQL - label",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE speaker.name REGEXP 'Ada.+' ORDER BY speaker.name",
@@ -135,7 +135,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
       assertEquals("Parameter count - label", 0, q.parameters.size());
 
       q = transformer.sqlFor(
-         "id NOT MATCHES \"Ada.+\"", "speaker_number, name", null, "ORDER BY speaker.name");
+         "id NOT MATCHES \"Ada.+\"", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("SQL - id",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE speaker.name NOT REGEXP 'Ada.+' ORDER BY speaker.name",
@@ -146,14 +146,14 @@ public class TestParticipantAgqlToSqlLegacyStyle {
    @Test public void emptyExpression() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "", "speaker_number, name", null, "ORDER BY speaker.name");
+         "", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("SQL - no userWhere",
                    "SELECT speaker_number, name FROM speaker ORDER BY speaker.name",
                    q.sql);
       assertEquals("Parameter count - no userWhere", 0, q.parameters.size());
 
       q = transformer.sqlFor(
-         "", "speaker_number, name", "speaker.annotated_by = 'user'", "ORDER BY speaker.name");
+        "", "speaker_number, name", "speaker.annotated_by = 'user'", false, "ORDER BY speaker.name");
       assertEquals("SQL - id",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE speaker.annotated_by = 'user' ORDER BY speaker.name",
@@ -164,7 +164,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
    @Test public void corpusLabel() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "my(\"corpus\").label = \"CC\"", "speaker_number, name", null, "ORDER BY speaker.name");
+         "my(\"corpus\").label = \"CC\"", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT corpus.corpus_name"
@@ -181,7 +181,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
          "my(\"corpus\").label IN (\"CC\", 'IA', 'MU', \"graph\", 'who')",
-         "speaker_number, name", null, "ORDER BY speaker.name");
+         "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT corpus.corpus_name"
@@ -197,7 +197,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
    @Test public void corpusLabels() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "'CC' IN labels('corpus')", "speaker_number, name", null, "ORDER BY speaker.name");
+         "'CC' IN labels('corpus')", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE 'CC' IN (SELECT corpus.corpus_name"
@@ -212,7 +212,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
    @Test public void listLength() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "list('transcript_rating').length > 2", "speaker_number, name", null, "ORDER BY speaker.name");
+         "list('transcript_rating').length > 2", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("Transcript attribute - list - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT COUNT(*)"
@@ -227,7 +227,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
       assertEquals("Parameter count", 0, q.parameters.size());
 
       q = transformer.sqlFor(
-         "list('participant_gender').length = 0", "speaker_number, name", null, "ORDER BY speaker.name");
+         "list('participant_gender').length = 0", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("Participant attribute - list - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT COUNT(*)"
@@ -240,7 +240,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
       assertEquals("Parameter count", 0, q.parameters.size());
     
       q = transformer.sqlFor(
-         "labels('transcript_rating').length > 2", "speaker_number, name", null, "ORDER BY speaker.name");
+         "labels('transcript_rating').length > 2", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("Transcript attribute - labels - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT COUNT(*)"
@@ -255,7 +255,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
       assertEquals("Parameter count", 0, q.parameters.size());
     
       q = transformer.sqlFor(
-         "labels('participant_gender').length = 0", "speaker_number, name", null, "ORDER BY speaker.name");
+         "labels('participant_gender').length = 0", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("Participant attribute - labels - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT COUNT(*)"
@@ -271,7 +271,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
    @Test public void labels() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "'en' IN labels('transcript_language')", "speaker_number, name", null, "ORDER BY speaker.name");
+         "'en' IN labels('transcript_language')", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("Transcript attribute - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE 'en' IN (SELECT DISTINCT label"
@@ -285,7 +285,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
       assertEquals("Parameter count", 0, q.parameters.size());
 
       q = transformer.sqlFor(
-         "'NA' IN labels('participant_gender')", "speaker_number, name", null, "ORDER BY speaker.name");
+         "'NA' IN labels('participant_gender')", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("Participant attribute - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE 'NA' IN (SELECT DISTINCT label"
@@ -300,7 +300,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
    @Test public void participantAttributeLabel() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "my('participant_gender').label = 'NA'", "speaker_number, name", null, "ORDER BY speaker.name");
+         "my('participant_gender').label = 'NA'", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE (SELECT label"
@@ -316,7 +316,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
    @Test public void annotators() throws AGQLException {
       ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
       ParticipantAgqlToSql.Query q = transformer.sqlFor(
-         "'labbcat' NOT IN annotators('transcript_rating')", "speaker_number, name", null, "ORDER BY speaker.name");
+         "'labbcat' NOT IN annotators('transcript_rating')", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("Transcript Attribute - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE 'labbcat' NOT IN (SELECT annotated_by"
@@ -330,7 +330,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
       assertEquals("Transcript Attribute - Parameter count", 0, q.parameters.size());
 
       q = transformer.sqlFor(
-         "'labbcat' NOT IN annotators('participant_gender')", "speaker_number, name", null, "ORDER BY speaker.name");
+         "'labbcat' NOT IN annotators('participant_gender')", "speaker_number, name", null, false, "ORDER BY speaker.name");
       assertEquals("Participant Attribute - SQL",
                    "SELECT speaker_number, name FROM speaker"
                    +" WHERE 'labbcat' NOT IN (SELECT annotated_by"
@@ -350,7 +350,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
             + " AND list('invalid layer 2').length > 2"
             + " AND my('invalid layer 3').label = 'NA'"
             + " AND 'labbcat' NOT IN annotators('invalid layer 4')",
-            "speaker_number, name", null, "ORDER BY speaker.name");
+            "speaker_number, name", null, false, "ORDER BY speaker.name");
          fail("sqlFor fails: " + q.sql);
       } catch(AGQLException exception) {
          assertEquals("Number of errors: " + exception.getErrors(), 4, exception.getErrors().size());
@@ -383,7 +383,7 @@ public class TestParticipantAgqlToSqlLegacyStyle {
          + " AND user_id = 'label')"
          + " OR NOT EXISTS (SELECT * FROM role_permission)"
          + " OR NOT EXISTS (SELECT * FROM transcript_speaker"
-         + " WHERE transcript_speaker.speaker_number = speaker.speaker_number))",
+         + " WHERE transcript_speaker.speaker_number = speaker.speaker_number))", false,
          "ORDER BY speaker.name");
       assertEquals(
          "SQL - label",
