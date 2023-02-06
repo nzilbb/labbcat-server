@@ -1,6 +1,6 @@
 #universe {
     margin: auto;
-    border: 1px var(--theme-color) solid;
+    border: 1px var(--theme-text-color) solid;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -22,13 +22,13 @@
 }
 #members label {
     flex-grow: 1;
-    color: var(--theme-color);
+    color: var(--theme-text-color);
     position: relative;
     top: -10px;
 }
 #set {
     display: flex;
-    border: 2px var(--theme-color) solid;
+    border: 2px var(--theme-text-color) solid;
     border-radius: 50%;
     flex-grow: 2;
     align-items: center;
@@ -36,7 +36,7 @@
     min-height: 40vh;
 }
 .user {
-    border: 1px var(--theme-color) solid;
+    border: 1px var(--theme-text-color) solid;
     border-radius: 5px;
     width: 100px;
     min-width: max-content;

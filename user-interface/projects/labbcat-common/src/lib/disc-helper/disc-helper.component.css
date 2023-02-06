@@ -10,6 +10,6 @@
 }
 .disc-helper a {
     padding-left: 4px;
-    color: var(--theme-color);
+    color: var(--theme-text-color);
     text-decoration: none;
 }
