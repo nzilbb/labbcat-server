@@ -100,7 +100,7 @@ public class TestStore
       gender = participant.first("participant_gender");
       assertNotNull("attribute saved", gender);
       assertEquals("attribute label correct", "X", gender.getLabel());
-      //TODO assertFalse("no changes saved", l.saveParticipant(participant));
+      assertFalse("no changes saved", l.saveParticipant(participant));
 
       // change their attribute
       gender.setLabel("Y");
