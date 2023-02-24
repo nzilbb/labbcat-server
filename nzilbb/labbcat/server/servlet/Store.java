@@ -30,7 +30,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.SortedSet;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -80,6 +84,25 @@ import org.xml.sax.*;
  <dt><span class="paramLabel">Parameters:</span></dt>
  <dd><code>id</code> - The ID of the transcript.</dd>
  <dd><code>annotationId</code> - The annotation's ID.</dd>
+ </dl>
+ </li>
+ </ul>
+ <a id="saveParticipant(Annotation)">
+ <!--   -->
+ </a>
+ <ul class="blockList">
+ <li class="blockList">
+ <h4>/api/edit/store/saveParticipant</h4>
+ <div class="block">Saves a participant, and all its tags, to the database.
+ <p> If the participant ID does not already exist in the database, a new participant record is created.
+ </div>
+ <dl>
+ <dt><span class="paramLabel">Parameters:</span></dt>
+ <dd><code>id</code> - The ID of the participant.</dd>
+ <dd><code>label</code> - The new ID of the participant, if it's changing.</dd>
+ <dd>A series of parameters whose names are prefixed "participant_", representing the participant attribute values. </dd>
+ <dt><span class="returnLabel">Returns:</span></dt>
+ <dd>A JSON representation of the new participant record, structured as an Annotation.</dd>
  </dl>
  </li>
  </ul>
@@ -231,6 +254,8 @@ public class Store extends StoreQuery {
         json = createAnnotation(request, response, store);
       } else if (pathInfo.endsWith("destroyannotation")) {
         json = destroyAnnotation(request, response, store);
+      } else if (pathInfo.endsWith("saveparticipant")) {
+        json = saveParticipant(request, response, store);
       } else if (pathInfo.endsWith("deletetranscript")
                  // support deprecated name
                  || pathInfo.endsWith("deletegraph")) {
@@ -310,8 +335,143 @@ public class Store extends StoreQuery {
     if (errors.size() > 0) return failureResult(errors);
     store.destroyAnnotation(id, annotationId);
     return successResult(request, null, "Annotation deleted: {0}", id);
-  }      
-  // TODO saveParticipant
+  }
+  
+  /**
+   * Implementation of {@link nzilbb.ag.GraphStore#saveParticipant(Annotation)}
+   * @param request The HTTP request.
+   * @param request The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject saveParticipant(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    Vector<String> errors = new Vector<String>();
+    String id = request.getParameter("id");
+    if (id == null) errors.add(localize(request, "No ID specified."));
+
+    Schema schema = store.getSchema();
+    // identify participant attribute layers
+    Vector<Layer> participantAttributeLayers = new Vector<Layer>();
+    for (Layer child : schema.getLayer(schema.getParticipantLayerId()).getChildren().values()) {
+      if ("speaker".equals(child.get("class_id"))) {
+        if (request.getParameter(child.getId()) != null) {
+          participantAttributeLayers.add(child);
+        } // there is a matching http parameter
+      } // participant attribute
+    } // next child
+
+    Annotation participant = store.getParticipant(
+      id, participantAttributeLayers.stream()
+      .map(l->l.getId())
+      .collect(Collectors.toList())
+      .toArray(new String[0]));
+    if (participant == null) { // create a new one
+      participant = new Annotation()
+        .setLayerId(schema.getParticipantLayerId())
+        .setLabel(id);
+      participant.setId(id);
+      participant.create();
+    } 
+    // ensure changes are tracked for the participant and all children
+    participant.setTracker(new ChangeTracker());
+    for (SortedSet<Annotation> layers : participant.getAnnotations().values()) {
+      for (Annotation child : layers) {
+        child.setTracker(participant.getTracker());
+      } // next child
+    } // next child layer
+    String label = request.getParameter("label");
+    if (label != null) {
+      participant.setLabel(label);
+    }
+    
+    // identify participant attribute layers
+    HashSet<Annotation> toRemove = new HashSet<Annotation>();
+    for (Layer layer : participantAttributeLayers) {
+      if ("readonly".equals(layer.get("type"))) continue; // ignore readonly layers
+      if (!layer.getPeers()) { // single value
+        Annotation annotation = participant.first(layer.getId());
+        if (annotation != null) annotation.setTracker(participant.getTracker());
+        String value = request.getParameter(layer.getId());
+        if (value == null && layer.getType() == Constants.TYPE_BOOLEAN) { // TODO this won't work because value will never be null - only parameters with values are in participantAttributeLayers
+          // no value means false, if it's a checkbox boolean
+          value = "0";
+        }
+        if (layer.get("other") != null) {
+          String otherValue = request.getParameter(layer.getId() + "_other");
+          if (otherValue.length() > 0) {
+            value = otherValue;
+          }
+        }
+        if (value != null) { // value to save
+          if (annotation != null) { // update
+            if (!annotation.getLabel().equals(value)) { // only if it's changing.
+              annotation.setLabel(value);
+            }
+          } else { // insert
+            // can't use createTag, because it requires that the annotation be in a graph
+            Annotation tag = new Annotation(null, value, layer.getId());
+            tag.create(); // don't setTracker, that uses the ID and we don't have one
+            participant.addAnnotation(tag);
+          }
+        }
+      } else { // possibly multiple values
+        HashSet<String> newValues = new HashSet<String>();
+        String[] multipleValues = request.getParameterValues(layer.getId());
+        if (multipleValues != null) { // multiple values
+          for (String value : multipleValues) newValues.add(value);
+        }
+        if (layer.get("other") != null) {
+          String otherValue = request.getParameter(layer.getId() + "_other");
+          if (otherValue.length() > 0) {
+            newValues.add(otherValue);
+          }
+        }
+        HashMap<String,Annotation> currentAnnotations = new HashMap<String,Annotation>();
+        for (Annotation annotation : participant.getAnnotations(layer.getId())) {
+          annotation.setTracker(participant.getTracker());
+          currentAnnotations.put(annotation.getLabel(), annotation);
+        } // next annotation
+        
+        // add values that aren't already present
+        HashSet<String> valuesToAdd = new HashSet<String>(newValues);
+        valuesToAdd.removeAll(currentAnnotations.keySet());
+        for (String l : valuesToAdd) {
+          // can't use createTag, because it requires that the annotation be in a graph
+          Annotation tag = new Annotation(null, l, layer.getId());
+          tag.create(); // don't setTracker, because that uses the ID and we don't have one
+          participant.addAnnotation(tag);
+        } // next value
+	
+        // delete values are aren't specified
+        HashSet<String> valuesToRemove = new HashSet<String>(currentAnnotations.keySet());
+        valuesToRemove.removeAll(newValues);
+        for (String l : valuesToRemove) {
+          currentAnnotations.get(l).destroy();
+          // remove it from our cached model below...
+          toRemove.add(currentAnnotations.get(l));
+        } // next value
+      } // possibly multiple values      
+    } // next layer
+    
+    // save the changes
+    try {
+      if (store.saveParticipant(participant)) {
+        // remove the deleted annotations from our local model before rendering
+        for (Annotation removed : toRemove) {
+          participant.getAnnotations(removed.getLayerId()).remove(removed);
+        }
+        return successResult(request, true, "Participant saved: {0}", id);
+      } else {
+        return successResult(request, false, "No changes to save: {0}", id);
+      }
+    } catch(Exception exception) {
+      errors.add(exception.getMessage());
+    }
+    return failureResult(errors);
+  }
+  
   // TODO saveMedia
   // TODO saveSource
   // TODO saveEpisodeDocument

@@ -1029,11 +1029,6 @@ public class StoreQuery extends LabbcatServlet {
     if (id == null) return failureResult(request, "No ID specified.");
     String[] layerIds = request.getParameterValues("layerIds");
     Annotation participant = store.getParticipant(id, layerIds);
-    if (participant == null)
-    {
-      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-      return failureResult(request, "Participant not found: {0}", id);
-    }
     return successResult(request, participant, null);
   }      
    

@@ -307,19 +307,6 @@ public class StoreAdministration extends Store {
       } else if (pathInfo.endsWith("deleteannotatortask")) {
         json = deleteAnnotatorTask(request, response, store);
       }
-      // TODO
-      // if (pathInfo.endsWith("createannotation"))
-      // {
-      //    json = createAnnotation(request, response, store);
-      // }
-      // else if (pathInfo.endsWith("destroyannotation"))
-      // {
-      //    json = destroyAnnotation(request, response, store);
-      // }
-      // else if (pathInfo.endsWith("deletegraph"))
-      // {
-      //    json = deleteGraph(request, response, store);
-      // }
     } // only if it's a POST request
       
     if (json == null) { // either not POST or not a recognized function

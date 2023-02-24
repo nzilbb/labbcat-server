@@ -1145,6 +1145,8 @@ public class SqlGraphStore implements GraphStore {
   /**
    * Saves a participant, and all its tags, to the database.  The participant is
    * represented by an Annotation that isn't assumed to be part of a graph.
+   * <p> If a participant with the corresponding ID does not exist, a new participant
+   * record is created.
    * @param participant
    * @return true if changes were saved, false if there were no changes to save.
    * @throws StoreException If an error prevents the participant from being saved.
