@@ -32,6 +32,8 @@ export class TranscriptsComponent implements OnInit {
     queryDescription = ""; // Human-readable version of the query
     participantQuery = ""; // AGQL query string for matching participants
     participantDescription = ""; // Human readable description of participant query
+    transcriptQuery = ""; // AGQL query string for pre-matching transcripts
+    transcriptDescription = ""; // Human readable description of transcript query
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0; 
@@ -70,6 +72,14 @@ export class TranscriptsComponent implements OnInit {
                         this.participantDescription = params["participants"];
                     } else {
                         this.participantDescription = "Selected participants";
+                    }
+                }
+                if (params["transcript_expression"]) {
+                    this.transcriptQuery = params["transcript_expression"];
+                    if (params["transcripts"]) {
+                        this.transcriptDescription = params["transcripts"];
+                    } else {
+                        this.transcriptDescription = "Selected transcripts";
                     }
                 }
                 if (params["to"]) {
@@ -165,8 +175,9 @@ export class TranscriptsComponent implements OnInit {
     loadingList = false;
     /** List transcripts that match the filters */
     listTranscripts(): void {
-        this.query = ""; // if any
-        this.queryDescription = "";        
+        this.query = this.transcriptQuery; // if any
+        this.queryDescription = this.transcriptDescription;
+        console.log(`query start ${this.query}`);
         for (let layer of this.filterLayers) {
 
             if (layer.id == this.schema.root.id
@@ -323,6 +334,7 @@ export class TranscriptsComponent implements OnInit {
         } // next filter layer
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
+        console.log(`query end ${this.query}`);
         let queryExpression = this.query;
         if (this.participantQuery) {
             if (queryExpression) queryExpression += " && ";

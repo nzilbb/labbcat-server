@@ -11,6 +11,7 @@ import { MatchesComponent } from './matches/matches.component';
 import { ParticipantsComponent } from './participants/participants.component';
 import { PraatComponent } from './praat/praat.component';
 import { TranscriptsComponent } from './transcripts/transcripts.component';
+import { ParticipantComponent } from './participant/participant.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { TranscriptsComponent } from './transcripts/transcripts.component';
       MatchesComponent,
       ParticipantsComponent,
       PraatComponent,
-      TranscriptsComponent
+      TranscriptsComponent,
+      ParticipantComponent
   ],
   imports: [
       BrowserModule,
@@ -29,6 +31,7 @@ import { TranscriptsComponent } from './transcripts/transcripts.component';
           { path: 'task', component: TaskComponent },
           { path: 'praat', component: PraatComponent },
           { path: 'participants', component: ParticipantsComponent },
+          { path: 'participant', component: ParticipantComponent },
           { path: 'transcripts', component: TranscriptsComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,

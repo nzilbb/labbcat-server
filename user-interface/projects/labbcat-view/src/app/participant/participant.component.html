@@ -1,0 +1,47 @@
+<div id="header" class="attribute-list">
+  <div class="attribute">
+    <label for="label" i18n="Participant ID label">Name</label>
+    <span id="label" class="values"><div class="value">{{participant.label}}</div></span>
+  </div>
+</div>
+<div id="attributes" class="attribute-list tabs">
+  <div class="tab-labels">
+    <label *ngFor="let category of categoryLabels"
+           [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
+           (click)="currentCategory = category">
+      {{category}}
+    </label>
+  </div>
+  <div *ngFor="let category of categoryLabels"
+       [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
+      <div *ngFor="let layer of categoryLayers[category]" class="attribute">
+        <label for="{{layer.id}}" title="{{layer.id}}">{{layer.description}}</label>
+        <span id="{{layer.id}}" class="values">
+          <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
+            <span class="label">{{annotation.label}}</span>
+            <ng-container *ngIf="layer.type == 'boolean'" class="description">
+              <span *ngIf="annotation.label == '1'" class="description">true</span>
+              <span *ngIf="annotation.label == '0'" class="description">false</span>
+            </ng-container>
+            <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label" class="description">
+              <span class="description">{{layer.validLabels[annotation.label]}}</span>
+            </ng-container>
+          </div>
+        </span>
+      </div>
+    </div>
+</div>
+<div class="links">
+  <lib-link
+    [routerLink]="['..','transcripts']"
+    [queryParams]="{transcript_expression:'labels(&quot;participant&quot;).includes(&quot;'+participant.label+'&quot;)', transcripts:'Transcripts including ' + participant.label}"
+    img="document.svg" icon="🗎"
+    i18n-label label="Transcripts"
+    i18n-title title="List transcripts that include this participant"></lib-link>
+  <lib-link
+    href="{{baseUrl}}/allUtterances?id={{participant.label}}"
+    img="all-utterances.svg" icon="“"
+    i18n-label label="All Utterances"
+    i18n-title title="List all utterances by these participants"
+    ></lib-link>
+</div>

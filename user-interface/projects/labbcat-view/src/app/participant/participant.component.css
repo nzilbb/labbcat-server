@@ -1,0 +1,15 @@
+.attribute .value .description {
+    padding-left: 10px;
+}
+.attribute .value .description:before {
+    content: '(';
+}
+.attribute .value .description:after {
+    content: ')';
+}
+
+.links {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}

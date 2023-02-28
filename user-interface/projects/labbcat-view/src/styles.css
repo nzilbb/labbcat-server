@@ -59,7 +59,7 @@
 @keyframes roll-down {
     from {
         opacity: 0;
-        overflow: auto;
+        overflow: hidden;
         max-height: 0px;
     }
     to {
@@ -331,6 +331,64 @@ tbody tr:nth-child(odd) {
 }
 .header {
     font-style: italic;
+}
+
+/* attribute lists */
+
+.attribute-list {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    min-width: 33%;
+    margin: auto;
+}
+.attribute-list .attribute {
+    display: flex;
+    flex-direction: row;
+    padding: 4px;
+}
+.attribute-list .attribute:nth-child(odd) {
+    background: #EEEEEE;
+}
+.attribute-list .attribute label {
+    width: 50%
+}
+.attribute-list .attribute label:after {
+    content: ':';
+}
+.attribute-list .attribute .values {
+    display: flex;
+    flex-direction: column;
+}
+
+/* tabs UX */
+.tab-labels {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: stretch;
+}
+.tab-labels label.tab-label {
+    flex-grow: 1;
+    display: inline-block;
+    padding: 8px;
+    border: 1px var(--theme-text-color) solid;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    text-align: center;
+}
+label.tab-label.active {
+    border-bottom: 1px white solid;
+}
+.tab-body {
+    animation-name: roll-down;
+    animation-duration: 1s;
+}
+.tab-body.inactive {
+    display: none;
+}
+.tab-body.attribute-list {
+    width: 100%;
 }
 
 lib-pagination {
