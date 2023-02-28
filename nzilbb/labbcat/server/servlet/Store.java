@@ -508,8 +508,13 @@ public class Store extends StoreQuery {
     String id = request.getParameter("id");
     if (id == null) errors.add(localize(request, "No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
-    store.deleteParticipant(id);
-    return successResult(request, null, "Participant deleted: {0}", id);
+    try {
+      store.deleteParticipant(id);
+      return successResult(request, null, "Participant deleted: {0}", id);
+    } catch (StoreException exception) {
+      errors.add(exception.getMessage());
+    }
+    return failureResult(errors);
   }      
    
   /**

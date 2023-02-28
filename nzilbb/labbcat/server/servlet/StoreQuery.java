@@ -1028,6 +1028,11 @@ public class StoreQuery extends LabbcatServlet {
     String id = request.getParameter("id");
     if (id == null) return failureResult(request, "No ID specified.");
     String[] layerIds = request.getParameterValues("layerIds");
+    // The httr R package can't handle multiple parameters with the same name,
+    // so we may have received a single newline-delimited string
+    if (layerIds != null && layerIds.length == 1) {
+      layerIds = layerIds[0].split("\n");
+    }
     Annotation participant = store.getParticipant(id, layerIds);
     return successResult(request, participant, null);
   }      

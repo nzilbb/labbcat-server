@@ -202,13 +202,24 @@ public class TestStoreQuery
       assertEquals("getLayer: Correct layer",
                    "orthography", layer.getId());
 
-      String[] attributes = { "participant_gender" };
+      String[] attributes = { "participant_gender", "participant_year_of_birth" };
       Annotation participant = l.getParticipant(participantId, attributes);
       assertEquals("getParticipant: Correct participant",
                    participantId, participant.getLabel()); // not getId()
-      assertTrue("getParticipant: Includes attribute",
+      assertTrue("getParticipant: Includes first attribute",
                  participant.getAnnotations(attributes[0]).size() > 0);
-
+      assertTrue("getParticipant: Includes second attribute",
+                 participant.getAnnotations(attributes[1]).size() > 0);
+      
+      // The httr R package can't handle multiple parameters with the same name,
+      // so ensure a single newline-delimited string also works
+      String[] flattenedAttributes = { String.join("\n", attributes) };
+      participant = l.getParticipant(participantId, flattenedAttributes);
+      assertTrue("getParticipant: Includes first attribute",
+                 participant.getAnnotations(attributes[0]).size() > 0);
+      assertTrue("getParticipant: Includes second attribute",
+                 participant.getAnnotations(attributes[1]).size() > 0);
+      
       count = l.countMatchingAnnotations(
          "layer.id == 'orthography' && label == 'and'");
       assertTrue("countMatchingAnnotations: There are some matches",
