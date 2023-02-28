@@ -339,7 +339,7 @@ tbody tr:nth-child(odd) {
     display: flex;
     flex-direction: column;
     width: fit-content;
-    min-width: 33%;
+    min-width: 50%;
     margin: auto;
 }
 .attribute-list .attribute {

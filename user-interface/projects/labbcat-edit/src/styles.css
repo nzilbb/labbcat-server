@@ -130,6 +130,69 @@ lib-wait {
 
 .list + div.buttons { min-height: 30px; }
 
+/* attribute lists */
+
+.attribute-list {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    min-width: 50%;
+    margin: auto;
+}
+.attribute-list .attribute {
+    display: flex;
+    flex-direction: row;
+    padding: 4px;
+}
+.attribute-list .attribute:nth-child(odd) {
+    background: #EEEEEE;
+}
+.attribute-list .attribute > label, .attribute-list .attribute .values {
+    width: 50%
+}
+.attribute-list .attribute .values > .value > input,
+.attribute-list .attribute .values > .value > textarea,
+.attribute-list .attribute .values > .value > select {
+    width: 95%;
+}
+.attribute-list > .attribute > label:after {
+    content: ':';
+}
+.attribute-list .attribute .values {
+    display: flex;
+    flex-direction: column;
+}
+
+/* tabs UX */
+.tab-labels {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: stretch;
+}
+.tab-labels label.tab-label {
+    flex-grow: 1;
+    display: inline-block;
+    padding: 8px;
+    border: 1px var(--theme-text-color) solid;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    text-align: center;
+}
+label.tab-label.active {
+    border-bottom: 1px white solid;
+}
+.tab-body {
+    animation-name: roll-down;
+    animation-duration: 1s;
+}
+.tab-body.inactive {
+    display: none;
+}
+.tab-body.attribute-list {
+    width: 100%;
+}
+
 .buttons a {
     display: inline-block;
     color: var(--theme-text-color);

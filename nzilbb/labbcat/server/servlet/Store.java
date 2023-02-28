@@ -394,10 +394,6 @@ public class Store extends StoreQuery {
         Annotation annotation = participant.first(layer.getId());
         if (annotation != null) annotation.setTracker(participant.getTracker());
         String value = request.getParameter(layer.getId());
-        if (value == null && layer.getType() == Constants.TYPE_BOOLEAN) { // TODO this won't work because value will never be null - only parameters with values are in participantAttributeLayers
-          // no value means false, if it's a checkbox boolean
-          value = "0";
-        }
         if (layer.get("other") != null) {
           String otherValue = request.getParameter(layer.getId() + "_other");
           if (otherValue.length() > 0) {
@@ -420,7 +416,12 @@ public class Store extends StoreQuery {
         HashSet<String> newValues = new HashSet<String>();
         String[] multipleValues = request.getParameterValues(layer.getId());
         if (multipleValues != null) { // multiple values
-          for (String value : multipleValues) newValues.add(value);
+          for (String value : multipleValues) {
+            if (value.length() > 0 // if the value is not blank
+                || layer.getValidLabels().containsKey("")) { // (unless blank is explicitly valid)
+                newValues.add(value);
+              }
+          }
         }
         if (layer.get("other") != null) {
           String otherValue = request.getParameter(layer.getId() + "_other");

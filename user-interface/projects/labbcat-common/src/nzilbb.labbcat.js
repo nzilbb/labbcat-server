@@ -144,12 +144,6 @@
             if (response.model != null) {
                 if (response.model.result) {
                     result = response.model.result;
-                    if (evt.target.call == "newTranscript"
-                        || evt.target.call == "updateTranscript") {
-                        // for these calls, the result is an object with one key, whose
-                        // value is the threadId - so just return that
-                        result = result[evt.target.id];
-                    }
                 }
 	        if (!result && result != 0) result = response.model;
             }
@@ -581,14 +575,23 @@
         /**
          * Gets the number of annotations on the given layer of the given transcript.
          * @param {string} id The ID of the transcript.
-         * @param {layerId} The ID of the layer.
+         * @param {string} layerId The ID of the layer.
+         * @param {int} [maxOrdinal] The maximum ordinal for the counted annotations.
+         * e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+         * parent is counted. If <var>maxOrdinal</var> is null, then all annotations are
+         * counted, regardless of their ordinal.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: A (possibly empty) array of annotations.
          */
-        countAnnotations(id, layerId, onResult) {
+        countAnnotations(id, layerId, maxOrdinal, onResult) {
+            if (typeof maxOrdinal === "function") { // (id, layerId, onResult)
+                onResult = maxOrdinal;
+                maxOrdinal = null;
+            }
 	    this.createRequest("countAnnotations", {
                 id : id,
-                layerId : layerId
+                layerId : layerId,
+                maxOrdinal : maxOrdinal
             }, onResult).send();
         }
         
@@ -596,21 +599,36 @@
          * Gets the annotations on the given layer of the given transcript.
          * @param {string} id The ID of the transcript.
          * @param {string} layerId The ID of the layer.
+         * @param {int} [maxOrdinal] The maximum ordinal for the returned annotations.
+         * e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+         * parent is returned. If <var>maxOrdinal</var> is null, then all annotations are
+         * returned, regardless of their ordinal.
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
          * @param {int} [pageNumber] The zero-based page number to return, or null to return 
          * the first page. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: A (possibly empty) array of annotations.
          */
-        getAnnotations(id, layerId, pageLength, pageNumber, onResult) {
-            if (typeof pageLength === "function") { // (id, layerId, onResult)
+        getAnnotations(id, layerId, maxOrdinal, pageLength, pageNumber, onResult) {
+            if (typeof maxOrdinal === "function") { // (id, layerId, onResult)
+                onResult = maxOrdinal;
+                maxOrdinal = null;
+                pageLength = null;
+                pageNumber = null;
+            } else if (typeof pageLength === "function") { // (id, layerId, maxOrdinal, onResult)
                 onResult = pageLength;
                 pageLength = null;
                 pageNumber = null;
+            } else if (typeof pageNumber === "function") { // (id, layerId, pageLength, pageNumber, onResult)
+                onResult = pageNumber;
+                pageNumber = pageLength;
+                pageLength = maxOrdinal;
+                maxOrdinal = null;
             }
 	    this.createRequest("getAnnotations", {
                 id : id,
                 layerId : layerId,
+                maxOrdinal : maxOrdinal,
                 pageLength : pageLength,
                 pageNumber : pageNumber
             }, onResult).send();
@@ -2399,6 +2417,28 @@
         }
 
         /**
+         * Saves a participant, and all its tags, to the graph store.
+         * To change the ID of an existing participant, pass the old/current ID as the
+         * <var>id</var>, and pass the new ID as the <var>label</var>.
+         * If the participant ID does not already exist in the database, a new participant record
+         * is created. 
+         * @param {string} id The participant ID - either the unique internal database ID,
+         * or their name. 
+         * @param {string} label The new ID (name) for the participant
+         * @param {object} attributes Participant attribute values - the names are the
+         * participant attribute layer IDs, and the values are the corresponding new
+         * attribute values.  
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        saveParticipant(id, label, attributes, onResult) {
+            attributes["id"] = id;
+            attributes["label"] = label;
+	    this.createRequest(
+                "saveParticipant", null, onResult, null, "POST",
+                this.storeEditUrl, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString(attributes));
+        }
+        /**
          * Deletes the given participan, and all assciated meta-data, from the graph store.
          * @param {string} id The participant ID
          * @param {resultCallback} onResult Invoked when the request has completed.
@@ -2570,9 +2610,7 @@
                                     errors = ["" +exception+ ": " + labbcat.responseText];
                                     messages = [];
 			        }
-                                // for this call, the result is an object with one key, whose
-                                // value is the threadId - so just return that
-			        onResult(result[transcriptName], errors, messages, "newTranscript",
+			        onResult(result, errors, messages, "newTranscript",
                                          transcriptName);
 		            });
 		        } else {
@@ -2589,18 +2627,28 @@
          * Uploads a new version of an existing transcript.
          * @param {file|string} transcript The transcript to upload. In a browser, this
          * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {boolean} suppressGeneration (optional) false (the default) to run
+         * automatic layer generation, true to suppress automatic layer generation.
          * @param {resultCallback} onResult Invoked when the request has returned a result, 
          * which is the task ID of the resulting annotation generation task. The 
          * task status can be updated using {@link LabbcatView#taskStatus}
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
-        updateTranscript(transcript, onResult, onProgress) {
-            if (exports.verbose) console.log("updateTranscript(" + transcript + ")");
+        updateTranscript(transcript, suppressGeneration, onResult, onProgress) {
+            if (typeof suppressGeneration === "function") {
+                onProgress = onResult;
+                onResult = suppressGeneration;
+                suppressGeneration = false
+            }
+            if (exports.verbose) {
+                console.log("updateTranscript(" + transcript + ","+suppressGeneration+")");
+            }
             
             // create form
             var fd = new FormData();
             fd.append("todo", "update");
             fd.append("auto", "true");
+            if (suppressGeneration) fd.append("suppressGeneration", "true");
             
             if (!runningOnNode) {	
                 
@@ -2672,7 +2720,7 @@
 		            }
                             // for this call, the result is an object with one key, whose
                             // value is the threadId - so just return that
-			    onResult(result[transcriptName], errors, messages, "updateTranscript",
+			    onResult(result, errors, messages, "updateTranscript",
                                      transcriptName);
                         });
 	            } else {

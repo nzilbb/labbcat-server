@@ -6,4 +6,6 @@ export interface Annotation {
     endId: string;
     ordinal: number;
     annotations: object;
+    
+    _changed: boolean;
 }

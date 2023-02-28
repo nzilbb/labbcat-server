@@ -8,18 +8,22 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { LabbcatCommonModule, PendingChangesGuard } from 'labbcat-common';
 import { MissingAnnotationsComponent } from './missing-annotations/missing-annotations.component';
+import { ParticipantComponent } from './participant/participant.component';
 
 @NgModule({
     declarations: [
         AppComponent,
-        MissingAnnotationsComponent
+        MissingAnnotationsComponent,
+        ParticipantComponent
     ],
     imports: [
         BrowserModule,
         HttpClientModule,
         RouterModule.forRoot([
             { path: 'edit/missingAnnotations', component: MissingAnnotationsComponent,
-              canDeactivate: [PendingChangesGuard] }
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'edit/participant', component: ParticipantComponent,
+              canDeactivate: [PendingChangesGuard]}
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)
