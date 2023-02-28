@@ -19,7 +19,6 @@ export class ParticipantComponent implements OnInit {
     categoryLabels: string[];
     currentCategory: string;
     participant: Annotation;
-    transcriptIds: string[];
     
     constructor(
         private labbcatService: LabbcatService,
@@ -34,7 +33,6 @@ export class ParticipantComponent implements OnInit {
             this.route.queryParams.subscribe((params) => {
                 this.id = params["id"]
                 this.readParticipant();
-                this.readTranscripts();
             });
         });
     }
@@ -84,13 +82,4 @@ export class ParticipantComponent implements OnInit {
             });       
     }
 
-    readTranscripts(): void {
-        this.labbcatService.labbcat.getTranscriptIdsWithParticipant(
-            this.id, (transcriptIds, errors, messages) => {
-                if (errors) errors.forEach(m => this.messageService.error(m));
-                if (messages) messages.forEach(m => this.messageService.info(m));
-                this.transcriptIds = transcriptIds;
-            });       
-    }
-    
 }
