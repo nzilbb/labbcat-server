@@ -20,7 +20,7 @@
   </div>
   <div *ngFor="let category of categoryLabels"
        [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
-      <div *ngFor="let layer of categoryLayers[category]" class="attribute" title="{{layer.id}}">
+      <div *ngFor="let layer of categoryLayers[category]" class="attribute" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">
         <label for="{{layer.id}}">{{layer.description}}</label>
         <span id="values-{{layer.id}}" class="values">
           
@@ -187,21 +187,6 @@
   </div>
 </div>
 
-<div *ngIf="participant" class="links">
-  <lib-link
-    [routerLink]="['..','transcripts']"
-    [queryParams]="{transcript_expression:'labels(&quot;participant&quot;).includes(&quot;'+participant.label+'&quot;)', transcripts:'Transcripts including ' + participant.label}"
-    img="document.svg" icon="🗎"
-    i18n-label label="Transcripts"
-    i18n-title title="List transcripts that include this participant"></lib-link>
-  <lib-link
-    href="{{baseUrl}}/allUtterances?id={{participant.label}}"
-    img="all-utterances.svg" icon="“"
-    i18n-label label="All Utterances"
-    i18n-title title="List all utterances by these participants"
-    ></lib-link>
-</div>
-
 <fieldset *ngIf="participant" class="password"><legend i18n>Pass Phrase</legend>
   <div *ngIf="passwordForm" id="password-form">
     <input type="text" id="password" required
@@ -217,3 +202,18 @@
     img="key.svg" icon="🔑"
     ></lib-button>
 </fieldset>
+
+<div *ngIf="participant" class="links">
+  <lib-link
+    [routerLink]="['..','transcripts']"
+    [queryParams]="{transcript_expression:'labels(&quot;participant&quot;).includes(&quot;'+participant.label+'&quot;)', transcripts:'Transcripts including ' + participant.label}"
+    img="document.svg" icon="🗎"
+    i18n-label label="Transcripts"
+    i18n-title title="List transcripts that include this participant"></lib-link>
+  <lib-link
+    href="{{baseUrl}}/allUtterances?id={{participant.label}}"
+    img="all-utterances.svg" icon="“"
+    i18n-label label="All Utterances"
+    i18n-title title="List all utterances by these participants"
+    ></lib-link>
+</div>
