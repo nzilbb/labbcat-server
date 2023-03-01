@@ -239,6 +239,10 @@ progress, div.progress_container, div.progress {
     vertical-align: middle;
 }
 
+/* Styles to undo legacy stylesheet stuff - TODO remove this when no longer necessary */
+span.label:after {
+    content: '';
+}
 
 
 
@@ -339,7 +343,7 @@ tbody tr:nth-child(odd) {
     display: flex;
     flex-direction: column;
     width: fit-content;
-    min-width: 50%;
+    min-width: 50vw;
     margin: auto;
 }
 .attribute-list .attribute {

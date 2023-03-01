@@ -85,7 +85,7 @@
               value="{{id}}"
               [checked]="selectedIds.includes(id)"
               (checkedChange)="selectedIds.includes(id)?selectedIds.splice(selectedIds.indexOf(id),1):selectedIds.push(id)"></lib-grouped-checkbox>
-            <a href="participant?id={{id | urlEncode}}" title="{{id}}">{{id}}</a>
+            <a href="{{(user && user.roles.includes('edit'))?'edit/':''}}participant?id={{id | urlEncode}}" title="{{id}}">{{id}}</a>
           </span>
           <span class="attribute" *ngIf="layer.id != schema.participantLayerId && attributeValues[id].annotations">
 

@@ -27,6 +27,9 @@ span.number {
 #password-form input {
     width: 100%;
 }
+.links lib-link {
+    padding: 10px;
+}
 
 /* Thanks: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */
 .grow-wrap {

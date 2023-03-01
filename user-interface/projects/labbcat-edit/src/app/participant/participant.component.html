@@ -187,6 +187,20 @@
   </div>
 </div>
 
+<div *ngIf="participant" class="links">
+  <lib-link
+    href="{{baseUrl}}transcripts?transcript_expression=labels(&quot;participant&quot;).includes(&quot;{{participant.label}}&quot;)&transcripts=Transcripts including {{participant.label}}"
+    img="document.svg" icon="🗎"
+    i18n-label label="Transcripts"
+    i18n-title title="List transcripts that include this participant"></lib-link>
+  <lib-link
+    href="{{baseUrl}}allUtterances?id={{participant.label}}"
+    img="all-utterances.svg" icon="“"
+    i18n-label label="All Utterances"
+    i18n-title title="List all utterances by these participants"
+    ></lib-link>
+</div>
+
 <fieldset *ngIf="participant" class="password"><legend i18n>Pass Phrase</legend>
   <div *ngIf="passwordForm" id="password-form">
     <input type="text" id="password" required
@@ -202,17 +216,3 @@
     img="key.svg" icon="🔑"
     ></lib-button>
 </fieldset>
-
-<div *ngIf="participant" class="links">
-  <lib-link
-    href="{{baseUrl}}/transcripts?transcript_expression=labels(&quot;participant&quot;).includes(&quot;{{participant.label}}&quot;)&transcripts=Transcripts including {{participant.label}}"
-    img="document.svg" icon="🗎"
-    i18n-label label="Transcripts"
-    i18n-title title="List transcripts that include this participant"></lib-link>
-  <lib-link
-    href="{{baseUrl}}/allUtterances?id={{participant.label}}"
-    img="all-utterances.svg" icon="“"
-    i18n-label label="All Utterances"
-    i18n-title title="List all utterances by these participants"
-    ></lib-link>
-</div>

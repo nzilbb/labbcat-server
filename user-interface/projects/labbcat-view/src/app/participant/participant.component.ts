@@ -1,9 +1,13 @@
+import { Injectable, Inject, LOCALE_ID } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Annotation, Response, Layer, User } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
+@Injectable({
+  providedIn: 'root'
+})
 @Component({
   selector: 'app-participant',
   templateUrl: './participant.component.html',
@@ -12,6 +16,7 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 export class ParticipantComponent implements OnInit {
     
     baseUrl: string;
+    user: User;
     schema: any;
     id: string;
     attributes: string[];
@@ -21,6 +26,7 @@ export class ParticipantComponent implements OnInit {
     participant: Annotation;
     
     constructor(
+        @Inject('environment') private environment,
         private labbcatService: LabbcatService,
         private messageService: MessageService,
         private route: ActivatedRoute,
@@ -29,14 +35,31 @@ export class ParticipantComponent implements OnInit {
     
     ngOnInit(): void {
         this.readBaseUrl();
-        this.readSchema().then(()=> {
-            this.route.queryParams.subscribe((params) => {
-                this.id = params["id"]
-                this.readParticipant();
+        this.readUserInfo().then(()=> {
+            this.readSchema().then(()=> {
+                this.route.queryParams.subscribe((params) => {
+                    this.id = params["id"];
+                    if (this.user.roles.includes('edit')
+                        && this.environment.production) {
+                        // redirect to the edit page instead
+                        document.location.href = "edit/participant?id="+this.id;
+                    } else {
+                        this.readParticipant();
+                    }
+                });
             });
         });
     }
 
+    readUserInfo(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
+                this.user = user as User;
+                resolve();
+            });
+        });
+    }
+    
     readSchema(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
