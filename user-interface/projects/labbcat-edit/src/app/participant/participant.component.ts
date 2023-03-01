@@ -21,8 +21,9 @@ export class ParticipantComponent extends EditComponent implements OnInit {
     currentCategory: string;
     participant: Annotation;
     updating = false;
-    multiValueAttributes: object; //layerId->(value->ticked)
-    otherValues: object; //layerId->value
+    multiValueAttributes: object; // layerId->(value->ticked)
+    otherValues: object; // layerId->value
+    textAreas: string[]; // track textareas for auto-resize
     
     constructor(
         labbcatService: LabbcatService,
@@ -48,6 +49,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
             this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
                 this.schema = schema;
                 this.attributes = [];
+                this.textAreas = [];
                 this.categoryLayers = {};
                 this.categoryLabels = [];
                 this.multiValueAttributes = {};
@@ -78,6 +80,9 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                             } // next valid label
                         } // multi-value attribute
                         this.otherValues[layer.id] = "";
+                        if (layer.type == 'string' && layer.subtype == 'text') {
+                            this.textAreas.push(layer.id); // track textareas for auto-resize
+                        }
                     }
                 }
                 resolve();
@@ -126,6 +131,11 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                 } // next layer/attribute
                 this.changed = false;
                 this.participant = participant;
+
+                // resize textareas after the view has had a chance to render
+                setTimeout(()=>{
+                    for (let layerId of this.textAreas) this.resizeTextArea(layerId);
+                }, 200);
             });       
     }
 
@@ -133,8 +143,20 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         if (annotation) {
             annotation._changed = true;
             if (clearOther) this.otherValues[annotation.layerId] = "";
+            this.resizeTextArea(annotation.layerId);
         }
         this.changed = true;
+
+    }
+
+    resizeTextArea(id: string): boolean {
+        // is it a textarea that needs resizing?
+        const element = document.getElementById(id) as any;
+        if (element != null && element.tagName == "TEXTAREA") {
+            element.parentNode.dataset.replicatedValue = element.value;
+            return true;
+        }
+        return false;
     }
 
     updateParticipant(): boolean { // TODO call reportValidity() on all controls

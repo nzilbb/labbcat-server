@@ -110,10 +110,12 @@
                        id="{{layer.id}}"
                        placeholder="{{layer.hint}}"/>
                 
-                <textarea *ngIf="layer.type == 'string' && layer.subtype == 'text'" 
-                          [(ngModel)]="participant.annotations[layer.id][0].label" (input)="onChange(participant.annotations[layer.id][0])"
-                          id="{{layer.id}}"
-                          placeholder="{{layer.hint}}"></textarea>
+                <div *ngIf="layer.type == 'string' && layer.subtype == 'text'" class="grow-wrap">
+                  <textarea [(ngModel)]="participant.annotations[layer.id][0].label"
+                            (input)="onChange(participant.annotations[layer.id][0])"
+                            id="{{layer.id}}"
+                            placeholder="{{layer.hint}}"></textarea>
+                </div>
                 <span *ngIf="layer.type == 'number'" class="number">
                   <label *ngIf="layer.type == 'number' && layer.style.endsWith('slider') && layer.style.split('|').length>1">
                     {{layer.style.split(' ')[2].split('|')[0]}}
