@@ -535,10 +535,13 @@ public class SqlGraphStore implements GraphStore {
       // transcript attributes
       layerLookup.put("transcript_type", getLayer("transcript_type"));
       sql = getConnection().prepareStatement(
-        "SELECT * FROM attribute_definition"
-        +" WHERE class_id = 'transcript'"
+        "SELECT attribute_definition.* FROM attribute_definition"
+        +" LEFT OUTER JOIN attribute_category"
+        +" ON attribute_definition.class_id = attribute_category.class_id"
+        +" AND attribute_definition.category = attribute_category.category"
+        +" WHERE attribute_definition.class_id = 'transcript'"
         +(getUserRoles().contains("edit")?"":" AND access = '1'")
-        +" ORDER BY display_order");
+        +" ORDER BY attribute_category.display_order, attribute_definition.display_order");
       rs = sql.executeQuery();
       try {
         while (rs.next()) {
@@ -552,14 +555,18 @@ public class SqlGraphStore implements GraphStore {
          
       // participant attributes
       sql = getConnection().prepareStatement(
-        "SELECT * FROM attribute_definition"
-        +" WHERE class_id = 'speaker'"
+        "SELECT attribute_definition.* FROM attribute_definition"
+        +" LEFT OUTER JOIN attribute_category"
+        +" ON attribute_definition.class_id = attribute_category.class_id"
+        +" AND attribute_definition.category = attribute_category.category"
+        +" WHERE attribute_definition.class_id = 'speaker'"
         +(getUserRoles().contains("edit")?"":" AND access = '1'")
-        +" ORDER BY display_order");
+        +" ORDER BY attribute_category.display_order, attribute_definition.display_order");
       rs = sql.executeQuery();
       try {
         while (rs.next()) {
           Layer layer = getParticipantAttributeLayer(rs);
+          System.out.println("att " + layer.getCategory() + " - " + layer.getId());
           layerLookup.put(layer.getId(), layer);
         }
       } finally {
