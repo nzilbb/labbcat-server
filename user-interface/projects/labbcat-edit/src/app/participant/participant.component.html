@@ -1,5 +1,5 @@
-<lib-wait *ngIf="!participant"></lib-wait>
-<div id="header" class="attribute-list">
+<lib-wait *ngIf="!loaded"></lib-wait>
+<div *ngIf="participant" id="header" class="attribute-list">
   <div class="attribute">
     <label for="label" i18n="Participant ID label">Name</label>
     <span id="label" class="values"><div class="value">
@@ -10,7 +10,7 @@
     </div></span>
   </div>
 </div>
-<div id="attributes" class="attribute-list tabs">
+<div *ngIf="participant" id="attributes" class="attribute-list tabs">
   <div class="tab-labels">
     <label *ngFor="let category of categoryLabels"
            [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
@@ -177,7 +177,7 @@
       </div>
     </div>
 </div>
-<div id="attributes" class="attribute-list">
+<div *ngIf="participant" id="attributes" class="attribute-list">
   <div class="buttons">
     <lib-button action="save" [processing]="updating"
                 (press)="updateParticipant();"
@@ -186,7 +186,7 @@
   </div>
 </div>
 
-<div class="links">
+<div *ngIf="participant" class="links">
   <lib-link
     [routerLink]="['..','transcripts']"
     [queryParams]="{transcript_expression:'labels(&quot;participant&quot;).includes(&quot;'+participant.label+'&quot;)', transcripts:'Transcripts including ' + participant.label}"

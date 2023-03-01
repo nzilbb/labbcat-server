@@ -24,6 +24,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
     multiValueAttributes: object; // layerId->(value->ticked)
     otherValues: object; // layerId->value
     textAreas: string[]; // track textareas for auto-resize
+    loaded = false;
     
     constructor(
         labbcatService: LabbcatService,
@@ -107,35 +108,40 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         } // next multi-value attribute layer
         this.labbcatService.labbcat.getParticipant(
             this.id, this.attributes, (participant, errors, messages) => {
+                this.loaded = true;
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
-                // TODO ensure categories are in the correct order
-                // ensure all attributes have at lease one annotation
-                for (let layerId of this.attributes) {
-                    if (this.isMultiValue(layerId)) {
-                        if (participant.annotations[layerId]) {
-                            for (let annotation of participant.annotations[layerId]) {
-                                this.multiValueAttributes[layerId][annotation.label] = true;
-                            } // next annotation
+                if (!participant) {
+                    console.error("Invalid participant ID");
+                    this.messageService.error("Invalid participant ID"); // TODO i18n
+                } else { // valid participant
+                    // ensure all attributes have at lease one annotation
+                    for (let layerId of this.attributes) {
+                        if (this.isMultiValue(layerId)) {
+                            if (participant.annotations[layerId]) {
+                                for (let annotation of participant.annotations[layerId]) {
+                                    this.multiValueAttributes[layerId][annotation.label] = true;
+                                } // next annotation
+                            }
+                        } else {
+                            // make sure all single-value attributes have an annotation
+                            if (!participant.annotations[layerId]) {
+                                // create dummary annotation to bind to
+                                participant.annotations[layerId] = [{
+                                    layerId : layerId,
+                                    label: "",
+                                    _changed : true } as Annotation];
+                            }
                         }
-                    } else {
-                        // make sure all single-value attributes have an annotation
-                        if (!participant.annotations[layerId]) {
-                            // create dummary annotation to bind to
-                            participant.annotations[layerId] = [{
-                                layerId : layerId,
-                                label: "",
-                                _changed : true } as Annotation];
-                        }
-                    }
-                } // next layer/attribute
-                this.changed = false;
-                this.participant = participant;
-
-                // resize textareas after the view has had a chance to render
-                setTimeout(()=>{
-                    for (let layerId of this.textAreas) this.resizeTextArea(layerId);
-                }, 200);
+                    } // next layer/attribute
+                    this.changed = false;
+                    this.participant = participant;
+                    
+                    // resize textareas after the view has had a chance to render
+                    setTimeout(()=>{
+                        for (let layerId of this.textAreas) this.resizeTextArea(layerId);
+                    }, 200);
+                } // valid participant
             });       
     }
 
@@ -159,7 +165,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         return false;
     }
 
-    updateParticipant(): boolean { // TODO call reportValidity() on all controls
+    updateParticipant(): boolean {
 
         // validation
         let everythingValid = true;
@@ -175,25 +181,27 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         for (let category of Object.keys(this.categoryLayers)) {
             for (let l of this.categoryLayers[category]) {
                 let validateLayer = false;
-                for (let annotation of this.participant.annotations[l.id]) {
-                    if (annotation._changed) {
-                        const control = document.getElementById(l.id) as any;
-                        if (control && control.checkValidity) {
-                            if (!control.checkValidity()) {
-                                if (this.currentCategory == category) { // current category
-                                    control.reportValidity();
-                                } else { // not current category, so show category first
-                                    this.currentCategory = category;
-                                    // show message after short delay, to give the category time to
-                                    // become visible
-                                    setTimeout(()=>control.reportValidity(), 200);
+                if (this.participant.annotations[l.id]) {
+                    for (let annotation of this.participant.annotations[l.id]) {
+                        if (annotation._changed) {
+                            const control = document.getElementById(l.id) as any;
+                            if (control && control.checkValidity) {
+                                if (!control.checkValidity()) {
+                                    if (this.currentCategory == category) { // current category
+                                        control.reportValidity();
+                                    } else { // not current category, so show category first
+                                        this.currentCategory = category;
+                                        // show message after short delay, to give the category time to
+                                        // become visible
+                                        setTimeout(()=>control.reportValidity(), 200);
+                                    }
+                                    return false;
                                 }
-                                return false;
                             }
+                            break;
                         }
-                        break;
-                    }
-                } // next annotation
+                    } // next annotation
+                } // there are annotations
             } // next attribute
         } // next category
         
