@@ -363,6 +363,13 @@ public class Store extends StoreQuery {
         } // there is a matching http parameter
       } // participant attribute
     } // next child
+    if (request.getParameter(schema.getCorpusLayerId()) != null) {
+      Layer corpusLayer = (Layer)schema.getLayer(schema.getCorpusLayerId()).clone();
+      // the corpus layer has slightly different characteristics in relation to participants
+      corpusLayer.setPeers(true);
+      corpusLayer.setCategory("Corpus");      
+      participantAttributeLayers.add(corpusLayer);
+    }
 
     // the participant password can be updated using a pseudo-layer "_password"
     if (request.getParameter("_password") != null) {

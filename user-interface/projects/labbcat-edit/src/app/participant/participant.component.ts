@@ -57,16 +57,18 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                 this.categoryLabels = [];
                 this.multiValueAttributes = {};
                 this.otherValues = {};
+                let corpusLayer: Layer; // corpus layer - save it for last
                 // participant attributes
                 for (let layerId in schema.layers) {
                     // main_participant this relates participants to transcripts, so ignore that
                     if (layerId == "main_participant") continue;
                     
                     const layer = schema.layers[layerId] as Layer;
-                    if (layer.parentId == schema.participantLayerId
-                        && layer.alignment == 0) {
+                    if ((layer.parentId == schema.participantLayerId
+                        && layer.alignment == 0)) { // participant attribute layer
                         // ensure we can iterate all layer IDs
                         this.attributes.push(layer.id);
+
                         // categorise layers by category
                         if (!this.categoryLayers[layer.category]) {
                             this.categoryLayers[layer.category] = [];
@@ -86,7 +88,22 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                         if (layer.type == 'string' && layer.subtype == 'text') {
                             this.textAreas.push(layer.id); // track textareas for auto-resize
                         }
+                    } else if (layer.id == schema.corpusLayerId) {
+                        corpusLayer = layer;
                     }
+                }
+                if (corpusLayer) { // make this an editable label on its own tab
+                    corpusLayer.category = "Corpora"; // TODO i18n
+                    corpusLayer.peers = true;
+                    corpusLayer.subtype = "string";
+                    this.multiValueAttributes[corpusLayer.id] = {};
+                    for (let label of Object.keys(corpusLayer.validLabels)) {
+                        this.multiValueAttributes[corpusLayer.id][label] = false; // unchecked
+                    } // next valid label
+                    this.attributes.push(corpusLayer.id);
+                    this.categoryLayers[corpusLayer.category] = [];
+                    this.categoryLabels.push(corpusLayer.category);
+                    this.categoryLayers[corpusLayer.category].push(corpusLayer);
                 }
                 resolve();
             });

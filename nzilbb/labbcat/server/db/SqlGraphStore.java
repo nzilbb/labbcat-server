@@ -1215,6 +1215,13 @@ public class SqlGraphStore implements GraphStore {
       PreparedStatement sqlDeleteAllParticipantAttributesOnLayer
         = getConnection().prepareStatement(
           "DELETE FROM annotation_participant WHERE speaker_number = ? AND layer = ?");
+      PreparedStatement sqlInsertParticipantCorpus = getConnection().prepareStatement(
+        "INSERT INTO speaker_corpus (speaker_number, corpus_id)"
+        +" SELECT ?, corpus_id FROM corpus WHERE corpus_name = ?");
+      PreparedStatement sqlDeleteParticipantCorpus = getConnection().prepareStatement(
+        "DELETE speaker_corpus.* FROM speaker_corpus"
+        +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+        +" WHERE speaker_number = ? AND corpus_name = ?");
       try {
         for (String layerId : participant.getAnnotations().keySet()) {
           for (Annotation attribute : participant.getAnnotations().get(layerId)) {
@@ -1224,7 +1231,8 @@ public class SqlGraphStore implements GraphStore {
               saveParticipantAttributeChanges(
                 attribute, sqlInsertParticipantAttribute, sqlUpdateParticipantAttribute,
                 sqlDeleteParticipantAttribute, sqlDeleteAllParticipantAttributesOnLayer,
-                sqlUpdateParticipantPassword);
+                sqlUpdateParticipantPassword, sqlInsertParticipantCorpus,
+                sqlDeleteParticipantCorpus);
             }
           } // next child
         } // next child layer
@@ -1234,6 +1242,8 @@ public class SqlGraphStore implements GraphStore {
         sqlUpdateParticipantPassword.close();
         sqlDeleteParticipantAttribute.close();
         sqlDeleteAllParticipantAttributesOnLayer.close();
+        sqlInsertParticipantCorpus.close();
+        sqlDeleteParticipantCorpus.close();
       }
     } catch(ParseException exception) {
       System.err.println("Error parsing ID for participant: "+participant.getId());
@@ -4980,6 +4990,13 @@ public class SqlGraphStore implements GraphStore {
           "DELETE FROM annotation_participant WHERE speaker_number = ? AND layer = ?");
       PreparedStatement sqlUpdateParticipantPassword = getConnection().prepareStatement(
         "UPDATE speaker SET password = md5(?) WHERE speaker_number = ?");
+      PreparedStatement sqlInsertParticipantCorpus = getConnection().prepareStatement(
+        "INSERT INTO speaker_corpus (speaker_number, corpus_id)"
+        +" SELECT ?, corpus_id FROM corpus WHERE corpus_name = ?");
+      PreparedStatement sqlDeleteParticipantCorpus = getConnection().prepareStatement(
+        "DELETE speaker_corpus.* FROM speaker_corpus"
+        +" INNER JOIN corpus ON speaker_corpus.corpus_id = corpus.corpus_id"
+        +" WHERE speaker_number = ? AND corpus_name = ?");
 
       PreparedStatement sqlAttributeLayers = getConnection().prepareStatement(
         "SELECT attribute FROM attribute_definition WHERE class_id = ?");
@@ -5055,7 +5072,8 @@ public class SqlGraphStore implements GraphStore {
                 sqlUpdateParticipantAttribute, 
                 sqlDeleteParticipantAttribute,
                 sqlDeleteAllParticipantAttributesOnLayer,
-                sqlUpdateParticipantPassword);
+                sqlUpdateParticipantPassword, sqlInsertParticipantCorpus,
+                sqlDeleteParticipantCorpus);
             } else { // temporal annotation
               saveAnnotationChanges(
                 annotation, extraUpdates, 
@@ -5212,6 +5230,8 @@ public class SqlGraphStore implements GraphStore {
         sqlUpdateParticipantAttribute.close();
         sqlDeleteParticipantAttribute.close();
         sqlDeleteAllParticipantAttributesOnLayer.close();
+        sqlInsertParticipantCorpus.close();
+        sqlDeleteParticipantCorpus.close();
       }
     } catch(SQLException exception) {
       System.err.println("saveTranscript: " + exception.toString());
@@ -6728,7 +6748,9 @@ public class SqlGraphStore implements GraphStore {
     PreparedStatement sqlUpdateParticipantAttribute,
     PreparedStatement sqlDeleteParticipantAttribute,
     PreparedStatement sqlDeleteAllParticipantAttributesOnLayer,
-    PreparedStatement sqlUpdateParticipantPassword)
+    PreparedStatement sqlUpdateParticipantPassword,
+    PreparedStatement sqlInsertParticipantCorpus,
+    PreparedStatement sqlDeleteParticipantCorpus)
     throws SQLException, StoreException, PermissionException {
     try {
       if ("_password".equals(annotation.getLayerId())) { // password update
@@ -6737,7 +6759,27 @@ public class SqlGraphStore implements GraphStore {
         sqlUpdateParticipantPassword.setString(1, annotation.getLabel());
         sqlUpdateParticipantPassword.setInt(2, speakerNumber);
         int updated = sqlUpdateParticipantPassword.executeUpdate();
-      } else { // not password update
+      } else if ("corpus".equals(annotation.getLayerId())) { // corpus update
+        switch (annotation.getChange()) {
+          case Create: {
+            Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
+            int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
+            
+            sqlInsertParticipantCorpus.setInt(1, speakerNumber);
+            sqlInsertParticipantCorpus.setString(2, annotation.getLabel());
+            int updated = sqlInsertParticipantCorpus.executeUpdate();
+            break;
+          } case Destroy: {
+              Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
+              int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
+              
+              sqlDeleteParticipantCorpus.setInt(1, speakerNumber);
+              sqlDeleteParticipantCorpus.setString(2, annotation.getLabel());
+              int updated = sqlDeleteParticipantCorpus.executeUpdate();
+              break;
+            } // Destroy
+        } // switch on change type
+      } else { // regular attribute update
         switch (annotation.getChange()) {
           case Create: {
             String attribute = annotation.getLayerId().substring("participant_".length());
