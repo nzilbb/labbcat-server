@@ -205,8 +205,7 @@
 
 <div *ngIf="participant" class="links">
   <lib-link
-    [routerLink]="['..','transcripts']"
-    [queryParams]="{transcript_expression:'labels(&quot;participant&quot;).includes(&quot;'+participant.label+'&quot;)', transcripts:'Transcripts including ' + participant.label}"
+    href="{{baseUrl}}/transcripts?transcript_expression=labels(&quot;participant&quot;).includes(&quot;{{participant.label}}&quot;)&transcripts=Transcripts including {{participant.label}}"
     img="document.svg" icon="🗎"
     i18n-label label="Transcripts"
     i18n-title title="List transcripts that include this participant"></lib-link>
