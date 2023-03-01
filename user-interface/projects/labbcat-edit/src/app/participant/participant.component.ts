@@ -104,6 +104,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
             this.id, this.attributes, (participant, errors, messages) => {
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
+                // TODO ensure categories are in the correct order
                 // ensure all attributes have at lease one annotation
                 for (let layerId of this.attributes) {
                     if (this.isMultiValue(layerId)) {
@@ -129,7 +130,6 @@ export class ParticipantComponent extends EditComponent implements OnInit {
     }
 
     onChange(annotation: Annotation, clearOther?: boolean): void {
-        console.log(`onChange ${annotation}`);
         if (annotation) {
             annotation._changed = true;
             if (clearOther) this.otherValues[annotation.layerId] = "";
@@ -137,7 +137,44 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         this.changed = true;
     }
 
-    updateParticipant(): void {
+    updateParticipant(): boolean { // TODO call reportValidity() on all controls
+
+        // validation
+        let everythingValid = true;
+        if (this.participant._changed) { // check participant ID
+            const control = document.getElementById("participant") as any;
+            if (control && control.checkValidity) {
+                if (!control.checkValidity()) {
+                    control.reportValidity();
+                    return false;
+                }
+            }
+        }
+        for (let category of Object.keys(this.categoryLayers)) {
+            for (let l of this.categoryLayers[category]) {
+                let validateLayer = false;
+                for (let annotation of this.participant.annotations[l.id]) {
+                    if (annotation._changed) {
+                        const control = document.getElementById(l.id) as any;
+                        if (control && control.checkValidity) {
+                            if (!control.checkValidity()) {
+                                if (this.currentCategory == category) { // current category
+                                    control.reportValidity();
+                                } else { // not current category, so show category first
+                                    this.currentCategory = category;
+                                    // show message after short delay, to give the category time to
+                                    // become visible
+                                    setTimeout(()=>control.reportValidity(), 200);
+                                }
+                                return false;
+                            }
+                        }
+                        break;
+                    }
+                } // next annotation
+            } // next attribute
+        } // next category
+        
         this.updating = true;
         // compile single-value and multi-value attribute values
         const attributeValues = {};        
@@ -176,9 +213,12 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
 
-                this.id = this.participant.label; // in case we changed the name/ID
+                if (updated) {
+                    this.id = this.participant.label; // in case we changed the name/ID
+                }
                 this.readParticipant();
             });
+        return true;
     }
     
     definesValidLabels(layer: Layer): boolean {

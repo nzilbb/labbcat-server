@@ -3,7 +3,9 @@
   <div class="attribute">
     <label for="label" i18n="Participant ID label">Name</label>
     <span id="label" class="values"><div class="value">
-        <input type="text" [ngModel]="participant.label"
+        <input type="text" [(ngModel)]="participant.label"
+               (input)="onChange(participant)"
+               id="participant" required
                i18n-placeholder placeholder="Cannot be blank">
     </div></span>
   </div>
