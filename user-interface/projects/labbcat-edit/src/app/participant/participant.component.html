@@ -179,7 +179,8 @@
 </div>
 <div *ngIf="participant" id="attributes" class="attribute-list">
   <div class="buttons">
-    <lib-button action="save" [processing]="updating"
+    <lib-button action="save"
+                [processing]="updating"
                 (press)="updateParticipant();"
                 *ngIf="changed"
                 i18n-title title="Save all pronunciations"></lib-button>
@@ -200,3 +201,19 @@
     i18n-title title="List all utterances by these participants"
     ></lib-link>
 </div>
+
+<fieldset *ngIf="participant" class="password"><legend i18n>Pass Phrase</legend>
+  <div *ngIf="passwordForm" id="password-form">
+    <input type="text" id="password" required
+           [(ngModel)]="password" 
+           (keydown.enter)="setPassword()"
+	   i18n-placeholder placeholder="Enter a new pass phrase for the participant here">
+  </div>
+  <lib-button
+    (press)="setPassword()"
+    [processing]="updating"
+    i18n-label label="Change Pass Phrase"
+    i18n-title title="Set a pass phrase for the participant"
+    img="key.svg" icon="🔑"
+    ></lib-button>
+</fieldset>

@@ -1208,6 +1208,8 @@ public class SqlGraphStore implements GraphStore {
       PreparedStatement sqlUpdateParticipantAttribute
         = getConnection().prepareStatement(
           "UPDATE annotation_participant SET label = ?, annotated_by = ?, annotated_when = ? WHERE layer = ? AND annotation_id = ?");
+      PreparedStatement sqlUpdateParticipantPassword = connection.prepareStatement(
+        "UPDATE speaker SET password = md5(?) WHERE speaker_number = ?");
       PreparedStatement sqlDeleteParticipantAttribute = getConnection().prepareStatement(
         "DELETE FROM annotation_participant WHERE layer = ? AND annotation_id = ?");
       PreparedStatement sqlDeleteAllParticipantAttributesOnLayer
@@ -1219,13 +1221,17 @@ public class SqlGraphStore implements GraphStore {
             if (attribute.getChange() != Change.Operation.NoChange) {
               thereWereChanges = true;
               if (attribute.getParentId() == null) attribute.setParentId(participant.getId());
-              saveParticipantAttributeChanges(attribute, sqlInsertParticipantAttribute, sqlUpdateParticipantAttribute, sqlDeleteParticipantAttribute, sqlDeleteAllParticipantAttributesOnLayer);
+              saveParticipantAttributeChanges(
+                attribute, sqlInsertParticipantAttribute, sqlUpdateParticipantAttribute,
+                sqlDeleteParticipantAttribute, sqlDeleteAllParticipantAttributesOnLayer,
+                sqlUpdateParticipantPassword);
             }
           } // next child
         } // next child layer
       } finally {
         sqlInsertParticipantAttribute.close();
         sqlUpdateParticipantAttribute.close();
+        sqlUpdateParticipantPassword.close();
         sqlDeleteParticipantAttribute.close();
         sqlDeleteAllParticipantAttributesOnLayer.close();
       }
@@ -4972,6 +4978,8 @@ public class SqlGraphStore implements GraphStore {
       PreparedStatement sqlDeleteAllParticipantAttributesOnLayer
         = getConnection().prepareStatement(
           "DELETE FROM annotation_participant WHERE speaker_number = ? AND layer = ?");
+      PreparedStatement sqlUpdateParticipantPassword = getConnection().prepareStatement(
+        "UPDATE speaker SET password = md5(?) WHERE speaker_number = ?");
 
       PreparedStatement sqlAttributeLayers = getConnection().prepareStatement(
         "SELECT attribute FROM attribute_definition WHERE class_id = ?");
@@ -5046,7 +5054,8 @@ public class SqlGraphStore implements GraphStore {
                 sqlInsertParticipantAttribute, 
                 sqlUpdateParticipantAttribute, 
                 sqlDeleteParticipantAttribute,
-                sqlDeleteAllParticipantAttributesOnLayer);
+                sqlDeleteAllParticipantAttributesOnLayer,
+                sqlUpdateParticipantPassword);
             } else { // temporal annotation
               saveAnnotationChanges(
                 annotation, extraUpdates, 
@@ -5190,6 +5199,7 @@ public class SqlGraphStore implements GraphStore {
         sqlUpdateSegmentAnnotationId.close();
         sqlUpdateFreeformAnnotation.close();
         sqlUpdateMetaAnnotation.close();
+        sqlUpdateParticipantPassword.close();
         sqlSelectWordFields.close();
         sqlSelectSegmentFields.close();
         sqlUpdateWordAnnotation.close();
@@ -6717,77 +6727,85 @@ public class SqlGraphStore implements GraphStore {
     Annotation annotation, PreparedStatement sqlInsertParticipantAttribute,
     PreparedStatement sqlUpdateParticipantAttribute,
     PreparedStatement sqlDeleteParticipantAttribute,
-    PreparedStatement sqlDeleteAllParticipantAttributesOnLayer)
+    PreparedStatement sqlDeleteAllParticipantAttributesOnLayer,
+    PreparedStatement sqlUpdateParticipantPassword)
     throws SQLException, StoreException, PermissionException {
     try {
-      switch (annotation.getChange()) {
-        case Create: {
-          String attribute = annotation.getLayerId().substring("participant_".length());
-          Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
-          int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
-
-          Layer layer = annotation.getLayer();
-          if (layer == null) layer = getLayer(annotation.getLayerId());
-          if (!layer.getPeers()) {
-            // the attribute might be new in this graph, but already exist in the database
-            // so delete first and then add
-            sqlDeleteAllParticipantAttributesOnLayer.setInt(1, speakerNumber);
-            sqlDeleteAllParticipantAttributesOnLayer.setString(2, attribute);
-            sqlDeleteAllParticipantAttributesOnLayer.executeUpdate();
-          }
-
-          sqlInsertParticipantAttribute.setInt(1, speakerNumber);
-          sqlInsertParticipantAttribute.setString(2, attribute);
-          sqlInsertParticipantAttribute.setString(3, annotation.getLabel());
-          if (annotation.getAnnotator() != null) {
-            sqlInsertParticipantAttribute.setString(4, annotation.getAnnotator());
-          } else {
-            sqlInsertParticipantAttribute.setString(4, getUser());
-          }
-          // if (annotation.getWhen() != null)
-          // {
-          // 	  sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
-          // }
-          // else
-          {
-            sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
-          }
-          int updated = sqlInsertParticipantAttribute.executeUpdate();
-          break;
-        } case Update: {
-            Object[] o = fmtParticipantAttributeId.parse(annotation.getId());
-            String attribute = o[0].toString();
-            int annotationId = ((Long)o[1]).intValue();
-            sqlUpdateParticipantAttribute.setString(1, annotation.getLabel());	    
+      if ("_password".equals(annotation.getLayerId())) { // password update
+        Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
+        int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
+        sqlUpdateParticipantPassword.setString(1, annotation.getLabel());
+        sqlUpdateParticipantPassword.setInt(2, speakerNumber);
+        int updated = sqlUpdateParticipantPassword.executeUpdate();
+      } else { // not password update
+        switch (annotation.getChange()) {
+          case Create: {
+            String attribute = annotation.getLayerId().substring("participant_".length());
+            Object[] o = fmtMetaAnnotationId.parse(annotation.getParentId());
+            int speakerNumber = Integer.parseInt(o[1].toString().replace(",",""));
+            
+            Layer layer = annotation.getLayer();
+            if (layer == null) layer = getLayer(annotation.getLayerId());
+            if (!layer.getPeers()) {
+              // the attribute might be new in this graph, but already exist in the database
+              // so delete first and then add
+              sqlDeleteAllParticipantAttributesOnLayer.setInt(1, speakerNumber);
+              sqlDeleteAllParticipantAttributesOnLayer.setString(2, attribute);
+              sqlDeleteAllParticipantAttributesOnLayer.executeUpdate();
+            }
+            
+            sqlInsertParticipantAttribute.setInt(1, speakerNumber);
+            sqlInsertParticipantAttribute.setString(2, attribute);
+            sqlInsertParticipantAttribute.setString(3, annotation.getLabel());
             if (annotation.getAnnotator() != null) {
-              sqlUpdateParticipantAttribute.setString(2, annotation.getAnnotator());
+              sqlInsertParticipantAttribute.setString(4, annotation.getAnnotator());
             } else {
-              sqlUpdateParticipantAttribute.setString(2, getUser());
+              sqlInsertParticipantAttribute.setString(4, getUser());
             }
             // if (annotation.getWhen() != null)
             // {
-            // 	  sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(annotation.getWhen().getTime()));
+            // 	  sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(annotation.getWhen().getTime()));
             // }
             // else
             {
-              sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
+              sqlInsertParticipantAttribute.setTimestamp(5, new Timestamp(new java.util.Date().getTime()));
             }
-            sqlUpdateParticipantAttribute.setString(4, attribute);
-            sqlUpdateParticipantAttribute.setInt(5, annotationId);
-            sqlUpdateParticipantAttribute.executeUpdate();
+            int updated = sqlInsertParticipantAttribute.executeUpdate();
             break;
-          } case Destroy: {
+          } case Update: {
               Object[] o = fmtParticipantAttributeId.parse(annotation.getId());
               String attribute = o[0].toString();
               int annotationId = ((Long)o[1]).intValue();
-              sqlDeleteParticipantAttribute.setString(1, attribute);
-              sqlDeleteParticipantAttribute.setInt(2, annotationId);
-              sqlDeleteParticipantAttribute.executeUpdate();
+              sqlUpdateParticipantAttribute.setString(1, annotation.getLabel());	    
+              if (annotation.getAnnotator() != null) {
+                sqlUpdateParticipantAttribute.setString(2, annotation.getAnnotator());
+              } else {
+                sqlUpdateParticipantAttribute.setString(2, getUser());
+              }
+              // if (annotation.getWhen() != null)
+              // {
+              // 	  sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(annotation.getWhen().getTime()));
+              // }
+              // else
+              {
+                sqlUpdateParticipantAttribute.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
+              }
+              sqlUpdateParticipantAttribute.setString(4, attribute);
+              sqlUpdateParticipantAttribute.setInt(5, annotationId);
+              sqlUpdateParticipantAttribute.executeUpdate();
               break;
-            } // Destroy
-      } // switch on change type
-	 
-      annotation.put("@SqlUpdated", Boolean.TRUE); // flag the anchor as having been updated
+            } case Destroy: {
+                Object[] o = fmtParticipantAttributeId.parse(annotation.getId());
+                String attribute = o[0].toString();
+                int annotationId = ((Long)o[1]).intValue();
+                sqlDeleteParticipantAttribute.setString(1, attribute);
+                sqlDeleteParticipantAttribute.setInt(2, annotationId);
+                sqlDeleteParticipantAttribute.executeUpdate();
+                break;
+              } // Destroy
+        } // switch on change type
+      } // not password update
+      annotation.put("@SqlUpdated", Boolean.TRUE); // flag the annotation as having been updated
     } catch(ParseException exception) {
       System.err.println("Error parsing ID for transcript attribute: "+annotation.getId());
       throw new StoreException(

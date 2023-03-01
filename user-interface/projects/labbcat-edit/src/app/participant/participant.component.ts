@@ -25,6 +25,8 @@ export class ParticipantComponent extends EditComponent implements OnInit {
     otherValues: object; // layerId->value
     textAreas: string[]; // track textareas for auto-resize
     loaded = false;
+    passwordForm = false;
+    password = "";
     
     constructor(
         labbcatService: LabbcatService,
@@ -282,5 +284,33 @@ export class ParticipantComponent extends EditComponent implements OnInit {
 
     otherValueAllowed(layer: Layer): boolean {
         return /other/.test(layer.style);
+    }
+
+    setPassword(): void {
+        if (!this.passwordForm) {
+            this.passwordForm = true;
+            setTimeout(()=>{
+                const control = document.getElementById("password") as any;
+                control.focus();
+            }, 200);
+        } else {
+            // validate
+            const control = document.getElementById("password") as any;
+            if (control.reportValidity()) {
+                this.updating = true;
+                this.labbcatService.labbcat.saveParticipant(
+                    this.id, null, { _password: this.password}, (updated, errors, messages) => {
+                        this.updating = false;
+                        if (errors) errors.forEach(m => this.messageService.error(m));
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+
+                        if (updated) {
+                            // reset form
+                            this.password = "";
+                            this.passwordForm = false;
+                        }
+                    });
+            }
+        }
     }
 }

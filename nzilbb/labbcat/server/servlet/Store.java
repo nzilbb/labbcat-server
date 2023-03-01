@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -100,7 +100,9 @@ import org.xml.sax.*;
  <dt><span class="paramLabel">Parameters:</span></dt>
  <dd><code>id</code> - The ID of the participant.</dd>
  <dd><code>label</code> - The new ID of the participant, if it's changing.</dd>
- <dd>A series of parameters whose names are prefixed "participant_", representing the participant attribute values. </dd>
+ <dd>A series of parameters whose names are prefixed "participant_", representing the participant attribute values. <br>
+ <dd><code>_password</code> - An optional parameter for specifying a new pass phrase for the participant.</dd>
+ </dd>
  <dt><span class="returnLabel">Returns:</span></dt>
  <dd>A JSON representation of the new participant record, structured as an Annotation.</dd>
  </dl>
@@ -362,6 +364,11 @@ public class Store extends StoreQuery {
       } // participant attribute
     } // next child
 
+    // the participant password can be updated using a pseudo-layer "_password"
+    if (request.getParameter("_password") != null) {
+      participantAttributeLayers.add(new Layer("_password", "Password"));
+    }
+    
     Annotation participant = store.getParticipant(
       id, participantAttributeLayers.stream()
       .map(l->l.getId())

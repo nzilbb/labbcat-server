@@ -18,6 +18,16 @@ span.number {
     flex-direction: row;
 }
 
+.password {
+    animation-name: roll-down;
+    animation-duration: 1s;
+    width: 50%;
+    margin: auto;
+}
+#password-form input {
+    width: 100%;
+}
+
 /* Thanks: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */
 .grow-wrap {
   /* easy way to plop the elements on top of each other and have them both sized based on the tallest one's height */
