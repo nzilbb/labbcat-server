@@ -566,7 +566,6 @@ public class SqlGraphStore implements GraphStore {
       try {
         while (rs.next()) {
           Layer layer = getParticipantAttributeLayer(rs);
-          System.out.println("att " + layer.getCategory() + " - " + layer.getId());
           layerLookup.put(layer.getId(), layer);
         }
       } finally {
