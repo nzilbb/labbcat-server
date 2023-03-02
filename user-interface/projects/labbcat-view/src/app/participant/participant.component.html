@@ -20,12 +20,12 @@
         <span *ngIf="participant.annotations && participant.annotations[layer.id]"
               id="{{layer.id}}" class="values">
           <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
-            <span class="label">{{annotation.label}}</span>
-            <ng-container *ngIf="layer.type == 'boolean'" class="description">
+            <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
+            <ng-container *ngIf="layer.type == 'boolean'">
               <span *ngIf="annotation.label == '1'" class="description">true</span>
               <span *ngIf="annotation.label == '0'" class="description">false</span>
             </ng-container>
-            <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label" class="description">
+            <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label">
               <span class="description">{{layer.validLabels[annotation.label]}}</span>
             </ng-container>
           </div>

@@ -26,7 +26,10 @@
           
           <ng-container *ngIf="layer.subtype == 'readonly'">
             <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
-              <span class="label">{{annotation.label}}</span>
+              <span class="label"
+                    title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">
+                {{annotation.label}}
+              </span>
               <ng-container *ngIf="layer.type == 'boolean'" class="description">
                 <span *ngIf="annotation.label == '1'" class="description">true</span>
                 <span *ngIf="annotation.label == '0'" class="description">false</span>
@@ -38,7 +41,8 @@
           </ng-container><!-- readonly -->
           <ng-container *ngIf="layer.subtype != 'readonly'">
             
-            <div *ngIf="!isMultiValue(layer.id)" class="value"><!-- (single value) -->
+            <div *ngIf="!isMultiValue(layer.id)" class="value"
+                 title="{{participant.annotations[layer.id][0].annotator}} {{participant.annotations[layer.id][0].when | date:'medium'}}"><!-- (single value) -->
               
               <ng-container *ngIf="definesValidLabels(layer)">
 
