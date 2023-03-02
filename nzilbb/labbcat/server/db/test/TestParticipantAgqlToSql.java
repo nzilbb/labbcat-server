@@ -316,6 +316,19 @@ public class TestParticipantAgqlToSql {
                  +" ORDER BY speaker.name",
                  q.sql);
     assertEquals("Parameter count", 0, q.parameters.size());
+    
+    q = transformer.sqlFor(
+      "labels('transcript').includes('test.eaf')", "speaker_number, name", null, false, "ORDER BY speaker.name");
+    assertEquals("Participant attribute - SQL",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE 'test.eaf' IN (SELECT DISTINCT transcript_id"
+                 +" FROM transcript_speaker"
+                 +" INNER JOIN transcript ON transcript_speaker.ag_id = transcript.ag_id"
+                 +" WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+                 +")"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
   }
 
   @Test public void labelsWithIncludesAny() throws AGQLException {

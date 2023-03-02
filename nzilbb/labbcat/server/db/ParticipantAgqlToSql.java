@@ -237,6 +237,15 @@ public class ParticipantAgqlToSql {
                   +" WHERE transcript_speaker.speaker_number = speaker.speaker_number"
                   +" ORDER BY transcript_family.name"
                   +")");
+              } else if (layerId.equals("transcript")) { // special case!
+                // we can query transcripts a participant is in by using
+                // labels('transcript')
+                conditions.push(
+                  "(SELECT DISTINCT transcript_id"
+                  +" FROM transcript_speaker"
+                  +" INNER JOIN transcript ON transcript_speaker.ag_id = transcript.ag_id"
+                  +" WHERE transcript_speaker.speaker_number = speaker.speaker_number"
+                  +")");
               } else {
                 errors.add("Can only get labels list for participant or transcript attributes: "
                            + ctx.getText());

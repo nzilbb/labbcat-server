@@ -1,11 +1,11 @@
-<lib-wait *ngIf="!participant"></lib-wait>
-<div *ngIf="participant" id="header" class="attribute-list">
+<lib-wait *ngIf="!transcript"></lib-wait>
+<div *ngIf="transcript" id="header" class="attribute-list">
   <div class="attribute">
-    <label for="label" i18n="Participant ID label">Name</label>
-    <span id="label" class="values"><div class="value">{{participant.label}}</div></span>
+    <label for="label" i18n="Transcript ID label">Name</label>
+    <span id="label" class="values"><div class="value">{{transcript.label}}</div></span>
   </div>
 </div>
-<div *ngIf="participant" id="attributes" class="attribute-list tabs">
+<div *ngIf="transcript" id="attributes" class="attribute-list tabs">
   <div class="tab-labels">
     <label *ngFor="let category of categoryLabels"
            [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
@@ -17,9 +17,9 @@
        [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
         <label for="{{layer.id}}" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">{{layer.description}}</label>
-        <span *ngIf="participant.annotations && participant.annotations[layer.id]"
+        <span *ngIf="transcript[layer.id]"
               id="{{layer.id}}" class="values">
-          <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
+          <div *ngFor="let annotation of transcript[layer.id]" class="value">
             <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
             <ng-container *ngIf="layer.type == 'boolean'">
               <span *ngIf="annotation.label == '1'" class="description">true</span>
@@ -33,17 +33,10 @@
       </div>
     </div>
 </div>
-<div *ngIf="participant" class="links">
+<div *ngIf="transcript" class="links">
   <lib-link
-    [routerLink]="['..','transcripts']"
-    [queryParams]="{transcript_expression:'labels(&quot;participant&quot;).includes(&quot;'+participant.label+'&quot;)', transcripts:'Transcripts including ' + participant.label}"
-    img="document.svg" icon="🗎"
-    i18n-label label="Transcripts"
-    i18n-title title="List transcripts that include this participant"></lib-link>
-  <lib-link
-    href="{{baseUrl}}allUtterances?id={{participant.label}}"
-    img="all-utterances.svg" icon="“"
-    i18n-label label="All Utterances"
-    i18n-title title="List all utterances by these participants"
-    ></lib-link>
+    href="{{baseUrl}}participants?participant_expression=labels(&quot;transcript&quot;).includes(&quot;{{id}}&quot;)&participants=Participants in {{id}}"
+    img="people.svg" icon="👥"
+    i18n-label label="Participants"
+    i18n-title title="List participant that are included in this transcript"></lib-link>
 </div>

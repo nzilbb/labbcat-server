@@ -1,0 +1,20 @@
+.attribute .value .description {
+    padding-left: 10px;
+}
+.attribute .value .description:before {
+    content: '(';
+}
+.attribute .value .description:after {
+    content: ')';
+}
+.attribute .value {
+    max-width: 400px;
+}
+.links {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.links lib-link {
+    padding: 10px;
+}

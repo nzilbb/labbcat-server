@@ -27,6 +27,8 @@ export class ParticipantsComponent implements OnInit {
     filterValues = {};
     query = ""; // AGQL query string for matching participants
     queryDescription = ""; // Human-readable version of the query
+    participantQuery = ""; // AGQL query string for pre-matching participants
+    participantDescription = ""; // Human readable description of participant query
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0;
@@ -53,6 +55,14 @@ export class ParticipantsComponent implements OnInit {
                 }
                 if (params["to"]) {
                     this.nextPage = params["to"];
+                }
+                if (params["participant_expression"]) {
+                    this.participantQuery = params["participant_expression"];
+                    if (params["participants"]) {
+                        this.participantDescription = params["participants"];
+                    } else {
+                        this.participantDescription = "Selected participants";
+                    }
                 }
                 this.listParticipants();
             });
@@ -133,8 +143,8 @@ export class ParticipantsComponent implements OnInit {
     loadingList = false;
     /** List participants that match the filters */
     listParticipants(): void {
-        this.query = "";
-        this.queryDescription = "";        
+        this.query = this.participantQuery; // if any
+        this.queryDescription = this.participantDescription;
         for (let layer of this.filterLayers) {
 
             if (layer.id == this.schema.participantLayerId

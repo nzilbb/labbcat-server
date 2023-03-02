@@ -12,6 +12,7 @@ import { ParticipantsComponent } from './participants/participants.component';
 import { PraatComponent } from './praat/praat.component';
 import { TranscriptsComponent } from './transcripts/transcripts.component';
 import { ParticipantComponent } from './participant/participant.component';
+import { TranscriptAttributesComponent } from './transcript-attributes/transcript-attributes.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { ParticipantComponent } from './participant/participant.component';
       ParticipantsComponent,
       PraatComponent,
       TranscriptsComponent,
-      ParticipantComponent
+      ParticipantComponent,
+      TranscriptAttributesComponent
   ],
   imports: [
       BrowserModule,
@@ -33,6 +35,7 @@ import { ParticipantComponent } from './participant/participant.component';
           { path: 'participants', component: ParticipantsComponent },
           { path: 'participant', component: ParticipantComponent },
           { path: 'transcripts', component: TranscriptsComponent },
+          { path: 'transcript/attributes', component: TranscriptAttributesComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)
