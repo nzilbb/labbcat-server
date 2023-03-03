@@ -63,9 +63,13 @@ export class TranscriptAttributesComponent implements OnInit {
                         && layer.id != schema.participantLayerId
                         && layer.id != schema.episodeLayerId
                         && layer.id != schema.corpusLayerId) {
+
+                        // ensure we can iterate all layer IDs
                         this.attributes.push(layer.id);
+                        
                         // ensure the transcript type layer has a category
                         if (layer.id == "transcript_type") layer.category = "General";
+                        
                         if (!this.categoryLayers[layer.category]) {
                             this.categoryLayers[layer.category] = [];
                             this.categoryLabels.push(layer.category);

@@ -29,6 +29,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +45,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
+import nzilbb.ag.serialize.SerializationDescriptor;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.ag.serialize.SerializationParametersMissingException;
+import nzilbb.ag.serialize.SerializerNotConfiguredException;
+import nzilbb.ag.serialize.json.JSONSerialization;
+import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.Merger;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.db.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
@@ -105,6 +116,22 @@ import org.xml.sax.*;
  </dd>
  <dt><span class="returnLabel">Returns:</span></dt>
  <dd>A JSON representation of the new participant record, structured as an Annotation.</dd>
+ </dl>
+ </li>
+ </ul>
+ <a id="saveTranscript(Graph)">
+ <!--   -->
+ </a>
+ <ul class="blockList">
+ <li class="blockList">
+ <h4>/api/edit/store/saveTranscript</h4>
+ <div class="block">Saved changes to transcript attributes to the database.
+ </div>
+ <dl>
+ <dt><span class="paramLabel">Body:</span></dt>
+ <dd>JSON-encoded representation of the transcript's annotation graph, including only
+ * transcript attribute layers.</dd>
+ </dd>
  </dl>
  </li>
  </ul>
@@ -258,6 +285,8 @@ public class Store extends StoreQuery {
         json = destroyAnnotation(request, response, store);
       } else if (pathInfo.endsWith("saveparticipant")) {
         json = saveParticipant(request, response, store);
+      } else if (pathInfo.endsWith("savetranscript")) {
+        json = saveTranscript(request, response, store);
       } else if (pathInfo.endsWith("deletetranscript")
                  // support deprecated name
                  || pathInfo.endsWith("deletegraph")) {
@@ -279,7 +308,76 @@ public class Store extends StoreQuery {
 
   // GraphStore method handlers
 
-  // TODO saveTranscript
+  /**
+   * Implementation of {@link nzilbb.ag.GraphStore#saveTranscript(Graph)}, which currently
+   * only supports transcript attribute update.
+   * @param request The HTTP request.
+   * @param request The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject saveTranscript(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException,
+    GraphNotFoundException {
+
+    // parse body as JSON to construct incoming graph
+    // serialize with JSON serialization
+    Schema schema = store.getSchema();
+    JSONSerialization s = new JSONSerialization();
+    s.configure(s.configure(new ParameterSet(), schema), schema);
+    try {
+      s.setParameters( // set the default parameters from...
+        s.load( // ... loading the incoming stream
+          Utility.OneNamedStreamArray(
+            new NamedStream().setStream(request.getInputStream()).setMimeType("application/json")),
+          schema));
+      Graph editedGraph = s.deserialize()[0];
+    
+      // list layers, check they're all transcript attribute layers
+      Vector<String> layerIds = new Vector<String>();
+      Vector<String> errors = new Vector<String>();
+      for (Layer layer : editedGraph.getSchema().getLayers().values()) {
+        if (layer.getParent() != null
+            && layer.getParent().equals(editedGraph.getSchema().getRoot())
+            && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
+          layerIds.add(layer.getId());
+        } else if (!layer.equals(editedGraph.getSchema().getRoot())) {
+          errors.add(localize(
+                       request, "Only transcript attributes can be updated: {0}", layer.getId())); 
+        }
+      } // next layer
+      if (errors.size() > 0) return failureResult(errors);
+      
+      // get server version of graph
+      Graph ag = store.getTranscript(editedGraph.getId(), layerIds.toArray(new String[0]));
+      ag.trackChanges();
+      
+      // merge attribute changes
+      Merger merger = new Merger(editedGraph);
+      merger.transform(ag);      
+
+      // save changes to graph store
+      boolean thereWereChanges = store.saveTranscript(ag);
+      if (thereWereChanges) {
+            return successResult(request, true, "Transcript saved: {0}", ag.getId());
+      } else {
+        return successResult(request, false, "No changes to save: {0}", ag.getId());
+      }
+      
+    } catch(TransformationException exception) {
+      throw new StoreException(exception);
+    } catch(SerializerNotConfiguredException exception) { // shouldn't happen
+      throw new StoreException(exception);
+    } catch(SerializationParametersMissingException exception) { // shouldn't happen
+      throw new StoreException(exception);
+    } catch(SerializationException exception) { // shouldn't happen
+      throw new StoreException(exception);
+    } catch(Throwable t) {
+      t.printStackTrace(System.out);
+      throw new StoreException(t);
+    }
+  }
    
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#createAnnotation(String,String,String,String,String,Integer,String)}

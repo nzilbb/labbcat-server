@@ -2366,14 +2366,24 @@
         }
 
         /**
-         * Saves the given transcript. The graph can be partial e.g. include only some of
-         * the layers that the stored version of the transcript contains.
-         * @param graph The transcript to save.
+         * Saves changes to the given transcript annotation graph object, which was
+         * previously returned from {@link #getTranscript}. 
+         * <em>NB</em> this not be confused with the methods that upload a file:
+         * {@link #newTranscript} and {@link #updateTranscript}.
+         * <em>NB</em> Currently only transcript attributes can be updated.
+         * <p> The graph can be partial e.g. include only some of the layers that the
+         * stored version of the transcript contains. 
+         * @param transcript The transcript to save.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: true if changes were saved, false if there
          * were no changes to save.
+         * @see LabbcatView#getTranscript
          */
-        saveGraph(graph, onResult) { // TODO
+        saveTranscript(transcript, onResult) {
+	    this.createRequest(
+                "saveTranscript", null, onResult, null, "POST",
+                this.storeEditUrl, "application/json")
+                .send(JSON.stringify(transcript));
         }
     
         /**
@@ -2427,7 +2437,8 @@
          * @param {string} label The new ID (name) for the participant
          * @param {object} attributes Participant attribute values - the names are the
          * participant attribute layer IDs, and the values are the corresponding new
-         * attribute values.  
+         * attribute values. The pass phrase for participant access can also be set by
+         * specifying a "_password" attribute.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         saveParticipant(id, label, attributes, onResult) {
@@ -2625,6 +2636,8 @@
         
         /**
          * Uploads a new version of an existing transcript.
+         * <em>NB</em> this not be confused with the method that saves an annotation graph
+         * object: {@link #saveTranscript}
          * @param {file|string} transcript The transcript to upload. In a browser, this
          * must be a file object, and in Node, it must be the full path to the file. 
          * @param {boolean} suppressGeneration (optional) false (the default) to run

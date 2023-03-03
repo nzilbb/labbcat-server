@@ -1,0 +1,202 @@
+<lib-wait *ngIf="!loaded"></lib-wait>
+<div *ngIf="transcript" id="header" class="attribute-list">
+  <div class="attribute">
+    <label for="label" i18n="Transcript ID">Name</label>
+    <span id="label" class="values">
+      <div class="value">
+        <a href="{{baseUrl}}transcript?id={{id}}"
+           title-i18n title="Open transcript">
+          {{id}}
+        </a>
+      </div>
+    </span>
+  </div>
+</div>
+<div *ngIf="transcript" id="attributes" class="attribute-list tabs">
+  <div class="tab-labels">
+    <label *ngFor="let category of categoryLabels"
+           [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
+           (click)="currentCategory = category">
+      {{category}}
+    </label>
+  </div>
+  <div *ngFor="let category of categoryLabels"
+       [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
+      <div *ngFor="let layer of categoryLayers[category]" class="attribute" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">
+        <label for="{{layer.id}}">{{layer.description}}</label>
+        <span id="values-{{layer.id}}" class="values">
+          
+          <ng-container *ngIf="layer.subtype == 'readonly'">
+            <div *ngFor="let annotation of transcript[layer.id]" class="value">
+              <span class="label"
+                    title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">
+                {{annotation.label}}
+              </span>
+              <ng-container *ngIf="layer.type == 'boolean'" class="description">
+                <span *ngIf="annotation.label == '1'" class="description">true</span>
+                <span *ngIf="annotation.label == '0'" class="description">false</span>
+              </ng-container>
+              <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label" class="description">
+                <span class="description">{{layer.validLabels[annotation.label]}}</span>
+              </ng-container>
+            </div>
+          </ng-container><!-- readonly -->
+          <ng-container *ngIf="layer.subtype != 'readonly'">
+            
+            <div *ngIf="!isMultiValue(layer.id)" class="value"
+                 title="{{transcript[layer.id][0].annotator}} {{transcript[layer.id][0].when | date:'medium'}}"><!-- (single value) -->
+              
+              <ng-container *ngIf="definesValidLabels(layer)">
+
+                <select
+                  [(ngModel)]="transcript[layer.id][0].label"
+                  (input)="onChange(transcript[layer.id][0], true)"
+                  id="{{layer.id}}"
+                  >
+                  <option *ngFor="let option of optionValues(layer, transcript[layer.id])" value="{{option}}">
+                    {{option}}
+                    <ng-container *ngIf="layer.validLabels[option] && layer.validLabels[option] != option">
+                      ({{layer.validLabels[option]}})
+                    </ng-container>
+                  </option>
+                </select>
+                <input *ngIf="otherValueAllowed(layer)" type="text"
+                       [(ngModel)]="otherValues[layer.id]"
+                       (input)="onChange(null)"
+                       id="{{layer.id}}-other" class="other"                       
+                       i18n-title title="Enter a value that's not in the list"
+                       i18n-placeholder placeholder="Other">
+              </ng-container>
+
+              <ng-container *ngIf="!definesValidLabels(layer)">
+                
+                <input *ngIf="layer.type == 'string' && layer.subtype == 'string'"
+                       type="text"
+                       [(ngModel)]="transcript[layer.id][0].label"
+                       (input)="onChange(transcript[layer.id][0])"
+                       id="{{layer.id}}"
+                       placeholder="{{layer.hint}}"/>
+                
+                <input *ngIf="layer.type == 'string' && layer.subtype == 'date'"
+                       type="date"
+                       [(ngModel)]="transcript[layer.id][0].label"
+                       (input)="onChange(transcript[layer.id][0])"
+                       min="{{layer.style.trim()?layer.style.split(' ')[0]+'-01-01':''}}"
+                       max="{{layer.style.trim()?layer.style.split(' ')[1]+'-12-31':''}}"
+                       id="{{layer.id}}"
+                       placeholder="{{layer.hint}}"/>
+                
+                <input *ngIf="layer.type == 'string' && layer.subtype == 'datetime'"
+                       type="datetime-local"
+                       [(ngModel)]="transcript[layer.id][0].label"
+                       (input)="onChange(transcript[layer.id][0])"
+                       min="{{layer.style.trim()?layer.style.split(' ')[0]+'-01-01':''}}"
+                       max="{{layer.style.trim()?layer.style.split(' ')[1]+'-12-31':''}}"
+                       id="{{layer.id}}"
+                       placeholder="{{layer.hint}}"/>
+                
+                <input *ngIf="layer.type == 'string' && layer.subtype == 'time'"
+                       type="time"
+                       [(ngModel)]="transcript[layer.id][0].label"
+                       (input)="onChange(transcript[layer.id][0])"
+                       id="{{layer.id}}"
+                       placeholder="{{layer.hint}}"/>
+                
+                <input *ngIf="layer.type == 'string' && layer.subtype == 'email'"
+                       type="email"
+                       [(ngModel)]="transcript[layer.id][0].label"
+                       (input)="onChange(transcript[layer.id][0])"
+                       id="{{layer.id}}"
+                       placeholder="{{layer.hint}}"/>
+                
+                <input *ngIf="layer.type == 'string' && layer.subtype == 'url'"
+                       type="url"
+                       [(ngModel)]="transcript[layer.id][0].label"
+                       (input)="onChange(transcript[layer.id][0])"
+                       id="{{layer.id}}"
+                       placeholder="{{layer.hint}}"/>
+                
+                <div *ngIf="layer.type == 'string' && layer.subtype == 'text'" class="grow-wrap">
+                  <textarea [(ngModel)]="transcript[layer.id][0].label"
+                            (input)="onChange(transcript[layer.id][0])"
+                            id="{{layer.id}}"
+                            placeholder="{{layer.hint}}"></textarea>
+                </div>
+                <span *ngIf="layer.type == 'number'" class="number">
+                  <label *ngIf="layer.type == 'number' && layer.style.endsWith('slider') && layer.style.split('|').length>1">
+                    {{layer.style.split(' ')[2].split('|')[0]}}
+                  </label>
+                  <input *ngIf="layer.type == 'number'"
+                         type="{{layer.style.endsWith('slider')?'range':'number'}}"
+                         step="{{layer.subtype == 'integer'?1:0.01}}"
+                         [(ngModel)]="transcript[layer.id][0].label" (input)="onChange(transcript[layer.id][0])"
+                         min="{{layer.style.split('-').length>1?layer.style.split(' ')[1].split('-')[0]:''}}"
+                         max="{{layer.style.split('-').length>1?layer.style.split(' ')[1].split('-')[1]:''}}"
+                         id="{{layer.id}}"
+                         placeholder="{{layer.hint}}"/>
+                  <label *ngIf="layer.type == 'number' && layer.style.endsWith('slider') && layer.style.split('|').length>1">
+                    {{layer.style.split(' ')[2].split('|')[1]}}
+                  </label>
+                </span>
+                
+                <ng-container *ngIf="layer.type == 'boolean'">
+                  <label>
+                    <input type="radio" name="{{layer.id}}"
+                           [(ngModel)]="transcript[layer.id][0].label" (input)="onChange(transcript[layer.id][0])"
+                           id="{{layer.id}}"
+                           value="1">
+                    true
+                  </label>
+                  <label>
+                    <input type="radio" name="{{layer.id}}"
+                           [(ngModel)]="transcript[layer.id][0].label" (input)="onChange(transcript[layer.id][0])"
+                           id="{{layer.id}}-0"
+                           value="0">
+                    false
+                  </label>
+                </ng-container>
+                
+              </ng-container>              
+            
+            </div><!-- !isMultiValue -->
+            <ng-container *ngIf="isMultiValue(layer.id)" class="value">
+              <div *ngFor="let option of optionValues(layer, transcript[layer.id])" class="value"><!-- (multiple values) -->
+                <label *ngIf="option">
+                  <input type="checkbox" 
+                         [(ngModel)]="multiValueAttributes[layer.id][option]"
+                         (input)="onChange(null)">
+                  <span class="label">{{option}}</span>
+                  <ng-container *ngIf="layer.validLabels[option] && layer.validLabels[option] != option">
+                    <span class="description">{{layer.validLabels[option]}}</span>
+                  </ng-container>
+                </label>
+              </div>
+                <input *ngIf="otherValueAllowed(layer)" type="text"
+                       [(ngModel)]="otherValues[layer.id]"
+                       (input)="onChange(transcript[layer.id][0])"
+                       id="{{layer.id}}-other" class="other"                       
+                       i18n-title title="Enter a value that's not in the list"
+                       i18n-placeholder placeholder="Other">
+            </ng-container><!-- isMultiValue -->
+          </ng-container><!-- !readonly -->
+        </span>
+      </div>
+    </div>
+</div>
+<div *ngIf="transcript" id="attributes" class="attribute-list">
+  <div class="buttons">
+    <lib-button action="save"
+                [processing]="updating"
+                (press)="updateTranscript();"
+                *ngIf="changed"
+                i18n-title title="Save all pronunciations"></lib-button>
+  </div>
+</div>
+
+<div *ngIf="transcript" class="links">
+  <lib-link
+    href="{{baseUrl}}participants?participant_expression=labels(&quot;transcript&quot;).includes(&quot;{{id}}&quot;)&participants=Participants in {{id}}"
+    img="people.svg" icon="👥"
+    i18n-label label="Participants"
+    i18n-title title="List participant that are included in this transcript"></lib-link>
+</div>

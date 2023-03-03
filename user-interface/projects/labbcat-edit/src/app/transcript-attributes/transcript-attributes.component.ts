@@ -6,12 +6,12 @@ import { Annotation, Response, Layer, User } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
 @Component({
-  selector: 'app-participant',
-  templateUrl: './participant.component.html',
-  styleUrls: ['./participant.component.css']
+  selector: 'app-transcript-attributes',
+  templateUrl: './transcript-attributes.component.html',
+  styleUrls: ['./transcript-attributes.component.css']
 })
-export class ParticipantComponent extends EditComponent implements OnInit {
-    
+export class TranscriptAttributesComponent extends EditComponent implements OnInit {
+
     baseUrl: string;
     schema: any;
     id: string;
@@ -19,14 +19,12 @@ export class ParticipantComponent extends EditComponent implements OnInit {
     categoryLayers: object; // string->Layer
     categoryLabels: string[];
     currentCategory: string;
-    participant: Annotation;
+    transcript: object;
     updating = false;
     multiValueAttributes: object; // layerId->(value->ticked)
     otherValues: object; // layerId->value
     textAreas: string[]; // track textareas for auto-resize
     loaded = false;
-    passwordForm = false;
-    password = "";
     
     constructor(
         labbcatService: LabbcatService,
@@ -42,7 +40,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         this.readSchema().then(()=> {
             this.route.queryParams.subscribe((params) => {
                 this.id = params["id"]
-                this.readParticipant();
+                this.readTranscript();
             });
         });
     }
@@ -58,17 +56,24 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                 this.multiValueAttributes = {};
                 this.otherValues = {};
                 let corpusLayer: Layer; // corpus layer - save it for last
-                // participant attributes
+                // transcript attributes
                 for (let layerId in schema.layers) {
-                    // main_participant this relates participants to transcripts, so ignore that
-                    if (layerId == "main_participant") continue;
+                    // main_transcript this relates transcripts to transcripts, so ignore that
+                    if (layerId == "main_transcript") continue;
                     
                     const layer = schema.layers[layerId] as Layer;
-                    if ((layer.parentId == schema.participantLayerId
-                        && layer.alignment == 0)) { // participant attribute layer
+                    if (layer.parentId == "transcript"
+                        && layer.alignment == 0
+                        && layer.id != schema.participantLayerId
+                        && layer.id != schema.episodeLayerId
+                        && layer.id != schema.corpusLayerId) {
+
                         // ensure we can iterate all layer IDs
                         this.attributes.push(layer.id);
 
+                        // ensure the transcript type layer has a category
+                        if (layer.id == "transcript_type") layer.category = "General";
+                        
                         // categorise layers by category
                         if (!this.categoryLayers[layer.category]) {
                             this.categoryLayers[layer.category] = [];
@@ -88,22 +93,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                         if (layer.type == 'string' && layer.subtype == 'text') {
                             this.textAreas.push(layer.id); // track textareas for auto-resize
                         }
-                    } else if (layer.id == schema.corpusLayerId) {
-                        corpusLayer = layer;
                     }
-                }
-                if (corpusLayer) { // make this an editable label on its own tab
-                    corpusLayer.category = "Corpora"; // TODO i18n
-                    corpusLayer.peers = true;
-                    corpusLayer.subtype = "string";
-                    this.multiValueAttributes[corpusLayer.id] = {};
-                    for (let label of Object.keys(corpusLayer.validLabels)) {
-                        this.multiValueAttributes[corpusLayer.id][label] = false; // unchecked
-                    } // next valid label
-                    this.attributes.push(corpusLayer.id);
-                    this.categoryLayers[corpusLayer.category] = [];
-                    this.categoryLabels.push(corpusLayer.category);
-                    this.categoryLayers[corpusLayer.category].push(corpusLayer);
                 }
                 resolve();
             });
@@ -116,38 +106,38 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         });
     }
     
-    readParticipant(): void {
+    readTranscript(): void {
         // ensure multiValueAttributes start all unchecked, and 'other' values blank
-        // each time participant is loaded
+        // each time transcript is loaded
         for (let layerId of Object.keys(this.multiValueAttributes)) {
             for (let label of Object.keys(this.multiValueAttributes[layerId])) {
                 this.multiValueAttributes[layerId][label] = false;
             } // next possible value
             this.otherValues[layerId] = "";
         } // next multi-value attribute layer
-        this.labbcatService.labbcat.getParticipant(
-            this.id, this.attributes, (participant, errors, messages) => {
+        this.labbcatService.labbcat.getTranscript(
+            this.id, this.attributes, (transcript, errors, messages) => {
                 this.loaded = true;
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
-                if (!participant) {
-                    console.error("Invalid participant ID");
-                    this.messageService.error("Invalid participant ID"); // TODO i18n
-                } else { // valid participant
+                if (!transcript) {
+                    console.error("Invalid transcript ID");
+                    this.messageService.error("Invalid transcript ID"); // TODO i18n
+                } else { // valid transcript
                     // ensure all attributes have at lease one annotation
                     for (let layerId of this.attributes) {
                         if (this.isMultiValue(layerId)) {
-                            if (!participant.annotations[layerId]) {
-                                participant.annotations[layerId] = [];
+                            if (!transcript[layerId]) {
+                                transcript[layerId] = [];
                             }
-                            for (let annotation of participant.annotations[layerId]) {
+                            for (let annotation of transcript[layerId]) {
                                 this.multiValueAttributes[layerId][annotation.label] = true;
                             } // next annotation
                         } else {
                             // make sure all single-value attributes have an annotation
-                            if (!participant.annotations[layerId]) {
+                            if (!transcript[layerId]) {
                                 // create dummary annotation to bind to
-                                participant.annotations[layerId] = [{
+                                transcript[layerId] = [{
                                     layerId : layerId,
                                     label: "",
                                     _changed : true } as Annotation];
@@ -155,13 +145,13 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                         }
                     } // next layer/attribute
                     this.changed = false;
-                    this.participant = participant;
+                    this.transcript = transcript;
                     
                     // resize textareas after the view has had a chance to render
                     setTimeout(()=>{
                         for (let layerId of this.textAreas) this.resizeTextArea(layerId);
                     }, 200);
-                } // valid participant
+                } // valid transcript
             });       
     }
 
@@ -184,24 +174,15 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         return false;
     }
 
-    updateParticipant(): boolean {
+    updateTranscript(): boolean {
 
         // validation
         let everythingValid = true;
-        if (this.participant._changed) { // check participant ID
-            const control = document.getElementById("participant") as any;
-            if (control && control.checkValidity) {
-                if (!control.checkValidity()) {
-                    control.reportValidity();
-                    return false;
-                }
-            }
-        }
         for (let category of Object.keys(this.categoryLayers)) {
             for (let l of this.categoryLayers[category]) {
                 let validateLayer = false;
-                if (this.participant.annotations[l.id]) {
-                    for (let annotation of this.participant.annotations[l.id]) {
+                if (this.transcript[l.id]) {
+                    for (let annotation of this.transcript[l.id]) {
                         if (annotation._changed) {
                             const control = document.getElementById(l.id) as any;
                             if (control && control.checkValidity) {
@@ -226,46 +207,34 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         
         this.updating = true;
         // compile single-value and multi-value attribute values
-        const attributeValues = {};        
         for (let layerId of this.attributes) {
             if (this.isMultiValue(layerId)) {
                 // the attribute value is sent as an array of values
-                attributeValues[layerId] = [];
+                this.transcript[layerId] = [];
                 for (let value of Object.keys(this.multiValueAttributes[layerId])) {
                     if (this.multiValueAttributes[layerId][value]) {
-                        attributeValues[layerId].push(value);
+                        this.transcript[layerId].push({ layerId: layerId, label: value });
                     }
                 } // next possible value
                 // 'other' values are added
                 if (this.otherValues[layerId]) {
-                    attributeValues[layerId].push(this.otherValues[layerId]);
-                }
-                if (attributeValues[layerId].length == 0) { // no value set
-                    // if we don't pass a value, no http parameter is sent,
-                    // so the attribute is ignored
-                    // so we pass an empty value
-                    attributeValues[layerId].push("");
+                    this.transcript[layerId].push(
+                        { layerId: layerId, label: this.otherValues[layerId] });
                 }
             } else { // single value
                 // 'other' values override selected values
                 if (this.otherValues[layerId]) {
-                    attributeValues[layerId] = this.otherValues[layerId];
+                    this.transcript[layerId][0].label = this.otherValues[layerId];
                     this.otherValues[layerId] = "";
-                } else {
-                    attributeValues[layerId] = this.participant.annotations[layerId][0].label;
                 }
-            }
+            } // single value
         } // next attribute
-        this.labbcatService.labbcat.saveParticipant(
-            this.id, this.participant.label, attributeValues, (updated, errors, messages) => {
+        this.labbcatService.labbcat.saveTranscript(
+            this.transcript, (updated, errors, messages) => {
                 this.updating = false;
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
-
-                if (updated) {
-                    this.id = this.participant.label; // in case we changed the name/ID
-                }
-                this.readParticipant();
+                this.readTranscript();
             });
         return true;
     }
@@ -289,7 +258,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         }
         return values;
     }
-
+    
     labelPresent(annotations: Annotation[], label: string): boolean {
         if (annotations) {
             for (let annotation of annotations) {
@@ -298,36 +267,9 @@ export class ParticipantComponent extends EditComponent implements OnInit {
         }
         return false;
     }
-
+    
     otherValueAllowed(layer: Layer): boolean {
         return /other/.test(layer.style);
     }
 
-    setPassword(): void {
-        if (!this.passwordForm) {
-            this.passwordForm = true;
-            setTimeout(()=>{
-                const control = document.getElementById("password") as any;
-                control.focus();
-            }, 200);
-        } else {
-            // validate
-            const control = document.getElementById("password") as any;
-            if (control.reportValidity()) {
-                this.updating = true;
-                this.labbcatService.labbcat.saveParticipant(
-                    this.id, null, { _password: this.password}, (updated, errors, messages) => {
-                        this.updating = false;
-                        if (errors) errors.forEach(m => this.messageService.error(m));
-                        if (messages) messages.forEach(m => this.messageService.info(m));
-
-                        if (updated) {
-                            // reset form
-                            this.password = "";
-                            this.passwordForm = false;
-                        }
-                    });
-            }
-        }
-    }
 }
