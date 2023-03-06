@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.jar.JarFile;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
@@ -506,6 +507,46 @@ public class SqlGraphStoreAdministration
             sql.setString(3, option);
             sql.executeUpdate();
           }
+          sql.close();
+        }
+      } else if (layer.get("class_id") != null && layer.get("attribute") != null) {
+        // transcript/participant attribute
+        PreparedStatement sql = getConnection().prepareStatement(
+          "UPDATE attribute_definition"
+          +" SET label = ?, category = ?, type = ?, style = ?, description = ?, display_order = ?,"
+          +" searchable = ?, access = ?, peers = ?" 
+          +" WHERE class_id = ? AND attribute = ?");
+        try {
+          sql.setString(
+            1, Optional.of(layer.getDescription())
+            .orElse(oldVersion.getDescription()));
+          sql.setString(
+            2, Optional.of(layer.getCategory())
+            .orElse(oldVersion.getCategory()));
+          sql.setString(
+            3, Optional.of((String)layer.get("subtype"))
+            .orElse((String)oldVersion.get("subtype")));
+          sql.setString(
+            4, Optional.of((String)layer.get("style"))
+            .orElse((String)oldVersion.get("style")));
+          sql.setString(
+            5, Optional.of((String)layer.get("hint"))
+            .orElse((String)oldVersion.get("hint")));
+          sql.setInt(
+            6, Optional.of((Integer)layer.get("display_order"))
+            .orElse((Integer)oldVersion.get("display_order")));
+          sql.setInt(
+            7, Optional.of((String)layer.get("searchable"))
+            .orElse((String)oldVersion.get("searchable")).equals("0")?0:1);
+          sql.setInt(
+            8, Optional.of((String)layer.get("access"))
+            .orElse((String)oldVersion.get("access")).equals("0")?0:1);
+          sql.setInt(9, layer.getPeers()?0:1);
+          sql.setString(10, (String)oldVersion.get("class_id"));
+          sql.setString(11, (String)oldVersion.get("attribute"));
+          sql.executeUpdate();
+          
+        } finally {
           sql.close();
         }
       } else {

@@ -27,6 +27,7 @@ import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AdminLayersComponent } from './admin-layers/admin-layers.component';
 import { AdminLayerLabelsComponent } from './admin-layer-labels/admin-layer-labels.component';
+import { AdminAttributesComponent } from './admin-attributes/admin-attributes.component';
 
 @NgModule({
     declarations: [
@@ -48,7 +49,8 @@ import { AdminLayerLabelsComponent } from './admin-layer-labels/admin-layer-labe
         AdminUsersComponent,
         AdminChangePasswordComponent,
         AdminLayersComponent,
-        AdminLayerLabelsComponent
+        AdminLayerLabelsComponent,
+        AdminAttributesComponent
     ],
     imports: [
         BrowserModule,
@@ -87,6 +89,7 @@ import { AdminLayerLabelsComponent } from './admin-layer-labels/admin-layer-labe
             { path: 'admin/layers/validLabels/:layerId', component: AdminLayerLabelsComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
+            { path: 'admin/attributes/:scope', component: AdminAttributesComponent},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)

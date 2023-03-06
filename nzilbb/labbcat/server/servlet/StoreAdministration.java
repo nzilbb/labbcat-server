@@ -367,7 +367,7 @@ public class StoreAdministration extends Store {
       new InputStreamReader(request.getInputStream(), "UTF-8"));
     // incoming object:
     JsonObject json = reader.readObject();
-    Layer layer = new Layer(json);
+    Layer layer = new Layer(json);    
     if (layer.getId() == null) errors.add(localize(request, "No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     return successResult(
