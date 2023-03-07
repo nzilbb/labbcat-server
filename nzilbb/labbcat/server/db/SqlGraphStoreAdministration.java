@@ -545,6 +545,57 @@ public class SqlGraphStoreAdministration
           sql.setString(10, (String)oldVersion.get("class_id"));
           sql.setString(11, (String)oldVersion.get("attribute"));
           sql.executeUpdate();
+
+          // validLabels
+          HashSet<String> toDelete = new HashSet<String>(oldVersion.getValidLabels().keySet());
+          toDelete.removeAll(layer.getValidLabels().keySet());
+          if (toDelete.size() > 0) {
+            // delete missing options
+            sql.close();
+            sql = getConnection().prepareStatement(
+              "DELETE FROM attribute_option WHERE class_id = ? AND attribute = ? AND value = ?");
+            sql.setString(1, (String)oldVersion.get("class_id"));
+            sql.setString(2, (String)oldVersion.get("attribute"));
+            for (String option : toDelete) {
+              sql.setString(3, option);
+              sql.executeUpdate();
+            }
+          }
+            
+          HashSet<String> toCreate = new HashSet<String>(layer.getValidLabels().keySet());
+          toCreate.removeAll(oldVersion.getValidLabels().keySet());            
+          if (toCreate.size() > 0) {
+            sql.close();
+            sql = getConnection().prepareStatement(
+              "INSERT INTO attribute_option (class_id, attribute, value, description)"
+              +" VALUES (?,?,?,?)");
+            sql.setString(1, (String)oldVersion.get("class_id"));
+            sql.setString(2, (String)oldVersion.get("attribute"));
+            for (String option : toCreate) {
+              sql.setString(3, option);
+              sql.setString(4, layer.getValidLabels().get(option));
+              sql.executeUpdate();
+            }
+          }
+
+          // update the rest
+          HashSet<String> toUpdate = new HashSet<String>(layer.getValidLabels().keySet());
+          toCreate.removeAll(toDelete);
+          toCreate.removeAll(toCreate);
+          if (toUpdate.size() > 0) {
+            // insert new options
+            sql.close();
+            sql = getConnection().prepareStatement(
+              "UPDATE attribute_option SET description = ?"
+              +" WHERE class_id = ? AND attribute = ? AND value = ?");
+            sql.setString(2, (String)oldVersion.get("class_id"));
+            sql.setString(3, (String)oldVersion.get("attribute"));
+            for (String option : toUpdate) {
+              sql.setString(1, layer.getValidLabels().get(option));
+              sql.setString(4, option);
+              sql.executeUpdate();
+            }
+          }
           
         } finally {
           sql.close();
@@ -583,16 +634,7 @@ public class SqlGraphStoreAdministration
     if (existingLayer != null) {
       throw new StoreException("Layer already exists: " + layer.getId());
     }
-      
-    String subtype = "T"; // Constants.TYPE_STRING
-    if (Constants.TYPE_NUMBER.equals(layer.getType())) {
-      subtype = "N";  // TODO handle type = number/integer
-    } else if (Constants.TYPE_IPA.equals(layer.getType())) {
-      subtype = "D";
-    } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
-      subtype = "boolean";
-    }
-         
+
     // check parent
     if (layer.getParentId() == null) {
       throw new StoreException("No parentId specified: " + layer.getId());
@@ -604,291 +646,196 @@ public class SqlGraphStoreAdministration
         "Invalid parent ("+layer.getParentId()+") for: " + layer.getId());
     }
 
-    // TODO add support for participant/transcript attributes
-
-    try {
-      int project_id = -1;
-      PreparedStatement sql = getConnection().prepareStatement(
-        "SELECT project_id FROM project WHERE project = ?");
-      if (layer.getCategory() != null) {
-        sql.setString(1, layer.getCategory());
-        ResultSet rs = sql.executeQuery();
-        if (rs.next()) project_id = rs.getInt(1);
-        rs.close();
+    // is it an attribute?
+    if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
+      if (layer.getParentId().equals(schema.getParticipantLayerId())
+          && layer.getId().startsWith("participant_")) { // participant attribute
+        layer.put("class_id", "speaker");
+        layer.put("attribute", layer.getId().replaceAll("^participant_",""));
+      } else if (layer.getParentId().equals(schema.getRoot().getId())
+          && layer.getId().startsWith("transcript_")) { // transcript attr.
+        layer.put("class_id", "transcript");
+        layer.put("attribute", layer.getId().replaceAll("^transcript_",""));
       }
-      sql.close();
-
-      sql = getConnection().prepareStatement(
-        "SELECT MAX(layer_id) + 1 FROM layer");
-      ResultSet rs = sql.executeQuery();
-      rs.next();
-      int layer_id = rs.getInt(1);
-      rs.close();
-      sql.close();
-
-      // We might create an automation task after adding the layer...
-      String annotatorId = null;
-      String taskParameters = null;
-
-      sql = getConnection().prepareStatement(
-        "INSERT INTO layer"
-        +" (layer_id, short_description, description, notes, alignment," // TODO remove description
-        +" peers, peers_overlap, parent_includes, saturated, type,"
-        +" layer_manager_id, enabled, project_id, parent_id, scope, extra)"
-        +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-      sql.setInt(1, layer_id);
-      sql.setString(2, layer.getId());
-      sql.setString(3, layer.getId()); // 'description', which is deprecated
-      sql.setString(4, layer.getDescription()); // 'notes'
-      sql.setInt(5, layer.getAlignment());
-      sql.setInt(6, layer.getPeers()?1:0);
-      sql.setInt(7, layer.getPeersOverlap()?1:0);
-      sql.setInt(8, layer.getParentIncludes()?1:0);
-      sql.setInt(9, layer.getSaturated()?1:0);
-      sql.setString(10, subtype);
-      if (layer.containsKey("layer_manager_id") && layer.get("layer_manager_id") != null
-          && layer.get("layer_manager_id").toString().length() > 0) {
-        sql.setString(11, layer.get("layer_manager_id").toString());
-        if (layer.containsKey("extra") && layer.get("extra") != null
-            && layer.get("extra").toString().length() > 0) {
-          // if the layer manager is a known subclass of
-          // nz.ac.canterbury.ling.layermanager.AnnotatorWrapperManager
-          // then create an automation instead of saving to the 'extra' field
-          String layerManagerId = layer.get("layer_manager_id").toString();
-          if (layerManagerId.equals("CharacterMapper")) {
-            annotatorId = "PhonemeTranscoder";
-          } else if (layerManagerId.equals("CMUdict")) {
-            annotatorId = "CMUDictionaryTagger";
-          } else if (layerManagerId.equals("FlatFileDictionary")) {
-            annotatorId = "FlatLexiconTagger";
-          } else if (layerManagerId.equals("HTK")) {
-            annotatorId = "HTKAligner";
-          } else if (layerManagerId.equals("labelmapper")) {
-            annotatorId = "LabelMapper";
-          } else if (layerManagerId.equals("MFA")) {
-            annotatorId = "MFA";
-          } else if (layerManagerId.equals("BAS")) {
-            annotatorId = "BASAnnotator";
-          } else if (layerManagerId.equals("MorTagger")) {
-            annotatorId = "MorTagger";
-          } else if (layerManagerId.equals("PatternMatcher")) {
-            annotatorId = "PatternTagger";
-          } else if (layerManagerId.equals("PorterStemmer")) {
-            annotatorId = "PorterStemmer";
-          } else if (layerManagerId.equals("es-phon")) {
-            annotatorId = "SpanishPhonologyTagger";
-          } else if (layerManagerId.equals("StanfordPosTagger")) {
-            annotatorId = "StanfordPosTagger";
-          }
-          if (annotatorId != null) { // annotator
-            sql.setNull(16, java.sql.Types.VARCHAR); // extra
-            // we will add a task with this configuration afterwards
-            taskParameters = layer.get("extra").toString();
+    }
+    
+    String subtype = "T"; // Constants.TYPE_STRING
+    if (Constants.TYPE_NUMBER.equals(layer.getType())) {
+      subtype = "N";  // TODO handle type = number/integer
+    } else if (Constants.TYPE_IPA.equals(layer.getType())) {
+      subtype = "D";
+    } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
+      subtype = "boolean";
+    }
+    if (layer.containsKey("subtype")) { // the given subtype trumps the above
+      subtype = layer.get("subtype").toString();
+    }
+    
+    try {
+      
+      if (layer.containsKey("class_id") && layer.containsKey("attribute")) { // an attribute
+        // transcript/participant attribute
+        PreparedStatement sql = getConnection().prepareStatement(
+          "INSERT INTO attribute_definition"
+          +" (label, category, type, style, description, display_order,"
+          +" searchable, access, peers, class_id, attribute)"
+          +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        try {
+          sql.setString(1, Optional.of(layer.getDescription()).orElse(layer.getId()));
+          sql.setString(2, layer.getCategory());
+          sql.setString(3, subtype);
+          sql.setString(4, Optional.of((String)layer.get("style")).orElse(""));
+          sql.setString(5, Optional.of((String)layer.get("hint")).orElse(""));
+          int display_order = -1;
+          if (layer.containsKey("display_order")) {
+            display_order = (Integer)layer.get("display_order");
           } else {
-            sql.setString(16, layer.get("extra").toString()); // extra
+            // MAX(display_order) + 1
+            PreparedStatement sqlDisplayOrder = getConnection().prepareStatement(
+              "SELECT COALESCE(MAX(display_order),0) + 1"
+              +" FROM attribute_definition WHERE class_id = ?");
+            sqlDisplayOrder.setString(1, (String)layer.get("class_id"));
+            ResultSet rs = sqlDisplayOrder.executeQuery();
+            rs.next();
+            display_order = rs.getInt(1);
+            rs.close();
+            sqlDisplayOrder.close();
+          }
+          sql.setInt(6, display_order);
+          sql.setInt(7, Optional.of((String)layer.get("searchable")).orElse("0").equals("0")?0:1);
+          sql.setInt(8, Optional.of((String)layer.get("access")).orElse("0").equals("0")?0:1);
+          sql.setInt(9, layer.getPeers()?0:1);
+          sql.setString(10, (String)layer.get("class_id"));
+          sql.setString(11, (String)layer.get("attribute"));
+          sql.executeUpdate();
+
+          // validLabels
+          if (layer.getValidLabels() != null && layer.getValidLabels().size() > 0) {
+            sql.close();
+            sql = getConnection().prepareStatement(
+              "INSERT INTO attribute_option (class_id, attribute, value, description)"
+              +" VALUES (?,?,?,?)");
+            sql.setString(1, (String)layer.get("class_id"));
+            sql.setString(2, (String)layer.get("attribute"));
+            for (String option : layer.getValidLabels().keySet()) {
+              sql.setString(3, option);
+              sql.setString(4, layer.getValidLabels().get(option));
+              sql.executeUpdate();
+            } // next option
+          } // there are validLabels
+        } finally {
+          sql.close();
+        }
+
+      } else { // a temporal layer
+      
+        int project_id = -1;
+        PreparedStatement sql = getConnection().prepareStatement(
+          "SELECT project_id FROM project WHERE project = ?");
+        if (layer.getCategory() != null) {
+          sql.setString(1, layer.getCategory());
+          ResultSet rs = sql.executeQuery();
+          if (rs.next()) project_id = rs.getInt(1);
+          rs.close();
+        }
+        sql.close();
+        
+        sql = getConnection().prepareStatement(
+          "SELECT MAX(layer_id) + 1 FROM layer");
+        ResultSet rs = sql.executeQuery();
+        rs.next();
+        int layer_id = rs.getInt(1);
+        rs.close();
+        sql.close();
+        
+        // We might create an automation task after adding the layer...
+        String annotatorId = null;
+        String taskParameters = null;
+
+        sql = getConnection().prepareStatement(
+          "INSERT INTO layer"
+          +" (layer_id, short_description, description, notes, alignment," // TODO remove description
+          +" peers, peers_overlap, parent_includes, saturated, type,"
+          +" layer_manager_id, enabled, project_id, parent_id, scope, extra)"
+          +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        sql.setInt(1, layer_id);
+        sql.setString(2, layer.getId());
+        sql.setString(3, layer.getId()); // 'description', which is deprecated
+        sql.setString(4, layer.getDescription()); // 'notes'
+        sql.setInt(5, layer.getAlignment());
+        sql.setInt(6, layer.getPeers()?1:0);
+        sql.setInt(7, layer.getPeersOverlap()?1:0);
+        sql.setInt(8, layer.getParentIncludes()?1:0);
+        sql.setInt(9, layer.getSaturated()?1:0);
+        sql.setString(10, subtype);
+        if (layer.containsKey("layer_manager_id") && layer.get("layer_manager_id") != null
+            && layer.get("layer_manager_id").toString().length() > 0) {
+          sql.setString(11, layer.get("layer_manager_id").toString());
+          if (layer.containsKey("extra") && layer.get("extra") != null
+              && layer.get("extra").toString().length() > 0) {
+            // if the layer manager is a known subclass of
+            // nz.ac.canterbury.ling.layermanager.AnnotatorWrapperManager
+            // then create an automation instead of saving to the 'extra' field
+            String layerManagerId = layer.get("layer_manager_id").toString();
+            if (layerManagerId.equals("CharacterMapper")) {
+              annotatorId = "PhonemeTranscoder";
+            } else if (layerManagerId.equals("CMUdict")) {
+              annotatorId = "CMUDictionaryTagger";
+            } else if (layerManagerId.equals("FlatFileDictionary")) {
+              annotatorId = "FlatLexiconTagger";
+            } else if (layerManagerId.equals("HTK")) {
+              annotatorId = "HTKAligner";
+            } else if (layerManagerId.equals("labelmapper")) {
+              annotatorId = "LabelMapper";
+            } else if (layerManagerId.equals("MFA")) {
+              annotatorId = "MFA";
+            } else if (layerManagerId.equals("BAS")) {
+              annotatorId = "BASAnnotator";
+            } else if (layerManagerId.equals("MorTagger")) {
+              annotatorId = "MorTagger";
+            } else if (layerManagerId.equals("PatternMatcher")) {
+              annotatorId = "PatternTagger";
+            } else if (layerManagerId.equals("PorterStemmer")) {
+              annotatorId = "PorterStemmer";
+            } else if (layerManagerId.equals("es-phon")) {
+              annotatorId = "SpanishPhonologyTagger";
+            } else if (layerManagerId.equals("StanfordPosTagger")) {
+              annotatorId = "StanfordPosTagger";
+            }
+            if (annotatorId != null) { // annotator
+              sql.setNull(16, java.sql.Types.VARCHAR); // extra
+              // we will add a task with this configuration afterwards
+              taskParameters = layer.get("extra").toString();
+            } else {
+              sql.setString(16, layer.get("extra").toString()); // extra
+            }
+          } else {
+            sql.setNull(16, java.sql.Types.VARCHAR); // extra
           }
         } else {
+          sql.setNull(11, java.sql.Types.VARCHAR);
           sql.setNull(16, java.sql.Types.VARCHAR); // extra
         }
-      } else {
-        sql.setNull(11, java.sql.Types.VARCHAR);
-        sql.setNull(16, java.sql.Types.VARCHAR); // extra
-      }
-      if (layer.containsKey("enabled")
-          && layer.get("enabled").toString().length() > 0) {
-        sql.setString(12, layer.get("enabled").toString());
-      } else {
-        sql.setNull(12, java.sql.Types.VARCHAR);
-      }
-      if (project_id >= 0) {
-        sql.setInt(13, project_id);
-      } else {
-        sql.setNull(13, java.sql.Types.INTEGER);
-      }
+        if (layer.containsKey("enabled")
+            && layer.get("enabled").toString().length() > 0) {
+          sql.setString(12, layer.get("enabled").toString());
+        } else {
+          sql.setNull(12, java.sql.Types.VARCHAR);
+        }
+        if (project_id >= 0) {
+          sql.setInt(13, project_id);
+        } else {
+          sql.setNull(13, java.sql.Types.INTEGER);
+        }
+        
+        try {
+          if (parent.getId().equals(schema.getWordLayerId())) { // word layer
             
-      try {
-        if (parent.getId().equals(schema.getWordLayerId())) { // word layer
-                  
-          sql.setInt(14, (Integer)parent.get("layer_id"));
-          sql.setString(15, SqlConstants.SCOPE_WORD.toUpperCase());
-          sql.executeUpdate();
-          sql.close();
-                  
-          // create annotation table
-          sql = getConnection().prepareStatement(
-            "CREATE TABLE annotation_layer_"+layer_id+" ("
-            + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
-            + " ag_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Annotation graph (transcript) ID',"
-            + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
-            + " NOT NULL DEFAULT ''" 
-            + " COMMENT 'Text annotation for the word'," 
-            + " label_status TINYINT UNSIGNED DEFAULT 0"
-            + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
-            + " data MEDIUMBLOB" 
-            + " COMMENT 'Binary data attached to annotation'," 
-            + " start_anchor_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Anchor for start time',"
-            + " end_anchor_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Anchor for end time',"
-            + " turn_annotation_id INTEGER UNSIGNED NOT NULL" 
-            + " COMMENT 'References annotation_layer_11.annotation_id',"
-            + " ordinal_in_turn INTEGER" 
-            + " COMMENT 'Copy of annotation_layer_0.ordinal_in_turn',"  
-            + " word_annotation_id INTEGER UNSIGNED" 
-            + " COMMENT 'References annotation_layer_0.annotation_id'," 
-            + " parent_id INTEGER UNSIGNED NULL"
-            + " COMMENT 'Parent annotation_id',"
-            + " ordinal INTEGER NULL"
-            + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
-            + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
-            + " COMMENT 'Name of person/system who created/changed the anchor',"
-            + " annotated_when DATETIME NULL"
-            + " COMMENT 'Date/time of the creation or last change of the anchor',"
-            + " PRIMARY KEY (annotation_id),"
-            + " INDEX IDX_LABEL(label, ag_id, turn_annotation_id), "
-            + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id), "
-            + " INDEX IDX_END_ANCHOR(end_anchor_id),"
-            + " INDEX IDX_WORD(word_annotation_id),"
-            + " INDEX IDX_TURN(turn_annotation_id, ordinal_in_turn),"
-            +"  INDEX IDX_AG(ag_id, annotation_id)"
-            + " ) ENGINE=MyISAM;");
-          sql.executeUpdate();
-          sql.close();
-                  
-        } else if (parent.getId().equals("segment")) { // segment layer
-                  
-          sql.setInt(14, (Integer)parent.get("layer_id"));
-          sql.setString(15, SqlConstants.SCOPE_SEGMENT.toUpperCase());
-          sql.executeUpdate();
-          sql.close();
-                  
-          // create annotation table
-          sql = getConnection().prepareStatement(
-            "CREATE TABLE annotation_layer_"+layer_id+" ("
-            + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
-            + " ag_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Annotation graph (transcript) ID',"
-            + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
-            + " NOT NULL DEFAULT ''" 
-            + " COMMENT 'Text annotation for the segment'," 
-            + " label_status TINYINT UNSIGNED DEFAULT 0"
-            + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
-            + " data MEDIUMBLOB" 
-            + " COMMENT 'Binary data attached to annotation'," 
-            + " start_anchor_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Anchor for start time',"
-            + " end_anchor_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Anchor for end time',"
-            + " turn_annotation_id INTEGER UNSIGNED NOT NULL" 
-            + " COMMENT 'References annotation_layer_11.annotation_id',"
-            + " ordinal_in_turn INTEGER" 
-            + " COMMENT 'Copy of annotation_layer_0.ordinal_in_turn',"  
-            + " word_annotation_id INTEGER UNSIGNED" 
-            + " COMMENT 'References annotation_layer_0.annotation_id'," 
-            + " ordinal_in_word INTEGER" 
-            + " COMMENT 'Copy of annotation_layer_1.ordinal_in_word',"
-            + " segment_annotation_id INTEGER UNSIGNED NOT NULL" 
-            + " COMMENT 'References annotation_layer_1.annotation_id',"
-            + " parent_id INTEGER UNSIGNED NULL"
-            + " COMMENT 'Parent annotation_id',"
-            + " ordinal INTEGER NULL"
-            + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
-            + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
-            + " COMMENT 'Name of person/system who created/changed the anchor',"
-            + " annotated_when DATETIME NULL"
-            + " COMMENT 'Date/time of the creation or last change of the anchor',"
-            + " PRIMARY KEY (annotation_id),"
-            + " INDEX IDX_LABEL(label, word_annotation_id, ag_id, turn_annotation_id), "
-            + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id), "
-            + " INDEX IDX_END_ANCHOR(end_anchor_id),"
-            + " INDEX IDX_WORD(word_annotation_id, ordinal_in_word),"
-            + " INDEX IDX_SEGMENT(segment_annotation_id),"
-            + " INDEX IDX_TURN(turn_annotation_id, ordinal_in_turn, word_annotation_id, ordinal_in_word),"
-            +"  INDEX IDX_AG(ag_id, annotation_id)"
-            + " ) ENGINE=MyISAM;");
-          sql.executeUpdate();
-          sql.close();
-                  
-        } else if (parent.getId().equals(schema.getTurnLayerId())) { // phrase layer
-                  
-          sql.setInt(14, (Integer)parent.get("layer_id"));
-          sql.setString(15, SqlConstants.SCOPE_META.toUpperCase());
-          sql.executeUpdate();
-          sql.close();
-                  
-          // create annotation table
-          sql = getConnection().prepareStatement(
-            "CREATE TABLE annotation_layer_"+layer_id+" ("
-            + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
-            + " ag_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Annotation graph (transcript) ID',"
-            + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
-            + " NOT NULL DEFAULT ''" 
-            + " COMMENT 'Speaker number (from speaker.speaker_number)'," 
-            + " label_status TINYINT UNSIGNED DEFAULT 0"
-            + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
-            + " data MEDIUMBLOB" 
-            + " COMMENT 'Binary data attached to annotation'," 
-            + " start_anchor_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Anchor for start time'," 
-            + " end_anchor_id INTEGER UNSIGNED NOT NULL"
-            + " COMMENT 'Anchor for end time'," 
-            + " turn_annotation_id INTEGER UNSIGNED" 
-            + " COMMENT 'References annotation_layer_11.annotation_id'," 
-            + " parent_id INTEGER UNSIGNED NULL"
-            + " COMMENT 'Parent annotation_id',"
-            + " ordinal INTEGER NULL"
-            + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
-            + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
-            + " COMMENT 'Name of person/system who created/changed the anchor',"
-            + " annotated_when DATETIME NULL"
-            + " COMMENT 'Date/time of the creation or last change of the anchor',"
-            + " PRIMARY KEY (annotation_id),"
-            + " INDEX IDX_LABEL(label, ag_id, start_anchor_id), "
-            + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id),"
-            + " INDEX IDX_END_ANCHOR(end_anchor_id),"
-            + " INDEX IDX_TURN(turn_annotation_id, annotation_id),"
-            +"  INDEX IDX_AG(ag_id, annotation_id)"
-            + " ) ENGINE=MyISAM;");
-          sql.executeUpdate();
-          sql.close();
-                  
-          // create transcript speaker table (some layer managers still need this)
-          sql = getConnection().prepareStatement(
-            "CREATE TABLE transcript_speaker_layer_"+layer_id+" ("
-            +" speaker_number INT NOT NULL,"
-            +" ag_id INT NOT NULL,"
-            +" variant int(10) unsigned NOT NULL default 0,"
-            +" representation varchar(100) NOT NULL default '''',"
-            +" number DOUBLE unsigned NOT NULL default 0,"
-            +" PRIMARY KEY  (speaker_number,ag_id,variant),"
-            +" KEY IDX_REPRESENTATION (representation)"
-            +" ) ENGINE=MyISAM;");
-          sql.executeUpdate();
-          sql.close();
-                  
-          // create corpus table (some layer managers still need this)
-          sql = getConnection().prepareStatement(
-            "CREATE TABLE corpus_layer_"+layer_id+" ("
-            +" corpus_id int(11) NOT NULL default 0,"
-            +" variant int(10) unsigned NOT NULL default 0,"
-            +" representation varchar(100) NOT NULL default '''',"
-            +" number DOUBLE unsigned NOT NULL default 0,"
-            +" PRIMARY KEY  (corpus_id, variant),"
-            +" KEY IDX_REPRESENTATION (representation)"
-            +" ) ENGINE=MyISAM;");
-          sql.executeUpdate();
-          sql.close();
-                  
-        } else if (parent.getId().equals(schema.getRoot().getId())) { // span layer
-          if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
-                     
-            sql.setInt(14, SqlConstants.LAYER_GRAPH);
-            sql.setString(15, SqlConstants.SCOPE_FREEFORM.toUpperCase());
+            sql.setInt(14, (Integer)parent.get("layer_id"));
+            sql.setString(15, SqlConstants.SCOPE_WORD.toUpperCase());
             sql.executeUpdate();
             sql.close();
-                     
+            
             // create annotation table
             sql = getConnection().prepareStatement(
               "CREATE TABLE annotation_layer_"+layer_id+" ("
@@ -896,8 +843,111 @@ public class SqlGraphStoreAdministration
               + " ag_id INTEGER UNSIGNED NOT NULL"
               + " COMMENT 'Annotation graph (transcript) ID',"
               + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
-              + " NOT NULL DEFAULT ''"
-              + " COMMENT 'Text annotation'," 
+              + " NOT NULL DEFAULT ''" 
+              + " COMMENT 'Text annotation for the word'," 
+              + " label_status TINYINT UNSIGNED DEFAULT 0"
+              + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
+              + " data MEDIUMBLOB" 
+              + " COMMENT 'Binary data attached to annotation'," 
+              + " start_anchor_id INTEGER UNSIGNED NOT NULL"
+              + " COMMENT 'Anchor for start time',"
+              + " end_anchor_id INTEGER UNSIGNED NOT NULL"
+              + " COMMENT 'Anchor for end time',"
+              + " turn_annotation_id INTEGER UNSIGNED NOT NULL" 
+              + " COMMENT 'References annotation_layer_11.annotation_id',"
+              + " ordinal_in_turn INTEGER" 
+              + " COMMENT 'Copy of annotation_layer_0.ordinal_in_turn',"  
+              + " word_annotation_id INTEGER UNSIGNED" 
+              + " COMMENT 'References annotation_layer_0.annotation_id'," 
+              + " parent_id INTEGER UNSIGNED NULL"
+              + " COMMENT 'Parent annotation_id',"
+              + " ordinal INTEGER NULL"
+              + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
+              + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+              + " COMMENT 'Name of person/system who created/changed the anchor',"
+              + " annotated_when DATETIME NULL"
+              + " COMMENT 'Date/time of the creation or last change of the anchor',"
+              + " PRIMARY KEY (annotation_id),"
+              + " INDEX IDX_LABEL(label, ag_id, turn_annotation_id), "
+              + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id), "
+              + " INDEX IDX_END_ANCHOR(end_anchor_id),"
+              + " INDEX IDX_WORD(word_annotation_id),"
+              + " INDEX IDX_TURN(turn_annotation_id, ordinal_in_turn),"
+              +"  INDEX IDX_AG(ag_id, annotation_id)"
+              + " ) ENGINE=MyISAM;");
+            sql.executeUpdate();
+            sql.close();
+            
+          } else if (parent.getId().equals("segment")) { // segment layer
+            
+            sql.setInt(14, (Integer)parent.get("layer_id"));
+            sql.setString(15, SqlConstants.SCOPE_SEGMENT.toUpperCase());
+            sql.executeUpdate();
+            sql.close();
+            
+            // create annotation table
+            sql = getConnection().prepareStatement(
+              "CREATE TABLE annotation_layer_"+layer_id+" ("
+              + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
+              + " ag_id INTEGER UNSIGNED NOT NULL"
+              + " COMMENT 'Annotation graph (transcript) ID',"
+              + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+              + " NOT NULL DEFAULT ''" 
+              + " COMMENT 'Text annotation for the segment'," 
+              + " label_status TINYINT UNSIGNED DEFAULT 0"
+              + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
+              + " data MEDIUMBLOB" 
+              + " COMMENT 'Binary data attached to annotation'," 
+              + " start_anchor_id INTEGER UNSIGNED NOT NULL"
+              + " COMMENT 'Anchor for start time',"
+              + " end_anchor_id INTEGER UNSIGNED NOT NULL"
+              + " COMMENT 'Anchor for end time',"
+              + " turn_annotation_id INTEGER UNSIGNED NOT NULL" 
+              + " COMMENT 'References annotation_layer_11.annotation_id',"
+              + " ordinal_in_turn INTEGER" 
+              + " COMMENT 'Copy of annotation_layer_0.ordinal_in_turn',"  
+              + " word_annotation_id INTEGER UNSIGNED" 
+              + " COMMENT 'References annotation_layer_0.annotation_id'," 
+              + " ordinal_in_word INTEGER" 
+              + " COMMENT 'Copy of annotation_layer_1.ordinal_in_word',"
+              + " segment_annotation_id INTEGER UNSIGNED NOT NULL" 
+              + " COMMENT 'References annotation_layer_1.annotation_id',"
+              + " parent_id INTEGER UNSIGNED NULL"
+              + " COMMENT 'Parent annotation_id',"
+              + " ordinal INTEGER NULL"
+              + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
+              + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+              + " COMMENT 'Name of person/system who created/changed the anchor',"
+              + " annotated_when DATETIME NULL"
+              + " COMMENT 'Date/time of the creation or last change of the anchor',"
+              + " PRIMARY KEY (annotation_id),"
+              + " INDEX IDX_LABEL(label, word_annotation_id, ag_id, turn_annotation_id), "
+              + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id), "
+              + " INDEX IDX_END_ANCHOR(end_anchor_id),"
+              + " INDEX IDX_WORD(word_annotation_id, ordinal_in_word),"
+              + " INDEX IDX_SEGMENT(segment_annotation_id),"
+              + " INDEX IDX_TURN(turn_annotation_id, ordinal_in_turn, word_annotation_id, ordinal_in_word),"
+              +"  INDEX IDX_AG(ag_id, annotation_id)"
+              + " ) ENGINE=MyISAM;");
+            sql.executeUpdate();
+            sql.close();
+            
+          } else if (parent.getId().equals(schema.getTurnLayerId())) { // phrase layer
+            
+            sql.setInt(14, (Integer)parent.get("layer_id"));
+            sql.setString(15, SqlConstants.SCOPE_META.toUpperCase());
+            sql.executeUpdate();
+            sql.close();
+            
+            // create annotation table
+            sql = getConnection().prepareStatement(
+              "CREATE TABLE annotation_layer_"+layer_id+" ("
+              + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
+              + " ag_id INTEGER UNSIGNED NOT NULL"
+              + " COMMENT 'Annotation graph (transcript) ID',"
+              + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+              + " NOT NULL DEFAULT ''" 
+              + " COMMENT 'Speaker number (from speaker.speaker_number)'," 
               + " label_status TINYINT UNSIGNED DEFAULT 0"
               + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
               + " data MEDIUMBLOB" 
@@ -906,6 +956,8 @@ public class SqlGraphStoreAdministration
               + " COMMENT 'Anchor for start time'," 
               + " end_anchor_id INTEGER UNSIGNED NOT NULL"
               + " COMMENT 'Anchor for end time'," 
+              + " turn_annotation_id INTEGER UNSIGNED" 
+              + " COMMENT 'References annotation_layer_11.annotation_id'," 
               + " parent_id INTEGER UNSIGNED NULL"
               + " COMMENT 'Parent annotation_id',"
               + " ordinal INTEGER NULL"
@@ -918,56 +970,119 @@ public class SqlGraphStoreAdministration
               + " INDEX IDX_LABEL(label, ag_id, start_anchor_id), "
               + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id),"
               + " INDEX IDX_END_ANCHOR(end_anchor_id),"
+              + " INDEX IDX_TURN(turn_annotation_id, annotation_id),"
               +"  INDEX IDX_AG(ag_id, annotation_id)"
               + " ) ENGINE=MyISAM;");
             sql.executeUpdate();
             sql.close();
-
-          } else { // layer.getAlignment() == Constants.ALIGNMENT_NONE TODO transcript attributes
-            throw new StoreException("Span layers must be aligned");
-          }
-        } else { // TODO support participant attributes
-          // TODO support episode layers
-          throw new StoreException(
-            "Invalid parentId "+layer.getParentId()
-            +" - must be one of: " + schema.getWordLayerId() + ", " + schema.getTurnLayerId()
-            + ", " + schema.getRoot().getId());
-        }
-
-        if (annotatorId != null && taskParameters != null) {
-          // create an automation task named after the layer
-          try {
-            newAnnotatorTask(annotatorId, layer.getId(), layer.getDescription());
-            saveAnnotatorTaskParameters(layer.getId(), taskParameters);
-          } catch(Exception exception) {
-            System.err.println(
-              "SqlGraphStoreAdministration.newLayer(" + layer + "): " + exception);
-          }
-        }
-      } finally {
-        sql.close();
-      }
-
-      // validLabels
-      int order = 1;
-      sql = getConnection().prepareStatement(
-        "INSERT INTO label_option (layer_id, value, description, display_order)"
-        +" VALUES (?,?,?,?)");
-      try {
-        sql.setInt(1, layer_id);
-        for (String option : layer.getValidLabels().keySet()) {
-          sql.setString(2, option);
-          sql.setString(3, layer.getValidLabels().get(option));
-          sql.setInt(4, order++);
-          sql.executeUpdate();
-        }
-      } finally {
-        sql.close();
-      }
             
+            // create transcript speaker table (some layer managers still need this)
+            sql = getConnection().prepareStatement(
+              "CREATE TABLE transcript_speaker_layer_"+layer_id+" ("
+              +" speaker_number INT NOT NULL,"
+              +" ag_id INT NOT NULL,"
+              +" variant int(10) unsigned NOT NULL default 0,"
+              +" representation varchar(100) NOT NULL default '''',"
+              +" number DOUBLE unsigned NOT NULL default 0,"
+              +" PRIMARY KEY  (speaker_number,ag_id,variant),"
+              +" KEY IDX_REPRESENTATION (representation)"
+              +" ) ENGINE=MyISAM;");
+            sql.executeUpdate();
+            sql.close();
+            
+            // create corpus table (some layer managers still need this)
+            sql = getConnection().prepareStatement(
+              "CREATE TABLE corpus_layer_"+layer_id+" ("
+              +" corpus_id int(11) NOT NULL default 0,"
+              +" variant int(10) unsigned NOT NULL default 0,"
+              +" representation varchar(100) NOT NULL default '''',"
+              +" number DOUBLE unsigned NOT NULL default 0,"
+              +" PRIMARY KEY  (corpus_id, variant),"
+              +" KEY IDX_REPRESENTATION (representation)"
+              +" ) ENGINE=MyISAM;");
+            sql.executeUpdate();
+            sql.close();
+            
+          } else if (parent.getId().equals(schema.getRoot().getId())) { // span layer
+            if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
+              
+              sql.setInt(14, SqlConstants.LAYER_GRAPH);
+              sql.setString(15, SqlConstants.SCOPE_FREEFORM.toUpperCase());
+              sql.executeUpdate();
+              sql.close();
+              
+              // create annotation table
+              sql = getConnection().prepareStatement(
+                "CREATE TABLE annotation_layer_"+layer_id+" ("
+                + " annotation_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
+                + " ag_id INTEGER UNSIGNED NOT NULL"
+                + " COMMENT 'Annotation graph (transcript) ID',"
+                + " label VARCHAR(247) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+                + " NOT NULL DEFAULT ''"
+                + " COMMENT 'Text annotation'," 
+                + " label_status TINYINT UNSIGNED DEFAULT 0"
+                + " COMMENT 'How reliable the label is - 50: automated, 100: manually labelled', "
+                + " data MEDIUMBLOB" 
+                + " COMMENT 'Binary data attached to annotation'," 
+                + " start_anchor_id INTEGER UNSIGNED NOT NULL"
+                + " COMMENT 'Anchor for start time'," 
+                + " end_anchor_id INTEGER UNSIGNED NOT NULL"
+                + " COMMENT 'Anchor for end time'," 
+                + " parent_id INTEGER UNSIGNED NULL"
+                + " COMMENT 'Parent annotation_id',"
+                + " ordinal INTEGER NULL"
+                + " COMMENT 'The serial position of this annotation among its siblings on the same layer',"
+                + " annotated_by VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+                + " COMMENT 'Name of person/system who created/changed the anchor',"
+                + " annotated_when DATETIME NULL"
+                + " COMMENT 'Date/time of the creation or last change of the anchor',"
+                + " PRIMARY KEY (annotation_id),"
+                + " INDEX IDX_LABEL(label, ag_id, start_anchor_id), "
+                + " INDEX IDX_ANCHOR(start_anchor_id, end_anchor_id),"
+                + " INDEX IDX_END_ANCHOR(end_anchor_id),"
+                +"  INDEX IDX_AG(ag_id, annotation_id)"
+                + " ) ENGINE=MyISAM;");
+              sql.executeUpdate();
+              sql.close();
+              
+            } else { // layer.getAlignment() == Constants.ALIGNMENT_NONE TODO transcript attributes
+              throw new StoreException("Span layers must be aligned");
+            }
+            if (annotatorId != null && taskParameters != null) {
+              // create an automation task named after the layer
+              try {
+                newAnnotatorTask(annotatorId, layer.getId(), layer.getDescription());
+                saveAnnotatorTaskParameters(layer.getId(), taskParameters);
+              } catch(Exception exception) {
+                System.err.println(
+                  "SqlGraphStoreAdministration.newLayer(" + layer + "): " + exception);
+              }
+            }
+          } // span layer
+        } finally {
+          sql.close();
+        }
+        // validLabels
+        int order = 1;
+        sql = getConnection().prepareStatement(
+          "INSERT INTO label_option (layer_id, value, description, display_order)"
+          +" VALUES (?,?,?,?)");
+        try {
+          sql.setInt(1, layer_id);
+          for (String option : layer.getValidLabels().keySet()) {
+            sql.setString(2, option);
+            sql.setString(3, layer.getValidLabels().get(option));
+            sql.setInt(4, order++);
+            sql.executeUpdate();
+          }
+        } finally {
+          sql.close();
+        }
+      } // a temporal layer  
+      
       // ensure schema is reloaded with new layer
       this.schema = null;      
-            
+      
       return getLayer(layer.getId());
     } catch (SQLException sqlX) {
       System.err.println("SqlGraphStoreAdministration.newLayer(" + layer + "): " + sqlX);
@@ -999,70 +1114,95 @@ public class SqlGraphStoreAdministration
         throw new StoreException("Cannot delete system layer: " + id);
       }
       Layer layer = getLayer(id);
-      if (!layer.containsKey("layer_id")) {
+      if (!layer.containsKey("layer_id") 
+          && (!layer.containsKey("class_id") || !layer.containsKey("attribute"))) {
         throw new StoreException("Deleting layer " + id + " not yet implemented");
       }
-      int layer_id = (Integer)layer.get("layer_id");
-      if (layer_id < 0) {
-        throw new StoreException("Cannot delete system layer: " + id + " ("+layer_id+")");
-      }
 
-      // drop the annotation table
-      PreparedStatement sql = getConnection().prepareStatement(
-        "DROP TABLE IF EXISTS annotation_layer_" + layer_id);
-      sql.executeUpdate();
-      sql.close();
-
-      // delete any annotation tasks named after the layer
-      try {
-        deleteAnnotatorTask(layer.getId());
-      } catch(StoreException exception) {}
-         
-      // if there are auxiliary configurations...
-      sql = getConnection().prepareStatement(
-        "SELECT description FROM layer_auxiliary_manager WHERE layer_id = ?");
-      sql.setInt(1, layer_id);
-      ResultSet rs = sql.executeQuery();
-      while (rs.next()) {
-        // delete any annotation tasks for the auxiliary configuration
+      if (layer.containsKey("layer_id")) { // temporal layer
+        int layer_id = (Integer)layer.get("layer_id");
+        if (layer_id < 0) {
+          throw new StoreException("Cannot delete system layer: " + id + " ("+layer_id+")");
+        }
+        
+        // drop the annotation table
+        PreparedStatement sql = getConnection().prepareStatement(
+          "DROP TABLE IF EXISTS annotation_layer_" + layer_id);
+        sql.executeUpdate();
+        sql.close();
+        
+        // delete any annotation tasks named after the layer
         try {
-          deleteAnnotatorTask(layer.getId() + ":" + rs.getString(1));
+          deleteAnnotatorTask(layer.getId());
         } catch(StoreException exception) {}
-      } // next auxiliary configuration
-      rs.close();
-      sql.close();
+        
+        // if there are auxiliary configurations...
+        sql = getConnection().prepareStatement(
+          "SELECT description FROM layer_auxiliary_manager WHERE layer_id = ?");
+        sql.setInt(1, layer_id);
+        ResultSet rs = sql.executeQuery();
+        while (rs.next()) {
+          // delete any annotation tasks for the auxiliary configuration
+          try {
+            deleteAnnotatorTask(layer.getId() + ":" + rs.getString(1));
+          } catch(StoreException exception) {}
+        } // next auxiliary configuration
+        rs.close();
+        sql.close();
+        
+        // delete any auxiliary configurations
+        sql = getConnection().prepareStatement(
+          "DELETE FROM layer_auxiliary_manager WHERE layer_id = ?");
+        sql.setInt(1, layer_id);
+        sql.executeUpdate();
+        sql.close();
+        
+        // drop old 'meta' layer tables
+        sql = getConnection().prepareStatement(
+          "DROP TABLE IF EXISTS transcript_speaker_layer_" + layer_id);
+        sql.executeUpdate();
+        sql.close();         
+        sql = getConnection().prepareStatement(
+          "DROP TABLE IF EXISTS corpus_layer_" + layer_id);
+        sql.executeUpdate();
+        sql.close();
+        
+        // delete validLabels
+        sql = getConnection().prepareStatement(
+          "DELETE FROM label_option WHERE layer_id = ?");
+        sql.setInt(1, layer_id);
+        sql.executeUpdate();
+        sql.close();
+        
+        // delete the layer row
+        sql = getConnection().prepareStatement(
+          "DELETE FROM layer WHERE layer_id = ?");
+        sql.setInt(1, layer_id);
+        sql.executeUpdate();
+        sql.close();
+        
+      } else { // attribute layer
 
-      // delete any auxiliary configurations
-      sql = getConnection().prepareStatement(
-        "DELETE FROM layer_auxiliary_manager WHERE layer_id = ?");
-      sql.setInt(1, layer_id);
-      sql.executeUpdate();
-      sql.close();
-
-      // drop old 'meta' layer tables
-      sql = getConnection().prepareStatement(
-        "DROP TABLE IF EXISTS transcript_speaker_layer_" + layer_id);
-      sql.executeUpdate();
-      sql.close();         
-      sql = getConnection().prepareStatement(
-        "DROP TABLE IF EXISTS corpus_layer_" + layer_id);
-      sql.executeUpdate();
-      sql.close();
-
-      // delete validLabels
-      sql = getConnection().prepareStatement(
-        "DELETE FROM label_option WHERE layer_id = ?");
-      sql.setInt(1, layer_id);
-      sql.executeUpdate();
-      sql.close();
-
-      // delete the layer row
-      sql = getConnection().prepareStatement(
-        "DELETE FROM layer WHERE layer_id = ?");
-      sql.setInt(1, layer_id);
-      sql.executeUpdate();
-      sql.close();
-         
+        String class_id = (String)layer.get("class_id");
+        String attribute = (String)layer.get("attribute");
+        
+        // delete validLabels
+        PreparedStatement sql = getConnection().prepareStatement(
+          "DELETE FROM attribute_option WHERE class_id = ? AND attribute = ?");
+        sql.setString(1, class_id);
+        sql.setString(2, attribute);
+        sql.executeUpdate();
+        sql.close();
+        
+        // delete the layer row
+        sql = getConnection().prepareStatement(
+          "DELETE FROM attribute_definition WHERE class_id = ? AND attribute = ?");
+        sql.setString(1, class_id);
+        sql.setString(2, attribute);
+        sql.executeUpdate();
+        sql.close();
+        
+      }
       // ensure schema is reloaded with layer removed
       this.schema = null;
          
