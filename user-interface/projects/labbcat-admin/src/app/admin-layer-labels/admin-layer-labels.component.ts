@@ -10,6 +10,7 @@ import { AdminComponent } from '../admin-component';
   styleUrls: ['./admin-layer-labels.component.css']
 })
 export class AdminLayerLabelsComponent extends AdminComponent implements OnInit {
+    layerId: string;
     layer: Layer;
     labels: string[];
     
@@ -23,11 +24,19 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
     }
     
     ngOnInit(): void {
-        this.readLayer(this.route.snapshot.paramMap.get('layerId'));
+        this.layerId = this.route.snapshot.paramMap.get('layerId');
+        if (this.layerId) { // layerId is part of the URL
+            this.readLayer();
+        } else { // layerId is a request parameter
+            this.route.queryParams.subscribe((params) => {
+                this.layerId = params["layerId"];
+                this.readLayer();
+            });
+        }
     }
 
-    readLayer(layerId: string): void {
-        this.labbcatService.labbcat.getLayer(layerId, (layer, errors, messages) => {
+    readLayer(): void {
+        this.labbcatService.labbcat.getLayer(this.layerId, (layer, errors, messages) => {
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
             this.setLayer(layer as Layer);
@@ -106,7 +115,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
                     }
                     this.setLayer(layer);
                 } else {
-                    this.readLayer(layer.id);
+                    this.readLayer();
                 }
             });
     }

@@ -182,6 +182,9 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
             this.updating--;
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
+            if (!messages || !messages.length) {
+                this.messageService.info(`Updated ${row.id}`); // TODO i18n
+            }
             // update the model with the field returned
             const updatedRow = this.parseStyle(layer as Layer);
             const i = this.rows.findIndex(r => {

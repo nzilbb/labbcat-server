@@ -1,5 +1,5 @@
-<h2 i18n="page header" *ngIf="scope == 'trascript'">Transcript Attributes</h2>
-<h2 i18n="page header" *ngIf="scope == 'participant'">Participant Attributes</h2>
+<h2 i18n="page header" *ngIf="scope == 'transcript'">Define Transcript Attributes</h2>
+<h2 i18n="page header" *ngIf="scope == 'participant'">Define Participant Attributes</h2>
 
 <div class="layer-list">
   <span class="attribute-id" i18n-title="Attribute ID" title="ID"><legend i18n>ID</legend>
@@ -123,12 +123,12 @@
                   i18n-title title="Valid labels"
                   img="tag.svg" icon="🏷"
                   class="valid-labels"
-                   href="admin/layers/validLabels/{{layer.id}}"></lib-link>
+                  href="admin/layers/validLabels?layerId={{layer.id}}"></lib-link>
         <lib-button  action="delete" [processing]="layer._deleting"
                      disabled="{{layer._cantDelete}}"
                      (press)="deleteRow(layer);"
                      class="delete"
-                      title="{{layer._cantDelete}}"></lib-button>
+                     title="{{layer._cantDelete}}"></lib-button>
         <lib-button img="up.svg" icon="↑"
                     (press)="move('up', layer);"
                     [disabled]="r == 0"

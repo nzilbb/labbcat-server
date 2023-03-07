@@ -88,6 +88,8 @@ import { AdminAttributesComponent } from './admin-attributes/admin-attributes.co
             { path: 'admin/annotators', component: AdminAnnotatorsComponent },
             { path: 'admin/layers/validLabels/:layerId', component: AdminLayerLabelsComponent,
               canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/layers/validLabels', component: AdminLayerLabelsComponent,
+              canDeactivate: [PendingChangesGuard] },
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
             { path: 'admin/attributes/:scope', component: AdminAttributesComponent},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
