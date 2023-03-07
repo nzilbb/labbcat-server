@@ -57,7 +57,7 @@
   </span>
   <span class="buttons">
     <lib-button action="create" [processing]="creating"
-                (press)="name.reportValidity() && labelType.reportValidity() && label.reportValidity() && createRow(name.value, labelType.value, label.value, access.value, searchable.value, category.value, description.value) && !(name.value = label.value = description.value = '') && !(labelType.selectedIndex = access.selectedIndex = searchable.selectedIndex = category.selectedIndex = 0);"
+                (press)="name.reportValidity() && labelType.reportValidity() && createRow(name.value, labelType.value, label.value || name.value, access.value, searchable.value, category.value, description.value) && !(name.value = label.value = description.value = '') && !(labelType.selectedIndex = access.selectedIndex = searchable.selectedIndex = category.selectedIndex = 0);"
                 i18n-title title="Add new record"></lib-button>
   </span>
   <span class="layer-description new-layer" i18n-title title="Description"><legend i18n>Description</legend>
@@ -67,7 +67,7 @@
   </span>
 
   <lib-wait *ngIf="!rows"></lib-wait>
-  <ng-container class="item" *ngFor="let layer of rows">
+  <ng-container class="item" *ngFor="let layer of rows; index as r;">
     <ng-container *ngIf="newAttributeId || (!categoryFilter || layer.category == categoryFilter) && (!searchabilityFilter || layer.searchable == searchabilityFilter)">
       <span class="attribute-id" i18n-title="Attribute ID" title="ID"><legend i18n>ID</legend>
         {{layer.attribute}}</span>
@@ -122,16 +122,29 @@
         <lib-link *ngIf="layer.subtype == 'select'"
                   i18n-title title="Valid labels"
                   img="tag.svg" icon="🏷"
-                  href="admin/layers/validLabels/{{layer.id}}"></lib-link>
+                  class="valid-labels"
+                   href="admin/layers/validLabels/{{layer.id}}"></lib-link>
         <lib-button  action="delete" [processing]="layer._deleting"
                      disabled="{{layer._cantDelete}}"
                      (press)="deleteRow(layer);"
-                     title="{{layer._cantDelete}}"></lib-button>
+                     class="delete"
+                      title="{{layer._cantDelete}}"></lib-button>
+        <lib-button img="up.svg" icon="↑"
+                    (press)="move('up', layer);"
+                    [disabled]="r == 0"
+                    class="move-up"
+                    i18n-title title="Move up"></lib-button>
+        <lib-button img="down.svg" icon="↓"
+                    (press)="move('down', layer);"
+                    [disabled]="r >= rows.length -1"
+                    class="move-down"
+                    i18n-title title="Move down"></lib-button>
       </span>
       <span class="layer-style" i18n-title title="Style"><legend i18n>Style</legend>
         <div *ngIf="!layer.subtype.startsWith('date') && layer.subtype != 'readonly' && layer.subtype != 'select' && layer.subtype != 'boolean'" class="min-max">
           <input type="number"
                  [(ngModel)]="layer.size"
+                 (input)="onChange(layer)"
                  i18n-title title="Size of box"
                  i18n-placeholder placeholder="Size"
                  step="1">
@@ -139,45 +152,53 @@
         <div *ngIf="layer.subtype == 'number' || layer.subtype == 'integer' || layer.subtype.startsWith('date')" class="min-max">
           <input type="number"
                  [(ngModel)]="layer.min"
+                 (input)="onChange(layer)"
                  i18n-title title="Minimum allowed value"
                  i18n-placeholder placeholder="Min"
                  step="{{layer.subtype == 'number'?0.01:1}}">
           -
           <input type="number"
                  [(ngModel)]="layer.max"
+                 (input)="onChange(layer)"
                  i18n-title title="Maximum allowed value"
                  i18n-placeholder placeholder="Max"
                  step="{{layer.subtype == 'number'?0.01:1}}" >
-          <label *ngIf="layer.subtype == 'number' || layer.subtype == 'integer'" class="slider"><input type="checkbox"
-                 [(ngModel)]="layer.slider"
-                 i18n-title title="User selects by moving a slide control"><span i18n>Slider</span></label>
+          <label *ngIf="layer.subtype == 'number' || layer.subtype == 'integer'"
+                 class="slider"><input type="checkbox"
+                                       [(ngModel)]="layer.slider"
+                                       (input)="onChange(layer)"
+                                       i18n-title title="User selects by moving a slide control"><span i18n>Slider</span></label>
         </div>
         <div *ngIf="layer.slider && (layer.subtype == 'number' || layer.subtype == 'integer')" class="min-max-labels">
           <input type="text"
                  [(ngModel)]="layer.minLabel"
+                 (input)="onChange(layer)"
                  i18n-title title="Label for minimum end of the slider"
                  i18n-placeholder placeholder="Min Label" >
           -
           <input type="text"
                  [(ngModel)]="layer.maxLabel"
+                 (input)="onChange(layer)"
                  i18n-title title="Label for maximum end of the slider"
                  i18n-placeholder placeholder="Max Label" >
         </div>
         <div *ngIf="layer.subtype == 'select'" class="other">
           <label i18n-title title="Whether the user can enter a value other than the predetermined labels">
             <input type="checkbox"
-                   [(ngModel)]="layer.slider"><span i18n>Other</span></label>
+                   [(ngModel)]="layer.slider"
+                   (input)="onChange(layer)"><span i18n>Other</span></label>
         </div>
         <div *ngIf="layer.subtype == 'select'" class="multiple">
           <label i18n-title title="Whether the user can select more than one label">
             <input type="checkbox"
                    [(ngModel)]="layer.multiple"
-                   ><span i18n>Multiple</span></label>
+                   (input)="onChange(layer)"><span i18n>Multiple</span></label>
         </div>
         <div *ngIf="layer.subtype == 'select' || layer.subtype == 'boolean'" class="radio">
           <label i18n-title title="Whether it's a list buttons to check, or a dropdown list">
             <input type="checkbox"
                    [(ngModel)]="layer.radio"
+                   (input)="onChange(layer)"
                    ><span *ngIf="layer.subtype == 'boolean' || !layer.multiple" i18n>Radio-buttons</span><span *ngIf="layer.subtype != 'boolean' && layer.multiple" i18n>Check-boxes</span></label>
         </div>
       </span><!-- style -->
@@ -192,8 +213,14 @@
   </ng-container>
 </div>
 <div class="buttons">
+  <lib-link
+    href="{{baseUrl}}admin/{{scope}}AttributeCategories"
+    img="wrench.svg" icon="🔧"
+    i18n-label label="Categories"
+    i18n-title title="Edit list of possible categories for these attributes"></lib-link>
   <lib-button action="save" [processing]="updating > 0"
               (press)="updateChangedRows();"
               *ngIf="changed"
               i18n-title title="Save all changed records"></lib-button>
+  <!-- TODO move up/down -->
 </div>

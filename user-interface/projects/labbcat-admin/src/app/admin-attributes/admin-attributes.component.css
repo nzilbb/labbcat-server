@@ -55,6 +55,10 @@ textarea { width: 100%; }
     width: auto;
 }
 
+.move-up, .move-down {
+    animation-name: delayed-fade-in;
+    animation-duration: 1s;
+}
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {

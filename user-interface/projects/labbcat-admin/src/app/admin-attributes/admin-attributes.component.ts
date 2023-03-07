@@ -13,6 +13,7 @@ import { AdminComponent } from '../admin-component';
 })
 export class AdminAttributesComponent extends AdminComponent implements OnInit {
     
+    baseUrl: string;
     scope: string;
     class_id: string;
     schema: any;
@@ -35,6 +36,7 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
     }
     
     ngOnInit(): void {
+        this.readBaseUrl();
         this.readRows();
         // need to subscribe to URL path changes, because the component will be re-used
         // from scope to scope
@@ -42,6 +44,12 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
             switchMap((params: ParamMap) => params.get('scope'))
         ).subscribe(scope => {
             this.readRows();
+        });
+    }
+
+    readBaseUrl(): void {
+        this.labbcatService.labbcat.getId((url, errors, messages) => {
+            this.baseUrl = url;
         });
     }
 
@@ -102,15 +110,17 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
             hint: description,
             searchable: filter||"0",
             access: access||"0",
-            display_order: 1000, // TODO after max(display_order)
             style: ""
         };
-        this.labbcatService.labbcat.newLayer(layer, (row, errors, messages) => {
+        this.labbcatService.labbcat.newLayer(layer, (layer, errors, messages) => {
             this.creating = false;
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
             // update the model with the field returned
-            if (row) this.rows.push(row as Layer);
+            if (layer) {
+                layer = this.parseStyle(layer)
+                this.rows.push(layer as Layer);
+            }
             this.updateChangedFlag();
 
             // if it's a select layer, go to validLabels page
@@ -124,7 +134,7 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
 
     deleteRow(row: Layer) {
         row._deleting = true;
-        if (confirm(`Are you sure you want to delete ${row.id}`)) {
+        if (confirm(`Are you sure you want to delete ${row.attribute}`)) {
             this.labbcatService.labbcat.deleteLayer(
                 row.id, (model, errors, messages) => { 
                 row._deleting = false;
@@ -138,6 +148,24 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
         } else {
             row._deleting = false;
         }
+    }
+    
+    move(direction: string, row: Layer) {
+        let indexToMoveUp = this.rows.indexOf(row);
+        let indexToMoveDown = indexToMoveUp - 1;
+        if (direction == "down") {
+            indexToMoveDown = indexToMoveUp;
+            indexToMoveUp = indexToMoveUp + 1;
+        }
+        const toMoveUp = this.rows[indexToMoveUp];
+        const toMoveDown = this.rows[indexToMoveDown];
+        const newDisplayOrder = toMoveDown.display_order;
+        toMoveDown.display_order = toMoveUp.display_order;
+        toMoveUp.display_order = newDisplayOrder;
+        this.rows[indexToMoveUp] = toMoveDown;
+        this.rows[indexToMoveDown] = toMoveUp;
+        this.onChange(toMoveUp);
+        this.onChange(toMoveDown);
     }
     
     updateChangedRows() {
@@ -155,7 +183,7 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
             // update the model with the field returned
-            const updatedRow = layer as Layer;
+            const updatedRow = this.parseStyle(layer as Layer);
             const i = this.rows.findIndex(r => {
                 return r.id == updatedRow.id; })
             this.rows[i] = updatedRow;
