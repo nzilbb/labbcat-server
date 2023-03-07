@@ -348,7 +348,7 @@ public class StoreAdministration extends Store {
     if (layer.getId() == null) errors.add(localize(request, "No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     return successResult(
-      request, store.newLayer(layer), null);
+      request, store.newLayer(layer), "Layer added: {0}", layer.getId());
   }
    
   /**
@@ -371,7 +371,7 @@ public class StoreAdministration extends Store {
     if (layer.getId() == null) errors.add(localize(request, "No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     return successResult(
-      request, store.saveLayer(layer), null);
+      request, store.saveLayer(layer), "Layer saved: {0}", layer.getId());
   }
    
   /**
