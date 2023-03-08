@@ -19,6 +19,7 @@ export class TranscriptAttributesComponent implements OnInit {
     categoryLayers: object; // string->Layer
     categoryLabels: string[];
     currentCategory: string;
+    categories: object; // string->Category
     transcript: Annotation;
     
     constructor(
@@ -30,6 +31,7 @@ export class TranscriptAttributesComponent implements OnInit {
     
     ngOnInit(): void {
         this.readBaseUrl();
+        this.readCategories();
         this.readUserInfo();
         this.readSchema().then(()=> {
             this.route.queryParams.subscribe((params) => {
@@ -39,6 +41,22 @@ export class TranscriptAttributesComponent implements OnInit {
         });
     }
     
+    readCategories(): Promise<void> {
+        this.categories = {};
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.readCategories(
+                "transcript", (categories, errors, messages) => {
+                    for (let category of categories) {
+                        this.categories[category.category] = category;
+                    }
+                    // extra pseudo category that allows administration of corpora
+                    this.categories["Corpora"] = {
+                        description: "The corpora the participant belongs to"};
+                    resolve();
+                });
+        });
+    }
+
     readUserInfo(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {

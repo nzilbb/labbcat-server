@@ -4,3 +4,7 @@
         width: 65%;
     }
 }
+.move-up, .move-down {
+    animation-name: delayed-fade-in;
+    animation-duration: 1s;
+}

@@ -23,6 +23,7 @@ export class ParticipantComponent implements OnInit {
     categoryLayers: object; // string->Layer
     categoryLabels: string[];
     currentCategory: string;
+    categories: object; // string->Category
     participant: Annotation;
     
     constructor(
@@ -35,6 +36,7 @@ export class ParticipantComponent implements OnInit {
     
     ngOnInit(): void {
         this.readBaseUrl();
+        this.readCategories();
         this.readUserInfo().then(()=> {
             this.readSchema().then(()=> {
                 this.route.queryParams.subscribe((params) => {
@@ -48,6 +50,19 @@ export class ParticipantComponent implements OnInit {
                     }
                 });
             });
+        });
+    }
+
+    readCategories(): Promise<void> {
+        this.categories = {};
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.readCategories(
+                "participant", (categories, errors, messages) => {
+                    for (let category of categories) {
+                        this.categories[category.category] = category;
+                    }
+                    resolve();
+                });
         });
     }
 

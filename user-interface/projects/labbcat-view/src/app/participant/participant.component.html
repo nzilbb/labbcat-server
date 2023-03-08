@@ -9,7 +9,8 @@
   <div class="tab-labels">
     <label *ngFor="let category of categoryLabels"
            [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
-           (click)="currentCategory = category">
+           (click)="currentCategory = category"
+           title="{{categories[category].description}}">
       {{category}}
     </label>
   </div>

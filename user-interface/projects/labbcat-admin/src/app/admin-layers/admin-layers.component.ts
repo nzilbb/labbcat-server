@@ -3,7 +3,7 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { switchMap } from 'rxjs/operators';
 
-import { Project } from '../project';
+import { Category } from '../category';
 import { MessageService, LabbcatService, Response, Layer } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
@@ -34,7 +34,7 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
     }
     
     ngOnInit(): void {
-        this.readProjects();
+        this.readCategories();
         this.readLayerManagers().then(()=>{
             this.readRows();
         });
@@ -49,11 +49,11 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
         });
     }
 
-    readProjects(): void {
-        this.labbcatService.labbcat.readProjects((projects, errors, messages) => {
+    readCategories(): void {
+        this.labbcatService.labbcat.readCategories("layer", (categories, errors, messages) => {
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
-            this.categories = projects.map(p => p.project);
+            this.categories = categories.map(c => c.category);
         });
     }
     
@@ -116,7 +116,7 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
     }
 
     creating = false;
-    createRow(name: string, labelType: string, alignment: string, manager: string, enabled: string, project: string, description: string): boolean {
+    createRow(name: string, labelType: string, alignment: string, manager: string, enabled: string, category: string, description: string): boolean {
         this.creating = true;
         
         let layer = {
@@ -130,7 +130,7 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
             saturated: alignment == "0",
             type: labelType,
             validLabels: {},
-            category: project,
+            category: category,
             enabled: enabled,
             layer_manager_id: manager
         };

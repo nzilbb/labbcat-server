@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { EditComponent } from '../edit-component';
+import { Category } from '../category';
 import { Annotation, Response, Layer, User } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
@@ -19,6 +20,7 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
     categoryLayers: object; // string->Layer
     categoryLabels: string[];
     currentCategory: string;
+    categories: object; // string->Category
     transcript: object;
     updating = false;
     multiValueAttributes: object; // layerId->(value->ticked)
@@ -37,11 +39,25 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
     
     ngOnInit(): void {
         this.readBaseUrl();
+        this.readCategories();
         this.readSchema().then(()=> {
             this.route.queryParams.subscribe((params) => {
                 this.id = params["id"]
                 this.readTranscript();
             });
+        });
+    }
+
+    readCategories(): Promise<void> {
+        this.categories = {};
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.readCategories(
+                "transcript", (categories, errors, messages) => {
+                    for (let category of categories) {
+                        this.categories[category.category] = category;
+                    }
+                    resolve();
+                });
         });
     }
 

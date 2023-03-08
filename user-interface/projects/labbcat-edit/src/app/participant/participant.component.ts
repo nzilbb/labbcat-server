@@ -19,6 +19,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
     categoryLayers: object; // string->Layer
     categoryLabels: string[];
     currentCategory: string;
+    categories: object; // string->Category
     participant: Annotation;
     updating = false;
     multiValueAttributes: object; // layerId->(value->ticked)
@@ -39,11 +40,28 @@ export class ParticipantComponent extends EditComponent implements OnInit {
     
     ngOnInit(): void {
         this.readBaseUrl();
+        this.readCategories();
         this.readSchema().then(()=> {
             this.route.queryParams.subscribe((params) => {
                 this.id = params["id"]
                 this.readParticipant();
             });
+        });
+    }
+
+    readCategories(): Promise<void> {
+        this.categories = {};
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.readCategories(
+                "participant", (categories, errors, messages) => {
+                    for (let category of categories) {
+                        this.categories[category.category] = category;
+                    }
+                    // extra pseudo category that allows administration of corpora
+                    this.categories["Corpora"] = {
+                        description: "The corpora the participant belongs to"};
+                    resolve();
+                });
         });
     }
 

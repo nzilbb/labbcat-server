@@ -2318,6 +2318,46 @@
                 .send();
         }
                 
+        /**
+         * Reads a list of category records.
+         * @see LabbcatAdmin#createCategory
+         * @see LabbcatAdmin#updateCategory
+         * @see LabbcatAdmin#deleteCategory
+         * @param {string} class_id What attributes to read; "transcript" or "participant". 
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of category records with the following
+         * attributes:
+         * <dl>
+         *  <dt> class_id </dt> <dd> The class_id of the category. </dd>
+         *  <dt> category </dt> <dd> The name/id of the category. </dd>
+         *  <dt> description </dt> <dd> The description of the category. </dd>
+         *  <dt> display_order </dt> <dd> Where the category appears among other categories. </dd>
+         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. </dd>
+         * </dl>
+         */
+        readCategories(class_id, pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            if (class_id == "participant") class_id = "speaker";
+            this.createRequest(
+                `categories/${class_id}`, {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, `${this.baseUrl}api/categories/${class_id}`)
+                .send();
+        }
+        
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
@@ -3109,7 +3149,7 @@
         
         /**
          * Creates a new category record.
-         * @see LabbcatAdmin#readCategories
+         * @see LabbcatView#readCategories
          * @see LabbcatAdmin#updateCategory
          * @see LabbcatAdmin#deleteCategory
          * @param {string} class_id What attributes the category applies to; "transcript" or
@@ -3134,49 +3174,9 @@
         }
         
         /**
-         * Reads a list of category records.
-         * @see LabbcatAdmin#createCategory
-         * @see LabbcatAdmin#updateCategory
-         * @see LabbcatAdmin#deleteCategory
-         * @param {string} class_id What attributes to read; "transcript" or "participant". 
-         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
-         * records will be returned). 
-         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
-         * @param {resultCallback} onResult Invoked when the request has returned a 
-         * <var>result</var> which will be: A list of category records with the following
-         * attributes:
-         * <dl>
-         *  <dt> class_id </dt> <dd> The class_id of the category. </dd>
-         *  <dt> category </dt> <dd> The name/id of the category. </dd>
-         *  <dt> description </dt> <dd> The description of the category. </dd>
-         *  <dt> display_order </dt> <dd> Where the category appears among other categories. </dd>
-         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
-         *    records returned from the server that can not currently be deleted; 
-         *    a string representing the reason the record can't be deleted. </dd>
-         * </dl>
-         */
-        readCategories(class_id, pageNumber, pageLength, onResult) {
-            if (typeof pageNumber === "function") { // (onResult)
-                onResult = pageNumber;
-                pageNumber = null;
-                pageLength = null;
-            } else if (typeof l === "function") { // (p, onResult)
-                onResult = l;
-                pageLength = null;
-            }
-            if (class_id == "participant") class_id = "speaker";
-            this.createRequest(
-                `categories/${class_id}`, {
-                    pageNumber:pageNumber,
-                    pageLength:pageLength
-                }, onResult, `${this.baseUrl}api/admin/categories/${class_id}`)
-                .send();
-        }
-        
-        /**
          * Updates an existing category record.
          * @see LabbcatAdmin#createCategory
-         * @see LabbcatAdmin#readCategories
+         * @see LabbcatView#readCategories
          * @see LabbcatAdmin#deleteCategory
          * @param {string} class_id What attributes the category applies to; "transcript" or
          * "participant". 
@@ -3200,7 +3200,7 @@
         /**
          * Deletes an existing category record.
          * @see LabbcatAdmin#createCategory
-         * @see LabbcatAdmin#readCategories
+         * @see LabbcatView#readCategories
          * @see LabbcatAdmin#updateCategory
          * @param {string} class_id What attributes the category applies to; "transcript" or
          * "participant". 

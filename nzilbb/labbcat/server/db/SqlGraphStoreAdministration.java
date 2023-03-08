@@ -426,11 +426,10 @@ public class SqlGraphStoreAdministration
             }
                   
             // category
+            if (layer.getCategory() == null) layer.setCategory("");
             if (!(""+oldVersion.getCategory()).equals(layer.getCategory())) {
               PreparedStatement sql = getConnection().prepareStatement(
-                "UPDATE layer"
-                +" SET project_id = (SELECT project_id FROM project WHERE project = ?)"
-                +" WHERE layer_id = ?");
+                "UPDATE layer SET category = ? WHERE layer_id = ?");
               sql.setString(1, layer.getCategory());
               sql.setInt(2, layer_id);
               sql.executeUpdate();
@@ -728,19 +727,8 @@ public class SqlGraphStoreAdministration
         }
 
       } else { // a temporal layer
-      
-        int project_id = -1;
+              
         PreparedStatement sql = getConnection().prepareStatement(
-          "SELECT project_id FROM project WHERE project = ?");
-        if (layer.getCategory() != null) {
-          sql.setString(1, layer.getCategory());
-          ResultSet rs = sql.executeQuery();
-          if (rs.next()) project_id = rs.getInt(1);
-          rs.close();
-        }
-        sql.close();
-        
-        sql = getConnection().prepareStatement(
           "SELECT MAX(layer_id) + 1 FROM layer");
         ResultSet rs = sql.executeQuery();
         rs.next();
@@ -756,7 +744,7 @@ public class SqlGraphStoreAdministration
           "INSERT INTO layer"
           +" (layer_id, short_description, description, notes, alignment," // TODO remove description
           +" peers, peers_overlap, parent_includes, saturated, type,"
-          +" layer_manager_id, enabled, project_id, parent_id, scope, extra)"
+          +" layer_manager_id, enabled, category, parent_id, scope, extra)"
           +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         sql.setInt(1, layer_id);
         sql.setString(2, layer.getId());
@@ -822,10 +810,10 @@ public class SqlGraphStoreAdministration
         } else {
           sql.setNull(12, java.sql.Types.VARCHAR);
         }
-        if (project_id >= 0) {
-          sql.setInt(13, project_id);
+        if (layer.getCategory() != null) {
+          sql.setString(13, layer.getCategory());
         } else {
-          sql.setNull(13, java.sql.Types.INTEGER);
+          sql.setString(13, "");
         }
         
         try {

@@ -516,11 +516,11 @@ public class SqlGraphStore implements GraphStore {
     LinkedHashMap<String,Layer> layerLookup = new LinkedHashMap<String,Layer>();
     try {
       PreparedStatement sql = getConnection().prepareStatement(
-        "SELECT layer.*, project.project, parent_layer.short_description AS parent_name"
+        "SELECT layer.*, parent_layer.short_description AS parent_name"
         +" FROM layer"
-        +" LEFT OUTER JOIN project ON layer.project_id = project.project_id"
+        +" LEFT OUTER JOIN attribute_category ON layer.category = attribute_category.category"
         +" LEFT OUTER JOIN layer parent_layer ON layer.parent_id = parent_layer.layer_id"
-        +" ORDER BY layer.layer_id");
+        +" ORDER BY attribute_category.display_order, layer.layer_id");
       ResultSet rs = sql.executeQuery();
       try {
         while (rs.next()) {
@@ -650,8 +650,8 @@ public class SqlGraphStore implements GraphStore {
     } else {
       layer.setType(Constants.TYPE_STRING);
     }
-    if (rs.getString("project") != null) {
-      layer.setCategory(rs.getString("project"));
+    if (rs.getString("category") != null) {
+      layer.setCategory(rs.getString("category"));
     }
       
     // other attributes
@@ -662,7 +662,6 @@ public class SqlGraphStore implements GraphStore {
     layer.put("scope", rs.getString("scope"));
     layer.put("enabled", rs.getString("enabled"));
     layer.put("notes", rs.getString("notes"));
-    layer.put("project_id", rs.getString("project_id"));
     layer.put("data_mime_type", rs.getString("data_mime_type"));
     layer.put("style", rs.getString("style"));
       
@@ -858,9 +857,9 @@ public class SqlGraphStore implements GraphStore {
       }
 
       PreparedStatement sql = getConnection().prepareStatement(
-        "SELECT layer.*, project.project, parent_layer.short_description AS parent_name"
+        "SELECT layer.*, attribute_category.category, parent_layer.short_description AS parent_name"
         +" FROM layer"
-        +" LEFT OUTER JOIN project ON layer.project_id = project.project_id"
+        +" LEFT OUTER JOIN attribute_category ON layer.category = attribute_category.category"
         +" LEFT OUTER JOIN layer parent_layer ON layer.parent_id = parent_layer.layer_id"
         +" WHERE layer.short_description = ?");
       sql.setString(1, id);

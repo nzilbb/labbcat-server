@@ -142,6 +142,12 @@ public class AdminCategories extends TableServletBase {
                 new Vector<String>(){{add("class_id");add("category");}},
                 "{0,choice,1#There is still a layer using this category: {1}"
                 +"|1<There are still {0} layers using this category, including {1}}"));
+          add(new DeleteCheck(
+                "SELECT COUNT(*), MIN(short_description) FROM layer"
+                +" WHERE 'layer' = ? AND category = ?",
+                new Vector<String>(){{add("class_id");add("category");}},
+                "{0,choice,1#There is still a layer using this category: {1}"
+                +"|1<There are still {0} layers using this category, including {1}}"));
         }};
    }
   
@@ -175,7 +181,8 @@ public class AdminCategories extends TableServletBase {
          }
          // validate class_id
          if (!record.getString("class_id").equals("transcript")
-             && !record.getString("class_id").equals("speaker")) {
+             && !record.getString("class_id").equals("speaker")
+             && !record.getString("class_id").equals("layer")) {
            errors.add(localize(request, "Scope invalid: {0}", record.getString("class_id")));
          }
        }
