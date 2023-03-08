@@ -49,7 +49,7 @@
     <select #category
             [(ngModel)]="categoryFilter">
       <option selected value="" i18n="Category label">Category</option>
-      <option *ngFor="let category of categories" value="{{category}}">{{category}}</option>
+      <option *ngFor="let category of categories" value="{{category.category}}">{{category.category}}</option>
     </select>
     <img src="{{imagesLocation+'/filter.svg'}}" i18n-alt alt="Filter"
          i18n-title title="Filter the list"
@@ -113,8 +113,7 @@
         <select #category
                 [(ngModel)]="layer.category"
                 (input)="onChange(layer)">
-          <option value="" i18n="No category">[none]</option>
-          <option *ngFor="let category of categories" value="{{category}}">{{category}}</option>
+          <option *ngFor="let category of categories" value="{{category.category}}">{{category.category}}</option>
         </select>
       </span>
       <span class="buttons">
@@ -213,14 +212,12 @@
   </ng-container>
 </div>
 <div class="buttons">
-  <lib-link
-    href="{{baseUrl}}admin/{{scope}}AttributeCategories"
-    img="wrench.svg" icon="🔧"
-    i18n-label label="Categories"
-    i18n-title title="Edit list of possible categories for these attributes"></lib-link>
+  <lib-link [routerLink]="['../../categories',scope]"
+            img="wrench.svg" icon="🔧"
+            i18n-label label="Categories"
+            i18n-title title="Edit list of possible categories for these attributes"></lib-link>
   <lib-button action="save" [processing]="updating > 0"
               (press)="updateChangedRows();"
               *ngIf="changed"
               i18n-title title="Save all changed records"></lib-button>
-  <!-- TODO move up/down -->
 </div>

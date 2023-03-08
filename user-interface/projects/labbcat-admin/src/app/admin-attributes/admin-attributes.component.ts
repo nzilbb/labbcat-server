@@ -3,6 +3,7 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { switchMap } from 'rxjs/operators';
 
+import { Category } from '../category';
 import { MessageService, LabbcatService, Response, Layer } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
@@ -20,7 +21,7 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
     rows: Layer[];
     layerManagers: any[];
     layerManagerLookup = {};
-    categories: string[];
+    categories: Category[];
     
     newAttributeId = "";
     categoryFilter = "";
@@ -37,13 +38,14 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
     
     ngOnInit(): void {
         this.readBaseUrl();
-        this.readRows();
         // need to subscribe to URL path changes, because the component will be re-used
         // from scope to scope
         this.route.paramMap.pipe(
             switchMap((params: ParamMap) => params.get('scope'))
         ).subscribe(scope => {
-            this.readRows();
+            this.readCategories().then(()=>{
+                this.readRows();
+            });
         });
     }
 
@@ -53,11 +55,23 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
         });
     }
 
+    readCategories(): Promise<void> {
+        this.scope = this.route.snapshot.paramMap.get('scope');
+        this.class_id = this.scope == "participant"?"speaker":this.scope;
+        this.categories = [];
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.readCategories(
+                this.class_id, (categories, errors, messages) => {
+                    this.categories = categories;
+                    resolve();
+                });
+        });
+    }
+    
     readRows(): void {
         this.rows = null;
         this.scope = this.route.snapshot.paramMap.get('scope');
         this.class_id = this.scope == "participant"?"speaker":this.scope;
-        this.categories = [];
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
             if (errors) errors.forEach(m => this.messageService.error(m));
@@ -69,10 +83,7 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
                     let layer = schema.layers[l] as Layer;
                     if (isLayerInScope(layer)) {
                         // make sure category is set
-                        layer.category = layer.category || "General";
-                        if (!this.categories.includes(layer.category)) {
-                            this.categories.push(layer.category);
-                        }
+                        layer.category = layer.category || this.categories[0].category;
                         layer = this.parseStyle(layer)
                         this.rows.push(layer);
                     }

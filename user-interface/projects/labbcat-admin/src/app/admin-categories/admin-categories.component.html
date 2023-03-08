@@ -1,0 +1,50 @@
+<h2 *ngIf="scope == 'transcript'" i18n="page header">Transcript Attribute Categories</h2>
+<h2 *ngIf="scope == 'participant'" i18n="page header">Participant Attribute Categories</h2>
+<div class="list category-list">
+  <div class="item add-new">
+    <span class="category-name" i18n-title title="Name"><legend i18n>Name</legend>
+      <input #category type="text" required i18n-placeholder placeholder="Name"></span>
+    <span class="category-description" i18n-title title="Description"><legend i18n>Description</legend>
+      <textarea #description i18n-placeholder placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <lib-button action="create"
+                  (press)="category.reportValidity() && createRow(category.value, description.value); category.value = description.value = '';" [processing]="creating"
+                  i18n-title title="Add new record"></lib-button>
+    </span>
+  </div>
+  
+  <lib-wait *ngIf="!rows"></lib-wait>
+  <div class="item" *ngFor="let category of rows; index as r;">
+    <span class="category-name" i18n-title title="Name"><legend i18n>Name</legend>
+      {{category.category}}</span>
+    <span class="category-description" i18n-title title="Description"><legend i18n>Description</legend>
+      <textarea #description
+                [(ngModel)]="category.description"
+                (input)="onChange(category)"
+                i18n-placeholder placeholder="Description"></textarea>
+    </span>
+    <span class="buttons">
+      <lib-button action="delete"
+                  disabled="{{category._cantDelete}}"
+                  (press)="deleteRow(category);"  [processing]="category._deleting"
+                  title="{{category._cantDelete}}"></lib-button>
+      <lib-button img="up.svg" icon="↑"
+                  (press)="move('up', category);"
+                  [disabled]="r == 0"
+                  class="move-up"
+                  i18n-title title="Move up"></lib-button>
+      <lib-button img="down.svg" icon="↓"
+                  (press)="move('down', category);"
+                  [disabled]="r >= rows.length -1"
+                  class="move-down"
+                  i18n-title title="Move down"></lib-button>
+    </span>
+  </div>
+</div>
+<div class="buttons">
+  <lib-button action="save"
+              (press)="updateChangedRows();" [processing]="updating > 0"
+              *ngIf="changed"
+              i18n-title title="Save all changed records"></lib-button>
+</div>
