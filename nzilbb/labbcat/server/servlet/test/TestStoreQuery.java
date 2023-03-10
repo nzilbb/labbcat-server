@@ -229,7 +229,54 @@ public class TestStoreQuery
          "layer.id == 'orthography' && label == 'and'", 2, 0);
       assertEquals("getMatchingAnnotations: Two annotations are returned",
                    2, annotations.length);
+      
+      
+      String[] values = l.aggregateMatchingAnnotations(
+        "COUNT", "layer.id == 'orthography' && label == 'and'");
+      assertEquals("aggregateMatchingAnnotations(COUNT): A single value was returned",
+                   1, values.length);
+      assertTrue("aggregateMatchingAnnotations(COUNT): It looks like a number",
+                 values[0].matches("[0-9]+"));
+      int tokenCount = Integer.parseInt(values[0]);
 
+      values = l.aggregateMatchingAnnotations(
+        "DISTINCT", "layer.id == 'orthography' && /^a.*/.test(label)");
+      assertTrue("aggregateMatchingAnnotations(DISTINCT): Some values returned",
+                 values.length > 0);
+      int typeCount = values.length;
+
+      values = l.aggregateMatchingAnnotations(
+        "COUNT DISTINCT", "layer.id == 'orthography' && /^a.*/.test(label)");
+      assertEquals("aggregateMatchingAnnotations(COUNT DISTINCT): One value returned",
+                   1, values.length);
+      assertEquals("aggregateMatchingAnnotations(COUNT DISTINCT): Correct value returned",
+                   typeCount, Integer.parseInt(values[0]));
+      
+      values = l.aggregateMatchingAnnotations(
+        "DISTINCT,COUNT", "layer.id == 'orthography' && /^a.*/.test(label)");
+      assertTrue("aggregateMatchingAnnotations(DISTINCT,COUNT): Some values returned",
+                 values.length > 0);
+      assertEquals("aggregateMatchingAnnotations(DISTINCT,COUNT): Even number of values returned",
+                   0, values.length % 2);
+      assertTrue("aggregateMatchingAnnotations(DISTINCT,COUNT): First value looks like an orthography",
+                 values[0].matches("[a-z0-9]+"));
+      assertEquals("aggregateMatchingAnnotations(DISTINCT,COUNT): 2x typeCount",
+                   2 * typeCount, values.length);
+
+      values = l.aggregateMatchingAnnotations(
+        "MAX", "layer.id == 'orthography' && /^a.*/.test(label)");
+      assertEquals("aggregateMatchingAnnotations(MAX): One value returned",
+                   1, values.length);
+      assertTrue("aggregateMatchingAnnotations(MAX): Value looks right: "+values[0],
+                 values[0].startsWith("a"));
+      
+      values = l.aggregateMatchingAnnotations(
+        "MIN", "layer.id == 'orthography' && /^a.*/.test(label)");
+      assertEquals("aggregateMatchingAnnotations(MIN): One value returned",
+                   1, values.length);
+      assertEquals("aggregateMatchingAnnotations(MIN): Value is correct",
+                   "a", values[0]);
+      
       MediaTrackDefinition[] tracks = l.getMediaTracks();
       assertTrue("getMediaTracks: Some tracks are returned",
                  tracks.length > 0);

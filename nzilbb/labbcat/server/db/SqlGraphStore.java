@@ -2655,6 +2655,93 @@ public class SqlGraphStore implements GraphStore {
   }
 
   /**
+   * Identifies a list of annotations that match a particular pattern, and aggregates
+   * their labels. 
+   * <p> This allows for counting, listing distinct labels, etc.
+   * @param operation The aggregation operation(s) - e.g. 
+   * <dl>
+   *  <dt> DISTINCT </dt><dd> List the distinct labels. </dd>
+   *  <dt> MAX </dt><dd> Return the highest label. </dd>
+   *  <dt> MIN </dt><dd> Return the lowest label. </dd>
+   *  <dt> COUNT </dt><dd> Return the number of annotations. </dd>
+   *  <dt> COUNT DISTINCT </dt><dd> Return the number of distinct labels. </dd>
+   * </dl>
+   * More than one operation can be specified, by using a comma delimiter. 
+   * e.g. "DISTINCT,COUNT" will return each distinct label, followed by its count
+   * (i.e. the array will have twice the number of elements as there are distinct words,
+   * even-indexed elements are the word labels, and odd-indexed elements are the counts).
+   * @param expression An expression that determines which annotations match.
+   * <p> The expression language is loosely based on JavaScript; expressions such as the
+   * following can be used: 
+   * <ul>
+   *  <li><code>layer.id == 'orthography'</code></li>
+   *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography'</code></li> 
+   * </ul>
+   * <p><em>NB</em> all expressions must match by either id or layer.id.
+   * @return A list of results. This may have a single element (e.g. when
+   * <var>operation</var> == <q>COUNT</q>), or may be a (long) list of labels (e.g. when
+   * <var>operation</var> == <q>DISTINCT</q>. If there are multiple operations then the
+   * array will contain a multiple of the number of matching annotations. 
+   * (e.g. if <var>operation</var> == <q>DISTINCT,COUNT</q> then the array will have
+   * twice the number of elements as there are distinct words, even-indexed elements are
+   * the word labels, and odd-indexed elements are the counts.) 
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public String[] aggregateMatchingAnnotations(String operation, String expression)
+    throws StoreException, PermissionException {
+    String select = "COUNT(*)";
+    String suffix = "";
+    if (operation.equalsIgnoreCase("DISTINCT")) {
+      select = "DISTINCT annotation.label";
+      suffix = " ORDER BY annotation.label";
+    } else if (operation.equalsIgnoreCase("MAX")) {
+      select = "MAX(annotation.label)";
+      suffix = " ORDER BY annotation.label";
+    } else if (operation.equalsIgnoreCase("MIN")) {
+      select = "MIN(annotation.label)";
+      suffix = " ORDER BY annotation.label";
+    } else if (operation.equalsIgnoreCase("COUNT DISTINCT")) {
+      select = "COUNT(DISTINCT annotation.label)";
+      suffix = "";
+    } else if (operation.equalsIgnoreCase("DISTINCT,COUNT")) {
+      select = "annotation.label, COUNT(*)";
+      suffix = " GROUP BY annotation.label";
+    }
+    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+    AnnotationAgqlToSql.Query query = transformer.sqlFor(
+      expression, select, userWhereClauseGraph("", "graph"), "");
+    String sSql = query.sql
+      // remove layer expression from SELECT clause
+      .replaceAll(", '.+' AS layer FROM"," FROM")
+      // remove ORDER BY clause if any
+      .replaceAll(" ORDER BY [a-z_., ]+$","")
+      // add our own ORDER/GROUP BY if any
+      + suffix;
+    System.out.println("Aggregate QL: ("+operation+") " + expression);
+    System.out.println("Aggregate SQL: " + sSql);
+    try {
+      PreparedStatement sql = getConnection().prepareStatement(sSql);
+      ResultSet rs = sql.executeQuery();
+      try {
+        int fieldsPerRow = rs.getMetaData().getColumnCount();
+        Vector<String> values = new Vector<String>();
+        while (rs.next()) {
+          for (int f = 1; f <= fieldsPerRow; f++) {
+            values.add(rs.getString(f));
+          } // next field
+        } // next row
+        return values.toArray(new String[0]);
+      } finally {
+        rs.close();
+        sql.close();
+      }
+    } catch(SQLException exception) {
+      throw new StoreException(exception);
+    }
+  }
+
+  /**
    * Gets the annotations on given layers for a set of match IDs.
    * @param matchIds An iterator that supplies match IDs - these may be the contents of
    * the MatchId column in exported search results, token URLs, or annotation IDs.

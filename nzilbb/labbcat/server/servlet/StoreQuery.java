@@ -399,6 +399,46 @@ import org.xml.sax.*;
           </dl>
         </li>
       </ul>
+      <a id="aggregateMatchingAnnotations(java.lang.String,java.lang.String)">
+        <!--   -->
+      </a>
+      <ul class="blockList">
+        <li class="blockList">
+          <h4>/api/store/aggregateMatchingAnnotations</h4>
+          <div class="block"> Identifies a list of annotations that match a particular pattern, and aggregates their labels. <p> This allows for counting, listing distinct labels, etc.</div>
+          <dl>
+            <dt><span class="paramLabel">Parameters:</span></dt>
+            <dd><code>operation</code> - The aggregation operation(s) - e.g. 
+             <dl>
+              <dt> DISTINCT </dt><dd> List the distinct labels. </dd>
+              <dt> MAX </dt><dd> Return the highest label. </dd>
+              <dt> MIN </dt><dd> Return the lowest label. </dd>
+              <dt> COUNT </dt><dd> Return the number of annotations. </dd>
+              <dt> COUNT DISTINCT </dt><dd> Return the number of distinct labels. </dd>
+             </dl>
+             More than one operation can be specified, by using a comma delimiter. 
+             e.g. "DISTINCT,COUNT" will return each distinct label, followed by its count
+             (i.e. the array will have twice the number of elements as there are distinct words,
+             even-indexed elements are the word labels, and odd-indexed elements are the counts).</dd>
+            <dd><code>expression</code> - An expression that determines which transcripts match.
+              <p> The expression language is currently not well defined, but expressions such as the
+                following can be used: 
+             <ul>
+              <li><code>layer.id == 'orthography'</code></li>
+              <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography'</code></li> 
+             </ul>
+              <p><em>NB</em> all expressions must match by either id or layer.id.</dd>
+            <dt><span class="returnLabel">Returns:</span></dt>
+            <dd>A list of results. This may have a single element (e.g. when
+             <var>operation</var> == <q>COUNT</q>), or may be a (long) list of labels (e.g. when
+             <var>operation</var> == <q>DISTINCT</q>. If there are multiple operations then the
+             array will contain a multiple of the number of matching annotations. 
+             (e.g. if <var>operation</var> == <q>DISTINCT,COUNT</q> then the array will have
+             twice the number of elements as there are distinct words, even-indexed elements are
+             the word labels, and odd-indexed elements are the counts.) </dd>
+          </dl>
+        </li>
+      </ul>
       <a id="countAnnotations(java.lang.String,java.lang.String)">
         <!--   -->
       </a>
@@ -869,6 +909,8 @@ public class StoreQuery extends LabbcatServlet {
         json = countMatchingAnnotations(request, response, store);
       } else if (pathInfo.endsWith("getmatchingannotations")) {
         json = getMatchingAnnotations(request, response, store);
+      } else if (pathInfo.endsWith("aggregatematchingannotations")) {
+        json = aggregateMatchingAnnotations(request, response, store);
       } else if (pathInfo.endsWith("countannotations")) {
         json = countAnnotations(request, response, store);
       } else if (pathInfo.endsWith("getannotations")) {
@@ -1237,6 +1279,28 @@ public class StoreQuery extends LabbcatServlet {
     if (errors.size() > 0) return failureResult(errors);
     Annotation[] annotations = store.getMatchingAnnotations(expression, pageLength, pageNumber);
     return successResult(request, annotations, annotations.length == 0?"There are no annotations.":null);
+  }         
+
+  /**
+   * Implementation of
+   * {@link nzilbb.ag.GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
+   * @param request The HTTP request.
+   * @param request The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject aggregateMatchingAnnotations(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException {
+      
+    Vector<String> errors = new Vector<String>();
+    String operation = request.getParameter("operation");
+    if (operation == null) errors.add(localize(request, "No operation specified."));
+    String expression = request.getParameter("expression");
+    if (expression == null) errors.add(localize(request, "No expression specified."));
+    if (errors.size() > 0) return failureResult(errors);
+    String[] values = store.aggregateMatchingAnnotations(operation, expression);
+    return successResult(request, values, values.length == 0?"There are no annotations.":null);
   }         
 
   /**
