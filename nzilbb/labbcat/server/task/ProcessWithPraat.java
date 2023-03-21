@@ -1597,7 +1597,8 @@ public class ProcessWithPraat extends Task {
         +" INNER JOIN annotation_participant"
         +"  ON annotation_participant.speaker_number = speaker.speaker_number"
         +"  AND annotation_participant.layer = ?"
-        +" WHERE speaker.name = ?");
+        +" WHERE speaker.name = ?" // name, e.g. "BR178LK_MargaretSpencer"
+        +" OR CONCAT('p_', speaker.speaker_number) = ?"); // Annotation ID, e.g. "p_30"
       if (formantDifferentiationLayerId != null)
         attributes.add(formantDifferentiationLayerId);
       if (pitchDifferentiationLayerId != null)
@@ -1767,6 +1768,7 @@ public class ProcessWithPraat extends Task {
     // get participant attribute values we will need
     HashMap<String,String> attributeValues = new HashMap<String,String>();
     sqlSpeakerAttribute.setString(2, batch.elementAt(0).get(participantNameColumn));
+    sqlSpeakerAttribute.setString(3, batch.elementAt(0).get(participantNameColumn));
     if (getAttributes() != null) {
       for (String layer : getAttributes()) {
         String attribute = layer.replaceFirst("participant_","");
