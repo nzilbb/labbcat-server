@@ -67,8 +67,16 @@
  *        "category":null
  *    }
  *}</pre>
+ *
  * <p> If the <q>Accept-Language</q> request header is set, the server will endeavor to
  * localize messages to the specified language.
+ *
+ * <p> User authorization for password-protected instances of LaBB-CAT uses the 'Basic'
+ * HTTP authentication scheme. This involves sending an <q>Authorization</q> request
+ * header of the form <tt>Basic <var>TTTTTTTT</var></tt>, where <var>TTTTTTTT</var> is an
+ * authentication token formed by base64-encoding a string of the form
+ * <tt><var>username</var>:<var>password</var></tt>
+ *
  * <p> Annotation Graph store functions include:
  * <ul>
  *  <li> {@link StoreQuery GraphStoreQuery} functions for querying transcripts/annotations. </li>
