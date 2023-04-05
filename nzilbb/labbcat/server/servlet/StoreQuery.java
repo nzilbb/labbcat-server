@@ -59,7 +59,7 @@ import org.xml.sax.*;
 
 /**
  * <tt>/api/store/&hellip;</tt> :
- * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStoreQuery.html">GraphStoreQuery</a> 
+ * <a href="https://nzilbb.github.io/ag/apidocs/nzilbb/ag/GraphStoreQuery.html">GraphStoreQuery</a> 
  * functions.
       <a id="getId()">
         <!--   -->

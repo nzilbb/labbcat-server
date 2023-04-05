@@ -49,7 +49,7 @@ import org.xml.sax.*;
 
 /**
  * <tt>/api/admin/store/&hellip;</tt> :
- * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStoreAdministration.html">GraphStoreAdministration</a>
+ * <a href="https://nzilbb.github.io/ag/apidocs/nzilbb/ag/GraphStoreAdministration.html">GraphStoreAdministration</a>
  * functions. This includes all requests supported by {@link StoreQuery} and {@link Store}.
  <a id="newLayer(nzilbb.ag.Layer)">
  <!--   -->

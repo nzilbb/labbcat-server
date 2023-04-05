@@ -61,7 +61,7 @@ import org.xml.sax.*;
 
 /**
  * <tt>/api/edit/store/&hellip;</tt> :
- * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/GraphStore.html">GraphStore</a>
+ * <a href="https://nzilbb.github.io/ag/apidocs/nzilbb/ag/GraphStore.html">GraphStore</a>
  * functions. This includes all requests supported by {@link StoreQuery}.
  <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
  <!--   -->
