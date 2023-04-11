@@ -309,6 +309,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
    * fragments, of the given MIME type, or a ZIP file containing individual files. 
    * @throws Exception
    */
+  @Deprecated // TODO remove this method once legacy BatchExportTask is no longer referenced
   public Vector<NamedStream> serializeGraphs(
     String name, String[] ids, Collection<String> layers, String mimeType,
     SqlGraphStoreAdministration store)
