@@ -378,10 +378,10 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
                     try {
                       zipOut.close();
                     } catch(Exception exception) {
-                      System.err.println("CounvertFragment: Cannot close ZIP file: " + exception);
+                      System.err.println("ConvertFragment: Cannot close ZIP file: " + exception);
                     }
                   } catch(Exception exception) {
-                    System.err.println("CounvertFragment: open zip stream: " + exception);
+                    System.err.println("ConvertFragment: open zip stream: " + exception);
                   }
                 }
               }).start();
