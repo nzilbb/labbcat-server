@@ -299,5 +299,78 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
     bCancel = true;
   } // end of cancel()
    
+  /**
+   * Converts the given utterances to the given format.
+   * @param ids IDs of graphs to convert.
+   * @param layers A list of layer names.
+   * @param mimeType The target content type.
+   * @param store The graph store for retrieving serializers and graphs from.
+   * @return A Stream containing the fragments - could be a single stream with the
+   * fragments, of the given MIME type, or a ZIP file containing individual files. 
+   * @throws Exception
+   */
+  public Vector<NamedStream> serializeGraphs(
+    String name, String[] ids, Collection<String> layers, String mimeType,
+    SqlGraphStoreAdministration store)
+    throws Exception {
+      
+    bCancel = false;
+    // ensure the collection is mutable
+    layers = new Vector<String>(layers);
+      
+    String[] selectedLayerIds = layers.toArray(new String[0]);
+      
+    int iGraphCount = ids.length;
+    if (iGraphCount == 0) throw new Exception("No IDs specified");
+    int iGraph = 0;
+      
+    File fTempDir = new File(System.getProperty("java.io.tmpdir"));
+      
+    GraphSerializer serializer = store.serializerForMimeType(mimeType);
+    if (serializer == null) {
+      throw new Exception("Invalid MIME type: " + mimeType);
+    }
+    Schema schema = store.getSchema();
+    // configure serializer
+    ParameterSet configuration = new ParameterSet();
+    // default values
+    serializer.configure(configuration, schema);
+    // load saved ones
+    ConfigurationHelper.LoadConfiguration(
+      serializer.getDescriptor(), configuration, store.getSerializersDirectory(), schema);
+    serializer.configure(configuration, schema);
+    for (String l : serializer.getRequiredLayers()) layers.add(l);
+    String[] layerIds = layers.toArray(new String[0]);
+      
+    // for each transcript specified
+    Vector<Graph> graphs = new Vector<Graph>();
+    for (String id : ids) {
+      if (bCancel) break;
+
+      try {
+        graphs.add(store.getTranscript(id, layerIds));
+      } catch(Exception exception) {
+        System.err.println("SerializeGraphs error processing: " + id + " - " + exception);
+      }	    
+    } // next graph
+    iPercentComplete = 50;
+      
+    final Vector<NamedStream> files = new Vector<NamedStream>();
+    if (!bCancel) {
+      // serialize them
+      serializer.serialize(
+        graphs.spliterator(), selectedLayerIds,
+        stream -> {
+          if (bCancel) return;
+          files.add(stream);
+          iPercentComplete = 50 + Optional.of(serializer.getPercentComplete()).orElse(0)/2;
+        },
+        warning -> System.out.println("WARNING: " + warning),
+        exception -> System.err.println("SerializeFragment error: " + exception));
+      iPercentComplete = 100;
+    }
+    return files;
+  } // end of serializeGraphs()
+   
   private static final long serialVersionUID = -1;
 } // end of class SerializeGraphs
