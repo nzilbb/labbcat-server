@@ -40,11 +40,13 @@ import nzilbb.ag.StoreException;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.serialize.GraphSerializer;
 import nzilbb.ag.serialize.SerializationException;
+import nzilbb.ag.serialize.SerializerNotConfiguredException;
 import nzilbb.ag.serialize.util.ConfigurationHelper;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
+import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
 import org.w3c.dom.*;
 import org.xml.sax.*;
@@ -171,7 +173,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
         for (String l : layersToSerialize) layers.add(l);
         
         // configure serializer
-        GraphSerializer serializer = store.serializerForMimeType(mimeType);
+        final GraphSerializer serializer = store.serializerForMimeType(mimeType);
         if (serializer == null) {
           response.sendError(400, "Invalid MIME type: " + mimeType);
           return;
@@ -189,100 +191,176 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
         for (String l : serializer.getRequiredLayers()) layers.add(l);
         final String[] layersToLoad = layers.toArray(new String[0]);
 
-        // if we know we'll only produce one file, don't create a zip stream
-        if (serializer.getCardinality() == GraphSerializer.Cardinality.NToOne
-            || (serializer.getCardinality() == GraphSerializer.Cardinality.NToN
-                && ids.length == 1)) { // single output stream, return that file
-
-          response.setContentType(mimeType);
-          serializer.serialize(
-            // a source of the graph to serialize
-            Utility.OneGraphSpliterator​(
-              store.getTranscript(ids[0], layersToLoad)),
-            // the selected layers to include (not necessarily all the layers loaded)
-            layersToSerialize,
-            // what to do with the resulting stream
-            stream -> {
-              if (bCancel) return;
+        // make the serialization a monitorable, cancelable task 
+        // create a stream to pump from
+        final HttpServletResponse finalResponse = response;
+        final String finalName = name;
+        PipedInputStream inStream = new PipedInputStream();
+        final PipedOutputStream outStream = new PipedOutputStream(inStream);
+        final String[] finalIds = ids;
+        Task task = new Task() {
+            int gotGraphCount = 0;
+            public Integer getPercentComplete() {
+              if (serializer.getPercentComplete() != null) {
+                iPercentComplete = serializer.getPercentComplete();
+              } else {
+                iPercentComplete = iPercentComplete = gotGraphCount * 100 / finalIds.length;
+              }
+              return super.getPercentComplete();
+            }
+            public void run() {
+              runStart();
               try {
-                response.addHeader(
-                  "Content-Disposition", "attachment; filename=" + stream.getName());
-                OutputStream out = response.getOutputStream();
-                IO.Pump(stream.getStream(), out);
-                out.flush();
-                out.close();
-              } catch (IOException iox) {
-                log("Could no read single graph stream: " + iox);
+                
+                // if we know we'll only produce one file, don't create a zip stream
+                if (serializer.getCardinality() == GraphSerializer.Cardinality.NToOne
+                    || (serializer.getCardinality() == GraphSerializer.Cardinality.NToN
+                        && finalIds.length == 1)) { // single output stream, return that file
+                  
+                  finalResponse.setContentType(mimeType);
+                  serializer.serialize(
+                    // a source of graphs to serialize (for NToOne there might be more than one)
+                    Arrays.stream(finalIds)
+                    .map((id)->{
+                        if (bCancelling) return null;
+                        setStatus(id);
+                        try {
+                          return store.getTranscript(id, layersToLoad);
+                        } catch (Exception x) {
+                          setLastException(x);
+                          setStatus("SerializeGraphs: getTranscript("+id+"): " + x);
+                          return null;
+                        } finally {
+                          gotGraphCount += 1;
+                        }
+                      })
+                    .filter(graph->graph != null)
+                    .spliterator(),
+                    // the selected layers to include (not necessarily all the layers loaded)
+                    layersToSerialize,
+                    // what to do with the resulting stream
+                    stream -> {
+                      if (bCancelling) return;
+                      try {
+                        setStatus(stream.getName());
+                        finalResponse.addHeader(
+                          "Content-Disposition", "attachment; filename=" + stream.getName());
+                        IO.Pump(stream.getStream(), outStream);
+                        outStream.flush();
+                        outStream.close();
+                      } catch (IOException iox) {
+                        setLastException(iox);
+                        setStatus("Could no read single graph stream: " + iox);
+                      } finally {
+                        try {
+                          stream.getStream().close();
+                        } catch(Exception exception) {
+                          setStatus(
+                            "SerializeGraphs: Cannot close single graph stream: " + exception);
+                        }
+                      }
+                      iPercentComplete = 100;
+                    },
+                    warning -> setStatus("WARNING: " + warning),
+                    exception -> {
+                      setLastException(exception);
+                      setStatus("Serialization error: " + exception);
+                    });
+                    
+                  
+                } else { // multiple output streams, return a zip file
+                  
+                  // send headers
+                  finalResponse.setContentType("application/zip");
+                  finalResponse.addHeader(
+                    "Content-Disposition",
+                    "attachment; filename=" + IO.SafeFileNameUrl(finalName) + ".zip");
+                  final ZipOutputStream zipOut = new ZipOutputStream(outStream);
+                  try {
+                    
+                    // serialize the stream
+                    serializer.serialize(
+                      // a source of graphs to serialize
+                      Arrays.stream(finalIds)
+                      .map((id)->{
+                          if (bCancelling) return null;
+                          setStatus(id);
+                          try {
+                            return store.getTranscript(id, layersToLoad);
+                          } catch (Exception x) {
+                            setLastException(x);
+                            setStatus("SerializeGraphs: getTranscript("+id+"): " + x);
+                            return null;
+                          } finally {
+                            gotGraphCount += 1;
+                          }
+                        })
+                      .filter(graph->graph != null)
+                      .spliterator(),
+                      // the selected layers to include (not necessarily all the layers loaded)
+                      layersToSerialize,
+                      // what to do with the resulting streams
+                      stream -> {
+                        if (bCancelling) return;
+                        setStatus(stream.getName());
+                        try {
+                          // create the zip entry
+                          zipOut.putNextEntry(
+                            new ZipEntry(IO.SafeFileNameUrl(stream.getName())));
+                          // pump the data into it
+                          IO.Pump(stream.getStream(), zipOut, false);
+                        } catch (ZipException zx) {
+                          setLastException(zx);
+                          setStatus("SerializeGraphs: can't zip stream "+stream.getName()+": " + zx);
+                        } catch (IOException iox) {
+                          setLastException(iox);
+                          setStatus("SerializeGraphs: can't process stream "+stream.getName()+": " + iox);
+                        } finally {
+                          try {
+                            stream.getStream().close();
+                          } catch(Exception exception) {
+                            setStatus("SerializeGraphs: Cannot close graph stream: " + exception);
+                          }
+                        }
+                      },
+                      warning -> setStatus("WARNING: " + warning),
+                      exception -> {
+                        setLastException(exception);
+                        setStatus("Serialization error: " + exception);
+                      });
+
+                  } finally { // finish up
+                    try {
+                      zipOut.close();
+                    } catch(Exception exception) {
+                      setStatus("SerializeGraphs: Cannot close ZIP file: " + exception);
+                    }
+                  }
+                } // multiple output streams, return a zip file
+                setStatus(finalName + (bCancelling?" cancelled.":" complete."));
+              } catch (SerializerNotConfiguredException x) { // shouldn't happen
+                setLastException(x);
+                setStatus("Could not serialize " + finalName + ": " + x);
               } finally {
-                try {
-                  stream.getStream().close();
-                } catch(Exception exception) {
-                  log("SerializeGraphs: Cannot close single graph stream: " + exception);
+                runEnd();
+                if (getLastException() != null) {
+                  
+                  // somebody might want more info
+                  StringWriter sw = new StringWriter();
+                  PrintWriter pw = new PrintWriter(sw);
+                  getLastException().printStackTrace(pw);
+                  setStatus(getLastException() + ": " + sw.toString());
+                  pw.close();
+                            
+                  // wait a while before disappearing
+                  waitToDie();
                 }
               }
-              iPercentComplete = 100;
-            },
-            warning -> System.out.println("WARNING: " + warning),
-            exception -> log("SerializeFragment error: " + exception));
-          
-        } else { // multiple output streams, return a zip file
-
-          // send headers
-          response.setContentType("application/zip");
-          response.addHeader(
-            "Content-Disposition", "attachment; filename=" + IO.SafeFileNameUrl(name) + ".zip");
-          final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
-          try {
-            
-            // serialize the stream
-            serializer.serialize(
-              // a source of graphs to serialize
-              Arrays.stream(ids)
-              .map((id)->{
-                  try {
-                    return store.getTranscript(id, layersToLoad);
-                  } catch (Exception x) {
-                    log("SerializeGraphs: getTranscript("+id+"): " + x);
-                    return null;
-                  }
-                })
-              .filter(graph->graph != null)
-              .spliterator(),
-              // the selected layers to include (not necessarily all the layers loaded)
-              layersToSerialize,
-              // what to do with the resulting streams
-              stream -> {
-                if (bCancel) return;
-                try {
-                  // create the zip entry
-                  zipOut.putNextEntry(
-                    new ZipEntry(IO.SafeFileNameUrl(stream.getName())));
-                  // pump the data into it
-                  IO.Pump(stream.getStream(), zipOut, false);
-                } catch (ZipException zx) {
-                  log("SerializeGraphs: can't zip stream "+stream.getName()+": " + zx);
-                } catch (IOException iox) {
-                  log("SerializeGraphs: can't process stream "+stream.getName()+": " + iox);
-                } finally {
-                  try {
-                    stream.getStream().close();
-                  } catch(Exception exception) {
-                    log("SerializeGraphs: Cannot close graph stream: " + exception);
-                  }
-                }
-                iPercentComplete = Optional.ofNullable(serializer.getPercentComplete()).orElse(1);
-              },
-              warning -> System.out.println("WARNING: " + warning),
-              exception -> log("SerializeFragment error: " + exception));
-            
-          } finally { // finish up
-            try {
-              zipOut.close();
-            } catch(Exception exception) {
-              log("SerializeGraphs: Cannot close ZIP file: " + exception);
-            }
-          }
-        } // multiple output streams, return a zip file
+            } // run
+          };
+        task.setStore(store);
+        task.start();
+        IO.Pump(inStream, response.getOutputStream());
         
       } finally {
         cacheStore(store);
