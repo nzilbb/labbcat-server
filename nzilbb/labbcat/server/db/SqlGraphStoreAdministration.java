@@ -540,7 +540,7 @@ public class SqlGraphStoreAdministration
           sql.setInt(
             8, Optional.of((String)layer.get("access"))
             .orElse((String)oldVersion.get("access")).equals("0")?0:1);
-          sql.setInt(9, layer.getPeers()?0:1);
+          sql.setInt(9, layer.getPeers()?1:0);
           sql.setString(10, (String)oldVersion.get("class_id"));
           sql.setString(11, (String)oldVersion.get("attribute"));
           sql.executeUpdate();

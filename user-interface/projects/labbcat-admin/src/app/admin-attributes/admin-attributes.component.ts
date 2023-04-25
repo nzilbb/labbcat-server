@@ -301,7 +301,12 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
         }
         if (layer.slider) layer.style += " slider";
         if (layer.other) layer.style += " other";
-        if (layer.multiple) layer.style += " multiple";
+        if (layer.multiple) {
+            layer.style += " multiple";
+            layer.peers = true;
+        } else {
+            layer.peers = false;
+        }
         if (layer.radio) layer.style += " radio";
         return layer;
     }

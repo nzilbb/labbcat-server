@@ -184,7 +184,7 @@
         <div *ngIf="layer.subtype == 'select'" class="other">
           <label i18n-title title="Whether the user can enter a value other than the predetermined labels">
             <input type="checkbox"
-                   [(ngModel)]="layer.slider"
+                   [(ngModel)]="layer.other"
                    (input)="onChange(layer)"><span i18n>Other</span></label>
         </div>
         <div *ngIf="layer.subtype == 'select'" class="multiple">
