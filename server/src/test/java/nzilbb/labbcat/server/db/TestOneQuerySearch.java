@@ -77,6 +77,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
   }
   
   /** Ensure a simple word search on a word layer that's not "word" generates the correct SQL. */
@@ -121,6 +123,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
   }
   
   /** Ensure searching main participant utterances only generates the correct SQL. */
@@ -173,6 +177,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
   }
   
   /** Ensure searching aligned words only generates the correct SQL. */
@@ -226,6 +232,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
   }
   
   /** Ensure a one-column search with multiple word layers generates the correct SQL. */
@@ -279,6 +287,10 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^([aeiou].*)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description",
+                 "_^([^cCEFHiIPqQuUV0123456789~#\\{\\$@].*)$_^([aeiou].*)$",
+                 search.getDescription());
   }
   
   /** Ensure a multi-column search generates the correct SQL. */
@@ -335,6 +347,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(needle)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(knitting)$_^(needle)$", search.getDescription());
   }
   
   /** Ensure searches with min and max generate the correct SQL. */
@@ -384,6 +398,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals(Double.valueOf(2), parameters.get(0));
     assertTrue(parameters.get(0) instanceof Double);
+    
+    assertEquals("Description", "_2", search.getDescription());
 
     // max only
     search.setMatrix(
@@ -428,6 +444,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals(Double.valueOf(3), parameters.get(0));
     assertTrue(parameters.get(0) instanceof Double);
+
+    assertEquals("Description", "_3", search.getDescription());
 
     // min and max
     search.setMatrix(
@@ -476,6 +494,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof Double);
     assertEquals(Double.valueOf(3), parameters.get(1));
     assertTrue(parameters.get(1) instanceof Double);
+
+    assertEquals("Description", "_2_3", search.getDescription());
   }
   
   /** Ensure searches with word-start anchoring generate the correct SQL. */
@@ -551,6 +571,8 @@ public class TestOneQuerySearch {
     assertEquals("^(es)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
 
+    assertEquals("Description", "_^(mate)$_^(es)$", search.getDescription());
+
     parameters.clear();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -595,6 +617,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(es)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(mate)$_^(es)$", search.getDescription());
 
     // span layer
     search.setMatrix(
@@ -666,6 +690,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(haystack)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$_^(haystack)$", search.getDescription());
 
     parameters.clear();
     sql = search.generateSql(
@@ -711,6 +737,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(haystack)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$_^(haystack)$", search.getDescription());
 
     // turn start
     search.setMatrix(
@@ -759,6 +787,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
 
     // utterance start
     search.setMatrix(
@@ -819,6 +849,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
 
   }
   
@@ -894,6 +926,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(es)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(mate)$_^(es)$", search.getDescription());
 
     parameters.clear();
     sql = search.generateSql(
@@ -939,6 +973,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(es)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(mate)$_^(es)$", search.getDescription());
 
     // span layer
     search.setMatrix(
@@ -1007,6 +1043,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(haystack)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$_^(haystack)$", search.getDescription());
 
     parameters.clear();
     sql = search.generateSql(
@@ -1052,6 +1090,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(haystack)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$_^(haystack)$", search.getDescription());
 
     // turn end
     search.setMatrix(
@@ -1103,6 +1143,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
 
     // utterance end
     search.setMatrix(
@@ -1164,6 +1206,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
 
   }
   
@@ -1249,6 +1293,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("^(es)$", parameters.get(2));
     assertTrue(parameters.get(2) instanceof String);
+    
+    assertEquals("Description", "_^(yerba)$_^(mate)$_^(es)$", search.getDescription());
 
     parameters.clear();
     sql = search.generateSql(
@@ -1302,6 +1348,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("^(es)$", parameters.get(2));
     assertTrue(parameters.get(2) instanceof String);
+    
+    assertEquals("Description", "_^(yerba)$_^(mate)$_^(es)$", search.getDescription());
 
     // span layer
     search.setMatrix(
@@ -1380,6 +1428,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("^(haystack)$", parameters.get(2));
     assertTrue(parameters.get(2) instanceof String);
+    
+    assertEquals("Description", "_^(knitting)$_^(needle)$_^(haystack)$", search.getDescription());
 
     parameters.clear();
     sql = search.generateSql(
@@ -1432,6 +1482,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("^(haystack)$", parameters.get(2));
     assertTrue(parameters.get(2) instanceof String);
+    
+    assertEquals("Description", "_^(knitting)$_^(needle)$_^(haystack)$", search.getDescription());
 
     // turn end
     search.setMatrix(
@@ -1493,6 +1545,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(needle)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(knitting)$_^(needle)$", search.getDescription());
 
     // utterance end
     search.setMatrix(
@@ -1562,6 +1616,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(needle)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(knitting)$_^(needle)$", search.getDescription());
 
   }
   
@@ -1631,6 +1687,8 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(I)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(kit)$_^(I)$", search.getDescription());
 
     // only segment layer
     search.setMatrix(
@@ -1680,6 +1738,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(I)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(I)$", search.getDescription());
   }
 
   /**
@@ -1740,6 +1800,8 @@ public class TestOneQuerySearch {
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(I)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(I)$", search.getDescription());
 
   }
 
