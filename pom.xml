@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+  <modelVersion>4.0.0</modelVersion>
+    
+  <groupId>nz.ilbb.labbcat</groupId>
+    
+  <artifactId>labbcat</artifactId>
+    
+  <version>1.0.0</version>
+    
+  <name>LaBB-CAT web-app</name>
+    
+  <packaging>pom</packaging>
+    
+  <description>
+    Implementation of LaBB-CAT server-hosted components, including back-end servlets and services.
+  </description>
+    
+  <url>https://github.com/nzilbb/labbcat/</url>
+    
+  <licenses>
+        
+    <license>
+            
+      <name>AGPL-3.0-or-later</name>
+            
+      <comments>GNU Affero General Public License v3.0 or later</comments>
+            
+      <url>https://www.gnu.org/licenses/agpl.txt</url>
+            
+      <distribution>manual</distribution>
+      <!-- change to repo once it's in there -->
+          
+    </license>
+      
+  </licenses>
+    
+  <scm>
+        
+    <connection>scm:git:git://github.com/nzilbb/labbcat.git</connection>
+        
+    <developerConnection>scm:git:ssh://github.com:nzilbb/labbcat.git</developerConnection>
+        
+    <url>https://github.com/nzilbb/labbcat/tree/main</url>
+      
+  </scm>
+    
+  <developers>
+        
+    <developer>
+            
+      <id>robert</id>
+            
+      <name>Robert Fromont</name>
+            
+      <email>robert.fromont@canterbury.ac.nz</email>
+            
+      <url>https://github.com/robertfromont</url>
+            
+      <organization>New Zealand Institute of Language, Brain and Behaviour</organization>
+            
+      <organizationUrl>https://www.canterbury.ac.nz/nzilbb/</organizationUrl>
+            
+      <roles>
+                
+        <role>architect</role>
+                
+        <role>developer</role>
+              
+      </roles>
+            
+      <timezone>America/Buenos_Aires</timezone>
+          
+    </developer>
+      
+  </developers>
+    
+  <!--distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement-->
+    
+  
+  <properties>
+        
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        
+    <maven.compiler.source>1.8</maven.compiler.source>
+        
+    <maven.compiler.target>1.8</maven.compiler.target>
+      
+  </properties>
+    
+  <modules>
+        
+    <module>server</module>
+      
+  </modules>
+    
+  <profiles>
+        
+    <profile>
+            
+      <id>release</id>
+            
+      <build>
+                
+        <plugins>
+                    
+          <plugin>
+                        
+            <groupId>org.apache.maven.plugins</groupId>
+                        
+            <artifactId>maven-source-plugin</artifactId>
+                        
+            <version>2.2.1</version>
+                        
+            <executions>
+                            
+              <execution>
+                                
+                <id>attach-sources</id>
+                                
+                <goals>
+                                    
+                  <goal>jar-no-fork</goal>
+                                  
+                </goals>
+                              
+              </execution>
+                          
+            </executions>
+                      
+          </plugin>
+                    
+          <plugin>
+            	    
+            <groupId>org.apache.maven.plugins</groupId>
+            	    
+            <artifactId>maven-javadoc-plugin</artifactId>
+                        
+            <version>3.2.0</version>
+            	    
+            <configuration>
+                            
+              <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+                            
+              <show>protected</show>
+              	      
+              <bottom>&lt;a rel='license' href='http://creativecommons.org/licenses/by-sa/2.0/'&gt;&lt;img alt='CC-BY-SA Creative Commons Licence ' src='/ag/images/cc-by-sa.svg' title='This work is licensed under a Creative Commons Attribution-ShareAlike 2.0 Generic License' /&gt;&lt;/a&gt;&lt;a rel='author' href='https://www.canterbury.ac.nz/nzilbb/'&gt;&lt;img src='/ag/images/nzilbb.svg' alt='Te Kāhui Roro Reo | The New Zealand Institute of Language, Brain and Behaviour' title='&#127279; ${maven.build.timestamp} NZILBB'&gt;&lt;/a&gt;</bottom>
+              	    
+            </configuration>
+                        
+            <executions>
+                            
+              <execution>
+                                
+                <id>attach-javadocs</id>
+                                
+                <goals>
+                                    
+                  <goal>jar</goal>
+                                  
+                </goals>
+                              
+              </execution>
+                          
+            </executions>
+                      
+          </plugin>
+                    
+          <plugin>
+                        
+            <groupId>org.apache.maven.plugins</groupId>
+                        
+            <artifactId>maven-gpg-plugin</artifactId>
+                        
+            <version>1.5</version>
+                        
+            <executions>
+                            
+              <execution>
+                                
+                <id>sign-artifacts</id>
+                                
+                <phase>verify</phase>
+                                
+                <goals>
+                                    
+                  <goal>sign</goal>
+                                  
+                </goals>
+                              
+              </execution>
+                          
+            </executions>
+                      
+          </plugin>
+                    
+          <plugin>
+                        
+            <groupId>org.sonatype.plugins</groupId>
+                        
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+                        
+            <version>1.6.7</version>
+                        
+            <extensions>true</extensions>
+                        
+            <configuration>
+                            
+              <serverId>ossrh</serverId>
+                            
+              <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                            
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                          
+            </configuration>
+                      
+          </plugin>
+                  
+        </plugins>
+              
+      </build>
+          
+    </profile>
+      
+  </profiles>
+  
+</project>
