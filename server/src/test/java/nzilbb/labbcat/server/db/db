@@ -1,0 +1,10 @@
+  /home/robert/nzilbb/labbcat-server/server/src/test/java/nzilbb/labbcat/server/db:
+  total used in directory 348 available 69.6 GiB
+  drwxr-xr-x 2 robert tomcat   4096 Apr 27 13:35 .
+  drwxr-xr-x 6 robert tomcat   4096 Apr 27 13:35 ..
+  -rw-r--r-- 1 robert tomcat  40615 Mar 30  2022 TestAnnotationAgqlToSql.java
+  -rw-r--r-- 1 robert tomcat  30635 Apr 25 12:27 TestGraphAgqlToSql.java
+  -rw-r--r-- 1 robert tomcat  29966 Sep 21  2021 TestGraphAgqlToSqlLegacyStyle.java
+  -rw-r--r-- 1 robert tomcat  12373 Apr 27 13:17 TestOneQuerySearch.java
+  -rw-r--r-- 1 robert tomcat  28164 Mar  2 18:53 TestParticipantAgqlToSql.java
+  -rw-r--r-- 1 robert tomcat  22316 Jan 16 10:03 TestParticipantAgqlToSqlLegacyStyle.java
