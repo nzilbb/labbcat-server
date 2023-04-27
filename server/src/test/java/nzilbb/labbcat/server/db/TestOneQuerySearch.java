@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -41,7 +41,7 @@ public class TestOneQuerySearch {
     search.setMatrix(
       new Matrix().addColumn(
         new Column().addLayerMatch(
-          new LayerMatch().setId("word").setPattern("needle"))));
+          new LayerMatch().setId("word").setPattern("needle").setTarget(true))));
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
     assertEquals(
@@ -52,11 +52,11 @@ public class TestOneQuerySearch {
       +" target_annotation_uid) SELECT ?, search_0_0.ag_id AS ag_id,"
       +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_0.start_anchor_id,"
       +" search_0_0.end_anchor_id,0, NULL AS segment_annotation_id,"
-      +" search_0_0.word_annotation_id AS target_annotation_id,"
+      +" search_0_0.annotation_id AS target_annotation_id,"
       +" search_0_0.turn_annotation_id AS turn_annotation_id,"
       +" search_0_0.word_annotation_id AS first_matched_word_annotation_id,"
       +" search_0_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
-      +" CONCAT('ew_0_', search_0_0.word_annotation_id) AS target_annotation_uid"
+      +" CONCAT('ew_0_', search_0_0.annotation_id) AS target_annotation_uid"
       +" FROM annotation_layer_11 turn"
       +" /* extra joins */"
       +"  INNER JOIN annotation_layer_0 search_0_0"
@@ -64,15 +64,164 @@ public class TestOneQuerySearch {
       +"  AND search_0_0.label  REGEXP  ?"
       +" /* subsequent columns */"
       +"  WHERE 1=1"
-      +" /* transcript type */"
-      +"  /* who */"
-      +"  /* main speaker clause */"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
       +"  /* access clause */"
       +"  /* first column: */"
       +" /* border conditions */"
       +"  /* search criteria subqueries */"
       +"  /* subsequent columns */"
       +"  ORDER BY search_0_0.turn_annotation_id, search_0_0.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+  }
+  
+  /** Ensure a simple word search on a word layer that's not "word" generates the correct SQL. */
+  @Test public void oneWordLayerSearch() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(
+          new LayerMatch().setId("orthography").setPattern("needle"))));
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+  }
+  
+  /** Ensure searching main participant utterances only generates the correct SQL. */
+  @Test public void mainParticipant() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(
+          new LayerMatch().setId("orthography").setPattern("needle"))));
+
+    // main participant
+    Vector<Object> parameters = new Vector<Object>();
+    search.setMainParticipantOnly(true);
+    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN transcript_speaker"
+      +" ON transcript_speaker.ag_id = turn.ag_id"
+      +" AND turn.label REGEXP '^[0-9]+$'"
+      +" AND transcript_speaker.speaker_number = CAST(turn.label AS SIGNED)"
+      +"  /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  AND transcript_speaker.main_speaker = 1"
+      +" /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+  }
+  
+  /** Ensure searching aligned words only generates the correct SQL. */
+  @Test public void alignedWords() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(
+          new LayerMatch().setId("orthography").setPattern("needle"))));
+
+    // main participant
+    Vector<Object> parameters = new Vector<Object>();
+    search.setAnchorConfidenceThreshold((byte)50);
+    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start"
+      +" ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" AND word_0_start.alignment_status >= 50"
+      +" INNER JOIN anchor word_0_end"
+      +" ON word_0_end.anchor_id = search_0_2.end_anchor_id"
+      +" AND word_0_end.alignment_status >= 50"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
       sql);
     assertEquals("number of parameters" + parameters, 1, parameters.size());
     assertEquals("^(needle)$", parameters.get(0));
@@ -115,9 +264,9 @@ public class TestOneQuerySearch {
       +"  AND search_0_2.label  REGEXP  ?"
       +" /* subsequent columns */"
       +"  WHERE 1=1"
-      +" /* transcript type */"
-      +"  /* who */"
-      +"  /* main speaker clause */"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
       +"  /* access clause */"
       +"  /* first column: */"
       +" /* border conditions */"
@@ -132,6 +281,1468 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(1) instanceof String);
   }
   
+  /** Ensure a multi-column search generates the correct SQL. */
+  @Test public void multiColumnSearch() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("knitting"))
+                 .setAdj(2))                 
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
+      );
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +" WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  /* column _1: */"
+      +"  AND search_1_2.ordinal_in_turn"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(knitting)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(needle)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+  }
+  
+  /** Ensure searches with min and max generate the correct SQL. */
+  @Test public void numericSearches() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+
+    // min only
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("syllableCount")
+                                .setMin("2")))
+      );
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "min only",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_186.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_186.start_anchor_id,"
+      +" search_0_186.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_186.word_annotation_id AS target_annotation_id,"
+      +" search_0_186.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_186.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_186.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_186.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_186 search_0_186"
+      +"  ON search_0_186.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_186.label AS DECIMAL) >= ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_186.turn_annotation_id, search_0_186.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals(Double.valueOf(2), parameters.get(0));
+    assertTrue(parameters.get(0) instanceof Double);
+
+    // max only
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("syllableCount")
+                                .setMax("3")))
+      );
+    parameters.clear();
+    sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "max only",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_186.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_186.start_anchor_id,"
+      +" search_0_186.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_186.word_annotation_id AS target_annotation_id,"
+      +" search_0_186.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_186.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_186.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_186.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_186 search_0_186"
+      +"  ON search_0_186.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_186.label AS DECIMAL) < ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_186.turn_annotation_id, search_0_186.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals(Double.valueOf(3), parameters.get(0));
+    assertTrue(parameters.get(0) instanceof Double);
+
+    // min and max
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("syllableCount")
+                                .setMin("2")
+                                .setMax("3")))
+      );
+    parameters.clear();
+    sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "min and max",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_186.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_186.start_anchor_id,"
+      +" search_0_186.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_186.word_annotation_id AS target_annotation_id,"
+      +" search_0_186.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_186.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_186.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_186.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_186 search_0_186"
+      +"  ON search_0_186.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_186.label AS DECIMAL) >= ?"
+      +"  AND CAST(search_0_186.label AS DECIMAL) < ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_186.turn_annotation_id, search_0_186.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals(Double.valueOf(2), parameters.get(0));
+    assertTrue(parameters.get(0) instanceof Double);
+    assertEquals(Double.valueOf(3), parameters.get(1));
+    assertTrue(parameters.get(1) instanceof Double);
+  }
+  
+  /** Ensure searches with word-start anchoring generate the correct SQL. */
+  @Test public void anchorStart() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+
+    // phrase layer
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("language").setPattern("es")
+                                .setAnchorStart(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("mate")))
+      );
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // no word linked layers
+      () -> "", () -> "");
+    assertEquals(
+      "not word-linked phrase layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_20 search_0_20"
+      +"  INNER JOIN anchor meta_0_start_20"
+      +"  ON meta_0_start_20.anchor_id = search_0_20.start_anchor_id"
+      +"  INNER JOIN anchor meta_0_end_20"
+      +"  ON meta_0_end_20.anchor_id = search_0_20.end_anchor_id)"
+      +"  ON search_0_20.ag_id = search_0_2.ag_id"
+      +"  AND search_0_20.turn_annotation_id = search_0_2.turn_annotation_id"
+      +"  AND meta_0_start_20.offset <= word_0_start.offset"
+      +"  AND meta_0_end_20.offset > word_0_start.offset"
+      +"  AND search_0_20.label  REGEXP  ?"
+      +"  AND NOT EXISTS (SELECT other_word.label"
+      +"  FROM annotation_layer_0  other_word"
+      +"  INNER JOIN anchor other_word_start"
+      +"  ON other_word_start.anchor_id = other_word.start_anchor_id"
+      +"  WHERE other_word.turn_annotation_id = search_0_2.turn_annotation_id"
+      +"  AND other_word_start.offset >= meta_0_start_20.offset"
+      +"  AND other_word_start.offset < meta_0_end_20.offset"
+      +"  AND other_word_start.offset < word_0_start.offset )"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(mate)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(es)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> l.getId().equals("language"), // language layer is word-linked
+      () -> "", () -> "");
+    assertEquals(
+      "word-linked phrase layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN annotation_layer_20 search_0_20"
+      +" ON search_0_20.start_anchor_id = search_0_2.start_anchor_id"
+      +" AND search_0_20.label  REGEXP  ? "
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(mate)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(es)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    // span layer
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("topic").setPattern("haystack")
+                                .setAnchorStart(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
+      );
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // no word linked layers
+      () -> "", () -> "");
+    assertEquals(
+      "not word-linked span layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_30 search_0_30"
+      +"  INNER JOIN anchor meta_0_start_30"
+      +"  ON meta_0_start_30.anchor_id = search_0_30.start_anchor_id"
+      +"  INNER JOIN anchor meta_0_end_30"
+      +"  ON meta_0_end_30.anchor_id = search_0_30.end_anchor_id)"
+      +"  ON search_0_30.ag_id = search_0_2.ag_id"
+      +"  AND meta_0_start_30.offset <= word_0_start.offset"
+      +"  AND meta_0_end_30.offset > word_0_start.offset"
+      +"  AND search_0_30.label  REGEXP  ?"
+      +"  AND ( search_0_2.start_anchor_id = search_0_30.start_anchor_id OR NOT EXISTS"
+      +" (SELECT other_word.label"
+      +"  FROM annotation_layer_0  other_word"
+      +"  INNER JOIN annotation_layer_11  other_turn"
+      +"  ON other_word.turn_annotation_id = other_turn.annotation_id"
+      +"  INNER JOIN anchor other_word_start"
+      +"  ON other_word_start.anchor_id = other_word.start_anchor_id"
+      +"  WHERE other_word.ag_id = search_0_2.ag_id  AND other_turn.label = turn.label"
+      +"  AND other_word_start.offset >= meta_0_start_30.offset"
+      +"  AND other_word_start.offset < meta_0_end_30.offset"
+      +"  AND other_word_start.offset < word_0_start.offset ) )"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(haystack)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> l.getId().equals("topic"), // topic layer is word-linked
+      () -> "", () -> "");
+    assertEquals(
+      "word-linked span layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN annotation_layer_30 search_0_30"
+      +" ON search_0_30.start_anchor_id = search_0_2.start_anchor_id"
+      +" AND search_0_30.label  REGEXP  ? "
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(haystack)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    // turn start
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
+                 .addLayerMatch(new LayerMatch().setId("turn").setAnchorStart(true)))
+      );
+    parameters = new Vector<Object>();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // this not called for turn
+      () -> "", () -> "");
+    assertEquals(
+      "turn start",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  AND search_0_2.ordinal_in_turn = 1"
+      +" /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+
+    // utterance start
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
+                 .addLayerMatch(new LayerMatch().setId("utterance").setAnchorStart(true)))
+      );
+    parameters = new Vector<Object>();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // this not called for utterance
+      () -> "", () -> "");
+    assertEquals(
+      "utterance start",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_12 line_0"
+      +"  INNER JOIN anchor line_0_start  ON line_0_start.anchor_id = line_0.start_anchor_id"
+      +"  INNER JOIN anchor line_0_end  ON line_0_end.anchor_id = line_0.end_anchor_id)"
+      +" ON line_0.turn_annotation_id = search_0_2.turn_annotation_id"
+      +"  AND line_0_start.offset <= word_0_start.offset"
+      +"  AND line_0_end.offset > word_0_start.offset"
+      +" LEFT OUTER JOIN annotation_layer_0 last_word"
+      +" ON last_word.turn_annotation_id = search_0_2.turn_annotation_id"
+      +" AND last_word.ordinal_in_turn = search_0_2.ordinal_in_turn - 1"
+      +"  LEFT OUTER JOIN anchor last_word_start"
+      +"  ON last_word_start.anchor_id = last_word.start_anchor_id"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  AND (last_word.annotation_id IS NULL OR last_word_start.offset < line_0_start.offset)"
+      +" /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+
+  }
+  
+  /** Ensure one-column searches with word-end anchoring generate the correct SQL. */
+  @Test public void oneColumAnchorEnd() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+
+    // phrase layer
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("language").setPattern("es")
+                                .setAnchorEnd(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("mate")))
+      );
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // no word linked layers
+      () -> "", () -> "");
+    assertEquals(
+      "not word-linked phrase layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_20 search_0_20"
+      +"  INNER JOIN anchor meta_0_start_20"
+      +"  ON meta_0_start_20.anchor_id = search_0_20.start_anchor_id"
+      +"  INNER JOIN anchor meta_0_end_20"
+      +"  ON meta_0_end_20.anchor_id = search_0_20.end_anchor_id)"
+      +"  ON search_0_20.ag_id = search_0_2.ag_id"
+      +"  AND search_0_20.turn_annotation_id = search_0_2.turn_annotation_id"
+      +"  AND meta_0_start_20.offset <= word_0_start.offset"
+      +"  AND meta_0_end_20.offset > word_0_start.offset"
+      +"  AND search_0_20.label  REGEXP  ?  AND NOT EXISTS"
+      +" (SELECT other_word.label"
+      +"  FROM annotation_layer_0  other_word"
+      +"  INNER JOIN anchor other_word_start"
+      +"  ON other_word_start.anchor_id = other_word.start_anchor_id"
+      +"  WHERE other_word.turn_annotation_id = search_0_2.turn_annotation_id"
+      +"  AND other_word_start.offset >= meta_0_start_20.offset"
+      +"  AND other_word_start.offset < meta_0_end_20.offset"
+      +"  AND other_word_start.offset > word_0_start.offset )"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(mate)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(es)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> l.getId().equals("language"), // language layer is word-linked
+      () -> "", () -> "");
+    assertEquals(
+      "word-linked phrase layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN annotation_layer_20 search_0_20"
+      +" ON search_0_20.end_anchor_id = search_0_2.end_anchor_id"
+      +" AND search_0_20.label  REGEXP  ? "
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(mate)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(es)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    // span layer
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("topic").setPattern("haystack")
+                                .setAnchorEnd(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
+      );
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // no word linked layers
+      () -> "", () -> "");
+    assertEquals(
+      "not word-linked span layer", // TODO this is not valid: Unknown column 'search_30.end_anchor_id' in 'on clause' - looks like it should be search_0_30.end_anchor_id
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_30 search_0_30"
+      +"  INNER JOIN anchor meta_0_start_30"
+      +"  ON meta_0_start_30.anchor_id = search_0_30.start_anchor_id"
+      +"  INNER JOIN anchor meta_0_end_30"
+      +"  ON meta_0_end_30.anchor_id = search_0_30.end_anchor_id)"
+      +"  ON search_0_30.ag_id = search_0_2.ag_id"
+      +"  AND meta_0_start_30.offset <= word_0_start.offset"
+      +"  AND meta_0_end_30.offset > word_0_start.offset"
+      +"  AND search_0_30.label  REGEXP  ?  AND"
+      +" ( search_0_2.end_anchor_id = search_30.end_anchor_id OR NOT EXISTS"
+      +" (SELECT other_word.label"
+      +"  FROM annotation_layer_0  other_word"
+      +"  INNER JOIN anchor other_word_start"
+      +"  ON other_word_start.anchor_id = other_word.start_anchor_id"
+      +"  WHERE other_word.ag_id = search_0_2.ag_id"
+      +"  AND other_word_start.offset >= meta_0_start_30.offset"
+      +"  AND other_word_start.offset < meta_0_end_30.offset"
+      +"  AND other_word_start.offset > word_0_start.offset ) )"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(haystack)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> l.getId().equals("topic"), // topic layer is word-linked
+      () -> "", () -> "");
+    assertEquals(
+      "word-linked span layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN annotation_layer_30 search_0_30"
+      +" ON search_0_30.end_anchor_id = search_0_2.end_anchor_id"
+      +" AND search_0_30.label  REGEXP  ? "
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(haystack)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    // turn end
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
+                 .addLayerMatch(new LayerMatch().setId("turn").setAnchorEnd(true)))
+      );
+    parameters = new Vector<Object>();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // this not called for turn
+      () -> "", () -> "");
+    assertEquals(
+      "turn end",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" LEFT OUTER JOIN annotation_layer_0  next_word_0"
+      +" ON next_word_0.turn_annotation_id = search_0_2.turn_annotation_id"
+      +" AND next_word_0.ordinal_in_turn = search_0_2.ordinal_in_turn + 1"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  AND next_word_0.annotation_id IS NULL"
+      +" /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+
+    // utterance end
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
+                 .addLayerMatch(new LayerMatch().setId("utterance").setAnchorEnd(true)))
+      );
+    parameters = new Vector<Object>();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // this not called for utterance
+      () -> "", () -> "");
+    assertEquals(
+      "utterance end",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_12 line_0"
+      +"  INNER JOIN anchor line_0_start  ON line_0_start.anchor_id = line_0.start_anchor_id"
+      +"  INNER JOIN anchor line_0_end  ON line_0_end.anchor_id = line_0.end_anchor_id)"
+      +" ON line_0.turn_annotation_id = search_0_2.turn_annotation_id"
+      +"  AND line_0_start.offset <= word_0_start.offset"
+      +"  AND line_0_end.offset > word_0_start.offset"
+      +" LEFT OUTER JOIN annotation_layer_0  next_word_0"
+      +" ON next_word_0.turn_annotation_id = search_0_2.turn_annotation_id"
+      +" AND next_word_0.ordinal_in_turn = search_0_2.ordinal_in_turn + 1"
+      +"  LEFT OUTER JOIN anchor next_word_0_start"
+      +"  ON next_word_0_start.anchor_id = next_word_0.start_anchor_id"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  AND (next_word_0.annotation_id IS NULL"
+      +" OR next_word_0_start.offset >= line_0_end.offset)"
+      +" /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+
+  }
+  
+  /** Ensure multi-column searches with word-end anchoring generate the correct SQL. */
+  @Test public void multiColumnAnchorEnd() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+
+    // phrase layer
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("yerba")))
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("language").setPattern("es")
+                                .setAnchorEnd(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("mate")))
+      );
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // no word linked layers
+      () -> "", () -> "");
+    assertEquals(
+      "not word-linked phrase layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id,"
+      +" turn_annotation_id, first_matched_word_annotation_id, last_matched_word_annotation_id,"
+      +" complete, target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_1_start ON word_1_start.anchor_id = search_1_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_20 search_1_20"
+      +"  INNER JOIN anchor meta_1_start_20"
+      +"  ON meta_1_start_20.anchor_id = search_1_20.start_anchor_id"
+      +"  INNER JOIN anchor meta_1_end_20"
+      +"  ON meta_1_end_20.anchor_id = search_1_20.end_anchor_id)"
+      +"  ON search_1_20.ag_id = search_1_2.ag_id"
+      +"  AND search_1_20.turn_annotation_id = search_1_2.turn_annotation_id"
+      +"  AND meta_1_start_20.offset <= word_1_start.offset"
+      +"  AND meta_1_end_20.offset > word_1_start.offset"
+      +"  AND search_1_20.label  REGEXP  ?  AND NOT EXISTS"
+      +" (SELECT other_word.label"
+      +"  FROM annotation_layer_0  other_word"
+      +"  INNER JOIN anchor other_word_start"
+      +"  ON other_word_start.anchor_id = other_word.start_anchor_id"
+      +"  WHERE other_word.turn_annotation_id = search_1_2.turn_annotation_id"
+      +"  AND other_word_start.offset >= meta_1_start_20.offset"
+      +"  AND other_word_start.offset < meta_1_end_20.offset"
+      +"  AND other_word_start.offset > word_1_start.offset )"
+      +" WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  /* column _1: */"
+      +"  AND search_1_2.ordinal_in_turn"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^(yerba)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(mate)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^(es)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> l.getId().equals("language"), // language layer is word-linked
+      () -> "", () -> "");
+    assertEquals(
+      "word-linked phrase layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id,"
+      +" turn_annotation_id, first_matched_word_annotation_id, last_matched_word_annotation_id,"
+      +" complete, target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +" INNER JOIN annotation_layer_20 search_1_20"
+      +" ON search_1_20.end_anchor_id = search_1_2.end_anchor_id"
+      +" AND search_1_20.label  REGEXP  ? "
+      +" WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  /* column _1: */"
+      +"  AND search_1_2.ordinal_in_turn"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^(yerba)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(mate)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^(es)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+
+    // span layer
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("knitting")))
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("topic").setPattern("haystack")
+                                .setAnchorEnd(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
+      );
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // no word linked layers
+      () -> "", () -> "");
+    assertEquals(
+      "not word-linked span layer", // TODO this is not valid: Unknown column 'search_30.end_anchor_id' in 'on clause' - looks like it should be search_0_30.end_anchor_id
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_1_start ON word_1_start.anchor_id = search_1_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_30 search_1_30"
+      +"  INNER JOIN anchor meta_1_start_30"
+      +"  ON meta_1_start_30.anchor_id = search_1_30.start_anchor_id"
+      +"  INNER JOIN anchor meta_1_end_30"
+      +"  ON meta_1_end_30.anchor_id = search_1_30.end_anchor_id)"
+      +"  ON search_1_30.ag_id = search_1_2.ag_id"
+      +"  AND meta_1_start_30.offset <= word_1_start.offset"
+      +"  AND meta_1_end_30.offset > word_1_start.offset"
+      +"  AND search_1_30.label  REGEXP  ?"
+      +"  AND ( search_1_2.end_anchor_id = search_30.end_anchor_id OR NOT EXISTS"
+      +" (SELECT other_word.label"
+      +"  FROM annotation_layer_0  other_word"
+      +"  INNER JOIN anchor other_word_start"
+      +"  ON other_word_start.anchor_id = other_word.start_anchor_id"
+      +"  WHERE other_word.ag_id = search_1_2.ag_id"
+      +"  AND other_word_start.offset >= meta_1_start_30.offset"
+      +"  AND other_word_start.offset < meta_1_end_30.offset"
+      +"  AND other_word_start.offset > word_1_start.offset ) )"
+      +" WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  /* column _1: */"
+      +"  AND search_1_2.ordinal_in_turn"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^(knitting)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(needle)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^(haystack)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> l.getId().equals("topic"), // topic layer is word-linked
+      () -> "", () -> "");
+    assertEquals(
+      "word-linked span layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +" INNER JOIN annotation_layer_30 search_1_30"
+      +" ON search_1_30.end_anchor_id = search_1_2.end_anchor_id"
+      +" AND search_1_30.label  REGEXP  ? "
+      +" WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  /* column _1: */"
+      +"  AND search_1_2.ordinal_in_turn"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^(knitting)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(needle)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^(haystack)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+
+    // turn end
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("knitting")))
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
+                 .addLayerMatch(new LayerMatch().setId("turn").setAnchorEnd(true)))
+      );
+    parameters = new Vector<Object>();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // this not called for turn
+      () -> "", () -> "");
+    assertEquals(
+      "turn end",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +" LEFT OUTER JOIN annotation_layer_0  next_word_1"
+      +" ON next_word_1.turn_annotation_id = search_1_2.turn_annotation_id"
+      +" AND next_word_1.ordinal_in_turn = search_1_2.ordinal_in_turn + 1"
+      +" WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  /* column _1: */"
+      +"  AND search_1_2.ordinal_in_turn"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" AND next_word_1.annotation_id IS NULL"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(knitting)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(needle)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    // utterance end
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("knitting")))
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
+                 .addLayerMatch(new LayerMatch().setId("utterance").setAnchorEnd(true)))
+      );
+    parameters = new Vector<Object>();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // this not called for utterance
+      () -> "", () -> "");
+    assertEquals(
+      "utterance end",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.turn_annotation_id = turn.annotation_id  AND search_1_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_1_start ON word_1_start.anchor_id = search_1_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_12 line_1"
+      +"  INNER JOIN anchor line_1_start  ON line_1_start.anchor_id = line_1.start_anchor_id"
+      +"  INNER JOIN anchor line_1_end  ON line_1_end.anchor_id = line_1.end_anchor_id)"
+      +" ON line_1.turn_annotation_id = search_1_2.turn_annotation_id"
+      +"  AND line_1_start.offset <= word_1_start.offset"
+      +"  AND line_1_end.offset > word_1_start.offset"
+      +" LEFT OUTER JOIN annotation_layer_0  next_word_1"
+      +" ON next_word_1.turn_annotation_id = search_1_2.turn_annotation_id"
+      +" AND next_word_1.ordinal_in_turn = search_1_2.ordinal_in_turn + 1"
+      +"  LEFT OUTER JOIN anchor next_word_1_start"
+      +"  ON next_word_1_start.anchor_id = next_word_1.start_anchor_id"
+      +" WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  /* column _1: */"
+      +"  AND search_1_2.ordinal_in_turn"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" AND (next_word_1.annotation_id IS NULL OR next_word_1_start.offset >= line_1_end.offset)"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(knitting)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(needle)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+  }
+  
+  /**
+   * Ensure one-column segment searches (with and without word matching)
+   * generate the correct SQL.
+   */   
+  @Test public void segmentSearch() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    // with a word-layer condition
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("kit"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("I").setTarget(true))
+        ));
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "with word layer condition",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_1 segment_0"
+      +" ON segment_0.turn_annotation_id = turn.annotation_id"
+      +" INNER JOIN anchor segment_0_start"
+      +" ON segment_0_start.anchor_id = segment_0.start_anchor_id"
+      +" INNER JOIN (annotation_layer_2 search_0_2"
+      +"  INNER JOIN anchor word_0_start_2"
+      +"  ON word_0_start_2.anchor_id = search_0_2.start_anchor_id"
+      +"  INNER JOIN anchor word_0_end_2  ON word_0_end_2.anchor_id = search_0_2.end_anchor_id)"
+      +"  ON search_0_2.word_annotation_id = segment_0.word_annotation_id"
+      +"  AND word_0_start_2.offset <= segment_0_start.offset"
+      +"  AND word_0_end_2.offset > segment_0_start.offset"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +"  INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.segment_annotation_id = segment_0.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(kit)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(I)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+
+    // only segment layer
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("I").setTarget(true))
+        ));
+    parameters.clear();
+    sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "only segment layer",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, word_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, word_0.start_anchor_id,"
+      +" word_0.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" word_0.turn_annotation_id AS turn_annotation_id,"
+      +" word_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" word_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_0 word_0 ON word_0.turn_annotation_id = turn.annotation_id"
+      +" INNER JOIN annotation_layer_1 segment_0"
+      +" ON segment_0.word_annotation_id = word_0.annotation_id"
+      +" INNER JOIN anchor segment_0_start"
+      +" ON segment_0_start.anchor_id = segment_0.start_anchor_id"
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.segment_annotation_id = segment_0.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY word_0.turn_annotation_id, word_0.ordinal_in_turn, search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(I)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+  }
+
+  /**
+   * Ensure segment search with alignment confidence threshold generates the correct SQL.
+   */   
+  @Test public void alignedSegmentSearch() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    // with a word-layer condition
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("I").setTarget(true))
+        ));
+    search.setAnchorConfidenceThreshold((byte)50);
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    assertEquals(
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id, first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, word_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, word_0.start_anchor_id,"
+      +" word_0.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" word_0.turn_annotation_id AS turn_annotation_id,"
+      +" word_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" word_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_0 word_0 ON word_0.turn_annotation_id = turn.annotation_id"
+      +" INNER JOIN annotation_layer_1 segment_0"
+      +" ON segment_0.word_annotation_id = word_0.annotation_id"
+      +" INNER JOIN anchor segment_0_start"
+      +" ON segment_0_start.anchor_id = segment_0.start_anchor_id"
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.segment_annotation_id = segment_0.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN anchor word_0_start"
+      +" ON word_0_start.anchor_id = word_0.start_anchor_id"
+      +" AND word_0_start.alignment_status >= 50"
+      +" INNER JOIN anchor word_0_end"
+      +" ON word_0_end.anchor_id = word_0.end_anchor_id"
+      +" AND word_0_end.alignment_status >= 50"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY word_0.turn_annotation_id, word_0.ordinal_in_turn, search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(I)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+
+  }
+
   /**
    * Return a plausible schema, including SQL attributes.
    * @return A test schema.
@@ -192,7 +1803,7 @@ public class TestOneQuerySearch {
       
       (Layer)(new Layer("topic", "Topic").setAlignment(Constants.ALIGNMENT_INTERVAL)
               .setPeers(true).setPeersOverlap(false).setSaturated(false))
-      .with("layer_id", 33).with("scope", "F"),
+      .with("layer_id", 30).with("scope", "F"),
       
       (Layer)(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
               .setPeers(true).setPeersOverlap(false).setSaturated(false)
@@ -225,9 +1836,16 @@ public class TestOneQuerySearch {
               .setType(Constants.TYPE_IPA))
       .with("layer_id", 52).with("scope", "W"),
       
+      (Layer)(new Layer("syllableCount", "Syllable Count").setAlignment(Constants.ALIGNMENT_NONE)
+              .setPeers(false).setPeersOverlap(false).setSaturated(true)
+              .setParentId("word").setParentIncludes(true)
+              .setType(Constants.TYPE_NUMBER))
+      .with("layer_id", 186).with("scope", "W"),
+      
       (Layer)(new Layer("segment", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
               .setPeers(true).setPeersOverlap(false).setSaturated(true)
-              .setParentId("word").setParentIncludes(true))
+              .setParentId("word").setParentIncludes(true)
+              .setType(Constants.TYPE_IPA))
       .with("layer_id", SqlConstants.LAYER_SEGMENT).with("scope", "S"),
       
       (Layer)(new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)

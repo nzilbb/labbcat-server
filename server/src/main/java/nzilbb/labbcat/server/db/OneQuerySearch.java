@@ -142,6 +142,7 @@ public class OneQuerySearch extends SearchTask {
     // look for a layer with a search specification
     final Vector<LayerMatch> layersPrimaryFirst = new Vector<LayerMatch>();
     matrix.getColumns().get(iWordColumn).getLayers().values().stream()
+      .filter(LayerMatch::HasPattern)
       // existing layers
       .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
       // temporal layers
@@ -568,6 +569,7 @@ public class OneQuerySearch extends SearchTask {
       bUseWordContainsJoins = false;
       layersPrimaryFirst.clear();
       column.getLayers().values().stream()
+        .filter(LayerMatch::HasPattern)
         // existing layers
         .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
         // temporal layers
@@ -2531,8 +2533,8 @@ public class OneQuerySearch extends SearchTask {
    *  <li>1: border conditions</li>
    *  <li>2: search criteria subqueries</li>
    *  <li>3: extra fields for the SELECT clause - e.g. for line annotation_id and start/end anchors for the last column result</li>
-   *  <li>4: "turn.label IN (...)" if speakers are specified, or "" if not</li>
-   *  <li>5: "type_id IN (...)" transcript type id list if its a subset of all types</li>
+   *  <li>4: "turn.label IN (...)" if participantQuery is specified, or "" if not</li>
+   *  <li>5: transcript-matching clause if transcriptQuery is specified, or "" if not</li>
    *  <li>6: main speaker clause</li>
    *  <li>7: access clause</li>
    *  <li>8: subsequent column select clauses</li>
@@ -2567,9 +2569,9 @@ public class OneQuerySearch extends SearchTask {
     +" /* extra joins */ {0}"
     +" /* subsequent columns */ {9}" 
     +" WHERE 1=1" // ...so that everything that follows can start with "AND"
-    +" /* transcript type */ {5}"
-    +" /* who */ {4}" 
-    +" /* main speaker clause */ {6}" 
+    +" /* transcripts */ {5}"
+    +" /* participants */ {4}" 
+    +" /* main participant clause */ {6}" 
     +" /* access clause */ {7}" 
     +" /* first column: */"
     +" /* border conditions */ {1}" 
