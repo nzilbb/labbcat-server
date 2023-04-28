@@ -87,6 +87,11 @@ public class TestMatrix {
       +"\"syllableCount\":{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"},"
       +"\"orthography\":{\"id\":\"orthography\",\"target\":true}}}]}",
       m.toString());
+    
+    assertEquals(
+      "Description",
+      "orthography≈the phonology≉[aeiou].* syllableCount≥2<3",
+      m.getDescription());
   }
 
   /** Ensure that deserialization from JSON works. */
@@ -253,5 +258,32 @@ public class TestMatrix {
     assertTrue("Second col: orthography layer target", layerMatch.getTarget());
     assertNull("Second col: orthography layer anchorStart", layerMatch.getAnchorStart());
     assertNull("Second col: orthography layer anchorEnd", layerMatch.getAnchorEnd());
+  }
+  
+  /** Ensure that serialization to JSON works. */
+  @Test public void queries() {
+    Matrix m = new Matrix()
+      .addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("the")))
+      .setParticipantQuery("first('participant_gender').label != 'M'")
+      .setTranscriptQuery("first('transcript_type').label != 'wordlist'");
+
+    assertEquals(
+      "JSON serialization",
+      "{\"columns\":[{\"adj\":1,\"layers\":"
+      +"{\"orthography\":{\"id\":\"orthography\",\"pattern\":\"the\"}}}],"
+      +"\"participantQuery\":\"first('participant_gender').label != 'M'\","
+      +"\"transcriptQuery\":\"first('transcript_type').label != 'wordlist'\""
+      +"}",
+      m.toString());    
+    assertEquals("Description ignores queries", "orthography≈the", m.getDescription());
+
+    m = new Matrix().fromJsonString(m.toString());
+    assertEquals("participantQuery deserialized",
+                 "first('participant_gender').label != 'M'",
+                 m.getParticipantQuery());
+    assertEquals("transciptQuery deserialized",
+                 "first('transcript_type').label != 'wordlist'",
+                 m.getTranscriptQuery());    
   }
 }

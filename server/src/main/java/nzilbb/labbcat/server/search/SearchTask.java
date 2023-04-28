@@ -53,45 +53,6 @@ public abstract class SearchTask extends Task {
    * @param newMatrix Matrix that defines this search.
    */
   public SearchTask setMatrix(Matrix newMatrix) { matrix = newMatrix; return this; }
-
-  /**
-   * AGQL expression for identifying which transcripts to search.
-   * <p> e.g. "['CC','IA'].includesAny(labels('corpus'))"
-   * @see #getTranscriptQuery()
-   * @see #setTranscriptQuery(String)
-   */
-  protected String transcriptQuery;
-  /**
-   * Getter for {@link #transcriptQuery}: AGQL expression for identifying which
-   * transcripts to search. 
-   * @return AGQL expression for identifying which transcripts to search.
-   */
-  public String getTranscriptQuery() { return transcriptQuery; }
-  /**
-   * Setter for {@link #transcriptQuery}: AGQL expression for identifying which
-   * transcripts to search. 
-   * @param newTranscriptQuery AGQL expression for identifying which transcripts to search.
-   */
-  public SearchTask setTranscriptQuery(String newTranscriptQuery) { transcriptQuery = newTranscriptQuery; return this; }
-
-  /**
-   * AGQL expression for identifying which participants to search.
-   * @see #getParticipantQuery()
-   * @see #setParticipantQuery(String)
-   */
-  protected String participantQuery;
-  /**
-   * Getter for {@link #participantQuery}: AGQL expression for identifying which
-   * participants to search. 
-   * @return AGQL expression for identifying which participants to search.
-   */
-  public String getParticipantQuery() { return participantQuery; }
-  /**
-   * Setter for {@link #participantQuery}: AGQL expression for identifying which
-   * participants to search. 
-   * @param newParticipantQuery AGQL expression for identifying which participants to search.
-   */
-  public SearchTask setParticipantQuery(String newParticipantQuery) { participantQuery = newParticipantQuery; return this; }
   
   /**
    * Whether to seearch main-participant utterances only or not.

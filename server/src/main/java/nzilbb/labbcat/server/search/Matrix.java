@@ -24,6 +24,7 @@ package nzilbb.labbcat.server.search;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -38,41 +39,55 @@ public class Matrix implements CloneableBean {
   
   /**
    * Query to identify participants whose utterances should be searched.
+   * <p> e.g. "first('participant_gender').label == 'NB'"
    * @see #getParticipantQuery()
    * @see #setParticipantQuery(String)
    */
-  protected String participantQuery; // TODO
+  protected String participantQuery;
   /**
    * Getter for {@link #participantQuery}: Query to identify participants whose utterances
    * should be searched. 
    * @return Query to identify participants whose utterances should be searched.
    */
+  @ClonedProperty
   public String getParticipantQuery() { return participantQuery; }
   /**
    * Setter for {@link #participantQuery}: Query to identify participants whose utterances
-   * should be searched. 
-   * @param newParticipantQuery Query to identify participants whose utterances should be searched.
+   * should be searched.  
+   * @param newParticipantQuery Query to identify participants whose utterances should be
+   * searched. An empty string results in null being assigned.
    */
-  public Matrix setParticipantQuery(String newParticipantQuery) { participantQuery = newParticipantQuery; return this; }
+  public Matrix setParticipantQuery(String newParticipantQuery) {
+    participantQuery = newParticipantQuery != null && newParticipantQuery.length() == 0? null
+      : newParticipantQuery;
+    return this;
+  }
   
   /**
    * Query to identify transcripts whose utterances should be searched.
+   * <p> e.g. "['CC','IA'].includesAny(labels('corpus'))"
    * @see #getTranscriptQuery()
    * @see #setTranscriptQuery(String)
    */
-  protected String transcriptQuery; // TODO
+  protected String transcriptQuery;
   /**
    * Getter for {@link #transcriptQuery}: Query to identify transcripts whose utterances
    * should be searched. 
    * @return Query to identify transcripts whose utterances should be searched.
    */
+  @ClonedProperty
   public String getTranscriptQuery() { return transcriptQuery; }
   /**
    * Setter for {@link #transcriptQuery}: Query to identify transcripts whose utterances
    * should be searched. 
-   * @param newTranscriptQuery Query to identify transcripts whose utterances should be searched.
+   * @param newTranscriptQuery Query to identify transcripts whose utterances should be
+   * searched. An empty string results in null being assigned.
    */
-  public Matrix setTranscriptQuery(String newTranscriptQuery) { transcriptQuery = newTranscriptQuery; return this; }
+  public Matrix setTranscriptQuery(String newTranscriptQuery) {
+    transcriptQuery = newTranscriptQuery != null && newTranscriptQuery.length() == 0? null
+      : newTranscriptQuery;
+    return this;
+  }
 
   /**
    * The columns of the search matrix, each representing patterns matching one word token.
@@ -117,6 +132,12 @@ public class Matrix implements CloneableBean {
         JsonObject jsonColumn = jsonColumns.getJsonObject(c);
         addColumn((Column)(new Column().fromJson(jsonColumn)));
       } // next element
+    }
+    if (json.containsKey("participantQuery")) {
+      participantQuery = json.getString("participantQuery");
+    }
+    if (json.containsKey("transcriptQuery")) {
+      transcriptQuery = json.getString("transcriptQuery");
     }
     return this;
   }
@@ -171,6 +192,35 @@ public class Matrix implements CloneableBean {
     return -1;
   } // end of getTargetColumn()
   
+  /**
+   * A curt semi-human-readable summary of the matrix that can be used for
+   * probably-unique, more or less descriptive file names, etc. 
+   * @return A string describing the layer matches.
+   */
+  public String getDescription() {
+    return layerMatchStream()
+      .filter(LayerMatch::HasPattern)
+      .map(layerMatch -> {
+          StringBuilder description = new StringBuilder(layerMatch.getId());
+          if (layerMatch.getPattern() != null) {
+            if (layerMatch.getNot() != null && layerMatch.getNot()) {
+              description.append("≉");
+            } else {
+              description.append("≈");
+            }
+            description.append(layerMatch.getPattern());
+          }
+          if (layerMatch.getMin() != null) {
+            description.append("≥").append(layerMatch.getMin());
+          }
+          if (layerMatch.getMax() != null) {
+            description.append("<").append(layerMatch.getMax());
+          }
+          return description.toString();
+        })
+      .collect(Collectors.joining(" "));
+  } // end of getDescription()
+
   /**
    * Returns the JSON serialization of this search matrix.
    * @return The JSON serialization of this search matrix.

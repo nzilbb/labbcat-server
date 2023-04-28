@@ -33,7 +33,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Vector;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import nzilbb.ag.*;
 import nzilbb.labbcat.server.search.Column;
 import nzilbb.labbcat.server.search.LayerMatch;
@@ -57,17 +57,17 @@ public class OneQuerySearch extends SearchTask {
    * @param layerIsSpanningAndWordAnchored A predicate that determines whether the given layer
    * is a phrase or span layer for which all annotations share anchors with words.
    * @param participantCondition Supplies the WHERE condition that identifies the target
-   * participants, presumably based on {@link SearchTask#participantQuery}. 
+   * participants, presumably based on {@link Matrix#participantQuery}. 
    * @param transcriptCondition Supplies the WHERE condition that identifies the target
-   * transcripts, presumably based on {@link SearchTask#transcriptQuery}. 
+   * transcripts, presumably based on {@link Matrix#transcriptQuery}. 
    * @return An SQL query to implement the query.
    * @throws Exception If the search should be halted for any reason
-   * - e.g. the {@link QueryTask#participantQuery} identifies no participants.
+   * - e.g. the {@link Matrix#participantQuery} identifies no participants.
    */
   public String generateSql( // TODO use LinkedHasjet<String> for extra joins etc.
     Vector<Object> parameters,
     Schema schema, Predicate<Layer> layerIsSpanningAndWordAnchored,
-    Supplier<String> participantCondition, Supplier<String> transcriptCondition)
+    UnaryOperator<String> participantCondition, UnaryOperator<String> transcriptCondition)
     throws Exception {
     description = "";
     
@@ -378,7 +378,7 @@ public class OneQuerySearch extends SearchTask {
           + " " + (layerMatch.getAnchorStart()?"[":"")
           + " " + (layerMatch.getAnchorEnd()?"]":""));
 	       
-        // for export filename
+        // for export filename TODO move this to Matrix
         if (layerMatch.getNot()) {
           description += "_NOT";
         }
@@ -509,7 +509,7 @@ public class OneQuerySearch extends SearchTask {
         sSqlExtraJoinsFirst += sSqlTranscriptJoin;
       }
     } // filtering by role
-    String strSpeakerWhere = participantCondition.get();
+    String strSpeakerWhere = participantCondition.apply(matrix.getParticipantQuery());
     if (strSpeakerWhere == null && getLastException() != null) {
       throw (Exception)getLastException();
     }
@@ -910,7 +910,7 @@ public class OneQuerySearch extends SearchTask {
       sSqlExtraJoinsFirst += sSqlTranscriptSpeakerJoin;
     }
     
-    String sTranscriptCondition = transcriptCondition.get();
+    String sTranscriptCondition = transcriptCondition.apply(matrix.getTranscriptQuery());
     if (sTranscriptCondition == null && getLastException() != null) {
       throw (Exception)getLastException();
     }
@@ -1021,7 +1021,7 @@ public class OneQuerySearch extends SearchTask {
     long searchTime = new java.util.Date().getTime();
 
     // the participant condition is a list of turn labels, which are speaker_numbers
-    Supplier<String> participantCondition = () -> {
+    UnaryOperator<String> participantCondition = participantQuery -> {
       if (participantQuery != null && participantQuery.trim().length() > 0) {
         setStatus("Identifying participants...");
         try {
@@ -1073,7 +1073,7 @@ public class OneQuerySearch extends SearchTask {
     };
 
     // the transcript condition uses a modified version of the 
-    Supplier<String> transcriptCondition = () -> {
+    UnaryOperator<String> transcriptCondition = transcriptQuery -> {
       if (transcriptQuery != null && transcriptQuery.length() > 0) {
         try {
           // check there are some matches

@@ -45,4 +45,10 @@ public interface SearchResults extends Iterator<String> {
    */
   public int size();
   
+  /**
+   * Go to the nth item in the list, so it will be the next returned by {@link #next()}.
+   * @param n The number of the item to seek to.
+   * @return true if the nth item exists, false otherwise.
+   */
+  public boolean seek(int n);
 }

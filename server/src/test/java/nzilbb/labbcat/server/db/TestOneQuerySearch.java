@@ -43,7 +43,7 @@ public class TestOneQuerySearch {
         new Column().addLayerMatch(
           new LayerMatch().setId("word").setPattern("needle").setTarget(true))));
     Vector<Object> parameters = new Vector<Object>();
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
@@ -89,7 +89,7 @@ public class TestOneQuerySearch {
         new Column().addLayerMatch(
           new LayerMatch().setId("orthography").setPattern("needle"))));
     Vector<Object> parameters = new Vector<Object>();
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
@@ -138,7 +138,7 @@ public class TestOneQuerySearch {
     // main participant
     Vector<Object> parameters = new Vector<Object>();
     search.setMainParticipantOnly(true);
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
@@ -192,7 +192,7 @@ public class TestOneQuerySearch {
     // main participant
     Vector<Object> parameters = new Vector<Object>();
     search.setAnchorConfidenceThreshold((byte)50);
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
@@ -248,7 +248,7 @@ public class TestOneQuerySearch {
                        .setId("orthography").setPattern("[aeiou].*"))
         ));
     Vector<Object> parameters = new Vector<Object>();
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
@@ -305,7 +305,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
       );
     Vector<Object> parameters = new Vector<Object>();
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
@@ -363,7 +363,7 @@ public class TestOneQuerySearch {
                                 .setMin("2")))
       );
     Vector<Object> parameters = new Vector<Object>();
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "min only",
       "INSERT INTO _result"
@@ -409,7 +409,7 @@ public class TestOneQuerySearch {
                                 .setMax("3")))
       );
     parameters.clear();
-    sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "max only",
       "INSERT INTO _result"
@@ -456,7 +456,7 @@ public class TestOneQuerySearch {
                                 .setMax("3")))
       );
     parameters.clear();
-    sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "min and max",
       "INSERT INTO _result"
@@ -514,7 +514,7 @@ public class TestOneQuerySearch {
     String sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // no word linked layers
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "not word-linked phrase layer",
       "INSERT INTO _result"
@@ -577,7 +577,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> l.getId().equals("language"), // language layer is word-linked
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "word-linked phrase layer",
       "INSERT INTO _result"
@@ -632,7 +632,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // no word linked layers
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "not word-linked span layer",
       "INSERT INTO _result"
@@ -697,7 +697,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> l.getId().equals("topic"), // topic layer is word-linked
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "word-linked span layer",
       "INSERT INTO _result"
@@ -751,7 +751,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // this not called for turn
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "turn start",
       "INSERT INTO _result"
@@ -801,7 +801,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // this not called for utterance
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "utterance start",
       "INSERT INTO _result"
@@ -870,7 +870,7 @@ public class TestOneQuerySearch {
     String sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // no word linked layers
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "not word-linked phrase layer",
       "INSERT INTO _result"
@@ -933,7 +933,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> l.getId().equals("language"), // language layer is word-linked
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "word-linked phrase layer",
       "INSERT INTO _result"
@@ -988,7 +988,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // no word linked layers
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "not word-linked span layer", // TODO this is not valid: Unknown column 'search_30.end_anchor_id' in 'on clause' - looks like it should be search_0_30.end_anchor_id
       "INSERT INTO _result"
@@ -1050,7 +1050,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> l.getId().equals("topic"), // topic layer is word-linked
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "word-linked span layer",
       "INSERT INTO _result"
@@ -1104,7 +1104,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // this not called for turn
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "turn end",
       "INSERT INTO _result"
@@ -1157,7 +1157,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // this not called for utterance
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "utterance end",
       "INSERT INTO _result"
@@ -1229,7 +1229,7 @@ public class TestOneQuerySearch {
     String sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // no word linked layers
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "not word-linked phrase layer",
       "INSERT INTO _result"
@@ -1300,7 +1300,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> l.getId().equals("language"), // language layer is word-linked
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "word-linked phrase layer",
       "INSERT INTO _result"
@@ -1365,7 +1365,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // no word linked layers
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "not word-linked span layer", // TODO this is not valid: Unknown column 'search_30.end_anchor_id' in 'on clause' - looks like it should be search_0_30.end_anchor_id
       "INSERT INTO _result"
@@ -1435,7 +1435,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> l.getId().equals("topic"), // topic layer is word-linked
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "word-linked span layer",
       "INSERT INTO _result"
@@ -1498,7 +1498,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // this not called for turn
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "turn end",
       "INSERT INTO _result"
@@ -1561,7 +1561,7 @@ public class TestOneQuerySearch {
     sql = search.generateSql(
       parameters, getSchema(),
       l -> false, // this not called for utterance
-      () -> "", () -> "");
+      p -> "", t -> "");
     assertEquals(
       "utterance end",
       "INSERT INTO _result"
@@ -1637,7 +1637,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("I").setTarget(true))
         ));
     Vector<Object> parameters = new Vector<Object>();
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "with word layer condition",
       "INSERT INTO _result"
@@ -1698,7 +1698,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("I").setTarget(true))
         ));
     parameters.clear();
-    sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "only segment layer",
       "INSERT INTO _result"
@@ -1756,7 +1756,7 @@ public class TestOneQuerySearch {
         ));
     search.setAnchorConfidenceThreshold((byte)50);
     Vector<Object> parameters = new Vector<Object>();
-    String sql = search.generateSql(parameters, getSchema(), l -> false, () -> "", () -> "");
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
