@@ -29,20 +29,20 @@ import java.util.Iterator;
 public interface SearchResults extends Iterator<String> {
 
   /**
-    * A descriptive name for the collection.
-    * @return A descriptive name for the collection.
-    */
-   public String getName();
-
-   /**
-    * Resets the iterator to the beginning of the list
-    */
-   public void reset();
-
-   /**
-    * Returns the number of utterances in the collection.
-    * @return The number of utterances in the collection.
-    */
-   public int size();
-
+   * A descriptive name for the collection.
+   * @return A descriptive name for the collection.
+   */
+  public String getName();
+  
+  /**
+   * Resets the iterator to the beginning of the list
+   */
+  public void reset();
+  
+  /**
+   * Returns the number of utterances in the collection.
+   * @return The number of utterances in the collection.
+   */
+  public int size();
+  
 }
