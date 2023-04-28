@@ -63,7 +63,7 @@ public class TestMatrix {
                                   .setTarget(true)));
     
     assertEquals(
-      "JSON serialization",
+      "JSON serialization - toJson",
       "{\"columns\":["
       +"{\"adj\":3,"
       +"\"layers\":{"
@@ -74,6 +74,19 @@ public class TestMatrix {
       +"\"syllableCount\":{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"},"
       +"\"orthography\":{\"id\":\"orthography\",\"target\":true}}}]}",
       m.toJson().toString());
+    
+    assertEquals(
+      "JSON serialization - toString",
+      "{\"columns\":["
+      +"{\"adj\":3,"
+      +"\"layers\":{"
+      +"\"orthography\":{\"id\":\"orthography\",\"pattern\":\"the\"}}}"
+      +",{\"adj\":1,"
+      +"\"layers\":{"
+      +"\"phonology\":{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"},"
+      +"\"syllableCount\":{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"},"
+      +"\"orthography\":{\"id\":\"orthography\",\"target\":true}}}]}",
+      m.toString());
   }
 
   /** Ensure that deserialization from JSON works. */

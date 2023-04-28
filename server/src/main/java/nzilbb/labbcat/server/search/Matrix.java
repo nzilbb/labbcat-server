@@ -37,6 +37,44 @@ import nzilbb.util.ClonedProperty;
 public class Matrix implements CloneableBean {
   
   /**
+   * Query to identify participants whose utterances should be searched.
+   * @see #getParticipantQuery()
+   * @see #setParticipantQuery(String)
+   */
+  protected String participantQuery; // TODO
+  /**
+   * Getter for {@link #participantQuery}: Query to identify participants whose utterances
+   * should be searched. 
+   * @return Query to identify participants whose utterances should be searched.
+   */
+  public String getParticipantQuery() { return participantQuery; }
+  /**
+   * Setter for {@link #participantQuery}: Query to identify participants whose utterances
+   * should be searched. 
+   * @param newParticipantQuery Query to identify participants whose utterances should be searched.
+   */
+  public Matrix setParticipantQuery(String newParticipantQuery) { participantQuery = newParticipantQuery; return this; }
+  
+  /**
+   * Query to identify transcripts whose utterances should be searched.
+   * @see #getTranscriptQuery()
+   * @see #setTranscriptQuery(String)
+   */
+  protected String transcriptQuery; // TODO
+  /**
+   * Getter for {@link #transcriptQuery}: Query to identify transcripts whose utterances
+   * should be searched. 
+   * @return Query to identify transcripts whose utterances should be searched.
+   */
+  public String getTranscriptQuery() { return transcriptQuery; }
+  /**
+   * Setter for {@link #transcriptQuery}: Query to identify transcripts whose utterances
+   * should be searched. 
+   * @param newTranscriptQuery Query to identify transcripts whose utterances should be searched.
+   */
+  public Matrix setTranscriptQuery(String newTranscriptQuery) { transcriptQuery = newTranscriptQuery; return this; }
+
+  /**
    * The columns of the search matrix, each representing patterns matching one word token.
    * @see #getColumns()
    * @see #setColumns(List)
@@ -132,5 +170,13 @@ public class Matrix implements CloneableBean {
     } // next column
     return -1;
   } // end of getTargetColumn()
+  
+  /**
+   * Returns the JSON serialization of this search matrix.
+   * @return The JSON serialization of this search matrix.
+   */
+  @Override public String toString() {
+    return toJson().toString();
+  } // end of toString()
 
 }

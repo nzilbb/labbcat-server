@@ -26,6 +26,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
@@ -62,11 +64,12 @@ public class OneQuerySearch extends SearchTask {
    * @throws Exception If the search should be halted for any reason
    * - e.g. the {@link QueryTask#participantQuery} identifies no participants.
    */
-  public String generateSql(
+  public String generateSql( // TODO use LinkedHasjet<String> for extra joins etc.
     Vector<Object> parameters,
     Schema schema, Predicate<Layer> layerIsSpanningAndWordAnchored,
     Supplier<String> participantCondition, Supplier<String> transcriptCondition)
-    throws Exception {     
+    throws Exception {
+    description = "";
     
     // column 0 first
     int iWordColumn = 0;
@@ -137,7 +140,6 @@ public class OneQuerySearch extends SearchTask {
         iTargetLayer = SqlConstants.LAYER_TRANSCRIPTION;
       }
     } // there is a marked target
-//    if (targetLayer == null) targetLayer = schema.getLayer(targetLayerId);
     
     // look for a layer with a search specification
     final Vector<LayerMatch> layersPrimaryFirst = new Vector<LayerMatch>();
@@ -1007,13 +1009,14 @@ public class OneQuerySearch extends SearchTask {
    */
   protected void search() throws Exception {
 
+    iPercentComplete = 1;
     Connection connection = store.getConnection();
     final Schema schema = store.getSchema();
 
     // word columns
 	 
     // // list of Word objects that match matrix
-    // GraphFragmentList matchesSoFar = createEmptyResultsList(null);
+    results = new SqlSearchResults(this);
 	 
     long searchTime = new java.util.Date().getTime();
 
@@ -1155,1096 +1158,7 @@ public class OneQuerySearch extends SearchTask {
       sqlAnchoredToWordStartCount.close();
       sqlAnchoredToWordEndCount.close();
     }
-    setStatus("Finding matches...");
-    
-    // int iWordColumn = 0;
-    
-    // // we need a primary word table to join to for each column (to determine adjacency, etc.)
-    // // but to minimise the number of joins, we don't just make that the TRANSCRIPTION layer
-    // // instead, we use any word layer that there's a match for (there will be one usually)
-    // // and fall back to joining to the TRANSCRIPTION layer if all patterns in a given column
-    // // are for non-word layers...
-          
-    // // column 0 first
-    // iWordColumn = 0;
-    // setStatus("Finding matches...");
-    // String sSqlExtraJoinsFirst = "";
-    // String sSqlLayerMatchesFirst = "";
-    // String sSqlExtraFieldsFirst = "";
-    // boolean bTargetAnnotation = false;
-    // String targetExpression = "word_0.annotation_id";
-    // String targetSegmentExpression = "NULL";
-    // String targetSegmentOrder = "";
-
-    // Object[] columnSuffix = { "_" + iWordColumn };
-    // String sSqlWordStartJoin = sqlWordStartJoin.format(columnSuffix);
-    // String sSqlWordEndJoin = sqlWordEndJoin.format(columnSuffix);
-    // String sSegmentStartJoin = sqlSegmentStartJoin.format(columnSuffix);
-    // String sSqlLineJoin = sqlLineJoin.format(columnSuffix);
-    // String sSqlEndLineJoin = sqlEndLineJoin.format(columnSuffix);
-    // String sSqlEndTurnJoin = sqlEndTurnJoin.format(columnSuffix);
-
-    // Optional<LayerMatch> firstPrimaryWordLayer = matrix.getColumns().get(iWordColumn).stream()
-    //   .map(column -> column.getLayers())
-    //   .filter(LayerMatch::HasPattern)
-    //   // not a "NOT .+" expression
-    //   .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
-    //   .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
-    //   // word scope
-    //   .filter(layerMatch -> schema.getWordLayerId().equals(layerMatch.getId())
-    //           || (schema.getWordLayerId().equals(
-    //                 schema.getLayer(layerMatch.getId()).getParentId())
-    //               && !layerMatch.getId().equals("segment")))
-    //   .findAny();
-    
-    // // do we need a word layer to anchor to?
-    // if (!firstPrimaryWordLayer.isPresent()) {
-    //   sSqlExtraJoinsFirst += " INNER JOIN annotation_layer_0"
-    //     +" word_"+iWordColumn+" ON word_"+iWordColumn+".turn_annotation_id = turn.annotation_id";
-    // }
-      
-    // // check for segment layer search
-    // // this affects how we match aligned word layers
-    // Optional<Layer> targetSegmentLayer = matrix.getColumns().get(iWordColumn).stream()
-    //   .map(column -> column.getLayers())
-    //   .filter(LayerMatch::HasPattern)
-    //   .map(layerMatch -> schema.getLayer(layerMatch.getId()))
-    //   .filter(Objects::nonNull)
-    //   // segment scope
-    //   .filter(layer -> "segment".equals(layer.getId())
-    //           || "segment".equals(layer.getParentId()))
-    //   .findAny();
-    // boolean bUseWordContainsJoins = targetSegmentLayer.isPresent();
-    
-    // PreparedStatement sqlAnnotationCount = connection.prepareStatement(
-    //   "SELECT COUNT(*) FROM annotation_layer_?");
-    // PreparedStatement sqlAnchoredToWordStartCount = connection.prepareStatement(
-    //   "SELECT COUNT(*) FROM annotation_layer_? annotation"
-    //   +" INNER JOIN annotation_layer_"+Labbcat.LAYER_TRANSCRIPTION+" word"
-    //   +" ON annotation.start_anchor_id = word.start_anchor_id");
-    // PreparedStatement sqlAnchoredToWordEndCount = connection.prepareStatement(
-    //   "SELECT COUNT(*) FROM annotation_layer_? annotation"
-    //   +" INNER JOIN annotation_layer_"+Labbcat.LAYER_TRANSCRIPTION+" word"
-    //   +" ON annotation.end_anchor_id = word.end_anchor_id");
-
-    // int iTargetLayer = SqlConstants.LAYER_TRANSCRIPTION;
-    // int iTargetColumn = 0;
-    // String targetLayerId = matrix.getTargetLayerId();
-    // if (targetLayerId == null) {
-    //   targetLayerId = schema.getWordLayerId();
-    // } else { // there is a marked target
-    //   Layer targetLayer = schema.getLayer(targetLayerId);
-    //   if (targetLayer != null && targetLayer.containsKey("layer_id")) {
-    //     iTargetLayer = (Integer)targetLayer.get("layer_id");
-    //     iTargetColumn = matrix.getTargetColumn();
-    //   } // valid layer
-    // } // there is a marked target
-    
-    // // look for a layer with a search specification
-    // final Vector<LayerMatch> layersPrimaryFirst = new Vector<LayerMatch>();
-    // matrix.getColumns().get(iWordColumn).stream()
-    //   .map(column -> column.getLayers())
-    //   // existing layers
-    //   .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
-    //   // temporal layers
-    //   .filter(layerMatch -> schema.getLayer(layerMatch.getId()).containsKey("layer_id"))
-    //   .forEach(layerMatch -> layersPrimaryFirst.add(layerMatch));
-    // if (firstPrimaryWordLayer.isPresent()) {
-    //   // move it to the front
-    //   if (layersPrimaryFirst.remove(firstPrimaryWordLayer.get())) { // it was there
-    //     layersPrimaryFirst.add(0, firstPrimaryWordLayer.get());
-    //   }
-    // }
-    // for (LayerMatch layerMatch : layersPrimaryFirst) {
-    //   if (bCancelling) break;
-      
-    //   layerMatch.setNullBooleans();        
-    //   Layer layer = schema.getLayer(layerMatch.getId());
-    //   Integer layer_id = (Integer)(layer.get("layer_id"));
-    //   String sExtraMetaCondition = "";
-    //   Object[] oLayerId = { layer_id, "_" + iWordColumn };
-
-    //   boolean bPhraseLayer = !schema.getWordLayerId().equals(layer.getId())
-    //     && (schema.getTurnLayerId().equals(layer.getId())
-    //         || schema.getTurnLayerId().equals(layer.getParentId()));
-    //   boolean bSpanLayer = layer.getAlignments() != Constants.ALIGNMENT_NONE
-    //     && (layer.getParentId() == null
-    //         || layer.getParentId().equals(schema.getRoot().getId()));
-      
-    //   // can we assume that the annotations are anchored to words?
-    //   boolean bWordAnchoredMetaLayer = false;
-    //   if (bPhraseLayer || bSpanLayer) {
-    //     sqlAnnotationCount.setInt(1, layer_id);
-    //     ResultSet rsCount = sqlAnnotationCount.executeQuery();
-    //     rsCount.next();
-    //     int annotationCount = rsCount.getInt(1);
-    //     rsCount.close();
-    //     sqlAnchoredToWordStartCount.setInt(1, layer_id);
-    //     rsCount = sqlAnchoredToWordStartCount.executeQuery();
-    //     rsCount.next();
-    //     int anchoredToWordStartCount = rsCount.getInt(1);
-    //     rsCount.close();
-    //     sqlAnchoredToWordEndCount.setInt(1, layer_id);
-    //     rsCount = sqlAnchoredToWordEndCount.executeQuery();
-    //     rsCount.next();
-    //     int anchoredToWordEndCount = rsCount.getInt(1);
-    //     rsCount.close();
-    //     if (annotationCount == anchoredToWordStartCount
-    //         && annotationCount == anchoredToWordEndCount) {
-    //       bWordAnchoredMetaLayer = true;
-    //     }
-    //   }
-	 
-    //   if ((bPhraseLayer || bSpanLayer)
-    //       // if spanning layer is anchored to words, we don't need conditions that confirm
-    //       // the absence of preceding/following words in the span
-    //       && !bWordAnchoredMetaLayer) {
-    //     if (layerMatch.getAnchorStart()) {
-    //       if (bPhraseLayer) {
-    //         sExtraMetaCondition += SqlSearchPatterns.fmtSqlStartMetaSpanCondition
-    //           .format(oLayerId);
-    //       } else {
-    //         sExtraMetaCondition += SqlSearchPatterns.fmtSqlStartFreeformSpanCondition
-    //           .format(oLayerId);
-    //       }
-    //     }
-    //     if (layerMatch.getAnchorEnd()) {
-    //       if (bPhraseLayer) {
-    //         sExtraMetaCondition += SqlSearchPatterns.fmtSqlEndMetaSpanCondition
-    //           .format(oLayerId);
-    //       } else {
-    //         sExtraMetaCondition += SqlSearchPatterns.fmtSqlEndFreeformSpanCondition
-    //           .format(oLayerId);
-    //       }
-    //     }
-    //   }
-    //   boolean bSegmentLayer = "segment".equals(layer.getId())
-    //     || "segment".equals(layer.getParentId());
-
-    //   // text substitution args
-    //   Object oArgs[] = { 
-    //     layer_id, // table
-    //     layerMatch.getNot()?"NOT":"", // [NOT] REGEXP 
-    //     Integer.valueOf( // case sensitivity
-    //       layer.getType().equals(Constants.TYPE_IPA) // ... for DISC
-    //       || layer.getType().equals(Constants.TYPE_SELECT)?1:0), // ... and 'select' layers
-    //     layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
-    //     sExtraMetaCondition, // e.g. anchoring to the start/end of a span
-    //     (Integer)(targetSegmentLayer.isPresent()?targetSegmentLayer.get().get("layer_id"):null)
-    //     "_" + iWordColumn
-    //   };
-
-    //   if (LayerMatch.HasPattern(layerMatch)) {
-    //     vSearchLayerTypes.add(layer.getType());
-    //     if (layerMatch.getMin() == null && layerMatch.getMax() != null) { // max only
-    //       if (bPhraseLayer || bSpanLayer) {
-    //         // meta/freeform layer
-    //         if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
-    //           // anchored to start of word
-    //           sSqlExtraJoinsFirst += NSQL.db.START_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs);
-    //         } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
-    //           // anchored to end of word
-    //           sSqlExtraJoinsFirst += NSQL.db.END_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs);
-    //         } else { // un-anchored meta condition
-    //           if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-    //             sSqlExtraJoinsFirst += sSqlWordStartJoin;
-    //           }
-    //           if (bPhraseLayer) {
-    //             sSqlExtraJoinsFirst += NSQL.db.CONTAINING_META_NUMERIC_MAX_JOIN.format(oArgs);
-    //           } else {
-    //             sSqlExtraJoinsFirst += NSQL.db.CONTAINING_FREEFORM_NUMERIC_MAX_JOIN
-    //               .format(oArgs);
-    //           }
-    //         } // un-anchored meta condition
-    //       } else if (bUseWordContainsJoins) {
-    //         // word-containing-segment layer
-    //         if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-    //           sSqlExtraJoinsFirst += sSegmentStartJoin;
-    //         }
-    //         sSqlExtraJoinsFirst 
-    //           += NSQL.db.CONTAINING_WORD_NUMERIC_MAX_JOIN.format(oArgs);
-    //       } else {
-    //         sSqlExtraJoinsFirst += NSQL.db.NUMERIC_MAX_JOIN.format(oArgs);
-    //       }
-    //       vSearchStrings.add(layerMatch.getMax());
-    //       vSearchStrings.add(""); // one argument only
-    //     } else if (layerMatch.getMin() != null && layerMatch.getMax() == null) { // min only
-    //       if (bPhraseLayer || bSpanLayer) {
-    //         // meta/freeform layer
-    //         if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
-    //           // anchored to start of word
-    //           sSqlExtraJoinsFirst += NSQL.db.START_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs);
-    //         } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
-    //           // anchored to end of word
-    //           sSqlExtraJoinsFirst += NSQL.db.END_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs);
-    //         } else { // un-anchored meta condition
-    //           if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-    //             sSqlExtraJoinsFirst += sSqlWordStartJoin;
-    //           }
-    //           if (bPhraseLayer) {
-    //             sSqlExtraJoinsFirst += NSQL.db.CONTAINING_META_NUMERIC_MIN_JOIN.format(oArgs);
-    //           } else {
-    //             sSqlExtraJoinsFirst += NSQL.db.CONTAINING_FREEFORM_NUMERIC_MIN_JOIN
-    //               .format(oArgs);
-    //           }
-    //         } // un-anchors meta condition
-    //       } else if (bUseWordContainsJoins) {
-    //         // word-containing-segment layer
-    //         if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-    //           sSqlExtraJoinsFirst += sSegmentStartJoin;
-    //         }
-    //         sSqlExtraJoinsFirst 
-    //           += NSQL.db.CONTAINING_WORD_NUMERIC_MIN_JOIN.format(oArgs);
-    //       } else {
-    //         sSqlExtraJoinsFirst += NSQL.db.NUMERIC_MIN_JOIN.format(oArgs);
-    //       }
-    //       vSearchStrings.add(layerMatch.getMin());
-    //       vSearchStrings.add(""); // one argument only
-    //     } else if (layerMatch.getMin() != null && layerMatch.getMax() != null) { // min & max
-    //       if (bPhraseLayer || bSpanLayer) {
-    //         // meta/freeform layer
-    //         if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
-    //           // anchored to start of word
-    //           sSqlExtraJoinsFirst += NSQL.db.START_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs);
-    //         } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
-    //           // anchored to end of word
-    //           sSqlExtraJoinsFirst += NSQL.db.END_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs);
-    //         }  else { // un-anchored meta condition
-    //           if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-    //             sSqlExtraJoinsFirst += sSqlWordStartJoin;
-    //           }
-    //           if (bPhraseLayer) {
-    //             sSqlExtraJoinsFirst += NSQL.db.CONTAINING_META_NUMERIC_RANGE_JOIN.format(oArgs);
-    //           } else {
-    //             sSqlExtraJoinsFirst += NSQL.db.CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN
-    //               .format(oArgs);
-    //           }
-    //         } // un-anchored meta condition
-    //       } else if (bUseWordContainsJoins) {
-    //         // word-containing-segment layer
-    //         if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-    //           sSqlExtraJoinsFirst += sSegmentStartJoin;
-    //         }
-    //         sSqlExtraJoinsFirst += NSQL.db.CONTAINING_WORD_NUMERIC_RANGE_JOIN.format(oArgs);
-    //       } else {
-    //         sSqlExtraJoinsFirst += NSQL.db.NUMERIC_RANGE_JOIN.format(oArgs);
-    //       }
-    //       vSearchStrings.add(layerMatch.getMin());
-    //       vSearchStrings.add(layerMatch.getMax());
-    //     } else if (layerMatch.getPattern() != null) { // use regexp
-    //       String sSqlExtraJoin = "";
-    //       if (bPhraseLayer || bSpanLayer) {
-    //         if (layer.getAlignment() == Contains.ALIGNMENT_POINT
-    //             || layer.getId().equals("noise")
-    //             || layer.getId().equals("comment")) {
-    //           if (!sSqlExtraJoinsFirst.contains(sSqlWordEndJoin)) {
-    //             sSqlExtraJoin += sSqlWordEndJoin;
-    //           }
-    //           if (bPhraseLayer) {
-    //             sSqlExtraJoin += NSQL.db.TRAILING_META_REGEXP_JOIN.format(oArgs);
-    //           } else {
-    //             sSqlExtraJoin += NSQL.db.TRAILING_FREEFORM_REGEXP_JOIN.format(oArgs);
-    //           }
-    //         } else {
-    //           // meta/freeform layer
-    //           if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
-    //             // anchored to start of word
-    //             sSqlExtraJoinsFirst += NSQL.db.START_ANCHORED_REGEXP_JOIN.format(oArgs);
-    //           } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
-    //             // anchored to end of word
-    //             sSqlExtraJoinsFirst += NSQL.db.END_ANCHORED_REGEXP_JOIN.format(oArgs);
-    //           } else { // un-anchored meta condition
-    //             if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-    //               sSqlExtraJoin += sSqlWordStartJoin;
-    //             }
-    //             if (bPhraseLayer) {
-    //               sSqlExtraJoin += NSQL.db.CONTAINING_META_REGEXP_JOIN.format(oArgs);
-    //             } else {
-    //               sSqlExtraJoin += NSQL.db.CONTAINING_FREEFORM_REGEXP_JOIN.format(oArgs);
-    //             }
-    //           } // un-anchored meta condition
-    //         }
-    //       } else if (bSegmentLayer) {
-    //         if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-    //           sSqlExtraJoin += sSegmentStartJoin;
-    //         }
-    //         sSqlExtraJoin += NSQL.db.SEGMENT_REGEXP_JOIN.format(oArgs);
-    //       } else if (bUseWordContainsJoins) {
-    //         // word-containing-segment layer
-    //         if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-    //           sSqlExtraJoin += sSegmentStartJoin;
-    //         }
-    //         sSqlExtraJoin += NSQL.db.CONTAINING_WORD_REGEXP_JOIN.format(oArgs);
-    //       } else {
-    //         sSqlExtraJoin += NSQL.db.REGEXP_JOIN.format(oArgs);
-    //       }
-    //       if (layerMatch.getNot() && ".+".equals(layerMatch.getPattern())) { // NOT EXISTS
-    //         // special case: "NOT .+" means "not anything" - i.e. missing annotations
-    //         sSqlExtraJoin = sSqlExtraJoin
-    //           // change join to be LEFT OUTER...
-    //           .replace("INNER JOIN annotation_layer_"+layer_id,
-    //                    "LEFT OUTER JOIN annotation_layer_"+layer_id)
-    //           // ...or meta join to be LEFT OUTER...
-    //           .replace("INNER JOIN (annotation_layer_"+layer_id,
-    //                    "LEFT OUTER JOIN (annotation_layer_"+layer_id)
-    //           // and remove the pattern match
-    //           .replaceAll("AND (CAST\\()?search_[0-9]+_"+layer_id
-    //                       +"\\.label( AS BINARY\\))? NOT REGEXP (BINARY)? \\?", "");
-    //         // and add a test for NULL to the WHERE clause
-    //         sSqlLayerMatchesFirst += NSQL.db.NULL_ANNOTATION_CONDITION.format(oArgs);
-    //         vSearchStrings.add(""); // no arguments
-    //         vSearchStrings.add(""); // no arguments
-    //       } else { // REGEXP MATCH
-    //         // add implicit ^ and $
-    //         layerMatch.ensurePatternAnchored();
-    //         // save the layer and string
-    //         // for later adding to the parameters of the query
-    //         vSearchStrings.add(layerMatch.getPattern());
-    //         vSearchStrings.add(""); // one argument only
-    //       }
-    //       sSqlExtraJoinsFirst += sSqlExtraJoin;
-    //     } // use regexp
-        
-    //     setStatus(
-    //       "Layer: '" + layer.getId() 
-    //       + "' pattern: " + (layerMatch.getNot()?"NOT":"")
-    //       + " " + layerMatch.getPattern()
-    //       + " " + layerMatch.getMin() + " " + layerMatch.getMax()
-    //       + " " + (layerMatch.getAnchorStart()?"[":"")
-    //       + " " + (layerMatch.getAnchorEnd()?"]":""));
-	       
-    //     // for export filename
-    //     if (layerMatch.getNot()) {
-    //       description += "_NOT";
-    //     }
-    //     if (layerMatch.getPattern() != null) {
-    //       description += "_" + layerMatch.getPattern();
-    //     }
-    //     if (layerMin.getMin() != null) {
-    //       description += "_" + layerMatch.getMin();
-    //     }
-    //     if (layerMax.getMax() != null) {
-    //       description += "_" + layerMatch.getMax();
-    //     }
-    //     if (targetLayerId.equals(layerMatch.getId()) && iWordColumn == iTargetColumn) {
-    //       targetLayer = layer;
-    //       sSqlExtraFieldsFirst += ", search_" + iTargetLayerId
-    //         + ".annotation_id AS target_annotation_id";
-    //       targetExpression = "search_" + iWordColumn + "_" + iTargetLayerId
-    //         + ".annotation_id";
-    //       bTargetAnnotation = true;
-    //     }
-    //   } // matching this layer
-    // } // next layer
-
-    // if (bCancelling) return;
-
-    // if (vSearchStrings.size() == 0) {
-    //   setStatus("Nothing to search for - Search matrix was blank");
-    //   return;
-    // }
-
-    // if (iTargetSegmentLayer != null) {
-    //   sSqlExtraFieldsFirst += ", search_" + iTargetSegmentLayer
-    //     + ".segment_annotation_id AS target_segment_id";
-    //   targetSegmentExpression = "search_0_" + iTargetSegmentLayer
-    //     + ".segment_annotation_id";
-    //   targetSegmentOrder = ", search_0_" + iTargetSegmentLayer
-    //     + ".ordinal_in_word";
-    // }
-
-    // // start border condition
-    // String sStartConditionFirst = "";
-    // if (matrix.getColumns().get(0).getLayers().values().stream()
-    //     .filter(layerMatch -> layerMatch.getAnchorStart()) // start anchored to utterance
-    //     .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
-    //     .findAny().isPresent()) { // start of utterance
-    //   if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-    //     sSqlExtraJoinsFirst += sSqlWordStartJoin;
-    //   }
-    //   if (!sSqlExtraJoinsFirst.contains(sSqlLineJoin)) {
-    //     sSqlExtraJoinsFirst += sSqlLineJoin;
-    //   }
-    //   if (!sSqlExtraJoinsFirst.contains(sSqlStartLineJoin)) {
-    //     sSqlExtraJoinsFirst += sSqlStartLineJoin;
-    //   }
-    //   sStartConditionFirst = sSqlStartLineCondition;
-    // } else if (matrix.getColumns().get(0).getLayers().values().stream()
-    //            .filter(layerMatch -> layerMatch.getAnchorStart()) // start anchored to turn
-    //            .filter(layerMatch -> schema.getTurnLayerId().equals(layerMatch.getId()))
-    //            .findAny().isPresent()) { // start of turn
-    //   sStartConditionFirst = sqlStartTurnCondition;
-    // }
-	 
-    // // is this also the last column?
-    // if (matrix.getColumns().size() == 1) {   
-    //   // end condition
-    //   if (matrix.getColumns().get(0).getLayers().values().stream()
-    //       .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to utterance
-    //       .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
-    //       .findAny().isPresent()) { // end of utterance
-    //     if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-    //       sSqlExtraJoinsFirst += sSqlWordStartJoin;
-    //     }
-    //     if (!sSqlExtraJoinsFirst.contains(sSqlLineJoin)) {
-    //       sSqlExtraJoinsFirst += sSqlLineJoin;
-    //     }
-    //     if (!sSqlExtraJoinsFirst.contains(sSqlEndLineJoin)) {
-    //       sSqlExtraJoinsFirst += sSqlEndLineJoin;
-    //     }
-    //     sSqlLayerMatchesFirst += sqlEndLineCondition.format(columnSuffix);
-    //   } else if (matrix.getColumns().get(0).getLayers().values().stream()
-    //              .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to turn
-    //              .filter(layerMatch -> schema.getTurnLayerId().equals(layerMatch.getId()))
-    //              .findAny().isPresent()) { // end of turn
-    //     if (!sSqlExtraJoinsFirst.contains(sSqlEndTurnJoin)) {
-    //       sSqlExtraJoinsFirst += sSqlEndTurnJoin;
-    //     }
-    //     sSqlLayerMatchesFirst += sqlEndTurnCondition.format(columnSuffix);
-    //   }
-    // } // last column
-
-    // // aligned words only?
-    // if (anchorConfidenceThreshold != null) { // TODO segment threshold too
-    //   if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-    //     sSqlExtraJoinsFirst += sSqlWordStartJoin
-    //       + " AND word_"+iWordColumn+"_start.alignment_status >= "
-    //       + anchorConfidenceThreshold;
-    //   } else { // update existing join
-    //     sSqlExtraJoinsFirst = sSqlExtraJoinsFirst.replaceAll(
-    //       " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id",
-    //       " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id"
-    //       + " AND word_"+iWordColumn+"_start.alignment_status >= "
-    //       + anchorConfidenceThreshold);
-    //   }
-    //   if (!sSqlExtraJoinsFirst.contains(sSqlWordEndJoin)) {
-    //     sSqlExtraJoinsFirst += sSqlWordEndJoin
-    //       + " AND word_"+iWordColumn+"_end.alignment_status >= "
-    //       + anchorConfidenceThreshold;
-    //   } else { // update existing join
-    //     sSqlExtraJoinsFirst = sSqlExtraJoinsFirst.replaceAll(
-    //       " ON word_"+iWordColumn+"_end\\.anchor_id = word_"+iWordColumn+"\\.end_anchor_id",
-    //       " ON word_"+iWordColumn+"_start\\.end_id = word_"+iWordColumn+"\\.end_anchor_id"
-    //       + " AND word_"+iWordColumn+"_end.alignment_status >= "
-    //       + anchorConfidenceThreshold);
-    //   }
-    // }
-
-    // // access restrictions?
-    // String strAccessWhere = "";
-    // if (restrictByUser != null) {
-    //   strAccessWhere = " AND EXISTS (SELECT * FROM role"
-    //     + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
-    //     + " INNER JOIN annotation_transcript access_attribute" 
-    //     + " ON access_attribute.layer = role_permission.attribute_name" 
-    //     + " AND access_attribute.label REGEXP role_permission.value_pattern"
-    //     + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
-    //     + " WHERE user_id = ? AND access_attribute.ag_id = turn.ag_id)"
-    //     +" OR EXISTS (SELECT * FROM role"
-    //     + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
-    //     + " AND role_permission.attribute_name = 'corpus'" 
-    //     + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
-    //     + " WHERE transcript.corpus_name REGEXP role_permission.value_pattern"
-    //     + " AND user_id = ?)";
-    //   if (sSqlExtraJoinsFirst.indexOf(sSqlTranscriptJoin) < 0) {
-    //     sSqlExtraJoinsFirst += sSqlTranscriptJoin;
-    //   }
-    // } // filtering by role
-    // String strSpeakerWhere = "";
-    // if (participantQuery != null && participantQuery.trim().length() > 0) {
-    //   setStatus("Identifying participants...");
-    //   String[] participantIds = store.getMatchingParticipantIds(participantQuery);
-    //   if (participantIds.length == 0) {
-    //     String[] nobody = { "This list of participant IDs should never match anybody" };
-    //     participantIds = nobody;
-    //     String message = "Participant expression matches no participants: " + participantQuery;
-    //     setStatus(message);
-    //     setLastException(new Exception(message));
-    //     return;
-    //   }
-
-    //   // participantIds contains names, but we need speaker_numbers
-    //   PreparedStatement selectSpeaker = connection.prepareStatement(
-    //     "SELECT speaker_number FROM speaker WHERE name = ?");
-    //   try {
-    //     StringBuilder speakerWhere = new StringBuilder();
-    //     for (String name = participantIds) {
-    //       selectSpeaker.setString(1, name);
-    //       ResultSet rstSpeaker = selectSpeaker.executeQuery();
-    //       if (rstSpeaker.next()) {
-    //         if (speakerWhere.length() == 0) {
-    //           speakerWhere.append(
-    //             " AND turn.label REGEXP '^[0-9]+$' AND CAST(turn.label AS SIGNED) IN (");
-    //         } else {
-    //           speakerWhere.append(",");
-    //         }
-    //         speakerWhere.append(rstSpeaker.getString("speaker_number"));
-    //       } // speaker is there
-    //       rstSpeaker.close();
-    //     }
-    //     speakerWhere.append(")");
-    //   } finally {
-    //     selectSpeaker.close();
-    //   }
-    //   strSpeakerWhere = speakerWhere.toString();
-    //   setStatus("Participant count: " + participantIds.length);
-    // } // participantQuery
-
-    // // now match subsequent columns
-    // String strSubsequentSelect = "";
-    // String strSubsequentJoin = "";
-    // String strSubsequentWhere = "";
-    // for (
-    //   iWordColumn = 1; 
-    //   iWordColumn < matrix.getColumns().size() && !bCancelling; 
-    //   iWordColumn++) { 
-    //   String sSqlExtraJoins = "";
-    //   String sSqlExtraFields = "";
-    //   String sSqlLayerMatches = "";
-    //   iTargetSegmentLayer = null;
-    //   Column column = matrix.getColumns().get(iWordColumn);
-
-    //   // do we need a word layer to anchor to?
-    //   Optional<LayerMatch> primaryWordLayer = column.getLayers().stream()
-    //     .filter(LayerMatch::HasPattern)
-    //     // not a "NOT .+" expression
-    //     .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
-    //     .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
-    //     // word scope
-    //     .filter(layerMatch -> schema.getWordLayerId().equals(layerMatch.getId())
-    //             || (schema.getWordLayerId().equals(
-    //                   schema.getLayer(layerMatch.getId()).getParentId())
-    //                 && !layerMatch.getId().equals("segment")))
-    //     .findAny();
-    //   if (!primaryWordLayer.isPresent()) {
-    //     Object oSubPatternMatchArgs[] = { 
-    //       null, // extra JOINs
-    //       null, // border conditions
-    //       null, // regexp/range subqueries
-    //       null, // for line info
-    //       "_" + iWordColumn, // column suffix
-    //       "_" + (iWordColumn-1) // previous column suffix
-    //     };
-    //     sSqlExtraJoins += SqlSearchPatterns.sqlPatternMatchSubsequentJoin
-    //       .format(oSubPatternMatchArgs);
-    //   }
-      
-    //   columnSuffix[0] = "_" + iWordColumn;
-    //   sSqlWordStartJoin = SqlSearchPatterns.sqlWordStartJoin.format(columnSuffix);
-    //   sSqlWordEndJoin = SqlSearchPatterns.sqlWordEndJoin.format(columnSuffix);
-    //   sSegmentStartJoin = SqlSearchPatterns.sqlSegmentStartJoin.format(columnSuffix);
-    //   sSqlLineJoin = SqlSearchPatterns.sqlLineJoin.format(columnSuffix);
-    //   sSqlEndLineJoin = SqlSearchPatterns.sqlEndLineJoin.format(columnSuffix);
-    //   sSqlEndTurnJoin = SqlSearchPatterns.sqlEndTurnJoin.format(columnSuffix);
-      
-    //   // check for segment layer search
-    //   // this affects how we match aligned word layers
-    //   bUseWordContainsJoins = false;
-    //   layersPrimaryFirst.clear();
-    //   column.getLayers().stream()
-    //     // existing layers
-    //     .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
-    //     // temporal layers
-    //     .filter(layerMatch -> schema.getLayer(layerMatch.getId()).containsKey("layer_id"))
-    //     .forEach(layerMatch -> layersPrimaryFirst.add(layerMatch));
-    //   if (primaryWordLayer.isPresent()) {
-    //     // move it to the front
-    //     if (layersPrimaryFirst.remove(primaryWordLayer.get())) { // it was there
-    //       layersPrimaryFirst.add(0, primaryWordLayer);
-    //     }
-    //   }
-    //   for (LayerMatch layerMatch : layersPrimaryFirst) {
-    //     if (bCancelling) break;
-    //     layerMatch.setNullBooleans();        
-    //     Layer layer = schema.getLayer(layerMatch.getId());
-    //     Integer layer_id = (Integer)(layer.get("layer_id"));
-
-    //     boolean bSegmentLayer = "segment".equals(layer.getId())
-    //       || "segment".equals(layer.getParentId());
-    //     if (bSegmentLayer) {
-    //       String sSearch = asPatterns[iWordColumn][iLayer];
-    //       String sSearch2 = asPattern2s[iWordColumn][iLayer];
-    //       if (LayerMatch.HasPattern(layerMatch)) {
-    //         if (iTargetSegmentLayer == null) {
-    //           // target this segment layer
-    //           iTargetSegmentLayer = layer_id;
-    //           bUseWordContainsJoins = true;
-    //           break;
-    //         }
-    //       }
-    //     }
-    //   } // next layer
-	    
-    //   // look for a layer with a search specification
-    //   for (LayerMatch layerMatch : layersPrimaryFirst) {
-    //     if (bCancelling) break;
-    //     layerMatch.setNullBooleans();        
-    //     Layer layer = schema.getLayer(layerMatch.getId());
-    //     Integer layer_id = (Integer)(layer.get("layer_id"));
-    //     String sExtraMetaCondition = "";
-    //     Object[] oLayerId = { new Integer(layer.getId()), "_" + iWordColumn };
-	
-    //     boolean bPhraseLayer = !schema.getWordLayerId().equals(layer.getId())
-    //       && (schema.getTurnLayerId().equals(layer.getId())
-    //           || schema.getTurnLayerId().equals(layer.getParentId()));
-    //     boolean bSpanLayer = layer.getAlignments() != Constants.ALIGNMENT_NONE
-    //       && (layer.getParentId() == null
-    //           || layer.getParentId().equals(schema.getRoot().getId()));
-        
-    //     // can we assume that the annotations are anchored to words?
-    //     boolean bWordAnchoredMetaLayer = false;
-    //     if (bPhraseLayer || bSpanLayer) {
-    //       sqlAnnotationCount.setInt(1, layer_id);
-    //       ResultSet rsCount = sqlAnnotationCount.executeQuery();
-    //       rsCount.next();
-    //       int annotationCount = rsCount.getInt(1);
-    //       rsCount.close();
-    //       sqlAnchoredToWordStartCount.setInt(1, layer_id);
-    //       rsCount = sqlAnchoredToWordStartCount.executeQuery();
-    //       rsCount.next();
-    //       int anchoredToWordStartCount = rsCount.getInt(1);
-    //       rsCount.close();
-    //       sqlAnchoredToWordEndCount.setInt(1, layer_id);
-    //       rsCount = sqlAnchoredToWordEndCount.executeQuery();
-    //       rsCount.next();
-    //       int anchoredToWordEndCount = rsCount.getInt(1);
-    //       rsCount.close();
-    //       if (annotationCount == anchoredToWordStartCount
-    //           && annotationCount == anchoredToWordEndCount) {
-    //         bWordAnchoredMetaLayer = true;
-    //       }
-    //     }
-	    
-    //     if ((bPhraseLayer || bSpanLayer)
-    //         // if spanning layer is anchored to words, we don't need conditions that confirm
-    //         // the absence of preceding/following words in the span
-    //         && !bWordAnchoredMetaLayer) {
-    //       if (layerMatch.getAnchorStart()) {
-    //         if (bPhraseLayer) {
-    //           sExtraMetaCondition += SqlSearchPatterns.fmtSqlStartMetaSpanCondition
-    //             .format(oLayerId);
-    //         } else {
-    //           sExtraMetaCondition += SqlSearchPatterns.fmtSqlStartFreeformSpanCondition
-    //             .format(oLayerId);
-    //         }
-    //       }
-    //       if (layerMatch.getAnchorEnd()) {
-    //         if (bPhraseLayer) {
-    //           sExtraMetaCondition += SqlSearchPatterns.fmtSqlEndMetaSpanCondition
-    //             .format(oLayerId);
-    //         } else {
-    //           sExtraMetaCondition += SqlSearchPatterns.fmtSqlEndFreeformSpanCondition
-    //             .format(oLayerId);
-    //         }
-    //       }
-    //     }
-    //     boolean bSegmentLayer = "segment".equals(layer.getId())
-    //       || "segment".equals(layer.getParentId());
-
-    //     // text substitution args
-    //     Object oArgs[] = { 
-    //       layer_id, // table
-    //       layerMatch.getNot()?"NOT":"", // [NOT] REGEXP 
-    //       Integer.valueOf( // case sensitivity
-    //         layer.getType().equals(Constants.TYPE_IPA) // ... for DISC
-    //         || layer.getType().equals(Constants.TYPE_SELECT)?1:0), // ... and 'select' layers
-    //       layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
-    //       sExtraMetaCondition, // e.g. anchoring to the start of a span
-    //       null,
-    //       "_" + iWordColumn
-    //     };
-        
-    //     if (LayerMatch.HasPattern(layerMatch)) {
-    //       vSearchLayerTypes.add(layer.getType());
-    //       if (layerMatch.getMin() == null && layerMatch.getMax() != null) { // max only
-    //         if (bPhraseLayer || bSpanLayer) {
-    //           // meta/freeform layer
-    //           if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
-    //             // anchored to start of word
-    //             sSqlExtraJoins += NSQL.db.START_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs);
-    //           } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
-    //             // anchored to end of word
-    //             sSqlExtraJoins += NSQL.db.END_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs);
-    //           } else { // un-anchored meta condition
-    //             if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-    //               sSqlExtraJoins += sSqlWordStartJoin;
-    //             }
-    //             if (bPhraseLayer) {
-    //               sSqlExtraJoins += NSQL.db.CONTAINING_META_NUMERIC_MAX_JOIN.format(oArgs);
-    //             } else {
-    //               sSqlExtraJoins += NSQL.db.CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs);
-    //             }
-    //           } // un-anchored meta condition
-    //         } else if (bUseWordContainsJoins) {
-    //           // word-containing-segment layer
-    //           if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-    //             sSqlExtraJoins += sSegmentStartJoin;
-    //           }
-    //           sSqlExtraJoins += NSQL.db.CONTAINING_WORD_NUMERIC_MAX_JOIN.format(oArgs);
-    //         } else {
-    //           sSqlExtraJoins += NSQL.db.NUMERIC_MAX_JOIN.format(oArgs);
-    //         }
-    //         vSearchStrings.add(layerMatch.getMax());
-    //         vSearchStrings.add(""); // one argument only
-    //       } else if (layerMatch.getMin() != null && layerMatch.getMax() == null) { // min only
-    //         if (bPhraseLayer || bSpanLayer) {
-    //           // meta/freeform layer
-    //           if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
-    //             // anchored to start of word
-    //             sSqlExtraJoins += NSQL.db.START_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs);
-    //           } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
-    //             // anchored to end of word
-    //             sSqlExtraJoins += NSQL.db.END_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs);
-    //           } else { // un-anchored meta condition
-    //             if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-    //               sSqlExtraJoins += sSqlWordStartJoin;
-    //             }
-    //             if (bPhraseLayer) {
-    //               sSqlExtraJoins += NSQL.db.CONTAINING_META_NUMERIC_MIN_JOIN.format(oArgs);
-    //             } else {
-    //               sSqlExtraJoins += NSQL.db.CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs);
-    //             }
-    //           } // un-anchored meta condition
-    //         } else if (bUseWordContainsJoins) {
-    //           // word-containing-segment layer
-    //           if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-    //             sSqlExtraJoins += sSegmentStartJoin;
-    //           }
-    //           sSqlExtraJoins += NSQL.db.CONTAINING_WORD_NUMERIC_MIN_JOIN.format(oArgs);
-    //         } else {
-    //           sSqlExtraJoins += NSQL.db.NUMERIC_MIN_JOIN.format(oArgs);
-    //         }
-    //         vSearchStrings.add(layerMatch.getMin());
-    //         vSearchStrings.add(""); // one argument only
-    //       } else if (layerMatch.getMin() != null && layerMatch.getMax() != null) { // min&max
-    //         if (bPhraseLayer || bSpanLayer) {
-    //           // meta/freeform layer
-    //           if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
-    //             // anchored to start of word
-    //             sSqlExtraJoins += NSQL.db.START_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs);
-    //           } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
-    //             // anchored to end of word
-    //             sSqlExtraJoins += NSQL.db.END_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs);
-    //           } else { // un-anchored meta condition
-    //             if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-    //                 sSqlExtraJoins += sSqlWordStartJoin;
-    //             }
-    //             if (bPhraseLayer) {
-    //               sSqlExtraJoins += NSQL.db.CONTAINING_META_NUMERIC_RANGE_JOIN.format(oArgs);
-    //             } else {
-    //               sSqlExtraJoins += NSQL.db.CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs);
-    //             }
-    //           } // un-anchored meta condition
-    //         } else if (bUseWordContainsJoins) {
-    //           // word-containing-segment layer
-    //           if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-    //             sSqlExtraJoins += sSegmentStartJoin;
-    //           }
-    //           sSqlExtraJoins += NSQL.db.CONTAINING_WORD_NUMERIC_RANGE_JOIN.format(oArgs);
-    //         } else {
-    //           sSqlExtraJoins += NSQL.db.NUMERIC_RANGE_JOIN.format(oArgs);
-    //         }
-    //         vSearchStrings.add(layerMatch.getMin());
-    //         vSearchStrings.add(layerMatch.getMax());
-    //       } else if (layerMatch.getPattern() != null) { // use regexp
-    //         String sSqlExtraJoin = "";
-    //         if (bPhraseLayer || bSpanLayer) {
-    //           if (layer.getAlignment() == Contains.ALIGNMENT_POINT
-    //               || layer.getId().equals("noise")
-    //               || layer.getId().equals("comment")) {
-    //             // meta/freeform layer
-    //             if (!sSqlExtraJoins.contains(sSqlWordEndJoin)) {
-    //               sSqlExtraJoin += sSqlWordEndJoin;
-    //             }
-    //             sSqlExtraJoin += NSQL.db.TRAILING_META_REGEXP_JOIN.format(oArgs);
-    //           } else {
-    //             // meta/freeform layer
-    //             if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
-    //               // anchored to start of word
-    //               sSqlExtraJoin += NSQL.db.START_ANCHORED_REGEXP_JOIN.format(oArgs);
-    //             } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
-    //               // anchored to end of word
-    //               sSqlExtraJoin += NSQL.db.END_ANCHORED_REGEXP_JOIN.format(oArgs);
-    //             }  else { // un-anchored meta condition
-    //               if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-    //                 sSqlExtraJoin += sSqlWordStartJoin;
-    //               }
-    //               if (bPhraseLayer) {
-    //                 sSqlExtraJoin += NSQL.db.CONTAINING_META_REGEXP_JOIN.format(oArgs);
-    //               } else {
-    //                 sSqlExtraJoin += NSQL.db.CONTAINING_FREEFORM_REGEXP_JOIN.format(oArgs);
-    //               }
-    //             } // un-anchored meta condition
-    //           }
-    //         } else if (bSegmentLayer) {
-    //           if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-    //             sSqlExtraJoin += sSegmentStartJoin;
-    //           }
-    //           sSqlExtraJoin += NSQL.db.SEGMENT_REGEXP_JOIN.format(oArgs);
-    //           if (iTargetSegmentLayer == null) {
-    //             // target this segment layer
-    //             iTargetSegmentLayer = layer.getId();
-    //           }
-    //         } else if (bUseWordContainsJoins) {
-    //           // word-containing-segment layer
-    //           if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-    //             sSqlExtraJoin += sSegmentStartJoin;
-    //           }
-    //           sSqlExtraJoin += NSQL.db.CONTAINING_WORD_REGEXP_JOIN.format(oArgs);
-    //         } else {
-    //           sSqlExtraJoin += NSQL.db.REGEXP_JOIN.format(oArgs);
-    //         }
-    //         if (layerMatch.getNot() && ".+".equals(layerMatch.getPattern())) { // NOT EXISTS
-    //           // special case: "NOT .+" means "not anything" - i.e. missing annotations
-    //           sSqlExtraJoin = sSqlExtraJoin
-    //             // change join to be LEFT OUTER...
-    //             .replace("INNER JOIN annotation_layer_"+layer_id,
-    //                      "LEFT OUTER JOIN annotation_layer_"+layer.getId())
-    //             // ...or meta join to be LEFT OUTER...
-    //             .replace("INNER JOIN (annotation_layer_"+layer_id,
-    //                      "LEFT OUTER JOIN (annotation_layer_"+layer.getId())
-    //             // and remove the pattern match
-    //             .replaceAll("AND (CAST\\()?search_[0-9]+_"+layer_id
-    //                         +"\\.label( AS BINARY\\))? NOT REGEXP (BINARY)? \\?", "");
-    //           // and add a test for NULL to the WHERE clause
-    //           sSqlLayerMatches += NSQL.db.NULL_ANNOTATION_CONDITION.format(oArgs);
-    //           vSearchStrings.add(""); // no arguments
-    //           vSearchStrings.add(""); // no arguments
-    //         } else { // REGEXP MATCH
-    //           // regexp - add implicit ^ and $
-    //           layerMatch.ensurePatternAnchored();
-    //           // save the layer and string
-    //           // for later adding to the parameters of the query
-    //           vSearchStrings.add(layerMatch.getPattern());
-    //           vSearchStrings.add(""); // one argument only
-    //         }
-    //         sSqlExtraJoins += sSqlExtraJoin;
-    //       }
-          
-    //       if (layer.getId().equals(targetLayerId) && iWordColumn == iTargetColumn) {
-    //         targetLayer = layer;
-    //         sSqlExtraFields += ", search_"+iWordColumn+"_" + iTargetLayerId
-    //           + ".annotation_id AS target_annotation_id";
-    //         targetExpression = "search_"+iWordColumn+"_" + iTargetLayerId
-    //           + ".annotation_id";
-    //         bTargetAnnotation = true;
-    //       }
-          
-    //       setStatus(
-    //         "Layer: '" + layer.getId() 
-    //         + "' pattern: " + (layerMatch.getNot()?"NOT":"")
-    //         + " " + layerMatch.getPattern()
-    //         + " " + layerMatch.getMin() + " " + layerMatch.getMax()
-    //         + " " + (layerMatch.getAnchorStart()?"[":"")
-    //         + " " + (layerMatch.getAnchorEnd()?"]":""));
-          
-    //       // for export filename
-    //       if (layerMatch.getNot()) {
-    //         description += "_NOT";
-    //       }
-    //       if (layerMatch.getPattern() != null) {
-    //         description += "_" + layerMatch.getPattern();
-    //       }
-    //       if (layerMin.getMin() != null) {
-    //         description += "_" + layerMatch.getMin();
-    //       }
-    //       if (layerMax.getMax() != null) {
-    //         description += "_" + layerMatch.getMax();
-    //       }
-    //     } // matching this layer
-    //   } // next layer
-    //   if (bCancelling) return;
-
-    //   // aligned words only?
-    //   if (anchorConfidenceThreshold != null) { // TODO segment threshold too
-    //     if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-    //       sSqlExtraJoins += sSqlWordStartJoin
-    //         + " AND word_"+iWordColumn+"_start.alignment_status >= "
-    //         + anchorConfidenceThreshold;
-    //     } else { // update existing join
-    //       sSqlExtraJoins = sSqlExtraJoins.replaceAll(
-    //         " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id",
-    //         " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id"
-    //         + " AND word_"+iWordColumn+"_start.alignment_status >= "
-    //         + anchorConfidenceThreshold);
-    //     }
-    //     if (!sSqlExtraJoins.contains(sSqlWordEndJoin)) {
-    //       sSqlExtraJoins += sSqlWordEndJoin
-    //         + " AND word_"+iWordColumn+"_end.alignment_status >= "
-    //         + anchorConfidenceThreshold;
-    //     } else { // update existing join
-    //       sSqlExtraJoins = sSqlExtraJoins.replaceAll(
-    //         " ON word_"+iWordColumn+"_end\\.anchor_id = word_"+iWordColumn+"\\.end_anchor_id",
-    //         " ON word_"+iWordColumn+"_start\\.end_id = word_"+iWordColumn+"\\.end_anchor_id"
-    //         + " AND word_"+iWordColumn+"_end.alignment_status >= "
-    //         + anchorConfidenceThreshold);
-    //     }
-    //   }
-
-    //   // is this the last column?
-    //   String sBorderCondition = "";
-    //   if (iWordColumn == matrix.getColumns().size() - 1) {
-    //     // end condition
-    //     if (matrix.getColumns().get(matrix.getColumns().size() - 1).getLayers().values().stream()
-    //         .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to utterance
-    //         .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
-    //         .findAny().isPresent()) { // end of utterance
-    //       if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-    //         sSqlExtraJoins += sSqlWordStartJoin;
-    //       }
-    //       if (!sSqlExtraJoins.contains(sSqlLineJoin)) {
-    //         sSqlExtraJoins += sSqlLineJoin;
-    //       }
-    //       if (!sSqlExtraJoins.contains(sSqlEndLineJoin)) {
-    //         sSqlExtraJoins += sSqlEndLineJoin;
-    //       }
-    //       sBorderCondition = sqlEndLineCondition.format(columnSuffix);
-    //     } else if (matrix.getColumns().get(matrix.getColumns().size() - 1).getLayers().values()
-    //                .stream()
-    //                .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to turn
-    //                .filter(layerMatch -> schema.getTurnLayerId().equals(layerMatch.getId()))
-    //                .findAny().isPresent()) { // end of turn
-    //       if (!sSqlExtraJoins.contains(sSqlEndTurnJoin)) {
-    //         sSqlExtraJoins += sSqlEndTurnJoin;
-    //       }
-    //       sBorderCondition = sqlEndTurnCondition.format(columnSuffix);          
-    //     }
-    //   } // last column
-	       
-    //   if (iTargetSegmentLayer != null) {
-    //     sSqlExtraFields += ", search"+iWordColumn+"_" + iTargetSegmentLayer
-    //       + ".segment_annotation_id AS target_segment_id";
-    //     targetSegmentExpression = "search_"+iWordColumn+"_" + iTargetSegmentLayer
-    //       + ".segment_annotation_id"; 
-    //     targetSegmentOrder = ", search_"+iWordColumn+"_" + iTargetSegmentLayer
-    //       + ".ordinal_in_word";
-    //   }
-	    
-    //   Object oSubPatternMatchArgs[] = { 
-    //     sSqlExtraJoins, // extra JOINs
-    //     sBorderCondition, // border conditions
-    //     sSqlLayerMatches, // regexp/range subqueries
-    //     sSqlExtraFields, // for line info
-    //     "_" + iWordColumn, // column suffix
-    //     "_" + (iWordColumn-1) // previous column suffix
-    //   };
-      
-    //   strSubsequentSelect += SqlSearchPatterns.sqlPatternMatchSubsequentSelect
-    //     .format(oSubPatternMatchArgs);
-    //   strSubsequentJoin += sSqlExtraJoins;
-    //   strSubsequentWhere += SqlSearchPatterns.sqlPatternMatchSubsequentWhere
-    //     .format(oSubPatternMatchArgs);
-
-    //   setStatus("Adjacency for col " + iWordColumn + " is: " + column.getAdj());
-    // } // next column
-
-    // sqlAnnotationCount.close();
-    // sqlAnchoredToWordStartCount.close();
-    // sqlAnchoredToWordEndCount.close();
-    
-    // if (bMainSpeakersOnly) {
-    //   sSqlExtraJoinsFirst += sSqlTranscriptSpeakerJoin;
-    // }
-    
-    // String transcriptCondition = "";
-    // if (transcriptQuery != null && transcriptQuery.length() > 0) {
-    //   if (sSqlExtraJoinsFirst.indexOf(sSqlTranscriptJoin) < 0) {
-    //     sSqlExtraJoinsFirst += sSqlTranscriptJoin;
-    //   }
-    //   // check there are some matches
-    //   String[] transcriptIds = store.getMatchingTranscriptIds(transcriptQuery);
-    //   if (transcriptIds.length == 0) {
-    //     String message = "Transcript query matches no transcripts: " + transcriptQuery;
-    //     setStatus(message);
-    //     setLastException(new Exception(message));
-    //     return;
-    //   }
-    //   GraphAgqlToSql transformer = new GraphAgqlToSql(store.getSchema());
-    //   GraphAgqlToSql.Query q = transformer.sqlFor(
-    //     transcriptQuery, "transcript.transcript_id", null, null, null);
-    //   transcriptCondition = q.sql
-    //     .replaceFirst("^SELECT transcript.transcript_id FROM transcript WHERE ", " AND ")
-    //     .replaceFirst(" ORDER BY transcript.transcript_id$","");
-    // }
-    
-    // Object oPatternMatchArgs[] = { 
-    //   sSqlExtraJoinsFirst, // extra JOINs
-    //   sStartConditionFirst, // border conditions
-    //   sSqlLayerMatchesFirst, // regexp/range subqueries
-    //   sSqlExtraFieldsFirst, // for line info
-    //   strSpeakerWhere, // speakers
-    //   transcriptCondition, // transcripts
-    //   mainParticipantOnly? strMainParticipantClause : "", // main
-    //   strAccessWhere, // user-based access restrictions
-    //   strSubsequentSelect,
-    //   strSubsequentJoin,
-    //   strSubsequentWhere,
-    //   "_" + (matrix.getColumns().size() - 1), // last column suffix
-    //   targetSegmentExpression, // segment_annotation_id expression
-    //   targetExpression, // target_annotation_id expression
-    //   (targetLayer==null? "w"
-    //    :targetLayer.getParentId() == null
-    //    || targetLayer.getParentId().equals(schema.getRoot().getId())? ""
-    //    :"")+Character.toLowerCase(targetLayer.get("scope").toString()),// target scope (lowercase)
-    //   targetLayer==null?0:targetLayer.get("layer_id"), // target layer_id
-    //   getMaxResults()>0?"LIMIT " + getMaxResults():"",
-    //   targetSegmentOrder
-    // };
-
-    // // create sql query
-    // String q = SqlSearchPatterns.sqlPatternMatchFirst.format(oPatternMatchArgs);
-    // setStatus(q);
-    // // now, a number of expressions are expressed in terms of "word_c" where they need to be
-    // // "search_c_l", so correct that now...
-    // for (int c = 0; c < matrix.getColumns().size(); c++) {
-    //   if (firstPrimaryWordLayer.isPresent()) {
-    //     // (if there's no word-based matching, leave default join)        
-    //     // fix segment join
-    //     q = q.replaceAll(
-    //       "segment_"+c+" ON segment_"+c+"\\.word_annotation_id = word_"+c+"\\.annotation_id",
-    //       "segment_"+c+" ON segment_"+c+".turn_annotation_id = turn.annotation_id");
-    //   }
-    //   Optional<Integer> primaryWordLayerId = column.getLayers().stream()
-    //     .filter(LayerMatch::HasPattern)
-    //     // not a "NOT .+" expression
-    //     .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
-    //     .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
-    //     // word scope
-    //     .filter(layerMatch -> schema.getWordLayerId().equals(layerMatch.getId())
-    //             || (schema.getWordLayerId().equals(
-    //                   schema.getLayer(layerMatch.getId()).getParentId())
-    //                 && !layerMatch.getId().equals("segment")))
-    //     .map(layerMatch -> schema.getLayer(layerMatch.getId()))
-    //     .filter(Object::NonNull)
-    //     .map(layer -> (Integer)layer.get("layer_id"))
-    //     .filter(Object::NonNull)
-    //     .findAny();
-    //   int l = primaryWordLayerId.orElse(-999);
-    //   if (l >= 0) {
-    //     // fix join
-    //     q = q.replaceAll(
-    //       "search_"+c+"_"+l+"  ON search_"+c+"_"+l+"\\.word_annotation_id = word_"+c+"\\.word_annotation_id",
-    //       "search_"+c+"_"+l+"  ON search_"+c+"_"+l+".turn_annotation_id = turn.annotation_id");
-        
-    //     // fix mentions
-    //     q = q.replaceAll(
-    //       " word_"+c+"\\.",
-    //       " search_"+c+"_"+l+".");
-    //     q = q.replaceAll(
-    //       " word_"+c+" ",
-    //       " search_"+c+"_"+l+" ");
-    //   }
-    // } // next column
-    // if (targetLayer==null)
-    // {
-    //   // fix target fields
-    //   q = q.replaceAll(
-    //     "\\.annotation_id AS target_annotation_id",
-    //     ".word_annotation_id AS target_annotation_id");
-    //   q = q.replaceAll(
-    //     "\\.annotation_id\\) AS target_annotation_uid",
-    //     ".word_annotation_id) AS target_annotation_uid");
-    // }
+    setStatus("Finding matches...");    
     
     // Create temporary table so that multiple users can query at once without locking each other
     PreparedStatement sqlPatternMatch = connection.prepareStatement(
@@ -2274,155 +1188,238 @@ public class OneQuerySearch extends SearchTask {
     
     // set the layer search parameters
     int iLayerParameter = 1;     
-    // sqlPatternMatch.setLong(iLayerParameter++, ((DbSearch)matchesSoFar).getId());      
+    sqlPatternMatch.setLong(iLayerParameter++, ((SqlSearchResults)results).getId());      
 
-    // // pass through the search string lists twice
-    // // first time for JOIN clause parameters,
-    // // second time for WHERE clause parameters
+    // set parameter values
+    for (Object parameter : parameters) {
+      if (parameter instanceof Double) {
+        sqlPatternMatch.setDouble(
+          iLayerParameter++, (Double)parameter);
+      } else {
+        sqlPatternMatch.setString(iLayerParameter++, parameter.toString());
+      }
+    }
     
-    // // JOIN clause parameters
-    // Iterator<String> itSearchLayerTypes = vSearchLayerTypes.iterator();
-    // Iterator<String> itSearchStrings = vSearchStrings.iterator();
-    // while (itSearchLayerTypes.hasNext()) {
-    //   String sLayerType = itSearchLayerTypes.next();
-    //   String sArg = itSearchStrings.next();
-    //   String sSecondArg = itSearchStrings.next();
-    //   if (sLayerType.equals(Constants.TYPE_NUMBER)) {
-    //     // two parameters for numeric - min and then max
-    //     sqlPatternMatch.setDouble(
-    //       iLayerParameter++, Double.parseDouble(sArg));
-    //     if (sSecondArg.length() > 0) {
-    //       sqlPatternMatch.setDouble(
-    //         iLayerParameter++, Double.parseDouble(sSecondArg));
-    //     }
-    //   } else {
-    //     // setStatus("param " + iLayerParameter + ": " + sArg);
-    //     if (sArg.length() > 0) { // sArg may be unset, e.g. in "NOT .+" case
-    //       sqlPatternMatch.setString(iLayerParameter++, sArg);
-    //       if (sSecondArg.length() > 0) {
-    //         sqlPatternMatch.setString(iLayerParameter++, sSecondArg);
-    //       }
-    //     }
-    //   }
-    // } // use parameters
+    if (restrictByUser != null) {
+      sqlPatternMatch.setString(iLayerParameter++, restrictByUser);
+      sqlPatternMatch.setString(iLayerParameter++, restrictByUser);
+    }
+    for (int iWordColumn = 1; iWordColumn < matrix.getColumns().size(); iWordColumn++) {
+      sqlPatternMatch.setInt(
+        iLayerParameter++, matrix.getColumns().get(iWordColumn).getAdj());
+    } // next adjacency
     
-    // if (strAccessWhere.length() > 0) {
-    //   sqlPatternMatch.setString(iLayerParameter++, restrictByUser);
-    //   sqlPatternMatch.setString(iLayerParameter++, restrictByUser);
-    // }
-    // for (iWordColumn = 1; iWordColumn < matrix.getColumns(); iWordColumn++) {
-    //   sqlPatternMatch.setInt(
-    //     iLayerParameter++, matrix.getColumns().get(iWordColumn).getAdj());
-    // } // next adjacency
-    // iPercentComplete = 1;
+    iPercentComplete = SQL_STARTED_PERCENT; 
+    setStatus("Querying...");
+    if (!bCancelling) executeUpdate(sqlPatternMatch); 
+    sqlPatternMatch.close();
+    iPercentComplete = SQL_FINISHED_PERCENT;
 
-    // iPercentComplete = SQL_STARTED_PERCENT; 
-    // setStatus("Querying...");
-    // if (!isCancelling()) executeUpdate(sqlPatternMatch); 
-    // sqlPatternMatch.close();
-    // iPercentComplete = SQL_FINISHED_PERCENT;
+    setStatus("Query complete, collating results...");
+    sqlPatternMatch = connection.prepareStatement(
+      "CREATE TEMPORARY TABLE _result_copy ( "
+      +" search_id INTEGER UNSIGNED NOT NULL, "
+      +" match_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
+      +" ag_id INTEGER UNSIGNED NOT NULL,"
+      +" speaker_number INTEGER UNSIGNED NOT NULL,"
+      +" start_anchor_id INTEGER UNSIGNED NOT NULL,"
+      +" end_anchor_id INTEGER UNSIGNED NOT NULL,"
+      +" defining_annotation_id INTEGER UNSIGNED NULL,"
+      +" segment_annotation_id INTEGER UNSIGNED NULL,"
+      +" target_annotation_id INTEGER UNSIGNED NULL,"
+      +" turn_annotation_id INTEGER UNSIGNED NULL,"
+      +" first_matched_word_annotation_id INTEGER UNSIGNED NULL,"
+      +" last_matched_word_annotation_id INTEGER UNSIGNED NULL,"
+      +" complete BIT NULL,"
+      +" target_annotation_uid VARCHAR(20) NULL,"
+      +" PRIMARY KEY  (search_id, match_id),"
+      +" INDEX IDX_UID (search_id, target_annotation_uid)"
+      +") ENGINE=MyISAM;");
+    if (!bCancelling) executeUpdate(sqlPatternMatch);
+    sqlPatternMatch.close();
+    sqlPatternMatch = connection.prepareStatement(
+      "INSERT INTO _result_copy SELECT * FROM _result");
+    if (!bCancelling) executeUpdate(sqlPatternMatch);
+    sqlPatternMatch.close();
 
-    // setStatus("Query complete, collating results...");
-    // sqlPatternMatch = connection.prepareStatement(
-    //   "CREATE TEMPORARY TABLE _result_copy ( "
-    //   +" search_id INTEGER UNSIGNED NOT NULL, "
-    //   +" match_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,"
-    //   +" ag_id INTEGER UNSIGNED NOT NULL,"
-    //   +" speaker_number INTEGER UNSIGNED NOT NULL,"
-    //   +" start_anchor_id INTEGER UNSIGNED NOT NULL,"
-    //   +" end_anchor_id INTEGER UNSIGNED NOT NULL,"
-    //   +" defining_annotation_id INTEGER UNSIGNED NULL,"
-    //   +" segment_annotation_id INTEGER UNSIGNED NULL,"
-    //   +" target_annotation_id INTEGER UNSIGNED NULL,"
-    //   +" turn_annotation_id INTEGER UNSIGNED NULL,"
-    //   +" first_matched_word_annotation_id INTEGER UNSIGNED NULL,"
-    //   +" last_matched_word_annotation_id INTEGER UNSIGNED NULL,"
-    //   +" complete BIT NULL,"
-    //   +" target_annotation_uid VARCHAR(20) NULL,"
-    //   +" PRIMARY KEY  (search_id, match_id),"
-    //   +" INDEX IDX_UID (search_id, target_annotation_uid)"
-    //   +") ENGINE=MyISAM;");
-    // if (!isCancelling()) executeUpdate(sqlPatternMatch);
-    // sqlPatternMatch.close();
-    // sqlPatternMatch = connection.prepareStatement(
-    //   "INSERT INTO _result_copy SELECT * FROM _result");
-    // if (!isCancelling()) executeUpdate(sqlPatternMatch);
-    // sqlPatternMatch.close();
+    sqlPatternMatch = connection.prepareStatement(
+      "DELETE dup.*"
+      +" FROM _result dup"
+      +" INNER JOIN _result_copy orig"
+      +" ON dup.search_id = orig.search_id AND dup.target_annotation_uid = orig.target_annotation_uid"
+      +" AND dup.match_id > orig.match_id"
+      +" WHERE dup.search_id = ?");
+    sqlPatternMatch.setLong(1, ((SqlSearchResults)results).getId());      
+    if (!bCancelling) executeUpdate(sqlPatternMatch);
+    sqlPatternMatch.close();
 
-    // // TODO start here...
-    // sqlPatternMatch = connection.prepareStatement(
-    //   "DELETE dup.*"
-    //   +" FROM _result dup"
-    //   +" INNER JOIN _result_copy orig"
-    //   +" ON dup.search_id = orig.search_id AND dup.target_annotation_uid = orig.target_annotation_uid"
-    //   +" AND dup.match_id > orig.match_id"
-    //   +" WHERE dup.search_id = ?");
-    // sqlPatternMatch.setLong(1, ((DbSearch)matchesSoFar).getId());      
-    // if (!isCancelling()) executeUpdate(sqlPatternMatch);
-    // sqlPatternMatch.close();
-
-    // sqlPatternMatch = connection.prepareStatement(
-    //   "DROP TABLE _result_copy");
-    // executeUpdate(sqlPatternMatch);
-    // sqlPatternMatch.close();
+    sqlPatternMatch = connection.prepareStatement(
+      "DROP TABLE _result_copy");
+    executeUpdate(sqlPatternMatch);
+    sqlPatternMatch.close();
       
 
-    // iPercentComplete = 92;
-    // // set defining annotation and its anchors, and sort the results by speaker and transcript...
-      
-    // // copy the incomplete results back into the table, sorting as we go      
-    // sqlPatternMatch = connection.prepareStatement(
-    //   "INSERT INTO result"
-    //   +" (search_id,ag_id,speaker_number,"
-    //   +" start_anchor_id,end_anchor_id,defining_annotation_id,"
-    //   +" segment_annotation_id,target_annotation_id,first_matched_word_annotation_id,last_matched_word_annotation_id,complete,target_annotation_uid)"
-    //   +" SELECT unsorted.search_id,unsorted.ag_id,unsorted.speaker_number,"
-    //   +" line_start.anchor_id,line_end.anchor_id,line.annotation_id,"
-    //   +" unsorted.segment_annotation_id,unsorted.target_annotation_id,unsorted.first_matched_word_annotation_id,unsorted.last_matched_word_annotation_id,1,unsorted.target_annotation_uid"
-    //   +" FROM _result unsorted"
-    //   +" INNER JOIN transcript ON unsorted.ag_id = transcript.ag_id"
-    //   +" INNER JOIN speaker ON unsorted.speaker_number = speaker.speaker_number"
-    //   +" INNER JOIN anchor word_start ON unsorted.start_anchor_id = word_start.anchor_id"
-    //   +" INNER JOIN (annotation_layer_"+Labbcat.LAYER_UTTERANCE + " line" 
-    //   +"  INNER JOIN anchor line_start"
-    //   +"  ON line_start.anchor_id = line.start_anchor_id"
-    //   +"  INNER JOIN anchor line_end"
-    //   +"  ON line_end.anchor_id = line.end_anchor_id)"
-    //   +" ON line.turn_annotation_id = unsorted.turn_annotation_id"
-    //   // line bounds are outside word bounds...
-    //   +"  AND line_start.offset <= word_start.offset"
-    //   +"  AND line_end.offset > word_start.offset"
-    //   +" WHERE unsorted.search_id = ? AND complete = 0"
-    //   +" ORDER BY speaker.name, transcript.transcript_id, unsorted.match_id");
-    // sqlPatternMatch.setLong(1, ((DbSearch)matchesSoFar).getId());      
-    // if (!isCancelling()) executeUpdate(sqlPatternMatch);
-    // sqlPatternMatch.close();
+    iPercentComplete = 92;
+    
+    // set defining annotation and its anchors, and sort the results by speaker and transcript...
+    
+    // copy the incomplete results back into the table, sorting as we go      
+    sqlPatternMatch = connection.prepareStatement(
+      "INSERT INTO result"
+      +" (search_id,ag_id,speaker_number,"
+      +" start_anchor_id,end_anchor_id,defining_annotation_id,"
+      +" segment_annotation_id,target_annotation_id,first_matched_word_annotation_id,"
+      +" last_matched_word_annotation_id,complete,target_annotation_uid)"
+      +" SELECT unsorted.search_id,unsorted.ag_id,unsorted.speaker_number,"
+      +" line_start.anchor_id,line_end.anchor_id,line.annotation_id,"
+      +" unsorted.segment_annotation_id,unsorted.target_annotation_id,"
+      +" unsorted.first_matched_word_annotation_id,unsorted.last_matched_word_annotation_id,"
+      +" 1,unsorted.target_annotation_uid"
+      +" FROM _result unsorted"
+      +" INNER JOIN transcript ON unsorted.ag_id = transcript.ag_id"
+      +" INNER JOIN speaker ON unsorted.speaker_number = speaker.speaker_number"
+      +" INNER JOIN anchor word_start ON unsorted.start_anchor_id = word_start.anchor_id"
+      +" INNER JOIN (annotation_layer_"+SqlConstants.LAYER_UTTERANCE + " line" 
+      +"  INNER JOIN anchor line_start"
+      +"  ON line_start.anchor_id = line.start_anchor_id"
+      +"  INNER JOIN anchor line_end"
+      +"  ON line_end.anchor_id = line.end_anchor_id)"
+      +" ON line.turn_annotation_id = unsorted.turn_annotation_id"
+      // line bounds are outside word bounds...
+      +"  AND line_start.offset <= word_start.offset"
+      +"  AND line_end.offset > word_start.offset"
+      +" WHERE unsorted.search_id = ? AND complete = 0"
+      +" ORDER BY speaker.name, transcript.transcript_id, unsorted.match_id");
+    sqlPatternMatch.setLong(1, ((SqlSearchResults)results).getId());      
+    if (!bCancelling) executeUpdate(sqlPatternMatch);
+    sqlPatternMatch.close();
 
-    // // delete the unsorted results
-    // sqlPatternMatch = connection.prepareStatement(
-    //   "DROP TABLE _result");
-    // executeUpdate(sqlPatternMatch);
-    // sqlPatternMatch.close();
+    // delete the unsorted results
+    sqlPatternMatch = connection.prepareStatement(
+      "DROP TABLE _result");
+    executeUpdate(sqlPatternMatch);
+    sqlPatternMatch.close();
+    
+    iPercentComplete = 95;
       
-    // iPercentComplete = 95;
-    // setStatus("Done.");
-      
-    // vResults = matchesSoFar;
-    // vResults.reset();
-    // vResults.hasNext(); // force it to recheck the database
-    // filterResults();
-    // //sqlResult.close();
+    results.reset();
+    results.hasNext(); // force it to recheck the database to get size etc.
+    filterResults(); // exclude simultaneous speech, etc.
 
-    // setStatus(
-    //   "There " + (vResults.size()==1?"was ":"were ") 
-    //   + vResults.size() 
-    //   + (vResults.size()==1?" match":" matches")
-    //   + " in " + (((getDuration()/1000)+30)/60)
-    //   + " minutes [" + getDuration() + "ms]");
-
+    int size = results.size();
+    setStatus("There " + (size==1?"was ":"were ") + size + (size==1?" match":" matches")
+              + " in " + (((getDuration()/1000)+30)/60)
+              + " minutes [" + getDuration() + "ms]");
+    
     iPercentComplete = 100;
-	 
+    
   }
+
+  /**
+   * Removes results that should be excluded; e.g. simultaneous speech as per the
+   * {@link #overlapThreshold} attribute, and subsequent utterances if
+   * {@link #matchesPerTranscript} is set.
+   */
+  protected void filterResults() throws Exception {
+    if (matchesPerTranscript != null || overlapThreshold != null) {
+      
+      if (overlapThreshold == null) {
+        setStatus(
+          "Return only first "
+          + (matchesPerTranscript.intValue() == 1 ?" result"
+             :" "+matchesPerTranscript + " results")
+          +" per transcript");
+      } else if (matchesPerTranscript == null) {
+        setStatus(
+          "Exclude utterances that overlap more than " + overlapThreshold + "%"
+          +" with another utterance");
+      } else {
+        setStatus(
+          "Exclude utterances that overlap more than " + overlapThreshold + "%"
+          +" with another utterance and include only first "
+          + (matchesPerTranscript.intValue() == 1 ?" result"
+             :" "+matchesPerTranscript + " results")
+          +" per transcript");
+      }
+      Integer currentGraphId = null;
+      HashMap<Integer,String> graphIds = new HashMap<Integer,String>();
+      int soFarThisGraph = 0;
+      results.reset();
+      int matchNumber = 1;
+      while (results.hasNext()) {
+        IdUtterance match = new IdUtterance(results.next());
+        boolean keepMatch = true;
+        if (overlapThreshold != null) {
+          if (!graphIds.containsKey(match.getGraphId())) { // get transcript name
+            // get the graph using the ag_id
+            Graph transcript = store.getTranscript(""+match.getGraphId());
+            graphIds.put(match.getGraphId(), transcript.getId());
+          }
+          String[] utteranceAnchorIds = {
+            "n_" + match.getStartAnchorId(), "n_" + match.getEndAnchorId()
+          };
+          Anchor[] utteranceAnchors = store.getAnchors(
+            graphIds.get(match.getGraphId()), utteranceAnchorIds);
+          if (utteranceAnchors[0].getOffset() == null
+              || utteranceAnchors[1].getOffset() == null) { // not anchored, skip this one
+            continue;
+          }
+          double dAnnotationDuration
+            = utteranceAnchors[1].getOffset() - utteranceAnchors[0].getOffset();
+          // get all utterances that overlap with this one (including this one)
+          String query = "graph.id == '"
+            +graphIds.get(match.getGraphId()).replace("\\","\\\\").replace("'","\\'")+"'"
+            +" && layer.id == 'utterance'"
+            +" && start.offset <= " + utteranceAnchors[1].getOffset()
+            +" && end.offset >= " + utteranceAnchors[0].getOffset();
+          Annotation[] overlappingUtterances = store.getMatchingAnnotations(query);
+          // collect them all into a graph for comparing anchor offsets
+          Graph g = new Graph();
+          g.addAnchor(utteranceAnchors[0]);
+          g.addAnchor(utteranceAnchors[1]);
+          HashSet<String> anchorIds = new HashSet<String>();
+          for (nzilbb.ag.Annotation other : overlappingUtterances) {
+            g.addAnnotation(other);
+            anchorIds.add(other.getStartId());
+            anchorIds.add(other.getEndId());
+          }
+          Anchor[] anchors = store.getAnchors(
+            graphIds.get(match.getGraphId()),
+            anchorIds.toArray(new String[anchorIds.size()]));
+          for (Anchor anchor : anchors) g.addAnchor(anchor);
+          
+          // look for an overlap that's greater than the threshold
+          Annotation utterance = g.getAnnotation(match.getDefiningAnnotationUid());
+          for (nzilbb.ag.Annotation other : overlappingUtterances) {
+            if (other == utterance) continue; // skip this utterance
+            double dOverlap = -other.distance(utterance);
+            if (dOverlap / dAnnotationDuration > overlapThreshold / 100.0) {
+              keepMatch = false;
+              break;
+            } // overlap over threshold
+          } // next overlapping utterance
+          // only keep the utterances that don't count as overlapping
+        } // overlapThreshold is set
+            
+        if (matchesPerTranscript != null) {
+          if (!match.getGraphId().equals(currentGraphId)) { // new graph
+            currentGraphId = match.getGraphId();
+            soFarThisGraph = 0;
+          }
+          if (soFarThisGraph < matchesPerTranscript) { // keep the first perTranscript matches
+            soFarThisGraph++;
+          } else {
+            keepMatch = false;
+          }
+        }
+
+        if (!keepMatch) { // remove it from database
+          results.remove();
+        }
+      } // next match
+      results.reset(); // recompute size, etc
+    }
+  } // end of filterResults()
 
   /**
    * Somebody is still interested in the thread, so keep it from dying.

@@ -20,8 +20,6 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 /**
- * Graph Store implementation.
- * An RDBMS database (assumed to by MySQL) as an annotation store, and the file system as
- * a file store. 
+ * MySQL implementation of LaBB-CAT's Graph Store, and all other RDBMS-related operations.
  */
 package nzilbb.labbcat.server.db;

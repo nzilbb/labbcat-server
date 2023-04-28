@@ -34,8 +34,7 @@ import nzilbb.util.MonitorableSeries;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class ResultSeries
-  implements MonitorableSeries<Graph> {
+public class ResultSeries implements MonitorableSeries<Graph> {
    
   // Attributes:
 
@@ -160,7 +159,7 @@ public class ResultSeries
    */
   public ResultSeries(long search_id, SqlGraphStore store, String[] layers)
     throws SQLException {
-      
+    
     setSearchId(search_id);
     setStore(store);
     setLayers(layers);
@@ -189,7 +188,6 @@ public class ResultSeries
     rs = sql.executeQuery();
       
   } // end of constructor
-
    
   /**
    * Finalize method called by the garbage collector.
@@ -287,8 +285,7 @@ public class ResultSeries
    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
    */
   public Integer getPercentComplete() {
-    if (rowCount > 0)
-    {
+    if (rowCount > 0) {
       return (int)((nextRow * 100) / rowCount);
     }
     return null;
