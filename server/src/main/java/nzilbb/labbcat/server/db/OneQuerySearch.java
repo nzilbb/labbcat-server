@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Vector;
@@ -73,9 +74,9 @@ public class OneQuerySearch extends SearchTask {
     
     // column 0 first
     int iWordColumn = 0;
-    String sSqlExtraJoinsFirst = "";
-    String sSqlLayerMatchesFirst = "";
-    String sSqlExtraFieldsFirst = "";
+    StringBuilder sSqlExtraJoinsFirst = new StringBuilder();
+    StringBuilder sSqlLayerMatchesFirst = new StringBuilder();
+    StringBuilder sSqlExtraFieldsFirst = new StringBuilder();
     boolean bTargetAnnotation = false;
     String targetExpression = "word_0.annotation_id";
     String targetSegmentExpression = "NULL";
@@ -110,8 +111,9 @@ public class OneQuerySearch extends SearchTask {
     
     // do we need a word layer to anchor to?
     if (!firstPrimaryWordLayer.isPresent()) {
-      sSqlExtraJoinsFirst += " INNER JOIN annotation_layer_"+ SqlConstants.LAYER_TRANSCRIPTION
-        +" word_"+iWordColumn+" ON word_"+iWordColumn+".turn_annotation_id = turn.annotation_id";
+      sSqlExtraJoinsFirst.append(
+        " INNER JOIN annotation_layer_"+ SqlConstants.LAYER_TRANSCRIPTION
+        +" word_"+iWordColumn+" ON word_"+iWordColumn+".turn_annotation_id = turn.annotation_id");
     }
     
     // check for segment layer search
@@ -163,7 +165,7 @@ public class OneQuerySearch extends SearchTask {
       layerMatch.setNullBooleans(); // to ensure if()s below don't need to check for null
       Layer layer = schema.getLayer(layerMatch.getId());
       Integer layer_id = (Integer)(layer.get("layer_id"));
-      String sExtraMetaCondition = "";
+      StringBuilder sExtraMetaCondition = new StringBuilder();
       Object[] oLayerId = { layer_id, "_" + iWordColumn };
       
       boolean bPhraseLayer = IsPhraseLayer(layer, schema);
@@ -178,20 +180,16 @@ public class OneQuerySearch extends SearchTask {
           && !bWordAnchoredMetaLayer) {
         if (layerMatch.getAnchorStart()) {
           if (bPhraseLayer) {
-            sExtraMetaCondition += fmtSqlStartMetaSpanCondition
-              .format(oLayerId);
+            sExtraMetaCondition.append(fmtSqlStartMetaSpanCondition.format(oLayerId));
           } else {
-            sExtraMetaCondition += fmtSqlStartFreeformSpanCondition
-              .format(oLayerId);
+            sExtraMetaCondition.append(fmtSqlStartFreeformSpanCondition.format(oLayerId));
           }
         }
         if (layerMatch.getAnchorEnd()) {
           if (bPhraseLayer) {
-            sExtraMetaCondition += fmtSqlEndMetaSpanCondition
-              .format(oLayerId);
+            sExtraMetaCondition.append(fmtSqlEndMetaSpanCondition.format(oLayerId));
           } else {
-            sExtraMetaCondition += fmtSqlEndFreeformSpanCondition
-              .format(oLayerId);
+            sExtraMetaCondition.append(fmtSqlEndFreeformSpanCondition.format(oLayerId));
           }
         }
       }
@@ -205,7 +203,7 @@ public class OneQuerySearch extends SearchTask {
           layer.getType().equals(Constants.TYPE_IPA) // ... for DISC
           || layer.getType().equals(Constants.TYPE_SELECT)?1:0), // ... and 'select' layers
         layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
-        sExtraMetaCondition, // e.g. anchoring to the start/end of a span
+        sExtraMetaCondition.toString(), // e.g. anchoring to the start/end of a span
         (Integer)(targetSegmentLayer.isPresent()?targetSegmentLayer.get().get("layer_id"):null),
         "_" + iWordColumn
       };
@@ -216,28 +214,28 @@ public class OneQuerySearch extends SearchTask {
             // meta/freeform layer
             if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
               // anchored to start of word
-              sSqlExtraJoinsFirst += START_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs);
+              sSqlExtraJoinsFirst.append(START_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs));
             } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
               // anchored to end of word
-              sSqlExtraJoinsFirst += END_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs);
+              sSqlExtraJoinsFirst.append(END_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs));
             } else { // un-anchored meta condition
-              if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-                sSqlExtraJoinsFirst += sSqlWordStartJoin;
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+                sSqlExtraJoinsFirst.append(sSqlWordStartJoin);
               }
               if (bPhraseLayer) {
-                sSqlExtraJoinsFirst += CONTAINING_META_NUMERIC_MAX_JOIN.format(oArgs);
+                sSqlExtraJoinsFirst.append(CONTAINING_META_NUMERIC_MAX_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoinsFirst += CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs);
+                sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs));
               }
             } // un-anchored meta condition
           } else if (bUseWordContainsJoins) {
             // word-containing-segment layer
-            if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-              sSqlExtraJoinsFirst += sSegmentStartJoin;
+            if (sSqlExtraJoinsFirst.indexOf(sSegmentStartJoin) < 0) {
+              sSqlExtraJoinsFirst.append(sSegmentStartJoin);
             }
-            sSqlExtraJoinsFirst += CONTAINING_WORD_NUMERIC_MAX_JOIN.format(oArgs);
+            sSqlExtraJoinsFirst.append(CONTAINING_WORD_NUMERIC_MAX_JOIN.format(oArgs));
           } else {
-            sSqlExtraJoinsFirst += NUMERIC_MAX_JOIN.format(oArgs);
+            sSqlExtraJoinsFirst.append(NUMERIC_MAX_JOIN.format(oArgs));
           }
           parameters.add(Double.valueOf(layerMatch.getMax()));
         } else if (layerMatch.getMin() != null && layerMatch.getMax() == null) { // min only
@@ -245,28 +243,28 @@ public class OneQuerySearch extends SearchTask {
             // meta/freeform layer
             if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
               // anchored to start of word
-              sSqlExtraJoinsFirst += START_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs);
+              sSqlExtraJoinsFirst.append(START_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs));
             } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
               // anchored to end of word
-              sSqlExtraJoinsFirst += END_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs);
+              sSqlExtraJoinsFirst.append(END_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs));
             } else { // un-anchored meta condition
-              if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-                sSqlExtraJoinsFirst += sSqlWordStartJoin;
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+                sSqlExtraJoinsFirst.append(sSqlWordStartJoin);
               }
               if (bPhraseLayer) {
-                sSqlExtraJoinsFirst += CONTAINING_META_NUMERIC_MIN_JOIN.format(oArgs);
+                sSqlExtraJoinsFirst.append(CONTAINING_META_NUMERIC_MIN_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoinsFirst += CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs);
+                sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs));
               }
             } // un-anchors meta condition
           } else if (bUseWordContainsJoins) {
             // word-containing-segment layer
-            if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-              sSqlExtraJoinsFirst += sSegmentStartJoin;
+            if (sSqlExtraJoinsFirst.indexOf(sSegmentStartJoin) < 0) {
+              sSqlExtraJoinsFirst.append(sSegmentStartJoin);
             }
-            sSqlExtraJoinsFirst += CONTAINING_WORD_NUMERIC_MIN_JOIN.format(oArgs);
+            sSqlExtraJoinsFirst.append(CONTAINING_WORD_NUMERIC_MIN_JOIN.format(oArgs));
           } else {
-            sSqlExtraJoinsFirst += NUMERIC_MIN_JOIN.format(oArgs);
+            sSqlExtraJoinsFirst.append(NUMERIC_MIN_JOIN.format(oArgs));
           }
           parameters.add(Double.valueOf(layerMatch.getMin()));
         } else if (layerMatch.getMin() != null && layerMatch.getMax() != null) { // min & max
@@ -274,81 +272,82 @@ public class OneQuerySearch extends SearchTask {
             // meta/freeform layer
             if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
               // anchored to start of word
-              sSqlExtraJoinsFirst += START_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs);
+              sSqlExtraJoinsFirst.append(START_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs));
             } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
               // anchored to end of word
-              sSqlExtraJoinsFirst += END_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs);
+              sSqlExtraJoinsFirst.append(END_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs));
             }  else { // un-anchored meta condition
-              if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-                sSqlExtraJoinsFirst += sSqlWordStartJoin;
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+                sSqlExtraJoinsFirst.append(sSqlWordStartJoin);
               }
               if (bPhraseLayer) {
-                sSqlExtraJoinsFirst += CONTAINING_META_NUMERIC_RANGE_JOIN.format(oArgs);
+                sSqlExtraJoinsFirst.append(CONTAINING_META_NUMERIC_RANGE_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoinsFirst += CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs);
+                sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs));
               }
             } // un-anchored meta condition
           } else if (bUseWordContainsJoins) {
             // word-containing-segment layer
-            if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-              sSqlExtraJoinsFirst += sSegmentStartJoin;
+            if (sSqlExtraJoinsFirst.indexOf(sSegmentStartJoin) < 0) {
+              sSqlExtraJoinsFirst.append(sSegmentStartJoin);
             }
-            sSqlExtraJoinsFirst += CONTAINING_WORD_NUMERIC_RANGE_JOIN.format(oArgs);
+            sSqlExtraJoinsFirst.append(CONTAINING_WORD_NUMERIC_RANGE_JOIN.format(oArgs));
           } else {
-            sSqlExtraJoinsFirst += NUMERIC_RANGE_JOIN.format(oArgs);
+            sSqlExtraJoinsFirst.append(NUMERIC_RANGE_JOIN.format(oArgs));
           }
           parameters.add(Double.valueOf(layerMatch.getMin()));
           parameters.add(Double.valueOf(layerMatch.getMax()));
         } else if (layerMatch.getPattern() != null) { // use regexp
-          String sSqlExtraJoin = "";
+          StringBuilder sSqlExtraJoin = new StringBuilder();
           if (bPhraseLayer || bSpanLayer) {
             if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT
                 || layer.getId().equals("noise")
                 || layer.getId().equals("comment")) {
-              if (!sSqlExtraJoinsFirst.contains(sSqlWordEndJoin)) {
-                sSqlExtraJoin += sSqlWordEndJoin;
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
+                sSqlExtraJoin.append(sSqlWordEndJoin);
               }
               if (bPhraseLayer) {
-                sSqlExtraJoin += TRAILING_META_REGEXP_JOIN.format(oArgs);
+                sSqlExtraJoin.append(TRAILING_META_REGEXP_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoin += TRAILING_FREEFORM_REGEXP_JOIN.format(oArgs);
+                sSqlExtraJoin.append(TRAILING_FREEFORM_REGEXP_JOIN.format(oArgs));
               }
             } else {
               // meta/freeform layer
               if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
                 // anchored to start of word
-                sSqlExtraJoinsFirst += START_ANCHORED_REGEXP_JOIN.format(oArgs);
+                sSqlExtraJoinsFirst.append(START_ANCHORED_REGEXP_JOIN.format(oArgs));
               } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
                 // anchored to end of word
-                sSqlExtraJoinsFirst += END_ANCHORED_REGEXP_JOIN.format(oArgs);
+                sSqlExtraJoinsFirst.append(END_ANCHORED_REGEXP_JOIN.format(oArgs));
               } else { // un-anchored meta condition
-                if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-                  sSqlExtraJoin += sSqlWordStartJoin;
+                if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+                  sSqlExtraJoin.append(sSqlWordStartJoin);
                 }
                 if (bPhraseLayer) {
-                  sSqlExtraJoin += CONTAINING_META_REGEXP_JOIN.format(oArgs);
+                  sSqlExtraJoin.append(CONTAINING_META_REGEXP_JOIN.format(oArgs));
                 } else {
-                  sSqlExtraJoin += CONTAINING_FREEFORM_REGEXP_JOIN.format(oArgs);
+                  sSqlExtraJoin.append(CONTAINING_FREEFORM_REGEXP_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
             }
           } else if (bSegmentLayer) {
-            if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-              sSqlExtraJoin += sSegmentStartJoin;
+            if (sSqlExtraJoinsFirst.indexOf(sSegmentStartJoin) < 0) {
+              sSqlExtraJoin.append(sSegmentStartJoin);
             }
-            sSqlExtraJoin += SEGMENT_REGEXP_JOIN.format(oArgs);
+            sSqlExtraJoin.append(SEGMENT_REGEXP_JOIN.format(oArgs));
           } else if (bUseWordContainsJoins) {
             // word-containing-segment layer
-            if (!sSqlExtraJoinsFirst.contains(sSegmentStartJoin)) {
-              sSqlExtraJoin += sSegmentStartJoin;
+            if (sSqlExtraJoinsFirst.indexOf(sSegmentStartJoin) < 0) {
+              sSqlExtraJoin.append(sSegmentStartJoin);
             }
-            sSqlExtraJoin += CONTAINING_WORD_REGEXP_JOIN.format(oArgs);
+            sSqlExtraJoin.append(CONTAINING_WORD_REGEXP_JOIN.format(oArgs));
           } else {
-            sSqlExtraJoin += REGEXP_JOIN.format(oArgs);
+            sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
           }
           if (layerMatch.getNot() && ".+".equals(layerMatch.getPattern())) { // NOT EXISTS
             // special case: "NOT .+" means "not anything" - i.e. missing annotations
-            sSqlExtraJoin = sSqlExtraJoin
+            sSqlExtraJoin = new StringBuilder(
+              sSqlExtraJoin.toString()
               // change join to be LEFT OUTER...
               .replace("INNER JOIN annotation_layer_"+layer_id,
                        "LEFT OUTER JOIN annotation_layer_"+layer_id)
@@ -357,9 +356,9 @@ public class OneQuerySearch extends SearchTask {
                        "LEFT OUTER JOIN (annotation_layer_"+layer_id)
               // and remove the pattern match
               .replaceAll("AND (CAST\\()?search_[0-9]+_"+layer_id
-                          +"\\.label( AS BINARY\\))? NOT REGEXP (BINARY)? \\?", "");
+                          +"\\.label( AS BINARY\\))? NOT REGEXP (BINARY)? \\?", ""));
             // and add a test for NULL to the WHERE clause
-            sSqlLayerMatchesFirst += NULL_ANNOTATION_CONDITION.format(oArgs);
+            sSqlLayerMatchesFirst.append(NULL_ANNOTATION_CONDITION.format(oArgs));
           } else { // REGEXP MATCH
             // add implicit ^ and $
             layerMatch.ensurePatternAnchored();
@@ -367,7 +366,7 @@ public class OneQuerySearch extends SearchTask {
             // for later adding to the parameters of the query
             parameters.add(layerMatch.getPattern());
           }
-          sSqlExtraJoinsFirst += sSqlExtraJoin;
+          sSqlExtraJoinsFirst.append(sSqlExtraJoin);
         } // use regexp
         
         setStatus(
@@ -392,8 +391,8 @@ public class OneQuerySearch extends SearchTask {
           description += "_" + layerMatch.getMax();
         }
         if (targetLayerId.equals(layerMatch.getId()) && iWordColumn == iTargetColumn) {
-          sSqlExtraFieldsFirst += ", search_" + iTargetLayer
-            + ".annotation_id AS target_annotation_id";
+          sSqlExtraFieldsFirst.append(
+            ", search_" + iTargetLayer + ".annotation_id AS target_annotation_id");
           targetExpression = "search_" + iWordColumn + "_" + iTargetLayer
             + ".annotation_id";
           bTargetAnnotation = true;
@@ -404,8 +403,9 @@ public class OneQuerySearch extends SearchTask {
     if (bCancelling) throw new Exception("Cancelled.");
 
     if (targetSegmentLayer.isPresent()) {
-      sSqlExtraFieldsFirst += ", search_" + targetSegmentLayer.get().get("layer_id")
-        + ".segment_annotation_id AS target_segment_id";
+      sSqlExtraFieldsFirst.append(
+        ", search_" + targetSegmentLayer.get().get("layer_id")
+        + ".segment_annotation_id AS target_segment_id");
       targetSegmentExpression = "search_0_" + targetSegmentLayer.get().get("layer_id")
         + ".segment_annotation_id";
       targetSegmentOrder = ", search_0_" + targetSegmentLayer.get().get("layer_id")
@@ -418,14 +418,14 @@ public class OneQuerySearch extends SearchTask {
         .filter(layerMatch -> layerMatch.getAnchorStart()) // start anchored to utterance
         .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
         .findAny().isPresent()) { // start of utterance
-      if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-        sSqlExtraJoinsFirst += sSqlWordStartJoin;
+      if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+        sSqlExtraJoinsFirst.append(sSqlWordStartJoin);
       }
-      if (!sSqlExtraJoinsFirst.contains(sSqlLineJoin)) {
-        sSqlExtraJoinsFirst += sSqlLineJoin;
+      if (sSqlExtraJoinsFirst.indexOf(sSqlLineJoin) < 0) {
+        sSqlExtraJoinsFirst.append(sSqlLineJoin);
       }
-      if (!sSqlExtraJoinsFirst.contains(sSqlStartLineJoin)) {
-        sSqlExtraJoinsFirst += sSqlStartLineJoin;
+      if (sSqlExtraJoinsFirst.indexOf(sSqlStartLineJoin) < 0) {
+        sSqlExtraJoinsFirst.append(sSqlStartLineJoin);
       }
       sStartConditionFirst = sSqlStartLineCondition;
     } else if (matrix.getColumns().get(0).getLayers().values().stream()
@@ -442,50 +442,54 @@ public class OneQuerySearch extends SearchTask {
           .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to utterance
           .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
           .findAny().isPresent()) { // end of utterance
-        if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-          sSqlExtraJoinsFirst += sSqlWordStartJoin;
+        if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+          sSqlExtraJoinsFirst.append(sSqlWordStartJoin);
         }
-        if (!sSqlExtraJoinsFirst.contains(sSqlLineJoin)) {
-          sSqlExtraJoinsFirst += sSqlLineJoin;
+        if (sSqlExtraJoinsFirst.indexOf(sSqlLineJoin) < 0) {
+          sSqlExtraJoinsFirst.append(sSqlLineJoin);
         }
-        if (!sSqlExtraJoinsFirst.contains(sSqlEndLineJoin)) {
-          sSqlExtraJoinsFirst += sSqlEndLineJoin;
+        if (sSqlExtraJoinsFirst.indexOf(sSqlEndLineJoin) < 0) {
+          sSqlExtraJoinsFirst.append(sSqlEndLineJoin);
         }
-        sSqlLayerMatchesFirst += sqlEndLineCondition.format(columnSuffix);
+        sSqlLayerMatchesFirst.append(sqlEndLineCondition.format(columnSuffix));
       } else if (matrix.getColumns().get(0).getLayers().values().stream()
                  .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to turn
                  .filter(layerMatch -> schema.getTurnLayerId().equals(layerMatch.getId()))
                  .findAny().isPresent()) { // end of turn
-        if (!sSqlExtraJoinsFirst.contains(sSqlEndTurnJoin)) {
-          sSqlExtraJoinsFirst += sSqlEndTurnJoin;
+        if (sSqlExtraJoinsFirst.indexOf(sSqlEndTurnJoin) < 0) {
+          sSqlExtraJoinsFirst.append(sSqlEndTurnJoin);
         }
-        sSqlLayerMatchesFirst += sqlEndTurnCondition.format(columnSuffix);
+        sSqlLayerMatchesFirst.append(sqlEndTurnCondition.format(columnSuffix));
       }
     } // last column
 
     // aligned words only?
     if (anchorConfidenceThreshold != null) { // TODO segment threshold too
-      if (!sSqlExtraJoinsFirst.contains(sSqlWordStartJoin)) {
-        sSqlExtraJoinsFirst += sSqlWordStartJoin
-          + " AND word_"+iWordColumn+"_start.alignment_status >= "
-          + anchorConfidenceThreshold;
-      } else { // update existing join
-        sSqlExtraJoinsFirst = sSqlExtraJoinsFirst.replaceAll(
-          " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id",
-          " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id"
+      if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+        sSqlExtraJoinsFirst.append(
+          sSqlWordStartJoin
           + " AND word_"+iWordColumn+"_start.alignment_status >= "
           + anchorConfidenceThreshold);
+      } else { // update existing join
+        sSqlExtraJoinsFirst = new StringBuilder(
+          sSqlExtraJoinsFirst.toString().replaceAll(
+            " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id",
+            " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id"
+            + " AND word_"+iWordColumn+"_start.alignment_status >= "
+            + anchorConfidenceThreshold));
       }
-      if (!sSqlExtraJoinsFirst.contains(sSqlWordEndJoin)) {
-        sSqlExtraJoinsFirst += sSqlWordEndJoin
-          + " AND word_"+iWordColumn+"_end.alignment_status >= "
-          + anchorConfidenceThreshold;
-      } else { // update existing join
-        sSqlExtraJoinsFirst = sSqlExtraJoinsFirst.replaceAll(
-          " ON word_"+iWordColumn+"_end\\.anchor_id = word_"+iWordColumn+"\\.end_anchor_id",
-          " ON word_"+iWordColumn+"_start\\.end_id = word_"+iWordColumn+"\\.end_anchor_id"
+      if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
+        sSqlExtraJoinsFirst.append(
+          sSqlWordEndJoin
           + " AND word_"+iWordColumn+"_end.alignment_status >= "
           + anchorConfidenceThreshold);
+      } else { // update existing join
+        sSqlExtraJoinsFirst = new StringBuilder(
+          sSqlExtraJoinsFirst.toString().replaceAll(
+            " ON word_"+iWordColumn+"_end\\.anchor_id = word_"+iWordColumn+"\\.end_anchor_id",
+            " ON word_"+iWordColumn+"_start\\.end_id = word_"+iWordColumn+"\\.end_anchor_id"
+            + " AND word_"+iWordColumn+"_end.alignment_status >= "
+            + anchorConfidenceThreshold));
       }
     }
 
@@ -506,7 +510,7 @@ public class OneQuerySearch extends SearchTask {
         + " WHERE transcript.corpus_name REGEXP role_permission.value_pattern"
         + " AND user_id = ?)";
       if (sSqlExtraJoinsFirst.indexOf(sSqlTranscriptJoin) < 0) {
-        sSqlExtraJoinsFirst += sSqlTranscriptJoin;
+        sSqlExtraJoinsFirst.append(sSqlTranscriptJoin);
       }
     } // filtering by role
     String strSpeakerWhere = participantCondition.apply(matrix.getParticipantQuery());
@@ -515,16 +519,16 @@ public class OneQuerySearch extends SearchTask {
     }
     
     // now match subsequent columns
-    String strSubsequentSelect = "";
-    String strSubsequentJoin = "";
-    String strSubsequentWhere = "";
+    StringBuilder strSubsequentSelect = new StringBuilder();
+    StringBuilder strSubsequentJoin = new StringBuilder();
+    StringBuilder strSubsequentWhere = new StringBuilder();
     for (
       iWordColumn = 1; 
       iWordColumn < matrix.getColumns().size() && !bCancelling; 
       iWordColumn++) { 
-      String sSqlExtraJoins = "";
-      String sSqlExtraFields = "";
-      String sSqlLayerMatches = "";
+      StringBuilder sSqlExtraJoins = new StringBuilder();
+      StringBuilder sSqlExtraFields = new StringBuilder();
+      StringBuilder sSqlLayerMatches = new StringBuilder();
       targetSegmentLayer = matrix.getColumns().get(iWordColumn)
         .getLayers().values().stream()
         .filter(LayerMatch::HasPattern)
@@ -555,7 +559,7 @@ public class OneQuerySearch extends SearchTask {
           "_" + iWordColumn, // column suffix
           "_" + (iWordColumn-1) // previous column suffix
         };
-        sSqlExtraJoins += sqlPatternMatchSubsequentJoin.format(oSubPatternMatchArgs);
+        sSqlExtraJoins.append(sqlPatternMatchSubsequentJoin.format(oSubPatternMatchArgs));
       }
       
       columnSuffix[0] = "_" + iWordColumn;
@@ -590,7 +594,7 @@ public class OneQuerySearch extends SearchTask {
         layerMatch.setNullBooleans();        
         Layer layer = schema.getLayer(layerMatch.getId());
         Integer layer_id = (Integer)(layer.get("layer_id"));
-        String sExtraMetaCondition = "";
+        StringBuilder sExtraMetaCondition = new StringBuilder();
         Object[] oLayerId = { (Integer)(layer.get("layer_id")), "_" + iWordColumn };
 	
         boolean bPhraseLayer = IsPhraseLayer(layer, schema);
@@ -605,16 +609,16 @@ public class OneQuerySearch extends SearchTask {
             && !bWordAnchoredMetaLayer) {
           if (layerMatch.getAnchorStart()) {
             if (bPhraseLayer) {
-              sExtraMetaCondition += fmtSqlStartMetaSpanCondition.format(oLayerId);
+              sExtraMetaCondition.append(fmtSqlStartMetaSpanCondition.format(oLayerId));
             } else {
-              sExtraMetaCondition += fmtSqlStartFreeformSpanCondition.format(oLayerId);
+              sExtraMetaCondition.append(fmtSqlStartFreeformSpanCondition.format(oLayerId));
             }
           }
           if (layerMatch.getAnchorEnd()) {
             if (bPhraseLayer) {
-              sExtraMetaCondition += fmtSqlEndMetaSpanCondition.format(oLayerId);
+              sExtraMetaCondition.append(fmtSqlEndMetaSpanCondition.format(oLayerId));
             } else {
-              sExtraMetaCondition += fmtSqlEndFreeformSpanCondition.format(oLayerId);
+              sExtraMetaCondition.append(fmtSqlEndFreeformSpanCondition.format(oLayerId));
             }
           }
         }
@@ -628,7 +632,7 @@ public class OneQuerySearch extends SearchTask {
             layer.getType().equals(Constants.TYPE_IPA) // ... for DISC
             || layer.getType().equals(Constants.TYPE_SELECT)?1:0), // ... and 'select' layers
           layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
-          sExtraMetaCondition, // e.g. anchoring to the start of a span
+          sExtraMetaCondition.toString(), // e.g. anchoring to the start of a span
           null,
           "_" + iWordColumn
         };
@@ -639,28 +643,28 @@ public class OneQuerySearch extends SearchTask {
               // meta/freeform layer
               if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
                 // anchored to start of word
-                sSqlExtraJoins += START_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs);
+                sSqlExtraJoins.append(START_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs));
               } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
                 // anchored to end of word
-                sSqlExtraJoins += END_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs);
+                sSqlExtraJoins.append(END_ANCHORED_NUMERIC_MAX_JOIN.format(oArgs));
               } else { // un-anchored meta condition
-                if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-                  sSqlExtraJoins += sSqlWordStartJoin;
+                if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
+                  sSqlExtraJoins.append(sSqlWordStartJoin);
                 }
                 if (bPhraseLayer) {
-                  sSqlExtraJoins += CONTAINING_META_NUMERIC_MAX_JOIN.format(oArgs);
+                  sSqlExtraJoins.append(CONTAINING_META_NUMERIC_MAX_JOIN.format(oArgs));
                 } else {
-                  sSqlExtraJoins += CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs);
+                  sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
             } else if (bUseWordContainsJoins) {
               // word-containing-segment layer
-              if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-                sSqlExtraJoins += sSegmentStartJoin;
+              if (sSqlExtraJoins.indexOf(sSegmentStartJoin) < 0) {
+                sSqlExtraJoins.append(sSegmentStartJoin);
               }
-              sSqlExtraJoins += CONTAINING_WORD_NUMERIC_MAX_JOIN.format(oArgs);
+              sSqlExtraJoins.append(CONTAINING_WORD_NUMERIC_MAX_JOIN.format(oArgs));
             } else {
-              sSqlExtraJoins += NUMERIC_MAX_JOIN.format(oArgs);
+              sSqlExtraJoins.append(NUMERIC_MAX_JOIN.format(oArgs));
             }
             parameters.add(Double.valueOf(layerMatch.getMax()));
           } else if (layerMatch.getMin() != null && layerMatch.getMax() == null) { // min only
@@ -668,28 +672,28 @@ public class OneQuerySearch extends SearchTask {
               // meta/freeform layer
               if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
                 // anchored to start of word
-                sSqlExtraJoins += START_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs);
+                sSqlExtraJoins.append(START_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs));
               } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
                 // anchored to end of word
-                sSqlExtraJoins += END_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs);
+                sSqlExtraJoins.append(END_ANCHORED_NUMERIC_MIN_JOIN.format(oArgs));
               } else { // un-anchored meta condition
-                if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-                  sSqlExtraJoins += sSqlWordStartJoin;
+                if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
+                  sSqlExtraJoins.append(sSqlWordStartJoin);
                 }
                 if (bPhraseLayer) {
-                  sSqlExtraJoins += CONTAINING_META_NUMERIC_MIN_JOIN.format(oArgs);
+                  sSqlExtraJoins.append(CONTAINING_META_NUMERIC_MIN_JOIN.format(oArgs));
                 } else {
-                  sSqlExtraJoins += CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs);
+                  sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
             } else if (bUseWordContainsJoins) {
               // word-containing-segment layer
-              if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-                sSqlExtraJoins += sSegmentStartJoin;
+              if (sSqlExtraJoins.indexOf(sSegmentStartJoin) < 0) {
+                sSqlExtraJoins.append(sSegmentStartJoin);
               }
-              sSqlExtraJoins += CONTAINING_WORD_NUMERIC_MIN_JOIN.format(oArgs);
+              sSqlExtraJoins.append(CONTAINING_WORD_NUMERIC_MIN_JOIN.format(oArgs));
             } else {
-              sSqlExtraJoins += NUMERIC_MIN_JOIN.format(oArgs);
+              sSqlExtraJoins.append(NUMERIC_MIN_JOIN.format(oArgs));
             }
             parameters.add(Double.valueOf(layerMatch.getMin()));
           } else if (layerMatch.getMin() != null && layerMatch.getMax() != null) { // min&max
@@ -697,78 +701,79 @@ public class OneQuerySearch extends SearchTask {
               // meta/freeform layer
               if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
                 // anchored to start of word
-                sSqlExtraJoins += START_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs);
+                sSqlExtraJoins.append(START_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs));
               } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
                 // anchored to end of word
-                sSqlExtraJoins += END_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs);
+                sSqlExtraJoins.append(END_ANCHORED_NUMERIC_RANGE_JOIN.format(oArgs));
               } else { // un-anchored meta condition
-                if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-                  sSqlExtraJoins += sSqlWordStartJoin;
+                if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
+                  sSqlExtraJoins.append(sSqlWordStartJoin);
                 }
                 if (bPhraseLayer) {
-                  sSqlExtraJoins += CONTAINING_META_NUMERIC_RANGE_JOIN.format(oArgs);
+                  sSqlExtraJoins.append(CONTAINING_META_NUMERIC_RANGE_JOIN.format(oArgs));
                 } else {
-                  sSqlExtraJoins += CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs);
+                  sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
             } else if (bUseWordContainsJoins) {
               // word-containing-segment layer
-              if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-                sSqlExtraJoins += sSegmentStartJoin;
+              if (sSqlExtraJoins.indexOf(sSegmentStartJoin) < 0) {
+                sSqlExtraJoins.append(sSegmentStartJoin);
               }
-              sSqlExtraJoins += CONTAINING_WORD_NUMERIC_RANGE_JOIN.format(oArgs);
+              sSqlExtraJoins.append(CONTAINING_WORD_NUMERIC_RANGE_JOIN.format(oArgs));
             } else {
-              sSqlExtraJoins += NUMERIC_RANGE_JOIN.format(oArgs);
+              sSqlExtraJoins.append(NUMERIC_RANGE_JOIN.format(oArgs));
             }
             parameters.add(Double.valueOf(layerMatch.getMin()));
             parameters.add(Double.valueOf(layerMatch.getMax()));
           } else if (layerMatch.getPattern() != null) { // use regexp
-            String sSqlExtraJoin = "";
+            StringBuilder sSqlExtraJoin = new StringBuilder();
             if (bPhraseLayer || bSpanLayer) {
               if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT
                   || layer.getId().equals("noise")
                   || layer.getId().equals("comment")) {
                 // meta/freeform layer
-                if (!sSqlExtraJoins.contains(sSqlWordEndJoin)) {
-                  sSqlExtraJoin += sSqlWordEndJoin;
+                if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
+                  sSqlExtraJoin.append(sSqlWordEndJoin);
                 }
-                sSqlExtraJoin += TRAILING_META_REGEXP_JOIN.format(oArgs);
+                sSqlExtraJoin.append(TRAILING_META_REGEXP_JOIN.format(oArgs));
               } else {
                 // meta/freeform layer
                 if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
                   // anchored to start of word
-                  sSqlExtraJoin += START_ANCHORED_REGEXP_JOIN.format(oArgs);
+                  sSqlExtraJoin.append(START_ANCHORED_REGEXP_JOIN.format(oArgs));
                 } else if (layerMatch.getAnchorEnd() && bWordAnchoredMetaLayer) {
                   // anchored to end of word
-                  sSqlExtraJoin += END_ANCHORED_REGEXP_JOIN.format(oArgs);
+                  sSqlExtraJoin.append(END_ANCHORED_REGEXP_JOIN.format(oArgs));
                 }  else { // un-anchored meta condition
-                  if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-                    sSqlExtraJoin += sSqlWordStartJoin;
+                  if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
+                    sSqlExtraJoin.append(sSqlWordStartJoin);
                   }
                   if (bPhraseLayer) {
-                    sSqlExtraJoin += CONTAINING_META_REGEXP_JOIN.format(oArgs);
+                    sSqlExtraJoin.append(CONTAINING_META_REGEXP_JOIN.format(oArgs));
                   } else {
-                    sSqlExtraJoin += CONTAINING_FREEFORM_REGEXP_JOIN.format(oArgs);
+                    sSqlExtraJoin.append(CONTAINING_FREEFORM_REGEXP_JOIN.format(oArgs));
                   }
                 } // un-anchored meta condition
               }
             } else if (bSegmentLayer) {
-              if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-                sSqlExtraJoin += sSegmentStartJoin;
+              if (sSqlExtraJoins.indexOf(sSegmentStartJoin) < 0) {
+                sSqlExtraJoin.append(sSegmentStartJoin);
               }
-              sSqlExtraJoin += SEGMENT_REGEXP_JOIN.format(oArgs);
+              sSqlExtraJoin.append(SEGMENT_REGEXP_JOIN.format(oArgs));
             } else if (bUseWordContainsJoins) {
               // word-containing-segment layer
-              if (!sSqlExtraJoins.contains(sSegmentStartJoin)) {
-                sSqlExtraJoin += sSegmentStartJoin;
+              if (sSqlExtraJoins.indexOf(sSegmentStartJoin) < 0) {
+                sSqlExtraJoin.append(sSegmentStartJoin);
               }
-              sSqlExtraJoin += CONTAINING_WORD_REGEXP_JOIN.format(oArgs);
+              sSqlExtraJoin.append(CONTAINING_WORD_REGEXP_JOIN.format(oArgs));
             } else {
-              sSqlExtraJoin += REGEXP_JOIN.format(oArgs);
+              sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
             }
             if (layerMatch.getNot() && ".+".equals(layerMatch.getPattern())) { // NOT EXISTS
               // special case: "NOT .+" means "not anything" - i.e. missing annotations
-              sSqlExtraJoin = sSqlExtraJoin
+              sSqlExtraJoin = new StringBuilder(
+                sSqlExtraJoin.toString()
                 // change join to be LEFT OUTER...
                 .replace("INNER JOIN annotation_layer_"+layer_id,
                          "LEFT OUTER JOIN annotation_layer_"+layer.getId())
@@ -777,9 +782,9 @@ public class OneQuerySearch extends SearchTask {
                          "LEFT OUTER JOIN (annotation_layer_"+layer.getId())
                 // and remove the pattern match
                 .replaceAll("AND (CAST\\()?search_[0-9]+_"+layer_id
-                            +"\\.label( AS BINARY\\))? NOT REGEXP (BINARY)? \\?", "");
+                            +"\\.label( AS BINARY\\))? NOT REGEXP (BINARY)? \\?", ""));
               // and add a test for NULL to the WHERE clause
-              sSqlLayerMatches += NULL_ANNOTATION_CONDITION.format(oArgs);
+              sSqlLayerMatches.append(NULL_ANNOTATION_CONDITION.format(oArgs));
             } else { // REGEXP MATCH
               // regexp - add implicit ^ and $
               layerMatch.ensurePatternAnchored();
@@ -787,12 +792,13 @@ public class OneQuerySearch extends SearchTask {
               // for later adding to the parameters of the query
               parameters.add(layerMatch.getPattern());
             }
-            sSqlExtraJoins += sSqlExtraJoin;
+            sSqlExtraJoins.append(sSqlExtraJoin);
           }
           
           if (layer.getId().equals(targetLayerId) && iWordColumn == iTargetColumn) {
-            sSqlExtraFields += ", search_"+iWordColumn+"_" + iTargetLayer
-              + ".annotation_id AS target_annotation_id";
+            sSqlExtraFields.append(
+              ", search_"+iWordColumn+"_" + iTargetLayer
+              + ".annotation_id AS target_annotation_id");
             targetExpression = "search_"+iWordColumn+"_" + iTargetLayer
               + ".annotation_id";
             bTargetAnnotation = true;
@@ -825,27 +831,33 @@ public class OneQuerySearch extends SearchTask {
       
       // aligned words only?
       if (anchorConfidenceThreshold != null) { // TODO segment threshold too
-        if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-          sSqlExtraJoins += sSqlWordStartJoin
-            + " AND word_"+iWordColumn+"_start.alignment_status >= "
-            + anchorConfidenceThreshold;
-        } else { // update existing join
-          sSqlExtraJoins = sSqlExtraJoins.replaceAll(
-            " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id",
-            " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id"
+        if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
+          sSqlExtraJoins.append(
+            sSqlWordStartJoin
             + " AND word_"+iWordColumn+"_start.alignment_status >= "
             + anchorConfidenceThreshold);
+        } else { // update existing join
+          sSqlExtraJoins = new StringBuilder(
+            sSqlExtraJoins.toString().replaceAll(
+              " ON word_"+iWordColumn+"_start\\.anchor_id = word_"
+              +iWordColumn+"\\.start_anchor_id",
+              " ON word_"+iWordColumn+"_start\\.anchor_id = word_"
+              +iWordColumn+"\\.start_anchor_id"
+              + " AND word_"+iWordColumn+"_start.alignment_status >= "
+              + anchorConfidenceThreshold));
         }
-        if (!sSqlExtraJoins.contains(sSqlWordEndJoin)) {
-          sSqlExtraJoins += sSqlWordEndJoin
-            + " AND word_"+iWordColumn+"_end.alignment_status >= "
-            + anchorConfidenceThreshold;
-        } else { // update existing join
-          sSqlExtraJoins = sSqlExtraJoins.replaceAll(
-            " ON word_"+iWordColumn+"_end\\.anchor_id = word_"+iWordColumn+"\\.end_anchor_id",
-            " ON word_"+iWordColumn+"_start\\.end_id = word_"+iWordColumn+"\\.end_anchor_id"
+        if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
+          sSqlExtraJoins.append(
+            sSqlWordEndJoin
             + " AND word_"+iWordColumn+"_end.alignment_status >= "
             + anchorConfidenceThreshold);
+        } else { // update existing join
+          sSqlExtraJoins = new StringBuilder(
+            sSqlExtraJoins.toString().replaceAll(
+              " ON word_"+iWordColumn+"_end\\.anchor_id = word_"+iWordColumn+"\\.end_anchor_id",
+              " ON word_"+iWordColumn+"_start\\.end_id = word_"+iWordColumn+"\\.end_anchor_id"
+              + " AND word_"+iWordColumn+"_end.alignment_status >= "
+              + anchorConfidenceThreshold));
         }
       }
       
@@ -857,14 +869,14 @@ public class OneQuerySearch extends SearchTask {
             .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to utterance
             .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
             .findAny().isPresent()) { // end of utterance
-          if (!sSqlExtraJoins.contains(sSqlWordStartJoin)) {
-            sSqlExtraJoins += sSqlWordStartJoin;
+          if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
+            sSqlExtraJoins.append(sSqlWordStartJoin);
           }
-          if (!sSqlExtraJoins.contains(sSqlLineJoin)) {
-            sSqlExtraJoins += sSqlLineJoin;
+          if (sSqlExtraJoins.indexOf(sSqlLineJoin) < 0) {
+            sSqlExtraJoins.append(sSqlLineJoin);
           }
-          if (!sSqlExtraJoins.contains(sSqlEndLineJoin)) {
-            sSqlExtraJoins += sSqlEndLineJoin;
+          if (sSqlExtraJoins.indexOf(sSqlEndLineJoin) < 0) {
+            sSqlExtraJoins.append(sSqlEndLineJoin);
           }
           sBorderCondition = sqlEndLineCondition.format(columnSuffix);
         } else if (matrix.getColumns().get(matrix.getColumns().size() - 1).getLayers().values()
@@ -872,16 +884,17 @@ public class OneQuerySearch extends SearchTask {
                    .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to turn
                    .filter(layerMatch -> schema.getTurnLayerId().equals(layerMatch.getId()))
                    .findAny().isPresent()) { // end of turn
-          if (!sSqlExtraJoins.contains(sSqlEndTurnJoin)) {
-            sSqlExtraJoins += sSqlEndTurnJoin;
+          if (sSqlExtraJoins.indexOf(sSqlEndTurnJoin) < 0) {
+            sSqlExtraJoins.append(sSqlEndTurnJoin);
           }
           sBorderCondition = sqlEndTurnCondition.format(columnSuffix);          
         }
       } // last column
       
       if (targetSegmentLayer.isPresent()) {
-        sSqlExtraFields += ", search"+iWordColumn+"_" + targetSegmentLayer.get().get("layer_id")
-          + ".segment_annotation_id AS target_segment_id";
+        sSqlExtraFields.append(
+          ", search"+iWordColumn+"_" + targetSegmentLayer.get().get("layer_id")
+          + ".segment_annotation_id AS target_segment_id");
         targetSegmentExpression
           = "search_"+iWordColumn+"_" + targetSegmentLayer.get().get("layer_id")
           + ".segment_annotation_id"; 
@@ -891,23 +904,23 @@ public class OneQuerySearch extends SearchTask {
       }
       
       Object oSubPatternMatchArgs[] = { 
-        sSqlExtraJoins, // extra JOINs
+        sSqlExtraJoins.toString(), // extra JOINs
         sBorderCondition, // border conditions
-        sSqlLayerMatches, // regexp/range subqueries
-        sSqlExtraFields, // for line info
+        sSqlLayerMatches.toString(), // regexp/range subqueries
+        sSqlExtraFields.toString(), // for line info
         "_" + iWordColumn, // column suffix
         "_" + (iWordColumn-1) // previous column suffix
       };
       
-      strSubsequentSelect += sqlPatternMatchSubsequentSelect.format(oSubPatternMatchArgs);
-      strSubsequentJoin += sSqlExtraJoins;
-      strSubsequentWhere += sqlPatternMatchSubsequentWhere.format(oSubPatternMatchArgs);
+      strSubsequentSelect.append(sqlPatternMatchSubsequentSelect.format(oSubPatternMatchArgs));
+      strSubsequentJoin.append(sSqlExtraJoins.toString());
+      strSubsequentWhere.append(sqlPatternMatchSubsequentWhere.format(oSubPatternMatchArgs));
       
       setStatus("Adjacency for col " + iWordColumn + " is: " + column.getAdj());
     } // next column
     
     if (mainParticipantOnly) {
-      sSqlExtraJoinsFirst += sSqlTranscriptSpeakerJoin;
+      sSqlExtraJoinsFirst.append(sSqlTranscriptSpeakerJoin);
     }
     
     String sTranscriptCondition = transcriptCondition.apply(matrix.getTranscriptQuery());
@@ -916,22 +929,22 @@ public class OneQuerySearch extends SearchTask {
     }
     if (sTranscriptCondition.length() > 0) {
       if (sSqlExtraJoinsFirst.indexOf(sSqlTranscriptJoin) < 0) {
-        sSqlExtraJoinsFirst += sSqlTranscriptJoin;
+        sSqlExtraJoinsFirst.append(sSqlTranscriptJoin);
       }
     }
     
     Object oPatternMatchArgs[] = { 
-      sSqlExtraJoinsFirst, // extra JOINs
+      sSqlExtraJoinsFirst.toString(), // extra JOINs
       sStartConditionFirst, // border conditions
-      sSqlLayerMatchesFirst, // regexp/range subqueries
-      sSqlExtraFieldsFirst, // for line info
+      sSqlLayerMatchesFirst.toString(), // regexp/range subqueries
+      sSqlExtraFieldsFirst.toString(), // for line info
       strSpeakerWhere, // speakers
       sTranscriptCondition, // transcripts
       mainParticipantOnly? strMainParticipantClause : "", // main
       strAccessWhere, // user-based access restrictions
-      strSubsequentSelect,
-      strSubsequentJoin,
-      strSubsequentWhere,
+      strSubsequentSelect.toString(),
+      strSubsequentJoin.toString(),
+      strSubsequentWhere.toString(),
       "_" + (matrix.getColumns().size() - 1), // last column suffix
       targetSegmentExpression, // segment_annotation_id expression
       targetExpression, // target_annotation_id expression
