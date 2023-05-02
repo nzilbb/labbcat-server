@@ -827,6 +827,7 @@ public class OneQuerySearch extends SearchTask {
           }
         } // matching this layer
       } // next layer
+      ((SqlSearchResults)results).setName(description);
       if (bCancelling) throw new Exception("Cancelled.");
       
       // aligned words only?
@@ -1028,7 +1029,7 @@ public class OneQuerySearch extends SearchTask {
 
     // word columns
 	 
-    // // list of Word objects that match matrix
+    // list of Word objects that match matrix
     results = new SqlSearchResults(this);
 	 
     long searchTime = new java.util.Date().getTime();

@@ -68,7 +68,22 @@ public class SqlSearchResults implements SearchResults {
    * Setter for {@link #name}: Name of result set.
    * @param newName Name of result set.
    */
-  public SqlSearchResults setName(String newName) { name = newName; return this; }
+  public SqlSearchResults setName(String newName) {
+    name = newName;
+    if (connection != null && id >= 0) {
+      try {
+        PreparedStatement sql = connection.prepareStatement(
+          "UPDATE search SET name = ? WHERE search_id = ?");
+        if (name.length() > 100) name = name.substring(0,100);
+        sql.setString(1, name);
+        sql.setLong(2, id);
+        sql.executeUpdate();        
+      } catch(SQLException exception) {
+        System.err.println("SqlSearchResults.setName: " + exception);
+      }
+    }
+    return this;
+  }
   
   /**
    * SearchResults method: Resets the iterator to the beginning of the list
@@ -121,7 +136,7 @@ public class SqlSearchResults implements SearchResults {
         .addMatchAnnotationUid("0", "ew_0_"+rsIterator.getInt("first_matched_word_annotation_id"))
         .addMatchAnnotationUid("1", "ew_0_"+rsIterator.getInt("last_matched_word_annotation_id"))
         .setTargetAnnotationUid(rsIterator.getString("target_annotation_uid"))
-        .setPrefix(resultNumberFormatter.format(nextRow)+"-"+"-")
+        .setPrefix(resultNumberFormatter.format(nextRow)+"-")
         .setGraphId(rsIterator.getInt("ag_id"))
         .setStartAnchorId(rsIterator.getLong("start_anchor_id"))
         .setEndAnchorId(rsIterator.getLong("end_anchor_id"))
@@ -171,7 +186,7 @@ public class SqlSearchResults implements SearchResults {
       = connection.prepareStatement(
         "INSERT INTO search (name, who, target_layer_id, context_words, definition)"
         +" VALUES (?,?,?,0,?)");
-    String name = search.getName();
+    name = search.getName();
     if (name.length() > 100) name = name.substring(0,100);
     sql.setString(1, name);
     sql.setString(2, search.getWho());
@@ -193,6 +208,17 @@ public class SqlSearchResults implements SearchResults {
     id = rs.getLong(1);
     rs.close();
     sqlLastId.close();
+  }
+
+  /**
+   * Constructor that provides access to an existing search record based on the given results.
+   * @param results The existing search results collection.
+   * @param connection A valid database connection.
+   */
+  public SqlSearchResults(SqlSearchResults results, Connection connection) {    
+    this.connection = connection;
+    this.id = results.id;
+    this.name = results.name;
   }
 
   /**

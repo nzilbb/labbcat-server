@@ -118,7 +118,8 @@ public class Search extends LabbcatServlet { // TODO unit test
     } else if (search != null) {
       matrix.fromLegacyString(search);
     } else {
-      response.sendError(400, localize("No search matrix specified."));
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      writeResponse(response, failureResult(request, "No search matrix specified."));
       return;
     }
     if (request.getParameter("participant_expression") != null) {
@@ -137,10 +138,10 @@ public class Search extends LabbcatServlet { // TODO unit test
         task.setMatchesPerTranscript(
           Integer.valueOf(request.getParameter("matches_per_transcript")));
       } catch(NumberFormatException exception) {
-        response.sendError(400, localize(
-                             request, "Invalid matches per transcript \"{0}\": {1}",
-                             request.getParameter("matches_per_transcript"),
-                             exception.getMessage())); 
+        writeResponse(response, failureResult(
+                        request, "Invalid matches per transcript \"{0}\": {1}",
+                        request.getParameter("matches_per_transcript"),
+                        exception.getMessage()));
         return;
       }
     }
@@ -149,10 +150,10 @@ public class Search extends LabbcatServlet { // TODO unit test
         task.setOverlapThreshold(
           Integer.valueOf(request.getParameter("overlap_threshold")));
       } catch(NumberFormatException exception) {
-        response.sendError(400, localize(
-                             request, "Invalid overlap threshold \"{0}\": {1}",
-                             request.getParameter("overlap_threshold"),
-                             exception.getMessage())); 
+        writeResponse(response, failureResult(
+                        request, "Invalid overlap threshold \"{0}\": {1}",
+                        request.getParameter("overlap_threshold"),
+                        exception.getMessage()));
         return;
       }
     }
@@ -161,10 +162,10 @@ public class Search extends LabbcatServlet { // TODO unit test
         task.setMaxMatches(
           Integer.valueOf(request.getParameter("num_transcripts")));
       } catch(NumberFormatException exception) {
-        response.sendError(400, localize(
-                             request, "Invalid maximum number of matches \"{0}\": {1}",
-                             request.getParameter("num_transcripts"),
-                             exception.getMessage())); 
+        writeResponse(response, failureResult(
+                        request, "Invalid maximum number of matches \"{0}\": {1}",
+                        request.getParameter("num_transcripts"),
+                        exception.getMessage()));
         return;
       }
     }
@@ -183,34 +184,31 @@ public class Search extends LabbcatServlet { // TODO unit test
             cacheStore((SqlGraphStoreAdministration)store);
           }
         });
-      try {
-        if (request.getRemoteUser() != null) {	
-          task.setWho(request.getRemoteUser());
-          // admin users have access to everything
-          if (!isUserInRole("admin", request, task.getStore().getConnection())
-              // if they're using using access permissions in general
-              && task.getStore().getPermissionsSpecified()) {
-            // other users may have restricted access to some things
-            task.setRestrictByUser(request.getRemoteUser());
-          } // not an admin user
-        } else {
-          task.setWho(request.getRemoteHost());
-        }
-
-        String validationError = task.validate();
-        if (validationError != null) {
-          response.sendError(400, localize(request, validationError)); 
-        } else {
-          task.start();
-        
-          // return its ID
-          JsonObjectBuilder jsonResult = Json.createObjectBuilder()
-            .add("threadId", task.getId());
-          writeResponse(
-            response, successResult(request, jsonResult.build(), null));
-        } // valid search
-      } finally {
+      if (request.getRemoteUser() != null) {	
+        task.setWho(request.getRemoteUser());
+        // admin users have access to everything
+        if (!isUserInRole("admin", request, task.getStore().getConnection())
+            // if they're using using access permissions in general
+            && task.getStore().getPermissionsSpecified()) {
+          // other users may have restricted access to some things
+          task.setRestrictByUser(request.getRemoteUser());
+        } // not an admin user
+      } else {
+        task.setWho(request.getRemoteHost());
       }
+      
+      String validationError = task.validate();
+      if (validationError != null) {
+        writeResponse(response, failureResult(request, validationError));
+      } else {
+        task.start();
+        
+        // return its ID
+        JsonObjectBuilder jsonResult = Json.createObjectBuilder()
+          .add("threadId", task.getId());
+        writeResponse(
+          response, successResult(request, jsonResult.build(), null));
+      } // valid search
     } catch(Exception ex) {
       throw new ServletException(ex);
     }

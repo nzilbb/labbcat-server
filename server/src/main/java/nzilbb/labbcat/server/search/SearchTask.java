@@ -269,7 +269,7 @@ public abstract class SearchTask extends Task {
           setStatus("No results available.");
         } else {
           if (!suppressResults && results.size() > 0) {
-            setResultUrl(store.getId() + "results" + "?threadId=" + getId());
+            setResultUrl(store.getId() + "matches?threadId=" + getId());
             setResultText("Display results");
           }
           
