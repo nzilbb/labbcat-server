@@ -286,4 +286,63 @@ public class TestMatrix {
                  "first('transcript_type').label != 'wordlist'",
                  m.getTranscriptQuery());    
   }
+  
+  /**
+   * Ensure that deserialization from a legacy plain-text String works.
+   * <p> Only a subset of original functionality has been migrated. In particular, border
+   * conditions and anchoring aren't deserialized.
+   */
+  @Test public void fromLegacyString() {
+    assertEquals("Single word search",
+                 "{\"columns\":[{\"adj\":1,\"layers\":"
+                 +"{\"orthography\":{\"id\":\"orthography\",\"pattern\":\"test\"}}}]"
+                 +"}",
+                 new Matrix().fromLegacyString("test").toString());
+    assertEquals("Multi word search",
+                 "{\"columns\":["
+                 +"{\"adj\":1,\"layers\":"
+                 +"{\"orthography\":{\"id\":\"orthography\",\"pattern\":\"test\"}}},"
+                 +"{\"adj\":1,\"layers\":"
+                 +"{\"orthography\":{\"id\":\"orthography\",\"pattern\":\"123\"}}}"
+                 +"]}",
+                 new Matrix().fromLegacyString("test\t123").toString());
+    assertEquals("Specify layer search",
+                 "{\"columns\":[{\"adj\":1,\"layers\":"
+                 +"{\"phonemes\":{\"id\":\"phonemes\",\"pattern\":\"tEst\"}}}]"
+                 +"}",
+                 new Matrix().fromLegacyString("phonemes:tEst").toString());
+    assertEquals("Range search",
+                 "{\"columns\":[{\"adj\":1,\"layers\":"
+                 +"{\"syllableCount\":{\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"}}}]"
+                 +"}",
+                 new Matrix().fromLegacyString("syllableCount:2<3").toString());
+    assertEquals("Range search - min only",
+                 "{\"columns\":[{\"adj\":1,\"layers\":"
+                 +"{\"syllableCount\":{\"id\":\"syllableCount\",\"min\":\"2\"}}}]"
+                 +"}",
+                 new Matrix().fromLegacyString("syllableCount:2<").toString());
+    assertEquals("Range search - max only",
+                 "{\"columns\":[{\"adj\":1,\"layers\":"
+                 +"{\"syllableCount\":{\"id\":\"syllableCount\",\"max\":\"3\"}}}]"
+                 +"}",
+                 new Matrix().fromLegacyString("syllableCount:<3").toString());
+    assertEquals("Multi-row search",
+                 "{\"columns\":[{\"adj\":1,\"layers\":"
+                 +"{\"phonemes\":{\"id\":\"phonemes\",\"pattern\":\"s.*\"},"
+                 +"\"orthography\":{\"id\":\"orthography\",\"pattern\":\"p.*\"}}"
+                 +"}]}",
+                 new Matrix().fromLegacyString("phonemes:s.*\northography:p.*").toString());
+    assertEquals("Multi-column search",
+                 "{\"columns\":["
+                 +"{\"adj\":1,\"layers\":"
+                 +"{\"pos\":{\"id\":\"pos\",\"pattern\":\"N\"},"
+                 +"\"phonemes\":{\"id\":\"phonemes\",\"pattern\":\".*[aeiou]\"}}},"
+                 +"{\"adj\":1,\"layers\":"
+                 +"{\"pos\":{\"id\":\"pos\",\"pattern\":\"V\"},"
+                 +"\"phonemes\":{\"id\":\"phonemes\",\"pattern\":\"[aeiou].*\"}}}"
+                 +"]}",
+                 new Matrix().fromLegacyString(
+                   "pos:N\nphonemes:.*[aeiou]\tpos:V\nphonemes:[aeiou].*").toString());
+  }
+  
 }
