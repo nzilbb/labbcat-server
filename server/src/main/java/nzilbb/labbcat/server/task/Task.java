@@ -24,6 +24,7 @@ package nzilbb.labbcat.server.task;
 import java.util.Date;
 import nzilbb.util.MonitorableTask;
 import nzilbb.labbcat.server.db.SqlGraphStore;
+import nzilbb.labbcat.server.db.StoreCache;
 
 /**
  * Base class for all long-running server-side tasks.
@@ -214,12 +215,39 @@ public class Task extends Thread implements MonitorableTask {
    * Getter for {@link #store}: Graph store.
    * @return Graph store.
    */
-  public SqlGraphStore getStore() { return store; }
+  public SqlGraphStore getStore() {
+    if (store == null && storeCache != null) {
+      store = storeCache.get();
+    }
+    return store;
+  }
   /**
    * Setter for {@link #store}: Graph store.
    * @param newStore Graph store.
    */
-  public Task setStore(SqlGraphStore newStore) { store = newStore; return this; }  
+  public Task setStore(SqlGraphStore newStore) { store = newStore; return this; }
+  
+  /**
+   * A supplier/consumer of graph stores, so that a store can be obtained if necessary,
+   * and resources can be shared/closed when appropriate. 
+   * @see #getStoreCache()
+   * @see #setStoreCache(StoreCache)
+   */
+  protected StoreCache storeCache;
+  /**
+   * Getter for {@link #storeCache}: A supplier/consumer of graph stores, so that a store
+   * can be obtained if necessary, and resources can be shared/closed when appropriate. 
+   * @return A supplier/consumer of graph stores, so that a store can be obtained if
+   * necessary, and resources can be shared/closed when appropriate. 
+   */
+  public StoreCache getStoreCache() { return storeCache; }
+  /**
+   * Setter for {@link #storeCache}: A supplier/consumer of graph stores, so that a store
+   * can be obtained if necessary, and resources can be shared/closed when appropriate. 
+   * @param newStoreCache A supplier/consumer of graph stores, so that a store can be
+   * obtained if necessary, and resources can be shared/closed when appropriate. 
+   */
+  public Task setStoreCache(StoreCache newStoreCache) { storeCache = newStoreCache; return this; }
    
   /**
    * Constructor
@@ -329,6 +357,12 @@ public class Task extends Thread implements MonitorableTask {
     // set final duration
     getDuration();
     bRunning = false;
+
+    if (storeCache != null && store != null) {
+      // return the store to the cache
+      storeCache.accept(store);
+      store = null;
+    }
     
     // minimise possible vestigal memory usage // TODO remove this
     try {

@@ -166,7 +166,7 @@ public class SqlSearchResults implements SearchResults {
    * @throws Exception If there's a problem inserting the search row.
    */
   public SqlSearchResults(SearchTask search) throws Exception {
-    Connection connection = search.getStore().getConnection();
+    connection = search.getStore().getConnection();
     PreparedStatement sql
       = connection.prepareStatement(
         "INSERT INTO search (name, who, target_layer_id, context_words, definition)"

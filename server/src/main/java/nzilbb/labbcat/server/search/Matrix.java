@@ -153,13 +153,65 @@ public class Matrix implements CloneableBean {
   } // end of fromJsonString()
   
   /**
+   * Defines the matrix using a string formatted in the legacy LaBB-CAT encoding.
+   * <p> A search string can be something like like
+   * <code>pos:N\nphonemes:.*[aeiou]\tpos:V\nphonemes:[aeiou].*</code>
+   * <p>Which searches for <q>A word with <i>N</i> on the <i>pos</i> layer, and ending
+   * with a vowel on the <i>phonemes</i> layer,  
+   * followed by a word with <i>V</i> on the <i>pos</i> layer and starting with a vowel on
+   * the <i>phonemes</i> layer.</q> 
+   * <p>The delimiters and formats of the parts are:
+   * <dl>
+   *  <dt><code>\n</code></dt> <dd>start new layer</dd>
+   *  <dt><code>\t</code></dt> <dd>start new search word column </dd>
+   *  <dt><code>:</code></dt> <dd>Separator between layer ID and its search expression.
+   *   If this is omitted, the whole string is assumed to be an expression to match on the
+   *   <i>orthography</i> layer - i.e. the string <q>expression</q> is the same as
+   *   <q>orthography:expression</q>.</dd>  
+   *  <dt><code>layer name</code></dt> <dd>The layer ID.</dd>
+   *  <dt><code>expression</code></dt> <dd>The the regular expressions can be preceded by
+   *   <code>NOT </code> indicating it's a reversed match.   
+   *   Or, for numeric layers, the expression may be of the form
+   *   <code><var>min</var>&lt;<var>max</var></code>, 
+   *   which is interpreted as <q><var>min</var>&le;<var>label</var>&lt;<var>max</var></q></dd>
+   * @param search
+   * @return This object.
+   */
+  public Matrix fromLegacyString(String search) { // TODO unit test
+    for (String c : search.split("\t")) {
+      Column column = new Column();
+      for (String l : c.split("\n")) {
+        String[] match = l.split(":");
+        LayerMatch layerMatch = new LayerMatch()
+          .setId(match.length > 1? match[0] : "orthography");
+        String condition = match.length > 1? match[1] : match[0];
+        if (condition.matches("[0-9.]*<[0-9.]*")) {
+          String[] limits = condition.split("<", 2);
+          layerMatch.setMin(limits[0]);
+          layerMatch.setMax(limits[1]);
+        } else {
+          if (condition.startsWith("NOT ")) {
+            layerMatch.setNot(true);
+            condition = condition.substring(4);
+          }
+          layerMatch.setPattern(condition);
+        }
+        column.addLayerMatch(layerMatch);
+      } // next layer
+      addColumn(column);
+    } // next column
+    return this;
+  } // end of fromLegacyString()
+  
+  /**
    * A stream of LayerMatchs defined in the matrix.
    * @return A stream of LayerMatchs defined in the matrix.
    */
   public Stream<LayerMatch> layerMatchStream() {
     return columns.stream()
       .map(column -> column.getLayers().values().stream())
-      .reduce(Stream.empty(), Stream::concat);
+      .reduce(Stream.empty(), Stream::concat)
+      .peek(l -> l.setNullBooleans());
   } // end of layerPatternStream()
   
   /**

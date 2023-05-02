@@ -240,12 +240,12 @@ public abstract class SearchTask extends Task {
    */
   public String validate() {
     if (matrix == null || matrix.getColumns() == null || matrix.getColumns().size() == 0) {
-      return "Search matrix was not specified";
+      return "Search matrix was not specified"; // TODO i18n
     }
     if (!matrix.layerMatchStream()
         .filter(LayerMatch::HasPattern)
         .findAny().isPresent()) {
-      return "No search text was specified";
+      return "No search text was specified"; // TODO i18n
     }
     return null;
   } // end of validate()

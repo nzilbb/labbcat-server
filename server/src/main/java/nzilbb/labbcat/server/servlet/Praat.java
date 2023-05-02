@@ -47,7 +47,9 @@ import nzilbb.ag.serialize.util.ConfigurationHelper;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.ParameterSet;
+import nzilbb.labbcat.server.db.SqlGraphStore;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
+import nzilbb.labbcat.server.db.StoreCache;
 import nzilbb.labbcat.server.task.ProcessWithPraat;
 import nzilbb.util.IO;
 import org.apache.commons.fileupload.FileItem;
@@ -265,645 +267,652 @@ public class Praat extends LabbcatServlet { // TODO unit test
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
     
-      try {
-        SqlGraphStoreAdministration store = getStore(request);
+    try {
+      // interpret request parameters
+      MultipartRequestParameters parameters = new MultipartRequestParameters(request); 
+      Vector<FileItem> files =  parameters.getFiles("csv");
+      if (files.size() == 0) {
+        writeResponse(response, failureResult(request, "No file received."));
+        return;
+      }
+      // save the input file
+      FileItem csv = files.elementAt(0);
+      String fileName = csv.getName();
+      // some browsers provide a full path, which must be truncated
+      int lastSlash = fileName.lastIndexOf('/');
+      if (lastSlash < 0) lastSlash = fileName.lastIndexOf('\\');
+      if (lastSlash >= 0) {
+        fileName = fileName.substring(lastSlash + 1);
+      }
+      // save the file
+      File uploadedCsvFile = File.createTempFile("Praat-", "-"+fileName);
+      uploadedCsvFile.delete();
+      uploadedCsvFile.deleteOnExit();
+      csv.write(uploadedCsvFile);        
+          
+      ProcessWithPraat task = new ProcessWithPraat();
+      task.setStoreCache(new StoreCache() {
+          public SqlGraphStore get() {
+            try {
+              return getStore(request);
+            } catch(Exception exception) {
+              System.err.println("Search.StoreCache: " + exception);
+              return null;
+            }
+          }
+          public void accept(SqlGraphStore store) {
+            cacheStore((SqlGraphStoreAdministration)store);
+          }
+        });
+      task.setDataFile(uploadedCsvFile);
+      task.setFileName(fileName);
+          
+      if (parameters.getString("transcriptColumn") != null) {
         try {
-          // interpret request parameters
-          MultipartRequestParameters parameters = new MultipartRequestParameters(request); 
-          Vector<FileItem> files =  parameters.getFiles("csv");
-          if (files.size() == 0) {
-            writeResponse(response, failureResult(request, "No file received."));
-            return;
-          }
-          // save the input file
-          FileItem csv = files.elementAt(0);
-          String fileName = csv.getName();
-          // some browsers provide a full path, which must be truncated
-          int lastSlash = fileName.lastIndexOf('/');
-          if (lastSlash < 0) lastSlash = fileName.lastIndexOf('\\');
-          if (lastSlash >= 0) {
-            fileName = fileName.substring(lastSlash + 1);
-          }
-          // save the file
-          File uploadedCsvFile = File.createTempFile("Praat-", "-"+fileName);
-          uploadedCsvFile.delete();
-          uploadedCsvFile.deleteOnExit();
-          csv.write(uploadedCsvFile);        
-          
-          ProcessWithPraat task = new ProcessWithPraat();
-          task.setStore(store); // TODO check this doesn't leak!
-          task.setDataFile(uploadedCsvFile);
-          task.setFileName(fileName);
-          
-          if (parameters.getString("transcriptColumn") != null) {
-            try {
-              task.setTranscriptIdColumn(
-                Integer.parseInt(parameters.getString("transcriptColumn")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "Transcript column \"{0}\" is not an integer.",
-                  parameters.getString("transcriptColumn")));
-              return;
-            }
-          } else {
-            writeResponse(
-              response, failureResult(
-                request, "Transcript column not supplied."));
-          }
-          
-          if (parameters.getString("participantColumn") != null) {
-            try {
-              task.setParticipantNameColumn(
-                Integer.parseInt(parameters.getString("participantColumn")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "Participant column \"{0}\" is not an integer.",
-                  parameters.getString("participantColumn")));
-              return;
-            }
-          } else {
-            writeResponse(
-              response, failureResult(
-                request, "Participant column not supplied."));
-          }
-          
-          if (parameters.getString("startTimeColumn") != null) {
-            try {
-              task.setMarkColumn(Integer.parseInt(parameters.getString("startTimeColumn")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "Start time column \"{0}\" is not an integer.",
-                  parameters.getString("startTimeColumn")));
-              return;
-            }
-          } else {
-            writeResponse(
-              response, failureResult(
-                request, "Start time column not supplied."));
-          }
-          
-          if (parameters.getString("endTimeColumn") != null) {
-            try {
-              task.setMarkEndColumn(Integer.parseInt(parameters.getString("endTimeColumn")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "End time column \"{0}\" is not an integer.",
-                  parameters.getString("endTimeColumn")));
-              return;
-            }
-          } else {
-            writeResponse(
-              response, failureResult(
-                request, "End time column not supplied."));
-          }
-          
-          if (parameters.getString("windowOffset") != null) {
-            try {
-              task.setWindowOffset(Double.parseDouble(parameters.getString("windowOffset")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "Window offset \"{0}\" is not a number.",
-                  parameters.getString("windowOffset")));
-              return;
-            }
-          }
-          
-          if (parameters.getString("passThroughData") != null
-              && parameters.getString("passThroughData").equalsIgnoreCase("false")) {
-            task.setPassThroughData(false);
-          }
-
-          task.setExtractF1("true".equalsIgnoreCase(parameters.getString("extractF1")));
-          task.setExtractF2("true".equalsIgnoreCase(parameters.getString("extractF2")));
-          task.setExtractF3("true".equalsIgnoreCase(parameters.getString("extractF3")));
-
-          if (parameters.getString("samplePoints") != null) {
-            StringTokenizer tokens = new StringTokenizer(
-              parameters.getString("samplePoints"), " ,;:-");
-            task.getSamplePoints().clear();
-            while (tokens.hasMoreTokens()) {
-              task.getSamplePoints().add(Double.valueOf(tokens.nextToken()));
-            }            
-          }
-          
-          if (parameters.getString("formantDifferentiationLayerId") != null) {
-            task.setFormantDifferentiationLayerId(
-              parameters.getString("formantDifferentiationLayerId"));
-          }
-          task.getFormantOtherPattern().clear();
-          for (String value : parameters.getStrings("formantOtherPattern")) {
-            try {
-              task.getFormantOtherPattern().add(Pattern.compile(value));
-            } catch(PatternSyntaxException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not a valid regular expression: {2}",
-                  "formantOtherPattern", value, exception.getMessage()));
-              return;
-            }
-          } // next value
-          if (parameters.getString("formantCeilingDefault") != null) {
-            try {
-              task.setFormantCeilingDefault(
-                Integer.parseInt(parameters.getString("formantCeilingDefault")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request,
-                  "{0} \"{1}\" is not an integer.",
-                  "formantCeilingDefault", parameters.getString("formantCeilingDefault")));
-              return;
-            }
-          }
-          task.getFormantCeilingOther().clear();
-          for (String value : parameters.getStrings("formantCeilingOther")) {
-            try {
-              task.getFormantCeilingOther().add(Integer.valueOf(value));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.", "formantCeilingOther", value));
-              return;
-            }
-          } // next value          
-          if (parameters.getString("scriptFormant") != null
-              && parameters.getString("scriptFormant").length() > 0) {
-            task.setScriptFormant(parameters.getString("scriptFormant"));
-          }
-
-          task.setUseFastTrack(
-            "true".equalsIgnoreCase(parameters.getString("useFastTrack")));
-          if (parameters.getString("fastTrackDifferentiationLayerId") != null) {
-            task.setFastTrackDifferentiationLayerId(
-              parameters.getString("fastTrackDifferentiationLayerId"));
-          }
-          task.getFastTrackOtherPattern().clear();
-          for (String value : parameters.getStrings("fastTrackOtherPattern")) {
-            try {
-              task.getFastTrackOtherPattern().add(Pattern.compile(value));
-            } catch(PatternSyntaxException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not a valid regular expression: {2}",
-                  "fastTrackOtherPattern", value, exception.getMessage()));
-              return;
-            }
-          } // next value
-          if (parameters.getString("fastTrackLowestAnalysisFrequencyDefault") != null) {
-            try {
-              task.setFastTrackLowestAnalysisFrequencyDefault(
-                Integer.parseInt(parameters.getString("fastTrackLowestAnalysisFrequencyDefault")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request,
-                  "{0} \"{1}\" is not an integer.",
-                  "fastTrackLowestAnalysisFrequencyDefault",
-                  parameters.getString("fastTrackLowestAnalysisFrequencyDefault")));
-              return;
-            }
-          }
-          task.getFastTrackLowestAnalysisFrequencyOther().clear();
-          for (String value : parameters.getStrings("fastTrackLowestAnalysisFrequencyOther")) {
-            try {
-              task.getFastTrackLowestAnalysisFrequencyOther().add(Integer.valueOf(value));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackLowestAnalysisFrequencyOther", value));
-              return;
-            }
-          } // next value
-          if (parameters.getString("fastTrackHighestAnalysisFrequencyDefault") != null) {
-            try {
-              task.setFastTrackHighestAnalysisFrequencyDefault(
-                Integer.parseInt(parameters.getString("fastTrackHighestAnalysisFrequencyDefault")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request,
-                  "{0} \"{1}\" is not an integer.",
-                  "fastTrackHighestAnalysisFrequencyDefault",
-                  parameters.getString("fastTrackHighestAnalysisFrequencyDefault")));
-              return;
-            }
-          }
-          task.getFastTrackHighestAnalysisFrequencyOther().clear();
-          for (String value : parameters.getStrings("fastTrackHighestAnalysisFrequencyOther")) {
-            try {
-              task.getFastTrackHighestAnalysisFrequencyOther().add(Integer.valueOf(value));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackHighestAnalysisFrequencyOther", value));
-              return;
-            }
-          } // next value
-          if (parameters.getString("fastTrackTimeStep") != null) {
-            try {
-              task.setFastTrackTimeStep(
-                Double.parseDouble(parameters.getString("fastTrackTimeStep")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request,
-                  "{0} \"{1}\" is not a number.",
-                  "fastTrackTimeStep", parameters.getString("fastTrackTimeStep")));
-              return;
-            }
-          }
-          if (parameters.getString("fastTrackBasisFunctions") != null
-              && parameters.getString("fastTrackBasisFunctions").length() > 0) {
-            task.setFastTrackBasisFunctions(parameters.getString("fastTrackBasisFunctions"));
-          }
-          if (parameters.getString("fastTrackErrorMethod") != null
-              && parameters.getString("fastTrackErrorMethod").length() > 0) {
-            task.setFastTrackErrorMethod(parameters.getString("fastTrackErrorMethod"));
-          }
-          if (parameters.getString("fastTrackTrackingMethod") != null
-              && parameters.getString("fastTrackTrackingMethod").length() > 0) {
-            task.setFastTrackTrackingMethod(parameters.getString("fastTrackTrackingMethod"));
-          }
-          if (parameters.getString("fastTrackBasisFunctions") != null
-              && parameters.getString("fastTrackBasisFunctions").length() > 0) {
-            task.setFastTrackBasisFunctions(parameters.getString("fastTrackBasisFunctions"));
-          }
-          task.setFastTrackEnableF1FrequencyHeuristic(
-            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF1FrequencyHeuristic")));
-          if (parameters.getString("fastTrackMaximumF1FrequencyValue") != null) {
-            try {
-              task.setFastTrackMaximumF1FrequencyValue(
-                Integer.parseInt(parameters.getString("fastTrackMaximumF1FrequencyValue")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackMaximumF1FrequencyValue",
-                  parameters.getString("fastTrackMaximumF1FrequencyValue")));
-              return;
-            }
-          }
-          task.setFastTrackEnableF1BandwidthHeuristic(
-            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF1BandwidthHeuristic")));
-          if (parameters.getString("fastTrackMaximumF1BandwidthValue") != null) {
-            try {
-              task.setFastTrackMaximumF1BandwidthValue(
-                Integer.parseInt(parameters.getString("fastTrackMaximumF1BandwidthValue")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackMaximumF1BandwidthValue",
-                  parameters.getString("fastTrackMaximumF1BandwidthValue")));
-              return;
-            }
-          }
-          task.setFastTrackEnableF2BandwidthHeuristic(
-            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF2BandwidthHeuristic")));
-          if (parameters.getString("fastTrackMaximumF2BandwidthValue") != null) {
-            try {
-              task.setFastTrackMaximumF2BandwidthValue(
-                Integer.parseInt(parameters.getString("fastTrackMaximumF2BandwidthValue")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackMaximumF2BandwidthValue",
-                  parameters.getString("fastTrackMaximumF2BandwidthValue")));
-              return;
-            }
-          }
-          task.setFastTrackEnableF3BandwidthHeuristic(
-            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF3BandwidthHeuristic")));
-          if (parameters.getString("fastTrackMaximumF3BandwidthValue") != null) {
-            try {
-              task.setFastTrackMaximumF3BandwidthValue(
-                Integer.parseInt(parameters.getString("fastTrackMaximumF3BandwidthValue")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackMaximumF3BandwidthValue",
-                  parameters.getString("fastTrackMaximumF3BandwidthValue")));
-              return;
-            }
-          }
-          task.setFastTrackEnableF4FrequencyHeuristic(
-            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF4FrequencyHeuristic")));
-          if (parameters.getString("fastTrackMinimumF4FrequencyValue") != null) {
-            try {
-              task.setFastTrackMinimumF4FrequencyValue(
-                Integer.parseInt(parameters.getString("fastTrackMinimumF4FrequencyValue")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackMinimumF4FrequencyValue",
-                  parameters.getString("fastTrackMinimumF4FrequencyValue")));
-              return;
-            }
-          }
-          task.setFastTrackEnableRhoticHeuristic(
-            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableRhoticHeuristic")));
-          task.setFastTrackEnableF3F4ProximityHeuristic(
-            "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF3F4ProximityHeuristic")));
-          if (parameters.getString("fastTrackNumberOfSteps") != null) {
-            try {
-              task.setFastTrackNumberOfSteps(
-                Integer.parseInt(parameters.getString("fastTrackNumberOfSteps")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackNumberOfSteps",
-                  parameters.getString("fastTrackNumberOfSteps")));
-              return;
-            }
-          }
-          if (parameters.getString("fastTrackNumberOfCoefficients") != null) {
-            try {
-              task.setFastTrackNumberOfCoefficients(
-                Integer.parseInt(parameters.getString("fastTrackNumberOfCoefficients")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackNumberOfCoefficients",
-                  parameters.getString("fastTrackNumberOfCoefficients")));
-              return;
-            }
-          }
-          if (parameters.getString("fastTrackNumberOfFormants") != null) {
-            try {
-              task.setFastTrackNumberOfFormants(
-                Integer.parseInt(parameters.getString("fastTrackNumberOfFormants")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "fastTrackNumberOfFormants",
-                  parameters.getString("fastTrackNumberOfFormants")));
-              return;
-            }
-          }
-          task.setFastTrackCoefficients(
-            "true".equalsIgnoreCase(parameters.getString("fastTrackCoefficients")));
-
-          task.setExtractMinimumPitch(
-            "true".equalsIgnoreCase(parameters.getString("extractMinimumPitch")));
-          task.setExtractMeanPitch(
-            "true".equalsIgnoreCase(parameters.getString("extractMeanPitch")));
-          task.setExtractMaximumPitch(
-            "true".equalsIgnoreCase(parameters.getString("extractMaximumPitch")));
-          
-          if (parameters.getString("pitchDifferentiationLayerId") != null) {
-            task.setPitchDifferentiationLayerId(
-              parameters.getString("pitchDifferentiationLayerId"));
-          }
-          task.getPitchOtherPattern().clear();
-          for (String value : parameters.getStrings("pitchOtherPattern")) {
-            try {
-              task.getPitchOtherPattern().add(Pattern.compile(value));
-            } catch(PatternSyntaxException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not a valid regular expression: {2}",
-                  "pitchOtherPattern", value, exception.getMessage()));
-              return;
-            }
-          } // next value
-          if (parameters.getString("pitchFloorDefault") != null) {
-            try {
-              task.setPitchFloorDefault(
-                Integer.parseInt(parameters.getString("pitchFloorDefault")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "pitchFloorDefault",
-                  parameters.getString("pitchFloorDefault")));
-              return;
-            }
-          }
-          task.getPitchFloorOther().clear();
-          for (String value : parameters.getStrings("pitchFloorOther")) {
-            try {
-              task.getPitchFloorOther().add(Integer.valueOf(value));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "pitchFloorOther",
-                  parameters.getString("pitchFloorOther")));
-              return;
-            }
-          } // next value
-          if (parameters.getString("pitchCeilingDefault") != null) {
-            try {
-              task.setPitchCeilingDefault(
-                Integer.parseInt(parameters.getString("pitchCeilingDefault")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "pitchCeilingDefault",
-                  parameters.getString("pitchCeilingDefault")));
-              return;
-            }
-          }
-          task.getPitchCeilingOther().clear();
-          for (String value : parameters.getStrings("pitchCeilingOther")) {
-            try {
-              task.getPitchCeilingOther().add(Integer.valueOf(value));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "pitchCeilingOther",
-                  parameters.getString("pitchCeilingOther")));
-              return;
-            }
-          } // next value
-          if (parameters.getString("voicingThresholdDefault") != null) {
-            try {
-              task.setVoicingThresholdDefault(
-                Double.parseDouble(parameters.getString("voicingThresholdDefault")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not a number.",
-                  "voicingThresholdDefault",
-                  parameters.getString("voicingThresholdDefault")));
-              return;
-            }
-          }
-          task.getVoicingThresholdOther().clear();
-          for (String value : parameters.getStrings("voicingThresholdOther")) {
-            try {
-              task.getVoicingThresholdOther().add(Double.valueOf(value));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not a number.",
-                  "voicingThresholdOther",
-                  parameters.getString("voicingThresholdOther")));
-              return;
-            }
-          } // next value
-          if (parameters.getString("scriptPitch") != null
-              && parameters.getString("scriptPitch").length() > 0) {
-            task.setScriptPitch(parameters.getString("scriptPitch"));
-          }
-
-          task.setExtractMaximumIntensity(
-            "true".equalsIgnoreCase(parameters.getString("extractMaximumIntensity")));
-          if (parameters.getString("intensityDifferentiationLayerId") != null) {
-            task.setIntensityDifferentiationLayerId(
-              parameters.getString("intensityDifferentiationLayerId"));
-          }
-          task.getIntensityOtherPattern().clear();
-          for (String value : parameters.getStrings("intensityOtherPattern")) {
-            try {
-              task.getIntensityOtherPattern().add(Pattern.compile(value));
-            } catch(PatternSyntaxException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not a valid regular expression: {2}",
-                  "intensityOtherPattern", value, exception.getMessage()));
-              return;
-            }
-          } // next value
-          if (parameters.getString("intensityPitchFloorDefault") != null) {
-            try {
-              task.setIntensityPitchFloorDefault(
-                Integer.parseInt(parameters.getString("intensityPitchFloorDefault")));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "intensityPitchFloorDefault",
-                  parameters.getString("intensityPitchFloorDefault")));
-              return;
-            }
-          }
-          task.getIntensityPitchFloorOther().clear();
-          for (String value : parameters.getStrings("intensityPitchFloorOther")) {
-            try {
-              task.getIntensityPitchFloorOther().add(Integer.valueOf(value));
-            } catch(NumberFormatException exception) {
-              writeResponse(
-                response, failureResult(
-                  request, "{0} \"{1}\" is not an integer.",
-                  "intensityPitchFloorOther",
-                  parameters.getString("intensityPitchFloorOther")));
-              return;
-            }
-          } // next value
-          if (parameters.getString("scriptIntensity") != null
-              && parameters.getString("scriptIntensity").length() > 0) {
-            task.setScriptIntensity(parameters.getString("scriptIntensity"));
-          }
-          
-          task.setExtractCOG1("true".equalsIgnoreCase(parameters.getString("extractCOG1")));
-          task.setExtractCOG2("true".equalsIgnoreCase(parameters.getString("extractCOG2")));
-          task.setExtractCOG23("true".equalsIgnoreCase(parameters.getString("extractCOG23")));
-          
-          if (parameters.getString("script") != null
-              && parameters.getString("script").length() > 0) {
-            task.setCustomScript(parameters.getString("script"));
-          }
-          
-          for (String value : parameters.getStrings("attributes")) {
-            task.getAttributes().add(value);
-          }
-
-          // ensure number of patterns match values
-          if (task.getFormantOtherPattern().size() != task.getFormantCeilingOther().size()) {
-            writeResponse(
-              response, failureResult(
-                request,
-                "{0} and {1} must have the same number of values.",
-                "formantOtherPattern", "formantCeilingOther"));
-            return;
-          }
-          if (task.getPitchOtherPattern().size() != task.getPitchFloorOther().size()) {
-            writeResponse(
-              response, failureResult(
-                request,
-                "{0} and {1} must have the same number of values.",
-                "pitchOtherPattern", "pitchFloorOther"));
-            return;
-          }
-          if (task.getPitchOtherPattern().size() != task.getPitchCeilingOther().size()) {
-            writeResponse(
-              response, failureResult(
-                request,
-                "{0} and {1} must have the same number of values.",
-                "pitchOtherPattern", "pitchCeilingOther"));
-            return;
-          }
-          if (task.getPitchOtherPattern().size() != task.getVoicingThresholdOther().size()) {
-            writeResponse(
-              response, failureResult(
-                request,
-                "{0} and {1} must have the same number of values.",
-                "pitchOtherPattern", "voicingThresholdOther"));
-            return;
-          }
-          if (task.getIntensityOtherPattern().size() != task.getIntensityPitchFloorOther().size()) {
-            writeResponse(
-              response, failureResult(
-                request,
-                "{0} and {1} must have the same number of values.",
-                "intensityOtherPattern", "intensityPitchFloorOther"));
-            return;
-          }
-          if (task.getFastTrackOtherPattern().size() != task.getFastTrackLowestAnalysisFrequencyOther().size()) {
-            writeResponse(
-              response, failureResult(
-                request,
-                "{0} and {1} must have the same number of values.",
-                "fastTrackOtherPattern", "fastTrackLowestAnalysisFrequencyOther"));
-            return;
-          }
-          if (task.getFastTrackOtherPattern().size() != task.getFastTrackHighestAnalysisFrequencyOther().size()) {
-            writeResponse(
-              response, failureResult(
-                request,
-                "{0} and {1} must have the same number of values.",
-                "fastTrackOtherPattern", "fastTrackHighestAnalysisFrequencyOther"));
-            return;
-          }
-
-          // start the task
-          task.setName(uploadedCsvFile.getName());
-          if (request.getRemoteUser() != null) {	
-            task.setWho(request.getRemoteUser());
-          } else {
-            task.setWho(request.getRemoteHost());
-          }
-          task.start();
-          
-          // return its ID
-          JsonObjectBuilder jsonResult = Json.createObjectBuilder()
-            .add("threadId", task.getId());
+          task.setTranscriptIdColumn(
+            Integer.parseInt(parameters.getString("transcriptColumn")));
+        } catch(NumberFormatException exception) {
           writeResponse(
-            response, successResult(request, jsonResult.build(), null));
-          
-        } finally {
-          // TODO cacheStore(store);
+            response, failureResult(
+              request, "Transcript column \"{0}\" is not an integer.",
+              parameters.getString("transcriptColumn")));
+          return;
         }
+      } else {
+        writeResponse(
+          response, failureResult(
+            request, "Transcript column not supplied."));
+      }
+          
+      if (parameters.getString("participantColumn") != null) {
+        try {
+          task.setParticipantNameColumn(
+            Integer.parseInt(parameters.getString("participantColumn")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "Participant column \"{0}\" is not an integer.",
+              parameters.getString("participantColumn")));
+          return;
+        }
+      } else {
+        writeResponse(
+          response, failureResult(
+            request, "Participant column not supplied."));
+      }
+          
+      if (parameters.getString("startTimeColumn") != null) {
+        try {
+          task.setMarkColumn(Integer.parseInt(parameters.getString("startTimeColumn")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "Start time column \"{0}\" is not an integer.",
+              parameters.getString("startTimeColumn")));
+          return;
+        }
+      } else {
+        writeResponse(
+          response, failureResult(
+            request, "Start time column not supplied."));
+      }
+          
+      if (parameters.getString("endTimeColumn") != null) {
+        try {
+          task.setMarkEndColumn(Integer.parseInt(parameters.getString("endTimeColumn")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "End time column \"{0}\" is not an integer.",
+              parameters.getString("endTimeColumn")));
+          return;
+        }
+      } else {
+        writeResponse(
+          response, failureResult(
+            request, "End time column not supplied."));
+      }
+          
+      if (parameters.getString("windowOffset") != null) {
+        try {
+          task.setWindowOffset(Double.parseDouble(parameters.getString("windowOffset")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "Window offset \"{0}\" is not a number.",
+              parameters.getString("windowOffset")));
+          return;
+        }
+      }
+          
+      if (parameters.getString("passThroughData") != null
+          && parameters.getString("passThroughData").equalsIgnoreCase("false")) {
+        task.setPassThroughData(false);
+      }
+
+      task.setExtractF1("true".equalsIgnoreCase(parameters.getString("extractF1")));
+      task.setExtractF2("true".equalsIgnoreCase(parameters.getString("extractF2")));
+      task.setExtractF3("true".equalsIgnoreCase(parameters.getString("extractF3")));
+
+      if (parameters.getString("samplePoints") != null) {
+        StringTokenizer tokens = new StringTokenizer(
+          parameters.getString("samplePoints"), " ,;:-");
+        task.getSamplePoints().clear();
+        while (tokens.hasMoreTokens()) {
+          task.getSamplePoints().add(Double.valueOf(tokens.nextToken()));
+        }            
+      }
+          
+      if (parameters.getString("formantDifferentiationLayerId") != null) {
+        task.setFormantDifferentiationLayerId(
+          parameters.getString("formantDifferentiationLayerId"));
+      }
+      task.getFormantOtherPattern().clear();
+      for (String value : parameters.getStrings("formantOtherPattern")) {
+        try {
+          task.getFormantOtherPattern().add(Pattern.compile(value));
+        } catch(PatternSyntaxException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not a valid regular expression: {2}",
+              "formantOtherPattern", value, exception.getMessage()));
+          return;
+        }
+      } // next value
+      if (parameters.getString("formantCeilingDefault") != null) {
+        try {
+          task.setFormantCeilingDefault(
+            Integer.parseInt(parameters.getString("formantCeilingDefault")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request,
+              "{0} \"{1}\" is not an integer.",
+              "formantCeilingDefault", parameters.getString("formantCeilingDefault")));
+          return;
+        }
+      }
+      task.getFormantCeilingOther().clear();
+      for (String value : parameters.getStrings("formantCeilingOther")) {
+        try {
+          task.getFormantCeilingOther().add(Integer.valueOf(value));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.", "formantCeilingOther", value));
+          return;
+        }
+      } // next value          
+      if (parameters.getString("scriptFormant") != null
+          && parameters.getString("scriptFormant").length() > 0) {
+        task.setScriptFormant(parameters.getString("scriptFormant"));
+      }
+
+      task.setUseFastTrack(
+        "true".equalsIgnoreCase(parameters.getString("useFastTrack")));
+      if (parameters.getString("fastTrackDifferentiationLayerId") != null) {
+        task.setFastTrackDifferentiationLayerId(
+          parameters.getString("fastTrackDifferentiationLayerId"));
+      }
+      task.getFastTrackOtherPattern().clear();
+      for (String value : parameters.getStrings("fastTrackOtherPattern")) {
+        try {
+          task.getFastTrackOtherPattern().add(Pattern.compile(value));
+        } catch(PatternSyntaxException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not a valid regular expression: {2}",
+              "fastTrackOtherPattern", value, exception.getMessage()));
+          return;
+        }
+      } // next value
+      if (parameters.getString("fastTrackLowestAnalysisFrequencyDefault") != null) {
+        try {
+          task.setFastTrackLowestAnalysisFrequencyDefault(
+            Integer.parseInt(parameters.getString("fastTrackLowestAnalysisFrequencyDefault")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request,
+              "{0} \"{1}\" is not an integer.",
+              "fastTrackLowestAnalysisFrequencyDefault",
+              parameters.getString("fastTrackLowestAnalysisFrequencyDefault")));
+          return;
+        }
+      }
+      task.getFastTrackLowestAnalysisFrequencyOther().clear();
+      for (String value : parameters.getStrings("fastTrackLowestAnalysisFrequencyOther")) {
+        try {
+          task.getFastTrackLowestAnalysisFrequencyOther().add(Integer.valueOf(value));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackLowestAnalysisFrequencyOther", value));
+          return;
+        }
+      } // next value
+      if (parameters.getString("fastTrackHighestAnalysisFrequencyDefault") != null) {
+        try {
+          task.setFastTrackHighestAnalysisFrequencyDefault(
+            Integer.parseInt(parameters.getString("fastTrackHighestAnalysisFrequencyDefault")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request,
+              "{0} \"{1}\" is not an integer.",
+              "fastTrackHighestAnalysisFrequencyDefault",
+              parameters.getString("fastTrackHighestAnalysisFrequencyDefault")));
+          return;
+        }
+      }
+      task.getFastTrackHighestAnalysisFrequencyOther().clear();
+      for (String value : parameters.getStrings("fastTrackHighestAnalysisFrequencyOther")) {
+        try {
+          task.getFastTrackHighestAnalysisFrequencyOther().add(Integer.valueOf(value));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackHighestAnalysisFrequencyOther", value));
+          return;
+        }
+      } // next value
+      if (parameters.getString("fastTrackTimeStep") != null) {
+        try {
+          task.setFastTrackTimeStep(
+            Double.parseDouble(parameters.getString("fastTrackTimeStep")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request,
+              "{0} \"{1}\" is not a number.",
+              "fastTrackTimeStep", parameters.getString("fastTrackTimeStep")));
+          return;
+        }
+      }
+      if (parameters.getString("fastTrackBasisFunctions") != null
+          && parameters.getString("fastTrackBasisFunctions").length() > 0) {
+        task.setFastTrackBasisFunctions(parameters.getString("fastTrackBasisFunctions"));
+      }
+      if (parameters.getString("fastTrackErrorMethod") != null
+          && parameters.getString("fastTrackErrorMethod").length() > 0) {
+        task.setFastTrackErrorMethod(parameters.getString("fastTrackErrorMethod"));
+      }
+      if (parameters.getString("fastTrackTrackingMethod") != null
+          && parameters.getString("fastTrackTrackingMethod").length() > 0) {
+        task.setFastTrackTrackingMethod(parameters.getString("fastTrackTrackingMethod"));
+      }
+      if (parameters.getString("fastTrackBasisFunctions") != null
+          && parameters.getString("fastTrackBasisFunctions").length() > 0) {
+        task.setFastTrackBasisFunctions(parameters.getString("fastTrackBasisFunctions"));
+      }
+      task.setFastTrackEnableF1FrequencyHeuristic(
+        "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF1FrequencyHeuristic")));
+      if (parameters.getString("fastTrackMaximumF1FrequencyValue") != null) {
+        try {
+          task.setFastTrackMaximumF1FrequencyValue(
+            Integer.parseInt(parameters.getString("fastTrackMaximumF1FrequencyValue")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackMaximumF1FrequencyValue",
+              parameters.getString("fastTrackMaximumF1FrequencyValue")));
+          return;
+        }
+      }
+      task.setFastTrackEnableF1BandwidthHeuristic(
+        "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF1BandwidthHeuristic")));
+      if (parameters.getString("fastTrackMaximumF1BandwidthValue") != null) {
+        try {
+          task.setFastTrackMaximumF1BandwidthValue(
+            Integer.parseInt(parameters.getString("fastTrackMaximumF1BandwidthValue")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackMaximumF1BandwidthValue",
+              parameters.getString("fastTrackMaximumF1BandwidthValue")));
+          return;
+        }
+      }
+      task.setFastTrackEnableF2BandwidthHeuristic(
+        "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF2BandwidthHeuristic")));
+      if (parameters.getString("fastTrackMaximumF2BandwidthValue") != null) {
+        try {
+          task.setFastTrackMaximumF2BandwidthValue(
+            Integer.parseInt(parameters.getString("fastTrackMaximumF2BandwidthValue")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackMaximumF2BandwidthValue",
+              parameters.getString("fastTrackMaximumF2BandwidthValue")));
+          return;
+        }
+      }
+      task.setFastTrackEnableF3BandwidthHeuristic(
+        "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF3BandwidthHeuristic")));
+      if (parameters.getString("fastTrackMaximumF3BandwidthValue") != null) {
+        try {
+          task.setFastTrackMaximumF3BandwidthValue(
+            Integer.parseInt(parameters.getString("fastTrackMaximumF3BandwidthValue")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackMaximumF3BandwidthValue",
+              parameters.getString("fastTrackMaximumF3BandwidthValue")));
+          return;
+        }
+      }
+      task.setFastTrackEnableF4FrequencyHeuristic(
+        "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF4FrequencyHeuristic")));
+      if (parameters.getString("fastTrackMinimumF4FrequencyValue") != null) {
+        try {
+          task.setFastTrackMinimumF4FrequencyValue(
+            Integer.parseInt(parameters.getString("fastTrackMinimumF4FrequencyValue")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackMinimumF4FrequencyValue",
+              parameters.getString("fastTrackMinimumF4FrequencyValue")));
+          return;
+        }
+      }
+      task.setFastTrackEnableRhoticHeuristic(
+        "true".equalsIgnoreCase(parameters.getString("fastTrackEnableRhoticHeuristic")));
+      task.setFastTrackEnableF3F4ProximityHeuristic(
+        "true".equalsIgnoreCase(parameters.getString("fastTrackEnableF3F4ProximityHeuristic")));
+      if (parameters.getString("fastTrackNumberOfSteps") != null) {
+        try {
+          task.setFastTrackNumberOfSteps(
+            Integer.parseInt(parameters.getString("fastTrackNumberOfSteps")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackNumberOfSteps",
+              parameters.getString("fastTrackNumberOfSteps")));
+          return;
+        }
+      }
+      if (parameters.getString("fastTrackNumberOfCoefficients") != null) {
+        try {
+          task.setFastTrackNumberOfCoefficients(
+            Integer.parseInt(parameters.getString("fastTrackNumberOfCoefficients")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackNumberOfCoefficients",
+              parameters.getString("fastTrackNumberOfCoefficients")));
+          return;
+        }
+      }
+      if (parameters.getString("fastTrackNumberOfFormants") != null) {
+        try {
+          task.setFastTrackNumberOfFormants(
+            Integer.parseInt(parameters.getString("fastTrackNumberOfFormants")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "fastTrackNumberOfFormants",
+              parameters.getString("fastTrackNumberOfFormants")));
+          return;
+        }
+      }
+      task.setFastTrackCoefficients(
+        "true".equalsIgnoreCase(parameters.getString("fastTrackCoefficients")));
+
+      task.setExtractMinimumPitch(
+        "true".equalsIgnoreCase(parameters.getString("extractMinimumPitch")));
+      task.setExtractMeanPitch(
+        "true".equalsIgnoreCase(parameters.getString("extractMeanPitch")));
+      task.setExtractMaximumPitch(
+        "true".equalsIgnoreCase(parameters.getString("extractMaximumPitch")));
+          
+      if (parameters.getString("pitchDifferentiationLayerId") != null) {
+        task.setPitchDifferentiationLayerId(
+          parameters.getString("pitchDifferentiationLayerId"));
+      }
+      task.getPitchOtherPattern().clear();
+      for (String value : parameters.getStrings("pitchOtherPattern")) {
+        try {
+          task.getPitchOtherPattern().add(Pattern.compile(value));
+        } catch(PatternSyntaxException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not a valid regular expression: {2}",
+              "pitchOtherPattern", value, exception.getMessage()));
+          return;
+        }
+      } // next value
+      if (parameters.getString("pitchFloorDefault") != null) {
+        try {
+          task.setPitchFloorDefault(
+            Integer.parseInt(parameters.getString("pitchFloorDefault")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "pitchFloorDefault",
+              parameters.getString("pitchFloorDefault")));
+          return;
+        }
+      }
+      task.getPitchFloorOther().clear();
+      for (String value : parameters.getStrings("pitchFloorOther")) {
+        try {
+          task.getPitchFloorOther().add(Integer.valueOf(value));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "pitchFloorOther",
+              parameters.getString("pitchFloorOther")));
+          return;
+        }
+      } // next value
+      if (parameters.getString("pitchCeilingDefault") != null) {
+        try {
+          task.setPitchCeilingDefault(
+            Integer.parseInt(parameters.getString("pitchCeilingDefault")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "pitchCeilingDefault",
+              parameters.getString("pitchCeilingDefault")));
+          return;
+        }
+      }
+      task.getPitchCeilingOther().clear();
+      for (String value : parameters.getStrings("pitchCeilingOther")) {
+        try {
+          task.getPitchCeilingOther().add(Integer.valueOf(value));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "pitchCeilingOther",
+              parameters.getString("pitchCeilingOther")));
+          return;
+        }
+      } // next value
+      if (parameters.getString("voicingThresholdDefault") != null) {
+        try {
+          task.setVoicingThresholdDefault(
+            Double.parseDouble(parameters.getString("voicingThresholdDefault")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not a number.",
+              "voicingThresholdDefault",
+              parameters.getString("voicingThresholdDefault")));
+          return;
+        }
+      }
+      task.getVoicingThresholdOther().clear();
+      for (String value : parameters.getStrings("voicingThresholdOther")) {
+        try {
+          task.getVoicingThresholdOther().add(Double.valueOf(value));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not a number.",
+              "voicingThresholdOther",
+              parameters.getString("voicingThresholdOther")));
+          return;
+        }
+      } // next value
+      if (parameters.getString("scriptPitch") != null
+          && parameters.getString("scriptPitch").length() > 0) {
+        task.setScriptPitch(parameters.getString("scriptPitch"));
+      }
+
+      task.setExtractMaximumIntensity(
+        "true".equalsIgnoreCase(parameters.getString("extractMaximumIntensity")));
+      if (parameters.getString("intensityDifferentiationLayerId") != null) {
+        task.setIntensityDifferentiationLayerId(
+          parameters.getString("intensityDifferentiationLayerId"));
+      }
+      task.getIntensityOtherPattern().clear();
+      for (String value : parameters.getStrings("intensityOtherPattern")) {
+        try {
+          task.getIntensityOtherPattern().add(Pattern.compile(value));
+        } catch(PatternSyntaxException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not a valid regular expression: {2}",
+              "intensityOtherPattern", value, exception.getMessage()));
+          return;
+        }
+      } // next value
+      if (parameters.getString("intensityPitchFloorDefault") != null) {
+        try {
+          task.setIntensityPitchFloorDefault(
+            Integer.parseInt(parameters.getString("intensityPitchFloorDefault")));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "intensityPitchFloorDefault",
+              parameters.getString("intensityPitchFloorDefault")));
+          return;
+        }
+      }
+      task.getIntensityPitchFloorOther().clear();
+      for (String value : parameters.getStrings("intensityPitchFloorOther")) {
+        try {
+          task.getIntensityPitchFloorOther().add(Integer.valueOf(value));
+        } catch(NumberFormatException exception) {
+          writeResponse(
+            response, failureResult(
+              request, "{0} \"{1}\" is not an integer.",
+              "intensityPitchFloorOther",
+              parameters.getString("intensityPitchFloorOther")));
+          return;
+        }
+      } // next value
+      if (parameters.getString("scriptIntensity") != null
+          && parameters.getString("scriptIntensity").length() > 0) {
+        task.setScriptIntensity(parameters.getString("scriptIntensity"));
+      }
+          
+      task.setExtractCOG1("true".equalsIgnoreCase(parameters.getString("extractCOG1")));
+      task.setExtractCOG2("true".equalsIgnoreCase(parameters.getString("extractCOG2")));
+      task.setExtractCOG23("true".equalsIgnoreCase(parameters.getString("extractCOG23")));
+          
+      if (parameters.getString("script") != null
+          && parameters.getString("script").length() > 0) {
+        task.setCustomScript(parameters.getString("script"));
+      }
+          
+      for (String value : parameters.getStrings("attributes")) {
+        task.getAttributes().add(value);
+      }
+
+      // ensure number of patterns match values
+      if (task.getFormantOtherPattern().size() != task.getFormantCeilingOther().size()) {
+        writeResponse(
+          response, failureResult(
+            request,
+            "{0} and {1} must have the same number of values.",
+            "formantOtherPattern", "formantCeilingOther"));
+        return;
+      }
+      if (task.getPitchOtherPattern().size() != task.getPitchFloorOther().size()) {
+        writeResponse(
+          response, failureResult(
+            request,
+            "{0} and {1} must have the same number of values.",
+            "pitchOtherPattern", "pitchFloorOther"));
+        return;
+      }
+      if (task.getPitchOtherPattern().size() != task.getPitchCeilingOther().size()) {
+        writeResponse(
+          response, failureResult(
+            request,
+            "{0} and {1} must have the same number of values.",
+            "pitchOtherPattern", "pitchCeilingOther"));
+        return;
+      }
+      if (task.getPitchOtherPattern().size() != task.getVoicingThresholdOther().size()) {
+        writeResponse(
+          response, failureResult(
+            request,
+            "{0} and {1} must have the same number of values.",
+            "pitchOtherPattern", "voicingThresholdOther"));
+        return;
+      }
+      if (task.getIntensityOtherPattern().size() != task.getIntensityPitchFloorOther().size()) {
+        writeResponse(
+          response, failureResult(
+            request,
+            "{0} and {1} must have the same number of values.",
+            "intensityOtherPattern", "intensityPitchFloorOther"));
+        return;
+      }
+      if (task.getFastTrackOtherPattern().size() != task.getFastTrackLowestAnalysisFrequencyOther().size()) {
+        writeResponse(
+          response, failureResult(
+            request,
+            "{0} and {1} must have the same number of values.",
+            "fastTrackOtherPattern", "fastTrackLowestAnalysisFrequencyOther"));
+        return;
+      }
+      if (task.getFastTrackOtherPattern().size() != task.getFastTrackHighestAnalysisFrequencyOther().size()) {
+        writeResponse(
+          response, failureResult(
+            request,
+            "{0} and {1} must have the same number of values.",
+            "fastTrackOtherPattern", "fastTrackHighestAnalysisFrequencyOther"));
+        return;
+      }
+
+      // start the task
+      task.setName(uploadedCsvFile.getName());
+      if (request.getRemoteUser() != null) {	
+        task.setWho(request.getRemoteUser());
+      } else {
+        task.setWho(request.getRemoteHost());
+      }
+      task.start();
+          
+      // return its ID
+      JsonObjectBuilder jsonResult = Json.createObjectBuilder()
+        .add("threadId", task.getId());
+      writeResponse(
+        response, successResult(request, jsonResult.build(), null));
+          
       } catch(Exception ex) {
         throw new ServletException(ex);
       }
   }
   
-   private static final long serialVersionUID = -1;
-} // end of class SerializeGraphs
+  private static final long serialVersionUID = -1;
+} // end of class Praat
