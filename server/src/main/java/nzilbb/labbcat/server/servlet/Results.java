@@ -23,6 +23,8 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -221,9 +223,11 @@ public class Results extends LabbcatServlet { // TODO unit test
               search.keepAlive(); // prevent the task from dying while we're still interested
               jsonOut.writeStartObject(); // match
               try {
+                
                 String matchId = results.next();
                 log("matchId: " + matchId);
                 jsonOut.write("MatchId", matchId);
+                
                 IdMatch result = new IdMatch(matchId);
                 // convert ag_id to transcript_id
                 if (!agIdToName.containsKey(result.getGraphId())) {
@@ -231,19 +235,139 @@ public class Results extends LabbcatServlet { // TODO unit test
                   agIdToName.put(result.getGraphId(), t.getLabel());
                 }
                 jsonOut.write("Transcript", agIdToName.get(result.getGraphId()));
+                
                 // convert speaker_number to name
                 if (!speakerNumberToName.containsKey(result.getSpeakerNumber())) {
                   Annotation p = store.getParticipant("m_-2_"+result.getSpeakerNumber(), null);
                   speakerNumberToName.put(result.getSpeakerNumber(), p.getLabel());
                 }
                 jsonOut.write("Participant", speakerNumberToName.get(result.getSpeakerNumber()));
+                
                 // convert anchor_ids to offsets
                 String[] anchorIds = {
                   "n_"+result.getStartAnchorId(), "n_"+result.getEndAnchorId() };
                 Anchor[] anchors = store.getAnchors(
                   agIdToName.get(result.getGraphId()), anchorIds);
-                jsonOut.write("Line", anchors[0].getOffset());
-                jsonOut.write("LineEnd", anchors[1].getOffset());                
+                result.setStartOffset(anchors[0].getOffset());
+                result.setEndOffset(anchors[1].getOffset());
+                jsonOut.write("Line", result.getStartOffset());
+                jsonOut.write("LineEnd", result.getEndOffset());
+
+                // get the match start/end tokens
+                StringBuilder beforeMatch = new StringBuilder();
+                StringBuilder text = new StringBuilder();
+                StringBuilder afterMatch = new StringBuilder();
+                String startTokenId = result.getMatchAnnotationUids().get("0");
+                String endTokenId = result.getMatchAnnotationUids().get("1");
+                String boundingTokenQuery = null;
+                if (startTokenId != null) {
+                  if (endTokenId != null) {
+                    boundingTokenQuery = "id IN ('"+startTokenId+"','"+endTokenId+"')";
+                  } else { // one token only
+                    boundingTokenQuery = "id == '"+startTokenId+"'";
+                  }
+                } else if (result.getTargetAnnotationUid() != null) { // no tokens, use target
+                  boundingTokenQuery = "id == '"+result.getTargetAnnotationUid()+"'";
+                }
+                if (boundingTokenQuery != null) {
+                  
+                  // get the matched text
+                  Annotation[] boundingTokens = store.getMatchingAnnotations(boundingTokenQuery);
+                  if (boundingTokens.length > 0) {
+                    // the label of the first token the start of the text
+                    text.append(boundingTokens[0].getLabel());
+                    if (boundingTokens.length > 1) { // there's a start and end token
+                      if (boundingTokens[0].getOrdinal() + 1 < boundingTokens[1].getOrdinal()) {
+                        // there are intervening tokens
+                        String interveningTokenQuery =
+                          "layer == '"+boundingTokens[0].getLayerId()+"'"
+                          +" && parentId == '"+boundingTokens[0].getParentId()+"'"
+                          +" && ordinal > "+boundingTokens[0].getOrdinal()
+                          +" && ordinal < "+boundingTokens[1].getOrdinal();
+                        Annotation[] interveningTokens = store.getMatchingAnnotations(
+                          interveningTokenQuery);
+                        Arrays.sort(
+                          interveningTokens, Comparator.comparingInt(a->a.getOrdinal()));
+                        for (Annotation token : interveningTokens) {
+                          // add the token to the text
+                          text.append(" ");
+                          text.append(token.getLabel());
+                        }
+                      } // there are intervening tokens
+                      // add final token to the text
+                      text.append(" ");
+                      text.append(boundingTokens[1].getLabel());
+                    } // there's a start and end token
+
+                    if (wordsContext != 0) { // get the context
+                      Annotation firstToken = boundingTokens[0];
+                      Annotation lastToken = boundingTokens[boundingTokens.length - 1];
+                      if (wordsContext > 0) { // number of words
+                        // get the context before the match
+                        String contextQuery = "layer == '"+firstToken.getLayerId()+"'"
+                          +" && parentId == '"+firstToken.getParentId()+"'"
+                          +" && ordinal >= "+(firstToken.getOrdinal() - wordsContext)
+                          +" && ordinal < "+firstToken.getOrdinal();
+                        Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
+                        Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
+                        for (Annotation token : contextTokens) {
+                          // add the token to the text
+                          if (beforeMatch.length() > 0) beforeMatch.append(" ");
+                          beforeMatch.append(token.getLabel());
+                        } // next token
+                        
+                        // get the context after the match
+                        contextQuery = "layer == '"+lastToken.getLayerId()+"'"
+                          +" && parentId == '"+lastToken.getParentId()+"'"
+                          +" && ordinal > "+lastToken.getOrdinal()
+                          +" && ordinal <= "+(lastToken.getOrdinal() + wordsContext);
+                        contextTokens = store.getMatchingAnnotations(contextQuery);
+                        Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
+                        for (Annotation token : contextTokens) {
+                          // add the token to the text
+                          if (afterMatch.length() > 0) afterMatch.append(" ");
+                          afterMatch.append(token.getLabel());
+                        } // next token
+                        
+                      } else { // whole utterance
+
+                        if (result.getStartOffset() != null) {
+                          // get the context before the match
+                          String contextQuery = "layer == '"+firstToken.getLayerId()+"'"
+                            +" && parentId == '"+firstToken.getParentId()+"'"
+                            +" && start.offset >= "+result.getStartOffset()
+                            +" && ordinal < "+firstToken.getOrdinal();
+                          Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
+                          Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
+                          for (Annotation token : contextTokens) {
+                            // add the token to the text
+                            if (beforeMatch.length() > 0) beforeMatch.append(" ");
+                            beforeMatch.append(token.getLabel());
+                          } // next token
+                        } // result.startOffset != null
+
+                        if (result.getEndOffset() != null) {
+                          // get the context after the match
+                          String contextQuery = "layer == '"+lastToken.getLayerId()+"'"
+                            +" && parentId == '"+lastToken.getParentId()+"'"
+                            +" && ordinal > "+lastToken.getOrdinal()
+                            +" && end.offset <= "+result.getEndOffset();
+                          Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
+                          Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
+                          for (Annotation token : contextTokens) {
+                            // add the token to the text
+                            if (afterMatch.length() > 0) afterMatch.append(" ");
+                            afterMatch.append(token.getLabel());
+                          } // next token
+                        } // result.endOffset != null
+                        
+                      } // whole utterance
+                    } // get the context
+                  } // there are bounding tokens                  
+                } // there are match tokens
+                jsonOut.write("BeforeMatch", beforeMatch.toString());
+                jsonOut.write("Text", text.toString());
+                jsonOut.write("AfterMatch", afterMatch.toString());
                 
               } finally {
                 jsonOut.writeEnd(); // match
