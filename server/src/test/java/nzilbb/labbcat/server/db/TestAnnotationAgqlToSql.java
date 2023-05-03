@@ -144,7 +144,7 @@ public class TestAnnotationAgqlToSql {
                  "SELECT DISTINCT annotation.*,"
                  +" 'word' AS layer"
                  +" FROM annotation_layer_0 annotation"
-                 +" WHERE CONCAT('ew_0_', annotation.annotation_id) = 'ew_0_456'"
+                 +" WHERE annotation.annotation_id = 456"
                  +" ORDER BY ag_id, parent_id, annotation_id",
                  q.sql);
 
@@ -156,8 +156,8 @@ public class TestAnnotationAgqlToSql {
                  +" 'orthography' AS layer"
                  +" FROM annotation_layer_2 annotation"
                  +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
-                 +" WHERE CONCAT('ew_2_', annotation.annotation_id)"
-                 +" IN ('ew_2_456','ew_2_789','ew_2_101112')"
+                 +" WHERE annotation.annotation_id"
+                 +" IN (456,789,101112)"
                  +" ORDER BY graph.transcript_id, parent_id, annotation_id LIMIT 1,1",
                  q.sql);
     
@@ -168,8 +168,19 @@ public class TestAnnotationAgqlToSql {
                  "SELECT COUNT(*),"
                  +" 'orthography' AS layer"
                  +" FROM annotation_layer_2 annotation"
-                 +" WHERE CONCAT('ew_2_', annotation.annotation_id)"
-                 +" IN ('ew_2_456','ew_2_789','ew_2_101112')",
+                 +" WHERE annotation.annotation_id"
+                 +" IN (456,789,101112)",
+                 q.sql);
+    
+    q = transformer.sqlFor(
+      "['ew_2_456'].includes(id)",
+      "COUNT(*)", null, null);
+    assertEquals("SQL - works when therre's only one item",
+                 "SELECT COUNT(*),"
+                 +" 'orthography' AS layer"
+                 +" FROM annotation_layer_2 annotation"
+                 +" WHERE annotation.annotation_id"
+                 +" IN (456)",
                  q.sql);
     
   }
@@ -224,7 +235,7 @@ public class TestAnnotationAgqlToSql {
                  +" 'orthography' AS layer"
                  +" FROM annotation_layer_2 annotation"
                  +" WHERE 'orthography' = 'orthography'"
-                 +" AND CONCAT('ew_0_', annotation.parent_id) = 'ew_0_123'"
+                 +" AND annotation.parent_id = 123"
                  +" ORDER BY ag_id, parent_id, annotation_id",
                  q.sql);
       
@@ -237,7 +248,7 @@ public class TestAnnotationAgqlToSql {
                  +" FROM annotation_layer_2 annotation"
                  +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                  +" WHERE 'orthography' = 'orthography'"
-                 +" AND CONCAT('ew_0_', annotation.parent_id) = 'ew_0_123'"
+                 +" AND annotation.parent_id = 123"
                  +" ORDER BY graph.transcript_id, parent_id, annotation_id"
                  +" LIMIT 1,1",
                  q.sql);      
@@ -269,8 +280,8 @@ public class TestAnnotationAgqlToSql {
                  +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
                  +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
                  +" WHERE 'utterance' = 'utterance'"
-                 +" AND 'ew_0_456' IN"
-                 +" (SELECT CONCAT('ew_0_', otherLayer.annotation_id)"
+                 +" AND 456 IN"
+                 +" (SELECT otherLayer.annotation_id"
                  +" FROM annotation_layer_0 otherLayer"
                  +" INNER JOIN anchor otherLayer_start"
                  +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
@@ -714,7 +725,7 @@ public class TestAnnotationAgqlToSql {
       "SELECT DISTINCT annotation.*, graph.ag_id, 'word' AS layer"
       +" FROM annotation_layer_0 annotation"
       +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
-      +" WHERE CONCAT('ew_0_', annotation.annotation_id) = 'ew_0_456'"
+      +" WHERE annotation.annotation_id = 456"
       +" AND ("
       +"EXISTS (SELECT * FROM role"
       +" INNER JOIN role_permission ON role.role_id = role_permission.role_id"

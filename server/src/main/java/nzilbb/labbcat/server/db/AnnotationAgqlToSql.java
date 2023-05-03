@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.ql.*;
@@ -1133,6 +1135,39 @@ public class AnnotationAgqlToSql {
     }
 
     q.sql = sql.toString();
+
+    // apply some known optimisations
+    q.sql = q.sql.replaceAll(
+      "CONCAT\\('(e[wms]*_[0-9]+_)', annotation.parent_id\\) = '\\1([0-9]+)'",
+      "annotation.parent_id = $2");
+    q.sql = q.sql.replaceAll(
+      "CONCAT\\('(e[wms]*_[0-9]+_)', annotation.annotation_id\\) = '\\1([0-9]+)'",
+      "annotation.annotation_id = $2");
+    q.sql = q.sql.replaceAll(
+      "'(e[wms]*_[0-9]+_)([0-9]+)' IN \\(SELECT CONCAT\\('\\1', otherLayer.annotation_id\\)",
+      "$2 IN (SELECT otherLayer.annotation_id");
+    boolean concatInFound = false;
+    Pattern concatInPattern = Pattern.compile(
+      "CONCAT\\('(?<prefix>e[wms]*_[0-9]+_)', annotation.annotation_id\\)"
+      +" IN \\((?<inList>'\\1[0-9]+'(,'\\1[0-9]+')*)\\)");
+    Matcher concatInMatcher = concatInPattern.matcher(q.sql);
+    StringBuffer newSql = new StringBuffer();
+    while (concatInMatcher.find()) {
+      concatInFound = true;
+      StringBuffer replacement = new StringBuffer("annotation.annotation_id IN (");
+      String prefix = concatInMatcher.group("prefix"); // e.g. ew_0_
+      String inList = concatInMatcher.group("inList"); // e.g. 'ew_0_1','ew_0_2','ew_0_3'
+      replacement.append(inList.replaceAll("'"+prefix+"([0-9]+)'", "$1"));
+      replacement.append(")");
+      // copy through what comes before the match      
+      concatInMatcher.appendReplacement(newSql, replacement.toString());
+    } // next match
+    if (concatInFound) {
+      // copy through what comes after the last match
+      concatInMatcher.appendTail(newSql);
+      q.sql = newSql.toString();
+    }
+    
     return q;
   } // end of sqlForTemporalLayer()
 
