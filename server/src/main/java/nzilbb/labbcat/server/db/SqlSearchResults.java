@@ -77,7 +77,8 @@ public class SqlSearchResults implements SearchResults {
         if (name.length() > 100) name = name.substring(0,100);
         sql.setString(1, name);
         sql.setLong(2, id);
-        sql.executeUpdate();        
+        sql.executeUpdate();
+        sql.close();
       } catch(SQLException exception) {
         System.err.println("SqlSearchResults.setName: " + exception);
       }
@@ -257,5 +258,13 @@ public class SqlSearchResults implements SearchResults {
       nextRow = firstMatch;
     }      
   } // end of checkIterator()
+
+  /**
+   * Close all open resources.
+   */
+  public void close() {
+    try { if (rsIterator != null) rsIterator.close(); } catch(SQLException exception) {}
+    try { if (sqlIterator != null) sqlIterator.close(); } catch(SQLException exception) {}
+  } // end of close()
 
 }

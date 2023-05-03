@@ -393,6 +393,7 @@ public class Results extends LabbcatServlet { // TODO unit test
           endFailureResult(request, jsonOut, x.getMessage());
         }
       } finally {
+        results.close();
         cacheStore(store);
         timer.end("GET");
         log(timer.toString());

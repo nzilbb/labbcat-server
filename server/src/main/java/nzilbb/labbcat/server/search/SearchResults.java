@@ -22,11 +22,12 @@
 package nzilbb.labbcat.server.search;
 
 import java.util.Iterator;
+import java.io.Closeable;
 
 /**
  * Represents an iterable collection of results.
  */
-public interface SearchResults extends Iterator<String> {
+public interface SearchResults extends Iterator<String>, Closeable {
 
   /**
    * A descriptive name for the collection.

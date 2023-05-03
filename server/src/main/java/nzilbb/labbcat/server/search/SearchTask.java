@@ -22,6 +22,7 @@
 package nzilbb.labbcat.server.search;
 
 import java.io.StringReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 import javax.json.Json;
@@ -281,6 +282,7 @@ public abstract class SearchTask extends Task {
       setLastException(ex);
       setStatus("run(): " + ex.getClass().getName() + " - " + ex.getMessage());
     } finally {
+      if (results != null) try { results.close(); } catch(IOException exception) {}
       runEnd();
     }
     
