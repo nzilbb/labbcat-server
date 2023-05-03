@@ -49,7 +49,7 @@ public class IdMatch extends IdUtterance {
    * A map of keys to annotation UIDs that identify the annotations that matched the
    * query. The keys identify which part of the query was matched. 
    * @see #getMatchAnnotationUids()
-   * @see #setMatchAnnotationUids(Map<String,String>)
+   * @see #setMatchAnnotationUids(Map)
    */
   protected Map<String,String> matchAnnotationUids = new TreeMap<String,String>();
   /**
