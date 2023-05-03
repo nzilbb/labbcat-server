@@ -23,6 +23,9 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -202,10 +205,22 @@ public class Results extends LabbcatServlet { // TODO unit test
       String[] corpusLayer = { schema.getCorpusLayerId() };
 
       try {
-        Connection connect = store.getConnection();
+        Connection connection = store.getConnection();
         results = new SqlSearchResults(results, connection);
         results.hasNext(); // load size etc.
 
+        PreparedStatement sqlMatchTranscriptContext = connection.prepareStatement(
+          "SELECT GROUP_CONCAT(word.label ORDER BY ordinal_in_turn SEPARATOR ' ')"
+          + " FROM annotation_layer_0 word"
+          + (wordsContext < 0?" INNER JOIN anchor start ON word.start_anchor_id = start.anchor_id"
+             :"")
+          + " WHERE word.ag_id = ?"
+          + " AND turn_annotation_id = ?"
+          + " AND ordinal_in_turn >= ? AND ordinal_in_turn <= ?"
+          + (wordsContext < 0?" AND start.offset >= ? AND start.offset < ?"
+             :"")
+          + " ORDER BY ordinal_in_turn");
+        
         JsonGenerator jsonOut = startResult(Json.createGenerator(response.getWriter()), false);
         try {
           String name = "results";
@@ -322,74 +337,38 @@ public class Results extends LabbcatServlet { // TODO unit test
                     if (wordsContext != 0) { // get the context
                       Annotation firstToken = boundingTokens[0];
                       Annotation lastToken = boundingTokens[boundingTokens.length - 1];
-                      if (wordsContext > 0) { // number of words
-                        // get the context before the match
-                        String contextQuery = "layer == '"+firstToken.getLayerId()+"'"
-                          +" && parentId == '"+firstToken.getParentId()+"'"
-                          +" && ordinal >= "+(firstToken.getOrdinal() - wordsContext)
-                          +" && ordinal < "+firstToken.getOrdinal();
-                        timer.start("contextTokens-before");
-                        Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
-                        timer.end("contextTokens-before");
-                        Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
-                        for (Annotation token : contextTokens) {
-                          // add the token to the text
-                          if (beforeMatch.length() > 0) beforeMatch.append(" ");
-                          beforeMatch.append(token.getLabel());
-                        } // next token
-                        
-                        // get the context after the match
-                        contextQuery = "layer == '"+lastToken.getLayerId()+"'"
-                          +" && parentId == '"+lastToken.getParentId()+"'"
-                          +" && ordinal > "+lastToken.getOrdinal()
-                          +" && ordinal <= "+(lastToken.getOrdinal() + wordsContext);
-                        timer.start("contextTokens-after");
-                        contextTokens = store.getMatchingAnnotations(contextQuery);
-                        timer.end("contextTokens-after");
-                        Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
-                        for (Annotation token : contextTokens) {
-                          // add the token to the text
-                          if (afterMatch.length() > 0) afterMatch.append(" ");
-                          afterMatch.append(token.getLabel());
-                        } // next token
-                        
-                      } else { // whole utterance
-
-                        if (result.getStartOffset() != null) {
-                          // get the context before the match
-                          String contextQuery = "layer == '"+firstToken.getLayerId()+"'"
-                            +" && parentId == '"+firstToken.getParentId()+"'"
-                            +" && start.offset >= "+result.getStartOffset()
-                            +" && ordinal < "+firstToken.getOrdinal();
-                          timer.start("contextTokens-before");
-                          Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
-                          timer.end("contextTokens-before");
-                          Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
-                          for (Annotation token : contextTokens) {
-                            // add the token to the text
-                            if (beforeMatch.length() > 0) beforeMatch.append(" ");
-                            beforeMatch.append(token.getLabel());
-                          } // next token
-                        } // result.startOffset != null
-
-                        if (result.getEndOffset() != null) {
-                          // get the context after the match
-                          String contextQuery = "layer == '"+lastToken.getLayerId()+"'"
-                            +" && parentId == '"+lastToken.getParentId()+"'"
-                            +" && ordinal > "+lastToken.getOrdinal()
-                            +" && end.offset <= "+result.getEndOffset();
-                          timer.start("contextTokens-after");
-                          Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
-                          timer.start("contextTokens-end");
-                          Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
-                          for (Annotation token : contextTokens) {
-                            // add the token to the text
-                            if (afterMatch.length() > 0) afterMatch.append(" ");
-                            afterMatch.append(token.getLabel());
-                          } // next token
-                        } // result.endOffset != null
-                        
-                      } // whole utterance
+                      // get the context before the match
+                      sqlMatchTranscriptContext.setInt(1, result.getGraphId());
+                      sqlMatchTranscriptContext.setLong(
+                        2, Long.valueOf(firstToken.getParentId().replace("em_11_","")));
+                      sqlMatchTranscriptContext.setInt(
+                        3, firstToken.getOrdinal() - wordsContext);
+                      sqlMatchTranscriptContext.setInt(
+                        4, firstToken.getOrdinal() - 1);
+                      if (wordsContext < 0) { // in line bounds
+                        sqlMatchTranscriptContext.setInt(3, 0);
+                        sqlMatchTranscriptContext.setDouble(5, result.getStartOffset());
+                        sqlMatchTranscriptContext.setDouble(6, result.getEndOffset());
+                      }
+                      ResultSet rs = sqlMatchTranscriptContext.executeQuery();
+                      rs.next();
+                      beforeMatch.append(rs.getString(1));
+                      rs.close();
+                      
+                      // get the context after the match
+                      sqlMatchTranscriptContext.setInt(
+                        3, lastToken.getOrdinal() + 1);
+                      sqlMatchTranscriptContext.setInt(
+                        4, lastToken.getOrdinal() + wordsContext);
+                      if (wordsContext < 0) { // in line bounds
+                        sqlMatchTranscriptContext.setInt(4, Integer.MAX_VALUE);
+                        sqlMatchTranscriptContext.setDouble(5, result.getStartOffset());
+                        sqlMatchTranscriptContext.setDouble(6, result.getEndOffset());
+                      }
+                      rs = sqlMatchTranscriptContext.executeQuery();
+                      rs.next();
+                      afterMatch.append(rs.getString(1));
+                      rs.close();
                     } // get the context
                   } // there are bounding tokens                  
                 } // there are match tokens
@@ -406,6 +385,7 @@ public class Results extends LabbcatServlet { // TODO unit test
             timer.end("results");
           } finally {
             jsonOut.writeEnd(); // end "matches"
+            sqlMatchTranscriptContext.close();
           }
           endSuccessResult(request, jsonOut, null);
         } catch (Exception x) {
