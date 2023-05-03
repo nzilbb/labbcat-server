@@ -124,6 +124,8 @@ public class Results extends LabbcatServlet { // TODO unit test
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
+    nzilbb.util.Timers timer = new nzilbb.util.Timers();
+    timer.start("GET");
     response.setContentType("application/json"); // TODO support CSV
     response.setCharacterEncoding("UTF-8");
 
@@ -196,9 +198,14 @@ public class Results extends LabbcatServlet { // TODO unit test
       // the original results object presumably has a dead connection
       // we want a new copy of our own
       SqlGraphStoreAdministration store = getStore(request);
+      Schema schema = store.getSchema();
+      String[] corpusLayer = { schema.getCorpusLayerId() };
+
       try {
-        results = new SqlSearchResults(results, store.getConnection());
+        Connection connect = store.getConnection();
+        results = new SqlSearchResults(results, connection);
         results.hasNext(); // load size etc.
+
         JsonGenerator jsonOut = startResult(Json.createGenerator(response.getWriter()), false);
         try {
           String name = "results";
@@ -206,39 +213,46 @@ public class Results extends LabbcatServlet { // TODO unit test
             name = search.getMatrix().getDescription();
           }
           if (name == null) name = search.getDescription();
-          log("name: " + name);
           jsonOut.write("name", name);
           jsonOut.writeStartArray("matches");
           try {
             if (pageLength == null) pageLength = results.size();
             if (pageNumber == null) pageNumber = Integer.valueOf(0);
-            log("pageLength: " + pageLength + " pageNumber " + pageNumber);
             int seekTo = (pageLength * pageNumber) + 1;
-            log("seekTo: " + seekTo);
             if (seekTo > 1) results.seek(seekTo);
             // cache graph/participant IDs to save database lookups
-            HashMap<Integer,String> agIdToName = new HashMap<Integer,String>();
+            HashMap<Integer,Graph> agIdToGraph = new HashMap<Integer,Graph>();
             HashMap<Integer,String> speakerNumberToName = new HashMap<Integer,String>();
+            timer.start("results");
             for (int r = 0; r < pageLength && results.hasNext(); r++) {
               search.keepAlive(); // prevent the task from dying while we're still interested
               jsonOut.writeStartObject(); // match
               try {
                 
+                timer.start("results.next");
                 String matchId = results.next();
-                log("matchId: " + matchId);
+                timer.end("results.next");
                 jsonOut.write("MatchId", matchId);
                 
+                timer.start("IdMatch");
                 IdMatch result = new IdMatch(matchId);
+                timer.end("IdMatch");
                 // convert ag_id to transcript_id
-                if (!agIdToName.containsKey(result.getGraphId())) {
-                  Graph t = store.getTranscript("g_"+result.getGraphId(), null);
-                  agIdToName.put(result.getGraphId(), t.getLabel());
+                if (!agIdToGraph.containsKey(result.getGraphId())) {
+                  timer.start("getTranscript");
+                  Graph t = store.getTranscript("g_"+result.getGraphId(), corpusLayer);
+                  timer.end("getTranscript");
+                  agIdToGraph.put(result.getGraphId(), t);
                 }
-                jsonOut.write("Transcript", agIdToName.get(result.getGraphId()));
+                Graph t = agIdToGraph.get(result.getGraphId());
+                jsonOut.write("Transcript", t.getLabel());
+                jsonOut.write("Corpus", t.first(schema.getCorpusLayerId()).getLabel());
                 
                 // convert speaker_number to name
                 if (!speakerNumberToName.containsKey(result.getSpeakerNumber())) {
+                  timer.start("getParticipant");
                   Annotation p = store.getParticipant("m_-2_"+result.getSpeakerNumber(), null);
+                  timer.end("getParticipant");
                   speakerNumberToName.put(result.getSpeakerNumber(), p.getLabel());
                 }
                 jsonOut.write("Participant", speakerNumberToName.get(result.getSpeakerNumber()));
@@ -246,8 +260,10 @@ public class Results extends LabbcatServlet { // TODO unit test
                 // convert anchor_ids to offsets
                 String[] anchorIds = {
                   "n_"+result.getStartAnchorId(), "n_"+result.getEndAnchorId() };
+                timer.start("getAnchors");
                 Anchor[] anchors = store.getAnchors(
-                  agIdToName.get(result.getGraphId()), anchorIds);
+                  agIdToGraph.get(result.getGraphId()).getId(), anchorIds);
+                timer.end("getAnchors");
                 result.setStartOffset(anchors[0].getOffset());
                 result.setEndOffset(anchors[1].getOffset());
                 jsonOut.write("Line", result.getStartOffset());
@@ -272,7 +288,9 @@ public class Results extends LabbcatServlet { // TODO unit test
                 if (boundingTokenQuery != null) {
                   
                   // get the matched text
+                  timer.start("boundingTokenQuery");
                   Annotation[] boundingTokens = store.getMatchingAnnotations(boundingTokenQuery);
+                  timer.end("boundingTokenQuery");
                   if (boundingTokens.length > 0) {
                     // the label of the first token the start of the text
                     text.append(boundingTokens[0].getLabel());
@@ -284,8 +302,10 @@ public class Results extends LabbcatServlet { // TODO unit test
                           +" && parentId == '"+boundingTokens[0].getParentId()+"'"
                           +" && ordinal > "+boundingTokens[0].getOrdinal()
                           +" && ordinal < "+boundingTokens[1].getOrdinal();
+                        timer.start("interveningTokens");
                         Annotation[] interveningTokens = store.getMatchingAnnotations(
                           interveningTokenQuery);
+                        timer.end("interveningTokens");
                         Arrays.sort(
                           interveningTokens, Comparator.comparingInt(a->a.getOrdinal()));
                         for (Annotation token : interveningTokens) {
@@ -308,7 +328,9 @@ public class Results extends LabbcatServlet { // TODO unit test
                           +" && parentId == '"+firstToken.getParentId()+"'"
                           +" && ordinal >= "+(firstToken.getOrdinal() - wordsContext)
                           +" && ordinal < "+firstToken.getOrdinal();
+                        timer.start("contextTokens-before");
                         Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
+                        timer.end("contextTokens-before");
                         Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
                         for (Annotation token : contextTokens) {
                           // add the token to the text
@@ -321,7 +343,9 @@ public class Results extends LabbcatServlet { // TODO unit test
                           +" && parentId == '"+lastToken.getParentId()+"'"
                           +" && ordinal > "+lastToken.getOrdinal()
                           +" && ordinal <= "+(lastToken.getOrdinal() + wordsContext);
+                        timer.start("contextTokens-after");
                         contextTokens = store.getMatchingAnnotations(contextQuery);
+                        timer.end("contextTokens-after");
                         Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
                         for (Annotation token : contextTokens) {
                           // add the token to the text
@@ -337,7 +361,9 @@ public class Results extends LabbcatServlet { // TODO unit test
                             +" && parentId == '"+firstToken.getParentId()+"'"
                             +" && start.offset >= "+result.getStartOffset()
                             +" && ordinal < "+firstToken.getOrdinal();
+                          timer.start("contextTokens-before");
                           Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
+                          timer.end("contextTokens-before");
                           Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
                           for (Annotation token : contextTokens) {
                             // add the token to the text
@@ -352,7 +378,9 @@ public class Results extends LabbcatServlet { // TODO unit test
                             +" && parentId == '"+lastToken.getParentId()+"'"
                             +" && ordinal > "+lastToken.getOrdinal()
                             +" && end.offset <= "+result.getEndOffset();
+                          timer.start("contextTokens-after");
                           Annotation[] contextTokens = store.getMatchingAnnotations(contextQuery);
+                          timer.start("contextTokens-end");
                           Arrays.sort(contextTokens, Comparator.comparingInt(a->a.getOrdinal()));
                           for (Annotation token : contextTokens) {
                             // add the token to the text
@@ -365,14 +393,17 @@ public class Results extends LabbcatServlet { // TODO unit test
                     } // get the context
                   } // there are bounding tokens                  
                 } // there are match tokens
+                timer.start("texts out");
                 jsonOut.write("BeforeMatch", beforeMatch.toString());
                 jsonOut.write("Text", text.toString());
                 jsonOut.write("AfterMatch", afterMatch.toString());
+                timer.end("texts out");
                 
               } finally {
                 jsonOut.writeEnd(); // match
               }
             } // next result
+            timer.end("results");
           } finally {
             jsonOut.writeEnd(); // end "matches"
           }
@@ -383,6 +414,8 @@ public class Results extends LabbcatServlet { // TODO unit test
         }
       } finally {
         cacheStore(store);
+        timer.end("GET");
+        log(timer.toString());
       }
       
     } catch(Exception ex) {
