@@ -23,12 +23,14 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -51,6 +53,9 @@ import nzilbb.labbcat.server.search.Column;
 import nzilbb.labbcat.server.search.Matrix;
 import nzilbb.labbcat.server.search.SearchTask;
 import nzilbb.labbcat.server.task.Task;
+import nzilbb.util.IO;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
 /**
  * <tt>/api/results</tt>
@@ -127,12 +132,12 @@ public class Results extends LabbcatServlet { // TODO unit test
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-    response.setContentType("application/json"); // TODO support CSV
     response.setCharacterEncoding("UTF-8");
 
     // parameters
     String threadId = request.getParameter("threadId");
     if (threadId == null) {
+      response.setContentType("application/json");
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       writeResponse(response, failureResult(request, "No task ID specified."));
       return;
@@ -142,6 +147,7 @@ public class Results extends LabbcatServlet { // TODO unit test
       try {
          wordsContext = Integer.parseInt(request.getParameter("words_context"));
       } catch(Exception exception) {
+        response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         writeResponse(response, failureResult(
                         request, "Invalid words context: {0}",
@@ -154,6 +160,7 @@ public class Results extends LabbcatServlet { // TODO unit test
       try {
         pageLength = Integer.valueOf(request.getParameter("pageLength"));
       } catch(NumberFormatException x) {
+        response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         writeResponse(response, failureResult(
                         request, "Invalid pageLength: {0}", request.getParameter("pageLength")));
@@ -165,6 +172,7 @@ public class Results extends LabbcatServlet { // TODO unit test
       try {
         pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
       } catch(NumberFormatException x) {
+        response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         writeResponse(response, failureResult(
                         request, "Invalid pageNumber: {0}", request.getParameter("pageNumber")));
@@ -178,8 +186,21 @@ public class Results extends LabbcatServlet { // TODO unit test
         contentType = request.getHeader("Accept");
       }
     }
-    if (contentType == null) contentType = "application/json";
-
+    if ("csv".equalsIgnoreCase(contentType)
+        || "text/csv".equalsIgnoreCase(contentType)) {
+      contentType = "text/csv";
+    } else {
+      contentType = "application/json";
+    }
+    response.setContentType(contentType);
+    // output will be either CSV or JSON - define an appropriate output streamer
+    boolean sendCsv = contentType.equals("text/csv");
+    CSVPrinter csvOut = sendCsv?new CSVPrinter(
+      response.getWriter(), CSVFormat.EXCEL.withDelimiter( 
+        // guess the best delimiter - comma if English speaking user, tab otherwise
+        request.getHeader("Accept-Language").contains("en")?',':'\t')):null;
+    JsonGenerator jsonOut = !sendCsv?Json.createGenerator(response.getWriter()):null;
+      
     try {
       Task task = Task.findTask(Long.valueOf(threadId));
       if (task == null) {
@@ -208,7 +229,7 @@ public class Results extends LabbcatServlet { // TODO unit test
         results.hasNext(); // load size etc.
 
         PreparedStatement sqlMatchTranscriptContext = connection.prepareStatement(
-          "SELECT GROUP_CONCAT(word.label ORDER BY ordinal_in_turn SEPARATOR ' ')"
+          "SELECT COALESCE(GROUP_CONCAT(word.label ORDER BY ordinal_in_turn SEPARATOR ' '),'')"
           + " FROM annotation_layer_0 word"
           + (wordsContext < 0?" INNER JOIN anchor start ON word.start_anchor_id = start.anchor_id"
              :"")
@@ -219,15 +240,22 @@ public class Results extends LabbcatServlet { // TODO unit test
              :"")
           + " ORDER BY ordinal_in_turn");
         
-        JsonGenerator jsonOut = startResult(Json.createGenerator(response.getWriter()), false);
         try {
-          String name = "results";
+          String searchName = "";
           if (search.getMatrix() != null) {
-            name = search.getMatrix().getDescription();
+            searchName = search.getMatrix().getDescription();
           }
-          if (name == null) name = search.getDescription();
-          jsonOut.write("name", name);
-          jsonOut.writeStartArray("matches");
+          if (searchName == null) searchName = search.getDescription();
+          
+          if (sendCsv) {
+            String fileName = IO.SafeFileNameUrl(searchName);
+            if (fileName.length() > 150) fileName = fileName.substring(0, 150);
+            fileName = "results_" + fileName + ".csv";
+            response.setHeader(
+              "Content-Disposition", "attachment; filename=" + fileName.toString());            
+          }
+
+          outputStart(jsonOut, csvOut, searchName);
           try {
             if (pageLength == null) pageLength = results.size();
             if (pageNumber == null) pageNumber = Integer.valueOf(0);
@@ -238,28 +266,24 @@ public class Results extends LabbcatServlet { // TODO unit test
             HashMap<Integer,String> speakerNumberToName = new HashMap<Integer,String>();
             for (int r = 0; r < pageLength && results.hasNext(); r++) {
               search.keepAlive(); // prevent the task from dying while we're still interested
-              jsonOut.writeStartObject(); // match
               try {
                 
                 String matchId = results.next();
-                jsonOut.write("MatchId", matchId);
-                
                 IdMatch result = new IdMatch(matchId);
+                
+                outputMatchStart(jsonOut, csvOut, searchName, result);
                 // convert ag_id to transcript_id
                 if (!agIdToGraph.containsKey(result.getGraphId())) {
                   Graph t = store.getTranscript("g_"+result.getGraphId(), corpusLayer);
                   agIdToGraph.put(result.getGraphId(), t);
                 }
                 Graph t = agIdToGraph.get(result.getGraphId());
-                jsonOut.write("Transcript", t.getLabel());
-                jsonOut.write("Corpus", t.first(schema.getCorpusLayerId()).getLabel());
                 
                 // convert speaker_number to name
                 if (!speakerNumberToName.containsKey(result.getSpeakerNumber())) {
                   Annotation p = store.getParticipant("m_-2_"+result.getSpeakerNumber(), null);
                   speakerNumberToName.put(result.getSpeakerNumber(), p.getLabel());
                 }
-                jsonOut.write("Participant", speakerNumberToName.get(result.getSpeakerNumber()));
                 
                 // convert anchor_ids to offsets
                 String[] anchorIds = {
@@ -268,8 +292,6 @@ public class Results extends LabbcatServlet { // TODO unit test
                   agIdToGraph.get(result.getGraphId()).getId(), anchorIds);
                 result.setStartOffset(anchors[0].getOffset());
                 result.setEndOffset(anchors[1].getOffset());
-                jsonOut.write("Line", result.getStartOffset());
-                jsonOut.write("LineEnd", result.getEndOffset());
 
                 // get the match start/end tokens
                 StringBuilder beforeMatch = new StringBuilder();
@@ -355,22 +377,39 @@ public class Results extends LabbcatServlet { // TODO unit test
                     } // get the context
                   } // there are bounding tokens                  
                 } // there are match tokens
-                jsonOut.write("BeforeMatch", beforeMatch.toString());
-                jsonOut.write("Text", text.toString());
-                jsonOut.write("AfterMatch", afterMatch.toString());
+                outputMatchAttribute(jsonOut, csvOut, "Transcript", t.getLabel());
+                outputMatchAttribute(
+                  jsonOut, csvOut,
+                  "Participant", speakerNumberToName.get(result.getSpeakerNumber()));
+                outputMatchAttribute(
+                  jsonOut, csvOut, "Corpus", t.first(schema.getCorpusLayerId()).getLabel());
+                outputMatchAttribute(jsonOut, csvOut, "Line", result.getStartOffset());
+                outputMatchAttribute(jsonOut, csvOut, "LineEnd", result.getEndOffset());
+                outputMatchAttribute(jsonOut, csvOut, "MatchId", matchId);
+                outputMatchAttribute(
+                  jsonOut, csvOut, "URL",
+                  store.getId()
+                  + "transcript?transcript=" + URLEncoder.encode(t.getLabel(), "UTF-8")
+                  + "#" + Optional.ofNullable(result.getTargetAnnotationUid())
+                  .orElse(Optional.ofNullable(result.getDefiningAnnotationUid())
+                          .orElse("")));
+                outputMatchAttribute(jsonOut, csvOut, "BeforeMatch", beforeMatch.toString());
+                outputMatchAttribute(jsonOut, csvOut, "Text", text.toString());
+                outputMatchAttribute(jsonOut, csvOut, "AfterMatch", afterMatch.toString());
                 
               } finally {
-                jsonOut.writeEnd(); // match
+                outputMatchEnd(jsonOut, csvOut); // end this match
               }
             } // next result
           } finally {
-            jsonOut.writeEnd(); // end "matches"
+            outputMatchesEnd(jsonOut, csvOut); // end all matches
             sqlMatchTranscriptContext.close();
           }
-          endSuccessResult(request, jsonOut, null);
+          outputSuccessfulEnd(jsonOut, csvOut, request);
         } catch (Exception x) {
           log(x.toString());
-          endFailureResult(request, jsonOut, x.getMessage());
+          x.printStackTrace(System.err);
+          outputFailedEnd(jsonOut, csvOut, request, x.getMessage());
         }
       } finally {
         results.close();
@@ -382,5 +421,172 @@ public class Results extends LabbcatServlet { // TODO unit test
     }
   }
   
+  /**
+   * Sends output for starting the results stream.
+   * <p> Assumes no output has yet been written.
+   * @param jsonOut Generator for JSON output, or null for CSV output.
+   * @param csvOut Printer for CSV output, or null for JSON output.
+   * @param searchName The name search that produced the results.
+   */
+  void outputStart(JsonGenerator jsonOut, CSVPrinter csvOut, String searchName)
+    throws IOException {
+    if (csvOut != null) {
+      // Send column headers
+      csvOut.print("SearchName");
+      csvOut.print("Number");
+      csvOut.print("Transcript");
+      csvOut.print("Speaker");
+      csvOut.print("Corpus");
+      csvOut.print("Line");
+      csvOut.print("LineEnd");
+      csvOut.print("MatchId");
+      csvOut.print("URL");
+      csvOut.print("Before Match");
+      csvOut.print("Text");
+      csvOut.print("After Match");
+    } else {
+      // initialise JSON envelope
+      startResult(jsonOut, false);
+      // set initial structure of model
+      jsonOut.write("name", searchName);
+      jsonOut.writeStartArray("matches");      
+    }
+  } // end of startResults()
+  
+  /**
+   * Sends output required for starting a match record.
+   * <p> Assumes that the last output call made was outputStart or outputMatchEnd.
+   * @param jsonOut Generator for JSON output, or null for CSV output.
+   * @param csvOut Printer for CSV output, or null for JSON output.
+   * @param searchName The name of the search that produced the results.
+   * @param result The match result that is being started.
+   */
+  void outputMatchStart(
+    JsonGenerator jsonOut, CSVPrinter csvOut, String searchName, IdMatch result)
+    throws IOException {
+    if (csvOut != null) {
+      // start new record
+      csvOut.println();
+      csvOut.print(searchName);
+      csvOut.print(
+        Optional.ofNullable(result.getPrefix()).orElse("")
+        .replace("-","") // strip hyphens
+        .replaceAll("^0+","")); // strip leading zeroes
+    } else {
+      // start match object
+      jsonOut.writeStartObject();
+    }
+  } // end of startMatch()
+  
+  /**
+   * Sends output required for a single match field.
+   * <p> Assumes that outputMatchStart has previously been called for this match.
+   * @param jsonOut Generator for JSON output, or null for CSV output.
+   * @param csvOut Printer for CSV output, or null for JSON output.
+   * @param name Name of the field/attribute.
+   * @param value String value of the field/attribute, or null.
+   */
+  private void outputMatchAttribute(
+    JsonGenerator jsonOut, CSVPrinter csvOut, String name, String value)
+    throws IOException {
+    if (csvOut != null) {
+      // send new field value
+      csvOut.print(Optional.ofNullable(value).orElse(""));
+    } else {
+      // send the name/value
+      jsonOut.write(name, value);
+    }
+  } // end of outputMatchAttribute()
+
+  /**
+   * Sends output required for a single match field.
+   * <p> Assumes that outputMatchStart has previously been called for this match.
+   * @param jsonOut Generator for JSON output, or null for CSV output.
+   * @param csvOut Printer for CSV output, or null for JSON output.
+   * @param name Name of the field/attribute.
+   * @param value Double value of the field/attribute, or null.
+   */
+  private void outputMatchAttribute(
+    JsonGenerator jsonOut, CSVPrinter csvOut, String name, Double value)
+    throws IOException {
+    if (csvOut != null) {
+      // send new field value TODO
+      csvOut.print(Optional.ofNullable(value).map(v->v.toString()).orElse(""));
+    } else {
+      // send the name/value
+      jsonOut.write(name, value);
+    }
+  } // end of outputMatchAttribute()
+
+  /**
+   * Sends output required for ending a match record.
+   * <p> Assumes that outputMatchStart has previously been called for this match.
+   * @param jsonOut Generator for JSON output, or null for CSV output.
+   * @param csvOut Printer for CSV output, or null for JSON output.
+   */
+  void outputMatchEnd(JsonGenerator jsonOut, CSVPrinter csvOut) {
+    if (csvOut != null) {
+      // nothing to output - new line happens in outputMatchStart
+    } else {
+      // end match object
+      jsonOut.writeEnd();
+    }
+  } // end of outputMatchEnd()  
+
+  /**
+   * Sends output required for ending all match records.
+   * <p> Assumes that outputMatchEnd has previously been called for the last match.
+   * @param jsonOut Generator for JSON output, or null for CSV output.
+   * @param csvOut Printer for CSV output, or null for JSON output.
+   */
+  void outputMatchesEnd(JsonGenerator jsonOut, CSVPrinter csvOut) {
+    if (csvOut != null) {
+      // nothing to output
+    } else {
+      // end match object
+      jsonOut.writeEnd();
+    }
+  } // end of outputMatchesEnd()  
+
+  /**
+   * Sends output for ending the results stream successfully.
+   * <p> Assumes outputMatchesEnd has been called.
+   * @param jsonOut Generator for JSON output, or null for CSV output.
+   * @param csvOut Printer for CSV output, or null for JSON output.
+   * @param request The HTTP request.
+   */
+  void outputSuccessfulEnd(JsonGenerator jsonOut, CSVPrinter csvOut, HttpServletRequest request)
+    throws IOException {
+    if (csvOut != null) {
+      csvOut.close();
+    } else {
+      // finish the JSON envelope
+      endSuccessResult(request, jsonOut, null);
+    }
+  } // end of outputSuccessfulEnd()
+
+  /**
+   * Sends output for ending the results stream with an error.
+   * <p> Errors can occur at any point, so no assumptions can be made about previous output calls.
+   * @param jsonOut Generator for JSON output, or null for CSV output.
+   * @param csvOut Printer for CSV output, or null for JSON output.
+   * @param request The HTTP request.
+   * @param error The error message to return.
+   */
+  void outputFailedEnd(
+    JsonGenerator jsonOut, CSVPrinter csvOut, HttpServletRequest request, String error)
+    throws IOException {
+    if (csvOut != null) {
+      // Send column headers
+      csvOut.println();
+      csvOut.print("ERROR: " + error);
+      csvOut.println();
+      csvOut.close();
+    } else {
+      // finish the JSON envelope
+      endFailureResult(request, jsonOut, error);
+    }
+  } // end of outputSuccessfulEnd()
+
   private static final long serialVersionUID = -1;
 } // end of class Results
