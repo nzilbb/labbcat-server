@@ -575,6 +575,19 @@ public class Results extends LabbcatServlet { // TODO unit test
       String[] systemLayers = { schema.getCorpusLayerId(), schema.getEpisodeLayerId() };
       Graph t = store.getTranscript("g_"+result.getGraphId(), systemLayers);
       agIdToGraph.put(result.getGraphId(), t);
+      if (options.contains("series_length")) {
+        PreparedStatement sqlSeriesLength = store.getConnection().prepareStatement(
+          "SELECT COALESCE(MAX(transcript.family_offset + anchor.offset),0) AS length"
+          + " FROM transcript"
+          + " INNER JOIN anchor ON transcript.ag_id = anchor.ag_id"
+          + " WHERE transcript.family_id = ?");
+        sqlSeriesLength.setInt(1, (Integer)t.get("@family_id"));
+        ResultSet rsSeriesLength = sqlSeriesLength.executeQuery();
+        rsSeriesLength.next();
+        t.put("@series_length", rsSeriesLength.getInt(1));
+        rsSeriesLength.close();
+        sqlSeriesLength.close();
+      }
     }
     Graph t = agIdToGraph.get(result.getGraphId());
     
@@ -677,8 +690,8 @@ public class Results extends LabbcatServlet { // TODO unit test
     if (layers.contains(schema.getRoot().getId())) {
       outputMatchAttribute(jsonOut, csvOut, "Transcript", t.getLabel());
     }
-    // TODO if (options.contains("series_offset")) csvOut.print("SeriesOffset");
-    // TODO if (options.contains("series_length")) csvOut.print("SeriesLength");
+    if (options.contains("series_offset")) csvOut.print(t.get("@offset_in_series").toString());
+    if (options.contains("series_length")) csvOut.print(t.get("@series_length").toString());
     if (layers.contains(schema.getParticipantLayerId())) {
       outputMatchAttribute(
         jsonOut, csvOut, "Participant", speakerNumberToName.get(result.getSpeakerNumber()));
@@ -702,7 +715,9 @@ public class Results extends LabbcatServlet { // TODO unit test
     if (options.contains("match"))  {
       outputMatchAttribute(jsonOut, csvOut, "MatchId", result.getId());
     }
-    // TODO if (options.contains("target"))
+    if (options.contains("target")) {
+      outputMatchAttribute(jsonOut, csvOut, "TargetId", result.getTargetAnnotationUid());
+    }
     if (options.contains("word_url"))  {
       outputMatchAttribute(
         jsonOut, csvOut, "URL",
@@ -751,7 +766,7 @@ public class Results extends LabbcatServlet { // TODO unit test
     JsonGenerator jsonOut, CSVPrinter csvOut, String name, Double value)
     throws IOException {
     if (csvOut != null) {
-      // send new field value TODO
+      // send field value
       csvOut.print(Optional.ofNullable(value).map(v->v.toString()).orElse(""));
     } else {
       // send the name/value
