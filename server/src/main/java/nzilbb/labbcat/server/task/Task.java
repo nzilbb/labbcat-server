@@ -22,6 +22,7 @@
 package nzilbb.labbcat.server.task;
 
 import java.util.Date;
+import java.text.SimpleDateFormat;
 import nzilbb.util.MonitorableTask;
 import nzilbb.labbcat.server.db.SqlGraphStore;
 import nzilbb.labbcat.server.db.StoreCache;
@@ -34,7 +35,9 @@ public class Task extends Thread implements MonitorableTask {
   protected static final ThreadGroup taskThreadGroup = new ThreadGroup("Tasks");
   /** Access the Task thread group */
   public static ThreadGroup getTaskThreadGroup() { return taskThreadGroup; }
-  
+
+  private static SimpleDateFormat logTimeFormat = new SimpleDateFormat("dd MMM HH:mm:ss");
+
   /** Determines how far through the task is is. */
   protected int iPercentComplete = 1; // TODO rename as percentComplete
   /**
@@ -77,6 +80,14 @@ public class Task extends Thread implements MonitorableTask {
    */
   public void setStatus(String sMessage) {
     sStatus = sMessage;
+    try {
+      log.append(logTimeFormat.format(new Date()) + "\t" + sMessage + "\n");
+      // log too big?
+      if (log.length() > maxLogSize) log.delete(0, (3 * maxLogSize) / 4);
+    } catch(Exception exception) {
+      // StringBuilder.append() can throw an ArrayIndexOutOfBoundsException
+      // not mentioned in the docs
+    }
   } // end of status()
 
   /** Username or something to identify the person who started the thread */
@@ -249,6 +260,31 @@ public class Task extends Thread implements MonitorableTask {
    */
   public Task setStoreCache(StoreCache newStoreCache) { storeCache = newStoreCache; return this; }
    
+  protected StringBuilder log = new StringBuilder(1024);
+  /**
+   * Provides a timestamped log of activity.
+   * @return a string containing all of the values that setStatus has had since the task started.
+   * @throws Exception
+   */
+  public String getLog() { return log.toString(); }
+  
+  /**
+   * Maximum size of the task's log, in characters.
+   * @see #getMaxLogSize()
+   * @see #setMaxLogSize(int)
+   */
+  protected int maxLogSize = 51200;
+  /**
+   * Getter for {@link #maxLogSize}: Maximum size of the task's log, in characters.
+   * @return Maximum size of the task's log, in characters.
+   */
+  public int getMaxLogSize() { return maxLogSize; }
+  /**
+   * Setter for {@link #maxLogSize}: Maximum size of the task's log, in characters.
+   * @param newMaxLogSize Maximum size of the task's log, in characters.
+   */
+  public Task setMaxLogSize(int newMaxLogSize) { maxLogSize = newMaxLogSize; return this; }  
+  
   /**
    * Constructor
    */
