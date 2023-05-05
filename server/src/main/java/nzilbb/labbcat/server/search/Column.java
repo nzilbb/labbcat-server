@@ -97,7 +97,10 @@ public class Column implements CloneableBean {
       JsonObject jsonLayers = json.getJsonObject("layers");
       for (String key : jsonLayers.keySet()) {
         JsonObject jsonLayer = jsonLayers.getJsonObject(key);
-        addLayerMatch((LayerMatch)(new LayerMatch().fromJson(jsonLayer)));
+        LayerMatch layer = (LayerMatch)(new LayerMatch().fromJson(jsonLayer));
+        // the JSON object itself may not include the ID, so ensure it's set from the key
+        if (layer.getId() == null) layer.setId(key);
+        addLayerMatch(layer);
       } // next element
     }
     if (json.containsKey("adj")) {

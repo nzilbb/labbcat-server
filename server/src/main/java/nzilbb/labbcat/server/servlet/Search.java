@@ -23,6 +23,8 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -124,6 +126,13 @@ public class Search extends LabbcatServlet { // TODO unit test
     }
     if (request.getParameter("participant_expression") != null) {
       matrix.setParticipantQuery(request.getParameter("participant_expression"));
+    } else  if (request.getParameter("participant_id") != null) {
+      matrix.setParticipantQuery(
+        "id IN ("
+        +Arrays.stream(request.getParameterValues("participant_id"))
+        .map(id->"'"+id+"'")
+        .collect(Collectors.joining(","))
+        +")");
     }
     if (request.getParameter("transcript_expression") != null) {
       matrix.setTranscriptQuery(request.getParameter("transcript_expression"));

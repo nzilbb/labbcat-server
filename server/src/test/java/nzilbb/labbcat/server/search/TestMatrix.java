@@ -344,5 +344,23 @@ public class TestMatrix {
                  new Matrix().fromLegacyString(
                    "pos:N\nphonemes:.*[aeiou]\tpos:V\nphonemes:[aeiou].*").toString());
   }
-  
+
+  /**
+   * Ensure that Matrix still function when not all attributes are present.
+   */
+  @Test public void incompleteMartrices() {
+    Matrix m = (Matrix)
+      (new Matrix().fromJsonString(
+        "{\"columns\":[{\"layers\":{\"orthography\":{\"pattern\":\"test\"}}}]}"));
+    assertEquals("Number of columns", 1, m.getColumns().size());
+    Column col = m.getColumns().get(0);
+    assertEquals("Col: adj", 1, col.getAdj());
+    assertEquals("Col: number of layers", 1, col.getLayers().size());
+    LayerMatch layerMatch = col.getLayers().get("orthography");
+    assertNotNull("layer is orthography", layerMatch);
+    assertEquals("layer id", "orthography", layerMatch.getId());
+    assertNull("layer negation null", layerMatch.getNot());
+    
+  }
+   
 }
