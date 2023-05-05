@@ -52,4 +52,25 @@ public interface SearchResults extends Iterator<String>, Closeable {
    * @return true if the nth item exists, false otherwise.
    */
   public boolean seek(int n);
+
+  /**
+   * The ID of the last match the iterator returned from {@link #next()}
+   * @return The ID of the last match the iterator returned from {@link #next()}
+   */
+  public String getLastMatchId();
+  
+  /**
+   * Getter for {@link #pageLength}: The maximum number of results to return from next(),
+   * or 0 for no maximum. 
+   * @return The maximum number of results to return from next(), or 0 for no maximum.
+   */
+  public int getPageLength();
+  /**
+   * Setter for {@link #pageLength}: The maximum number of results to return from next(),
+   * or 0 for no maximum. 
+   * @param newPageLength The maximum number of results to return from next(), or 0 for
+   * no maximum. 
+   */
+  public SearchResults setPageLength(int newPageLength);
+
 }

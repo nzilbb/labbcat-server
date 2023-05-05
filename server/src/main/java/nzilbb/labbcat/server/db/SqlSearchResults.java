@@ -121,19 +121,21 @@ public class SqlSearchResults implements SearchResults {
    */
   public boolean hasNext() {
     try { checkIterator(); } catch(SQLException exception) {}
-    return nextRow <= size;
+    return nextRow <= size && (pageLength <= 0 || nextCount < pageLength);
   } // end of hasNext()
 
+  int nextCount = 0;
   /**
-   * Iterator method: Returns the next element in the iteration.
-   * @return The next result.
+   * Iterator method: Returns the next result ID.
+   * @return The next result ID.
    */
   public String next() {
     if (!hasNext()) throw new NoSuchElementException();
+    nextCount++;
     try { 
       checkIterator();
       rsIterator.next();
-      lastMatch = new IdMatch()
+      lastMatchId = new IdMatch()
         .addMatchAnnotationUid("0", "ew_0_"+rsIterator.getInt("first_matched_word_annotation_id"))
         .addMatchAnnotationUid("1", "ew_0_"+rsIterator.getInt("last_matched_word_annotation_id"))
         .setTargetAnnotationUid(rsIterator.getString("target_annotation_uid"))
@@ -145,7 +147,7 @@ public class SqlSearchResults implements SearchResults {
         .setDefiningAnnotationUid("em_12_"+rsIterator.getInt("defining_annotation_id"))
         .getId();
       nextRow++;
-      return lastMatch;
+      return lastMatchId;
     } catch(Exception exception) {
       throw (NoSuchElementException)(new NoSuchElementException(exception.toString())
                                      .initCause(exception));
@@ -162,18 +164,49 @@ public class SqlSearchResults implements SearchResults {
    **/
   public void remove() throws UnsupportedOperationException, IllegalStateException {
     try {
-      if (lastMatch != null) rsIterator.deleteRow();
+      if (lastMatchId != null) rsIterator.deleteRow();
     } catch(SQLException exception) {
       throw (NoSuchElementException)(new NoSuchElementException(exception.toString())
                                      .initCause(exception));
     }
   }
+  
+  /**
+   * The ID of the last match the iterator returned from {@link #next()}
+   * @see #getLastMatchId()
+   */
+  protected String lastMatchId;
+  /**
+   * Getter for {@link #lastMatchId}: The ID of the last match the iterator returned from
+   * {@link #next()}
+   * @return The ID of the last match the iterator returned from {@link #next()}
+   */
+  public String getLastMatchId() { return lastMatchId; }  
+
+  /**
+   * The maximum number of results to return from {@link #next()}, or 0 for no maximum.
+   * @see #getPageLength()
+   * @see #setPageLength(int)
+   */
+  protected int pageLength = 0;
+  /**
+   * Getter for {@link #pageLength}: The maximum number of results to return from {@link #next()},
+   * or 0 for no maximum. 
+   * @return The maximum number of results to return from {@link #next()}, or 0 for no maximum.
+   */
+  public int getPageLength() { return pageLength; }
+  /**
+   * Setter for {@link #pageLength}: The maximum number of results to return from {@link #next()},
+   * or 0 for no maximum. 
+   * @param newPageLength The maximum number of results to return from {@link #next()}, or 0 for
+   * no maximum. 
+   */
+  public SearchResults setPageLength(int newPageLength) { pageLength = newPageLength; return this; }
 
   Connection connection = null;
   PreparedStatement sqlIterator = null;
   ResultSet rsIterator = null;
   int nextRow = 0;
-  String lastMatch = null;
   NumberFormat resultNumberFormatter = NumberFormat.getInstance();
 
   /**
