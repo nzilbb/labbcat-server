@@ -31,8 +31,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Vector;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -77,8 +79,13 @@ import org.apache.commons.csv.CSVPrinter;
  *      also be achieved by setting the value of the <i>Accept</i> request header. If
  *      neither the request parameter nor the requets header are set, the response is
  *      <q>application/json</q> </li>
- *  <li><i>csv_layer</i> - (Optional) IDs of which layers to include in the output. This
+ *  <li><i>csv_layer</i> - (Optional) IDs of which layers to include in the CSV output. This
  *      parameter is specified multiple times for multiple values. </li>
+ *  <li><i>include_count_...</i> - (Optional) Parameters that specify the number of
+ *      annotations on a given layer to return. The name of the paramater is
+ *      "include_count_" followed by the layer ID, and the value must be an
+ *      integer. Layers for which no include_count_ parameter is specified will include
+ *      one annotation in the output (i.e. the first one, if any).</li>
  *  <li><i>csv_option</i> - (Optional) Additional fields to include in the output. This
  *      parameter is specified multiple times for multiple values, which can include:
  *      <ul>
@@ -140,7 +147,7 @@ import org.apache.commons.csv.CSVPrinter;
  * <br> The task, when finished, will output a URL for accessing the matches of the search.
  * @author Robert Fromont
  */
-@WebServlet({"/api/results"} )
+@WebServlet({"/api/results"})
 public class Results extends LabbcatServlet { // TODO unit test
   
   /**
@@ -252,13 +259,17 @@ public class Results extends LabbcatServlet { // TODO unit test
         layers.add(schema.getWordLayerId());
       }
       // selected layers ordered hierarchically for CSV output
-      final LinkedHashSet<String> csvLayers = new LinkedHashSet<String>();
+      final LinkedHashMap<String,Integer> csvLayers = new LinkedHashMap<String,Integer>();
       // participant attributes
       schema.getParticipantLayer().getChildren().values().stream()
         .filter(l -> l.getAlignment() == Constants.ALIGNMENT_NONE)
         .map(l -> l.getId())
         .filter(id -> layers.contains(id))
-        .forEach(id -> csvLayers.add(id));
+        .forEach(id -> {
+            csvLayers.put(
+              id, Integer.valueOf(
+                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+          });
       // transcript attributes
       schema.getRoot().getChildren().values().stream()
         .filter(l -> l.getAlignment() == Constants.ALIGNMENT_NONE)
@@ -267,39 +278,59 @@ public class Results extends LabbcatServlet { // TODO unit test
         .filter(id -> !id.equals(schema.getCorpusLayerId()))
         .filter(id -> !id.equals(schema.getEpisodeLayerId()))
         .filter(id -> layers.contains(id))
-        .forEach(id -> csvLayers.add(id));
+        .forEach(id -> {
+            csvLayers.put(
+              id, Integer.valueOf(
+                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+          });
       // span layers
       schema.getRoot().getChildren().values().stream()
         .filter(l -> l.getAlignment() != Constants.ALIGNMENT_NONE)
         .map(l -> l.getId())
         .filter(id -> layers.contains(id))
-        .forEach(id -> csvLayers.add(id));
+        .forEach(id -> {
+            csvLayers.put(
+              id, Integer.valueOf(
+                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+          });
       // phrase layers
       schema.getTurnLayer().getChildren().values().stream()
         .map(l -> l.getId())
         .filter(id -> !schema.getWordLayerId().equals(id))
         .filter(id -> layers.contains(id))
-        .forEach(id -> csvLayers.add(id));
+        .forEach(id -> {
+            csvLayers.put(
+              id, Integer.valueOf(
+                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+          });
       // word layers
       if (layers.contains(schema.getWordLayerId())) {
-        csvLayers.add(schema.getWordLayerId());
+        csvLayers.put(schema.getWordLayerId(), 1);
       }
       schema.getWordLayer().getChildren().values().stream()
         .map(l -> l.getId())
         .filter(id -> !"segment".equals(id))
         .filter(id -> layers.contains(id))
-        .forEach(id -> csvLayers.add(id));
+        .forEach(id -> {
+            csvLayers.put(
+              id, Integer.valueOf(
+                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+          });
       // segment layers
       if (schema.getLayers().containsKey("segment")) {
         if (layers.contains("segment")) {
-          csvLayers.add("segment");
+          csvLayers.put("segment", 1);
         }
         schema.getLayer("segment").getChildren().values().stream()
           .map(l -> l.getId())
           .filter(id -> layers.contains(id))
-          .forEach(id -> csvLayers.add(id));
+          .forEach(id -> {
+              csvLayers.put(
+                id, Integer.valueOf(
+                  Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+            });
       }    
-    
+      
       String contentType = request.getParameter("todo");
       if (contentType == null) {
         contentType = request.getParameter("content-type");
@@ -386,8 +417,7 @@ public class Results extends LabbcatServlet { // TODO unit test
 
             if (contentType.equals("text/csv")) {
               // process the data rows
-              store.getMatchAnnotations(
-                results, csvLayers.toArray(new String[0]), 0, 1, annotations -> {
+              store.getMatchAnnotations(results, csvLayers, 0, annotations -> {
                   search.keepAlive(); // prevent the task from dying while we're still interested
                   try {
                     // write the initial non-layer fields
@@ -398,7 +428,14 @@ public class Results extends LabbcatServlet { // TODO unit test
                       store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
                     
                     // write the annotations
-                    Iterator<String> layerIds = csvLayers.iterator();
+                    Iterator<String> layerIds = csvLayers.keySet().stream()
+                      .map(id -> {
+                          Vector<String> reps = new Vector<String>();
+                          for (int i = 0; i < csvLayers.get(id); i++) reps.add(id);
+                          return reps.stream();
+                        })
+                      .flatMap(i -> i)
+                      .iterator();
                     for (Annotation annotation : annotations) {
                       Layer layer = schema.getLayer(layerIds.next());
                       if (annotation == null) {
@@ -484,8 +521,8 @@ public class Results extends LabbcatServlet { // TODO unit test
    */
   void outputStart(
     JsonGenerator jsonOut, CSVPrinter csvOut, String searchName,
-    LinkedHashSet<String> options, LinkedHashSet<String> layers, LinkedHashSet<String> csvLayers,
-    Schema schema)
+    LinkedHashSet<String> options, LinkedHashSet<String> layers,
+    LinkedHashMap<String,Integer> csvLayers, Schema schema)
     throws IOException {
     if (csvOut != null) {
       // Send column headers
@@ -507,21 +544,41 @@ public class Results extends LabbcatServlet { // TODO unit test
         csvOut.print("Text");
         csvOut.print("After Match");
       }
-      csvLayers.forEach(id -> {
+      csvLayers.keySet().forEach(id -> {
           try {
             Layer layer = schema.getLayer(id);
             if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
               if (layer.getParentId() == null
                   || layer.getParentId().equals(schema.getRoot().getId())
                   || layer.getParentId().equals(schema.getParticipantLayerId())) { // attribute
-                csvOut.print(id);
+                if (csvLayers.get(id) == 1) {
+                  csvOut.print(id);
+                } else {
+                  for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                    csvOut.print(id + " " + i);
+                  }
+                }
               } else { // tag
-                csvOut.print("Target " + id);
+                if (csvLayers.get(id) == 1) {
+                  csvOut.print("Target " + id);
+                } else {
+                  for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                    csvOut.print("Target " + id + " " + i);
+                  }
+                }
               }
             } else { // interval
-              csvOut.print("Target " + id);
-              csvOut.print("Target " + id + " start");
-              csvOut.print("Target " + id + " end");
+              if (csvLayers.get(id) == 1) {
+                csvOut.print("Target " + id);
+                csvOut.print("Target " + id + " start");
+                csvOut.print("Target " + id + " end");
+              } else {
+                for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                  csvOut.print("Target " + id + " " + i);
+                  csvOut.print("Target " + id + " " + i + " start");
+                  csvOut.print("Target " + id + " " + i + " end");
+                }
+              }
             }
           } catch(IOException x) {
           }
