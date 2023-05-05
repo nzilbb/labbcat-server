@@ -80,7 +80,7 @@ import nzilbb.labbcat.server.search.Matrix;
  *    "errors" : [],
  *    "messages" : [],
  *    "model" : {
- *        "threadId" : 80
+ *        "threadId" : "80"
  *    }
  * }</pre>
  * <br> The task, when finished, will output a URL for accessing the matches of the search.
@@ -205,7 +205,7 @@ public class Search extends LabbcatServlet { // TODO unit test
         
         // return its ID
         JsonObjectBuilder jsonResult = Json.createObjectBuilder()
-          .add("threadId", task.getId());
+          .add("threadId", ""+task.getId());
         writeResponse(
           response, successResult(request, jsonResult.build(), null));
       } // valid search
