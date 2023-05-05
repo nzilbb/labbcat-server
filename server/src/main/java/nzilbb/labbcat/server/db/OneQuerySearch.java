@@ -1026,6 +1026,7 @@ public class OneQuerySearch extends SearchTask {
     iPercentComplete = 1;
     Connection connection = store.getConnection();
     final Schema schema = store.getSchema();
+    setName(matrix.getDescription());
 
     // word columns
 	 
