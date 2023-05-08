@@ -2127,287 +2127,290 @@ public class ProcessWithPraat extends Task {
     Integer fastTrackHighestAnalysisFrequency,
     HashMap<String,String> attributeValues)
     throws Exception {
+
+    // TODO script preamble
     
-      scriptWriter.write("Open long sound file... " + wav.getPath());
-      scriptWriter.write("\nRename... soundfile");
-      // variables: formantCeiling, pitchFloor, voicingThreshold, pitchCeiling, intensityPitchFloor
+    scriptWriter.write("Open long sound file... " + wav.getPath());
+    scriptWriter.write("\nRename... soundfile");
+    // variables: formantCeiling, pitchFloor, voicingThreshold, pitchCeiling, intensityPitchFloor
      
-      if (useFastTrack) {
-        scriptWriter.write("\n# FastTrack:");
-        scriptWriter.write("\ninclude utils/trackAutoselectProcedure.praat");
-        // load default global settings
-        scriptWriter.write("\n@getSettings");
-        // override global settings that we know about
-        scriptWriter.write("\ntime_step = " + fastTrackTimeStep);
-        scriptWriter.write("\nbasis_functions$ = \""+fastTrackBasisFunctions+"\"");
-        scriptWriter.write("\nerror_method$ = \""+fastTrackErrorMethod+"\"");
-        scriptWriter.write("\nmethod$ = \""+fastTrackTrackingMethod+"\"");
-        scriptWriter.write(
-          "\nenable_F1_frequency_heuristic = " + (fastTrackEnableF1FrequencyHeuristic?"1":"0"));
-        scriptWriter.write("\nmaximum_F1_frequency_value = " + fastTrackMaximumF1FrequencyValue);
-        scriptWriter.write(
-          "\nenable_F1_bandwidth_heuristic = " + (fastTrackEnableF1BandwidthHeuristic?"1":"0"));
-        scriptWriter.write("\nmaximum_F1_bandwidth_value = " + fastTrackMaximumF1BandwidthValue);
-        scriptWriter.write(
-          "\nenable_F2_bandwidth_heuristic = " + (fastTrackEnableF2BandwidthHeuristic?"1":"0"));
-        scriptWriter.write("\nmaximum_F2_bandwidth_value = " + fastTrackMaximumF2BandwidthValue);
-        scriptWriter.write(
-          "\nenable_F3_bandwidth_heuristic = " + (fastTrackEnableF3BandwidthHeuristic?"1":"0"));
-        scriptWriter.write("\nmaximum_F3_bandwidth_value = " + fastTrackMaximumF3BandwidthValue);
-        scriptWriter.write(
-          "\nenable_F4_frequency_heuristic = " + (fastTrackEnableF4FrequencyHeuristic?"1":"0"));
-        scriptWriter.write("\nminimum_F4_frequency_value = " + fastTrackMinimumF4FrequencyValue);
-        scriptWriter.write("\nenable_rhotic_heuristic = " + (fastTrackEnableRhoticHeuristic?"1":"0"));
-        scriptWriter.write(
-          "\nenable_F3F4_proximity_heuristic = "
-          + (fastTrackEnableF3F4ProximityHeuristic?"1":"0"));
-        scriptWriter.write("\noutput_bandwidth = 1");
-        scriptWriter.write("\noutput_predictions = 1");
-        scriptWriter.write("\noutput_pitch = 1");
-        scriptWriter.write("\noutput_intensity = 1");
-        scriptWriter.write("\noutput_harmonicity = 1");
-        scriptWriter.write("\noutput_normalized_time = 1");
-        scriptWriter.write("\ndir$ = \"");
-        scriptWriter.write(tempDirectory.getPath());
-        scriptWriter.write("\"");
-        scriptWriter.write("\nsteps = " + fastTrackNumberOfSteps);
-        scriptWriter.write("\ncoefficients = " + fastTrackNumberOfCoefficients);
-        scriptWriter.write("\nformants = " + fastTrackNumberOfFormants);
-        scriptWriter.write("\nout_formant = 2"); // give use the formant object
-        scriptWriter.write("\nimage = 0"); // and nothing else...
-        scriptWriter.write("\nmax_plot = 4000");
-        scriptWriter.write("\nout_table = 0");
-        scriptWriter.write("\nout_all = 0");
-        scriptWriter.write("\ncurrent_view = 0");
-        scriptWriter.write("\nfastTrackMinimumDuration = " + fastTrackMinimumDuration);        
-      }
-      MessageFormat fmtFormantScript = new MessageFormat(
-        (useFastTrack?
-         // FastTrack has a limit of 30ms, below which it throws errors
-         "\nif windowDuration >= fastTrackMinimumDuration":"")
+    if (useFastTrack) {
+      scriptWriter.write("\n# FastTrack:");
+      scriptWriter.write("\ninclude utils/trackAutoselectProcedure.praat");
+      // load default global settings
+      scriptWriter.write("\n@getSettings");
+      // override global settings that we know about
+      scriptWriter.write("\ntime_step = " + fastTrackTimeStep);
+      scriptWriter.write("\nbasis_functions$ = \""+fastTrackBasisFunctions+"\"");
+      scriptWriter.write("\nerror_method$ = \""+fastTrackErrorMethod+"\"");
+      scriptWriter.write("\nmethod$ = \""+fastTrackTrackingMethod+"\"");
+      scriptWriter.write(
+        "\nenable_F1_frequency_heuristic = " + (fastTrackEnableF1FrequencyHeuristic?"1":"0"));
+      scriptWriter.write("\nmaximum_F1_frequency_value = " + fastTrackMaximumF1FrequencyValue);
+      scriptWriter.write(
+        "\nenable_F1_bandwidth_heuristic = " + (fastTrackEnableF1BandwidthHeuristic?"1":"0"));
+      scriptWriter.write("\nmaximum_F1_bandwidth_value = " + fastTrackMaximumF1BandwidthValue);
+      scriptWriter.write(
+        "\nenable_F2_bandwidth_heuristic = " + (fastTrackEnableF2BandwidthHeuristic?"1":"0"));
+      scriptWriter.write("\nmaximum_F2_bandwidth_value = " + fastTrackMaximumF2BandwidthValue);
+      scriptWriter.write(
+        "\nenable_F3_bandwidth_heuristic = " + (fastTrackEnableF3BandwidthHeuristic?"1":"0"));
+      scriptWriter.write("\nmaximum_F3_bandwidth_value = " + fastTrackMaximumF3BandwidthValue);
+      scriptWriter.write(
+        "\nenable_F4_frequency_heuristic = " + (fastTrackEnableF4FrequencyHeuristic?"1":"0"));
+      scriptWriter.write("\nminimum_F4_frequency_value = " + fastTrackMinimumF4FrequencyValue);
+      scriptWriter.write("\nenable_rhotic_heuristic = " + (fastTrackEnableRhoticHeuristic?"1":"0"));
+      scriptWriter.write(
+        "\nenable_F3F4_proximity_heuristic = "
+        + (fastTrackEnableF3F4ProximityHeuristic?"1":"0"));
+      scriptWriter.write("\noutput_bandwidth = 1");
+      scriptWriter.write("\noutput_predictions = 1");
+      scriptWriter.write("\noutput_pitch = 1");
+      scriptWriter.write("\noutput_intensity = 1");
+      scriptWriter.write("\noutput_harmonicity = 1");
+      scriptWriter.write("\noutput_normalized_time = 1");
+      scriptWriter.write("\ndir$ = \"");
+      scriptWriter.write(tempDirectory.getPath());
+      scriptWriter.write("\"");
+      scriptWriter.write("\nsteps = " + fastTrackNumberOfSteps);
+      scriptWriter.write("\ncoefficients = " + fastTrackNumberOfCoefficients);
+      scriptWriter.write("\nformants = " + fastTrackNumberOfFormants);
+      scriptWriter.write("\nout_formant = 2"); // give use the formant object
+      scriptWriter.write("\nimage = 0"); // and nothing else...
+      scriptWriter.write("\nmax_plot = 4000");
+      scriptWriter.write("\nout_table = 0");
+      scriptWriter.write("\nout_all = 0");
+      scriptWriter.write("\ncurrent_view = 0");
+      scriptWriter.write("\nfastTrackMinimumDuration = " + fastTrackMinimumDuration);        
+    }
+    MessageFormat fmtFormantScript = new MessageFormat(
+      (useFastTrack?
+       // FastTrack has a limit of 30ms, below which it throws errors
+       "\nif windowDuration >= fastTrackMinimumDuration":"")
+      +(extractF1?
+        "\n  result = Get value at time... 1 {0,number,#.###} Hertz Linear"
+        +"\n  print ''result:0''"
+        +"\n  printline":"")
+      +(extractF2?
+        "\n  result = Get value at time... 2 {0,number,#.###} Hertz Linear"
+        +"\n  print ''result:0''"
+        +"\n  printline":"")
+      +(extractF3?
+        "\n  result = Get value at time... 3 {0,number,#.###} Hertz Linear"
+        +"\n  print ''result:0''"
+        +"\n  printline":"")
+      +(useFastTrack?
+        "\nelse"
+        +"\n  # sample is too short, output blank values"
+        +"\n  result$ = \"\""
         +(extractF1?
-          "\n  result = Get value at time... 1 {0,number,#.###} Hertz Linear"
-          +"\n  print ''result:0''"
+          "\n  print ''result$''"
           +"\n  printline":"")
         +(extractF2?
-          "\n  result = Get value at time... 2 {0,number,#.###} Hertz Linear"
-          +"\n  print ''result:0''"
+          "\n  print ''result$''"
           +"\n  printline":"")
         +(extractF3?
-          "\n  result = Get value at time... 3 {0,number,#.###} Hertz Linear"
-          +"\n  print ''result:0''"
+          "\n  print ''result$''"
           +"\n  printline":"")
-        +(useFastTrack?
-          "\nelse"
-          +"\n  # sample is too short, output blank values"
-          +"\n  result$ = \"\""
-          +(extractF1?
-            "\n  print ''result$''"
-            +"\n  printline":"")
-          +(extractF2?
-            "\n  print ''result$''"
-            +"\n  printline":"")
-          +(extractF3?
-            "\n  print ''result$''"
-            +"\n  printline":"")
-          +"\nendif":""), 
-        Locale.UK);
-      StringBuilder customAttributes = new StringBuilder();
-      for (String attribute : attributeValues.keySet()) {
-        customAttributes.append("\n");
-        customAttributes.append(attribute.replaceAll("[^A-Za-z0-9]", "_"));
-        customAttributes.append("$ = \"");
-        customAttributes.append(attributeValues.get(attribute).replace("\"","\\\""));
-        customAttributes.append("\"");
-      }
-      String customScriptSnippet = // TODO participant attributes
-        "\n######### CUSTOM SCRIPT STARTS HERE #########"
-        // these for backwards compatibility
-        +"\nsampleStartTime = {0,number,#.###}" 
-        +"\nsampleEndTime = {1,number,#.###}"
-        +"\nsampleDuration = {7,number,#.###}"
-        // absolute start/end time (relative to beginning of original recording)
-        +"\nwindowOffset = {15,number,#.###}"
-        +"\nwindowAbsoluteStart = {0,number,#.###}"
-        +"\nwindowAbsoluteEnd = {1,number,#.###}"
-        +"\nwindowDuration = {7,number,#.###}"
-        +"\ntargetAbsoluteStart = {12,number,#.###}"
-        +"\ntargetAbsoluteEnd = {13,number,#.###}"
-        // start/end time within the extracted sample (the target +/- context)
-        +"\ntargetStart = {8,number,#.###}"
-        +"\ntargetEnd = {9,number,#.###}"
-        +"\ntargetDuration = {14,number,#.###}"
-        +"\nsampleNumber = {10,number,#0}"
-        +"\nsampleName$ = \"sample{10,number,#0}\""
-        +customAttributes.toString()
-        +"\nselect Sound sample{10,number,#0}"
-        +"\n{11}"
-        +"\n##########  CUSTOM SCRIPT ENDS HERE  #########";
-      MessageFormat fmtScript = new MessageFormat(
-        "\nselect LongSound soundfile"
-        +"\nExtract part... {0,number,#.###} {1,number,#.###} 0"
-        +"\nRename... sample{10,number,#0}"
-        +(extractF3 || extractF2 || extractF1?
-          "\nselect Sound sample{10,number,#0}"
-          +"\n"
-          + (useFastTrack?
-             "windowDuration = {1,number,#.###} - {0,number,#.###}"
-             // FastTrack has a limit of 30ms, below which it throws errors
-             +"\nif windowDuration >= fastTrackMinimumDuration"
-             +"\n  @trackAutoselect: selected(), dir$, {17,number,#0}, {18,number,#0},"
-             +" steps, coefficients, formants, method$, image, selected(), current_view, max_plot,"
-             +" out_formant, out_table, out_all"
-             +(fastTrackCoefficients?
-               // F1
+        +"\nendif":""), 
+      Locale.UK);
+    StringBuilder customAttributes = new StringBuilder();
+    for (String attribute : attributeValues.keySet()) {
+      customAttributes.append("\n");
+      customAttributes.append(attribute.replaceAll("[^A-Za-z0-9]", "_"));
+      customAttributes.append("$ = \"");
+      customAttributes.append(attributeValues.get(attribute).replace("\"","\\\""));
+      customAttributes.append("\"");
+    }
+    String customScriptSnippet = // TODO participant attributes
+      "\n######### CUSTOM SCRIPT STARTS HERE #########"
+      // these for backwards compatibility
+      +"\nsampleStartTime = {0,number,#.###}" 
+      +"\nsampleEndTime = {1,number,#.###}"
+      +"\nsampleDuration = {7,number,#.###}"
+      // absolute start/end time (relative to beginning of original recording)
+      +"\nwindowOffset = {15,number,#.###}"
+      +"\nwindowAbsoluteStart = {0,number,#.###}"
+      +"\nwindowAbsoluteEnd = {1,number,#.###}"
+      +"\nwindowDuration = {7,number,#.###}"
+      +"\ntargetAbsoluteStart = {12,number,#.###}"
+      +"\ntargetAbsoluteEnd = {13,number,#.###}"
+      // start/end time within the extracted sample (the target +/- context)
+      +"\ntargetStart = {8,number,#.###}"
+      +"\ntargetEnd = {9,number,#.###}"
+      +"\ntargetDuration = {14,number,#.###}"
+      +"\nsampleNumber = {10,number,#0}"
+      +"\nsampleName$ = \"sample{10,number,#0}\""
+      +customAttributes.toString()
+      +"\nselect Sound sample{10,number,#0}"
+      +"\n{11}"
+      +"\n##########  CUSTOM SCRIPT ENDS HERE  #########";
+    MessageFormat fmtScript = new MessageFormat(
+      "\nselect LongSound soundfile"
+      +"\nExtract part... {0,number,#.###} {1,number,#.###} 0"
+      +"\nRename... sample{10,number,#0}"
+      +(extractF3 || extractF2 || extractF1?
+        "\nselect Sound sample{10,number,#0}"
+        +"\n"
+        + (useFastTrack?
+           "windowDuration = {1,number,#.###} - {0,number,#.###}"
+           // FastTrack has a limit of 30ms, below which it throws errors
+           +"\nif windowDuration >= fastTrackMinimumDuration"
+           +"\n  @trackAutoselect: selected(), dir$, {17,number,#0}, {18,number,#0},"
+           +" steps, coefficients, formants, method$, image, selected(), current_view, max_plot,"
+           +" out_formant, out_table, out_all"
+           +(fastTrackCoefficients?
+             // F1
+             "\n  for c from 1 to coefficients + 1"
+             +"\n    coeff = trackAutoselect.f1coeffs#[c]"
+             +"\n    print ''coeff:0''"
+             +"\n    printline"
+             +"\n  endfor"
+             // F2
+             +"\n  for c from 1 to coefficients + 1"
+             +"\n    coeff = trackAutoselect.f2coeffs#[c]"
+             +"\n    print ''coeff:0''"
+             +"\n    printline"
+             +"\n  endfor"
+             // F3
+             +"\n  for c from 1 to coefficients + 1"
+             +"\n    coeff = trackAutoselect.f3coeffs#[c]"
+             +"\n    print ''coeff:0''"
+             +"\n    printline"
+             +"\n  endfor"
+             +(fastTrackNumberOfFormants>=4?
+               // F4
                "\n  for c from 1 to coefficients + 1"
-               +"\n    coeff = trackAutoselect.f1coeffs#[c]"
+               +"\n    coeff = trackAutoselect.f4coeffs#[c]"
                +"\n    print ''coeff:0''"
                +"\n    printline"
                +"\n  endfor"
-               // F2
-               +"\n  for c from 1 to coefficients + 1"
-               +"\n    coeff = trackAutoselect.f2coeffs#[c]"
-               +"\n    print ''coeff:0''"
-               +"\n    printline"
-               +"\n  endfor"
-               // F3
-               +"\n  for c from 1 to coefficients + 1"
-               +"\n    coeff = trackAutoselect.f3coeffs#[c]"
-               +"\n    print ''coeff:0''"
-               +"\n    printline"
-               +"\n  endfor"
-               +(fastTrackNumberOfFormants>=4?
-                 // F4
-                 "\n  for c from 1 to coefficients + 1"
-                 +"\n    coeff = trackAutoselect.f4coeffs#[c]"
-                 +"\n    print ''coeff:0''"
-                 +"\n    printline"
-                 +"\n  endfor"
-                 :"")
                :"")
-             +(fastTrackCoefficients?
-               "\nelse"
-               +"\n  # sample is too short, output blank values"
-               +"\n  coeff$ = \"\""
-               +"\n  for c from 1 to coefficients + 1"
+             :"")
+           +(fastTrackCoefficients?
+             "\nelse"
+             +"\n  # sample is too short, output blank values"
+             +"\n  coeff$ = \"\""
+             +"\n  for c from 1 to coefficients + 1"
+             +"\n    print ''coeff$''"
+             +"\n    printline"
+             +"\n  endfor"
+             +"\n  for c from 1 to coefficients + 1"
+             +"\n    print ''coeff$''"
+             +"\n    printline"
+             +"\n  endfor"
+             +"\n  for c from 1 to coefficients + 1"
+             +"\n    print ''coeff$''"
+             +"\n    printline"
+             +"\n  endfor"
+             +(fastTrackNumberOfFormants>=4?
+               // F4
+               "\n  for c from 1 to coefficients + 1"
                +"\n    print ''coeff$''"
                +"\n    printline"
                +"\n  endfor"
-               +"\n  for c from 1 to coefficients + 1"
-               +"\n    print ''coeff$''"
-               +"\n    printline"
-               +"\n  endfor"
-               +"\n  for c from 1 to coefficients + 1"
-               +"\n    print ''coeff$''"
-               +"\n    printline"
-               +"\n  endfor"
-               +(fastTrackNumberOfFormants>=4?
-                 // F4
-                 "\n  for c from 1 to coefficients + 1"
-                 +"\n    print ''coeff$''"
-                 +"\n    printline"
-                 +"\n  endfor"
-                 :"")
                :"")
-             +"\nendif" // sample too short
-             // !useFastTrack:
-             :"formantCeiling = {2,number,#0}"
-             +"\n"+getScriptFormant()):"")
-        +"{3}" // from fmtFormantScript
-        +(extractF3 || extractF2 || extractF1 || fastTrackCoefficients?
-          (useFastTrack?"\nif windowDuration >= fastTrackMinimumDuration":"")
-          +"\n  Remove" // formant object
-          +(useFastTrack?"\nendif":"")
-          :"")
-        +(extractMinimumPitch || extractMeanPitch || extractMaximumPitch?
-          "\nselect Sound sample{10,number,#0}"
-          +"\npitchFloor = {4,number,#0}"
-          +"\nvoicingThreshold = {6,number,#.#}"
-          +"\npitchCeiling = {5,number,#0}"
-          +"\n" + getScriptPitch()
-          +(extractMinimumPitch?
-            "\nresult = Get minimum... {8,number,#.###} {9,number,#.###} Hertz Parabolic"
-            +"\nprint ''result:0''"
-            +"\nprintline":"")
-          +(extractMeanPitch?
-            "\nresult = Get mean... {8,number,#.###} {9,number,#.###} Hertz" 
-            +"\nprint ''result:0''"
-            +"\nprintline":"")
-          +(extractMaximumPitch?
-            "\nresult = Get maximum... {8,number,#.###} {9,number,#.###} Hertz Parabolic"
-            +"\nprint ''result:0''"
-            +"\nprintline":"")
-          +"\nRemove":"") // pitch object
-        +(extractMaximumIntensity?
-          "\nselect Sound sample{10,number,#0}"
-          +"\nintensityPitchFloor = {16,number,#0}"
-          +"\n"+getScriptIntensity()
-          +"\nresult = Get maximum... {8,number,#.###} {9,number,#.###} Parabolic"
-          +"\nprint ''result''"
-          +"\nprintline"
-          +"\nRemove":"") // intensity object
-        +(extractCOG1 || extractCOG2 || extractCOG23?
-          "\nselect Sound sample{10,number,#0}"
-          +"\n" + getScriptSpectrum()
-          +(extractCOG1?
-            "\nresult = Get centre of gravity... 1"
-            +"\nprint ''result:0''"
-            +"\nprintline":"")
-          +(extractCOG2?
-            "\nresult = Get centre of gravity... 2"
-            +"\nprint ''result:0''"
-            +"\nprintline":"")
-          +(extractCOG23?
-            "\nresult = Get centre of gravity... 2/3"
-            +"\nprint ''result:0''"
-            +"\nprintline":"")
-          +"\nRemove":"") // spectrum object
-        +(customScript != null && customScript.trim().length() > 0?customScriptSnippet:"")
-        +"\nselect Sound sample{10,number,#0}"
-        +"\nRemove", // sound sample
-        Locale.UK);
-      int count = 0;
-      for (Vector<Double> tuple : targets) {
-        Double startTime = tuple.elementAt(0);
-        Double endTime = tuple.elementAt(1);
-        if (startTime >= 0.0) {
-          Double startWindow = startTime - windowOffset;
-          if (startWindow < 0.0) {
-            startWindow = 0.0;
-          }
-          Double endWindow = endTime + windowOffset;
-          Double relativeEndWindow = endWindow - startWindow;
-          Double relativeStartTime = startTime - startWindow;
-          Double relativeEndTime = endTime - startWindow;
-          // generate formant script for multiple targets
-          String sFormantScript = "";
-          if (extractF1 || extractF2 || extractF3) {
-            for (Double point : getSamplePoints()) {
-              Double targetTime = Double.valueOf(
-                startTime + ((endTime - startTime) * point));
-              Double relativeTime = targetTime - startWindow;
-              if (startWindow < 0.0) {
-                relativeTime += startWindow;
-              }
-              Object[] oFormantArg = { relativeTime };
-              sFormantScript += fmtFormantScript.format(oFormantArg);
-            } // next sample point
-          } // extracting formants
+             :"")
+           +"\nendif" // sample too short
+           // !useFastTrack:
+           :"formantCeiling = {2,number,#0}"
+           +"\n"+getScriptFormant()):"")
+      +"{3}" // from fmtFormantScript
+      +(extractF3 || extractF2 || extractF1 || fastTrackCoefficients?
+        (useFastTrack?"\nif windowDuration >= fastTrackMinimumDuration":"")
+        +"\n  Remove" // formant object
+        +(useFastTrack?"\nendif":"")
+        :"")
+      +(extractMinimumPitch || extractMeanPitch || extractMaximumPitch?
+        "\nselect Sound sample{10,number,#0}"
+        +"\npitchFloor = {4,number,#0}"
+        +"\nvoicingThreshold = {6,number,#.#}"
+        +"\npitchCeiling = {5,number,#0}"
+        +"\n" + getScriptPitch()
+        +(extractMinimumPitch?
+          "\nresult = Get minimum... {8,number,#.###} {9,number,#.###} Hertz Parabolic"
+          +"\nprint ''result:0''"
+          +"\nprintline":"")
+        +(extractMeanPitch?
+          "\nresult = Get mean... {8,number,#.###} {9,number,#.###} Hertz" 
+          +"\nprint ''result:0''"
+          +"\nprintline":"")
+        +(extractMaximumPitch?
+          "\nresult = Get maximum... {8,number,#.###} {9,number,#.###} Hertz Parabolic"
+          +"\nprint ''result:0''"
+          +"\nprintline":"")
+        +"\nRemove":"") // pitch object
+      +(extractMaximumIntensity?
+        "\nselect Sound sample{10,number,#0}"
+        +"\nintensityPitchFloor = {16,number,#0}"
+        +"\n"+getScriptIntensity()
+        +"\nresult = Get maximum... {8,number,#.###} {9,number,#.###} Parabolic"
+        +"\nprint ''result''"
+        +"\nprintline"
+        +"\nRemove":"") // intensity object
+      +(extractCOG1 || extractCOG2 || extractCOG23?
+        "\nselect Sound sample{10,number,#0}"
+        +"\n" + getScriptSpectrum()
+        +(extractCOG1?
+          "\nresult = Get centre of gravity... 1"
+          +"\nprint ''result:0''"
+          +"\nprintline":"")
+        +(extractCOG2?
+          "\nresult = Get centre of gravity... 2"
+          +"\nprint ''result:0''"
+          +"\nprintline":"")
+        +(extractCOG23?
+          "\nresult = Get centre of gravity... 2/3"
+          +"\nprint ''result:0''"
+          +"\nprintline":"")
+        +"\nRemove":"") // spectrum object
+      +(customScript != null && customScript.trim().length() > 0?customScriptSnippet:"")
+      +"\nselect Sound sample{10,number,#0}"
+      +"\nRemove", // sound sample
+      Locale.UK);
+    int count = 0;
+    for (Vector<Double> tuple : targets) {
+      Double startTime = tuple.elementAt(0);
+      Double endTime = tuple.elementAt(1);
+      if (startTime >= 0.0) {
+        Double startWindow = startTime - windowOffset;
+        if (startWindow < 0.0) {
+          startWindow = 0.0;
+        }
+        Double endWindow = endTime + windowOffset;
+        Double relativeEndWindow = endWindow - startWindow;
+        Double relativeStartTime = startTime - startWindow;
+        Double relativeEndTime = endTime - startWindow;
+        // generate formant script for multiple targets
+        String sFormantScript = "";
+        if (extractF1 || extractF2 || extractF3) {
+          for (Double point : getSamplePoints()) {
+            Double targetTime = Double.valueOf(
+              startTime + ((endTime - startTime) * point));
+            Double relativeTime = targetTime - startWindow;
+            if (startWindow < 0.0) {
+              relativeTime += startWindow;
+            }
+            Object[] oFormantArg = { relativeTime };
+            sFormantScript += fmtFormantScript.format(oFormantArg);
+          } // next sample point
+        } // extracting formants
 		  
-          Object[] oArgs = {
-            /* 0=*/ startWindow, endWindow, formantCeiling, 
-            /* 3=*/ sFormantScript, 
-            /* 4=*/ pitchFloor, pitchCeiling, voicingThreshold, 
-            /* 7=*/ relativeEndWindow, relativeStartTime, relativeEndTime,
-            /*10=*/ Integer.valueOf(count++),
-            /*11=*/ customScript,
-            /*12=*/ startTime, endTime, (endTime - startTime), windowOffset,
-            /*16=*/ intensityPitchFloor, 
-            /*17=*/ fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency
-          };
-          scriptWriter.write(fmtScript.format(oArgs));
-        } // valid interval
-      } // next target
+        Object[] oArgs = {
+          /* 0=*/ startWindow, endWindow, formantCeiling, 
+          /* 3=*/ sFormantScript, 
+          /* 4=*/ pitchFloor, pitchCeiling, voicingThreshold, 
+          /* 7=*/ relativeEndWindow, relativeStartTime, relativeEndTime,
+          /*10=*/ Integer.valueOf(count++),
+          /*11=*/ customScript,
+          /*12=*/ startTime, endTime, (endTime - startTime), windowOffset,
+          /*16=*/ intensityPitchFloor, 
+          /*17=*/ fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency
+        };
+        scriptWriter.write(fmtScript.format(oArgs));
+      } // valid interval
+    } // next target
+    // TODO script code
   }
   
   /**
