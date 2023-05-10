@@ -149,6 +149,7 @@ import org.apache.commons.csv.CSVPrinter;
  */
 @WebServlet({"/api/results"})
 public class Results extends LabbcatServlet { // TODO unit test
+  // TODO add support for annotation anchoring
   
   /**
    * Constructor
@@ -393,7 +394,9 @@ public class Results extends LabbcatServlet { // TODO unit test
           if (search.getMatrix() != null) {
             searchName = search.getMatrix().getDescription();
           }
-          if (searchName == null) searchName = search.getDescription();
+          if (searchName == null || searchName.trim().length() == 0) {
+            searchName = search.getDescription();
+          }
           final String finalSearchName = searchName;
           
           if (contentType.equals("text/csv")) {
@@ -688,20 +691,24 @@ public class Results extends LabbcatServlet { // TODO unit test
         if (boundingTokens.length > 1) { // there's a start and end token
           if (boundingTokens[0].getOrdinal() + 1 < boundingTokens[1].getOrdinal()) {
             // there are intervening tokens
-            String interveningTokenQuery =
-              "layer == '"+boundingTokens[0].getLayerId()+"'"
-              +" && parentId == '"+boundingTokens[0].getParentId()+"'"
-              +" && ordinal > "+boundingTokens[0].getOrdinal()
-              +" && ordinal < "+boundingTokens[1].getOrdinal();
-            Annotation[] interveningTokens = store.getMatchingAnnotations(
-              interveningTokenQuery);
-            Arrays.sort(
-              interveningTokens, Comparator.comparingInt(a->a.getOrdinal()));
-            for (Annotation token : interveningTokens) {
-              // add the token to the text
-              text.append(" ");
-              text.append(token.getLabel());
+
+            Annotation firstToken = boundingTokens[0];
+            Annotation lastToken = boundingTokens[boundingTokens.length - 1];
+            // get the context before the match
+            sqlMatchTranscriptContext.setInt(1, result.getGraphId());
+            sqlMatchTranscriptContext.setLong(
+              2, Long.valueOf(firstToken.getParentId().replace("em_11_","")));
+            sqlMatchTranscriptContext.setInt(3, firstToken.getOrdinal() + 1);
+            sqlMatchTranscriptContext.setInt(4, lastToken.getOrdinal() - 1);
+            if (wordsContext < 0) { // in line bounds
+              sqlMatchTranscriptContext.setDouble(5, result.getStartOffset());
+              sqlMatchTranscriptContext.setDouble(6, result.getEndOffset());
             }
+            ResultSet rs = sqlMatchTranscriptContext.executeQuery();
+            rs.next();
+            text.append(" ");
+            text.append(rs.getString(1));
+            rs.close();
           } // there are intervening tokens
           // add final token to the text
           text.append(" ");
