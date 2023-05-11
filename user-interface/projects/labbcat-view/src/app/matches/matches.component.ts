@@ -20,7 +20,7 @@ export class MatchesComponent implements OnInit {
     @ViewChild('generate_layer', {static: false}) generateLayer: ElementRef;
     name: string;
     status: string;
-    totalMatches: number;
+    matchCount: number;
     totalUtteranceDuration: number;
     zeroPad: number;
     searchedLayers: string[];
@@ -101,7 +101,6 @@ export class MatchesComponent implements OnInit {
             if (messages) messages.forEach(m => this.messageService.info(m));
             this.task = task;
             this.status = task.status;
-            this.totalMatches = task.size; // TODO need something more formal
             this.totalUtteranceDuration = task.totalUtteranceDuration;
             this.zeroPad = (""+task.size).length;
             this.searchedLayers = task.layers || [];
@@ -140,6 +139,7 @@ export class MatchesComponent implements OnInit {
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
                 this.name = results.name;
+                this.matchCount = results.matchCount;
                 for (let match of results.matches) {
                     match._selected = true;
                     this.matches.push(match as Match);
@@ -253,7 +253,7 @@ export class MatchesComponent implements OnInit {
 
     serialize(): void {
         this.todo.nativeElement.value = "convert";
-        this.form.nativeElement.action = this.baseUrl + "results";
+        this.form.nativeElement.action = this.baseUrl + "api/serialize/fragment";
         this.form.nativeElement.submit();
     }
 
@@ -262,7 +262,7 @@ export class MatchesComponent implements OnInit {
     }
     exportCsv(): void {
         this.todo.nativeElement.value = "csv";
-        this.form.nativeElement.action = this.baseUrl + "resultsStream";
+        this.form.nativeElement.action = this.baseUrl + "api/results";
         this.form.nativeElement.submit();
     }
 
@@ -297,7 +297,7 @@ export class MatchesComponent implements OnInit {
 
     dictionary(): void {
         this.todo.nativeElement.value = "dictionary";
-        this.form.nativeElement.action = this.baseUrl + "results";
+        this.form.nativeElement.action = this.baseUrl + "api/results/dictionary";
         this.form.nativeElement.submit();
     }
 

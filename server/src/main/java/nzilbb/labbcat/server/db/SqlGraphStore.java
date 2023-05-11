@@ -1595,7 +1595,7 @@ public class SqlGraphStore implements GraphStore {
    * <ul>
    *  <li><code>/Ada.+/.test(id)</code></li>
    *  <li><code>labels('participant').includes('Robert')</code></li>
-   *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+   *  <li><code>['CC', 'IA', 'MU'].includes(first('corpus').label)</code></li>
    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
    *  <li><code>first('participant_languages').label == 'en'</code></li>
@@ -1639,7 +1639,7 @@ public class SqlGraphStore implements GraphStore {
    * <ul>
    *  <li><code>/Ada.+/.test(id)</code></li>
    *  <li><code>labels('participant').includes('Robert')</code></li>
-   *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+   *  <li><code>['CC', 'IA', 'MU'].includes(first('corpus').label)</code></li>
    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
    *  <li><code>first('participant_languages').label == 'en'</code></li>
@@ -1683,7 +1683,7 @@ public class SqlGraphStore implements GraphStore {
    * <ul>
    *  <li><code>/Ada.+/.test(id)</code></li>
    *  <li><code>labels('participant').includes('Robert')</code></li>
-   *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+   *  <li><code>['CC', 'IA', 'MU'].includes(first('corpus').label)</code></li>
    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
    *  <li><code>first('participant_languages').label == 'en'</code></li>

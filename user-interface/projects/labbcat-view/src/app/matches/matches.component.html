@@ -3,7 +3,7 @@
 <p>{{status}} <span *ngIf="totalUtteranceDuration">(<span i18n>Total utterance duration:</span> {{totalUtteranceDuration | duration}})</span></p>
 
 <lib-wait *ngIf="readingMatches"></lib-wait>
-<form #form method="POST" id="frm" *ngIf="matches.length" target="_blank">
+<form #form method="POST" id="frm" *ngIf="matches.length" todotarget="_blank">
   <input type="hidden" name="threadId" value="{{threadId}}">
   <input type="hidden" name="generateLayerId" value="{{generateLayerId}}">
   <input type="hidden" name="annotationLayerId" value="{{annotationLayerId}}">
@@ -18,7 +18,7 @@
     <label i18n-title title="Select all results including those not shown here">
       <input type="checkbox" [(checked)]="selectAll" (change)="all()">
       <span i18n="select all results">Select all results</span>
-      ({{totalMatches}})
+      ({{matchCount}})
     </label>
     
     <label i18n-title title="How much context to show before/after match"
@@ -72,16 +72,16 @@
   <div id="matches-footer">
       <span class="match-count">{{matches.length}} results shown</span>
       <lib-button (press)="moreMatches()" [processing]="moreLoading"
-                  [disabled]="totalMatches - matches.length <= 0"
+                  [disabled]="matchCount - matches.length <= 0"
                   i18n-title title="Show more results"
-                  label="{{min(pageLength, totalMatches - matches.length)}} More Matches"
+                  label="{{min(pageLength, matchCount - matches.length)}} More Matches"
                   img="down-triangle.png" icon="▼"
                   >
       </lib-button>
       <lib-button (press)="allMatches()" [processing]="allLoading"
-                  [disabled]="totalMatches - matches.length <= 0"
+                  [disabled]="matchCount - matches.length <= 0"
                   i18n-title title="Show all results"
-                  label="{{totalMatches - matches.length}} Remaining Matches"
+                  label="{{matchCount - matches.length}} Remaining Matches"
                   img="down-double-triangle.png" icon="⏬"
                   >
       </lib-button>
@@ -90,7 +90,7 @@
     <label i18n-title title="Select all results including those not shown here">
       <input type="checkbox" [(checked)]="selectAll" (change)="all()">
       <span i18n="select all results">Select all results</span>
-      ({{totalMatches}})
+      ({{matchCount}})
     </label>
   </div>
   <div id="csv-export" class="controls">
@@ -177,11 +177,11 @@
     <lib-button (press)="dictionary();"
                 img="book.svg" icon="📕"
                 i18n-label label="Dictionary"></lib-button>
-    <select name="layer_id"
+    <select name="definitionLayerId"
             i18n-title title="Layer for definitions of dictionary entries">
       <option disabled i18n selected>Definition Layer</option>
       <option *ngFor="let layer of wordLayers"
-              value="{{layer.layer_id}}">
+              value="{{layer.id}}">
         <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
         <ng-container *ngIf="layer.id == 'orthography'" i18n>[word list only]</ng-container>
       </option>
@@ -205,7 +205,7 @@
   <div id="serialization-options" class="{{showSerializationOptions?'unhidden-panel':'hidden-panel'}}">
     <label>
       <span i18n>Export format</span>
-      <select #mimetype name="mimetype"
+      <select #mimetype name="mimeType"
               [(ngModel)]="mimeType"
               (change)="onChangeMimeType()"
               i18n-title title="Export format">
@@ -219,7 +219,7 @@
     </label></div>
     <fieldset>
     <legend i18n>Layers to export</legend>
-      <lib-layer-checkboxes name="layerIds"
+      <lib-layer-checkboxes name="layerId"
                             word="true" segment="true" phrase="true" excludeTurn="true"
                             selected="{{serializationLayers}}"></lib-layer-checkboxes>
     </fieldset>

@@ -55,8 +55,10 @@ import nzilbb.labbcat.server.db.SqlGraphStore;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.db.SqlSearchResults;
 import nzilbb.labbcat.server.db.StoreCache;
+import nzilbb.labbcat.server.search.ArraySearchResults;
 import nzilbb.labbcat.server.search.Column;
 import nzilbb.labbcat.server.search.Matrix;
+import nzilbb.labbcat.server.search.SearchResults;
 import nzilbb.labbcat.server.search.SearchTask;
 import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
@@ -70,6 +72,8 @@ import org.apache.commons.csv.CSVPrinter;
  * <ul>
  *  <li><i>threadId</i> - The search task ID returned by a previous call to
  *      <tt>/api/search</tt>. </li>
+ *  <li><i>utterance</i> - MatchIds for the selected results to return, if only a subset
+ *      is required. This parameter is specified multiple times for multiple values.</li>
  *  <li><i>words_context</i> - How many words of context before and after the match to
  *      include in the result text. </li>
  *  <li><i>pageLength</i> - How many results to return at a time. </li>
@@ -111,6 +115,7 @@ import org.apache.commons.csv.CSVPrinter;
  *  <li><i>todo</i> - (Optional) A legacy parameter whose value can be <q>csv</q> to
  *      specify that the content-type of the result be <q>text/csv</q></li>
  * </ul>
+ * <p> At least one of <i>threadId</i> or <i>utterance</i> must be specified.
  * <br><b>Output</b>: a JSON-encoded response object of the usual structure for which the
  * "model" contains the results of the search, e.g.
  * <pre>{
@@ -176,7 +181,8 @@ public class Results extends LabbcatServlet { // TODO unit test
       
       // parameters
       String threadId = request.getParameter("threadId");
-      if (threadId == null) {
+      String[] utterances = request.getParameterValues("utterance");
+      if (threadId == null && utterances == null) {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         writeResponse(response, failureResult(request, "No task ID specified."));
@@ -354,27 +360,36 @@ public class Results extends LabbcatServlet { // TODO unit test
       final JsonGenerator jsonOut = !contentType.equals("text/csv")?
         Json.createGenerator(response.getWriter()):null;
       
-      Task task = Task.findTask(Long.valueOf(threadId));
-      if (task == null) {
+      Task task = threadId==null?null:Task.findTask(Long.valueOf(threadId));
+      if (threadId != null && task == null && utterances == null) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         writeResponse(response, failureResult(
                         request, "Invalid task ID: {0}", "\""+threadId+"\""));
         return;
-      } else if (!(task instanceof SearchTask)) {
+      } else if (task != null && !(task instanceof SearchTask)) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         writeResponse(response, failureResult(
                         request, "Invalid task ID: {0}", task.getClass().getName()));
         return;
       }
       SearchTask search = (SearchTask)task;
-      search.keepAlive(); // prevent the task from dying while we're still interested
-      SqlSearchResults searchResults = (SqlSearchResults)search.getResults();
+      if (search != null) {
+        search.keepAlive(); // prevent the task from dying while we're still interested
+      }
+      SearchResults searchResults = utterances != null?
+        new ArraySearchResults(utterances) // explicit selection only
+        :search.getResults(); // all results from database
 
       try {
-        // the original results object presumably has a dead connection
-        // we want a new copy of our own
         Connection connection = store.getConnection();
-        final SqlSearchResults results = new SqlSearchResults(searchResults, connection);
+        final SearchResults results = utterances != null?searchResults
+          // the original results object presumably has a dead connection
+          // we want a new copy of our own
+          :new SqlSearchResults((SqlSearchResults)searchResults, connection);
+        if (utterances != null && search != null) { // both threadId and utterance specified
+          // copy name
+          ((ArraySearchResults)results).setName(search.getResults().getName());
+        }
         results.hasNext(); // load size etc.
 
         final PreparedStatement sqlMatchTranscriptContext = connection.prepareStatement(
@@ -407,7 +422,8 @@ public class Results extends LabbcatServlet { // TODO unit test
               "Content-Disposition", "attachment; filename=" + fileName.toString());            
           }
 
-          outputStart(jsonOut, csvOut, searchName, options, layers, csvLayers, schema);
+          outputStart(
+            jsonOut, csvOut, searchName, results.size(), options, layers, csvLayers, schema);
           try {
             if (pageLength == null) pageLength = results.size();
             if (pageNumber == null) pageNumber = Integer.valueOf(0);
@@ -523,7 +539,7 @@ public class Results extends LabbcatServlet { // TODO unit test
    * @param options The additional fields to output.
    */
   void outputStart(
-    JsonGenerator jsonOut, CSVPrinter csvOut, String searchName,
+    JsonGenerator jsonOut, CSVPrinter csvOut, String searchName, long matchCount,
     LinkedHashSet<String> options, LinkedHashSet<String> layers,
     LinkedHashMap<String,Integer> csvLayers, Schema schema)
     throws IOException {
@@ -591,6 +607,7 @@ public class Results extends LabbcatServlet { // TODO unit test
       startResult(jsonOut, false);
       // set initial structure of model
       jsonOut.write("name", searchName);
+      jsonOut.write("matchCount", matchCount);
       jsonOut.writeStartArray("matches");      
     }
   } // end of startResults()

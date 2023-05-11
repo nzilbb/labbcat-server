@@ -280,7 +280,11 @@ public abstract class SearchTask extends Task {
       }
     } catch (Exception ex) {
       setLastException(ex);
-      setStatus("run(): " + ex.getClass().getName() + " - " + ex.getMessage());
+      if (ex.getClass().getName().equals("java.lang.Exception")) { // generic error
+        setStatus(ex.getMessage());
+      } else {
+        setStatus("run(): " + ex.getClass().getName() + " - " + ex.getMessage());
+      }
     } finally {
       if (results != null) try { results.close(); } catch(IOException exception) {}
       runEnd();
@@ -301,7 +305,5 @@ public abstract class SearchTask extends Task {
    * @throws Exception
    */
   protected abstract void search() throws Exception;
-      
-
-
+  
 }

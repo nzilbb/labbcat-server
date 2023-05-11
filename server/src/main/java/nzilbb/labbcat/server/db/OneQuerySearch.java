@@ -42,10 +42,7 @@ import nzilbb.labbcat.server.search.Matrix;
 import nzilbb.labbcat.server.search.SearchTask;
 
 /**
- * A Graph series that filters another Graph series, collapsing consecutive instances of
- * the same graph into one graph.
- * <p> Annotations from selected layers a copied from subsequent instances into the first,
- * before the first graph is returned.
+ * Implementation of search that uses a single monolithic SQL query to identify matches.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class OneQuerySearch extends SearchTask {
@@ -65,7 +62,7 @@ public class OneQuerySearch extends SearchTask {
    * @throws Exception If the search should be halted for any reason
    * - e.g. the {@link Matrix#participantQuery} identifies no participants.
    */
-  public String generateSql( // TODO use LinkedHasjet<String> for extra joins etc.
+  public String generateSql(
     Vector<Object> parameters,
     Schema schema, Predicate<Layer> layerIsSpanningAndWordAnchored,
     UnaryOperator<String> participantCondition, UnaryOperator<String> transcriptCondition)
@@ -1024,7 +1021,7 @@ public class OneQuerySearch extends SearchTask {
   protected void search() throws Exception {
 
     iPercentComplete = 1;
-    Connection connection = store.getConnection();
+    Connection connection = getStore().getConnection();
     final Schema schema = store.getSchema();
     if (matrix != null) setName(matrix.getDescription());
 
@@ -1033,8 +1030,6 @@ public class OneQuerySearch extends SearchTask {
     // list of Word objects that match matrix
     results = new SqlSearchResults(this);
 	 
-    long searchTime = new java.util.Date().getTime();
-
     // the participant condition is a list of turn labels, which are speaker_numbers
     UnaryOperator<String> participantCondition = participantQuery -> {
       if (participantQuery != null && participantQuery.trim().length() > 0) {
@@ -1157,6 +1152,8 @@ public class OneQuerySearch extends SearchTask {
     };
 
     // generate an SQL statement from the search matrix
+    // TODO generate optimized SQL of OrthographySearch
+    // TODO generate optimized SQL of SpanSearch
     String q = null;
     // Parameter values
     Vector<Object> parameters = new Vector<Object>(); 
@@ -1166,7 +1163,9 @@ public class OneQuerySearch extends SearchTask {
                       layerIsSpanningAndWordAnchored, participantCondition, transcriptCondition);
     } catch (Exception x) {
       setStatus(x.getMessage());
-      setLastException(x);
+      if (!x.getMessage().equals("Cancelled.")) {
+        setLastException(x);
+      }
       return;
     } finally {
       sqlAnnotationCount.close();

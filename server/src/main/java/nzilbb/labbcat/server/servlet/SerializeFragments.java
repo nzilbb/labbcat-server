@@ -46,8 +46,12 @@ import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.db.ConsolidatedGraphSeries;
 import nzilbb.labbcat.server.db.FragmentSeries;
+import nzilbb.labbcat.server.db.ResultSeries;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
+import nzilbb.labbcat.server.db.SqlSearchResults;
+import nzilbb.labbcat.server.search.SearchTask;
 import nzilbb.labbcat.server.task.SerializeFragmentsTask;
+import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableSeries;
 
@@ -67,7 +71,12 @@ import nzilbb.util.MonitorableSeries;
  *  <li><i>end</i> - one or more end times (in seconds).</li>
  *  <li><i>filter</i> - (optional) one or more annotation IDs to filter by. e.g. a turn
  * annotation ID, which would ensure that only words within the specified turn are
- * included, not words from other turns.</li> 
+ * included, not words from other turns.</li>
+ *  <li><i>threadId</i> - (optional) The search task ID returned by a previous call to
+ *      <tt>/api/search</tt>.</li>
+ *  <li><i>utterance</i> - (optional) MatchIds for the selected results to return, if only
+ *      a subset is required. This can be specifed instead of id/start/end parameters.
+ *      This parameter is specified multiple times for multiple values.</li> 
  *  <li><i>name</i> - (optional) name of the collection.</li>
  *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
  *  <li><i>tag</i> - (optional) add a tag identifying the target annotation.</li>
@@ -126,8 +135,8 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
    public int getPercentComplete() {
       if (serializer != null && utterances != null) {
          iPercentComplete =
-            Optional.of(utterances.getPercentComplete()).orElse(0)/2
-            + Optional.of(serializer.getPercentComplete()).orElse(0)/2;
+            Optional.ofNullable(utterances.getPercentComplete()).orElse(0)/2
+            + Optional.ofNullable(serializer.getPercentComplete()).orElse(0)/2;
       }
       return iPercentComplete;
    }
@@ -159,7 +168,7 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
     *  <li><i>filter</i> - (optional) one or more annotation IDs to filter by. e.g. a turn
     * annotation ID, which would ensure that only words within the specified turn are
     * included, not words from other turns.</li>
-    *  <li><i>name</i> - (optional) name of the collection.</li>
+    *  <li><i>name</i> or <i>collection_name</i> - (optional) name of the collection.</li>
     *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
     *  <li><i>tag</i> - (optional) add a tag identifying the target annotation.</li>
     * </ul>
@@ -181,9 +190,10 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
       ServletContext context = getServletContext();
       
       // check parameters
-      String name = request.getParameter("name");
+      String name = request.getParameter("collection_name");
+      if (name == null || name.trim().length() == 0) name = request.getParameter("name");
       if (name == null || name.trim().length() == 0) name = "fragments";
-      name = IO.SafeFileNameUrl(name.trim());
+      name = "fragments_"+IO.SafeFileNameUrl(name.trim());
       
       String mimeType = request.getParameter("mimeType");
       if (mimeType == null) mimeType = request.getParameter("content-type");
@@ -198,35 +208,51 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
 	 response.sendError(500, "no layers specified");
 	 return;
       }
-      
+
+      long searchId = -1;
+      String threadId = request.getParameter("threadId");
+      if (threadId != null) {
+        Task task = Task.findTask(Long.valueOf(threadId));
+        if (task != null && task instanceof SearchTask) {
+          SearchTask search = (SearchTask)task;
+          if (search.getResults() != null && search.getResults() instanceof SqlSearchResults) {
+            searchId = ((SqlSearchResults)search.getResults()).getId();
+          }
+        }
+      }
+      String[] utterance = request.getParameterValues("utterance");
+
       // arrays of transcripts and delimiters
       String[] id = request.getParameterValues("id");
-      if (id == null) {
+      if (id == null && utterance == null && threadId == null) {
 	 response.sendError(500, "no graph IDs specified");
 	 return;
       }
       String[] start = request.getParameterValues("start");
-      if (start == null) {
+      if (start == null && utterance == null && threadId == null) {
 	 response.sendError(500, "no start offsets specified");
 	 return;
       }
       String[] end = request.getParameterValues("end");
-      if (end == null) {
+      if (end == null && utterance == null && threadId == null) {
 	 response.sendError(500, "no end offsets specified");
 	 return;
       }
       String[] filter = request.getParameterValues("filter");
-      if (id.length != start.length || id.length != end.length
-          || (filter != null && id.length != filter.length)) {
-	 response.sendError(500, "mismatched number of id, start, end, and filter parameters");
-	 return;
+      if (utterance == null && threadId == null &&
+          (id.length != start.length || id.length != end.length
+           || (filter != null && id.length != filter.length))) {
+        response.sendError(500, "mismatched number of id, start, end, and filter parameters");
+        return;
       }
 
       boolean prefixNames = request.getParameter("prefix") != null;
       boolean tagTarget = request.getParameter("tag") != null;
       NumberFormat resultNumberFormatter = NumberFormat.getInstance();
       resultNumberFormatter.setGroupingUsed(false);
-      resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
+      if (id != null) {
+        resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
+      } // TODO minimum integer digits for utterance/threadId cases
       
       try {
         if ("true".equalsIgnoreCase(request.getParameter("async"))) {
@@ -238,27 +264,31 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
           
           // utterances
           Vector<String> vUtterances = new Vector<String>();
-          if (filter == null) { // not filtering by turn etc.
-            for (int f = 0; f < id.length; f++) {
-              vUtterances.add(
-                id[f]+";"+start[f]+"-"+end[f]
-                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+          if (utterance != null) {
+            for (String matchId : utterance) vUtterances.add(matchId);
+          } else if (id != null) {
+            if (filter == null) { // not filtering by turn etc.
+              for (int f = 0; f < id.length; f++) {
+                vUtterances.add(
+                  id[f]+";"+start[f]+"-"+end[f]
+                  +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+              }
+            } else { // filtering by turn etc.
+              for (int f = 0; f < id.length; f++) {
+                vUtterances.add(
+                  id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                  +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+              }
             }
-          } else { // filtering by turn etc.
-            for (int f = 0; f < id.length; f++) {
-              vUtterances.add(
-                id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
-                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
-            }
-          }
+          } // id/start/end specified
           
           SerializeFragmentsTask task = new SerializeFragmentsTask(
-            name, -1, layers,
+            name, searchId, layers,
             mimeType, getStore(request))
             .setIncludeRequiredLayers(true)
             .setPrefixNames(prefixNames)
             .setTagTarget(tagTarget);
-          task.setUtterances(vUtterances);
+          if (vUtterances.size() > 0) task.setUtterances(vUtterances);
           if (request.getRemoteUser() != null) {	
             task.setWho(request.getRemoteUser());
           } else {
@@ -281,17 +311,21 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
           for (String l : layerId) layersToLoad.add(l);
             
           Vector<String> vUtterances = new Vector<String>();
-          if (filter == null) { // not filtering by turn etc.
-            for (int f = 0; f < id.length; f++) {
-              vUtterances.add(
-                id[f]+";"+start[f]+"-"+end[f]
-                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
-            }
-          } else { // filtering by turn etc.
-            for (int f = 0; f < id.length; f++) {
-              vUtterances.add(
-                id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
-                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+          if (utterance != null) {
+            for (String matchId : utterance) vUtterances.add(matchId);
+          } else if (id != null) {
+            if (filter == null) { // not filtering by turn etc.
+              for (int f = 0; f < id.length; f++) {
+                vUtterances.add(
+                  id[f]+";"+start[f]+"-"+end[f]
+                  +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+              }
+            } else { // filtering by turn etc.
+              for (int f = 0; f < id.length; f++) {
+                vUtterances.add(
+                  id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                  +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+              }
             }
           }
             
@@ -309,8 +343,11 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
             serializer.getDescriptor(), configuration, store.getSerializersDirectory(), schema);
           serializer.configure(configuration, schema);
           for (String l : serializer.getRequiredLayers()) layersToLoad.add(l);
-          MonitorableSeries<Graph> fragmentSource = new FragmentSeries(
-            vUtterances, store, layersToLoad.toArray(new String[0]))
+          MonitorableSeries<Graph> fragmentSource = vUtterances.size() > 0?
+            new FragmentSeries(vUtterances, store, layersToLoad.toArray(new String[0]))
+            .setPrefixNames(prefixNames)
+            .setTagTarget(tagTarget)
+            :new ResultSeries(searchId, store, layersToLoad.toArray(new String[0]))
             .setPrefixNames(prefixNames)
             .setTagTarget(tagTarget);
           // if we're not prefixing names, and we're tagging targets
@@ -320,7 +357,6 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
             fragmentSource = new ConsolidatedGraphSeries(fragmentSource)
               .copyLayer("target");
           }
-            
           final Vector<NamedStream> files = new Vector<NamedStream>();
           serializeFragments(
             name, fragmentSource,

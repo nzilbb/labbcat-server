@@ -312,6 +312,25 @@
         }
         
         /**
+         * Gets version information of all components of LaBB-CAT.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {object} An object containing section objects
+         * "System", "Formats", "Layer Managers", etc. each containing version information
+         * for sub-components. e.g.
+         * <ul>
+         *  <li>result["System"]["LaBB-CAT"] is the overall LaBB-CAT version,</li>
+         *  <li>result["System"]["nzilbb.ag"] is the overall annotation graph package
+         *      version,</li>
+         *  <li>result["Formats"]["Praat TextGrid"] is version of the Praat TextGrid
+         *      conversion module,</li>
+         *  <li>result["Layer Managers"]["HTK"] is version of the HTK Layer Manager, etc.</li>
+         * </ul>
+         */
+        versionInfo(onResult) {
+	    this.createRequest("version", null, onResult, this.baseUrl+"version").send();
+        }
+        
+        /**
          * Gets the store's ID.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:  {string} The annotation store's ID.
@@ -1103,7 +1122,7 @@
             if (overlapThreshold) parameters.overlap_threshold = overlapThreshold;
 
             this.createRequest(
-                "search", null, onResult, this.baseUrl+"search",
+                "search", null, onResult, this.baseUrl+"api/search",
                 "POST", // not GET, because the number of parameters can make the URL too long
                 null, "application/x-www-form-urlencoded")
                 .send(this.parametersToQueryString(parameters));
@@ -1155,7 +1174,7 @@
             if (exports.verbose) console.log(JSON.stringify(parameters));
 
             this.createRequest(
-                "allUtterances", null, onResult, this.baseUrl+"allUtterances",
+                "allUtterances", null, onResult, this.baseUrl+"api/utterances",
                 "POST", // not GET, because the number of parameters can make the URL too long
                 null, "application/x-www-form-urlencoded")
                 .send(this.parametersToQueryString(parameters));
@@ -1227,7 +1246,7 @@
                 words_context : wordsContext,
                 pageLength : pageLength,
                 pageNumber : pageNumber
-            }, onResult, this.baseUrl+"resultsStream").send();
+            }, onResult, this.baseUrl+"api/results").send();
         }
         
         /**

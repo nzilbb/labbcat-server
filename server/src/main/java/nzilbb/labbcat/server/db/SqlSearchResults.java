@@ -225,15 +225,21 @@ public class SqlSearchResults implements SearchResults {
     sql.setString(1, name);
     sql.setString(2, search.getWho());
     Integer target_layer_id = SqlConstants.LAYER_TRANSCRIPTION;
-    String matrixTarget = search.getMatrix().getTargetLayerId();
-    if (matrixTarget != null) {
-      Layer layer = search.getStore().getSchema().getLayer(matrixTarget);
-      if (layer != null && layer.containsKey("layer_id")) {
-        target_layer_id = (Integer)layer.get("layer_id");
+    if (search.getMatrix() != null) {
+      String matrixTarget = search.getMatrix().getTargetLayerId();
+      if (matrixTarget != null) {
+        Layer layer = search.getStore().getSchema().getLayer(matrixTarget);
+        if (layer != null && layer.containsKey("layer_id")) {
+          target_layer_id = (Integer)layer.get("layer_id");
+        }
       }
     }
     sql.setInt(3, target_layer_id);
-    sql.setString(4, search.getMatrix().toString());
+    if (search.getMatrix() != null) {
+      sql.setString(4, search.getMatrix().toString());
+    } else {
+      sql.setString(4, "");
+    }
     sql.executeUpdate();
     sql.close();
     PreparedStatement sqlLastId = connection.prepareStatement("SELECT LAST_INSERT_ID()");
