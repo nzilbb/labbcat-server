@@ -298,6 +298,28 @@ public class TestGraphAgqlToSql {
     assertEquals("Parameter count", 0, q.parameters.size());
 
     q = transformer.sqlFor(
+      "labels('participant').includesAny(['someone','other'])",
+      "transcript.transcript_id", null, null, null);
+    assertEquals("Transcript attribute - SQL",
+                 "SELECT transcript.transcript_id FROM transcript"
+                 +" WHERE ('someone' IN"
+                 +" (SELECT speaker.name"
+                 +" FROM transcript_speaker"
+                 +" INNER JOIN speaker"
+                 +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+                 +" WHERE transcript_speaker.ag_id = transcript.ag_id)"
+                 +" OR 'other' IN"
+                 +" (SELECT speaker.name"
+                 +" FROM transcript_speaker"
+                 +" INNER JOIN speaker"
+                 +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+                 +" WHERE transcript_speaker.ag_id = transcript.ag_id)"
+                 +")"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+    
+    q = transformer.sqlFor(
       "first('participant').label == 'someone'",
       "transcript.transcript_id", null, null, null);
     assertEquals("Transcript attribute - SQL",
