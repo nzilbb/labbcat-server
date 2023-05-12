@@ -299,6 +299,31 @@ public class SqlSearchResults implements SearchResults {
   } // end of checkIterator()
 
   /**
+   * Returns the sum of the durations of all utterances in the results.
+   * @param connection An open connection to the database.
+   * @return The sum of the durations of all utterances in the results.
+   */
+  public double totalUtteranceDuration(Connection connection) throws SQLException {
+    PreparedStatement sql = connection.prepareStatement(
+      "SELECT SUM(duration) FROM"
+      +" (SELECT DISTINCT start_anchor_id, end.anchor_id, end.offset - start.offset as duration"
+      +" FROM result"
+      +" INNER JOIN anchor start ON result.start_anchor_id = start.anchor_id"
+      +" INNER JOIN anchor end ON result.end_anchor_id = end.anchor_id"
+      +" WHERE search_id = ?) durations");
+    sql.setLong(1, getId());
+    ResultSet rs = sql.executeQuery();
+    try {
+      rs.next();
+      return rs.getDouble(1);
+    } finally {
+      rs.close();
+      sql.close();
+    }    
+  } // end of totalUtteranceDuration()
+
+
+  /**
    * Close all open resources.
    */
   public void close() {

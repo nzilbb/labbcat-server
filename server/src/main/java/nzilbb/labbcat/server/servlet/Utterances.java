@@ -57,6 +57,8 @@ import nzilbb.labbcat.server.search.Matrix;
  *      e.g. <q>['CC','IA'].includesAny(labels('corpus'))</q></li>
  *  <li><i>only_main_speaker</i> - Optional: "true" if only main-participant utterances should be
  *      searched, absent otherwise. </li>
+ *  <li><i>redirect</i> - Optional: "true" if the request should redirect to the
+ *      user-interface for monitoring the task, rather than returning a JSON body. </li>
  *  <li><i>speaker_number</i> - For backwards compatibility, a list of participant
  *      speaker_numbers as an alternative to the <i>participant_expression</i> parameter.</li>
  *  <li><i>transcript_type</i> - For backwards compatibility, a list of transcript_types
@@ -126,42 +128,39 @@ public class Utterances extends LabbcatServlet { // TODO unit test
     }
     task.setTranscriptQuery(request.getParameter("transcript_expression"));
     try {
+      final SqlGraphStoreAdministration store = getStore(request);
       if (task.getTranscriptQuery() == null && request.getParameter("transcript_type") != null) {
         // parameter values are numeric transcript_type.type_id values, but we need the text labels
-        SqlGraphStoreAdministration store = getStore(request);
-        try {
-          PreparedStatement sql = store.getConnection().prepareStatement(
-            "SELECT transcript_type"
-            + " FROM transcript_type"
-            + " WHERE type_id IN ("
-            +Arrays.stream(request.getParameterValues("transcript_type"))
-            .collect(Collectors.joining(","))
-            + ")");
-          ResultSet rs = sql.executeQuery();
-          StringBuilder transcriptQuery = new StringBuilder();
-          while(rs.next()) {
-            // something like ['wordlist','interview'].includes(first('transcript_type').label)
-            if (transcriptQuery.length() == 0) {
-              transcriptQuery.append("[");
-            } else {
-              transcriptQuery.append(",");
-            }
-            transcriptQuery.append("'").append(rs.getString(1).replace("'","\\'")).append("'");
-          } // next transcript type
-          if (transcriptQuery.length() > 0) {
-            transcriptQuery.append("].includes(first('transcript_type').label)");
-            task.setTranscriptQuery(transcriptQuery.toString());
+        PreparedStatement sql = store.getConnection().prepareStatement(
+          "SELECT transcript_type"
+          + " FROM transcript_type"
+          + " WHERE type_id IN ("
+          +Arrays.stream(request.getParameterValues("transcript_type"))
+          .collect(Collectors.joining(","))
+          + ")");
+        ResultSet rs = sql.executeQuery();
+        StringBuilder transcriptQuery = new StringBuilder();
+        while(rs.next()) {
+          // something like ['wordlist','interview'].includes(first('transcript_type').label)
+          if (transcriptQuery.length() == 0) {
+            transcriptQuery.append("[");
+          } else {
+            transcriptQuery.append(",");
           }
-        } finally {
-          cacheStore(store);
+          transcriptQuery.append("'").append(rs.getString(1).replace("'","\\'")).append("'");
+        } // next transcript type
+        if (transcriptQuery.length() > 0) {
+          transcriptQuery.append("].includes(first('transcript_type').label)");
+          task.setTranscriptQuery(transcriptQuery.toString());
         }
       } // transcript_type parameter
       if (request.getParameter("only_main_speaker") != null) task.setMainParticipantOnly(true);
-    
+      boolean redirect = request.getParameter("redirect") != null;
+      
       task.setStoreCache(new StoreCache() {
           public SqlGraphStore get() {
             try {
-              return getStore(request);
+              return store;
             } catch(Exception exception) {
               System.err.println("Search.StoreCache: " + exception);
               return null;
@@ -186,15 +185,19 @@ public class Utterances extends LabbcatServlet { // TODO unit test
       
       String validationError = task.validate();
       if (validationError != null) {
+        cacheStore(store);
         writeResponse(response, failureResult(request, validationError));
       } else {
         task.start();
-        
-        // return its ID
-        JsonObjectBuilder jsonResult = Json.createObjectBuilder()
-          .add("threadId", ""+task.getId());
-        writeResponse(
-          response, successResult(request, jsonResult.build(), null));
+
+        if (redirect) {
+          response.sendRedirect("../thread?threadId="+task.getId());
+        } else {
+          // return its ID
+          JsonObjectBuilder jsonResult = Json.createObjectBuilder()
+            .add("threadId", ""+task.getId());
+          writeResponse(response, successResult(request, jsonResult.build(), null));
+        }
       } // valid search
     } catch(Exception ex) {
       throw new ServletException(ex);

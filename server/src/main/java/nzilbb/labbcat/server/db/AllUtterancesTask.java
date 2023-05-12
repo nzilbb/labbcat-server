@@ -95,7 +95,7 @@ public class AllUtterancesTask extends SearchTask {
   protected void search() throws Exception {
 
     iPercentComplete = 1;
-    Connection connection = store.getConnection();
+    Connection connection = getStore().getConnection();
     final Schema schema = store.getSchema();
 
     // word columns
@@ -129,6 +129,7 @@ public class AllUtterancesTask extends SearchTask {
         break;
     }
     ((SqlSearchResults)results).setName(description);
+    setName(description);
 
     // transcripts
     StringBuilder transcriptClause = new StringBuilder();

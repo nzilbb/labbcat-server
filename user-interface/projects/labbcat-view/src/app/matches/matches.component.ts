@@ -75,7 +75,7 @@ export class MatchesComponent implements OnInit {
         this.readingMatches = true;
         this.route.queryParams.subscribe((params) => {
             this.threadId = params["threadId"];
-            this.wordsContext = params["wordsContext"] || 1;
+            this.wordsContext = params["wordsContext"] || 0;
             this.readTaskStatus();
         });
         this.readBaseUrl();
