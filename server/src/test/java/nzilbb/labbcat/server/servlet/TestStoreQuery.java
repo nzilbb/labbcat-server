@@ -64,7 +64,8 @@ public class TestStoreQuery
          fail("Could not create Labbcat object");
       }
    }
-   
+
+  /** Test basic store info and query operations. */
   @Test public void store() throws Exception { // TODO test getTranscript, getFragment
       
       String id = l.getId();

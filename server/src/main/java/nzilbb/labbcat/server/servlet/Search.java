@@ -89,7 +89,7 @@ import nzilbb.labbcat.server.search.Matrix;
  * @author Robert Fromont
  */
 @WebServlet({"/api/search"} )
-public class Search extends LabbcatServlet { // TODO unit test
+public class Search extends LabbcatServlet {
   
   /**
    * Constructor
