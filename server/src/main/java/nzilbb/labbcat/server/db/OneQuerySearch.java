@@ -50,7 +50,7 @@ public class OneQuerySearch extends SearchTask {
   /**
    * Create an SQL query that identifies results that match the search matrix patterns,
    * filling in the given lists with information about parameters to set.
-   * @param parameters List of parameter values, which must be either a Double or a String.
+   * @param parameters List of parameter values, which must be Double, Integer, or String.
    * @param schema The layer schema.
    * @param layerIsSpanningAndWordAnchored A predicate that determines whether the given layer
    * is a phrase or span layer for which all annotations share anchors with words.
@@ -68,6 +68,30 @@ public class OneQuerySearch extends SearchTask {
     UnaryOperator<String> participantCondition, UnaryOperator<String> transcriptCondition)
     throws Exception {
     description = "";
+
+    // we can generate optimized SQL for orthography-only searches
+    boolean orthographyOnly = !mainParticipantOnly
+      && anchorConfidenceThreshold == null // not only aligned
+      && matrix.getParticipantQuery() == null
+      && matrix.getTranscriptQuery() == null
+      && !matrix.layerMatchStream().filter(LayerMatch::HasPattern) // no non-orthography layers
+      .filter(match -> !match.getId().equals("orthography"))
+      .findAny().isPresent()      
+      && !matrix.getColumns().stream() // no adj > 1
+      .filter(column -> column.getAdj() > 1)
+      .findAny().isPresent()
+      && !matrix.layerMatchStream() // no negations
+      .filter(LayerMatch::HasPattern).filter(match -> match.getNot())
+      .findAny().isPresent()
+      && !matrix.layerMatchStream() // no anchoring
+      .filter(match -> match.getAnchorStart() || match.getAnchorEnd())
+      .findAny().isPresent();
+    if (orthographyOnly) {
+      setStatus("Optimising for orthography-only search...");
+      return generateOrthographySql(parameters, schema);
+    }
+    // TODO generate optimized SQL of SpanSearch
+
     
     // column 0 first
     int iWordColumn = 0;
@@ -1009,8 +1033,105 @@ public class OneQuerySearch extends SearchTask {
         "\\.annotation_id\\) AS target_annotation_uid",
         ".word_annotation_id) AS target_annotation_uid");
     }
+
+    if (restrictByUser != null) {
+      // add restricted user parameters
+      parameters.add(restrictByUser);
+      parameters.add(restrictByUser);
+    }
+
+    // add adjacency parameters
+    for (int c = 0; c < matrix.getColumns().size()-1; c++) {
+      parameters.add(matrix.getColumns().get(c).getAdj());
+    } // next adjacency
+    
     return q;
   } // end of generateSql()
+  
+  /**
+   * Create an SQL query that identifies results that match the search matrix patterns,
+   * optimised for a matrix that only searches the orthography layer,  filling in the
+   * given lists with information about parameters to set. 
+   * <p>This implementation makes speed gains over {@link #generateSql} by 
+   * supporting only the orthography layer, and no border conditions, 
+   * main-participant or transcript-type filtering. Allowing only plain, 
+   * full-database searches of the orthography layer means that the initial
+   * search query can be completed with no SQL JOINs, meaning that searches can 
+   * complete in something like one sixth of the time, on very large databases.
+   * @param parameters List of parameter values, which must be Double, Integer, or String.
+   * @param schema The layer schema.
+   * @return An SQL query to implement the query.
+   * @throws Exception If the search should be halted for any reason
+   * - e.g. the {@link Matrix#participantQuery} identifies no participants.
+   */
+  public String generateOrthographySql(Vector<Object> parameters, Schema schema)
+    throws Exception {
+    description = "";
+    int iWordColumn = 0;
+    StringBuffer q = new StringBuffer();
+    q.append("INSERT INTO _result");
+    q.append(" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,");
+    q.append(" defining_annotation_id, segment_annotation_id, target_annotation_id,");
+    q.append(" turn_annotation_id, first_matched_word_annotation_id,");
+    q.append(" last_matched_word_annotation_id, complete, target_annotation_uid)");
+    q.append(" SELECT ?, token_0.ag_id AS ag_id, 0 AS speaker_number,");
+    q.append(" token_0.start_anchor_id, token_0.end_anchor_id, 0, NULL AS segment_annotation_id,");
+    q.append(" token_0.word_annotation_id AS target_annotation_id,");
+    q.append(" token_0.turn_annotation_id AS turn_annotation_id,");
+    q.append(" token_0.word_annotation_id AS first_matched_word_annotation_id,");
+    q.append(" token_"+(matrix.getColumns().size()-1)+".word_annotation_id")
+      .append(" AS last_matched_word_annotation_id,");
+    q.append(" 0 AS complete, CONCAT('ew_2_', token_0.annotation_id) AS target_annotation_uid");
+    q.append(" FROM annotation_layer_2 token_0");
+    // susequent word joins
+    for (int c = 1; c < matrix.getColumns().size(); c++) {
+      q.append(" INNER JOIN annotation_layer_2 token_"+c);
+      q.append(" ON token_"+c+".turn_annotation_id = token_0.turn_annotation_id");
+      q.append(" AND token_"+c+".ordinal_in_turn = token_"+(c-1)+".ordinal_in_turn + 1");
+    }
+    if (restrictByUser != null) {
+      q.append(sSqlTranscriptJoin);
+    } // filtering by role
+    int c = 0;
+    for (Column column : matrix.getColumns()) {
+      // set the WHERE condition for this column
+      q.append(c==0?" WHERE ":" AND ");
+      q.append("token_"+(c++)+".label REGEXP ?");
+      // ensure there really is a pattern
+      LayerMatch match = column.getLayers().get("orthography");
+      if (match == null) throw new Exception("No orthography match for column "+c);
+      if (match.getPattern() == null) throw new Exception("No orthography pattern for column "+c);
+      // add the pattern to the parameters
+      match.ensurePatternAnchored();
+      parameters.add(match.getPattern());
+      description += "_" + match.getPattern();
+    } // next column
+    if (restrictByUser != null) {
+      q.append(" AND EXISTS (SELECT * FROM role")
+        .append(" INNER JOIN role_permission ON role.role_id = role_permission.role_id")
+        .append(" INNER JOIN annotation_transcript access_attribute")
+        .append(" ON access_attribute.layer = role_permission.attribute_name")
+        .append(" AND access_attribute.label REGEXP role_permission.value_pattern")
+        .append(" AND role_permission.entity REGEXP '.*t.*'") // transcript access
+        .append(" WHERE user_id = ? AND access_attribute.ag_id = turn.ag_id)")
+        .append(" OR EXISTS (SELECT * FROM role")
+        .append(" INNER JOIN role_permission ON role.role_id = role_permission.role_id")
+        .append(" AND role_permission.attribute_name = 'corpus'")
+        .append(" AND role_permission.entity REGEXP '.*t.*'") // transcript access
+        .append(" WHERE transcript.corpus_name REGEXP role_permission.value_pattern")
+        .append(" AND user_id = ?)");
+    } // filtering by role
+    q.append(" ORDER BY token_0.turn_annotation_id, token_0.ordinal_in_turn");
+    
+    if (restrictByUser != null) {
+      // add restricted user parameters
+      parameters.add(restrictByUser);
+      parameters.add(restrictByUser);
+    }
+    // (no adjacency parameters)
+
+    return q.toString();
+  } // end of generateOrthographySql()
   
   /**
    * Completes a layered search by first identifying the first 'column' of matches
@@ -1152,8 +1273,6 @@ public class OneQuerySearch extends SearchTask {
     };
 
     // generate an SQL statement from the search matrix
-    // TODO generate optimized SQL of OrthographySearch
-    // TODO generate optimized SQL of SpanSearch
     String q = null;
     // Parameter values
     Vector<Object> parameters = new Vector<Object>(); 
@@ -1209,19 +1328,13 @@ public class OneQuerySearch extends SearchTask {
       if (parameter instanceof Double) {
         sqlPatternMatch.setDouble(
           iLayerParameter++, (Double)parameter);
+      } else if (parameter instanceof Integer) {
+        sqlPatternMatch.setInt(
+          iLayerParameter++, (Integer)parameter);
       } else {
         sqlPatternMatch.setString(iLayerParameter++, parameter.toString());
       }
     }
-    
-    if (restrictByUser != null) {
-      sqlPatternMatch.setString(iLayerParameter++, restrictByUser);
-      sqlPatternMatch.setString(iLayerParameter++, restrictByUser);
-    }
-    for (int iWordColumn = 1; iWordColumn < matrix.getColumns().size(); iWordColumn++) {
-      sqlPatternMatch.setInt(
-        iLayerParameter++, matrix.getColumns().get(iWordColumn).getAdj());
-    } // next adjacency
     
     iPercentComplete = SQL_STARTED_PERCENT; 
     setStatus("Querying...");
@@ -1284,14 +1397,15 @@ public class OneQuerySearch extends SearchTask {
       +" start_anchor_id,end_anchor_id,defining_annotation_id,"
       +" segment_annotation_id,target_annotation_id,first_matched_word_annotation_id,"
       +" last_matched_word_annotation_id,complete,target_annotation_uid)"
-      +" SELECT unsorted.search_id,unsorted.ag_id,unsorted.speaker_number,"
+      +" SELECT unsorted.search_id,unsorted.ag_id,"
+      // get speaker_number from line, optimised orth SQL doesn't include it
+      +" CAST(line.label AS SIGNED)," 
       +" line_start.anchor_id,line_end.anchor_id,line.annotation_id,"
       +" unsorted.segment_annotation_id,unsorted.target_annotation_id,"
       +" unsorted.first_matched_word_annotation_id,unsorted.last_matched_word_annotation_id,"
       +" 1,unsorted.target_annotation_uid"
       +" FROM _result unsorted"
       +" INNER JOIN transcript ON unsorted.ag_id = transcript.ag_id"
-      +" INNER JOIN speaker ON unsorted.speaker_number = speaker.speaker_number"
       +" INNER JOIN anchor word_start ON unsorted.start_anchor_id = word_start.anchor_id"
       +" INNER JOIN (annotation_layer_"+SqlConstants.LAYER_UTTERANCE + " line" 
       +"  INNER JOIN anchor line_start"
@@ -1302,6 +1416,8 @@ public class OneQuerySearch extends SearchTask {
       // line bounds are outside word bounds...
       +"  AND line_start.offset <= word_start.offset"
       +"  AND line_end.offset > word_start.offset"
+      // get speaker_number from line, optimised orth SQL doesn't include it
+      +" INNER JOIN speaker ON CAST(line.label AS SIGNED) = speaker.speaker_number"
       +" WHERE unsorted.search_id = ? AND complete = 0"
       +" ORDER BY speaker.name, transcript.transcript_id, unsorted.match_id");
     sqlPatternMatch.setLong(1, ((SqlSearchResults)results).getId());      
@@ -1667,7 +1783,7 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat sqlPatternMatchSubsequentWhere = new MessageFormat(
     " /* column {4}: */ "
     +" AND word{4}.ordinal_in_turn"
-    +" BETWEEN word{5}.ordinal_in_turn + 1 AND word{5}.ordinal_in_turn + 1 + ?"
+    +" BETWEEN word{5}.ordinal_in_turn + 1 AND word{5}.ordinal_in_turn + ?"
     + "{1} {2}");
   
   // subqueries for matching the layer representation

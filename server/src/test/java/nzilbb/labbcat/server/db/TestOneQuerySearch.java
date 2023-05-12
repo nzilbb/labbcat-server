@@ -87,7 +87,9 @@ public class TestOneQuerySearch {
     search.setMatrix(
       new Matrix().addColumn(
         new Column().addLayerMatch(
-          new LayerMatch().setId("orthography").setPattern("needle"))));
+          new LayerMatch().setId("orthography")
+          .setNot(true) // add negation to prevent optimisation
+          .setPattern("needle"))));
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -107,7 +109,7 @@ public class TestOneQuerySearch {
       +" /* extra joins */"
       +"  INNER JOIN annotation_layer_2 search_0_2"
       +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
-      +"  AND search_0_2.label  REGEXP  ?"
+      +"  AND search_0_2.label NOT REGEXP  ?"
       +" /* subsequent columns */"
       +"  WHERE 1=1"
       +" /* transcripts */"
@@ -124,7 +126,96 @@ public class TestOneQuerySearch {
     assertEquals("^(needle)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
     
+    assertEquals("Description", "_NOT_^(needle)$", search.getDescription());
+  }
+  
+  /** Ensure a orthography-only searches produce optimised SQL. */
+  @Test public void optimisedOrthographySearch() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(
+          new LayerMatch().setId("orthography").setPattern("needle"))));
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "one column",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id,"
+      +" turn_annotation_id,"
+      +" first_matched_word_annotation_id,"
+      +" last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, token_0.ag_id AS ag_id,"
+      +" 0 AS speaker_number, token_0.start_anchor_id, token_0.end_anchor_id,"
+      +" 0, NULL AS segment_annotation_id, token_0.word_annotation_id AS target_annotation_id,"
+      +" token_0.turn_annotation_id AS turn_annotation_id,"
+      +" token_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" token_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_2_', token_0.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_2 token_0"
+      +" WHERE token_0.label REGEXP ?"
+      +" ORDER BY token_0.turn_annotation_id, token_0.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
     assertEquals("Description", "_^(needle)$", search.getDescription());
+
+    // multi-column
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("testing")))
+      .addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("1")))
+      .addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("2")))
+      .addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("3"))));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "multi column",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id,"
+      +" turn_annotation_id,"
+      +" first_matched_word_annotation_id,"
+      +" last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, token_0.ag_id AS ag_id,"
+      +" 0 AS speaker_number, token_0.start_anchor_id, token_0.end_anchor_id,"
+      +" 0, NULL AS segment_annotation_id, token_0.word_annotation_id AS target_annotation_id,"
+      +" token_0.turn_annotation_id AS turn_annotation_id,"
+      +" token_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" token_3.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_2_', token_0.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_2 token_0"
+      +" INNER JOIN annotation_layer_2 token_1"
+      +" ON token_1.turn_annotation_id = token_0.turn_annotation_id"
+      +" AND token_1.ordinal_in_turn = token_0.ordinal_in_turn + 1"
+      +" INNER JOIN annotation_layer_2 token_2"
+      +" ON token_2.turn_annotation_id = token_0.turn_annotation_id"
+      +" AND token_2.ordinal_in_turn = token_1.ordinal_in_turn + 1"
+      +" INNER JOIN annotation_layer_2 token_3"
+      +" ON token_3.turn_annotation_id = token_0.turn_annotation_id"
+      +" AND token_3.ordinal_in_turn = token_2.ordinal_in_turn + 1"
+      +" WHERE token_0.label REGEXP ?"
+      +" AND token_1.label REGEXP ?"
+      +" AND token_2.label REGEXP ?"
+      +" AND token_3.label REGEXP ?"
+      +" ORDER BY token_0.turn_annotation_id, token_0.ordinal_in_turn",
+      sql);
+    assertEquals("multi column - number of parameters" + parameters, 4, parameters.size());
+    assertEquals("^(testing)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(1)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^(2)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    assertEquals("^(3)$", parameters.get(3));
+    assertTrue(parameters.get(3) instanceof String);
+    
+    assertEquals("Description", "_^(testing)$_^(1)$_^(2)$_^(3)$", search.getDescription());
   }
   
   /** Ensure searching main participant utterances only generates the correct SQL. */
@@ -300,7 +391,7 @@ public class TestOneQuerySearch {
       new Matrix()
       .addColumn(new Column()
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("knitting"))
-                 .setAdj(2))                 
+                 .setAdj(2))
       .addColumn(new Column()
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
       );
@@ -339,14 +430,16 @@ public class TestOneQuerySearch {
       +"  /* subsequent columns */"
       +"  /* column _1: */"
       +"  AND search_1_2.ordinal_in_turn"
-      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + ?"
       +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
       sql);
-    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
     assertEquals("^(knitting)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(needle)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    assertEquals("adjacency", Integer.valueOf(2), parameters.get(2));
+    assertTrue(parameters.get(2) instanceof Integer);
     
     assertEquals("Description", "_^(knitting)$_^(needle)$", search.getDescription());
   }
@@ -1283,16 +1376,18 @@ public class TestOneQuerySearch {
       +"  /* subsequent columns */"
       +"  /* column _1: */"
       +"  AND search_1_2.ordinal_in_turn"
-      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + ?"
       +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
       sql);
-    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("number of parameters" + parameters, 4, parameters.size());
     assertEquals("^(yerba)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(mate)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("^(es)$", parameters.get(2));
     assertTrue(parameters.get(2) instanceof String);
+    assertEquals("adjacency", Integer.valueOf(1), parameters.get(3));
+    assertTrue(parameters.get(3) instanceof Integer);
     
     assertEquals("Description", "_^(yerba)$_^(mate)$_^(es)$", search.getDescription());
 
@@ -1338,16 +1433,18 @@ public class TestOneQuerySearch {
       +"  /* subsequent columns */"
       +"  /* column _1: */"
       +"  AND search_1_2.ordinal_in_turn"
-      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + ?"
       +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
       sql);
-    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("number of parameters" + parameters, 4, parameters.size());
     assertEquals("^(yerba)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(mate)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("^(es)$", parameters.get(2));
     assertTrue(parameters.get(2) instanceof String);
+    assertEquals("adjacency", Integer.valueOf(1), parameters.get(3));
+    assertTrue(parameters.get(3) instanceof Integer);
     
     assertEquals("Description", "_^(yerba)$_^(mate)$_^(es)$", search.getDescription());
 
@@ -1418,16 +1515,18 @@ public class TestOneQuerySearch {
       +"  /* subsequent columns */"
       +"  /* column _1: */"
       +"  AND search_1_2.ordinal_in_turn"
-      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + ?"
       +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
       sql);
-    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("number of parameters" + parameters, 4, parameters.size());
     assertEquals("^(knitting)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(needle)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("^(haystack)$", parameters.get(2));
     assertTrue(parameters.get(2) instanceof String);
+    assertEquals(Integer.valueOf(1), parameters.get(3));
+    assertTrue(parameters.get(3) instanceof Integer);
     
     assertEquals("Description", "_^(knitting)$_^(needle)$_^(haystack)$", search.getDescription());
 
@@ -1472,16 +1571,18 @@ public class TestOneQuerySearch {
       +"  /* subsequent columns */"
       +"  /* column _1: */"
       +"  AND search_1_2.ordinal_in_turn"
-      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + ?"
       +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
       sql);
-    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("number of parameters" + parameters, 4, parameters.size());
     assertEquals("^(knitting)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(needle)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("^(haystack)$", parameters.get(2));
     assertTrue(parameters.get(2) instanceof String);
+    assertEquals(Integer.valueOf(1), parameters.get(3));
+    assertTrue(parameters.get(3) instanceof Integer);
     
     assertEquals("Description", "_^(knitting)$_^(needle)$_^(haystack)$", search.getDescription());
 
@@ -1536,15 +1637,17 @@ public class TestOneQuerySearch {
       +"  /* subsequent columns */"
       +"  /* column _1: */"
       +"  AND search_1_2.ordinal_in_turn"
-      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + ?"
       +" AND next_word_1.annotation_id IS NULL"
       +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
       sql);
-    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
     assertEquals("^(knitting)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(needle)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    assertEquals(Integer.valueOf(1), parameters.get(2));
+    assertTrue(parameters.get(2) instanceof Integer);
     
     assertEquals("Description", "_^(knitting)$_^(needle)$", search.getDescription());
 
@@ -1607,15 +1710,17 @@ public class TestOneQuerySearch {
       +"  /* subsequent columns */"
       +"  /* column _1: */"
       +"  AND search_1_2.ordinal_in_turn"
-      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + 1 + ?"
+      +" BETWEEN search_0_2.ordinal_in_turn + 1 AND search_0_2.ordinal_in_turn + ?"
       +" AND (next_word_1.annotation_id IS NULL OR next_word_1_start.offset >= line_1_end.offset)"
       +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
       sql);
-    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
     assertEquals("^(knitting)$", parameters.get(0));
     assertTrue(parameters.get(0) instanceof String);
     assertEquals("^(needle)$", parameters.get(1));
     assertTrue(parameters.get(1) instanceof String);
+    assertEquals(Integer.valueOf(1), parameters.get(2));
+    assertTrue(parameters.get(2) instanceof Integer);
     
     assertEquals("Description", "_^(knitting)$_^(needle)$", search.getDescription());
 
