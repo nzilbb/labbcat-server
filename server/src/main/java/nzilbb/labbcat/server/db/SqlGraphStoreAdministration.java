@@ -761,6 +761,7 @@ public class SqlGraphStoreAdministration
           sql.setString(11, layer.get("layer_manager_id").toString());
           if (layer.containsKey("extra") && layer.get("extra") != null
               && layer.get("extra").toString().length() > 0) {
+        
             // if the layer manager is a known subclass of
             // nz.ac.canterbury.ling.layermanager.AnnotatorWrapperManager
             // then create an automation instead of saving to the 'extra' field
@@ -1036,17 +1037,17 @@ public class SqlGraphStoreAdministration
             } else { // layer.getAlignment() == Constants.ALIGNMENT_NONE TODO transcript attributes
               throw new StoreException("Span layers must be aligned");
             }
-            if (annotatorId != null && taskParameters != null) {
-              // create an automation task named after the layer
-              try {
-                newAnnotatorTask(annotatorId, layer.getId(), layer.getDescription());
-                saveAnnotatorTaskParameters(layer.getId(), taskParameters);
-              } catch(Exception exception) {
-                System.err.println(
-                  "SqlGraphStoreAdministration.newLayer(" + layer + "): " + exception);
-              }
-            }
           } // span layer
+          if (annotatorId != null && taskParameters != null) {
+            // create an automation task named after the layer
+            try {
+              newAnnotatorTask(annotatorId, layer.getId(), layer.getDescription());
+              saveAnnotatorTaskParameters(layer.getId(), taskParameters);
+            } catch(Exception exception) {
+              System.err.println(
+                "SqlGraphStoreAdministration.newLayer(" + layer + "): " + exception);
+            }
+          }
         } finally {
           sql.close();
         }
