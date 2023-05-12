@@ -281,7 +281,8 @@ public class SqlSearchResults implements SearchResults {
         "SELECT result.* FROM result"
         +" WHERE result.search_id = ?"
         +" ORDER BY match_id"
-        +(firstMatch!=1?" LIMIT "+(firstMatch-1)+",18446744073709551615":""));
+        +(firstMatch!=1?" LIMIT "+(firstMatch-1)+",18446744073709551615":""),
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
       sqlIterator.setLong(1, id);
       PreparedStatement sqlSize = connection.prepareStatement(
         "SELECT COUNT(*) FROM result WHERE result.search_id = ?");
@@ -321,7 +322,6 @@ public class SqlSearchResults implements SearchResults {
       sql.close();
     }    
   } // end of totalUtteranceDuration()
-
 
   /**
    * Close all open resources.
