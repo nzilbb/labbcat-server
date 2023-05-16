@@ -3084,7 +3084,7 @@ public class SqlGraphStore implements GraphStore {
           } // the MatchId doesn't include to ag_id
         } else if (layer.isAncestor(schema.getWordLayerId()) // a word child layer
                    || layer.getId().equals(schema.getWordLayerId())) { // or the word layer itself
-          // layer table has word_annotation_id            
+          // layer table has word_annotation_id
           Integer layer_id = (Integer)layer.get("layer_id");
           if (targetLayer.getId().equals(schema.getWordLayerId())) { // target is word layer
             // target is transcript layer
@@ -3156,9 +3156,29 @@ public class SqlGraphStore implements GraphStore {
             parameterGroups.put(layerId, groups);
             altQueries.put(layerId, null); // there is no alternative query
             altParameterGroups.put(layerId, null);
+          } else if (targetLayer.getParentId().equals(schema.getRoot().getId())
+                     && targetLayer.getAlignment() != Constants.ALIGNMENT_NONE) { // span layer
+            String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
+              +" start.offset"
+              +" FROM annotation_layer_"+layer_id+" annotation"
+              +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+              +" INNER JOIN (annotation_layer_"+targetLayer.get("layer_id")+" target"
+              +" INNER JOIN anchor target_start ON target.start_anchor_id = target_start.anchor_id"
+              +" INNER JOIN anchor target_end ON target.end_anchor_id = target_end.anchor_id)"
+              +" ON annotation.ag_id = target.ag_id"
+              +" AND start.offset >= target_start.offset"
+              +" AND start.offset < target_end.offset"
+              +" WHERE target.annotation_id = ?"
+              +" ORDER BY start.offset, annotation.annotation_id"
+              +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
+            Object[] groups = { layer.getId(), target_annotation_id_group };
+            queries.put(layerId, getConnection().prepareStatement(sql));
+            parameterGroups.put(layerId, groups);
+            altQueries.put(layerId, null); // there is no alternative query
+            altParameterGroups.put(layerId, null);
           } else { // can't process this layer
             queries.put(layerId, null);
-            Object[] reason = { "Could get " + layer + " for targets from " + targetLayer };
+            Object[] reason = { "Couldn't get " + layer + " for targets from " + targetLayer };
             parameterGroups.put(layerId, reason);
             altQueries.put(layerId, null);
             altParameterGroups.put(layerId, null);
@@ -3397,7 +3417,7 @@ public class SqlGraphStore implements GraphStore {
             altParameterGroups.put(layerId, null);
           }  else { // can't process this layer
             queries.put(layerId, null);
-            Object[] reason = { "Could get " + layer + " for targets from " + targetLayer };
+            Object[] reason = { "Couldn't get " + layer + " for targets from " + targetLayer };
             parameterGroups.put(layerId, reason);
             altQueries.put(layerId, null);
             altParameterGroups.put(layerId, null);
@@ -3486,14 +3506,14 @@ public class SqlGraphStore implements GraphStore {
             altParameterGroups.put(layerId, null);
           } else { // can't process this layer
             queries.put(layerId, null);
-            Object[] reason = { "Could get " + layer + " for targets from " + targetLayer };
+            Object[] reason = { "Couldn't get " + layer + " for targets from " + targetLayer };
             parameterGroups.put(layerId, reason);
             altQueries.put(layerId, null);
             altParameterGroups.put(layerId, null);
           }
         } // utterance
         else if (layer.getParentId() != null
-                 && layer.getParentId().equals(schema.getTurnLayerId())) { // meta layer
+                 && layer.getParentId().equals(schema.getTurnLayerId())) { // phrase layer
           Integer layer_id = (Integer)layer.get("layer_id");
           if (targetLayer.isAncestor(schema.getTurnLayerId())) {
             // target table has turn_annotation_id field
@@ -3566,7 +3586,7 @@ public class SqlGraphStore implements GraphStore {
             altParameterGroups.put(layerId, null);
           } else { // can't process this layer
             queries.put(layerId, null);
-            Object[] reason = { "Could get " + layer + " for targets from " + targetLayer };
+            Object[] reason = { "Couldn't get " + layer + " for targets from " + targetLayer };
             parameterGroups.put(layerId, reason);
             altQueries.put(layerId, null);
             altParameterGroups.put(layerId, null);

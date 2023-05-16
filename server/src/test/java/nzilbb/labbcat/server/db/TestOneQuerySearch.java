@@ -129,7 +129,7 @@ public class TestOneQuerySearch {
     assertEquals("Description", "_NOT_^(needle)$", search.getDescription());
   }
   
-  /** Ensure a orthography-only searches produce optimised SQL. */
+  /** Ensure an orthography-only searches produce optimised SQL. */
   @Test public void optimisedOrthographySearch() throws Exception {    
     OneQuerySearch search = new OneQuerySearch();
     search.setMatrix(
@@ -137,7 +137,7 @@ public class TestOneQuerySearch {
         new Column().addLayerMatch(
           new LayerMatch().setId("orthography").setPattern("needle"))));
     Vector<Object> parameters = new Vector<Object>();
-    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    String sql = search.generateOrthographySql(parameters, getSchema());
     assertEquals(
       "one column",
       "INSERT INTO _result"
@@ -173,7 +173,7 @@ public class TestOneQuerySearch {
       .addColumn(
         new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("3"))));
     parameters = new Vector<Object>();
-    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    sql = search.generateOrthographySql(parameters, getSchema());
     assertEquals(
       "multi column",
       "INSERT INTO _result"
@@ -216,6 +216,47 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(3) instanceof String);
     
     assertEquals("Description", "_^(testing)$_^(1)$_^(2)$_^(3)$", search.getDescription());
+  }
+  
+  /** Ensure a one-target-span-only searches produces optimised SQL. */
+  @Test public void optimisedSpanSearch() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    Schema schema = getSchema();
+    Layer spanLayer = schema.getLayer("topic");
+    LayerMatch match = new LayerMatch()
+      .setId(spanLayer.getId()).setPattern("needle").setTarget(true);
+    match.setNullBooleans();
+    match.ensurePatternAnchored();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(match)));
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateOneSpanSql(parameters, schema, spanLayer, match);
+    assertEquals(
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id,"
+      +" turn_annotation_id, first_matched_word_annotation_id,"
+      +" last_matched_word_annotation_id, complete, target_annotation_uid)"
+      +" SELECT ?, token.ag_id AS ag_id, 0 AS speaker_number,"
+      +" token.start_anchor_id, token.end_anchor_id,"
+      +" NULL AS defining_annotation_id,"
+      +" NULL AS segment_annotation_id,"
+      +" token.annotation_id AS target_annotation_id,"
+      +" NULL AS turn_annotation_id,"
+      +" NULL AS first_matched_word_annotation_id,"
+      +" NULL AS last_matched_word_annotation_id,"
+      +" 0 AS complete,"
+      +" CONCAT('e_',30,'_', token.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_30 token"
+      +" INNER JOIN anchor start ON token.start_anchor_id = start.anchor_id"
+      +" WHERE token.label REGEXP ? ORDER BY token.ag_id, start.offset",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
   }
   
   /** Ensure searching main participant utterances only generates the correct SQL. */

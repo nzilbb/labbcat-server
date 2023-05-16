@@ -30,11 +30,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Vector;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.labbcat.server.search.Column;
 import nzilbb.labbcat.server.search.LayerMatch;
@@ -68,30 +70,6 @@ public class OneQuerySearch extends SearchTask {
     UnaryOperator<String> participantCondition, UnaryOperator<String> transcriptCondition)
     throws Exception {
     description = "";
-
-    // we can generate optimized SQL for orthography-only searches
-    boolean orthographyOnly = !mainParticipantOnly
-      && anchorConfidenceThreshold == null // not only aligned
-      && matrix.getParticipantQuery() == null
-      && matrix.getTranscriptQuery() == null
-      && !matrix.layerMatchStream().filter(LayerMatch::HasPattern) // no non-orthography layers
-      .filter(match -> !match.getId().equals("orthography"))
-      .findAny().isPresent()      
-      && !matrix.getColumns().stream() // no adj > 1
-      .filter(column -> column.getAdj() > 1)
-      .findAny().isPresent()
-      && !matrix.layerMatchStream() // no negations
-      .filter(LayerMatch::HasPattern).filter(match -> match.getNot())
-      .findAny().isPresent()
-      && !matrix.layerMatchStream() // no anchoring
-      .filter(match -> match.getAnchorStart() || match.getAnchorEnd())
-      .findAny().isPresent();
-    if (orthographyOnly) {
-      setStatus("Optimising for orthography-only search...");
-      return generateOrthographySql(parameters, schema);
-    }
-    // TODO generate optimized SQL of SpanSearch
-
     
     // column 0 first
     int iWordColumn = 0;
@@ -1132,6 +1110,83 @@ public class OneQuerySearch extends SearchTask {
 
     return q.toString();
   } // end of generateOrthographySql()
+
+  /**
+   * Create an SQL query that identifies results that match the search matrix patterns,
+   * optimised for a matrix that only searches one span layer,  filling in the
+   * given lists with information about parameters to set. 
+   * <p>This implementation makes speed gains over {@link #generateSql} by 
+   * supporting only a single span (freeform) layer, identifying the matching spans first,
+   * and then identifying the first word in each to provide the match token.
+   * @param parameters List of parameter values, which must be Double, Integer, or String.
+   * @param schema The layer schema.
+   * @param spanLayer The one span layer being searched.
+   * @param layerMatch The one span's match condition.
+   * @return An SQL query to implement the query.
+   * @throws Exception If the search should be halted for any reason
+   * - e.g. the {@link Matrix#participantQuery} identifies no participants.
+   */
+  public String generateOneSpanSql(
+    Vector<Object> parameters, Schema schema, Layer spanLayer, LayerMatch layerMatch)
+    throws Exception {
+    description = "_"+layerMatch.getPattern();
+    StringBuilder q = new StringBuilder()
+      .append("INSERT INTO _result")
+      .append(" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,")
+      .append(" defining_annotation_id, segment_annotation_id, target_annotation_id,")
+      .append(" turn_annotation_id, first_matched_word_annotation_id,")
+      .append(" last_matched_word_annotation_id, complete, target_annotation_uid)")
+      .append(" SELECT ?, token.ag_id AS ag_id, 0 AS speaker_number,")
+      .append(" token.start_anchor_id, token.end_anchor_id,")
+      .append(" NULL AS defining_annotation_id,")
+      .append(" NULL AS segment_annotation_id,")
+      .append(" token.annotation_id AS target_annotation_id,")
+      .append(" NULL AS turn_annotation_id,")
+      .append(" NULL AS first_matched_word_annotation_id,")
+      .append(" NULL AS last_matched_word_annotation_id,")
+      .append(" 0 AS complete,")
+      .append(" CONCAT('e_',").append(spanLayer.get("layer_id").toString())
+      .append(",'_', token.annotation_id) AS target_annotation_uid")
+      .append(" FROM annotation_layer_").append(spanLayer.get("layer_id").toString())
+      .append(" token")
+      .append(" INNER JOIN anchor start ON token.start_anchor_id = start.anchor_id");
+    if (matrix.getTranscriptQuery() != null) {
+      q.append(" INNER JOIN transcript ON token.ag_id = transcript.ag_id");
+    }
+    q.append(" WHERE").append(" token.label ");
+    if (layerMatch.getNot()) q.append("NOT ");
+    q.append("REGEXP ?");
+    parameters.add(layerMatch.getPattern());
+    if (matrix.getTranscriptQuery() != null) {
+      GraphAgqlToSql transformer = new GraphAgqlToSql(store.getSchema());
+      GraphAgqlToSql.Query query = transformer.sqlFor(
+        matrix.getTranscriptQuery(), "transcript.transcript_id", null, null, null);
+      q.append(query.sql
+               .replaceFirst("^SELECT transcript.transcript_id FROM transcript WHERE ", " AND ")
+               .replaceFirst(" ORDER BY transcript.transcript_id$",""));
+    }
+    if (getRestrictByUser() != null) {
+      q.append(" AND (EXISTS (SELECT * FROM role")
+        .append(" INNER JOIN role_permission ON role.role_id = role_permission.role_id")
+        .append(" INNER JOIN annotation_transcript access_attribute")
+        .append(" ON access_attribute.layer = role_permission.attribute_name")
+        .append(" AND access_attribute.label REGEXP role_permission.value_pattern")
+        .append(" AND role_permission.entity REGEXP '.*t.*'") // transcript access
+        .append(" WHERE user_id = ? AND access_attribute.ag_id = token.ag_id)");
+      parameters.add(getRestrictByUser());
+      q.append(" OR EXISTS (SELECT * FROM role")
+        .append(" INNER JOIN role_permission ON role.role_id = role_permission.role_id")
+        .append(" AND role_permission.attribute_name = 'corpus'")
+        .append(" AND role_permission.entity REGEXP '.*t.*'") // transcript access
+        .append(" INNER JOIN transcript")
+        .append(" ON transcript.corpus_name REGEXP role_permission.value_pattern")
+        .append(" WHERE transcript.ag_id = token.ag_id")
+        .append(" AND user_id = ?))");
+      parameters.add(getRestrictByUser());
+    } // filtering by role
+    q.append(" ORDER BY token.ag_id, start.offset");
+    return q.toString();
+  }
   
   /**
    * Completes a layered search by first identifying the first 'column' of matches
@@ -1272,14 +1327,67 @@ public class OneQuerySearch extends SearchTask {
       return false;
     };
 
+    // we can generate optimized SQL for orthography-only searches
+    boolean orthographyOnly = !mainParticipantOnly
+      && anchorConfidenceThreshold == null // not only aligned
+      && matrix.getParticipantQuery() == null
+      && matrix.getTranscriptQuery() == null
+      && !matrix.layerMatchStream().filter(LayerMatch::HasPattern) // no non-orthography layers
+      .filter(match -> !match.getId().equals("orthography"))
+      .findAny().isPresent()
+      && !matrix.getColumns().stream() // no adj > 1
+      .filter(column -> column.getAdj() > 1)
+      .findAny().isPresent()
+      && !matrix.layerMatchStream() // no negations
+      .filter(LayerMatch::HasPattern).filter(match -> match.getNot())
+      .findAny().isPresent()
+      && !matrix.layerMatchStream() // no anchoring
+      .filter(match -> match.getAnchorStart() || match.getAnchorEnd())
+      .findAny().isPresent();
+    
+    // we can generate optimized SQL one-span-only searches
+    boolean noNonSpanLayers = !matrix.getColumns().stream() // no adj > 1
+      .filter(column -> column.getAdj() > 1)
+      .findAny().isPresent()
+      && !matrix.layerMatchStream().filter(LayerMatch::HasPattern)
+      .map(layerMatch -> schema.getLayer(layerMatch.getId()))
+      .filter(Objects::nonNull)
+      .filter(layer -> layer.getParentId() != null) // no non-top-level layers
+      .filter(layer -> !layer.getParentId().equals(schema.getRoot().getId())
+              // nor top level layers that are not aligned (i.e. transcript attributes)
+              || layer.getAlignment() == Constants.ALIGNMENT_NONE)
+      .findAny().isPresent();
+    List<Layer> spanLayers = matrix.layerMatchStream().filter(LayerMatch::HasPattern)
+      .map(layerMatch -> schema.getLayer(layerMatch.getId()))
+      .filter(Objects::nonNull)
+      .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE // aligned
+              && (layer.getParentId() == null // top-level layers
+                  || layer.getParentId().equals(schema.getRoot().getId())))
+      .collect(Collectors.toList());
+    LayerMatch spanLayerMatch = spanLayers.size() != 1?null
+      :matrix.layerMatchStream()
+      .filter(LayerMatch::HasPattern)
+      .filter(match -> match.getId().equals(spanLayers.get(0).getId()))
+      .findAny().get();
+
     // generate an SQL statement from the search matrix
     String q = null;
     // Parameter values
-    Vector<Object> parameters = new Vector<Object>(); 
+    Vector<Object> parameters = new Vector<Object>();
     try {
       setStatus("Creating query...");
-      q = generateSql(parameters, schema,
-                      layerIsSpanningAndWordAnchored, participantCondition, transcriptCondition);
+      if (orthographyOnly) {
+        setStatus("Optimising for orthography-only search...");
+        q = generateOrthographySql(parameters, schema);
+      } else if (noNonSpanLayers && spanLayers.size() == 1
+                 && spanLayerMatch.getTarget()) {
+        setStatus("Optimising for one-span-only search...");
+        q = generateOneSpanSql(parameters, schema, spanLayers.get(0), spanLayerMatch);
+      } else {
+        q = generateSql(
+          parameters, schema,
+          layerIsSpanningAndWordAnchored, participantCondition, transcriptCondition);
+      }
     } catch (Exception x) {
       setStatus(x.getMessage());
       if (!x.getMessage().equals("Cancelled.")) {
@@ -1316,7 +1424,7 @@ public class OneQuerySearch extends SearchTask {
     sqlPatternMatch.executeUpdate();
     sqlPatternMatch.close();
     
-    //setStatus(q);
+    // setStatus(q);
     sqlPatternMatch = connection.prepareStatement(q);
     
     // set the layer search parameters
@@ -1342,6 +1450,12 @@ public class OneQuerySearch extends SearchTask {
     sqlPatternMatch.close();
     iPercentComplete = SQL_FINISHED_PERCENT;
 
+    // if it's a single-span search, we need to fill in the token IDs
+    if (noNonSpanLayers && spanLayers.size() == 1
+        && spanLayerMatch.getTarget()) {
+      setTokenIds(connection, spanLayers.get(0), spanLayerMatch, participantCondition);
+    }
+    
     setStatus("Query complete, collating results...");
     sqlPatternMatch = connection.prepareStatement(
       "CREATE TEMPORARY TABLE _result_copy ( "
@@ -1383,8 +1497,7 @@ public class OneQuerySearch extends SearchTask {
     sqlPatternMatch = connection.prepareStatement(
       "DROP TABLE _result_copy");
     executeUpdate(sqlPatternMatch);
-    sqlPatternMatch.close();
-      
+    sqlPatternMatch.close();      
 
     iPercentComplete = 92;
     
@@ -1433,17 +1546,109 @@ public class OneQuerySearch extends SearchTask {
     iPercentComplete = 95;
       
     results.reset();
-    results.hasNext(); // force it to recheck the database to get size etc.
-    filterResults(); // exclude simultaneous speech, etc.
 
-    int size = results.size();
-    setStatus("There " + (size==1?"was ":"were ") + size + (size==1?" match":" matches")
-              + " in " + (((getDuration()/1000)+30)/60)
-              + " minutes [" + getDuration() + "ms]");
+    // exclude simultaneous speech, etc.
+    filterResults(); 
+
+    results.reset();
+    // force it to recheck the database to get size etc.
+    results.hasNext();
     
     iPercentComplete = 100;
     
   }
+  
+  /**
+   * Fills in the token IDs for the result set, assuming they're missing because the
+   * search query identified the target annotation ID but not the word tokens IDs.  
+   * @param spanLayer The one span layer being searched.
+   * @param layerMatch The one span layer's match conditions.
+   * @throws SQLException
+   */
+  protected void setTokenIds(
+    Connection connection, Layer spanLayer, LayerMatch layerMatch,
+    UnaryOperator<String> participantCondition) throws Exception {
+    StringBuilder worldLine = new StringBuilder()
+      .append("SELECT")
+      .append(" line.label, line.start_anchor_id, line.end_anchor_id,")
+      .append(" line.annotation_id AS defining_annotation_id, word.turn_annotation_id,")
+      .append(" word.annotation_id AS first_matched_word_annotation_id,")
+      .append(" word.annotation_id AS last_matched_word_annotation_id")
+      .append(" FROM annotation_layer_0 word")
+      .append(" INNER JOIN anchor word_start ON word.start_anchor_id = word_start.anchor_id")
+      .append(" INNER JOIN annotation_layer_12 line")
+      .append(" ON word.turn_annotation_id = line.turn_annotation_id")
+      .append(" INNER JOIN anchor line_start ON line.start_anchor_id = line_start.anchor_id")
+      .append(" INNER JOIN anchor line_end ON line.end_anchor_id = line_end.anchor_id");
+    if(mainParticipantOnly) {
+      worldLine.append(" INNER JOIN transcript_speaker ON transcript_speaker.ag_id = word.ag_id")
+        .append(" AND transcript_speaker.speaker_number = line.label AND main_speaker = 1");
+    }
+    worldLine.append(" INNER JOIN anchor span_start ON span_start.anchor_id = ?")
+      .append(" INNER JOIN anchor span_end ON span_end.anchor_id = ?")
+      .append(" AND word_start.offset >= line_start.offset")
+      .append(" AND word_start.offset < line_end.offset")
+      .append(" WHERE word.ag_id = ?");
+    if (layerMatch.getAnchorStart()) {
+      worldLine.append(" AND word.start_anchor_id = span_start.anchor_id");
+    }
+    if (layerMatch.getAnchorEnd()) {
+      worldLine.append(" AND word.end_anchor_id = span_end.anchor_id");
+    }
+    if (!layerMatch.getAnchorStart() && !layerMatch.getAnchorEnd()) {
+      worldLine.append(" AND word_start.offset >= span_start.offset")
+        .append(" AND word_start.offset < span_end.offset");
+    }
+    String speakerWhere = participantCondition.apply(matrix.getParticipantQuery());
+    if (speakerWhere == null && getLastException() != null) {
+      throw (Exception)getLastException();
+    }
+    worldLine.append(speakerWhere.replace("turn.label","line.label"));
+    worldLine.append(" ORDER BY word_start.offset")
+      .append(" LIMIT 1");
+    PreparedStatement sqlWordLine = connection.prepareStatement(worldLine.toString());
+    PreparedStatement sqlResults = connection.prepareStatement("SELECT * FROM _result");
+    PreparedStatement sqlUpdateResult = connection.prepareStatement(
+      "UPDATE _result SET speaker_number = ?, start_anchor_id = ?, end_anchor_id = ?,"
+      +" defining_annotation_id = ?, turn_annotation_id = ?,"
+      +" first_matched_word_annotation_id = ?, last_matched_word_annotation_id = ?"
+      +" WHERE search_id = ? AND match_id = ?");
+    PreparedStatement sqlDeleteResult = connection.prepareStatement(
+      "DELETE FROM _result WHERE search_id = ? AND match_id = ?");
+    ResultSet rsResults = sqlResults.executeQuery();
+    try {
+      while (rsResults.next() && !bCancelling) {
+        sqlWordLine.setLong(1, rsResults.getLong("start_anchor_id"));
+        sqlWordLine.setLong(2, rsResults.getLong("end_anchor_id"));
+        sqlWordLine.setInt(3, rsResults.getInt("ag_id")); // TODO and main participant?
+        ResultSet rsWordLine = sqlWordLine.executeQuery();
+        if (rsWordLine.next()) { // only the first one
+          sqlUpdateResult.setString(1, rsWordLine.getString("label")); // speaker_number
+          sqlUpdateResult.setLong(2, rsWordLine.getLong("start_anchor_id"));
+          sqlUpdateResult.setLong(3, rsWordLine.getLong("end_anchor_id"));
+          sqlUpdateResult.setLong(4, rsWordLine.getLong("defining_annotation_id"));
+          sqlUpdateResult.setLong(5, rsWordLine.getLong("turn_annotation_id"));
+          sqlUpdateResult.setLong(6, rsWordLine.getLong("first_matched_word_annotation_id"));
+          sqlUpdateResult.setLong(7, rsWordLine.getLong("last_matched_word_annotation_id"));
+          sqlUpdateResult.setInt(8, rsResults.getInt("search_id"));
+          sqlUpdateResult.setInt(9, rsResults.getInt("match_id"));
+          sqlUpdateResult.executeUpdate();
+        } else { // no matching token, so invalid result
+          sqlDeleteResult.setInt(1, rsResults.getInt("search_id"));
+          sqlDeleteResult.setInt(2, rsResults.getInt("match_id"));
+          sqlDeleteResult.executeUpdate();
+        }
+        rsWordLine.close();
+        
+      } // next result
+    } finally {
+      rsResults.close();
+      sqlResults.close();
+      sqlWordLine.close();
+      sqlUpdateResult.close();
+      sqlDeleteResult.close();
+    }
+  } // end of setTokenIds()
 
   /**
    * Removes results that should be excluded; e.g. simultaneous speech as per the
@@ -1547,7 +1752,6 @@ public class OneQuerySearch extends SearchTask {
           results.remove();
         }
       } // next match
-      results.reset(); // recompute size, etc
     }
   } // end of filterResults()
 

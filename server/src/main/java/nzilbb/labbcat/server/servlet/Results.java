@@ -467,7 +467,7 @@ public class Results extends LabbcatServlet { // TODO unit test
                       } else {
                         assert layer.getId().equals(annotation.getLayerId())
                           : "layer.getId().equals(annotation.getLayerId()) - "
-                          + layer + " <> " + annotation.getLayerId();
+                          + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
                         csvOut.print(annotation.getLabel());
                         if (schema.getLayer(annotation.getLayerId()).getAlignment()
                             != Constants.ALIGNMENT_NONE) { // offsets

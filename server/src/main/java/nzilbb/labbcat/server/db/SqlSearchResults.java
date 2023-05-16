@@ -87,11 +87,13 @@ public class SqlSearchResults implements SearchResults {
   }
   
   /**
-   * SearchResults method: Resets the iterator to the beginning of the list
+   * SearchResults method: Resets the iterator to the beginning of the list.
    */
   public void reset() {
     try { if (rsIterator != null) rsIterator.close(); } catch(SQLException exception) {}
     rsIterator = null;
+    // recompute size, etc.
+    try { checkIterator(); } catch(SQLException exception) {}
   }
 
   int size = 0;
@@ -139,7 +141,8 @@ public class SqlSearchResults implements SearchResults {
         .addMatchAnnotationUid("0", "ew_0_"+rsIterator.getInt("first_matched_word_annotation_id"))
         .addMatchAnnotationUid("1", "ew_0_"+rsIterator.getInt("last_matched_word_annotation_id"))
         .setTargetAnnotationUid(rsIterator.getString("target_annotation_uid"))
-        .setPrefix(resultNumberFormatter.format(nextRow)+"-")
+        .setPrefix(resultNumberFormatter.format(
+                     graphId >= 0?rsIterator.getInt("match_id"):nextRow)+"-")
         .setGraphId(rsIterator.getInt("ag_id"))
         .setStartAnchorId(rsIterator.getLong("start_anchor_id"))
         .setEndAnchorId(rsIterator.getLong("end_anchor_id"))
@@ -208,6 +211,7 @@ public class SqlSearchResults implements SearchResults {
   ResultSet rsIterator = null;
   int nextRow = 0;
   NumberFormat resultNumberFormatter = NumberFormat.getInstance();
+  int graphId = -1;
 
   /**
    * Constructor that creates a new search record based on the given search task.
@@ -262,6 +266,20 @@ public class SqlSearchResults implements SearchResults {
   }
 
   /**
+   * Constructor that provides access to an existing search record based on the given
+   * results, providing access to results from only the given graph ID.
+   * @param results The existing search results collection.
+   * @param graphId The ag_id to filter by.
+   * @param connection A valid database connection.
+   */
+  public SqlSearchResults(SqlSearchResults results, int graphId, Connection connection) {
+    this.connection = connection;
+    this.graphId = graphId;
+    this.id = results.id;
+    this.name = results.name;
+  }
+  
+  /**
    * Ensures that the iterator is in a valid state for iterating.
    * @throws SQLException
    */
@@ -280,10 +298,12 @@ public class SqlSearchResults implements SearchResults {
       sqlIterator = connection.prepareStatement(
         "SELECT result.* FROM result"
         +" WHERE result.search_id = ?"
+        +(graphId >= 0?" AND result.ag_id = ?":"")
         +" ORDER BY match_id"
         +(firstMatch!=1?" LIMIT "+(firstMatch-1)+",18446744073709551615":""),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
       sqlIterator.setLong(1, id);
+      if (graphId >= 0 ) sqlIterator.setInt(2, graphId);
       PreparedStatement sqlSize = connection.prepareStatement(
         "SELECT COUNT(*) FROM result WHERE result.search_id = ?");
       sqlSize.setLong(1, getId());
