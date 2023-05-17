@@ -218,7 +218,7 @@ public class TestOneQuerySearch {
     assertEquals("Description", "_^(testing)$_^(1)$_^(2)$_^(3)$", search.getDescription());
   }
   
-  /** Ensure a one-target-span-only searches produces optimised SQL. */
+  /** Ensure one-target-span-only searches produce optimised SQL. */
   @Test public void optimisedSpanSearch() throws Exception {    
     OneQuerySearch search = new OneQuerySearch();
     Schema schema = getSchema();
