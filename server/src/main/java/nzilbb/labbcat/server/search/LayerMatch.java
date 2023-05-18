@@ -224,6 +224,14 @@ public class LayerMatch implements CloneableBean {
   } // end of ensurePatternAnchored()
 
   /**
+   * Returns the JSON serialization of this layer.
+   * @return The JSON serialization of this layer.
+   */
+  @Override public String toString() {
+    return toJson().toString();
+  } // end of toString()
+  
+  /**
    * Determines whether the given LayerMatch actually specifies a #pattern, #min, or #max.
    * @param layerPattern
    * @return true if the given LayerMatch specifies a #pattern, #min, or #max, false otherwise.

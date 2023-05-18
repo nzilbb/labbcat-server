@@ -109,4 +109,11 @@ public class Column implements CloneableBean {
     return this;
   }
 
+  /**
+   * Returns the JSON serialization of this column.
+   * @return The JSON serialization of this column.
+   */
+  @Override public String toString() {
+    return toJson().toString();
+  } // end of toString()
 }

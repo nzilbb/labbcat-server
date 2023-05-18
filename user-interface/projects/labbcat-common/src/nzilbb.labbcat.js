@@ -895,7 +895,7 @@
         
         /**
          * Searches for tokens that match the given pattern.
-         * <p> Although <var>mainParticipant</var>, <var>aligned</var> and
+         * <p> Although <var>mainParticipantOnly</var>, <var>offsetThreshold</var> and
          * <var>matchesPerTranscript</var> are all optional, if one of them is specified,
          * then all must be specified.
          * <p> The <var>pattern</var> should match the structure of the search matrix in the
@@ -979,19 +979,22 @@
          * </pre>
          * @param {object} pattern An object representing the pattern to search for, which
          * mirrors the Search Matrix in the browser interface.
-         * @param {string[]} [participantExpression=null] An optional expression for
+         * @param {string[]} [participantQuery=null] An optional expression for
          * identifying participants to search the utterances of. This can be any
          * expression of the kind used with {@link LabbcatView#getMatchingParticipantIds}
          * e.g. "['AP2505_Nelson','AP2512_MattBlack','AP2515_ErrolHitt'].includes(id)"
-         * @param {string[]} [transcriptExpression=null] An optional expression for
+         * @param {string[]} [transcriptQuery=null] An optional expression for
          * identifying transcripts to search the utterances of. This can be any
          * expression of the kind used with {@link LabbcatView#getMatchingTranscriptIds} 
          * e.g. "['CC','ID'].includes(first('corpus').label)
          *       && first('transcript_type').label == 'wordlist'"
-         * @param {boolean} [mainParticipant=true] true to search only main-participant
+         * @param {boolean} [mainParticipantOnly=true] true to search only main-participant
          * utterances, false to search all utterances. 
-         * @param {boolean} [aligned=false] true to include only words that are aligned (i.e. have
-         * anchor confidence &ge; 50, false to search include un-aligned words as well. 
+         * @param {int} [offsetThreshold=null] Optional minimum alignment confidence for
+         * matching word or segment annotations. A value of 50 means that annotations that
+         * were at least automatically aligned will be returned. Use 100 for
+         * manually-aligned annotations only, and 0 or no value to return all matching
+         * annotations regardless of alignment confidence.
          * @param {int} [matchesPerTranscript=null] Optional maximum number of matches per
          * transcript to return. <tt>null</tt> means all matches.
          * @param {int} [overlapThreshold=null] Optional percentage overlap with other
@@ -1003,81 +1006,81 @@
          * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
          * {@link LabbcatView#waitForTask}, etc.
          */
-        search(pattern, participantExpression, transcriptExpression, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
-            if (typeof participantExpression === "function") { // (pattern, onResult)
-                onResult = participantExpression;
-                participantExpression = null;
-                transcriptExpression = null;
-                mainParticipant = true;
-                aligned = false;
+        search(pattern, participantQuery, transcriptQuery, mainParticipantOnly, offsetThreshold, matchesPerTranscript, overlapThreshold, onResult) {
+            if (typeof participantQuery === "function") { // (pattern, onResult)
+                onResult = participantQuery;
+                participantQuery = null;
+                transcriptQuery = null;
+                mainParticipantOnly = true;
+                offsetThreshold = null;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof transcriptExpression === "function") {
-                // (pattern, participantExpression, onResult)
-                onResult = transcriptExpression;
-                transcriptExpression = null;
-                mainParticipant = true;
-                aligned = false;
+            } else if (typeof transcriptQuery === "function") {
+                // (pattern, participantQuery, onResult)
+                onResult = transcriptQuery;
+                transcriptQuery = null;
+                mainParticipantOnly = true;
+                offsetThreshold = null;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof transcriptExpression === "boolean") {
-                // (pattern, participantExpression, mainParticipant, aligned,
+            } else if (typeof transcriptQuery === "boolean") {
+                // (pattern, participantQuery, mainParticipantOnly, offsetThreshold,
                 // matchesPerTranscript, onResult) 
                 onResult = overlapThreshold;
                 overlapThreshold = matchesPerTranscript
-                matchesPerTranscript = aligned;
-                aligned = mainParticipant;
-                mainParticipant = transcriptExpression;
+                matchesPerTranscript = offsetThreshold;
+                offsetThreshold = mainParticipantOnly;
+                mainParticipantOnly = transcriptQuery;
                 overlapThreshold = null;
-            } else if (typeof mainParticipant === "function") {
-                // (pattern, participantExpression, transcriptExpression, onResult)
-                onResult = mainParticipant;
-                mainParticipant = true;
-                aligned = false;
+            } else if (typeof mainParticipantOnly === "function") {
+                // (pattern, participantQuery, transcriptQuery, onResult)
+                onResult = mainParticipantOnly;
+                mainParticipantOnly = true;
+                offsetThreshold = null;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
             }
-            if (typeof aligned === "function") {
-                // (pattern, participantIds, transcriptExpression, mainParticipant, onResult)
+            if (typeof offsetThreshold === "function") {
+                // (pattern, participantIds, transcriptQuery, mainParticipantOnly, onResult)
                 // i.e. the original signature of this function
-                onResult = aligned;
-                aligned = false;
+                onResult = offsetThreshold;
+                offsetThreshold = null;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
             }
             if (typeof matchesPerTranscript === "function") {
-                // (pattern, participantIds, mainParticipant, aligned, onResult)
+                // (pattern, participantIds, mainParticipantOnly, offsetThreshold, onResult)
                 // i.e. the original signature of this function
                 onResult = matchesPerTranscript;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
             }
             if (typeof overlapThreshold === "function") {
-                // (pattern, participantIds, mainParticipant, aligned, matchesPerTranscript, onResult)
+                // (pattern, participantIds, mainParticipantOnly, offsetThreshold, matchesPerTranscript, onResult)
                 onResult = overlapThreshold;
                 overlapThreshold = null;
             }
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
-                            +", "+participantExpression
-                            +", "+transcriptExpression
-                            +", "+mainParticipant
-                            +", "+aligned
+                            +", "+participantQuery
+                            +", "+transcriptQuery
+                            +", "+mainParticipantOnly
+                            +", "+offsetThreshold
                             +", "+matchesPerTranscript
                             +", "+overlapThreshold+")");
             }
 
             // for backwards compatibility, convert arrays of IDs to expressions
-            if (Array.isArray(participantExpression)) {
-                participantExpression = "["
-                    +participantExpression
+            if (Array.isArray(participantQuery)) {
+                participantQuery = "["
+                    +participantQuery
                     .map(s=>"'"+s.replace(/'/,"\\'")+"'")
                     .join(",")
                     +"].includes(id)";
             }
-            if (Array.isArray(transcriptExpression)) {
-                transcriptExpression = "["
-                    +transcriptExpression
+            if (Array.isArray(transcriptQuery)) {
+                transcriptQuery = "["
+                    +transcriptQuery
                     .map(s=>"'"+s.replace(/'/,"\\'")+"'")
                     .join(",")
                     +"].includes(first('transcript_type').label)";
@@ -1114,12 +1117,12 @@
                 searchJson : JSON.stringify(pattern),
                 words_context : 0
             }
-            if (mainParticipant) parameters.only_main_speaker = true;
-            if (aligned) parameters.only_aligned = true;
-            if (matchesPerTranscript) parameters.matches_per_transcript = matchesPerTranscript;
-            if (participantExpression) parameters.participant_expression = participantExpression;
-            if (transcriptExpression) parameters.transcript_expression = transcriptExpression;
-            if (overlapThreshold) parameters.overlap_threshold = overlapThreshold;
+            if (mainParticipantOnly) parameters.mainParticipantOnly = true;
+            if (offsetThreshold) parameters.offsetThreshold = offsetThreshold;
+            if (matchesPerTranscript) parameters.matchesPerTranscript = matchesPerTranscript;
+            if (participantQuery) parameters.participantQuery = participantQuery;
+            if (transcriptQuery) parameters.transcriptQuery = transcriptQuery;
+            if (overlapThreshold) parameters.overlapThreshold = overlapThreshold;
 
             this.createRequest(
                 "search", null, onResult, this.baseUrl+"api/search",
