@@ -251,7 +251,7 @@ public class Matrix implements CloneableBean {
    */
   public String getDescription() {
     return layerMatchStream()
-      .filter(LayerMatch::HasPattern)
+      .filter(LayerMatch::HasCondition)
       .map(layerMatch -> {
           StringBuilder description = new StringBuilder(layerMatch.getId());
           if (layerMatch.getPattern() != null) {

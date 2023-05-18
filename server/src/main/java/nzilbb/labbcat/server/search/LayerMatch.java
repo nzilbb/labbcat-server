@@ -236,7 +236,7 @@ public class LayerMatch implements CloneableBean {
    * @param layerPattern
    * @return true if the given LayerMatch specifies a #pattern, #min, or #max, false otherwise.
    */
-  public static boolean HasPattern(LayerMatch layer) {
+  public static boolean HasCondition(LayerMatch layer) {
     return layer.getPattern() != null
       || layer.getMin() != null
       || layer.getMax() != null;

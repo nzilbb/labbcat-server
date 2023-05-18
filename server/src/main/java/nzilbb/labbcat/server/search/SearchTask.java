@@ -244,7 +244,7 @@ public abstract class SearchTask extends Task {
       return "Search matrix was not specified"; // TODO i18n
     }
     if (!matrix.layerMatchStream()
-        .filter(LayerMatch::HasPattern)
+        .filter(LayerMatch::HasCondition)
         .findAny().isPresent()) {
       return "No search text was specified"; // TODO i18n
     }
