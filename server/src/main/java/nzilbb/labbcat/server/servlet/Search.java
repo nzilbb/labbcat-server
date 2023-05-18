@@ -177,15 +177,17 @@ public class Search extends LabbcatServlet {
         return;
       }
     }
-    if (request.getParameter("matchesPerTranscript") != null
-        || request.getParameter("matches_per_transcript") != null) {
+    String matchesPerTranscript = request.getParameter("matchesPerTranscript");
+    if (matchesPerTranscript == null) {
+      matchesPerTranscript = request.getParameter("matches_per_transcript");
+    }
+    if (matchesPerTranscript != null) {
       try {
-        task.setMatchesPerTranscript(
-          Integer.valueOf(request.getParameter("matches_per_transcript")));
+        task.setMatchesPerTranscript(Integer.valueOf(matchesPerTranscript));
       } catch(NumberFormatException exception) {
         writeResponse(response, failureResult(
                         request, "Invalid matches per transcript \"{0}\": {1}",
-                        request.getParameter("matches_per_transcript"),
+                        matchesPerTranscript,
                         exception.getMessage()));
         return;
       }

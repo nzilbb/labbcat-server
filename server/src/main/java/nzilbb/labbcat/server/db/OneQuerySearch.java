@@ -71,6 +71,17 @@ public class OneQuerySearch extends SearchTask {
     throws Exception {
     description = "";
     
+    // if there's no explicit target layer
+    if (matrix.getTargetLayerId() == null) {
+      // and there's a segment condition
+      matrix.layerMatchStream()
+        .filter(match -> "segment".equals(match.getId()))
+        .filter(LayerMatch::HasCondition)
+        .findAny()
+        // make the segment condition the target
+        .ifPresent(match -> match.setTarget(true));
+    }
+    
     // column 0 first
     int iWordColumn = 0;
     StringBuilder sSqlExtraJoinsFirst = new StringBuilder();
@@ -526,7 +537,7 @@ public class OneQuerySearch extends SearchTask {
               + anchorConfidenceThreshold));
         }
       } // there's a target segment layer
-    }
+    } // aligned only
 
     // access restrictions?
     String strAccessWhere = "";
@@ -603,6 +614,7 @@ public class OneQuerySearch extends SearchTask {
       sSqlWordStartJoin = sqlWordStartJoin.format(columnSuffix);
       sSqlWordEndJoin = sqlWordEndJoin.format(columnSuffix);
       sSqlSegmentStartJoin = sqlSegmentStartJoin.format(columnSuffix);
+      sSqlSegmentEndJoin = sqlSegmentEndJoin.format(columnSuffix);
       sSqlLineJoin = sqlLineJoin.format(columnSuffix);
       sSqlEndLineJoin = sqlEndLineJoin.format(columnSuffix);
       sSqlEndTurnJoin = sqlEndTurnJoin.format(columnSuffix);
@@ -907,14 +919,14 @@ public class OneQuerySearch extends SearchTask {
         }
         if (targetSegmentLayer.isPresent()) {
           // segment threshold too
-          if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentStartJoin) < 0) {
-            sSqlExtraJoinsFirst.append(
+          if (sSqlExtraJoins.indexOf(sSqlSegmentStartJoin) < 0) {
+            sSqlExtraJoins.append(
               sSqlSegmentStartJoin
               + " AND segment_"+iWordColumn+"_start.alignment_status >= "
               + anchorConfidenceThreshold);
           } else { // update existing join
-            sSqlExtraJoinsFirst = new StringBuilder(
-              sSqlExtraJoinsFirst.toString().replaceAll(
+            sSqlExtraJoins = new StringBuilder(
+              sSqlExtraJoins.toString().replaceAll(
                 " ON segment_"+iWordColumn+"_start\\.anchor_id"
                 +" = segment_"+iWordColumn+"\\.start_anchor_id",
                 " ON segment_"+iWordColumn+"_start\\.anchor_id"
@@ -922,14 +934,14 @@ public class OneQuerySearch extends SearchTask {
                 + " AND segment_"+iWordColumn+"_start.alignment_status >= "
                 + anchorConfidenceThreshold));
           }
-          if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentEndJoin) < 0) {
-            sSqlExtraJoinsFirst.append(
+          if (sSqlExtraJoins.indexOf(sSqlSegmentEndJoin) < 0) {
+            sSqlExtraJoins.append(
               sSqlSegmentEndJoin
               + " AND segment_"+iWordColumn+"_end.alignment_status >= "
               + anchorConfidenceThreshold);
           } else { // update existing join
-            sSqlExtraJoinsFirst = new StringBuilder(
-              sSqlExtraJoinsFirst.toString().replaceAll(
+            sSqlExtraJoins = new StringBuilder(
+              sSqlExtraJoins.toString().replaceAll(
                 " ON segment_"+iWordColumn+"_end\\.anchor_id"
                 +" = segment_"+iWordColumn+"\\.end_anchor_id",
                 " ON segment_"+iWordColumn+"_end\\.end_id"
@@ -938,7 +950,7 @@ public class OneQuerySearch extends SearchTask {
                 + anchorConfidenceThreshold));
           }
         } // there's a target segment layer
-      }
+      } // aligned only
       
       // is this the last column?
       String sBorderCondition = "";
@@ -993,7 +1005,12 @@ public class OneQuerySearch extends SearchTask {
       
       strSubsequentSelect.append(sqlPatternMatchSubsequentSelect.format(oSubPatternMatchArgs));
       strSubsequentJoin.append(sSqlExtraJoins.toString());
-      strSubsequentWhere.append(sqlPatternMatchSubsequentWhere.format(oSubPatternMatchArgs));
+      if (matrix.getColumns().get(iWordColumn-1).getAdj() == 1) { // adj from previous column
+        strSubsequentWhere.append(sqlPatternMatchNextWhere.format(oSubPatternMatchArgs));
+      } else {
+        strSubsequentWhere.append(
+          sqlPatternMatchSubsequentRangeWhere.format(oSubPatternMatchArgs));
+      }
       
       setStatus("Adjacency for col " + iWordColumn + " is: " + column.getAdj());
     } // next column
@@ -1103,7 +1120,10 @@ public class OneQuerySearch extends SearchTask {
 
     // add adjacency parameters
     for (int c = 0; c < matrix.getColumns().size()-1; c++) {
-      parameters.add(matrix.getColumns().get(c).getAdj());
+      int adj = matrix.getColumns().get(c).getAdj();
+      if (adj != 1) {
+        parameters.add(matrix.getColumns().get(c).getAdj());
+      }
     } // next adjacency
     
     return q;
@@ -1227,7 +1247,7 @@ public class OneQuerySearch extends SearchTask {
   public String generateOneSpanSql(
     Vector<Object> parameters, Schema schema, Layer spanLayer, LayerMatch layerMatch)
     throws Exception {
-    description = "_"+layerMatch.getPattern();
+    description = "";
     StringBuilder q = new StringBuilder()
       .append("INSERT INTO _result")
       .append(" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,")
@@ -2103,10 +2123,30 @@ public class OneQuerySearch extends SearchTask {
    *  <li>5: previous column number</li>
    * </ul>
    */
-  static final MessageFormat sqlPatternMatchSubsequentWhere = new MessageFormat(
+  static final MessageFormat sqlPatternMatchSubsequentRangeWhere = new MessageFormat(
     " /* column {4}: */ "
     +" AND word{4}.ordinal_in_turn"
     +" BETWEEN word{5}.ordinal_in_turn + 1 AND word{5}.ordinal_in_turn + ?"
+    + "{1} {2}");
+  
+  /** 
+   * WHERE required for {@link #sqlPatternMatchSubsequentSelect}, for finding matches for
+   * subsequent columns. Speaker doesn't matter any more - the first query returned only
+   * words spoken by our search speakers.
+   * <p> Arguments are:
+   * <ul>
+   *  <li>0: any extra JOINs e.g. {@link #sSqlWordStartJoin} </li>
+   *  <li>1: border conditions</li>
+   *  <li>2: search criteria subqueries</li>
+   *  <li>3: extra fields for the SELECT clause - e.g. for line annotation_id and
+   *         start/end anchors for the last column result</li> 
+   *  <li>4: column number</li>
+   *  <li>5: previous column number</li>
+   * </ul>
+   */
+  static final MessageFormat sqlPatternMatchNextWhere = new MessageFormat(
+    " /* column {4}: */ "
+    +" AND word{4}.ordinal_in_turn = word{5}.ordinal_in_turn + 1"
     + "{1} {2}");
   
   // subqueries for matching the layer representation

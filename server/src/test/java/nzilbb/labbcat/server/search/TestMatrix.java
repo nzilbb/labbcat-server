@@ -348,7 +348,7 @@ public class TestMatrix {
   /**
    * Ensure that Matrix still function when not all attributes are present.
    */
-  @Test public void incompleteMartrices() {
+  @Test public void incompleteMatrices() {
     Matrix m = (Matrix)
       (new Matrix().fromJsonString(
         "{\"columns\":[{\"layers\":{\"orthography\":{\"pattern\":\"test\"}}}]}"));
@@ -359,8 +359,63 @@ public class TestMatrix {
     LayerMatch layerMatch = col.getLayers().get("orthography");
     assertNotNull("layer is orthography", layerMatch);
     assertEquals("layer id", "orthography", layerMatch.getId());
-    assertNull("layer negation null", layerMatch.getNot());
+    assertNull("layer negation null", layerMatch.getNot());    
+  }
+
+  /**
+   * Ensure target identification works for normal and edge cases.
+   */
+  @Test public void target() {
+    Matrix m = new Matrix()
+      .addColumn(new Column().addLayerMatch(
+                   new LayerMatch().setId("orthography").setPattern("the"))
+                 .setAdj(3))
+      .addColumn(new Column().addLayerMatch(
+                   new LayerMatch().setId("syllableCount").setMin("2").setMax("3")
+                   .setAnchorEnd(true)
+                   .setTarget(true))
+                 .addLayerMatch(
+                   new LayerMatch().setId("orthography").setPattern("")));
+    assertEquals("Normal case - layer", "syllableCount", m.getTargetLayerId());
+    assertEquals("Normal case - column", 1, m.getTargetColumn());
+
+    m = new Matrix()
+      .addColumn(new Column().addLayerMatch(
+                   new LayerMatch().setId("orthography").setPattern("the"))
+                 .setAdj(3))
+      .addColumn(new Column().addLayerMatch(
+                   new LayerMatch().setId("syllableCount").setMin("2").setMax("3")
+                   .setAnchorEnd(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("")));
+    assertNull("No target - layer", m.getTargetLayerId());
+    assertEquals("No target - column", -1, m.getTargetColumn());
+    
+    m = new Matrix()
+      .addColumn(new Column().addLayerMatch(
+                   new LayerMatch().setId("orthography").setPattern("the"))
+                 .setAdj(3))
+      .addColumn(new Column().addLayerMatch(
+                   new LayerMatch().setId("syllableCount").setMin("2").setMax("3")
+                   .setAnchorEnd(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("")
+                                .setTarget(true))); // target has no pattern
+    assertNull("Target has no pattern - layer", m.getTargetLayerId());
+    assertEquals("Target has no pattern - column", -1, m.getTargetColumn());
+    
+    m = new Matrix()
+      .addColumn(new Column().addLayerMatch(
+                   new LayerMatch().setId("orthography").setPattern("the")
+                   .setTarget(true)) // multiple targets
+                 .setAdj(3))
+      .addColumn(new Column().addLayerMatch(
+                   new LayerMatch().setId("syllableCount").setMin("2").setMax("3")
+                   .setAnchorEnd(true)
+                   .setTarget(true)) // multiple targets                 
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("")));
+    // choose first target
+    assertEquals("Multiple targets - layer", "orthography", m.getTargetLayerId());
+    assertEquals("Multiple targets - column", 0, m.getTargetColumn());
     
   }
-   
+
 }

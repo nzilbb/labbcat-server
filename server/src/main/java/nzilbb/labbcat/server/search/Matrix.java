@@ -221,6 +221,7 @@ public class Matrix implements CloneableBean {
    */
   public String getTargetLayerId() {
     return layerMatchStream()
+      .filter(LayerMatch::HasCondition)
       .filter(l -> l.getTarget())
       .map(l -> l.getId())
       .findAny()
@@ -236,6 +237,7 @@ public class Matrix implements CloneableBean {
   public int getTargetColumn() {
     for (int c = 0; c < columns.size(); c++) {
       if (columns.get(c).getLayers().values().stream()
+          .filter(LayerMatch::HasCondition)
           .filter(l -> l.getTarget())
           .findAny().isPresent()) {
         return c;
