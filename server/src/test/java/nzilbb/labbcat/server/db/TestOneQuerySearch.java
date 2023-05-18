@@ -128,6 +128,123 @@ public class TestOneQuerySearch {
     
     assertEquals("Description", "_NOT_^(needle)$", search.getDescription());
   }
+
+  /** Ensure transcript and participant queries are handled. */
+  @Test public void transcriptParticipantQueries() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(
+          new LayerMatch().setId("word").setPattern("needle").setTarget(true))));
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(
+      parameters, getSchema(), l -> false,
+      p -> "/*PARTICIPANT QUERY*/",
+      t -> "/*TRANSCRIPT QUERY*/");
+    assertEquals(
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_0.start_anchor_id,"
+      +" search_0_0.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_0.annotation_id AS target_annotation_id,"
+      +" search_0_0.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_0.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_0 search_0_0"
+      +"  ON search_0_0.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_0.label  REGEXP  ?"
+      +" INNER JOIN transcript ON turn.ag_id = transcript.ag_id" // transcript table included
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +" /*TRANSCRIPT QUERY*/"
+      +" /* participants */"
+      +" /*PARTICIPANT QUERY*/"
+      +" /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_0.turn_annotation_id, search_0_0.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
+  }
+  
+  /** Ensure setting restrictByUser generates SQL that filters out disallowed utterances. */
+  @Test public void restrictByUser() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(
+          new LayerMatch().setId("word").setPattern("needle").setTarget(true))));
+    search.setRestrictByUser("unit-test");
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_0.start_anchor_id,"
+      +" search_0_0.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_0.annotation_id AS target_annotation_id,"
+      +" search_0_0.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_0.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_0 search_0_0"
+      +"  ON search_0_0.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_0.label  REGEXP  ?"
+      +" INNER JOIN transcript ON turn.ag_id = transcript.ag_id" // transcript table included
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */"
+      +"  /* access clause */ "
+      +" AND EXISTS (SELECT * FROM role"
+      +" INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+      +" INNER JOIN annotation_transcript access_attribute" 
+      +" ON access_attribute.layer = role_permission.attribute_name" 
+      +" AND access_attribute.label REGEXP role_permission.value_pattern"
+      +" AND role_permission.entity REGEXP '.*t.*'" // transcript access
+      +" WHERE user_id = ? AND access_attribute.ag_id = turn.ag_id)"
+      +" OR EXISTS (SELECT * FROM role"
+      +" INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
+      +" AND role_permission.attribute_name = 'corpus'" 
+      +" AND role_permission.entity REGEXP '.*t.*'" // transcript access
+      +" WHERE transcript.corpus_name REGEXP role_permission.value_pattern"
+      +" AND user_id = ?)"
+      +" /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_0.turn_annotation_id, search_0_0.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("unit-test", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("unit-test", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$", search.getDescription());
+  }
   
   /** Ensure an orthography-only searches produce optimised SQL. */
   @Test public void optimisedOrthographySearch() throws Exception {    
@@ -216,6 +333,64 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(3) instanceof String);
     
     assertEquals("Description", "_^(testing)$_^(1)$_^(2)$_^(3)$", search.getDescription());
+
+    // numeric comparisons
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("testing")))
+      .addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMin("1")))
+      .addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMax("2")))
+      .addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMin("3").setMax("3"))));
+    parameters = new Vector<Object>();
+    sql = search.generateOrthographySql(parameters, getSchema());
+    assertEquals(
+      "numeric comparisons",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id,"
+      +" turn_annotation_id,"
+      +" first_matched_word_annotation_id,"
+      +" last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, token_0.ag_id AS ag_id,"
+      +" 0 AS speaker_number, token_0.start_anchor_id, token_0.end_anchor_id,"
+      +" 0, NULL AS segment_annotation_id, token_0.word_annotation_id AS target_annotation_id,"
+      +" token_0.turn_annotation_id AS turn_annotation_id,"
+      +" token_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" token_3.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_2_', token_0.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_2 token_0"
+      +" INNER JOIN annotation_layer_2 token_1"
+      +" ON token_1.turn_annotation_id = token_0.turn_annotation_id"
+      +" AND token_1.ordinal_in_turn = token_0.ordinal_in_turn + 1"
+      +" INNER JOIN annotation_layer_2 token_2"
+      +" ON token_2.turn_annotation_id = token_0.turn_annotation_id"
+      +" AND token_2.ordinal_in_turn = token_1.ordinal_in_turn + 1"
+      +" INNER JOIN annotation_layer_2 token_3"
+      +" ON token_3.turn_annotation_id = token_0.turn_annotation_id"
+      +" AND token_3.ordinal_in_turn = token_2.ordinal_in_turn + 1"
+      +" WHERE token_0.label REGEXP ?"
+      +" AND CAST(token_1.label AS DECIMAL) >= ?"
+      +" AND CAST(token_2.label AS DECIMAL) < ?"
+      +" AND CAST(token_3.label AS DECIMAL) >= ?"
+      +" AND CAST(token_3.label AS DECIMAL) < ?"
+      +" ORDER BY token_0.turn_annotation_id, token_0.ordinal_in_turn",
+      sql);
+    assertEquals("numeric comparisons - number of parameters" + parameters, 5, parameters.size());
+    assertEquals("^(testing)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals(Double.valueOf(1), parameters.get(1));
+    assertTrue(parameters.get(1) instanceof Double);
+    assertEquals(Double.valueOf(2), parameters.get(2));
+    assertTrue(parameters.get(2) instanceof Double);
+    assertEquals(Double.valueOf(3), parameters.get(3));
+    assertTrue(parameters.get(3) instanceof Double);
+    assertEquals(Double.valueOf(3), parameters.get(4));
+    assertTrue(parameters.get(4) instanceof Double);
+    
+    assertEquals("Description", "_^(testing)$_1_2_3_3", search.getDescription());
   }
   
   /** Ensure one-target-span-only searches produce optimised SQL. */
@@ -257,6 +432,47 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(0) instanceof String);
     
     assertEquals("Description", "_^(needle)$", search.getDescription());
+
+    // numeric comparison
+    match = new LayerMatch()
+      .setId(spanLayer.getId()).setMin("1").setMax("2").setTarget(true);
+    match.setNullBooleans();
+    match.ensurePatternAnchored();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column().addLayerMatch(match)));
+    parameters = new Vector<Object>();
+    sql = search.generateOneSpanSql(parameters, schema, spanLayer, match);
+    assertEquals(
+      "numeric comparison",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id,"
+      +" turn_annotation_id, first_matched_word_annotation_id,"
+      +" last_matched_word_annotation_id, complete, target_annotation_uid)"
+      +" SELECT ?, token.ag_id AS ag_id, 0 AS speaker_number,"
+      +" token.start_anchor_id, token.end_anchor_id,"
+      +" NULL AS defining_annotation_id,"
+      +" NULL AS segment_annotation_id,"
+      +" token.annotation_id AS target_annotation_id,"
+      +" NULL AS turn_annotation_id,"
+      +" NULL AS first_matched_word_annotation_id,"
+      +" NULL AS last_matched_word_annotation_id,"
+      +" 0 AS complete,"
+      +" CONCAT('e_',30,'_', token.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_30 token"
+      +" INNER JOIN anchor start ON token.start_anchor_id = start.anchor_id"
+      +" WHERE CAST(token.label AS DECIMAL) >= ?"
+      +" AND CAST(token.label AS DECIMAL) < ?"
+      +" ORDER BY token.ag_id, start.offset",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals(Double.valueOf(1), parameters.get(0));
+    assertTrue(parameters.get(0) instanceof Double);
+    assertEquals(Double.valueOf(2), parameters.get(1));
+    assertTrue(parameters.get(1) instanceof Double);
+    
+    assertEquals("Description", "_1_2", search.getDescription());
   }
   
   /** Ensure searching main participant utterances only generates the correct SQL. */

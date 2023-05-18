@@ -102,7 +102,7 @@ public class OneQuerySearch extends SearchTask {
     Vector<Optional<LayerMatch>> primaryWordLayers = new Vector<Optional<LayerMatch>>();
     Optional<LayerMatch> firstPrimaryWordLayer = matrix.getColumns().get(iWordColumn)
       .getLayers().values().stream()
-      .filter(LayerMatch::HasPattern)
+      .filter(LayerMatch::HasCondition)
       // not a "NOT .+" expression
       .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
       .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
@@ -122,7 +122,7 @@ public class OneQuerySearch extends SearchTask {
     // this affects how we match aligned word layers
     Optional<Layer> targetSegmentLayer = matrix.getColumns().get(iWordColumn)
       .getLayers().values().stream()
-      .filter(LayerMatch::HasPattern)
+      .filter(LayerMatch::HasCondition)
       .map(layerMatch -> schema.getLayer(layerMatch.getId()))
       .filter(Objects::nonNull)
       .filter(layer -> IsSegmentLayer(layer, schema))
@@ -148,7 +148,7 @@ public class OneQuerySearch extends SearchTask {
     // look for a layer with a search specification
     final Vector<LayerMatch> layersPrimaryFirst = new Vector<LayerMatch>();
     matrix.getColumns().get(iWordColumn).getLayers().values().stream()
-      .filter(LayerMatch::HasPattern)
+      .filter(LayerMatch::HasCondition)
       // existing layers
       .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
       // temporal layers
@@ -210,7 +210,7 @@ public class OneQuerySearch extends SearchTask {
         "_" + iWordColumn
       };
       
-      if (LayerMatch.HasPattern(layerMatch)) {
+      if (LayerMatch.HasCondition(layerMatch)) {
         if (layerMatch.getMin() == null && layerMatch.getMax() != null) { // max only
           if (bPhraseLayer || bSpanLayer) {
             // meta/freeform layer
@@ -568,7 +568,7 @@ public class OneQuerySearch extends SearchTask {
       Column column = matrix.getColumns().get(iWordColumn);
       targetSegmentLayer = column
         .getLayers().values().stream()
-        .filter(LayerMatch::HasPattern)
+        .filter(LayerMatch::HasCondition)
         .map(layerMatch -> schema.getLayer(layerMatch.getId()))
         .filter(Objects::nonNull)
         .filter(layer -> IsSegmentLayer(layer, schema))
@@ -576,7 +576,7 @@ public class OneQuerySearch extends SearchTask {
       
       // do we need a word layer to anchor to?
       Optional<LayerMatch> primaryWordLayer = column.getLayers().values().stream()
-        .filter(LayerMatch::HasPattern)
+        .filter(LayerMatch::HasCondition)
         // not a "NOT .+" expression
         .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
         .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
@@ -611,7 +611,7 @@ public class OneQuerySearch extends SearchTask {
       // this affects how we match aligned word layers
       targetSegmentLayer = matrix.getColumns().get(iWordColumn)
         .getLayers().values().stream()
-        .filter(LayerMatch::HasPattern)
+        .filter(LayerMatch::HasCondition)
         .map(layerMatch -> schema.getLayer(layerMatch.getId()))
         .filter(Objects::nonNull)
         .filter(layer -> IsSegmentLayer(layer, schema))
@@ -620,7 +620,7 @@ public class OneQuerySearch extends SearchTask {
     
       layersPrimaryFirst.clear();
       column.getLayers().values().stream()
-        .filter(LayerMatch::HasPattern)
+        .filter(LayerMatch::HasCondition)
         // existing layers
         .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
         // temporal layers
@@ -682,7 +682,7 @@ public class OneQuerySearch extends SearchTask {
           "_" + iWordColumn
         };
         
-        if (LayerMatch.HasPattern(layerMatch)) {
+        if (LayerMatch.HasCondition(layerMatch)) {
           if (layerMatch.getMin() == null && layerMatch.getMax() != null) { // max only
             if (bPhraseLayer || bSpanLayer) {
               // meta/freeform layer
@@ -1053,7 +1053,7 @@ public class OneQuerySearch extends SearchTask {
           "segment_"+c+" ON segment_"+c+".turn_annotation_id = turn.annotation_id");
       }
       Optional<Integer> primaryWordLayerId = column.getLayers().values().stream()
-        .filter(LayerMatch::HasPattern)
+        .filter(LayerMatch::HasCondition)
         // not a "NOT .+" expression
         .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
         .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
@@ -1071,8 +1071,10 @@ public class OneQuerySearch extends SearchTask {
       if (l >= 0) {
         // fix join
         q = q.replaceAll(
-          "search_"+c+"_"+l+"  ON search_"+c+"_"+l+"\\.word_annotation_id = word_"+c+"\\.word_annotation_id",
-          "search_"+c+"_"+l+"  ON search_"+c+"_"+l+".turn_annotation_id = turn.annotation_id");
+          "search_"+c+"_"+l
+          +"  ON search_"+c+"_"+l+"\\.word_annotation_id = word_"+c+"\\.word_annotation_id",
+          "search_"+c+"_"+l
+          +"  ON search_"+c+"_"+l+".turn_annotation_id = turn.annotation_id");
         
         // fix mentions
         q = q.replaceAll(
@@ -1155,15 +1157,30 @@ public class OneQuerySearch extends SearchTask {
     for (Column column : matrix.getColumns()) {
       // set the WHERE condition for this column
       q.append(c==0?" WHERE ":" AND ");
-      q.append("token_"+(c++)+".label REGEXP ?");
-      // ensure there really is a pattern
+      // ensure there really is a pattern with a condition
       LayerMatch match = column.getLayers().get("orthography");
       if (match == null) throw new Exception("No orthography match for column "+c);
-      if (match.getPattern() == null) throw new Exception("No orthography pattern for column "+c);
-      // add the pattern to the parameters
-      match.ensurePatternAnchored();
-      parameters.add(match.getPattern());
-      description += "_" + match.getPattern();
+      if (match.getPattern() != null) {
+        match.ensurePatternAnchored();
+        q.append("token_"+c+".label REGEXP ?");
+        parameters.add(match.getPattern());
+        description += "_" + match.getPattern();
+      } else { // numeric
+        if (match.getMin() != null) {
+          q.append("CAST(token_"+c+".label AS DECIMAL) >= ?");
+          parameters.add(Double.valueOf(match.getMin()));
+          description += "_" + match.getMin();
+        }
+        if (match.getMax() != null) {
+          if (match.getMin() != null) q.append(" AND ");
+          q.append("CAST(token_"+c+".label AS DECIMAL) < ?");
+          parameters.add(Double.valueOf(match.getMax()));
+          description += "_" + match.getMax();
+        } else if (match.getMin() == null) { // no condition set at all
+          throw new Exception("No orthography condition for column "+c); // TODO i18n
+        }
+      }
+      c++;
     } // next column
     if (restrictByUser != null) {
       q.append(" AND EXISTS (SELECT * FROM role")
@@ -1234,10 +1251,31 @@ public class OneQuerySearch extends SearchTask {
     if (matrix.getTranscriptQuery() != null) {
       q.append(" INNER JOIN transcript ON token.ag_id = transcript.ag_id");
     }
-    q.append(" WHERE").append(" token.label ");
-    if (layerMatch.getNot()) q.append("NOT ");
-    q.append("REGEXP ?");
-    parameters.add(layerMatch.getPattern());
+    q.append(" WHERE ");
+    // ensure there really is a pattern with a condition
+    if (layerMatch.getPattern() != null) {
+        layerMatch.ensurePatternAnchored();
+        if (layerMatch.getNot()) q.append("NOT ");
+        q.append("token.label REGEXP ?");
+        parameters.add(layerMatch.getPattern());
+        description += "_" + layerMatch.getPattern();
+    } else { // numeric
+      if (layerMatch.getMin() != null) {
+        q.append("CAST(token.label AS DECIMAL) >= ?");
+        parameters.add(Double.valueOf(layerMatch.getMin()));
+        description += "_" + layerMatch.getMin();
+      }
+      if (layerMatch.getMax() != null) {
+        if (layerMatch.getMin() != null) q.append(" AND ");
+        q.append("CAST(token.label AS DECIMAL) < ?");
+        parameters.add(Double.valueOf(layerMatch.getMax()));
+        description += "_" + layerMatch.getMax();
+      } else if (layerMatch.getMin() == null) { // no condition set at all
+        throw new Exception(
+          "No span condition specified on layer " + layerMatch.getId()); // TODO i18n
+      }
+    }
+    
     if (matrix.getTranscriptQuery() != null) {
       GraphAgqlToSql transformer = new GraphAgqlToSql(store.getSchema());
       GraphAgqlToSql.Query query = transformer.sqlFor(
@@ -1413,14 +1451,14 @@ public class OneQuerySearch extends SearchTask {
       && anchorConfidenceThreshold == null // not only aligned
       && matrix.getParticipantQuery() == null
       && matrix.getTranscriptQuery() == null
-      && !matrix.layerMatchStream().filter(LayerMatch::HasPattern) // no non-orthography layers
+      && !matrix.layerMatchStream().filter(LayerMatch::HasCondition) // no non-orthography layers
       .filter(match -> !match.getId().equals("orthography"))
       .findAny().isPresent()
       && !matrix.getColumns().stream() // no adj > 1
       .filter(column -> column.getAdj() > 1)
       .findAny().isPresent()
       && !matrix.layerMatchStream() // no negations
-      .filter(LayerMatch::HasPattern).filter(match -> match.getNot())
+      .filter(LayerMatch::HasCondition).filter(match -> match.getNot())
       .findAny().isPresent()
       && !matrix.layerMatchStream() // no anchoring
       .filter(match -> match.getAnchorStart() || match.getAnchorEnd())
@@ -1430,7 +1468,7 @@ public class OneQuerySearch extends SearchTask {
     boolean noNonSpanLayers = !matrix.getColumns().stream() // no adj > 1
       .filter(column -> column.getAdj() > 1)
       .findAny().isPresent()
-      && !matrix.layerMatchStream().filter(LayerMatch::HasPattern)
+      && !matrix.layerMatchStream().filter(LayerMatch::HasCondition)
       .map(layerMatch -> schema.getLayer(layerMatch.getId()))
       .filter(Objects::nonNull)
       .filter(layer -> layer.getParentId() != null) // no non-top-level layers
@@ -1438,7 +1476,7 @@ public class OneQuerySearch extends SearchTask {
               // nor top level layers that are not aligned (i.e. transcript attributes)
               || layer.getAlignment() == Constants.ALIGNMENT_NONE)
       .findAny().isPresent();
-    List<Layer> spanLayers = matrix.layerMatchStream().filter(LayerMatch::HasPattern)
+    List<Layer> spanLayers = matrix.layerMatchStream().filter(LayerMatch::HasCondition)
       .map(layerMatch -> schema.getLayer(layerMatch.getId()))
       .filter(Objects::nonNull)
       .filter(layer -> layer.getAlignment() != Constants.ALIGNMENT_NONE // aligned
@@ -1447,7 +1485,7 @@ public class OneQuerySearch extends SearchTask {
       .collect(Collectors.toList());
     LayerMatch spanLayerMatch = spanLayers.size() != 1?null
       :matrix.layerMatchStream()
-      .filter(LayerMatch::HasPattern)
+      .filter(LayerMatch::HasCondition)
       .filter(match -> match.getId().equals(spanLayers.get(0).getId()))
       .findAny().get();
 
