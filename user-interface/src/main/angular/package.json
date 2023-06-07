@@ -7,7 +7,11 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "build-labbcat-common": "ng build labbcat-common --prod",
+    "build-labbcat-view": "ng build --localize labbcat-view --prod",
+    "build-labbcat-edit": "ng build --localize labbcat-edit --prod",
+    "build-labbcat-admin": "ng build --localize labbcat-admin --prod"
   },
   "private": true,
   "dependencies": {

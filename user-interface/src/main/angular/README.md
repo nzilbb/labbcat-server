@@ -33,15 +33,4 @@ of the source files.
 
 ## Production build
 
-There is an *Maven* pom.xml in this directory for building the user
-interface for production distribution:
-
-```
-mvn package
-```
-
-This leaves build targets in:
-
-- `target/labbcat-view`
-- `target/labbcat-edit`
-- `target/labbcat-admin`
+See README.md in user-interface directory.
