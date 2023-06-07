@@ -12,5 +12,7 @@ pages.
 ## Release Build
 
 ```
-./node_modules/.bin/webpack --mode production
+mvn package
 ```
+
+This leaves output files in `target/wysiwiki/`
