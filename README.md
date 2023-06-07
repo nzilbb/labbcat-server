@@ -19,15 +19,11 @@ There currently three components here:
 
 ## Servlets
 
-### Dependencies
-
-- [nzilbb.ag.jar](https://github.com/nzilbb/ag)
-
 ### Build targets
 
-- `ant` - builds bin/nzilbb.labbcat.server.jar
-- `ant test` - also runs unit tests
-- `ant javadoc` - also produces JavaDoc API documentation.
+- `mvn package -pl :nzilbb.labbcat.server` - tests and builds *target/nzilbb.labbcat.server-n.n.n.jar*
+- `mvn package -pl :nzilbb.labbcat.server -Dmaven.test.skip` - builds *target/nzilbb.labbcat.server-n.n.n.jar* without running tests
+- `mvn site -pl :nzilbb.labbcat.server ` - build javadoc/API documentation in *docs*.
 
 ### Documentation
 
@@ -53,7 +49,7 @@ The user interface is broken into three angular apps
 (e.g. at http://localhost:8080/labbcat)
 2. Ensure your local LaBB-CAT instance has user authentication disabled and the CORS filter
 enabled in  ${config.local-labbcat-path}/WEB-INF/web.xml
-3. `cd user-interface`
+3. `cd user-interface/src/main/angular`
 4. `ng serve`
 
 The default app is *labbcat-admin*. To serve the view/edit apps,
@@ -80,10 +76,15 @@ To localize to a new language/variety:
 ### Deployment into LaBB-CAT
 
 To deploy a production version of the user interface into a local installation of
-LaBB-CAT:
+LaBB-CAT (correct the tomcat paths below to suit your environment):
 
-1. Check that the *local-labbcat-path* setting in *config.xml* is correct.
-2. `ant user-interface`
+1. `mvn package -pl :nzilbb.labbcat.user-interface`
+2. `rm -r /var/lib/tomcat9/webapps/labbcat/user-interface/*`
+3. `cp -r user-interface/target/labbcat-view/* /var/lib/tomcat9/webapps/labbcat/user-interface/`
+4. `rm -r /var/lib/tomcat9/webapps/labbcat/edit/user-interface/*`
+5. `cp -r user-interface/target/labbcat-edit/* /var/lib/tomcat9/webapps/labbcat/edit/user-interface/`
+6. `rm -r /var/lib/tomcat9/webapps/labbcat/admin/user-interface/*`
+7. `cp -r user-interface/target/labbcat-admin/* /var/lib/tomcat9/webapps/labbcat/admin/user-interface/`
 
 ## Wysiwiki
 
@@ -91,8 +92,15 @@ Requires Node and npm.
 
 To build:
 
-1. Esure *local-labbcat-path* is set in `config.xml`
-2. Execute: `ant wysiwiki`
+```
+mvn package -pl :nzilbb.labbcat.wysiwiki
+```
+
+To deploy into LaBB-CAT:
+
+```
+cp wysiwiki/target/wysiwiki/* /var/lib/tomcat9/webapps/labbcat/wysiwiki/
+```
 
 ## Docker image
 
