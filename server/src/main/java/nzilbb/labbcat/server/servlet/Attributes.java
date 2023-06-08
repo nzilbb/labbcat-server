@@ -40,7 +40,7 @@ import org.apache.commons.csv.*;
  *   <dl>
  *     <dt><span class="paramLabel">Parameters:</span></dt>
  *     <dd><code>id</code> - One or more graph IDs.</dd>
- *     <dd><code>query</code> - Graph QL expression to identify the graph IDs, if no
+ *     <dd><code>query</code> - AGQL expression to identify the graph IDs, if no
  *         <var>id</var> parameter is supplied.</dd>
  *     <dd><code>layer</code> - One or more layer IDs, representing transcript attribute
  *                              layers, or "transcript", "epsiode", or "corpus" .</dd>
