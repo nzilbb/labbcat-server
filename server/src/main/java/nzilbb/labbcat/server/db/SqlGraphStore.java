@@ -2772,8 +2772,8 @@ public class SqlGraphStore implements GraphStore {
    * Gets the annotations on given layers for a set of match IDs.
    * @param matchIds An iterator that supplies match IDs - these may be the contents of
    * the MatchId column in exported search results, token URLs, or annotation IDs.
-   * @param layerIds A mape where the keys are the layer IDs of the layers to get, and
-   * each value is the maximum number of annotations to retrieve for that layer.
+   * @param layerIdToMaxAnnotations A map where the keys are the layer IDs of the layers
+   * to get, and each value is the maximum number of annotations to retrieve for that layer.
    * @param targetOffset Which token to get the annotations of; 0 means the match target
    * itself, 1 means the token after the target, -1 means the token before the target, etc. 
    * @param consumer A consumer for handling the resulting

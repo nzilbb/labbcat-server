@@ -60,14 +60,12 @@ public interface SearchResults extends Iterator<String>, Closeable {
   public String getLastMatchId();
   
   /**
-   * Getter for {@link #pageLength}: The maximum number of results to return from next(),
-   * or 0 for no maximum. 
+   * The maximum number of results to return from next(), or 0 for no maximum. 
    * @return The maximum number of results to return from next(), or 0 for no maximum.
    */
   public int getPageLength();
   /**
-   * Setter for {@link #pageLength}: The maximum number of results to return from next(),
-   * or 0 for no maximum. 
+   * The maximum number of results to return from next(), or 0 for no maximum. 
    * @param newPageLength The maximum number of results to return from next(), or 0 for
    * no maximum. 
    */

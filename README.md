@@ -23,7 +23,7 @@ There currently three components here:
 
 - `mvn package -pl :nzilbb.labbcat.server` - tests and builds *target/nzilbb.labbcat.server-n.n.n.jar*
 - `mvn package -pl :nzilbb.labbcat.server -Dmaven.test.skip` - builds *target/nzilbb.labbcat.server-n.n.n.jar* without running tests
-- `mvn site -pl :nzilbb.labbcat.server ` - build javadoc/API documentation in *docs*.
+- `mvn site -pl :nzilbb.labbcat.server` - build javadoc/API documentation in *docs*.
 
 ### Documentation
 

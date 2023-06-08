@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 import java.util.function.Consumer;
 
 /**
- * Cache for Graph Stores, which supplies a {@link GraphStoreAdministration} object for
+ * Cache for Graph Stores, which supplies an {@link SqlGraphStore} object for
  * use, and then accepts it back again for reuse later.
  * <p> This ensures that resources are shared or closed as appropriate.
  * @author Robert Fromont robert@fromont.net.nz

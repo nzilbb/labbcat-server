@@ -232,9 +232,11 @@ public class LayerMatch implements CloneableBean {
   } // end of toString()
   
   /**
-   * Determines whether the given LayerMatch actually specifies a #pattern, #min, or #max.
-   * @param layerPattern
-   * @return true if the given LayerMatch specifies a #pattern, #min, or #max, false otherwise.
+   * Determines whether the given LayerMatch actually specifies a {@link #pattern},
+   * {@link #min}, or {@link #max}.
+   * @param layer The layer match to check.
+   * @return true if the given LayerMatch specifies a {@link #pattern}, {@link #min},
+   * or {@link #max}, false otherwise.
    */
   public static boolean HasCondition(LayerMatch layer) {
     return layer.getPattern() != null

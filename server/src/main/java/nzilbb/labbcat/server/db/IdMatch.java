@@ -32,7 +32,7 @@ import java.util.TreeMap;
  * <ul>
  * 	<li>
  * 		matching subparts can be identified by appending a list of annotation UIDs
- *              for insertion into {@link #mMatchAnnotationUids}, the keys being enclosed
+ *              for insertion into {@link #matchAnnotationUids}, the keys being enclosed
  *              in square brackets:<br> 
  * 		...;<em>[key]=uid;[key]=uid</em><br>
  * 		e.g. <samp>g_243;n_72700-n_72709;[0,0]=ew_0_123;[1,0]ew_0_234</samp></li>
@@ -157,7 +157,7 @@ public class IdMatch extends IdUtterance {
   
   /**
    * Determines whether another IMatch is equal to this one.
-   * @param other
+   * @param o The other object to compare to.
    * @return true if the critical attributes match, false otherwise.
    */
   @Override public boolean equals(Object o) {

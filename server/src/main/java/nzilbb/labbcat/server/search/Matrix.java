@@ -230,9 +230,9 @@ public class Matrix implements CloneableBean {
 
   /**
    * Determines which column the (first) LayerMatch where
-   * {@link LayerPatter#target} == true is located in. 
+   * {@link LayerMatch#target} == true is located in. 
    * @return The index of the column the (first) LayerMatch where
-   * {@link LayerPatter#target} == true is located in, or -1 if there is no such LayerMatch.
+   * {@link LayerMatch#target} == true is located in, or -1 if there is no such LayerMatch.
    */
   public int getTargetColumn() {
     for (int c = 0; c < columns.size(); c++) {
