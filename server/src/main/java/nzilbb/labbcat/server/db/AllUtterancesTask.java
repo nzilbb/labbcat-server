@@ -96,7 +96,7 @@ public class AllUtterancesTask extends SearchTask {
 
     iPercentComplete = 1;
     Connection connection = getStore().getConnection();
-    final Schema schema = store.getSchema();
+    final Schema schema = getStore().getSchema();
 
     // word columns
 	 
@@ -104,10 +104,10 @@ public class AllUtterancesTask extends SearchTask {
     results = new SqlSearchResults(this);
 
     // gather participants and check they're accessible
-    String[] participantIds = store.getMatchingParticipantIds(participantQuery);
+    String[] participantIds = getStore().getMatchingParticipantIds(participantQuery);
     Vector<Annotation> participants = new Vector<Annotation>();
     for (String participantId : participantIds) {
-      participants.add(store.getParticipant(participantId));
+      participants.add(getStore().getParticipant(participantId));
     }
     if (participants.size() == 0) throw new Exception("No participants matched."); // TODO i18n
     StringBuilder speakerNumberList = new StringBuilder(); 
@@ -143,7 +143,7 @@ public class AllUtterancesTask extends SearchTask {
       finalTranscriptQuery += " && "+transcriptQuery;
     }
     //setStatus(finalTranscriptQuery);
-    String[] transcriptIds = store.getMatchingTranscriptIds(finalTranscriptQuery);
+    String[] transcriptIds = getStore().getMatchingTranscriptIds(finalTranscriptQuery);
     if (transcriptIds.length == 0) throw new Exception("No transcripts matched."); // TODO i18n
     transcriptClause.append(" AND transcript.transcript_id IN (");
     transcriptClause.append(Arrays.stream(transcriptIds)

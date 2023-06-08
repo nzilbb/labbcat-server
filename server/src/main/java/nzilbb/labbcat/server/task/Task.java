@@ -221,7 +221,7 @@ public class Task extends Thread implements MonitorableTask {
    * @see #getStore()
    * @see #setStore(SqlGraphStore)
    */
-  protected SqlGraphStore store;
+  private SqlGraphStore store;
   /**
    * Getter for {@link #store}: Graph store.
    * @return Graph store.

@@ -1297,7 +1297,7 @@ public class OneQuerySearch extends SearchTask {
     }
     
     if (matrix.getTranscriptQuery() != null) {
-      GraphAgqlToSql transformer = new GraphAgqlToSql(store.getSchema());
+      GraphAgqlToSql transformer = new GraphAgqlToSql(getStore().getSchema());
       GraphAgqlToSql.Query query = transformer.sqlFor(
         matrix.getTranscriptQuery(), "transcript.transcript_id", null, null, null);
       q.append(query.sql
@@ -1337,7 +1337,7 @@ public class OneQuerySearch extends SearchTask {
 
     iPercentComplete = 1;
     Connection connection = getStore().getConnection();
-    final Schema schema = store.getSchema();
+    final Schema schema = getStore().getSchema();
     if (matrix != null) setName(matrix.getDescription());
 
     // word columns
@@ -1350,7 +1350,7 @@ public class OneQuerySearch extends SearchTask {
       if (participantQuery != null && participantQuery.trim().length() > 0) {
         setStatus("Identifying participants...");
         try {
-          String[] participantIds = store.getMatchingParticipantIds(participantQuery);
+          String[] participantIds = getStore().getMatchingParticipantIds(participantQuery);
           if (participantIds.length == 0) { // bail out by returning null & setting last exception
             setLastException(
               new Exception("Participant expression matches no participants: "
@@ -1402,13 +1402,13 @@ public class OneQuerySearch extends SearchTask {
       if (transcriptQuery != null && transcriptQuery.length() > 0) {
         try {
           // check there are some matches
-          if (store.countMatchingTranscriptIds(transcriptQuery) == 0) {
+          if (getStore().countMatchingTranscriptIds(transcriptQuery) == 0) {
             // bail out by returning null and setting last exception
             setLastException(
               new Exception("Transcript query matches no transcripts: " + transcriptQuery));
             return null;
           }
-          GraphAgqlToSql transformer = new GraphAgqlToSql(store.getSchema());
+          GraphAgqlToSql transformer = new GraphAgqlToSql(getStore().getSchema());
           GraphAgqlToSql.Query q = transformer.sqlFor(
             transcriptQuery, "transcript.transcript_id", null, null, null);
           return q.sql
@@ -1826,13 +1826,13 @@ public class OneQuerySearch extends SearchTask {
         if (overlapThreshold != null) {
           if (!graphIds.containsKey(match.getGraphId())) { // get transcript name
             // get the graph using the ag_id
-            Graph transcript = store.getTranscript(""+match.getGraphId());
+            Graph transcript = getStore().getTranscript(""+match.getGraphId());
             graphIds.put(match.getGraphId(), transcript.getId());
           }
           String[] utteranceAnchorIds = {
             "n_" + match.getStartAnchorId(), "n_" + match.getEndAnchorId()
           };
-          Anchor[] utteranceAnchors = store.getAnchors(
+          Anchor[] utteranceAnchors = getStore().getAnchors(
             graphIds.get(match.getGraphId()), utteranceAnchorIds);
           if (utteranceAnchors[0].getOffset() == null
               || utteranceAnchors[1].getOffset() == null) { // not anchored, skip this one
@@ -1846,7 +1846,7 @@ public class OneQuerySearch extends SearchTask {
             +" && layer.id == 'utterance'"
             +" && start.offset <= " + utteranceAnchors[1].getOffset()
             +" && end.offset >= " + utteranceAnchors[0].getOffset();
-          Annotation[] overlappingUtterances = store.getMatchingAnnotations(query);
+          Annotation[] overlappingUtterances = getStore().getMatchingAnnotations(query);
           // collect them all into a graph for comparing anchor offsets
           Graph g = new Graph();
           g.addAnchor(utteranceAnchors[0]);
@@ -1857,7 +1857,7 @@ public class OneQuerySearch extends SearchTask {
             anchorIds.add(other.getStartId());
             anchorIds.add(other.getEndId());
           }
-          Anchor[] anchors = store.getAnchors(
+          Anchor[] anchors = getStore().getAnchors(
             graphIds.get(match.getGraphId()),
             anchorIds.toArray(new String[anchorIds.size()]));
           for (Anchor anchor : anchors) g.addAnchor(anchor);

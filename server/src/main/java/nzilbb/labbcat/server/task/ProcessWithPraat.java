@@ -1574,9 +1574,9 @@ public class ProcessWithPraat extends Task {
     File outputFile = null;
     PreparedStatement sqlSpeakerAttribute = null;
     
-    String baseUrl = store.getBaseUrl();
+    String baseUrl = getStore().getBaseUrl();
     // we want file URLs, not http/https, so unset the base URL
-    store.setBaseUrl(null);
+    getStore().setBaseUrl(null);
     
     try {
       runStart();
@@ -1591,7 +1591,7 @@ public class ProcessWithPraat extends Task {
         "Extracting measurements for "+iRecordCount+" record"+(iRecordCount==1?"":"s")+"...");
       iPercentComplete = 1; // so the progress bar stops displaying as 'indeterminate'
 
-      sqlSpeakerAttribute = store.getConnection().prepareStatement(
+      sqlSpeakerAttribute = getStore().getConnection().prepareStatement(
         "SELECT annotation_participant.label"
         +" FROM speaker"
         +" INNER JOIN annotation_participant"
@@ -1609,7 +1609,7 @@ public class ProcessWithPraat extends Task {
         attributes.add(fastTrackDifferentiationLayerId);
 
       outputFile = File.createTempFile(
-        IO.WithoutExtension(fileName) + "-", ".csv", store.getFiles());
+        IO.WithoutExtension(fileName) + "-", ".csv", getStore().getFiles());
       CSVFormat format = CSVFormat.EXCEL.withDelimiter(fieldDelimiter);
       out = new CSVPrinter(new FileWriter(outputFile), format);
       in = new CSVParser(new FileReader(dataFile), format);
@@ -1716,10 +1716,10 @@ public class ProcessWithPraat extends Task {
       if (in != null) try {in.close();} catch(IOException exception) {}
       if (outputFile != null) {
         try {
-          setResultUrl(baseUrl +"/" + store.getFiles().getName() + "/"
+          setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
                        + URLEncoder.encode(outputFile.getName(), "UTF-8"));
         } catch(UnsupportedEncodingException impossible) { 
-          setResultUrl(baseUrl +"/" + store.getFiles().getName() + "/"
+          setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
                        + outputFile.getName());
         }
         setResultText("CSV file with measurements");
@@ -1755,7 +1755,7 @@ public class ProcessWithPraat extends Task {
     File wav = null;
     String wavError = null;
     try {
-      String sWav = store.getMedia(transcript, "", "audio/wav");
+      String sWav = getStore().getMedia(transcript, "", "audio/wav");
       if (sWav != null) {
         wav = new File(new URI(sWav));
       } else {
@@ -1954,7 +1954,7 @@ public class ProcessWithPraat extends Task {
       // directory, so that FastTrack files can be included
       
       File functions = new File(
-        new File(new File(store.getFiles(), "FastTrack-master"), "Fast Track"), "functions");
+        new File(new File(getStore().getFiles(), "FastTrack-master"), "Fast Track"), "functions");
       
       File script = File.createTempFile("ProcessWithPraat-", ".praat", functions);
       PrintWriter scriptWriter = new PrintWriter(script, "UTF-8");
@@ -2128,6 +2128,7 @@ public class ProcessWithPraat extends Task {
     HashMap<String,String> attributeValues)
     throws Exception {
 
+    
     // TODO script preamble
     
     scriptWriter.write("Open long sound file... " + wav.getPath());
@@ -2410,6 +2411,7 @@ public class ProcessWithPraat extends Task {
         scriptWriter.write(fmtScript.format(oArgs));
       } // valid interval
     } // next target
+    
     // TODO script code
   }
   
@@ -2422,7 +2424,7 @@ public class ProcessWithPraat extends Task {
   protected String executeScript(File script) throws Exception {
     
     // set up Praat execution
-    File praatPath = new File(store.getSystemAttribute("praatPath"));
+    File praatPath = new File(getStore().getSystemAttribute("praatPath"));
     File executableFile = new File(praatPath, "praat");
     String osName = java.lang.System.getProperty("os.name");
     if (osName.startsWith("Windows")) {
