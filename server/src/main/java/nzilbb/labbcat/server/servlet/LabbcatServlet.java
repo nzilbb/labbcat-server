@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -525,6 +526,19 @@ public class LabbcatServlet extends HttpServlet {
       throws IOException {
       JsonWriter writer = Json.createWriter(response.getWriter());
       writer.writeObject(json);
+      writer.close();
+   } // end of writeResponse()
+   
+   /**
+    * Writes the given JSON-encoded array response to the given writer.
+    * @param response
+    * @param json
+    * @throws IOException
+    */
+   protected void writeResponse(HttpServletResponse response, JsonArray json)
+      throws IOException {
+      JsonWriter writer = Json.createWriter(response.getWriter());
+      writer.writeArray(json);
       writer.close();
    } // end of writeResponse()
    
