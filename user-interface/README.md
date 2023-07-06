@@ -19,7 +19,7 @@ bundles to 1.1MB, which consequently loads 60% faster.
 
 ## Development server
 
-Run `ng serve` for a development server (*labbcat-admin* is the default app). Then
+Run `cd src/main/angular` and then `ng serve` for a development server (*labbcat-admin* is the default app). Then
 navigate to `http://localhost:4200/`. The app will automatically reload if you change any
 of the source files. 
 
