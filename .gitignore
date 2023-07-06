@@ -29,3 +29,6 @@ hs_err_pid*
 target
 # maven versions:set backup files
 *.versionsBackup
+
+dist
+node_modules
