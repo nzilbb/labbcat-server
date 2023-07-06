@@ -39,7 +39,7 @@
   <div id="matches">
     <ng-container class="match" *ngFor="let match of matches; let m = index;">
 
-      <div class="transcript-change" *ngIf="m == 0 || match.Transcript != matches[m-1].Transcript">
+      <div class="transcript-change" *ngIf="m == 0 || match.Transcript != matches[m-1].Transcript || match.Participant != matches[m-1].Participant">
         <span class="match-transcript">{{match.Transcript}}</span>
         <span class="match-participant">{{match.Participant}}</span>
       </div>
