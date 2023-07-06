@@ -122,23 +122,43 @@ public class OneQuerySearch extends SearchTask {
       .findAny();
     primaryWordLayers.add(firstPrimaryWordLayer);
     
-    // do we need a word layer to anchor to?
-    if (!firstPrimaryWordLayer.isPresent()) {
+    // check for segment layer search
+    // this affects how we match aligned word layers
+    Vector<Optional<LayerMatch>> primarySegmentLayers = new Vector<Optional<LayerMatch>>();
+    Optional<LayerMatch> targetSegmentLayer = matrix.getColumns().get(iWordColumn)
+      .getLayers().values().stream()
+      .filter(LayerMatch::HasCondition)
+      .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
+      .filter(layerMatch -> IsSegmentLayer(schema.getLayer(layerMatch.getId()), schema))
+      .findAny();
+    primarySegmentLayers.add(targetSegmentLayer);
+
+    if (firstPrimaryWordLayer.isPresent()) {
+      // change word start/end joins to match word layer table
+      sSqlWordStartJoin = sSqlWordStartJoin
+        .replace("word_"+iWordColumn+".", "search_"+iWordColumn+"_"
+                 +schema.getLayer(firstPrimaryWordLayer.get().getId()).get("layer_id")+".");
+      sSqlWordEndJoin = sSqlWordEndJoin
+        .replace("word_"+iWordColumn+".", "search_"+iWordColumn+"_"
+                 +schema.getLayer(firstPrimaryWordLayer.get().getId()).get("layer_id")+".");
+    } else { // no primary word layer 
+      // we need a word layer to anchor to
       sSqlExtraJoinsFirst.append(
         " INNER JOIN annotation_layer_"+ SqlConstants.LAYER_TRANSCRIPTION
         +" word_"+iWordColumn+" ON word_"+iWordColumn+".turn_annotation_id = turn.annotation_id");
     }
     
-    // check for segment layer search
-    // this affects how we match aligned word layers
-    Optional<Layer> targetSegmentLayer = matrix.getColumns().get(iWordColumn)
+    Optional<Layer> alignedWordLayer = matrix.getColumns().get(iWordColumn)
       .getLayers().values().stream()
       .filter(LayerMatch::HasCondition)
       .map(layerMatch -> schema.getLayer(layerMatch.getId()))
       .filter(Objects::nonNull)
-      .filter(layer -> IsSegmentLayer(layer, schema))
+      .filter(layer -> IsWordLayer(layer, schema))
+      .filter(layer -> !layer.getId().equals(schema.getWordLayerId()))
+      .filter(layer -> layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
       .findAny();
-    boolean bUseWordContainsJoins = targetSegmentLayer.isPresent(); // TODO only if matching non-"word" aligned word layer
+    boolean bUseWordContainsJoins = targetSegmentLayer.isPresent()
+      && alignedWordLayer.isPresent(); 
     
     int iTargetLayer = SqlConstants.LAYER_TRANSCRIPTION; // by default
     int iTargetColumn = 0; // by default
@@ -165,8 +185,12 @@ public class OneQuerySearch extends SearchTask {
       // temporal layers
       .filter(layerMatch -> schema.getLayer(layerMatch.getId()).containsKey("layer_id"))
       .forEach(layerMatch -> layersPrimaryFirst.add(layerMatch));
-    // move primary word layer to the front
-    if (firstPrimaryWordLayer.isPresent()) {
+ 
+    if (targetSegmentLayer.isPresent()) { // move primary segment layer to the front
+      if (layersPrimaryFirst.remove(targetSegmentLayer.get())) { // it was there
+        layersPrimaryFirst.add(0, targetSegmentLayer.get());
+      }
+    } else if (firstPrimaryWordLayer.isPresent()) { // move primary word layer to the front
       if (layersPrimaryFirst.remove(firstPrimaryWordLayer.get())) { // it was there
         layersPrimaryFirst.add(0, firstPrimaryWordLayer.get());
       }
@@ -217,7 +241,8 @@ public class OneQuerySearch extends SearchTask {
           || layer.getType().equals(Constants.TYPE_SELECT)?1:0), // ... and 'select' layers
         layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
         sExtraMetaCondition.toString(), // e.g. anchoring to the start/end of a span
-        (Integer)(targetSegmentLayer.isPresent()?targetSegmentLayer.get().get("layer_id"):null),
+        (Integer)(targetSegmentLayer.isPresent()?
+                  schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id"):null),
         "_" + iWordColumn
       };
       
@@ -241,7 +266,8 @@ public class OneQuerySearch extends SearchTask {
                 sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs));
               }
             } // un-anchored meta condition
-          } else if (bUseWordContainsJoins) {
+          } else if (bUseWordContainsJoins
+                     && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
             // word-containing-segment layer
             if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentStartJoin) < 0) {
               sSqlExtraJoinsFirst.append(sSqlSegmentStartJoin);
@@ -270,7 +296,8 @@ public class OneQuerySearch extends SearchTask {
                 sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs));
               }
             } // un-anchors meta condition
-          } else if (bUseWordContainsJoins) {
+          } else if (bUseWordContainsJoins
+                     && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
             // word-containing-segment layer
             if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentStartJoin) < 0) {
               sSqlExtraJoinsFirst.append(sSqlSegmentStartJoin);
@@ -299,7 +326,8 @@ public class OneQuerySearch extends SearchTask {
                 sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs));
               }
             } // un-anchored meta condition
-          } else if (bUseWordContainsJoins) {
+          } else if (bUseWordContainsJoins
+                     && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
             // word-containing-segment layer
             if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentStartJoin) < 0) {
               sSqlExtraJoinsFirst.append(sSqlSegmentStartJoin);
@@ -344,18 +372,30 @@ public class OneQuerySearch extends SearchTask {
               } // un-anchored meta condition
             }
           } else if (bSegmentLayer) {
-            if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentStartJoin) < 0) {
-              sSqlExtraJoin.append(sSqlSegmentStartJoin);
+            if (targetSegmentLayer.get().getId().equals(layer.getId())) { // first segment layer
+              sSqlExtraJoinsFirst.append(REGEXP_JOIN.format(oArgs));
+              if (bUseWordContainsJoins) {
+                sSqlExtraJoinsFirst.append(
+                  " INNER JOIN anchor segment_"+iWordColumn+"_start"
+                  +" ON segment_"+iWordColumn+"_start.anchor_id"
+                  +" = segment_"+iWordColumn+".start_anchor_id");
+              }
+            } else {
+              sSqlExtraJoin.append(SEGMENT_REGEXP_JOIN.format(oArgs));
             }
-            sSqlExtraJoin.append(SEGMENT_REGEXP_JOIN.format(oArgs));
-          } else if (bUseWordContainsJoins) {
-            // word-containing-segment layer
-            if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentStartJoin) < 0) {
-              sSqlExtraJoin.append(sSqlSegmentStartJoin);
-            }
+          } else if (bUseWordContainsJoins
+                     && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
             sSqlExtraJoin.append(CONTAINING_WORD_REGEXP_JOIN.format(oArgs));
           } else {
-            sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
+            if (targetSegmentLayer.isPresent()) {
+              sSqlExtraJoin.append(
+                REGEXP_JOIN.format(oArgs).replace(
+                  "word_"+iWordColumn+".",
+                  "search_"+iWordColumn+"_"+schema.getLayer(targetSegmentLayer.get().getId())
+                  .get("layer_id")+"."));
+            } else {
+              sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
+            }
           }
           if (layerMatch.getNot() && ".+".equals(layerMatch.getPattern())) { // NOT EXISTS
             // special case: "NOT .+" means "not anything" - i.e. missing annotations
@@ -417,11 +457,11 @@ public class OneQuerySearch extends SearchTask {
 
     if (targetSegmentLayer.isPresent()) {
       sSqlExtraFieldsFirst.append(
-        ", search_" + targetSegmentLayer.get().get("layer_id")
+        ", search_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
         + ".segment_annotation_id AS target_segment_id");
-      targetSegmentExpression = "search_0_" + targetSegmentLayer.get().get("layer_id")
+      targetSegmentExpression = "search_0_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
         + ".segment_annotation_id";
-      targetSegmentOrder = ", search_0_" + targetSegmentLayer.get().get("layer_id")
+      targetSegmentOrder = ", search_0_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
         + ".ordinal_in_word";
     }
 
@@ -484,10 +524,16 @@ public class OneQuerySearch extends SearchTask {
           + " AND word_"+iWordColumn+"_start.alignment_status >= "
           + anchorConfidenceThreshold);
       } else { // update existing join
+        String primaryWordTable = "word_"+iWordColumn;
+        if (firstPrimaryWordLayer.isPresent()) {
+          primaryWordTable = "search_"+iWordColumn+"_"
+            +schema.getLayer(firstPrimaryWordLayer.get().getId()).get("layer_id");
+        }
+        System.out.println("primaryWordTable " + primaryWordTable);
         sSqlExtraJoinsFirst = new StringBuilder(
           sSqlExtraJoinsFirst.toString().replaceAll(
-            " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id",
-            " ON word_"+iWordColumn+"_start\\.anchor_id = word_"+iWordColumn+"\\.start_anchor_id"
+            " ON word_"+iWordColumn+"_start\\.anchor_id = "+primaryWordTable+"\\.start_anchor_id",
+            " ON word_"+iWordColumn+"_start\\.anchor_id = "+primaryWordTable+"\\.start_anchor_id"
             + " AND word_"+iWordColumn+"_start.alignment_status >= "
             + anchorConfidenceThreshold));
       }
@@ -580,10 +626,10 @@ public class OneQuerySearch extends SearchTask {
       targetSegmentLayer = column
         .getLayers().values().stream()
         .filter(LayerMatch::HasCondition)
-        .map(layerMatch -> schema.getLayer(layerMatch.getId()))
-        .filter(Objects::nonNull)
-        .filter(layer -> IsSegmentLayer(layer, schema))
+        .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
+        .filter(layerMatch -> IsSegmentLayer(schema.getLayer(layerMatch.getId()), schema))
         .findAny();
+      primarySegmentLayers.add(targetSegmentLayer);
       
       // do we need a word layer to anchor to?
       Optional<LayerMatch> primaryWordLayer = column.getLayers().values().stream()
@@ -598,7 +644,15 @@ public class OneQuerySearch extends SearchTask {
                     && !layerMatch.getId().equals("segment")))
         .findAny();
       primaryWordLayers.add(primaryWordLayer);
-      if (!primaryWordLayer.isPresent()) {
+      if (primaryWordLayer.isPresent()) {
+        // change word start/end joins to match word layer table
+        sSqlWordStartJoin = sSqlWordStartJoin
+          .replace("word_"+iWordColumn+".", "search_"+iWordColumn+"_"
+                   +schema.getLayer(primaryWordLayer.get().getId()).get("layer_id")+".");
+        sSqlWordEndJoin = sSqlWordEndJoin
+          .replace("word_"+iWordColumn+".", "search_"+iWordColumn+"_"
+                   +schema.getLayer(primaryWordLayer.get().getId()).get("layer_id")+".");
+      } else { // no primary word layer
         Object oSubPatternMatchArgs[] = { 
           null, // extra JOINs
           null, // border conditions
@@ -624,11 +678,20 @@ public class OneQuerySearch extends SearchTask {
       targetSegmentLayer = matrix.getColumns().get(iWordColumn)
         .getLayers().values().stream()
         .filter(LayerMatch::HasCondition)
+        .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
+        .filter(layerMatch -> IsSegmentLayer(schema.getLayer(layerMatch.getId()), schema))
+        .findAny();
+      alignedWordLayer = matrix.getColumns().get(iWordColumn)
+        .getLayers().values().stream()
+        .filter(LayerMatch::HasCondition)
         .map(layerMatch -> schema.getLayer(layerMatch.getId()))
         .filter(Objects::nonNull)
-        .filter(layer -> IsSegmentLayer(layer, schema))
+        .filter(layer -> IsWordLayer(layer, schema))
+        .filter(layer -> !layer.getId().equals(schema.getWordLayerId()))
+        .filter(layer -> layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
         .findAny();
-      bUseWordContainsJoins = targetSegmentLayer.isPresent(); // TODO only if matching non-"word" aligned word layer
+      bUseWordContainsJoins = targetSegmentLayer.isPresent()
+        && alignedWordLayer.isPresent();
     
       layersPrimaryFirst.clear();
       column.getLayers().values().stream()
@@ -638,7 +701,11 @@ public class OneQuerySearch extends SearchTask {
         // temporal layers
         .filter(layerMatch -> schema.getLayer(layerMatch.getId()).containsKey("layer_id"))
         .forEach(layerMatch -> layersPrimaryFirst.add(layerMatch));
-      if (primaryWordLayer.isPresent()) {
+      if (targetSegmentLayer.isPresent()) { // move primary segment layer to the front
+        if (layersPrimaryFirst.remove(targetSegmentLayer.get())) { // it was there
+          layersPrimaryFirst.add(0, targetSegmentLayer.get());
+        }
+      } else if (primaryWordLayer.isPresent()) {
         // move it to the front
         if (layersPrimaryFirst.remove(primaryWordLayer.get())) { // it was there
           layersPrimaryFirst.add(0, primaryWordLayer.get());
@@ -714,7 +781,8 @@ public class OneQuerySearch extends SearchTask {
                   sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
-            } else if (bUseWordContainsJoins) {
+            } else if (bUseWordContainsJoins
+                       && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
               // word-containing-segment layer
               if (sSqlExtraJoins.indexOf(sSqlSegmentStartJoin) < 0) {
                 sSqlExtraJoins.append(sSqlSegmentStartJoin);
@@ -743,7 +811,8 @@ public class OneQuerySearch extends SearchTask {
                   sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
-            } else if (bUseWordContainsJoins) {
+            } else if (bUseWordContainsJoins
+                       && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
               // word-containing-segment layer
               if (sSqlExtraJoins.indexOf(sSqlSegmentStartJoin) < 0) {
                 sSqlExtraJoins.append(sSqlSegmentStartJoin);
@@ -772,7 +841,8 @@ public class OneQuerySearch extends SearchTask {
                   sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
-            } else if (bUseWordContainsJoins) {
+            } else if (bUseWordContainsJoins
+                       && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
               // word-containing-segment layer
               if (sSqlExtraJoins.indexOf(sSqlSegmentStartJoin) < 0) {
                 sSqlExtraJoins.append(sSqlSegmentStartJoin);
@@ -814,18 +884,34 @@ public class OneQuerySearch extends SearchTask {
                 } // un-anchored meta condition
               }
             } else if (bSegmentLayer) {
-              if (sSqlExtraJoins.indexOf(sSqlSegmentStartJoin) < 0) {
-                sSqlExtraJoin.append(sSqlSegmentStartJoin);
+              if (targetSegmentLayer.get().getId().equals(layer.getId())) { // first segment layer
+                sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
+                if (bUseWordContainsJoins) {
+                  sSqlExtraJoin.append(
+                    " INNER JOIN anchor segment_"+iWordColumn+"_start"
+                    +" ON segment_"+iWordColumn+"_start.anchor_id"
+                    +" = segment_"+iWordColumn+".start_anchor_id");
+                }
+              } else {
+                sSqlExtraJoin.append(SEGMENT_REGEXP_JOIN.format(oArgs));
               }
-              sSqlExtraJoin.append(SEGMENT_REGEXP_JOIN.format(oArgs));
-            } else if (bUseWordContainsJoins) {
+            } else if (bUseWordContainsJoins
+                       && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
               // word-containing-segment layer
               if (sSqlExtraJoins.indexOf(sSqlSegmentStartJoin) < 0) {
                 sSqlExtraJoin.append(sSqlSegmentStartJoin);
               }
               sSqlExtraJoin.append(CONTAINING_WORD_REGEXP_JOIN.format(oArgs));
             } else {
-              sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
+              if (targetSegmentLayer.isPresent()) {
+                sSqlExtraJoin.append(
+                  REGEXP_JOIN.format(oArgs).replace(
+                    "word_"+iWordColumn+".",
+                    "search_"+iWordColumn+"_"+schema.getLayer(targetSegmentLayer.get().getId())
+                    .get("layer_id")+"."));
+              } else {
+                sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
+              }
             }
             if (layerMatch.getNot() && ".+".equals(layerMatch.getPattern())) { // NOT EXISTS
               // special case: "NOT .+" means "not anything" - i.e. missing annotations
@@ -984,13 +1070,13 @@ public class OneQuerySearch extends SearchTask {
       
       if (targetSegmentLayer.isPresent()) {
         sSqlExtraFields.append(
-          ", search"+iWordColumn+"_" + targetSegmentLayer.get().get("layer_id")
+          ", search"+iWordColumn+"_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
           + ".segment_annotation_id AS target_segment_id");
         targetSegmentExpression
-          = "search_"+iWordColumn+"_" + targetSegmentLayer.get().get("layer_id")
+          = "search_"+iWordColumn+"_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
           + ".segment_annotation_id"; 
         targetSegmentOrder =
-          ", search_"+iWordColumn+"_" + targetSegmentLayer.get().get("layer_id")
+          ", search_"+iWordColumn+"_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
           + ".ordinal_in_word";
       }
       
@@ -1050,7 +1136,8 @@ public class OneQuerySearch extends SearchTask {
        :targetLayer.get("scope").toString().toLowerCase()),// target scope (lowercase)
       targetLayer==null?0:targetLayer.get("layer_id"), // target layer_id
       maxMatches>0?"LIMIT " + maxMatches:"",
-      targetSegmentOrder
+      targetSegmentOrder,
+      matrix.getColumns().size()-1 // last column index
     };
     
     // create sql query
@@ -1060,16 +1147,51 @@ public class OneQuerySearch extends SearchTask {
     // "search_c_l", so correct that now...
     for (int c = 0; c < matrix.getColumns().size(); c++) {
       Column column = matrix.getColumns().get(c);
+      Optional<LayerMatch> primarySegmentLayer = primarySegmentLayers.get(c);      
       Optional<LayerMatch> primaryWordLayer = primaryWordLayers.get(c);
+       if (primarySegmentLayer.isPresent()) {
+        Optional<Integer> primarySegmentLayerId = primarySegmentLayer
+          .filter(LayerMatch::HasCondition)
+          // not a "NOT .+" expression
+          .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
+          .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
+          // segment scope
+          .filter(layerMatch -> "segment".equals(layerMatch.getId())
+                  || ("segment".equals(
+                        schema.getLayer(layerMatch.getId()).getParentId())))
+          .map(layerMatch -> schema.getLayer(layerMatch.getId()))
+          .filter(Objects::nonNull)
+          .map(layer -> (Integer)layer.get("layer_id"))
+          .filter(Objects::nonNull);
+        int l = primarySegmentLayerId.orElse(-999);
+        if (l >= 0 && primaryWordLayer.isPresent()) {
+          // fix join
+          q = q.replaceAll(
+            "search_"+c+"_"+l
+            +"  ON search_"+c+"_"+l+"\\.word_annotation_id = word_"+c+"\\.word_annotation_id",
+            "search_"+c+"_"+l
+            +"  ON search_"+c+"_"+l+".turn_annotation_id = turn.annotation_id");
+        }
+        // fix mentions
+        q = q.replaceAll(
+          " segment_"+c+"\\.",
+          " search_"+c+"_"+l+".");
+        q = q.replaceAll(
+          " segment_"+c+" ",
+          " search_"+c+"_"+l+" ");        
+      }
+      
       if (primaryWordLayer.isPresent() // first primary word layer isn't "word"
-          && !primaryWordLayer.get().getId().equals(schema.getWordLayerId())) {
+          && !primaryWordLayer.get().getId().equals(schema.getWordLayerId())
+          // and there's no segment layer in this column
+          && !primarySegmentLayer.isPresent()) { 
         // (if there's no word-based matching, leave default join)        
         // fix segment join
         q = q.replaceAll(
           "segment_"+c+" ON segment_"+c+"\\.word_annotation_id = word_"+c+"\\.word_annotation_id",
           "segment_"+c+" ON segment_"+c+".turn_annotation_id = turn.annotation_id");
       }
-      Optional<Integer> primaryWordLayerId = column.getLayers().values().stream()
+      Optional<Integer> primaryWordLayerId = primaryWordLayer
         .filter(LayerMatch::HasCondition)
         // not a "NOT .+" expression
         .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
@@ -1082,17 +1204,17 @@ public class OneQuerySearch extends SearchTask {
         .map(layerMatch -> schema.getLayer(layerMatch.getId()))
         .filter(Objects::nonNull)
         .map(layer -> (Integer)layer.get("layer_id"))
-        .filter(Objects::nonNull)
-        .findAny();
+        .filter(Objects::nonNull);
       int l = primaryWordLayerId.orElse(-999);
       if (l >= 0) {
-        // fix join
-        q = q.replaceAll(
-          "search_"+c+"_"+l
-          +"  ON search_"+c+"_"+l+"\\.word_annotation_id = word_"+c+"\\.word_annotation_id",
-          "search_"+c+"_"+l
-          +"  ON search_"+c+"_"+l+".turn_annotation_id = turn.annotation_id");
-        
+        if (!primarySegmentLayer.isPresent()) {
+          // fix join
+          q = q.replaceAll(
+            "search_"+c+"_"+l
+            +"  ON search_"+c+"_"+l+"\\.word_annotation_id = word_"+c+"\\.word_annotation_id",
+            "search_"+c+"_"+l
+            +"  ON search_"+c+"_"+l+".turn_annotation_id = turn.annotation_id");
+        }
         // fix mentions
         q = q.replaceAll(
           " word_"+c+"\\.",
@@ -1652,22 +1774,17 @@ public class OneQuerySearch extends SearchTask {
       +" SELECT unsorted.search_id,unsorted.ag_id,"
       // get speaker_number from line, optimised orth SQL doesn't include it
       +" CAST(line.label AS SIGNED)," 
-      +" line_start.anchor_id,line_end.anchor_id,line.annotation_id,"
+      +" line.start_anchor_id,line.end_anchor_id,line.annotation_id,"
       +" unsorted.segment_annotation_id,unsorted.target_annotation_id,"
       +" unsorted.first_matched_word_annotation_id,unsorted.last_matched_word_annotation_id,"
       +" 1,unsorted.target_annotation_uid"
       +" FROM _result unsorted"
       +" INNER JOIN transcript ON unsorted.ag_id = transcript.ag_id"
-      +" INNER JOIN anchor word_start ON unsorted.start_anchor_id = word_start.anchor_id"
-      +" INNER JOIN (annotation_layer_"+SqlConstants.LAYER_UTTERANCE + " line" 
-      +"  INNER JOIN anchor line_start"
-      +"  ON line_start.anchor_id = line.start_anchor_id"
-      +"  INNER JOIN anchor line_end"
-      +"  ON line_end.anchor_id = line.end_anchor_id)"
-      +" ON line.turn_annotation_id = unsorted.turn_annotation_id"
+      +" INNER JOIN annotation_layer_0 word"
+      +" ON word.word_annotation_id = unsorted.first_matched_word_annotation_id"
       // line bounds are outside word bounds...
-      +"  AND line_start.offset <= word_start.offset"
-      +"  AND line_end.offset > word_start.offset"
+      +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_UTTERANCE + " line" 
+      +" ON line.annotation_id = word.utterance_annotation_id"
       // get speaker_number from line, optimised orth SQL doesn't include it
       +" INNER JOIN speaker ON CAST(line.label AS SIGNED) = speaker.speaker_number"
       +" WHERE unsorted.search_id = ? AND complete = 0"
@@ -2016,6 +2133,8 @@ public class OneQuerySearch extends SearchTask {
    *  <li>14: target scope (lowercase)</li>
    *  <li>15: target layer_id</li>
    *  <li>16: LIMIT clause, if any</li>
+   *  <li>17: segment order clause, if any</li>
+   *  <li>18: index of last word column</li>
    * </ul>
    */
   static final MessageFormat sqlPatternMatchFirst = new MessageFormat(
@@ -2027,7 +2146,7 @@ public class OneQuerySearch extends SearchTask {
     +" SELECT ?"
     +", word_0.ag_id AS ag_id"
     +", CAST(turn.label AS SIGNED) AS speaker_number"
-    +", word_0.start_anchor_id, word_0.end_anchor_id,0" // start_anchor_id, end_anchor_id, defining_annotation_id, updated later
+    +", word_0.start_anchor_id, word_{18}.end_anchor_id,0" // start_anchor_id, end_anchor_id, defining_annotation_id, updated later
     +", {12} AS segment_annotation_id"
     +", {13} AS target_annotation_id"
     +", word_0.turn_annotation_id AS turn_annotation_id"
@@ -2309,11 +2428,13 @@ public class OneQuerySearch extends SearchTask {
    * JOIN to get the start offset of the segment. The end offset isn't usually needed,
    * as the start time is enough to deduce whether a segment is contained by
    * some other annotation.
+   * <p> Arguments are:
+   * <ul>
+   *  <li>0: column suffix </li>
+   * </ul>
    */
   static final MessageFormat sqlSegmentStartJoin = new MessageFormat(
-    " INNER JOIN annotation_layer_1 segment{0}"
-    +" ON segment{0}.word_annotation_id = word{0}.word_annotation_id"
-    +" INNER JOIN anchor segment{0}_start"
+    " INNER JOIN anchor segment{0}_start"
     +" ON segment{0}_start.anchor_id = segment{0}.start_anchor_id");
    
   /** 
@@ -2897,10 +3018,10 @@ public class OneQuerySearch extends SearchTask {
    */
   static final MessageFormat SEGMENT_REGEXP_JOIN = new MessageFormat(    
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
-    + "  ON search{6}_{0}.segment_annotation_id = segment{6}.annotation_id"
+    + "  ON search{6}_{0}.segment_annotation_id = segment{6}.segment_annotation_id"
     + "  AND {2,choice,0#search{6}_{0}.label|1#CAST(search{6}_{0}.label AS BINARY)}"
     + " {1} REGEXP {2,choice,0#|1#BINARY} ?");
-  
+    
   /**
    * Query for matching containing word-layer label - uses <code>REGEXP</code>
    * <p> Arguments are:
@@ -2914,17 +3035,16 @@ public class OneQuerySearch extends SearchTask {
    * </ul>
    */
   static final MessageFormat CONTAINING_WORD_REGEXP_JOIN  = new MessageFormat(
-    " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
-    + "  INNER JOIN anchor word{6}_start_{0}"
-    + "  ON word{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
-    + "  INNER JOIN anchor word{6}_end_{0}"
-    + "  ON word{6}_end_{0}.anchor_id = search{6}_{0}.end_anchor_id)"
+    " INNER JOIN annotation_layer_{0} search{6}_{0}"
     + "  ON search{6}_{0}.word_annotation_id = segment{6}.word_annotation_id"
-    // word bounds enclose segment start time...
-    + "  AND word{6}_start_{0}.offset <= segment{6}_start.offset"
-    + "  AND word{6}_end_{0}.offset > segment{6}_start.offset"
     + "  AND {2,choice,0#search{6}_{0}.label|1#CAST(search{6}_{0}.label AS BINARY)}"
-    + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}");
+    + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}"
+    + " INNER JOIN anchor word{6}_start_{0}"
+    + "  ON word{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
+    + "  AND word{6}_start_{0}.offset <= segment{6}_start.offset"
+    + " INNER JOIN anchor word{6}_end_{0}"
+    + "  ON word{6}_end_{0}.anchor_id = search{6}_{0}.end_anchor_id"
+    + "  AND word{6}_end_{0}.offset > segment{6}_start.offset");
 
   /**
    * Query for pattern matching - uses <code>REGEXP</code> 

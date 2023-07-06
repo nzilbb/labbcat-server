@@ -4891,6 +4891,7 @@ public class SqlGraphStore implements GraphStore {
       Collection<Change> changes = graph.getChanges();
       if (changes.size() == 0) return false;
 
+      boolean utteranceChanges = graph.getChange() == Change.Operation.Create;
       boolean wordChanges = false;
       boolean segmentChanges = false;
       // forced-alignment to a phrase layer can lead to the phrase annotation ordinals
@@ -4960,25 +4961,30 @@ public class SqlGraphStore implements GraphStore {
                 wordChanges = true;
               } else if (layer.getId().equals("segment")) {
                 segmentChanges = true;
-              } else if (updatingFragment
-                         && change.getObject().getChange() == Change.Operation.Create
-                         && layer.getParentId().equals(schema.getTurnLayerId())
-                         && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL
-                         && layer.getPeers()
-                         /* technically, peers shouldn't overlap, but in reality
-                            layer created with the current LaBB-CAT UI have peersOverlap = true
-                            && !layer.getPeersOverlap()*/) {
-                // we're updating a span layer from within a fragment (e.g. forced alignment),
-                // so the ordinals might incorrecty start at 1
-                // so we'll fix them up later
-                Integer layer_id = (Integer)layer.get("layer_id");
-                if (layer_id != null && !adjustPhraseOrdinals.containsKey(layer_id)) {
-                  // haven't noticed this layer yet, so add it to the collection
-                  adjustPhraseOrdinals.put(layer_id, new HashSet<String>());
+              } else {
+                if (layer.getId().equals(schema.getUtteranceLayerId())) {
+                  utteranceChanges = true;
                 }
-                // ensure the turn_annotation_id is included in the ordinal fix below
-                adjustPhraseOrdinals.get(layer_id)
-                  .add(((Annotation)change.getObject()).getParentId());
+                if (updatingFragment
+                    && change.getObject().getChange() == Change.Operation.Create
+                    && layer.getParentId().equals(schema.getTurnLayerId())
+                    && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL
+                    && layer.getPeers()
+                    /* technically, peers shouldn't overlap, but in reality
+                       layer created with the current LaBB-CAT UI have peersOverlap = true
+                       && !layer.getPeersOverlap()*/) {
+                  // we're updating a span layer from within a fragment (e.g. forced alignment),
+                  // so the ordinals might incorrecty start at 1
+                  // so we'll fix them up later
+                  Integer layer_id = (Integer)layer.get("layer_id");
+                  if (layer_id != null && !adjustPhraseOrdinals.containsKey(layer_id)) {
+                    // haven't noticed this layer yet, so add it to the collection
+                    adjustPhraseOrdinals.put(layer_id, new HashSet<String>());
+                  }
+                  // ensure the turn_annotation_id is included in the ordinal fix below
+                  adjustPhraseOrdinals.get(layer_id)
+                    .add(((Annotation)change.getObject()).getParentId());
+                }
               }
             } // layer isn't null
             
@@ -5382,6 +5388,29 @@ public class SqlGraphStore implements GraphStore {
               
           } // next updating phrase layer
         } // not a new graph
+
+        if (wordChanges || utteranceChanges) {
+          // (re-)link words to utterances for fast search result collation
+          PreparedStatement sqlFindWordUtterance = connection.prepareStatement(
+            "UPDATE annotation_layer_0"
+            +" INNER JOIN anchor word_start"
+            +" ON annotation_layer_0.start_anchor_id = word_start.anchor_id"
+            +" INNER JOIN annotation_layer_12 utterance"
+            +" ON utterance.turn_annotation_id = annotation_layer_0.turn_annotation_id"
+            +" INNER JOIN anchor utterance_start"
+            +"  ON utterance_start.anchor_id = utterance.start_anchor_id"
+            +"  AND utterance_start.offset <= word_start.offset"
+            +" INNER JOIN anchor utterance_end"
+            +"  ON utterance_end.anchor_id = utterance.end_anchor_id"
+            +"  AND (utterance_end.offset > word_start.offset"
+            +"   OR (utterance_end.offset = word_start.offset"
+            +"    AND utterance_end.offset = utterance_start.offset))"
+            +" SET annotation_layer_0.utterance_annotation_id = utterance.annotation_id"
+            +" WHERE annotation_layer_0.ag_id = ?");
+          sqlFindWordUtterance.setInt(1, iAgId);
+          sqlFindWordUtterance.executeUpdate();
+          sqlFindWordUtterance.close();       
+        }
 
       } finally {
         sqlInsertAnchor.close();
