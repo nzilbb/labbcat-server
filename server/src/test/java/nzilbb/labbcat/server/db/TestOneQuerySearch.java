@@ -1340,7 +1340,7 @@ public class TestOneQuerySearch {
       l -> false, // no word linked layers
       p -> "", t -> "");
     assertEquals(
-      "not word-linked span layer", // TODO this is not valid: Unknown column 'search_30.end_anchor_id' in 'on clause' - looks like it should be search_0_30.end_anchor_id
+      "not word-linked span layer", 
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
       +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
@@ -1367,7 +1367,7 @@ public class TestOneQuerySearch {
       +"  AND meta_0_start_30.offset <= word_0_start.offset"
       +"  AND meta_0_end_30.offset > word_0_start.offset"
       +"  AND search_0_30.label  REGEXP  ?  AND"
-      +" ( search_0_2.end_anchor_id = search_30.end_anchor_id OR NOT EXISTS"
+      +" ( search_0_2.end_anchor_id = search_0_30.end_anchor_id OR NOT EXISTS"
       +" (SELECT other_word.label"
       +"  FROM annotation_layer_0  other_word"
       +"  INNER JOIN anchor other_word_start"
@@ -1715,7 +1715,7 @@ public class TestOneQuerySearch {
       l -> false, // no word linked layers
       p -> "", t -> "");
     assertEquals(
-      "not word-linked span layer", // TODO this is not valid: Unknown column 'search_30.end_anchor_id' in 'on clause' - looks like it should be search_0_30.end_anchor_id
+      "not word-linked span layer",
       "INSERT INTO _result"
       +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
       +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
@@ -1746,7 +1746,7 @@ public class TestOneQuerySearch {
       +"  AND meta_1_start_30.offset <= word_1_start.offset"
       +"  AND meta_1_end_30.offset > word_1_start.offset"
       +"  AND search_1_30.label  REGEXP  ?"
-      +"  AND ( search_1_2.end_anchor_id = search_30.end_anchor_id OR NOT EXISTS"
+      +"  AND ( search_1_2.end_anchor_id = search_1_30.end_anchor_id OR NOT EXISTS"
       +" (SELECT other_word.label"
       +"  FROM annotation_layer_0  other_word"
       +"  INNER JOIN anchor other_word_start"

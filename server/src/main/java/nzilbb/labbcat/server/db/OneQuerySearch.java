@@ -2358,7 +2358,7 @@ public class OneQuerySearch extends SearchTask {
   
   /** Extra conditions for matching the last word in a freeform spanning annotation */
   static final MessageFormat fmtSqlEndFreeformSpanCondition = new MessageFormat(
-    " AND ( word{1}.end_anchor_id = search_{0}.end_anchor_id"
+    " AND ( word{1}.end_anchor_id = search{1}_{0}.end_anchor_id"
     + " OR NOT EXISTS (SELECT other_word.label" 
     + "  FROM annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION
     + "  other_word" 
