@@ -1172,12 +1172,11 @@ public class TestOneQuerySearch {
       +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
       +"  AND search_0_2.label  REGEXP  ?"
       +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
-      +" INNER JOIN (annotation_layer_12 line_0"
-      +"  INNER JOIN anchor line_0_start  ON line_0_start.anchor_id = line_0.start_anchor_id"
-      +"  INNER JOIN anchor line_0_end  ON line_0_end.anchor_id = line_0.end_anchor_id)"
-      +" ON line_0.turn_annotation_id = search_0_2.turn_annotation_id"
-      +"  AND line_0_start.offset <= word_0_start.offset"
-      +"  AND line_0_end.offset > word_0_start.offset"
+      +" INNER JOIN annotation_layer_0 token_0"
+      +" ON token_0.annotation_id = search_0_2.word_annotation_id"
+      +" INNER JOIN annotation_layer_12 line_0"
+      +" ON line_0.annotation_id = token_0.utterance_annotation_id"
+      +" INNER JOIN anchor line_0_start ON line_0_start.anchor_id = line_0.start_anchor_id"
       +" LEFT OUTER JOIN annotation_layer_0 last_word"
       +" ON last_word.turn_annotation_id = search_0_2.turn_annotation_id"
       +" AND last_word.ordinal_in_turn = search_0_2.ordinal_in_turn - 1"
@@ -1205,7 +1204,7 @@ public class TestOneQuerySearch {
   }
   
   /** Ensure one-column searches with word-end anchoring generate the correct SQL. */
-  @Test public void oneColumAnchorEnd() throws Exception {    
+  @Test public void oneColumnAnchorEnd() throws Exception {    
     OneQuerySearch search = new OneQuerySearch();
 
     // phrase layer
@@ -1528,12 +1527,11 @@ public class TestOneQuerySearch {
       +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
       +"  AND search_0_2.label  REGEXP  ?"
       +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
-      +" INNER JOIN (annotation_layer_12 line_0"
-      +"  INNER JOIN anchor line_0_start  ON line_0_start.anchor_id = line_0.start_anchor_id"
-      +"  INNER JOIN anchor line_0_end  ON line_0_end.anchor_id = line_0.end_anchor_id)"
-      +" ON line_0.turn_annotation_id = search_0_2.turn_annotation_id"
-      +"  AND line_0_start.offset <= word_0_start.offset"
-      +"  AND line_0_end.offset > word_0_start.offset"
+      +" INNER JOIN annotation_layer_0 token_0"
+      +" ON token_0.annotation_id = search_0_2.word_annotation_id"
+      +" INNER JOIN annotation_layer_12 line_0"
+      +" ON line_0.annotation_id = token_0.utterance_annotation_id"
+      +" INNER JOIN anchor line_0_end ON line_0_end.anchor_id = line_0.end_anchor_id"
       +" LEFT OUTER JOIN annotation_layer_0  next_word_0"
       +" ON next_word_0.turn_annotation_id = search_0_2.turn_annotation_id"
       +" AND next_word_0.ordinal_in_turn = search_0_2.ordinal_in_turn + 1"
@@ -1930,12 +1928,11 @@ public class TestOneQuerySearch {
       +"  INNER JOIN annotation_layer_2 search_1_2"
       +"  ON search_1_2.turn_annotation_id = turn.annotation_id  AND search_1_2.label  REGEXP  ?"
       +" INNER JOIN anchor word_1_start ON word_1_start.anchor_id = search_1_2.start_anchor_id"
-      +" INNER JOIN (annotation_layer_12 line_1"
-      +"  INNER JOIN anchor line_1_start  ON line_1_start.anchor_id = line_1.start_anchor_id"
-      +"  INNER JOIN anchor line_1_end  ON line_1_end.anchor_id = line_1.end_anchor_id)"
-      +" ON line_1.turn_annotation_id = search_1_2.turn_annotation_id"
-      +"  AND line_1_start.offset <= word_1_start.offset"
-      +"  AND line_1_end.offset > word_1_start.offset"
+      +" INNER JOIN annotation_layer_0 token_1"
+      +" ON token_1.annotation_id = search_1_2.word_annotation_id"
+      +" INNER JOIN annotation_layer_12 line_1"
+      +" ON line_1.annotation_id = token_1.utterance_annotation_id"
+      +" INNER JOIN anchor line_1_end ON line_1_end.anchor_id = line_1.end_anchor_id"
       +" LEFT OUTER JOIN annotation_layer_0  next_word_1"
       +" ON next_word_1.turn_annotation_id = search_1_2.turn_annotation_id"
       +" AND next_word_1.ordinal_in_turn = search_1_2.ordinal_in_turn + 1"

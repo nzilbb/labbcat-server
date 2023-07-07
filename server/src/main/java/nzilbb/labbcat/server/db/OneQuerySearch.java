@@ -97,7 +97,9 @@ public class OneQuerySearch extends SearchTask {
     String sSqlWordEndJoin = sqlWordEndJoin.format(columnSuffix);
     String sSqlSegmentStartJoin = sqlSegmentStartJoin.format(columnSuffix);
     String sSqlSegmentEndJoin = sqlSegmentEndJoin.format(columnSuffix);
-    String sSqlLineJoin = sqlLineJoin.format(columnSuffix);
+    String sSqlLineJoin = sqlLineJoinViaToken.format(columnSuffix);
+    String sSqlLineStartJoin = sqlLineStartJoin.format(columnSuffix);
+    String sSqlLineEndJoin = sqlLineEndJoin.format(columnSuffix);
     String sSqlEndLineJoin = sqlEndLineJoin.format(columnSuffix);
     String sSqlEndTurnJoin = sqlEndTurnJoin.format(columnSuffix);
 
@@ -146,6 +148,7 @@ public class OneQuerySearch extends SearchTask {
       sSqlExtraJoinsFirst.append(
         " INNER JOIN annotation_layer_"+ SqlConstants.LAYER_TRANSCRIPTION
         +" word_"+iWordColumn+" ON word_"+iWordColumn+".turn_annotation_id = turn.annotation_id");
+      sSqlLineJoin = sqlDirectLineJoin.format(columnSuffix);
     }
     
     Optional<Layer> alignedWordLayer = matrix.getColumns().get(iWordColumn)
@@ -477,6 +480,9 @@ public class OneQuerySearch extends SearchTask {
       if (sSqlExtraJoinsFirst.indexOf(sSqlLineJoin) < 0) {
         sSqlExtraJoinsFirst.append(sSqlLineJoin);
       }
+      if (sSqlExtraJoinsFirst.indexOf(sSqlLineStartJoin) < 0) {
+        sSqlExtraJoinsFirst.append(sSqlLineStartJoin);
+      }
       if (sSqlExtraJoinsFirst.indexOf(sSqlStartLineJoin) < 0) {
         sSqlExtraJoinsFirst.append(sSqlStartLineJoin);
       }
@@ -500,6 +506,9 @@ public class OneQuerySearch extends SearchTask {
         }
         if (sSqlExtraJoinsFirst.indexOf(sSqlLineJoin) < 0) {
           sSqlExtraJoinsFirst.append(sSqlLineJoin);
+        }
+        if (sSqlExtraJoinsFirst.indexOf(sSqlLineEndJoin) < 0) {
+          sSqlExtraJoinsFirst.append(sSqlLineEndJoin);
         }
         if (sSqlExtraJoinsFirst.indexOf(sSqlEndLineJoin) < 0) {
           sSqlExtraJoinsFirst.append(sSqlEndLineJoin);
@@ -661,7 +670,7 @@ public class OneQuerySearch extends SearchTask {
           "_" + iWordColumn, // column suffix
           "_" + (iWordColumn-1) // previous column suffix
         };
-        sSqlExtraJoins.append(sqlPatternMatchSubsequentJoin.format(oSubPatternMatchArgs));
+        sSqlExtraJoins.append(sqlPatternMatchSubsequentJoin.format(oSubPatternMatchArgs));        
       }
       
       columnSuffix[0] = "_" + iWordColumn;
@@ -669,7 +678,11 @@ public class OneQuerySearch extends SearchTask {
       sSqlWordEndJoin = sqlWordEndJoin.format(columnSuffix);
       sSqlSegmentStartJoin = sqlSegmentStartJoin.format(columnSuffix);
       sSqlSegmentEndJoin = sqlSegmentEndJoin.format(columnSuffix);
-      sSqlLineJoin = sqlLineJoin.format(columnSuffix);
+      sSqlLineJoin = primaryWordLayer.isPresent()?
+        sqlLineJoinViaToken.format(columnSuffix)
+        :sqlDirectLineJoin.format(columnSuffix);
+      sSqlLineStartJoin = sqlLineStartJoin.format(columnSuffix);
+      sSqlLineEndJoin = sqlLineEndJoin.format(columnSuffix);
       sSqlEndLineJoin = sqlEndLineJoin.format(columnSuffix);
       sSqlEndTurnJoin = sqlEndTurnJoin.format(columnSuffix);
       
@@ -1051,6 +1064,9 @@ public class OneQuerySearch extends SearchTask {
           }
           if (sSqlExtraJoins.indexOf(sSqlLineJoin) < 0) {
             sSqlExtraJoins.append(sSqlLineJoin);
+          }
+          if (sSqlExtraJoins.indexOf(sSqlLineEndJoin) < 0) {
+            sSqlExtraJoins.append(sSqlLineEndJoin);
           }
           if (sSqlExtraJoins.indexOf(sSqlEndLineJoin) < 0) {
             sSqlExtraJoins.append(sSqlEndLineJoin);
@@ -2379,7 +2395,9 @@ public class OneQuerySearch extends SearchTask {
   /** Query for matching the start/end utterance (line) border conditions */
   static final MessageFormat sqlLineJoin = new MessageFormat(
     " INNER JOIN (annotation_layer_"+SqlConstants.LAYER_UTTERANCE
-    + " line{0}" 
+    + " line{0}"
+    // TODO use word.utterance_annotation_id instead of anchor offsets
+    // TODO + " ON line{0}.annotation_id = word{0}.utterance_annotation_id"
     + "  INNER JOIN anchor line{0}_start"
     + "  ON line{0}_start.anchor_id = line{0}.start_anchor_id"
     + "  INNER JOIN anchor line{0}_end"
@@ -2388,6 +2406,28 @@ public class OneQuerySearch extends SearchTask {
     // line bounds are outside word bounds...
     + "  AND line{0}_start.offset <= word{0}_start.offset"
     + "  AND line{0}_end.offset > word{0}_start.offset");
+  
+  /** Join to utterance directly from word table */
+  static final MessageFormat sqlDirectLineJoin = new MessageFormat(
+    " INNER JOIN annotation_layer_"+SqlConstants.LAYER_UTTERANCE + " line{0}"
+    +" ON line{0}.annotation_id = word{0}.utterance_annotation_id");
+  
+  /** Join to utterance directly from via system word table table */
+  static final MessageFormat sqlLineJoinViaToken = new MessageFormat(
+    " INNER JOIN annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION + " token{0}"
+    +" ON token{0}.annotation_id = word{0}.word_annotation_id"
+    +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_UTTERANCE + " line{0}"
+    +" ON line{0}.annotation_id = token{0}.utterance_annotation_id");
+
+  /** Join to utterance start */
+  static final MessageFormat sqlLineStartJoin = new MessageFormat(
+    " INNER JOIN anchor line{0}_start"
+    + " ON line{0}_start.anchor_id = line{0}.start_anchor_id");
+  
+  /** Join to utterance end */
+  static final MessageFormat sqlLineEndJoin = new MessageFormat(
+    " INNER JOIN anchor line{0}_end"
+    + " ON line{0}_end.anchor_id = line{0}.end_anchor_id");
   
   /** 
    * Fields that identify the line <code>annotation_id</code>
