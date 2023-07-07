@@ -66,11 +66,10 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         }
         let somethingAdded = false;
         for (let label of labels) {
-            if (!label) continue; // skip blank labels
             if (this.labels.indexOf(label) >= 0) {
                 this.messageService.error("Already exists: " + label); // TODO i18n
             } else {
-                this.layer.validLabels[label] = label;
+                this.layer.validLabels[label] = label||"(not specified)"; // TODO i18n
                 this.labels.push(label);
                 somethingAdded = true;
             }
