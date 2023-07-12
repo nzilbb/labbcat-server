@@ -681,6 +681,24 @@ public class SqlGraphStoreAdministration
           +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         try {
           sql.setString(1, Optional.of(layer.getDescription()).orElse(layer.getId()));
+          if (layer.getCategory() == null || layer.getCategory().length() == 0) { // no category
+            // select the first category
+            PreparedStatement sqlCategory = getConnection().prepareStatement(
+              "SELECT category FROM attribute_category WHERE class_id = ?"
+              +" ORDER BY display_order LIMIT 1");
+            sqlCategory.setString(1, (String)layer.get("class_id"));
+            ResultSet rsCategory = sqlCategory.executeQuery();
+            try {
+              if (rsCategory.next()) {
+                layer.setCategory(rsCategory.getString(1));
+              } else {            
+                layer.setCategory("General");
+              }
+            } finally {
+              rsCategory.close();
+              sqlCategory.close();
+            }
+          }
           sql.setString(2, layer.getCategory());
           sql.setString(3, subtype);
           sql.setString(4, Optional.of((String)layer.get("style")).orElse(""));
