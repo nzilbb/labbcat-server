@@ -27,6 +27,7 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -390,7 +391,17 @@ public class Results extends LabbcatServlet { // TODO unit test
           // copy name
           ((ArraySearchResults)results).setName(search.getResults().getName());
         }
-        results.hasNext(); // load size etc.
+        boolean distinctStartEndTokens = false;
+        // peek at first result so we can figure out if it's a one-word-wide result or not
+        if (results.hasNext()) { // (hasNext also loads size etc.)
+          IdMatch result = new IdMatch(results.next());
+          String startTokenId = result.getMatchAnnotationUids().get("0");
+          String endTokenId = result.getMatchAnnotationUids().get("1");
+          distinctStartEndTokens = startTokenId != null && endTokenId != null
+            && !startTokenId.equals(endTokenId);
+          results.reset(); // back to the beginning so we don't skip the first result
+        }
+        final boolean multiWordMatches = distinctStartEndTokens;
 
         final PreparedStatement sqlMatchTranscriptContext = connection.prepareStatement(
           "SELECT COALESCE(GROUP_CONCAT(word.label ORDER BY ordinal_in_turn SEPARATOR ' '),'')"
@@ -403,6 +414,19 @@ public class Results extends LabbcatServlet { // TODO unit test
           + (wordsContext < 0?" AND start.offset >= ? AND start.offset < ?"
              :"")
           + " ORDER BY ordinal_in_turn");
+        final PreparedStatement sqlMatchLayerLabels = connection.prepareStatement( // TODO handle segment layers too
+          "SELECT COALESCE(GROUP_CONCAT(annotation.label"
+          + " ORDER BY annotation.ordinal_in_turn SEPARATOR ' '),'')"
+          + " FROM annotation_layer_0 first_word"
+          + " INNER JOIN annotation_layer_0 last_word"
+          + " ON last_word.annotation_id = ?"
+          + " INNER JOIN annotation_layer_? annotation"
+          + " ON annotation.turn_annotation_id = first_word.turn_annotation_id"
+          + " AND annotation.ordinal_in_turn >= first_word.ordinal_in_turn"
+          + " AND annotation.ordinal_in_turn <= last_word.ordinal_in_turn"
+          + " AND annotation.ordinal = 1"
+          + " WHERE first_word.annotation_id = ?"
+          + " ORDER BY annotation.ordinal_in_turn");
         
         try {
           String searchName = "";
@@ -423,7 +447,7 @@ public class Results extends LabbcatServlet { // TODO unit test
           }
 
           outputStart(
-            jsonOut, csvOut, searchName, results.size(), options, layers, csvLayers, schema);
+            jsonOut, csvOut, searchName, results.size(), multiWordMatches, options, layers, csvLayers, schema);
           try {
             if (pageLength == null) pageLength = results.size();
             if (pageNumber == null) pageNumber = Integer.valueOf(0);
@@ -441,7 +465,7 @@ public class Results extends LabbcatServlet { // TODO unit test
                   try {
                     // write the initial non-layer fields
                     String matchId = results.getLastMatchId();
-                    IdMatch result = new IdMatch(matchId);                
+                    IdMatch result = new IdMatch(matchId);
                     outputMatchStart(
                       jsonOut, csvOut, finalSearchName, result, agIdToGraph, speakerNumberToName,
                       store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
@@ -455,8 +479,17 @@ public class Results extends LabbcatServlet { // TODO unit test
                         })
                       .flatMap(i -> i)
                       .iterator();
+                    Layer lastLayer = schema.getWordLayer();
                     for (Annotation annotation : annotations) {
                       Layer layer = schema.getLayer(layerIds.next());
+
+                      // if we've changed layer, finish off the last layer...
+                      if (lastLayer != null && !lastLayer.getId().equals(layer.getId())) {
+                        outputMatchLayerLabels(
+                          csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result, lastLayer);
+                      } // layer changed
+
+                      // now output this annotation
                       if (annotation == null) {
                         csvOut.print("");
                         if (layer.getAlignment()
@@ -484,7 +517,12 @@ public class Results extends LabbcatServlet { // TODO unit test
                           } // next anchor
                         } // offsets
                       } // annotation present
+                      lastLayer = layer;
                     } // next annotation
+                    if (lastLayer != null) {
+                      outputMatchLayerLabels(
+                        csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result, lastLayer);
+                    } // layer changed
                   } catch(Exception x) {
                     log("ERROR Results-consumer: " + x);
                     System.err.println("ERROR Results-consumer: " + x);
@@ -511,6 +549,7 @@ public class Results extends LabbcatServlet { // TODO unit test
           } finally {
             outputMatchesEnd(jsonOut, csvOut); // end all matches
             sqlMatchTranscriptContext.close();
+            sqlMatchLayerLabels.close();
           }
           outputSuccessfulEnd(jsonOut, csvOut, request);
         } catch (Exception x) {
@@ -535,12 +574,14 @@ public class Results extends LabbcatServlet { // TODO unit test
    * @param jsonOut Generator for JSON output, or null for CSV output.
    * @param csvOut Printer for CSV output, or null for JSON output.
    * @param searchName The name search that produced the results.
+   * @param matchCount The number of matches.
+   * @param multiWordMatches Whether matches span multiple tokens (or just one token)
    * @param layers The layers to output.
    * @param options The additional fields to output.
    */
   void outputStart(
     JsonGenerator jsonOut, CSVPrinter csvOut, String searchName, long matchCount,
-    LinkedHashSet<String> options, LinkedHashSet<String> layers,
+    boolean multiWordMatches, LinkedHashSet<String> options, LinkedHashSet<String> layers,
     LinkedHashMap<String,Integer> csvLayers, Schema schema)
     throws IOException {
     if (csvOut != null) {
@@ -598,6 +639,14 @@ public class Results extends LabbcatServlet { // TODO unit test
                   csvOut.print("Target " + id + " " + i + " end");
                 }
               }
+            }
+            // if the matches are multi-word, we not only return the target label
+            // but also the concatenation of all the labels within the match
+            if (multiWordMatches
+                // for word layers only
+                && schema.getWordLayerId().equals(layer.getParentId())
+                && !layer.getId().equals("segment")) {
+              csvOut.print("Match " + id);
             }
           } catch(IOException x) {
           }
@@ -854,7 +903,45 @@ public class Results extends LabbcatServlet { // TODO unit test
       jsonOut.write(name, value);
     }
   } // end of outputMatchAttribute()
-
+  
+  /**
+   * Outputs the concatenated labels of the match for the given layer.
+   * @param csvOut
+   * @param schema
+   * @param sqlMatchLayerLabels
+   * @param multiWordMatches
+   * @param result
+   * @param layer
+   */
+  public void outputMatchLayerLabels(
+    CSVPrinter csvOut, Schema schema, PreparedStatement sqlMatchLayerLabels,
+    boolean multiWordMatches, IdMatch result,
+    Layer layer) throws SQLException, IOException {
+    if (multiWordMatches
+        && schema.getWordLayerId().equals(layer.getParentId())  // word annotation
+        && !layer.getId().equals("segment")) {
+      String firstTokenId = result.getMatchAnnotationUids().get("0");
+      long firstWordAnnotationId = Long.parseLong(
+        firstTokenId.replace("ew_0_",""));
+      String lastTokenId = result.getMatchAnnotationUids().get("1");
+      long lastWordAnnotationId = Long.parseLong(
+        lastTokenId.replace("ew_0_",""));
+      sqlMatchLayerLabels.setLong(1, lastWordAnnotationId);
+      sqlMatchLayerLabels.setInt(2, (Integer)layer.get("layer_id"));
+      sqlMatchLayerLabels.setLong(3, firstWordAnnotationId);
+      ResultSet rsMatchLayerLabels = sqlMatchLayerLabels.executeQuery();
+      try {
+        if (rsMatchLayerLabels.next()) {
+          csvOut.print(rsMatchLayerLabels.getString(1));
+        } else {
+          csvOut.print("");
+        }
+      } finally {
+        rsMatchLayerLabels.close();
+      }
+    } // last layer was a word annotation layer
+  } // end of outputMatchLayerLabels()
+  
   /**
    * Sends output required for ending a match record.
    * <p> Assumes that outputMatchStart has previously been called for this match.
