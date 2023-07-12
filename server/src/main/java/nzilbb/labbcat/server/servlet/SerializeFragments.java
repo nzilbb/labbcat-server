@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -356,6 +356,13 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
             // are the same ID, and copy the target tags into the winning version of the graph
             fragmentSource = new ConsolidatedGraphSeries(fragmentSource)
               .copyLayer("target");
+          }
+          if (tagTarget) {
+            // make sure serializer outputs target layer too
+            Vector<String> layersIncludingTarget = new Vector<String>();
+            for (String l : layerId) layersIncludingTarget.add(l);
+            layersIncludingTarget.add("target");
+            layerId = layersIncludingTarget.toArray(new String[0]);
           }
           final Vector<NamedStream> files = new Vector<NamedStream>();
           serializeFragments(
