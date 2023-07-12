@@ -2342,9 +2342,6 @@
                 
         /**
          * Reads a list of category records.
-         * @see LabbcatAdmin#createCategory
-         * @see LabbcatAdmin#updateCategory
-         * @see LabbcatAdmin#deleteCategory
          * @param {string} class_id What attributes to read; "transcript" or "participant". 
          * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
          * records will be returned). 
@@ -2359,7 +2356,7 @@
          *  <dt> display_order </dt> <dd> Where the category appears among other categories. </dd>
          * </dl>
          */
-        readCategories(class_id, pageNumber, pageLength, onResult) {
+        readOnlyCategories(class_id, pageNumber, pageLength, onResult) {
             if (typeof pageNumber === "function") { // (onResult)
                 onResult = pageNumber;
                 pageNumber = null;
