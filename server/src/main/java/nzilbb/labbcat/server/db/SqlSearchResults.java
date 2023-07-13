@@ -92,6 +92,10 @@ public class SqlSearchResults implements SearchResults {
   public void reset() {
     try { if (rsIterator != null) rsIterator.close(); } catch(SQLException exception) {}
     rsIterator = null;
+    nextCount = 0;
+    nextRow = 0;
+    graphId = -1;
+    lastMatchId = null;
     // recompute size, etc.
     try { checkIterator(); } catch(SQLException exception) {}
   }
