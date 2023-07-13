@@ -1127,7 +1127,7 @@
             this.createRequest(
                 "search", null, onResult, this.baseUrl+"api/search",
                 "POST", // not GET, because the number of parameters can make the URL too long
-                null, "application/x-www-form-urlencoded")
+                null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
                 .send(this.parametersToQueryString(parameters));
         }
         
