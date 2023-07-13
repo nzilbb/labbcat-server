@@ -492,18 +492,20 @@ public class Results extends LabbcatServlet { // TODO unit test
                       // now output this annotation
                       if (annotation == null) {
                         csvOut.print("");
-                        if (layer.getAlignment()
-                            != Constants.ALIGNMENT_NONE) { // offsets
-                          csvOut.print("");
-                          csvOut.print("");
+                        switch (layer.getAlignment()) { // offsets
+                          case Constants.ALIGNMENT_INTERVAL:
+                            csvOut.print(""); // start
+                            csvOut.print(""); // end
+                            break;
+                          case Constants.ALIGNMENT_INSTANT:
+                            csvOut.print(""); // time
                         }
                       } else {
                         assert layer.getId().equals(annotation.getLayerId())
                           : "layer.getId().equals(annotation.getLayerId()) - "
                           + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
                         csvOut.print(annotation.getLabel());
-                        if (schema.getLayer(annotation.getLayerId()).getAlignment()
-                            != Constants.ALIGNMENT_NONE) { // offsets
+                        if (layer.getAlignment() != Constants.ALIGNMENT_NONE) { // offsets
                           String[] anchorIds = {
                             annotation.getStartId(), annotation.getEndId() };
                           Anchor[] anchors = store.getAnchors(null, anchorIds);
@@ -513,6 +515,10 @@ public class Results extends LabbcatServlet { // TODO unit test
                               csvOut.print(anchor.getOffset().toString());
                             } else { // no anchor offset available, or not confident enough
                               csvOut.print("");
+                            }
+                            if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
+                              // only one offset
+                              break;
                             }
                           } // next anchor
                         } // offsets
@@ -607,39 +613,53 @@ public class Results extends LabbcatServlet { // TODO unit test
       csvLayers.keySet().forEach(id -> {
           try {
             Layer layer = schema.getLayer(id);
-            if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
-              if (layer.getParentId() == null
-                  || layer.getParentId().equals(schema.getRoot().getId())
-                  || layer.getParentId().equals(schema.getParticipantLayerId())) { // attribute
-                if (csvLayers.get(id) == 1) {
-                  csvOut.print(id);
-                } else {
-                  for (int i = 1; i <= csvLayers.get(id) ; i++) {
-                    csvOut.print(id + " " + i);
-                  }
-                }
-              } else { // tag
+            switch (layer.getAlignment()) {
+              case Constants.ALIGNMENT_INTERVAL:
                 if (csvLayers.get(id) == 1) {
                   csvOut.print("Target " + id);
+                  csvOut.print("Target " + id + " start");
+                  csvOut.print("Target " + id + " end");
                 } else {
                   for (int i = 1; i <= csvLayers.get(id) ; i++) {
                     csvOut.print("Target " + id + " " + i);
+                    csvOut.print("Target " + id + " " + i + " start");
+                    csvOut.print("Target " + id + " " + i + " end");
                   }
                 }
-              }
-            } else { // interval
-              if (csvLayers.get(id) == 1) {
-                csvOut.print("Target " + id);
-                csvOut.print("Target " + id + " start");
-                csvOut.print("Target " + id + " end");
-              } else {
-                for (int i = 1; i <= csvLayers.get(id) ; i++) {
-                  csvOut.print("Target " + id + " " + i);
-                  csvOut.print("Target " + id + " " + i + " start");
-                  csvOut.print("Target " + id + " " + i + " end");
+                break;
+              case Constants.ALIGNMENT_INSTANT:
+                if (csvLayers.get(id) == 1) {
+                  csvOut.print("Target " + id);
+                  csvOut.print("Target " + id + " offset");
+                } else {
+                  for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                    csvOut.print("Target " + id + " " + i);
+                    csvOut.print("Target " + id + " " + i + " offset");
+                  }
                 }
-              }
-            }
+                break;
+              default:
+                if (layer.getParentId() == null
+                    || layer.getParentId().equals(schema.getRoot().getId())
+                    || layer.getParentId().equals(schema.getParticipantLayerId())) { // attribute
+                  if (csvLayers.get(id) == 1) {
+                    csvOut.print(id);
+                  } else {
+                    for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                      csvOut.print(id + " " + i);
+                    }
+                  }
+                } else { // tag
+                  if (csvLayers.get(id) == 1) {
+                    csvOut.print("Target " + id);
+                  } else {
+                    for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                      csvOut.print("Target " + id + " " + i);
+                    }
+                  }
+                }
+            } // switch alignment
+            
             // if the matches are multi-word, we not only return the target label
             // but also the concatenation of all the labels within the match
             if (multiWordMatches
