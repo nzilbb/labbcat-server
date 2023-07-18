@@ -111,15 +111,15 @@ cp wysiwiki/target/wysiwiki/* /var/lib/tomcat9/webapps/labbcat/wysiwiki/
 To build the docker image:
 
 1. copy the latest version of *labbcat.war* to be copied into the *bin* directory.
-2. docker build -t nzilbb/labbcat .
+2. `docker build -t nzilbb/labbcat .`
 
 To release a new version of the docker image:
 
-1. Execute:
+1. Execute:  
    docker push nzilbb/labbcat
-2. Tag the build with the version number:
+2. Tag the build with the version number:  
    docker tag nzilbb/labbcat nzilbb/labbcat:`unzip -qc bin/labbcat.war version.txt`
-3. Execute:
+3. Execute:  
    docker push nzilbb/labbcat:`unzip -qc bin/labbcat.war version.txt`
 
 The image does not include a MySQL server, which can be supplied from the MySQL docker
