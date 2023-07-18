@@ -135,6 +135,29 @@ public class TestSearch {
     }
   }
 
+  /** Ensure search for non-ASCII patterns, particularly IPA ones like "iː", work. */
+  @Test public void searchIPA()
+    throws Exception {
+    // get a participant ID to use
+    String[] ids = labbcat.getParticipantIds();
+    assertTrue("getParticipantIds: Some IDs are returned",
+               ids.length > 0);
+    String[] participantId = { ids[0] };
+
+    // all instances of "and"
+    JsonObject pattern = new PatternBuilder().addMatchLayer("segment", "iː").build();
+    String threadId = labbcat.search(pattern, participantId, null, false, null, null, null);
+    try {
+      TaskStatus task = labbcat.waitForTask(threadId, 30);
+      // if the task is still running, it's taking too long, so cancel it
+      if (task.getRunning()) try { labbcat.cancelTask(threadId); } catch(Exception exception) {}
+      assertFalse("Search task finished in a timely manner",
+                  task.getRunning());
+    } finally {
+      labbcat.releaseTask(threadId);
+    }
+  }
+
   /** Ensure exclusion of overlapping speech in search results works. */
   @Test public void searchExcludingOverlappingSpeech()
     throws Exception {
@@ -150,6 +173,6 @@ public class TestSearch {
   }
 
   public static void main(String args[]) {
-    org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestSearch");
+    org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestSearch");
   }
 }
