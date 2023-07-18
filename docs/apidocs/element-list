@@ -3,4 +3,5 @@ nzilbb.labbcat.server.search
 nzilbb.labbcat.server.servlet
 nzilbb.labbcat.server.servlet.annotator
 nzilbb.labbcat.server.servlet.doc
+nzilbb.labbcat.server.servlet.uttered
 nzilbb.labbcat.server.task
