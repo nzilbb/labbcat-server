@@ -2845,6 +2845,34 @@
           <context context-type="linenumber">92</context>
         </context-group>
       </trans-unit>
+<trans-unit id="ad282bb6c1be7b8eeb194ad06d77770c493e2c6d" datatype="html">
+        <source>Cannot be blank</source>
+        <target state="translated">No puede estar vacío</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="e8f230d377cb33869b0f1ff7c4fe88afd7c7a3f9" datatype="html">
+        <source>Enter a value that's not in the list</source>
+        <target state="translated">Introduzca un valor que no esté en la lista</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">177</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">179</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="85820574788f07c1b4e432b7044ca18af57f5b5b" datatype="html">
         <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION" equiv-text="{{label}}"/>} }</source>
         <target state="translated">{VAR_SELECT, select, New {Nuevo} Save {Guardar} Delete {Eliminar} other {<x id="INTERPOLATION" equiv-text="{{label}}"/>} }</target>
@@ -4586,6 +4614,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-change-password/admin-change-password.component.html</context>
           <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="727ff329c24a4fa9ffc8d74883cbeebf8e9db6e0" datatype="html">
+        <source>Set a pass phrase for the participant</source>
+        <target state="translated">Establecer una contraseña para el participante</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">220</context>
         </context-group>
       </trans-unit>
       <trans-unit id="83c4b58ab45398af03adc9575e36df52f427bfa8" datatype="html">
