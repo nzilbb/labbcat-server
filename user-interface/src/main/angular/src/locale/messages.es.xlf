@@ -93,7 +93,7 @@
       </trans-unit>
       <trans-unit id="b3a61a5de1933c93c5bb3ca6ac897af9233553ee" datatype="html">
         <source>Transcript Attributes</source>
-        <target state="translated">Atributos de transcripciones</target>
+        <target state="translated">Atributos de Transcripciones</target>
         <context-group purpose="location">
           <context context-type="sourcefile">dist/projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.ts</context>
           <context context-type="linenumber">65,66</context>
@@ -110,7 +110,7 @@
       </trans-unit>
       <trans-unit id="f710f6e2d388444f97eefee9ef110290c0bcb845" datatype="html">
         <source>Span Layers</source>
-        <target state="translated">Capas flotantes</target>
+        <target state="translated">Capas Flotantes</target>
         <context-group purpose="location">
           <context context-type="sourcefile">dist/projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.ts</context>
           <context context-type="linenumber">79,80</context>
@@ -127,7 +127,7 @@
       </trans-unit>
       <trans-unit id="c469d38b8e5ce39b0eefe9882256882f478e0307" datatype="html">
         <source>Phrase Layers</source>
-        <target state="translated">Capas frases</target>
+        <target state="translated">Capas Frases</target>
         <context-group purpose="location">
           <context context-type="sourcefile">dist/projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.ts</context>
           <context context-type="linenumber">93,96</context>
@@ -144,11 +144,19 @@
       </trans-unit>
       <trans-unit id="b2fa2f2e8c7200a64579d30e0a12207cef917cfb" datatype="html">
         <source>Word Layers</source>
-        <target state="translated">Capas de palabras</target>
+        <target state="translated">Capas de Palabras</target>
         <context-group purpose="location">
           <context context-type="sourcefile">dist/projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.ts</context>
           <context context-type="linenumber">114</context>
         </context-group>
+      </trans-unit>
+<trans-unit id="050c2d0294e1d7f561523b4fd0dc8d8aea456486" datatype="html">
+        <source>List participant that are included in this transcript</source>
+        <target state="translated">Enumerar participantes que están incluidos en esta transcripción</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">202</context>
+         </context-group>
       </trans-unit>
       <trans-unit id="9b0a085531b3557c1a2c0b98276fb31d6b0682bb" datatype="html">
         <source>Word</source>
@@ -238,6 +246,15 @@
           <context context-type="linenumber">87</context>
         </context-group>
         <note priority="1" from="description">date range upper bound</note>
+      </trans-unit>
+<trans-unit id="c6afc30614d08746633335d65d76364d0ee04358" datatype="html">
+        <source>Lower bound (inclusive)</source>
+        <target state="translated">Límite inferior (inclusive)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-filter/layer-filter.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <note priority="1" from="description">range lower bound</note>
       </trans-unit>
       <trans-unit id="d5e0dbc9fd4651759df915cdc6ba26fe3f17475f" datatype="html">
         <source>From</source>
@@ -777,6 +794,32 @@
           <context context-type="linenumber">180</context>
         </context-group>
       </trans-unit>
+<trans-unit id="c86cdebd5c00e93225e5576c2e857a6ddad1d560" datatype="html">
+        <source>Define Transcript Attributes</source>
+        <target state="translated">Definir Atributos de Transcripciones</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+           <context context-type="linenumber">1</context>
+         </context-group>
+        <note priority="1" from="description">page header</note>
+       </trans-unit>
+<trans-unit id="a504223851a690044e19a738f62131e4400d6078" datatype="html">
+        <source>Define Participant Attributes</source>
+        <target state="translated">Definir Atributos de Participantes</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">2</context>
+         </context-group>
+        <note priority="1" from="description">page header</note>
+       </trans-unit>
+<trans-unit id="1fcfda37d18065d0ac754a9b1752dd109b537e76" datatype="html">
+        <source>Attribute ID</source>
+        <target state="translated">ID Atributo</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">7</context>
+         </context-group>
+       </trans-unit>
       <trans-unit id="698c5d6e10312ae50d025daa1853be125559110c" datatype="html">
         <source>Definition Layer</source>
         <target state="translated">Capa de definición</target>
@@ -879,6 +922,35 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
           <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="cff1428d10d59d14e45edec3c735a27b5482db59" datatype="html">
+        <source>Name</source>
+        <target state="translated">Nombre</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <note priority="1" from="description">Participant ID label</note>
+      </trans-unit>
+<trans-unit id="df28241733412305cb1e03b1c9a18625e4658743" datatype="html">
+        <source>Transcripts</source>
+        <target state="translated">Transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">64</context>
+         </context-group>
+         <context-group purpose="location">
+           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">1</context>
         </context-group>
       </trans-unit>
       <trans-unit id="303cf04ca5c12a60d676b6a00ceaf852799c1af4" datatype="html">
@@ -2336,7 +2408,7 @@
       </trans-unit>
       <trans-unit id="676840cc7025773312b58c4dd0c77148e58ad797" datatype="html">
         <source>Participant Attributes</source>
-        <target state="translated">Atributos de participantes</target>
+        <target state="translated">Atributos de Participantes</target>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
           <context context-type="linenumber">2</context>
@@ -2353,7 +2425,7 @@
       </trans-unit>
       <trans-unit id="b3a61a5de1933c93c5bb3ca6ac897af9233553ee" datatype="html">
         <source>Transcript Attributes</source>
-        <target state="translated">Atributos de transcripciones</target>
+        <target state="translated">Atributos de Transcripciones</target>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
           <context context-type="linenumber">20</context>
@@ -2404,7 +2476,7 @@
       </trans-unit>
       <trans-unit id="b2fa2f2e8c7200a64579d30e0a12207cef917cfb" datatype="html">
         <source>Word Layers</source>
-        <target state="translated">Capas de palabras</target>
+        <target state="translated">Capas de Palabras</target>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
           <context context-type="linenumber">94</context>
@@ -2817,7 +2889,7 @@
       </trans-unit>
       <trans-unit id="676840cc7025773312b58c4dd0c77148e58ad797" datatype="html">
         <source>Participant Attributes</source>
-        <target state="translated">Atributos de participantes</target>
+        <target state="translated">Atributos de Participantes</target>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
           <context context-type="linenumber">2</context>
@@ -2834,7 +2906,7 @@
       </trans-unit>
       <trans-unit id="b3a61a5de1933c93c5bb3ca6ac897af9233553ee" datatype="html">
         <source>Transcript Attributes</source>
-        <target state="translated">Atributos de transcripciones</target>
+        <target state="translated">Atributos de Transcripciones</target>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
           <context context-type="linenumber">20</context>
@@ -2857,6 +2929,22 @@
           <context context-type="linenumber">38</context>
         </context-group>
       </trans-unit>
+<trans-unit id="fa4fd21babc6299cfde6ebfd217833b0e526e0df" datatype="html">
+        <source>List transcripts that include this participant</source>
+        <target state="translated">Enumerar transcripciones que incluyen este participante</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">200</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="b30859efd49167d5526065da1cc2088caf87e4a6" datatype="html">
+        <source>List all utterances by these participants</source>
+        <target state="translated">Enumerar todas las locuciones por estos participantes</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">205</context>
+         </context-group>
+       </trans-unit>
       <trans-unit id="5f5abe15cf9bac583662eb3c99761ab2b15f8891" datatype="html">
         <source>Phrase</source>
         <target state="translated">Frase</target>
@@ -2885,7 +2973,7 @@
       </trans-unit>
       <trans-unit id="b2fa2f2e8c7200a64579d30e0a12207cef917cfb" datatype="html">
         <source>Word Layers</source>
-        <target state="translated">Capas de palabras</target>
+        <target state="translated">Capas de Palabras</target>
         <context-group purpose="location">
           <context context-type="sourcefile">../../dist/labbcat-common/lib/layer-checkboxes/layer-checkboxes.component.d.ts</context>
           <context context-type="linenumber">94</context>
@@ -3562,6 +3650,42 @@
         </context-group>
         <note priority="1" from="description">menu title</note>
       </trans-unit>
+<trans-unit id="320bf83ffe6128510f05ed7893e740dbacd32fe4" datatype="html">
+        <source>View, create, and edit transcript attributes</source>
+        <target state="translated">Ver, crear, y editar atributos de transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+<trans-unit id="3797ba3cf049dfa53cebb7840675a0c1f60aec71" datatype="html">
+        <source>View, create, and edit transcript attribute categories</source>
+        <target state="translated">Ver, crear, y editar categorías de atributos de transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+<trans-unit id="1374395f3872c5cb5b994998aa1546f0def296a7" datatype="html">
+        <source>View, create, and edit participant attributes</source>
+        <target state="translated">Ver, crear, y editar atributos de participantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+<trans-unit id="6b8e9fba1e12a792812bbb0bcb8f2c0f6e22d6f6" datatype="html">
+        <source>View, create, and edit participant attribute categories</source>
+        <target state="translated">Ver, crear, y editar categorías de atributos de participantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
       <trans-unit id="4c626ac4a3bc20698914ff26f73438d56632fa56" datatype="html">
         <source>View, create, and edit corpora</source>
         <target state="translated">Ver, crear, y editar corpuses</target>
@@ -3595,7 +3719,7 @@
       </trans-unit>
       <trans-unit id="f97103b1395931c464d8d398c8265ffd93ad9a21" datatype="html">
         <source>Media Tracks</source>
-        <target state="translated">Pistas de medios</target>
+        <target state="translated">Pistas de Medios</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/admin-menu/admin-menu.component.html</context>
           <context context-type="linenumber">37</context>
@@ -4400,6 +4524,14 @@
           <context context-type="linenumber">3</context>
         </context-group>
       </trans-unit>
+<trans-unit id="6e7d4e6b083a502ed96c939b09aae0c5c1b7250f" datatype="html">
+        <source>Enter a new pass phrase for the participant here</source>
+        <target state="translated">Introducir la nueva contraseña para el participante</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">214</context>
+         </context-group>
+      </trans-unit>
       <trans-unit id="242338f4d770a9b6f7832db7b0c986dbdc7ec636" datatype="html">
         <source>Repeat Pass Phrase</source>
         <target state="translated">Repetir Contraseña</target>
@@ -4792,6 +4924,14 @@
         </context-group>
         <note priority="1" from="description">No category</note>
       </trans-unit>
+<trans-unit id="607de17c2a755f65775881c19e276e7c933bcf94" datatype="html">
+        <source>Category</source>
+        <target state="translated">Categoría</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">48</context>
+         </context-group>
+      </trans-unit>
       <trans-unit id="188604bcdf827f1d1743b2f787b3ef741d3083b2" datatype="html">
         <source>Valid labels</source>
         <target state="translated">Etiquetas válidas</target>
@@ -4799,6 +4939,514 @@
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
           <context context-type="linenumber">116</context>
         </context-group>
+      </trans-unit>
+<trans-unit id="7b320cfede5dfb62207fd258205dec29002ded0b" datatype="html">
+        <source>String</source>
+        <target state="translated">Cadena de Caracteres</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">78</context>
+         </context-group>
+        <note priority="1" from="description">Label type option</note>
+       </trans-unit>
+<trans-unit id="e74c5eea49d263260f0073c93a9ee8b6c68f6a46" datatype="html">
+        <source>Integer</source>
+        <target state="translated">Entero</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">13</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">79</context>
+         </context-group>
+        <note priority="1" from="description">Label type option</note>
+       </trans-unit>
+<trans-unit id="fbcb0d75afbe6aec04269381598a737f4bd19db7" datatype="html">
+        <source>Number</source>
+        <target state="translated">Número</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">14</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">80</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">15</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">78</context>
+         </context-group>
+        <note priority="1" from="description">Label type option</note>
+      </trans-unit>
+<trans-unit id="9ca82952a6bc860b5391d5975322d8af8ceddfa4" datatype="html">
+        <source>Select</source>
+        <target state="translated">Seleccionar</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">15</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">81</context>
+         </context-group>
+        <note priority="1" from="description">Label type option</note>
+      </trans-unit>
+<trans-unit id="2f933b826a570836cab04f683970a2d22068458c" datatype="html">
+        <source>Date</source>
+        <target state="translated">Fecha</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">16</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">82</context>
+         </context-group>
+        <note priority="1" from="description">Label type option</note>
+      </trans-unit>
+<trans-unit id="b24f1cd32cbc1ec9537af28c4fe1b8204097714b" datatype="html">
+        <source>Time</source>
+        <target state="translated">Hora</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">17</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+        <note priority="1" from="description">Label type option</note>
+      </trans-unit>
+<trans-unit id="0b07fa0112b2103399aeca13decea6b15e0938a8" datatype="html">
+        <source>Date/Time</source>
+        <target state="translated">Fecha/Hora</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+           <context context-type="linenumber">18</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">84</context>
+         </context-group>
+        <note priority="1" from="description">Label type option</note>
+      </trans-unit>
+<trans-unit id="e60350ece81e5e478a18558ce97b120a79a08f79" datatype="html">
+        <source>Boolean</source>
+        <target state="translated">Booleano</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">19</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">85</context>
+         </context-group>
+        <note priority="1" from="description">Label type option</note>
+      </trans-unit>
+<trans-unit id="8ba143716c2da6e4120c0c1a804f0bdd9a7e5f5b" datatype="html">
+        <source>Text</source>
+        <target state="translated">Texto</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">20</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">86</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">14</context>
+         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <note priority="1" from="description">Label type option</note>
+       </trans-unit>
+<trans-unit id="a2f5fd184312026608f26be32fd46af61df1bc6a" datatype="html">
+        <source>Read-Only</source>
+        <target state="translated">Sólo-Lectura</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">21</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">87</context>
+         </context-group>
+        <note priority="1" from="description">Label type option</note>
+      </trans-unit>
+<trans-unit id="244aae9346da82b0922506c2d2581373a15641cc" datatype="html">
+        <source>Email</source>
+        <target state="translated">Mail</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">22</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">88</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-users/admin-users.component.html</context>
+          <context context-type="linenumber">7</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="801b98c6f02fe3b32f6afa3ee854c99ed83474e6" datatype="html">
+        <source>URL</source>
+        <target state="translated">URL</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">23</context>
+         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+        <note priority="1" from="description">Label type option</note>
+       </trans-unit>
+<trans-unit id="c1afd5ae9f16d3c2518212e67338275a67341fd6" datatype="html">
+        <source>Layer Label</source>
+        <target state="translated">Etiqueta de Capa</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">28</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">95</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="fa5002e6d44382622a9752e361de52c3e81b9093" datatype="html">
+        <source>Access</source>
+        <target state="translated">Acceso</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">29</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="ddd8a4986d2d1717a274a5a0fbed04988a819e69" datatype="html">
+        <source>Private</source>
+        <target state="translated">Privado</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">32</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">99</context>
+         </context-group>
+        <note priority="1" from="description">Access Private</note>
+      </trans-unit>
+<trans-unit id="3c4c080864b313cfdff5fdea6aae5da276246d99" datatype="html">
+        <source>Public</source>
+        <target state="translated">Público</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">33</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">100</context>
+         </context-group>
+        <note priority="1" from="description">Access Public</note>
+      </trans-unit>
+<trans-unit id="a6556a136b29fe0dd37152c55c5fbb97fc418ee3" datatype="html">
+        <source>Whether the attribute can be used as a list filter</source>
+        <target state="translated">Si el atributo se puede usar como filtro de una lista</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">37</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">104</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="111a72878facd238fca3f55ec2cd2b0ac8796298" datatype="html">
+        <source>Searchable</source>
+        <target state="translated">Buscable</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">37</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">42</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="678c4235874108148c272aa3bbac26c6ccf2ed60" datatype="html">
+        <source>Searchability</source>
+        <target state="translated">Buscabilidad</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">40</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">107</context>
+         </context-group>
+        <note priority="1" from="description">Searchable label</note>
+       </trans-unit>
+<trans-unit id="e4a1b3b037a32fd2084f23839ea10bf4c40b487e" datatype="html">
+        <source>Not Searchable</source>
+        <target state="translated">No Buscable</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">41</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">108</context>
+         </context-group>
+        <note priority="1" from="description">Not Searchable option</note>
+       </trans-unit>
+<trans-unit id="5ca707824ab93066c7d9b44e1b8bf216725c2c22" datatype="html">
+        <source>Filter</source>
+        <target state="translated">Filtro</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">44</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">54</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="f5d502c5d44fd9d78ed4979a7efae43369b09dca" datatype="html">
+        <source>Move up</source>
+        <target state="translated">Mover hacia arriba</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">135</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-categories/admin-categories.component.html</context>
+          <context context-type="linenumber">37</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="7a91e24cda07c3ccff6a84d88c25de674bf288f0" datatype="html">
+        <source>Move down</source>
+        <target state="translated">Mover hacia abajo</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">140</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-categories/admin-categories.component.html</context>
+          <context context-type="linenumber">42</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="f4d044a9aec4b07f3b1bf3964886c37c497335cc" datatype="html">
+        <source>Style</source>
+        <target state="translated">Estilo</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">142</context>
+         </context-group>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">142</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="d319ef4bb55639cf7b50aeee4d8e67f137a9dda1" datatype="html">
+        <source>Size of box</source>
+        <target state="translated">Tamaño de la casilla</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">147</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="7faaaa08f56427999f3be41df1093ce4089bbd75" datatype="html">
+        <source>Size</source>
+        <target state="translated">Tamaño</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">148</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="a844666444deea20d0b0dbb166cbfe1351ca9a9e" datatype="html">
+        <source>Minimum allowed value</source>
+        <target state="translated">Mínimo permitido para valor</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">155</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="9abcd7c82643d60c22733470463f74e4a54bc069" datatype="html">
+        <source>Min</source>
+        <target state="translated">Min</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">156</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="42ed636c542ecf88d823aad1ba85aa87f4b76dae" datatype="html">
+        <source>Maximum allowed value</source>
+        <target state="translated">Máximo permitido para valor</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">162</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="c3ced4d162a0a55ee233a187ce7208ba5e922418" datatype="html">
+        <source>Max</source>
+        <target state="translated">Max</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">163</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="fe60e24d2e17431a26262095481faaf5abef3c39" datatype="html">
+        <source>User selects by moving a slide control</source>
+        <target state="translated">Usuario elige con un control deslizante</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">169</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="7f4c040bec9ca7b7b55e9e44f884f3ef843efd1a" datatype="html">
+        <source>Slider</source>
+        <target state="translated">Deslizador</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">169</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="d4877ef9791928c800afcf3aa81024a59e96adbc" datatype="html">
+        <source>Label for minimum end of the slider</source>
+        <target state="translated">Etiqueta para el lado mínimo del deslizador</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">175</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="340a2b4ae2e0de447491ce4f9c10d1aa57cec4e6" datatype="html">
+        <source>Min Label</source>
+        <target state="translated">Etiqueta Min</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">176</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="8cefcc02e9d34a08236982c711c18c63f04d7fc2" datatype="html">
+        <source>Label for maximum end of the slider</source>
+        <target state="translated">Etiqueta para el lado máximo del deslizador</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">181</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="b8725ce10ca60f08105530797785a8e2b87a6080" datatype="html">
+        <source>Max Label</source>
+        <target state="translated">Etiqueta Max</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">182</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="ef27b7e8bb53ede6b93e2acff4e4ac3c3337c142" datatype="html">
+        <source>Whether the user can enter a value other than the predetermined labels</source>
+        <target state="translated">Si el usuario puede ingresar un valor no incluido en los valores predeterminados</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">185</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="c2a9de3714f5767b174d0424bc8abe2dc37acc41" datatype="html">
+        <source>Other</source>
+        <target state="translated">Otro</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">188</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="c5ce3170c64c879d391a2f8858fd7f0cbacb1561" datatype="html">
+        <source>Whether the user can select more than one label</source>
+        <target state="translated">Si el usuario puede elegir múltiples valores</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">191</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="bb522fa6476b769fe12d0dbeef87c8a0684b1b3f" datatype="html">
+        <source>Multiple</source>
+        <target state="translated">Multiple</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">194</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="42f165096d6a0515d3790f61cfc2c78e7f1ad90c" datatype="html">
+        <source>Whether it's a list buttons to check, or a dropdown list</source>
+        <target state="translated">Si es una lista de botones para tildar, o una lista desplegable</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">197</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="a06b66fc2f1a0dc96e0cd277d5279870a8d46986" datatype="html">
+        <source>Radio-buttons</source>
+        <target state="translated">Botones Radio</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">201</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="7a9437099c13cf969b5af5c8d4e1a58fb15da563" datatype="html">
+        <source>Check-boxes</source>
+        <target state="translated">Casillas</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">201</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="04201f9d27abd7d6f58a4328ab98063ce1072006" datatype="html">
+        <source>Categories</source>
+        <target state="translated">Categorías</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">217</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="80e29055eb560c2c6e8915e7c0d303664fe2c115" datatype="html">
+        <source>Edit list of possible categories for these attributes</source>
+        <target state="translated">Editar lista de categorías para estos atributos</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
+          <context context-type="linenumber">218</context>
+         </context-group>
+       </trans-unit>
+<trans-unit id="4735fb7b504d9806cba21a4c98e37dfc6d09cfae" datatype="html">
+        <source>Transcript Attribute Categories</source>
+        <target state="translated">Categorías de Atributos de Transcripciones</target>
+         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-categories/admin-categories.component.html</context>
+          <context context-type="linenumber">1</context>
+         </context-group>
+      </trans-unit>
+<trans-unit id="8c42af972d3914b3489f81cbd940a25048582afa" datatype="html">
+        <source>Participant Attribute Categories</source>
+        <target state="translated">Categorías de Atributos de Participantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-categories/admin-categories.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+        <note priority="1" from="description">page header</note>
       </trans-unit>
       <trans-unit id="d9177398e7aea8be38ead28296324850bde3d1a8" datatype="html">
         <source>Layer configuration</source>

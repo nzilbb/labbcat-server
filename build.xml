@@ -156,51 +156,51 @@
 
   <target name="i18n"
           description="Extract resources for localization">
-    <exec executable="ng" dir="user-interface" failonerror="true">
+    <exec executable="ng" dir="user-interface/src/main/angular" failonerror="true">
       <arg value="extract-i18n"/>
       <arg value="labbcat-view"/>
       <arg value="--output-path"/>
       <arg value="projects/labbcat-view/src/locale"/>
     </exec>
-    <exec executable="ng" dir="user-interface" failonerror="true">
+    <exec executable="ng" dir="user-interface/src/main/angular" failonerror="true">
       <arg value="extract-i18n"/>
       <arg value="labbcat-edit"/>
       <arg value="--output-path"/>
       <arg value="projects/labbcat-edit/src/locale"/>
     </exec>
-    <exec executable="ng" dir="user-interface" failonerror="true">
+    <exec executable="ng" dir="user-interface/src/main/angular" failonerror="true">
       <arg value="extract-i18n"/>
       <arg value="labbcat-admin"/>
       <arg value="--output-path"/>
       <arg value="projects/labbcat-admin/src/locale"/>
     </exec>
     <!-- Combine the three project files into one file... -->
-    <exec executable="head" dir="user-interface" failonerror="true"
-          output="user-interface/src/locale/messages.xlf">
+    <exec executable="head" dir="user-interface/src/main/angular" failonerror="true"
+          output="user-interface/src/main/angular/src/locale/messages.xlf">
       <arg value="-n"/>
       <arg value="4"/>
       <arg value="projects/labbcat-view/src/locale/messages.xlf"/>
     </exec>
-    <exec executable="xmllint" dir="user-interface" failonerror="true"
-          output="user-interface/src/locale/messages.xlf" append="true">
+    <exec executable="xmllint" dir="user-interface/src/main/angular" failonerror="true"
+          output="user-interface/src/main/angular/src/locale/messages.xlf" append="true">
       <arg value="--xpath"/>
       <arg value="//*['trans-unit'=local-name()]"/>
       <arg value="projects/labbcat-view/src/locale/messages.xlf"/>
     </exec>
-    <exec executable="xmllint" dir="user-interface" failonerror="true"
-          output="user-interface/src/locale/messages.xlf" append="true">
+    <exec executable="xmllint" dir="user-interface/src/main/angular" failonerror="true"
+          output="user-interface/src/main/angular/src/locale/messages.xlf" append="true">
       <arg value="--xpath"/>
       <arg value="//*['trans-unit'=local-name()]"/>
       <arg value="projects/labbcat-edit/src/locale/messages.xlf"/>
     </exec>
-    <exec executable="xmllint" dir="user-interface" failonerror="true"
-          output="user-interface/src/locale/messages.xlf" append="true">
+    <exec executable="xmllint" dir="user-interface/src/main/angular" failonerror="true"
+          output="user-interface/src/main/angular/src/locale/messages.xlf" append="true">
       <arg value="--xpath"/>
       <arg value="//*['trans-unit'=local-name()]"/>
       <arg value="projects/labbcat-admin/src/locale/messages.xlf"/>
     </exec>
-    <exec executable="tail" dir="user-interface" failonerror="true"
-          output="user-interface/src/locale/messages.xlf" append="true">
+    <exec executable="tail" dir="user-interface/src/main/angular" failonerror="true"
+          output="user-interface/src/main/angular/src/locale/messages.xlf" append="true">
       <arg value="-n"/>
       <arg value="3"/>
       <arg value="projects/labbcat-view/src/locale/messages.xlf"/>

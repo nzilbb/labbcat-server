@@ -65,8 +65,12 @@ translation by executing:
 ant i18n
 ```
 
+This generates localization resources for all three app projects, and merges them
+into a single file:  
+*user-interface/src/main/angular/src/locale/messages.xlf*
+
 To localize to a new language/variety:
-1. Copy *user-interface/src/locale/messages.xlf* with a new name formatted
+1. Copy *user-interface/src/main/angular/src/locale/messages.xlf* with a new name formatted
    *messages.{language-code}-{country-code}.xlf* -
    e.g. *messages.es-AR.xlf* for Argentine Spanish.
 2. Edit the new file with an XLIFF editor.
