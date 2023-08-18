@@ -29,8 +29,8 @@
  *        search matrix UI. Each object as the following structure:
  *        <dl>
  *          <dt>layers</dt>
- *          <dd> A JSON object where keys are layer IDs, and values are JSON objects with
- *               the following structure:
+ *          <dd> A JSON object where keys are layer IDs, and values are either a JSON
+ *               object, or an array of JSON objects, with the following structure:
  *                <dl>
  *                 <dt>pattern</dt> <dd>A regular expression to match the label.</dd>
  *                 <dt>not</dt> <dd>Whether pattern matching is negated or not.</dd>
@@ -92,6 +92,31 @@
  *           "id":"topic",
  *           "target":false
  *         }
+ *       }
+ *     }]
+ * }</pre>
+ *
+ * <p> If a layer in the 'layers' object contains an array of object with multiple
+ * elements, then the layer expression is assumed to match multiple contiguous sub-word
+ * annotations. This allows matching of segments within context.
+ *
+ * <p> e.g. the following matrix identifies tokens where the spelling starts with "k", and
+ * segments start with /n/ followed by a vowel, which is the target:
+ *
+ * <pre>{
+ *   "columns":[
+ *     {
+ *       "layers":{
+ *         "orthography":{
+ *           "id":"orthography",
+ *           "pattern":"k.*"},
+ *         "segment":[
+ *           {
+ *             "pattern":"n",
+ *           },{
+ *             "pattern":"[aeiou]",
+ *             "target":true
+ *           }]
  *       }
  *     }]
  * }</pre>

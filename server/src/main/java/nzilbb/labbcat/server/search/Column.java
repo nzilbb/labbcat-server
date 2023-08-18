@@ -21,10 +21,13 @@
 //
 package nzilbb.labbcat.server.search;
 
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import nzilbb.util.CloneableBean;
 import nzilbb.util.ClonedProperty;
 
@@ -38,18 +41,18 @@ public class Column implements CloneableBean {
    * @see #getLayers()
    * @see #setLayers(Map)
    */
-  protected Map<String,LayerMatch> layers = new LinkedHashMap<String,LayerMatch>();
+  protected Map<String,List<LayerMatch>> layers = new LinkedHashMap<String,List<LayerMatch>>();
   /**
    * Getter for {@link #layers}: The layer patterns that match a word token. Keys are layer IDs.
    * @return The layer patterns that match a word token.
    */
   @ClonedProperty
-  public Map<String,LayerMatch> getLayers() { return layers; }
+  public Map<String,List<LayerMatch>> getLayers() { return layers; }
   /**
    * Setter for {@link #layers}: The layer patterns that match a word token. Keys are layer IDs.
    * @param newLayers The layer patterns that match a word token.
    */
-  public Column setLayers(Map<String,LayerMatch> newLayers) { layers = newLayers; return this; }
+  public Column setLayers(Map<String,List<LayerMatch>> newLayers) { layers = newLayers; return this; }
   
   /**
    * Adjecency; how far matches of the following column in the matrix can be from matches
@@ -83,9 +86,25 @@ public class Column implements CloneableBean {
    * @return This column.
    */
   public Column addLayerMatch(LayerMatch layerPattern) {
-    layers.put(layerPattern.getId(), layerPattern);
+    if (!layers.containsKey(layerPattern.getId())) {
+      layers.put(layerPattern.getId(), new Vector<LayerMatch>());
+    }
+    layers.get(layerPattern.getId()).add(layerPattern);
     return this;
   } // end of addLayerMatch()
+  
+  /**
+   * Gets the first match for the given layer, if any.
+   * @param layerId
+   * @return The first match for the given layer, or null if there is none.
+   */
+  public LayerMatch getFirstLayerMatch(String layerId) {
+    List<LayerMatch> matches = layers.get(layerId);
+    if (matches != null && matches.size() > 0) {
+      return matches.get(0);
+    }
+    return null;
+  } // end of getFirstLayerMatch()
   
   /**
    * Initializes the bean with the given JSON representation.
@@ -96,11 +115,22 @@ public class Column implements CloneableBean {
     if (json.containsKey("layers")) {
       JsonObject jsonLayers = json.getJsonObject("layers");
       for (String key : jsonLayers.keySet()) {
-        JsonObject jsonLayer = jsonLayers.getJsonObject(key);
-        LayerMatch layer = (LayerMatch)(new LayerMatch().fromJson(jsonLayer));
-        // the JSON object itself may not include the ID, so ensure it's set from the key
-        if (layer.getId() == null) layer.setId(key);
-        addLayerMatch(layer);
+        if (jsonLayers.get(key).getValueType() == JsonValue.ValueType.OBJECT) {
+          JsonObject jsonLayer = jsonLayers.getJsonObject(key);
+          LayerMatch layer = (LayerMatch)(new LayerMatch().fromJson(jsonLayer));
+          // the JSON object itself may not include the ID, so ensure it's set from the key
+          layer.setId(key);
+          addLayerMatch(layer);
+        } else { // an array
+          JsonArray jsonArray = jsonLayers.getJsonArray(key);
+          for (int l = 0; l < jsonArray.size(); l++) {
+            JsonObject jsonLayer = jsonArray.getJsonObject(l);
+            LayerMatch layer = (LayerMatch)(new LayerMatch().fromJson(jsonLayer));
+            // the JSON object itself may not include the ID, so ensure it's set from the key
+            layer.setId(key);
+            addLayerMatch(layer);
+          } // next element of array
+        } // array
       } // next element
     }
     if (json.containsKey("adj")) {

@@ -61,18 +61,17 @@ public class TestMatrix {
                                   .setId("orthography")
                                   .setPattern("")
                                   .setTarget(true)));
-    
     assertEquals(
       "JSON serialization - toJson",
       "{\"columns\":["
       +"{\"adj\":3,"
       +"\"layers\":{"
-      +"\"orthography\":{\"id\":\"orthography\",\"pattern\":\"the\"}}}"
+      +"\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"the\"}]}}"
       +",{\"adj\":1,"
       +"\"layers\":{"
-      +"\"phonology\":{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"},"
-      +"\"syllableCount\":{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"},"
-      +"\"orthography\":{\"id\":\"orthography\",\"target\":true}}}]}",
+      +"\"phonology\":[{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"}],"
+      +"\"syllableCount\":[{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"}],"
+      +"\"orthography\":[{\"id\":\"orthography\",\"target\":true}]}}]}",
       m.toJson().toString());
     
     assertEquals(
@@ -80,12 +79,12 @@ public class TestMatrix {
       "{\"columns\":["
       +"{\"adj\":3,"
       +"\"layers\":{"
-      +"\"orthography\":{\"id\":\"orthography\",\"pattern\":\"the\"}}}"
+      +"\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"the\"}]}}"
       +",{\"adj\":1,"
       +"\"layers\":{"
-      +"\"phonology\":{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"},"
-      +"\"syllableCount\":{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"},"
-      +"\"orthography\":{\"id\":\"orthography\",\"target\":true}}}]}",
+      +"\"phonology\":[{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"}],"
+      +"\"syllableCount\":[{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"}],"
+      +"\"orthography\":[{\"id\":\"orthography\",\"target\":true}]}}]}",
       m.toString());
     
     assertEquals(
@@ -131,7 +130,7 @@ public class TestMatrix {
     assertEquals("First col: adj", 3, col.getAdj());
     assertEquals("First col: number of layers", 1, col.getLayers().size());
 
-    LayerMatch layerMatch = col.getLayers().get("orthography");
+    LayerMatch layerMatch = col.getFirstLayerMatch("orthography");
     assertNotNull("First col: layer is orthography", layerMatch);
     assertEquals("First col: layer id", "orthography", layerMatch.getId());
     assertNull("First col: layer negation null", layerMatch.getNot());
@@ -148,7 +147,7 @@ public class TestMatrix {
     assertEquals("Second col: adj", 1, col.getAdj());
     assertEquals("Second col: number of layers", 3, col.getLayers().size());
 
-    layerMatch = col.getLayers().get("phonology");
+    layerMatch = col.getFirstLayerMatch("phonology");
     assertNotNull("Second col: phonology layer exists", layerMatch);
     assertEquals("Second col: phonology layer id", "phonology", layerMatch.getId());
     assertTrue("Second col: phonology layer negation", layerMatch.getNot());
@@ -159,7 +158,7 @@ public class TestMatrix {
     assertTrue("Second col: phonology layer anchorStart", layerMatch.getAnchorStart());
     assertNull("Second col: phonology layer anchorEnd", layerMatch.getAnchorEnd());
 
-    layerMatch = col.getLayers().get("syllableCount");
+    layerMatch = col.getFirstLayerMatch("syllableCount");
     assertNotNull("Second col: syllableCount layer exists", layerMatch);
     assertEquals("Second col: syllableCount layer id", "syllableCount", layerMatch.getId());
     assertNull("Second col: syllableCount layer pattern", layerMatch.getPattern());
@@ -170,7 +169,7 @@ public class TestMatrix {
     assertNull("Second col: syllableCount layer anchorStart", layerMatch.getAnchorStart());
     assertTrue("Second col: syllableCount layer anchorEnd", layerMatch.getAnchorEnd());
 
-    layerMatch = col.getLayers().get("orthography");
+    layerMatch = col.getFirstLayerMatch("orthography");
     assertNotNull("Second col: orthography layer exists", layerMatch);
     assertEquals("Second col: orthography layer id", "orthography", layerMatch.getId());
     assertNull("Second col: orthography layer negation null", layerMatch.getNot());
@@ -180,6 +179,59 @@ public class TestMatrix {
     assertTrue("Second col: orthography layer target", layerMatch.getTarget());
     assertNull("Second col: orthography layer anchorStart", layerMatch.getAnchorStart());
     assertNull("Second col: orthography layer anchorEnd", layerMatch.getAnchorEnd());
+  }
+  
+  /** Ensure that word-internal multi segment (de)serialization works. */
+  @Test public void segmentContextQuery() {
+    JsonObject json = Json.createObjectBuilder()
+      .add("columns", Json.createArrayBuilder()
+           .add(Json.createObjectBuilder()
+                .add("layers", Json.createObjectBuilder()
+                     .add("segment", Json.createArrayBuilder()
+                          .add(Json.createObjectBuilder() // starts with p/t/k
+                               .add("id", "doesn't matter")
+                               .add("pattern", "[ptk]")
+                               .add("anchorStart", true))
+                          .add(Json.createObjectBuilder() // followed by vowel
+                               .add("id", "this is ignored")
+                               .add("pattern", "[aeiou]")
+                               .add("target", true))
+                       )
+                  )
+             )
+        )
+      .build();
+    Matrix m = (Matrix)(new Matrix().fromJson(json));
+    assertEquals("Number of columns", 1, m.getColumns().size());
+
+    Column col = m.getColumns().get(0);
+    assertEquals("col: adj", 1, col.getAdj());
+    assertEquals("col: number of layers", 1, col.getLayers().size());
+    assertNotNull("layer is segment", col.getLayers().get("segment"));
+    assertEquals("layer: number of matches", 2, col.getLayers().get("segment").size());
+
+    LayerMatch layerMatch = col.getLayers().get("segment").get(0);
+    assertEquals("First match: layer id", "segment", layerMatch.getId());
+    assertNull("First match: layer negation null", layerMatch.getNot());
+    layerMatch.setNullBooleans();
+    assertFalse("First match: setNullBooleans - layer negation false", layerMatch.getNot());
+    assertEquals("First match: layer pattern", "[ptk]", layerMatch.getPattern());
+    assertNull("First match: layer min", layerMatch.getMin());
+    assertNull("First match: layer max", layerMatch.getMax());
+    assertFalse("First match: layer target", layerMatch.getTarget());
+    assertTrue("First match: layer anchorStart", layerMatch.getAnchorStart());
+    assertFalse("First match: layer anchorEnd", layerMatch.getAnchorEnd());
+    
+    layerMatch = col.getLayers().get("segment").get(1);
+    assertEquals("Second match: layer id", "segment", layerMatch.getId());
+    layerMatch.setNullBooleans();
+    assertFalse("Second match: setNullBooleans - layer negation false", layerMatch.getNot());
+    assertEquals("Second match: layer pattern", "[aeiou]", layerMatch.getPattern());
+    assertNull("Second match: layer min", layerMatch.getMin());
+    assertNull("Second match: layer max", layerMatch.getMax());
+    assertTrue("Second match: layer target", layerMatch.getTarget());
+    assertFalse("Second match: layer anchorStart", layerMatch.getAnchorStart());
+    assertFalse("Second match: layer anchorEnd", layerMatch.getAnchorEnd());
   }
   
   /** Ensure that deserialization from JSON-encoded String works. */
@@ -215,7 +267,7 @@ public class TestMatrix {
     assertEquals("First col: adj", 3, col.getAdj());
     assertEquals("First col: number of layers", 1, col.getLayers().size());
 
-    LayerMatch layerMatch = col.getLayers().get("orthography");
+    LayerMatch layerMatch = col.getFirstLayerMatch("orthography");
     assertNotNull("First col: layer is orthography", layerMatch);
     assertEquals("First col: layer id", "orthography", layerMatch.getId());
     assertEquals("First col: layer pattern", "the", layerMatch.getPattern());
@@ -229,7 +281,7 @@ public class TestMatrix {
     assertEquals("Second col: adj", 1, col.getAdj());
     assertEquals("Second col: number of layers", 3, col.getLayers().size());
 
-    layerMatch = col.getLayers().get("phonology");
+    layerMatch = col.getFirstLayerMatch("phonology");
     assertNotNull("Second col: phonology layer exists", layerMatch);
     assertEquals("Second col: phonology layer id", "phonology", layerMatch.getId());
     assertEquals("Second col: phonology layer pattern", "[aeiou].*", layerMatch.getPattern());
@@ -239,7 +291,7 @@ public class TestMatrix {
     assertTrue("Second col: phonology layer anchorStart", layerMatch.getAnchorStart());
     assertNull("Second col: phonology layer anchorEnd", layerMatch.getAnchorEnd());
 
-    layerMatch = col.getLayers().get("syllableCount");
+    layerMatch = col.getFirstLayerMatch("syllableCount");
     assertNotNull("Second col: syllableCount layer exists", layerMatch);
     assertEquals("Second col: syllableCount layer id", "syllableCount", layerMatch.getId());
     assertNull("Second col: syllableCount layer pattern", layerMatch.getPattern());
@@ -249,7 +301,7 @@ public class TestMatrix {
     assertNull("Second col: syllableCount layer anchorStart", layerMatch.getAnchorStart());
     assertTrue("Second col: syllableCount layer anchorEnd", layerMatch.getAnchorEnd());
 
-    layerMatch = col.getLayers().get("orthography");
+    layerMatch = col.getFirstLayerMatch("orthography");
     assertNotNull("Second col: orthography layer exists", layerMatch);
     assertEquals("Second col: orthography layer id", "orthography", layerMatch.getId());
     assertNull("Second col: orthography layer pattern", layerMatch.getPattern());
@@ -260,7 +312,7 @@ public class TestMatrix {
     assertNull("Second col: orthography layer anchorEnd", layerMatch.getAnchorEnd());
   }
   
-  /** Ensure that serialization to JSON works. */
+  /** Ensure that (de)serialization of participant/transcript queries works. */
   @Test public void queries() {
     Matrix m = new Matrix()
       .addColumn(
@@ -271,7 +323,7 @@ public class TestMatrix {
     assertEquals(
       "JSON serialization",
       "{\"columns\":[{\"adj\":1,\"layers\":"
-      +"{\"orthography\":{\"id\":\"orthography\",\"pattern\":\"the\"}}}],"
+      +"{\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"the\"}]}}],"
       +"\"participantQuery\":\"first('participant_gender').label != 'M'\","
       +"\"transcriptQuery\":\"first('transcript_type').label != 'wordlist'\""
       +"}",
@@ -295,51 +347,51 @@ public class TestMatrix {
   @Test public void fromLegacyString() {
     assertEquals("Single word search",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"orthography\":{\"id\":\"orthography\",\"pattern\":\"test\"}}}]"
+                 +"{\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"test\"}]}}]"
                  +"}",
                  new Matrix().fromLegacyString("test").toString());
     assertEquals("Multi word search",
                  "{\"columns\":["
                  +"{\"adj\":1,\"layers\":"
-                 +"{\"orthography\":{\"id\":\"orthography\",\"pattern\":\"test\"}}},"
+                 +"{\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"test\"}]}},"
                  +"{\"adj\":1,\"layers\":"
-                 +"{\"orthography\":{\"id\":\"orthography\",\"pattern\":\"123\"}}}"
+                 +"{\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"123\"}]}}"
                  +"]}",
                  new Matrix().fromLegacyString("test\t123").toString());
     assertEquals("Specify layer search",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"phonemes\":{\"id\":\"phonemes\",\"pattern\":\"tEst\"}}}]"
+                 +"{\"phonemes\":[{\"id\":\"phonemes\",\"pattern\":\"tEst\"}]}}]"
                  +"}",
                  new Matrix().fromLegacyString("phonemes:tEst").toString());
     assertEquals("Range search",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"syllableCount\":{\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"}}}]"
+                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"}]}}]"
                  +"}",
                  new Matrix().fromLegacyString("syllableCount:2<3").toString());
     assertEquals("Range search - min only",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"syllableCount\":{\"id\":\"syllableCount\",\"min\":\"2\"}}}]"
+                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"min\":\"2\"}]}}]"
                  +"}",
                  new Matrix().fromLegacyString("syllableCount:2<").toString());
     assertEquals("Range search - max only",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"syllableCount\":{\"id\":\"syllableCount\",\"max\":\"3\"}}}]"
+                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"max\":\"3\"}]}}]"
                  +"}",
                  new Matrix().fromLegacyString("syllableCount:<3").toString());
     assertEquals("Multi-row search",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"phonemes\":{\"id\":\"phonemes\",\"pattern\":\"s.*\"},"
-                 +"\"orthography\":{\"id\":\"orthography\",\"pattern\":\"p.*\"}}"
+                 +"{\"phonemes\":[{\"id\":\"phonemes\",\"pattern\":\"s.*\"}],"
+                 +"\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"p.*\"}]}"
                  +"}]}",
                  new Matrix().fromLegacyString("phonemes:s.*\northography:p.*").toString());
     assertEquals("Multi-column search",
                  "{\"columns\":["
                  +"{\"adj\":1,\"layers\":"
-                 +"{\"pos\":{\"id\":\"pos\",\"pattern\":\"N\"},"
-                 +"\"phonemes\":{\"id\":\"phonemes\",\"pattern\":\".*[aeiou]\"}}},"
+                 +"{\"pos\":[{\"id\":\"pos\",\"pattern\":\"N\"}],"
+                 +"\"phonemes\":[{\"id\":\"phonemes\",\"pattern\":\".*[aeiou]\"}]}},"
                  +"{\"adj\":1,\"layers\":"
-                 +"{\"pos\":{\"id\":\"pos\",\"pattern\":\"V\"},"
-                 +"\"phonemes\":{\"id\":\"phonemes\",\"pattern\":\"[aeiou].*\"}}}"
+                 +"{\"pos\":[{\"id\":\"pos\",\"pattern\":\"V\"}],"
+                 +"\"phonemes\":[{\"id\":\"phonemes\",\"pattern\":\"[aeiou].*\"}]}}"
                  +"]}",
                  new Matrix().fromLegacyString(
                    "pos:N\nphonemes:.*[aeiou]\tpos:V\nphonemes:[aeiou].*").toString());
@@ -356,7 +408,7 @@ public class TestMatrix {
     Column col = m.getColumns().get(0);
     assertEquals("Col: adj", 1, col.getAdj());
     assertEquals("Col: number of layers", 1, col.getLayers().size());
-    LayerMatch layerMatch = col.getLayers().get("orthography");
+    LayerMatch layerMatch = col.getFirstLayerMatch("orthography");
     assertNotNull("layer is orthography", layerMatch);
     assertEquals("layer id", "orthography", layerMatch.getId());
     assertNull("layer negation null", layerMatch.getNot());    

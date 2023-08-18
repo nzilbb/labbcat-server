@@ -2704,6 +2704,837 @@ public class TestOneQuerySearch {
   }
 
   /**
+   * Ensure intra-word segment context searches generate the correct SQL.
+   */   
+  @Test public void segmentContextSearch() throws Exception {
+    OneQuerySearch search = new OneQuerySearch();
+    // within word condition - has p/t/k segment followed by vowel segment
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]").setTarget(true))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]"))
+        ));
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment context: two segments, first is target",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_1 search_0_1_1"
+      +"  ON search_0_1_1.word_annotation_id = search_0_1.word_annotation_id"
+      +" AND search_0_1_1.ordinal_in_word = search_0_1.ordinal_in_word + 1"
+      +"  AND CAST(search_0_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    assertEquals("Description", "_^([ptk])$_^([aeiou])$_^([ptk].*)$", search.getDescription());
+
+    // same as above, but targeting the second segment
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]").setTarget(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment context: two segments, second is target",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, search_0_1_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_1 search_0_1_1"
+      +"  ON search_0_1_1.word_annotation_id = search_0_1.word_annotation_id"
+      +" AND search_0_1_1.ordinal_in_word = search_0_1.ordinal_in_word + 1"
+      +"  AND CAST(search_0_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    assertEquals("Description", "_^([ptk])$_^([aeiou])$_^([ptk].*)$", search.getDescription());
+
+    search = new OneQuerySearch();
+    // same as above, but segments in the second column
+    search.setMatrix(
+      new Matrix()
+      .addColumn(
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("the")))
+      .addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]").setTarget(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment context in second word column",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_1_2.end_anchor_id,0, search_1_1_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_1_1_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_1_1_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" /* subsequent columns */ "
+      +" INNER JOIN annotation_layer_1 search_1_1"
+      +"  ON search_1_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_1 search_1_1_1"
+      +"  ON search_1_1_1.word_annotation_id = search_1_1.word_annotation_id"
+      +" AND search_1_1_1.ordinal_in_word = search_1_1.ordinal_in_word + 1"
+      +"  AND CAST(search_1_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.word_annotation_id = search_1_1.word_annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" /* column _1: */ "
+      +" AND search_1_2.ordinal_in_turn = search_0_2.ordinal_in_turn + 1 "
+      +" ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_1_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 4, parameters.size());
+    assertEquals("^(the)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([ptk])$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(3));
+    assertTrue(parameters.get(3) instanceof String);
+    assertEquals("Description",
+                 "_^(the)$_^([ptk])$_^([aeiou])$_^([ptk].*)$", search.getDescription());
+
+    // within no word condition - has p/t/k segment followed by vowel segment
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]").setTarget(true))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]"))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment context: no word condition",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, word_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, word_0.start_anchor_id,"
+      +" word_0.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" word_0.turn_annotation_id AS turn_annotation_id,"
+      +" word_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" word_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_0 word_0"
+      +" ON word_0.turn_annotation_id = turn.annotation_id"
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.word_annotation_id = word_0.word_annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_1 search_0_1_1"
+      +"  ON search_0_1_1.word_annotation_id = search_0_1.word_annotation_id"
+      +" AND search_0_1_1.ordinal_in_word = search_0_1.ordinal_in_word + 1"
+      +"  AND CAST(search_0_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY word_0.turn_annotation_id, word_0.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("Description", "_^([ptk])$_^([aeiou])$", search.getDescription());
+
+  }
+  
+  /**
+   * Ensure segment anchoring to word boundaries generates the correct SQL.
+   */   
+  @Test public void segmentAnchoring() throws Exception {
+
+    // segment match only, anchored to word start
+    OneQuerySearch search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]")
+                       .setAnchorStart(true))
+        ));
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: start, segment only",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, word_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, word_0.start_anchor_id,"
+      +" word_0.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" word_0.turn_annotation_id AS turn_annotation_id,"
+      +" word_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" word_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_0 word_0"
+      +" ON word_0.turn_annotation_id = turn.annotation_id"
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.word_annotation_id = word_0.word_annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +"  AND search_0_1.start_anchor_id = word_0.start_anchor_id"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY word_0.turn_annotation_id, word_0.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("Description", "_^([ptk])$", search.getDescription());
+
+    // same as above, but anchored to the end
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]")
+                       .setAnchorEnd(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: end, segment only",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, word_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, word_0.start_anchor_id,"
+      +" word_0.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" word_0.turn_annotation_id AS turn_annotation_id,"
+      +" word_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" word_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_0 word_0"
+      +" ON word_0.turn_annotation_id = turn.annotation_id"
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.word_annotation_id = word_0.word_annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +"  AND search_0_1.end_anchor_id = word_0.end_anchor_id"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY word_0.turn_annotation_id, word_0.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("Description", "_^([ptk])$", search.getDescription());
+    
+    // same as above, but a second segment anchored to the end
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]")
+                       .setAnchorEnd(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: second segment to end, segment only",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, word_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, word_0.start_anchor_id,"
+      +" word_0.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" word_0.turn_annotation_id AS turn_annotation_id,"
+      +" word_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" word_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_0 word_0"
+      +" ON word_0.turn_annotation_id = turn.annotation_id"
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.word_annotation_id = word_0.word_annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_1 search_0_1_1"
+      +"  ON search_0_1_1.word_annotation_id = search_0_1.word_annotation_id"
+      +" AND search_0_1_1.ordinal_in_word = search_0_1.ordinal_in_word + 1"
+      +"  AND CAST(search_0_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +"  AND search_0_1_1.end_anchor_id = word_0.end_anchor_id"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY word_0.turn_annotation_id, word_0.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("Description", "_^([ptk])$_^([aeiou])$", search.getDescription());
+
+    // word layer and segment match, anchored to word start
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]")
+                       .setAnchorStart(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: start, segment and word match",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +"  AND search_0_1.start_anchor_id = search_0_2.start_anchor_id"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("Description", "_^([ptk])$_^([ptk].*)$", search.getDescription());
+
+    // word layer and segment match, anchored to word end
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]")
+                       .setAnchorEnd(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: end, segment and word match",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +"  AND search_0_1.end_anchor_id = search_0_2.end_anchor_id"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("Description", "_^([ptk])$_^([ptk].*)$", search.getDescription());
+
+    // word layer and segment match, one anchored to word start, another anchored to word end
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]")
+                       .setAnchorStart(true))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]")
+                       .setAnchorEnd(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: start/end, 2 segments and word match",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_1 search_0_1_1"
+      +"  ON search_0_1_1.word_annotation_id = search_0_1.word_annotation_id"
+      +" AND search_0_1_1.ordinal_in_word = search_0_1.ordinal_in_word + 1"
+      +"  AND CAST(search_0_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +"  AND search_0_1.start_anchor_id = search_0_2.start_anchor_id"
+      +"  AND search_0_1_1.end_anchor_id = search_0_2.end_anchor_id"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    assertEquals("Description", "_^([ptk])$_^([aeiou])$_^([ptk].*)$", search.getDescription());
+
+    // same as above, but targeting the second segment
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]")
+                       .setAnchorStart(true))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]")
+                       .setAnchorEnd(true)
+                       .setTarget(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: start/end, 2 segments and word match, target 2nd segment",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, search_0_1_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_1 search_0_1_1"
+      +"  ON search_0_1_1.word_annotation_id = search_0_1.word_annotation_id"
+      +" AND search_0_1_1.ordinal_in_word = search_0_1.ordinal_in_word + 1"
+      +"  AND CAST(search_0_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +"  AND search_0_1.start_anchor_id = search_0_2.start_anchor_id"
+      +"  AND search_0_1_1.end_anchor_id = search_0_2.end_anchor_id"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 3, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    assertEquals("Description", "_^([ptk])$_^([aeiou])$_^([ptk].*)$", search.getDescription());
+
+    // 2-column word and segment match, one anchored to word start, another anchored to word end
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]")
+                       .setAnchorStart(true))
+        )
+      .addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern(".*[aeiou]"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]")
+                       .setAnchorEnd(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: start/end, 2 segments and words match, 2 columns",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_1_2.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +"  AND search_0_1.start_anchor_id = search_0_2.start_anchor_id"
+      +" /* subsequent columns */ "
+      +" INNER JOIN annotation_layer_1 search_1_1"
+      +"  ON search_1_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.word_annotation_id = search_1_1.word_annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +"  AND search_1_1.end_anchor_id = search_1_2.end_anchor_id"
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" /* column _1: */ "
+      +" AND search_1_2.ordinal_in_turn = search_0_2.ordinal_in_turn + 1 "
+      +" ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 4, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    assertEquals("^(.*[aeiou])$", parameters.get(3));
+    assertTrue(parameters.get(3) instanceof String);
+    assertEquals("Description",
+                 "_^([ptk])$_^([ptk].*)$_^([aeiou])$_^(.*[aeiou])$",
+                 search.getDescription());
+
+    // same as above but targeting the second segment
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("[ptk].*"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[ptk]")
+                       .setAnchorStart(true))
+        )
+      .addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern(".*[aeiou]"))
+        .addLayerMatch(new LayerMatch()
+                       .setId("segment").setPattern("[aeiou]")
+                       .setAnchorEnd(true)
+                       .setTarget(true))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment anchoring: start/end, 2 segments and words match, 2 columns",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_1_2.end_anchor_id,0, search_1_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_1_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_1_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_1_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +"  AND search_0_1.start_anchor_id = search_0_2.start_anchor_id"
+      +" /* subsequent columns */ "
+      +" INNER JOIN annotation_layer_1 search_1_1"
+      +"  ON search_1_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_1_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_1_2"
+      +"  ON search_1_2.word_annotation_id = search_1_1.word_annotation_id"
+      +"  AND search_1_2.label  REGEXP  ?"
+      +"  AND search_1_1.end_anchor_id = search_1_2.end_anchor_id"
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" /* column _1: */ "
+      +" AND search_1_2.ordinal_in_turn = search_0_2.ordinal_in_turn + 1 "
+      +" ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_1_1.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 4, parameters.size());
+    assertEquals("^([ptk])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([ptk].*)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^([aeiou])$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    assertEquals("^(.*[aeiou])$", parameters.get(3));
+    assertTrue(parameters.get(3) instanceof String);
+    assertEquals("Description",
+                 "_^([ptk])$_^([ptk].*)$_^([aeiou])$_^(.*[aeiou])$",
+                 search.getDescription());
+  }
+  
+  /**
    * Return a plausible schema, including SQL attributes.
    * @return A test schema.
    */
