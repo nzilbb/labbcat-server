@@ -460,7 +460,7 @@ public class OneQuerySearch extends SearchTask {
                 // join via first segment
                 sSqlExtraJoinsFirst.append(
                   REGEXP_JOIN.format(oArgs)
-                  .replace("word_"+iWordColumn+"_"+layer_id+".word_annotation_id",
+                  .replace("word"+oLayerId[1]+".word_annotation_id",
                            "search_"+iWordColumn+"_"+layer_id+".word_annotation_id"
                            +" AND search"+oLayerId[1]+"_"+layer_id+".ordinal_in_word"
                            +" = search_"+iWordColumn+"_"+layer_id+".ordinal_in_word + "
@@ -1062,7 +1062,7 @@ public class OneQuerySearch extends SearchTask {
                   // join via first segment
                   sSqlExtraJoin.append(
                     REGEXP_JOIN.format(oArgs)
-                    .replace("word_"+iWordColumn+"_"+layer_id+".word_annotation_id",
+                    .replace("word"+oLayerId[1]+".word_annotation_id",
                              "search_"+iWordColumn+"_"+layer_id+".word_annotation_id"
                              +" AND search"+oLayerId[1]+"_"+layer_id+".ordinal_in_word"
                              +" = search_"+iWordColumn+"_"+layer_id+".ordinal_in_word + "

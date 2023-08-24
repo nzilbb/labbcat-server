@@ -386,10 +386,12 @@ public class AnnotationAgqlToSql {
                         +"(SELECT label" // transcript language attribute
                         +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                         +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                        +" AND label <> ''" // '' -> NULL to fall back to corpus language
                         +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1),"
                         +"(SELECT corpus_language FROM corpus" // or if not, corpus language
                         +" WHERE corpus.corpus_name = graph.corpus_name)"
                         +")");
+                      flags.transcriptJoin = true;
                     } else { // non-language transcript attribute
                       conditions.push(
                         "(SELECT label"
@@ -443,23 +445,26 @@ public class AnnotationAgqlToSql {
                     if (!temporalJoin) {
                       order = "otherLayer_"+joinIndex+".ordinal";
                     }
-                              
+                    
                     String joinField = joinFields[joinFieldIndex];
                     extraJoins.add(
-                      " INNER JOIN"
-                      +" annotation_layer_"+operandLayer.get("layer_id")+" otherLayer_"+joinIndex
-                      +" ON otherLayer_"+joinIndex+".ag_id = annotation.ag_id"
-                      +(joinField==null?""
-                        :" AND otherLayer_"+joinIndex+"."+joinField+" = annotation."+joinField)
+                      " LEFT OUTER JOIN ("
+                      +"annotation_layer_"+operandLayer.get("layer_id")+" otherLayer_"+joinIndex
                       +(!temporalJoin?"":
                         " INNER JOIN anchor otherLayer_start_"+joinIndex
                         +" ON otherLayer_"+joinIndex+".start_anchor_id"
                         +" = otherLayer_start_"+joinIndex+".anchor_id"
-                        +" AND otherLayer_start_"+joinIndex+".offset <= end.offset"
                         +" INNER JOIN anchor otherLayer_end_"+joinIndex
                         +" ON otherLayer_"+joinIndex+".end_anchor_id"
-                        +" = otherLayer_end_"+joinIndex+".anchor_id"
-                        +" AND start.offset <= otherLayer_end_"+joinIndex+".offset"));
+                        +" = otherLayer_end_"+joinIndex+".anchor_id")
+                      +")"
+                      +" ON otherLayer_"+joinIndex+".ag_id = annotation.ag_id"
+                      +(joinField==null?""
+                        :" AND otherLayer_"+joinIndex+"."+joinField+" = annotation."+joinField)
+                      +(!temporalJoin?"":
+                        " AND otherLayer_start_"+joinIndex+".offset < end.offset"
+                        +" AND start.offset < otherLayer_end_"+joinIndex+".offset")
+                      );
                     conditions.push("otherLayer_"+joinIndex+".label");
                     if (temporalJoin) flags.anchorsJoin = true;
                   } // temporal layer
@@ -467,6 +472,25 @@ public class AnnotationAgqlToSql {
               } // other layer
             } // first(...).label
           } // other.label
+        }
+        @Override public void exitCoalesceExpression(AGQLParser.CoalesceExpressionContext ctx) {
+          // last elements on the conditions stack are the parameters
+          int parameterCount = ctx.coalesceParameter().size();
+          Vector<String> parameters = new Vector<String>();
+          for (int p = 0; p < parameterCount; p++) {
+            parameters.add(0, conditions.pop().trim());
+          }
+          StringBuilder condition = new StringBuilder();
+          for (String parameter : parameters) {
+            if (condition.length() == 0) {
+              condition.append("COALESCE(");
+            } else {
+              condition.append(", ");
+            }
+            condition.append(parameter);
+          } // next parameter
+          condition.append(")");
+          conditions.push(condition.toString());
         }
         @Override public void exitGraphIdExpression(AGQLParser.GraphIdExpressionContext ctx) {
           space();
@@ -1130,7 +1154,7 @@ public class AnnotationAgqlToSql {
       sql.append(flags.transcriptJoin?"graph.transcript_id":"ag_id");
       sql.append(", ");
       if (flags.anchorsJoin) sql.append("start.offset, end.offset, ");
-      sql.append("parent_id, annotation_id");
+      sql.append("annotation.parent_id, annotation.annotation_id");
       if (sqlLimitClause != null) sql.append(" " + sqlLimitClause);
     }
 

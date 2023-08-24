@@ -493,6 +493,25 @@ public class ParticipantAgqlToSql {
           } // next literal option
           conditions.push(")");
         }
+        @Override public void exitCoalesceExpression(AGQLParser.CoalesceExpressionContext ctx) {
+          // last elements on the conditions stack are the parameters
+          int parameterCount = ctx.coalesceParameter().size();
+          Vector<String> parameters = new Vector<String>();
+          for (int p = 0; p < parameterCount; p++) {
+            parameters.add(0, conditions.pop().trim());
+          }
+          StringBuilder condition = new StringBuilder();
+          for (String parameter : parameters) {
+            if (condition.length() == 0) {
+              condition.append("COALESCE(");
+            } else {
+              condition.append(", ");
+            }
+            condition.append(parameter);
+          } // next parameter
+          condition.append(")");
+          conditions.push(condition.toString());
+        }
         @Override public void exitLogicalOperator(AGQLParser.LogicalOperatorContext ctx) {
           space();
           String operator = ctx.operator.getText().trim();

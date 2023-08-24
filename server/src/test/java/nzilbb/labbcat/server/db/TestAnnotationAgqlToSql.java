@@ -145,7 +145,7 @@ public class TestAnnotationAgqlToSql {
                  +" 'word' AS layer"
                  +" FROM annotation_layer_0 annotation"
                  +" WHERE annotation.annotation_id = 456"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
 
     q = transformer.sqlFor(
@@ -158,7 +158,7 @@ public class TestAnnotationAgqlToSql {
                  +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                  +" WHERE annotation.annotation_id"
                  +" IN (456,789,101112)"
-                 +" ORDER BY graph.transcript_id, parent_id, annotation_id LIMIT 1,1",
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id LIMIT 1,1",
                  q.sql);
     
     q = transformer.sqlFor(
@@ -195,7 +195,7 @@ public class TestAnnotationAgqlToSql {
                  +" 'orthography' AS layer"
                  +" FROM annotation_layer_2 annotation"
                  +" WHERE 'orthography' = 'orthography'"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
       
     q = transformer.sqlFor(
@@ -208,7 +208,7 @@ public class TestAnnotationAgqlToSql {
                  +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                  +" WHERE 'orthography' = 'orthography'"
                  +" AND annotation.label NOT REGEXP 'th[aeiou].*'"
-                 +" ORDER BY graph.transcript_id, parent_id, annotation_id LIMIT 1,1",
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id LIMIT 1,1",
                  q.sql);
       
     q = transformer.sqlFor(
@@ -221,7 +221,7 @@ public class TestAnnotationAgqlToSql {
                  +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                  +" WHERE annotation.label NOT REGEXP 'th[aeiou].*'"
                  +" AND 'orthography' = 'orthography'"
-                 +" ORDER BY graph.transcript_id, parent_id, annotation_id LIMIT 1,1",
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id LIMIT 1,1",
                  q.sql);
   }
 
@@ -236,7 +236,7 @@ public class TestAnnotationAgqlToSql {
                  +" FROM annotation_layer_2 annotation"
                  +" WHERE 'orthography' = 'orthography'"
                  +" AND annotation.parent_id = 123"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
       
     q = transformer.sqlFor(
@@ -249,7 +249,7 @@ public class TestAnnotationAgqlToSql {
                  +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                  +" WHERE 'orthography' = 'orthography'"
                  +" AND annotation.parent_id = 123"
-                 +" ORDER BY graph.transcript_id, parent_id, annotation_id"
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id"
                  +" LIMIT 1,1",
                  q.sql);      
   }
@@ -291,7 +291,7 @@ public class TestAnnotationAgqlToSql {
                  +" AND start.offset <= otherLayer_end.offset"
                  +" WHERE otherLayer.ag_id = annotation.ag_id"
                  +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id)"
-                 +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                 +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.annotation_id",
                  q.sql);
   }
 
@@ -309,7 +309,7 @@ public class TestAnnotationAgqlToSql {
                  +" INNER JOIN annotation_layer_11 turn"
                  +" ON speaker.speaker_number = turn.label"
                  +" WHERE turn.annotation_id = annotation.turn_annotation_id) = 'Robert'"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
   }
 
@@ -330,7 +330,7 @@ public class TestAnnotationAgqlToSql {
                  +" WHERE turn.annotation_id = annotation.turn_annotation_id) = 'Robert'"
                  +" AND (SELECT name FROM transcript_family"
                  +" WHERE transcript_family.family_id = graph.family_id) = 'some-episode'"
-                 +" ORDER BY graph.transcript_id, parent_id, annotation_id",
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
   }
 
@@ -350,7 +350,7 @@ public class TestAnnotationAgqlToSql {
                  +" WHERE turn.annotation_id = annotation.turn_annotation_id) = 'Robert'"
                  +" AND (SELECT type FROM transcript_type"
                  +" WHERE transcript_type.type_id = graph.type_id LIMIT 1) = 'wordlist'"
-                 +" ORDER BY graph.transcript_id, parent_id, annotation_id",
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
   }
 
@@ -371,7 +371,7 @@ public class TestAnnotationAgqlToSql {
                  +" ON speaker.speaker_number = turn.label"
                  +" WHERE turn.annotation_id = annotation.turn_annotation_id) = 'Robert'"
                  +" AND start.offset < 12.345"
-                 +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                 +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.annotation_id",
                  q.sql);
 
     // q = transformer.sqlFor( TODO
@@ -387,7 +387,7 @@ public class TestAnnotationAgqlToSql {
     //              +" INNER JOIN annotation_layer_11 turn"
     //              +" ON speaker.speaker_number = turn.label"
     //              +" WHERE turn.annotation_id = annotation.turn_annotation_id) = 'Robert'"
-    //              +" ORDER BY ag_id, parent_id, annotation_id",
+    //              +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
     //              q.sql);
   }
 
@@ -402,7 +402,7 @@ public class TestAnnotationAgqlToSql {
                  +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                  +" WHERE graph.transcript_id = 'AdaAicheson-01.trs'"
                  +" AND 'orthography' = 'orthography'"
-                 +" ORDER BY graph.transcript_id, parent_id, annotation_id",
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
 
     q = transformer.sqlFor(
@@ -414,7 +414,7 @@ public class TestAnnotationAgqlToSql {
                  +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                  +" WHERE graph.transcript_id = 'Ada\\'Aicheson-01.trs'"
                  +" AND 'orthography' = 'orthography'"
-                 +" ORDER BY graph.transcript_id, parent_id, annotation_id",
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
   }
 
@@ -467,7 +467,7 @@ public class TestAnnotationAgqlToSql {
     AnnotationAgqlToSql.Query q = transformer.sqlFor(
       "layerId = 'utterance' && labels('orthography').includes('foo')",
       "DISTINCT annotation.*", null, null);
-    assertEquals("Transcript attribute - SQL",
+    assertEquals("words in utterance",
                  "SELECT DISTINCT annotation.*, 'utterance' AS layer, start.offset, end.offset"
                  +" FROM annotation_layer_12 annotation"
                  +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
@@ -483,9 +483,31 @@ public class TestAnnotationAgqlToSql {
                  +" AND start.offset <= otherLayer_end.offset"
                  +" WHERE otherLayer.ag_id = annotation.ag_id"
                  +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id)"
-                 +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                 +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.annotation_id",
                  q.sql);
 
+    q = transformer.sqlFor(
+      "layerId = 'word' && first('language').label = 'mi'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("language of word",
+                 "SELECT DISTINCT annotation.*, 'word' AS layer, start.offset, end.offset"
+                 +" FROM annotation_layer_0 annotation"
+                 +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+                 +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+                 +" LEFT OUTER JOIN (annotation_layer_20 otherLayer_0"
+                 +" INNER JOIN anchor otherLayer_start_0"
+                 +" ON otherLayer_0.start_anchor_id = otherLayer_start_0.anchor_id"
+                 +" INNER JOIN anchor otherLayer_end_0"
+                 +" ON otherLayer_0.end_anchor_id = otherLayer_end_0.anchor_id)"
+                 +" ON otherLayer_0.ag_id = annotation.ag_id"
+                 +" AND otherLayer_0.turn_annotation_id = annotation.turn_annotation_id"
+                 +" AND otherLayer_start_0.offset < end.offset"
+                 +" AND start.offset < otherLayer_end_0.offset"
+                 +" WHERE 'word' = 'word'"
+                 +" AND otherLayer_0.label = 'mi'"
+                 +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.annotation_id",
+                 q.sql);
+    
     q = transformer.sqlFor(
       "layerId = 'utterance' && labels('who').includes('Ada')",
       "DISTINCT annotation.*", null, null);
@@ -497,7 +519,7 @@ public class TestAnnotationAgqlToSql {
                  +" FROM speaker"
                  +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
                  +" WHERE turn.annotation_id = annotation.turn_annotation_id)"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
     
     q = transformer.sqlFor(
@@ -515,8 +537,9 @@ public class TestAnnotationAgqlToSql {
                  +" FROM speaker"
                  +" INNER JOIN annotation_layer_11 turn ON speaker.speaker_number = turn.label"
                  +" WHERE turn.annotation_id = annotation.turn_annotation_id))"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
+
   }
 
   @Test public void attributeLabel() throws AGQLException {
@@ -531,7 +554,7 @@ public class TestAnnotationAgqlToSql {
                  +" AND (SELECT label FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" WHERE annotation_transcript.layer = 'scribe'"
                  +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1) = 'someone'"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
 
     // TODO add support for participant attributs
@@ -560,18 +583,54 @@ public class TestAnnotationAgqlToSql {
     assertEquals("Transcript attribute - SQL",
                  "SELECT DISTINCT annotation.*, 'utterance' AS layer"
                  +" FROM annotation_layer_12 annotation"
+                 +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
                  +" WHERE 'utterance' = 'utterance'"
                  +" AND COALESCE("
                  +"(SELECT label FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                 +" WHERE annotation_transcript.layer = 'language'"
+                 +" WHERE annotation_transcript.layer = 'language' AND label <> ''"
                  +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1),"
                  +"(SELECT corpus_language FROM corpus"
                  +" WHERE corpus.corpus_name = graph.corpus_name)"
                  +") = 'en'"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
   }
 
+  /** Test SQL generated by matching phrase language, falling back to transcript language */
+  @Test public void cascadingLanguageMatch() throws AGQLException {
+    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+    AnnotationAgqlToSql.Query q = transformer.sqlFor(
+      "layerId = 'word' && /en.*/.test("
+      +"first('language').label ?? first('transcript_language').label)",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("phrase language falls back to transcript language",
+                 "SELECT DISTINCT annotation.*, 'word' AS layer, start.offset, end.offset"
+                 +" FROM annotation_layer_0 annotation"
+                 +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+                 +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+                 +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+                 +" LEFT OUTER JOIN (annotation_layer_20 otherLayer_0"
+                 +" INNER JOIN anchor otherLayer_start_0"
+                 +" ON otherLayer_0.start_anchor_id = otherLayer_start_0.anchor_id"
+                 +" INNER JOIN anchor otherLayer_end_0"
+                 +" ON otherLayer_0.end_anchor_id = otherLayer_end_0.anchor_id)"
+                 +" ON otherLayer_0.ag_id = annotation.ag_id"
+                 +" AND otherLayer_0.turn_annotation_id = annotation.turn_annotation_id"
+                 +" AND otherLayer_start_0.offset < end.offset"
+                 +" AND start.offset < otherLayer_end_0.offset"
+                 +" WHERE 'word' = 'word'"
+                 +" AND COALESCE(otherLayer_0.label,"
+                 +" COALESCE("
+                 +"(SELECT label FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                 +" WHERE annotation_transcript.layer = 'language' AND label <> ''"
+                 +" AND annotation_transcript.ag_id = annotation.ag_id LIMIT 1),"
+                 +"(SELECT corpus_language FROM corpus"
+                 +" WHERE corpus.corpus_name = graph.corpus_name)"
+                 +")) REGEXP 'en.*'"
+                 +" ORDER BY graph.transcript_id, start.offset, end.offset,"
+                 +" annotation.parent_id, annotation.annotation_id",
+                 q.sql);
+  }
   @Test public void listLength() throws AGQLException {
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
     AnnotationAgqlToSql.Query q = transformer.sqlFor(
@@ -584,7 +643,7 @@ public class TestAnnotationAgqlToSql {
                  +" (SELECT COUNT(*) FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" WHERE annotation_transcript.layer = 'rating'"
                  +" AND annotation_transcript.ag_id = annotation.ag_id) > 10"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
       
     q = transformer.sqlFor(
@@ -605,7 +664,7 @@ public class TestAnnotationAgqlToSql {
                  +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id"
                  +" AND otherLayer_start.offset <= end.offset"
                  +" AND start.offset <= otherLayer_end.offset) > 100"
-                 +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                 +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.annotation_id",
                  q.sql);
   }
 
@@ -622,7 +681,7 @@ public class TestAnnotationAgqlToSql {
                  +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" WHERE annotation_transcript.layer = 'rating'"
                  +" AND annotation_transcript.ag_id = annotation.ag_id)"
-                 +" ORDER BY ag_id, parent_id, annotation_id",
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
                  q.sql);
 
     //    q = transformer.sqlFor(
@@ -658,7 +717,7 @@ public class TestAnnotationAgqlToSql {
                  +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
                  +" AND start.offset <= otherLayer_end.offset"
                  +" WHERE otherLayer.ag_id = annotation.ag_id)"
-                 +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                 +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.annotation_id",
                  q.sql);
 
     q = transformer.sqlFor(
@@ -680,7 +739,7 @@ public class TestAnnotationAgqlToSql {
                  +" AND start.offset <= otherLayer_end.offset"
                  +" WHERE otherLayer.ag_id = annotation.ag_id"
                  +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id)"
-                 +" ORDER BY ag_id, start.offset, end.offset, parent_id, annotation_id",
+                 +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.annotation_id",
                  q.sql);
   }
    
@@ -742,7 +801,7 @@ public class TestAnnotationAgqlToSql {
       +" WHERE graph.corpus_name REGEXP role_permission.value_pattern"
       +" AND user_id = 'test')"
       +" OR NOT EXISTS (SELECT * FROM role_permission))"
-      +" ORDER BY graph.transcript_id, parent_id, annotation_id",
+      +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id",
       q.sql);
     assertEquals("Parameter count - label", 0, q.parameters.size());
   }

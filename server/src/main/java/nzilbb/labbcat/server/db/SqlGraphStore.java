@@ -2739,7 +2739,7 @@ public class SqlGraphStore implements GraphStore {
       expression, select, userWhereClauseGraph("", "graph"), "");
     String sSql = query.sql
       // remove layer expression from SELECT clause
-      .replaceAll(", '.+' AS layer FROM"," FROM")
+      .replaceAll(", '.+' AS layer(, start.offset, end.offset)? FROM"," FROM")
       // remove ORDER BY clause if any
       .replaceAll(" ORDER BY [a-z_., ]+$","")
       // add our own ORDER/GROUP BY if any
@@ -3899,39 +3899,62 @@ public class SqlGraphStore implements GraphStore {
     String expression, String layerId, String label, Integer confidence)
     throws StoreException, PermissionException {
     try {
-      Layer layer = getLayer(layerId);
-      // get the first example to tag so we can get the layer
+      // get the first example to tag so we can get the layer and other info
       Annotation[] toTag = getMatchingAnnotations(expression, 1, 0, false);
       if (toTag.length == 0) return 0; // nothing to tag
-      boolean toTagIsParent = toTag[0].getLayerId().equals(layer.getParentId());
-      if (!toTagIsParent) { // ensure they share a parent layer
-        Layer toTagLayer = getLayer(toTag[0].getLayerId());
-        if (!layer.getParentId().equals(toTagLayer.getParentId())) {
-          throw new StoreException(
-            "Tag layer \""+layerId+"\" is not a child or peer layer of the layer to tag \""
-            +toTag[0].getLayerId()+"\"");
-        }
-      }
+      
+      Layer layer = getSchema().getLayer(layerId);
       // can be optimise for word tagging?
-      Matcher wordByLabel = Pattern.compile("^layer.id =+ '(.*)' && label =+ '(.*)'$")
+      Matcher wordByLabel = Pattern.compile(
+        "^layer.id =+ '(?<sourceLayer>.*)' (?<extraConditions>.*)&& label =+ '(?<wordLabel>.*)'$")
         .matcher(expression);
       if (wordByLabel.matches()
           && "word".equals(layer.getParentId())
-          && (wordByLabel.group(1).equals("word")
-              || wordByLabel.group(1).equals("orthography"))) {
+          && (wordByLabel.group("sourceLayer").equals("word")
+              || wordByLabel.group("sourceLayer").equals("orthography"))) {
         // optimise word tagging via orthography
-        String targetLayer = wordByLabel.group(1);
-        String wordLabel = wordByLabel.group(2);
+        String sourceLayer = wordByLabel.group("sourceLayer");
+        String wordLabel = wordByLabel.group("wordLabel");
+        int ordinal = 0;
         if (!layer.getPeers()) {
-          deleteMatchingAnnotations( // TODO handle language filtering
-            "layer == '"+esc(layerId)+"' && first('"+targetLayer+"').label == '"+wordLabel+"'");
+          deleteMatchingAnnotations(
+            "layer == '"+esc(layerId)+"' "
+            +wordByLabel.group("extraConditions") // e.g. language conditions etc.
+            +"&& first('"+sourceLayer+"').label == '"+wordLabel+"'");
+          ordinal = 1;
+        } else {
+          // figure out what the ordinal should be by assuming the first match is representative
+          // of all other words
+          String wordId = toTag[0].getId();
+          if (!wordId.startsWith("ew_0")) wordId = toTag[0].getParentId();
+          try {
+            long word_annotation_id = Long.parseLong(wordId.replace("ew_0_",""));
+            PreparedStatement sql = getConnection().prepareStatement(
+              "SELECT COALESCE(MAX(ordinal)+1,1) FROM annotation_layer_"+layer.get("layer_id")
+              +" WHERE word_annotation_id = ?");
+            sql.setLong(1, word_annotation_id);
+            ResultSet rs = sql.executeQuery();
+            try {
+              if (rs.next()) {
+                ordinal = rs.getInt(1);              
+              } else { // should be impossible:
+                System.err.println(
+                  "tagMatchingAnnotations: no next ordinal for "+toTag[0].getId());
+              }
+            } finally {
+              rs.close();
+              sql.close();
+            }
+          } catch(Exception exception) {
+            System.err.println(
+              "tagMatchingAnnotations: cannot compute ordinal for "+toTag[0].getId()
+              +": " + exception);
+          }
         }
         String select = 
           "annotation.ag_id, ?, ?, annotation.start_anchor_id, annotation.end_anchor_id,"
           +" annotation.turn_annotation_id, annotation.ordinal_in_turn,"
-          +" annotation.word_annotation_id, annotation.word_annotation_id, "
-          +(!layer.getPeers()?"1":"0") // computing ordinal here is slow! so we update it below
-          +", ?, Now()";
+          +" annotation.word_annotation_id, annotation.word_annotation_id, ?, ?, Now()";
         AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
         AnnotationAgqlToSql.Query query = transformer.sqlFor(
           expression, select, userWhereClauseGraph("", "graph"), "");
@@ -3941,21 +3964,26 @@ public class SqlGraphStore implements GraphStore {
           +" parent_id, ordinal, annotated_by, annotated_when) "
           +query.sql
           // remove layer field from SELECT clause generated by AnnotationAgqlToSql
-          .replace(", '"+targetLayer+"' AS layer","");
+          .replace(", '"+sourceLayer+"' AS layer","")
+          // remove dummy condition
+          .replace("'"+sourceLayer+"' = '"+sourceLayer+"' AND ", "")
+          // remove order
+          .replace("ORDER BY ag_id, parent_id, annotation_id","");
         try {
           // System.out.println(insert);
           PreparedStatement sql = getConnection().prepareStatement(insert);
           try {
             sql.setString(1, label);
             sql.setInt(2, confidence);
-            sql.setString(3, getUser());
+            sql.setInt(3, ordinal);
+            sql.setString(4, getUser());
             int count = sql.executeUpdate();
-            if (layer.getPeers()) { // need to set ordinal
+            if (ordinal == 0) { // need to set ordinal
               sql.close();
               // the fastest way is by way of a temporary table
               sql = getConnection().prepareStatement(
                 "CREATE TEMPORARY TABLE ords"
-                +" SELECT word_annotation_id, MAX(ordinal)+1 AS ordinal"
+                +" SELECT word_annotation_id, MAX(ordinal)+1 AS ordinal, MIN(ordinal) AS min"
                 +" FROM annotation_layer_"+layer.get("layer_id")
                 +" GROUP BY word_annotation_id HAVING MIN(ordinal) = 0");
               sql.executeUpdate();
@@ -3978,6 +4006,16 @@ public class SqlGraphStore implements GraphStore {
           throw new StoreException(x);
         }
       } else { // this is slow but correct
+        boolean toTagIsParent = toTag[0].getLayerId().equals(layer.getParentId());
+        if (!toTagIsParent) { // ensure they share a parent layer
+          Layer toTagLayer = getLayer(toTag[0].getLayerId());
+          if (!layer.getParentId().equals(toTagLayer.getParentId())) {
+            throw new StoreException(
+              "Tag layer \""+layerId+"\" is not a child or peer layer of the layer to tag \""
+              +toTag[0].getLayerId()+"\"");
+          }
+        }
+        
         // get them all
         toTag = getMatchingAnnotations(expression, null, null, true);
         // for each token...
@@ -3987,8 +4025,8 @@ public class SqlGraphStore implements GraphStore {
             layerId, label, confidence,
             toTagIsParent? token.getId() : token.getParentId());
         } // next token to tag
+        return toTag.length;
       }
-      return toTag.length;
     } catch(GraphNotFoundException exception) {
       throw new StoreException(exception);
     }

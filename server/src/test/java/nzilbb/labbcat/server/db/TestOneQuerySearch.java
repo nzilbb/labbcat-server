@@ -2961,6 +2961,63 @@ public class TestOneQuerySearch {
     assertTrue(parameters.get(1) instanceof String);
     assertEquals("Description", "_^([ptk])$_^([aeiou])$", search.getDescription());
 
+    // same as above, but ARPABET layer
+    search = new OneQuerySearch();
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("ARPABET").setPattern("[PTK]").setTarget(true))
+        .addLayerMatch(new LayerMatch()
+                       .setId("ARPABET").setPattern("[AEIOU].*[0-9]"))
+        ));
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "segment context: ARPABET - no word condition",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, word_0.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, word_0.start_anchor_id,"
+      +" word_0.end_anchor_id,0, search_0_200.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_200.annotation_id AS target_annotation_id,"
+      +" word_0.turn_annotation_id AS turn_annotation_id,"
+      +" word_0.word_annotation_id AS first_matched_word_annotation_id,"
+      +" word_0.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_200_', search_0_200.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_0 word_0"
+      +" ON word_0.turn_annotation_id = turn.annotation_id"
+      +" INNER JOIN annotation_layer_200 search_0_200"
+      +"  ON search_0_200.word_annotation_id = word_0.word_annotation_id"
+      +"  AND search_0_200.label  REGEXP  ?"
+      +" INNER JOIN annotation_layer_200 search_0_1_200"
+      +"  ON search_0_1_200.word_annotation_id = search_0_200.word_annotation_id"
+      +" AND search_0_1_200.ordinal_in_word = search_0_200.ordinal_in_word + 1"
+      +"  AND search_0_1_200.label  REGEXP  ?"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY word_0.turn_annotation_id, word_0.ordinal_in_turn,"
+      +" search_0_200.ordinal_in_word",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^([PTK])$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^([AEIOU].*[0-9])$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("Description", "_^([PTK])$_^([AEIOU].*[0-9])$", search.getDescription());
+
   }
   
   /**
