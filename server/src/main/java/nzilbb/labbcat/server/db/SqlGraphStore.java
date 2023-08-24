@@ -1497,8 +1497,8 @@ public class SqlGraphStore implements GraphStore {
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       expression, sqlSelectClause, userWhereClause, publicAttributesOnly, sqlOrderClause);
-    System.out.println("QL: " + expression);
-    System.out.println("SQL: " + q.sql);
+    // System.out.println("QL: " + expression);
+    // System.out.println("SQL: " + q.sql);
     PreparedStatement sql = q.prepareStatement(getConnection());
     return sql;
   } // end of participantMatchSql()
@@ -1651,8 +1651,8 @@ public class SqlGraphStore implements GraphStore {
     GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
     GraphAgqlToSql.Query q = transformer.sqlFor(
       expression, selectClause, userWhereClause, order, limit);
-    System.out.println("QL: " + expression);
-    System.out.println("SQL: " + q.sql);
+    // System.out.println("QL: " + expression);
+    // System.out.println("SQL: " + q.sql);
     PreparedStatement sql = q.prepareStatement(getConnection());
     return sql;
   } // end of graphMatchSql()
@@ -2523,8 +2523,8 @@ public class SqlGraphStore implements GraphStore {
       sSql = query.sql;
     } // no optimization found
       
-    System.out.println("QL: " + expression);
-    System.out.println("SQL: " + sSql);
+    // System.out.println("QL: " + expression);
+    // System.out.println("SQL: " + sSql);
     PreparedStatement sql = getConnection().prepareStatement(sSql);
     return sql;
   } // end of annotationMatchSql()
@@ -2744,8 +2744,8 @@ public class SqlGraphStore implements GraphStore {
       .replaceAll(" ORDER BY [a-z_., ]+$","")
       // add our own ORDER/GROUP BY if any
       + suffix;
-    System.out.println("Aggregate QL: ("+operation+") " + expression);
-    System.out.println("Aggregate SQL: " + sSql);
+    // System.out.println("Aggregate QL: ("+operation+") " + expression);
+    // System.out.println("Aggregate SQL: " + sSql);
     try {
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       ResultSet rs = sql.executeQuery();
@@ -3861,8 +3861,8 @@ public class SqlGraphStore implements GraphStore {
       String delete = query.sql
         .replaceAll("SELECT .* FROM", "DELETE annotation.* FROM")
         .replaceAll("ORDER BY [^)]+$","");
-      System.out.println("QL: " + expression);
-      System.out.println("SQL: " + delete);
+      // System.out.println("QL: " + expression);
+      // System.out.println("SQL: " + delete);
       PreparedStatement sql = getConnection().prepareStatement(delete);
       try {
         return sql.executeUpdate();
