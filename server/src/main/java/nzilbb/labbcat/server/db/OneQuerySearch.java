@@ -575,8 +575,16 @@ public class OneQuerySearch extends SearchTask {
         + (iTargetIndex==0?"":""+iTargetIndex+"_")
         + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
         + ".segment_annotation_id";
-      targetSegmentOrder = ", search_0_" + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
+      targetSegmentOrder = ", search_0_"
+        + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
         + ".ordinal_in_word";
+    } else if (alignedWordLayer.isPresent()
+               && alignedWordLayer.get().getId().equals(targetLayerId)
+               && iTargetColumn == iWordColumn) {
+      // if we're targeting a word child layer, we want to add "ordinal" to the ORDER BY
+      targetSegmentOrder = ", search_"+iWordColumn+"_"
+        + schema.getLayer(alignedWordLayer.get().getId()).get("layer_id")
+        + ".ordinal";
     }
 
     // start border condition
@@ -1289,6 +1297,13 @@ public class OneQuerySearch extends SearchTask {
           ", search_"+iWordColumn+"_"
           + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
           + ".ordinal_in_word";
+      } else if (alignedWordLayer.isPresent()
+                 && alignedWordLayer.get().getId().equals(targetLayerId)
+                 && iTargetColumn == iWordColumn) {
+        // if we're targeting a word child layer, we want to add "ordinal" to the ORDER BY
+        targetSegmentOrder = ", search_"+iWordColumn+"_"
+          + schema.getLayer(alignedWordLayer.get().getId()).get("layer_id")
+        + ".ordinal";
       }
       
       Object oSubPatternMatchArgs[] = { 
@@ -2690,58 +2705,6 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat sqlWordEndJoin = new MessageFormat(
     " INNER JOIN anchor word{0}_end ON word{0}_end.anchor_id = word{0}.end_anchor_id");
    
-  /**
-   * Query for displaying the static final result for a given match.
-   * <p> Arguments are:
-   * <ul>
-   * <li>0: subclause(s) to add to WHERE condition to identify context
-   * e.g. {@link #sSqlResultsWordCountContext}
-   * </li> 
-   * <li>1: any extra JOINs required e.g. {@link #sqlLineJoin}</li> 
-   * </ul>
-   */
-  static final MessageFormat sqlResultDisplay = new MessageFormat(
-    "SELECT word_0annotation_id, word_0ag_id, word_0label, word_0label_status,"
-    + " word_0start_anchor_id, word_0end_anchor_id, word_0turn_annotation_id,"
-    + " word_0ordinal_in_turn, word_0word_annotation_id,"
-    + " word_0parent_id, word_0ordinal".replaceAll("word\\.", "word_0")
-    + ", COALESCE(speaker.name, transcript_speaker.name) AS name,"
-    + " transcript_speaker.speaker_id,"
-    + " transcript_speaker.speaker_number,"
-    + " transcript_speaker.main_speaker"
-    + " FROM annotation_layer_" + SqlConstants.LAYER_TRANSCRIPTION
-    + " word_0"
-    + " INNER JOIN anchor word_0_start"
-    + " ON word_0_start.anchor_id = word_0.start_anchor_id"
-    + " INNER JOIN anchor word_0_end"
-    + " ON word_0_end.anchor_id = word_0.end_anchor_id "
-    + " INNER JOIN annotation_layer_"+SqlConstants.LAYER_TURN
-    + " turn ON word_0.turn_annotation_id = turn.annotation_id" 
-    + " INNER JOIN transcript_speaker"
-    + " ON turn.label REGEXP '^[0-9]+$'"
-    + " AND transcript_speaker.speaker_number = CAST(turn.label AS SIGNED)" 
-    + " AND transcript_speaker.ag_id = turn.ag_id" 
-    + " LEFT OUTER JOIN speaker ON speaker.speaker_number = CAST(turn.label AS SIGNED)" 
-    + "{1}"
-    + " WHERE word_0.turn_annotation_id = ?"
-    + "{0}"
-    + " ORDER BY word_0.ordinal_in_turn");
-      
-  /** WHERE clause for identifying words within a range of values of
-   * <code>word.ordinal_in_turn</code>, for use as an argument to {@link #sqlResultDisplay}. */
-  static final String sSqlResultsWordCountContext
-  = " AND word.ordinal_in_turn BETWEEN ? AND ?";
-  
-  /** WHERE clause for identifying words within a line, for use as an argument to
-   * {@link #sqlResultDisplay}. Must be used with {@link #sqlLineJoin}
-   */
-  static final String sSqlResultsLineContext
-  //      = " AND (line.annotation_id = ?"
-  = " AND (word_start.offset BETWEEN ? AND ?"
-    // ensure that if the result spills over to a new line, all the words
-    // are returned
-    +" OR word.ordinal_in_turn BETWEEN ? AND ?)";
-
   /**
    * Query for matching start-anchor-sharing layer by numerical maximum
    * - uses <code>DECIMAL</code>

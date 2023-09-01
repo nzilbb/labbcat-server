@@ -584,6 +584,61 @@ public class TestOneQuerySearch {
     assertEquals("Description", "_^(needle)$", search.getDescription());
   }
   
+  /** Ensure targeting aligned word layers generates the correct ORDER BY. */
+  @Test public void subWordOrdering() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+
+    // aligned word layer ordering
+    // with an aligned word-layer condition
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("syllable").setPattern("['\"].*")
+                       .setTarget(true))
+        ));
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "aligned word layer condition",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_187.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_187.start_anchor_id,"
+      +" search_0_187.end_anchor_id,0,"
+      +" NULL AS segment_annotation_id,"
+      +" search_0_187.annotation_id AS target_annotation_id,"
+      +" search_0_187.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_187.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_187.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_187_', search_0_187.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */ "
+      +" INNER JOIN annotation_layer_187 search_0_187"
+      +"  ON search_0_187.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_187.label AS BINARY)  REGEXP BINARY ?"
+      +" /* subsequent columns */ "
+      +" WHERE 1=1"
+      +" /* transcripts */ "
+      +" /* participants */ "
+      +" /* main participant clause */ "
+      +" /* access clause */ "
+      +" /* first column: */"
+      +" /* border conditions */ "
+      +" /* search criteria subqueries */ "
+      +" /* subsequent columns */ "
+      +" ORDER BY search_0_187.turn_annotation_id, search_0_187.ordinal_in_turn,"
+      +" search_0_187.ordinal",
+      sql);
+    assertEquals("number of parameters" + parameters, 1, parameters.size());
+    assertEquals("^(['\"].*)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    
+    assertEquals("Description", "_^(['\"].*)$", search.getDescription());
+  }
+  
   /** Ensure a one-column search with multiple word layers generates the correct SQL. */
   @Test public void multiWordLayerSearch() throws Exception {    
     OneQuerySearch search = new OneQuerySearch();
