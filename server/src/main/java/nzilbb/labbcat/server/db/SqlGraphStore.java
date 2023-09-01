@@ -3012,12 +3012,14 @@ public class SqlGraphStore implements GraphStore {
             altQueries.put(layerId, null); // there is no alternative query
             altParameterGroups.put(layerId, null);
           }
-        } else if (targetLayer.containsKey("layer_id") // target is segment
-                   && targetLayer.get("layer_id").equals(
-                     Integer.valueOf(SqlConstants.LAYER_SEGMENT))
+        } else if (targetLayer.containsKey("layer_id")
+                   // target is aligned word child
+                   && targetLayer.getParentId().equals(schema.getWordLayerId()) 
+                   && targetLayer.getAlignment() == Constants.ALIGNMENT_INTERVAL
+                   // layer is also word child
                    && (layer.getParentId() != null
                        && layer.getParentId().equals(targetLayer.getParentId()))) {// word child
-          // target is segment layer and layer is word child
+          // target is segment layer (or other aligned word child) and layer is word child
           Integer layer_id = (Integer)layer.get("layer_id");
           String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
             // these required for ORDER BY
