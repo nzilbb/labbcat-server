@@ -115,6 +115,7 @@ public class OneQuerySearch extends SearchTask {
     Vector<Optional<LayerMatch>> primaryWordLayers = new Vector<Optional<LayerMatch>>();
     Optional<LayerMatch> firstPrimaryWordLayer = matrix.getColumns().get(iWordColumn)
       .getLayers().values().stream()
+      .flatMap(m -> m.stream())
       .filter(LayerMatch::HasCondition)
       // not a "NOT .+" expression
       .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
@@ -125,15 +126,49 @@ public class OneQuerySearch extends SearchTask {
     primaryWordLayers.add(firstPrimaryWordLayer);
     
     // check for segment layer search
-    // this affects how we match aligned word layers
-    Vector<Optional<LayerMatch>> primarySegmentLayers = new Vector<Optional<LayerMatch>>();
-    Optional<LayerMatch> targetSegmentLayer = matrix.getColumns().get(iWordColumn)
-      .getLayers().values().stream()
+
+    // first determine whether there are any segment layers in the whole matrix
+    List<LayerMatch> allSegmentMatches = matrix.layerMatchStream()
       .filter(LayerMatch::HasCondition)
       .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
       .filter(layerMatch -> IsSegmentLayer(schema.getLayer(layerMatch.getId()), schema))
+      .collect(Collectors.toList());
+    Optional<LayerMatch> overallTargetSegmentLayer = allSegmentMatches.stream()
+      .filter(LayerMatch::IsTarget)
       .findAny();
-    primarySegmentLayers.add(targetSegmentLayer);
+    if (allSegmentMatches.size() > 0                 // there are segments matched
+        && !overallTargetSegmentLayer.isPresent()) { // but none is explicitly the target
+      // target the first one
+      overallTargetSegmentLayer = Optional.of(allSegmentMatches.get(0));
+      overallTargetSegmentLayer.get().setTarget(true);
+    }
+    
+    // this affects how we match aligned word layers in each column
+    Vector<Optional<LayerMatch>> primarySegmentLayers = new Vector<Optional<LayerMatch>>();
+    List<LayerMatch> segmentMatches = matrix.getColumns().get(iWordColumn)
+      .getLayers().values().stream()
+      .flatMap(m -> m.stream())
+      .filter(LayerMatch::HasCondition)
+      .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
+      .filter(layerMatch -> IsSegmentLayer(schema.getLayer(layerMatch.getId()), schema))
+      .collect(Collectors.toList());
+    // if there's an explicitly targetted one, us that
+    Optional<LayerMatch> columnTargetSegmentLayer = segmentMatches.stream()
+      .filter(LayerMatch::IsTarget)
+      .findAny();
+    if (!columnTargetSegmentLayer.isPresent()) { // no explicitly targeted layer
+      // target the first segment layer
+      columnTargetSegmentLayer = segmentMatches.stream().findAny();
+    }
+    primarySegmentLayers.add(columnTargetSegmentLayer);
+    boolean anchoredSegmentMatch = matrix.getColumns().get(iWordColumn)
+      .getLayers().values().stream()
+      .flatMap(m -> m.stream())
+      .filter(LayerMatch::HasCondition)
+      .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
+      .filter(layerMatch -> IsSegmentLayer(schema.getLayer(layerMatch.getId()), schema))
+      .filter(layerMatch -> layerMatch.getAnchorStart() || layerMatch.getAnchorEnd())
+      .findAny().isPresent();
 
     if (firstPrimaryWordLayer.isPresent()) {
       // change word start/end joins to match word layer table
@@ -153,6 +188,7 @@ public class OneQuerySearch extends SearchTask {
     
     Optional<Layer> alignedWordLayer = matrix.getColumns().get(iWordColumn)
       .getLayers().values().stream()
+      .flatMap(m -> m.stream())
       .filter(LayerMatch::HasCondition)
       .map(layerMatch -> schema.getLayer(layerMatch.getId()))
       .filter(Objects::nonNull)
@@ -160,11 +196,12 @@ public class OneQuerySearch extends SearchTask {
       .filter(layer -> !layer.getId().equals(schema.getWordLayerId()))
       .filter(layer -> layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
       .findAny();
-    boolean bUseWordContainsJoins = targetSegmentLayer.isPresent()
+    boolean bUseWordContainsJoins = columnTargetSegmentLayer.isPresent()
       && alignedWordLayer.isPresent(); 
     
     int iTargetLayer = SqlConstants.LAYER_TRANSCRIPTION; // by default
     int iTargetColumn = 0; // by default
+    int iTargetIndex = 0; // word-internal index for segment context
     String targetLayerId = matrix.getTargetLayerId();
     Layer targetLayer = null;
     if (targetLayerId == null) {
@@ -182,23 +219,32 @@ public class OneQuerySearch extends SearchTask {
     // look for a layer with a search specification
     final Vector<LayerMatch> layersPrimaryFirst = new Vector<LayerMatch>();
     matrix.getColumns().get(iWordColumn).getLayers().values().stream()
+      .flatMap(m -> m.stream())
       .filter(LayerMatch::HasCondition)
       // existing layers
       .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
       // temporal layers
       .filter(layerMatch -> schema.getLayer(layerMatch.getId()).containsKey("layer_id"))
       .forEach(layerMatch -> layersPrimaryFirst.add(layerMatch));
- 
-    if (targetSegmentLayer.isPresent()) { // move primary segment layer to the front
-      if (layersPrimaryFirst.remove(targetSegmentLayer.get())) { // it was there
-        layersPrimaryFirst.add(0, targetSegmentLayer.get());
-      }
+    if (columnTargetSegmentLayer.isPresent()) { // target segment layer
+      // move primary segment layer to the front
+      int i = 0; // there may be multiple matches for the same layer
+      for (LayerMatch seg :matrix.getColumns().get(iWordColumn)
+             .getLayers().get(columnTargetSegmentLayer.get().getId())) {
+        if (seg.getTarget()) iTargetIndex = i;
+        if (layersPrimaryFirst.remove(seg)) { // it was there
+          layersPrimaryFirst.add(i++, seg);
+        }
+      } // next segment layer match of the same ID
     } else if (firstPrimaryWordLayer.isPresent()) { // move primary word layer to the front
       if (layersPrimaryFirst.remove(firstPrimaryWordLayer.get())) { // it was there
         layersPrimaryFirst.add(0, firstPrimaryWordLayer.get());
       }
     }
     // for each specified layer matching pattern
+    String lastLayerId = null;
+    int sameLastLayerCount = 0;
+    StringBuilder anchoredSegmentClause = new StringBuilder();
     for (LayerMatch layerMatch : layersPrimaryFirst) {
       if (bCancelling) break;
       
@@ -207,6 +253,13 @@ public class OneQuerySearch extends SearchTask {
       Integer layer_id = (Integer)(layer.get("layer_id"));
       StringBuilder sExtraMetaCondition = new StringBuilder();
       Object[] oLayerId = { layer_id, "_" + iWordColumn };
+
+      if (layer.getId().equals(lastLayerId)) {
+        sameLastLayerCount++;
+        oLayerId[1] = "_" + iWordColumn + "_" + sameLastLayerCount;
+      } else {
+        sameLastLayerCount = 0;
+      }
       
       boolean bPhraseLayer = IsPhraseLayer(layer, schema);
       boolean bSpanLayer = IsSpanLayer(layer, schema);
@@ -244,9 +297,9 @@ public class OneQuerySearch extends SearchTask {
           || layer.getType().equals(Constants.TYPE_SELECT)?1:0), // ... and 'select' layers
         layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
         sExtraMetaCondition.toString(), // e.g. anchoring to the start/end of a span
-        (Integer)(targetSegmentLayer.isPresent()?
-                  schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id"):null),
-        "_" + iWordColumn
+        (Integer)(columnTargetSegmentLayer.isPresent()?
+                  schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id"):null),
+        oLayerId[1]
       };
       
       if (LayerMatch.HasCondition(layerMatch)) {
@@ -375,13 +428,55 @@ public class OneQuerySearch extends SearchTask {
               } // un-anchored meta condition
             }
           } else if (bSegmentLayer) {
-            if (targetSegmentLayer.get().getId().equals(layer.getId())) { // first segment layer
-              sSqlExtraJoinsFirst.append(REGEXP_JOIN.format(oArgs));
-              if (bUseWordContainsJoins) {
+            if (segmentMatches.get(0).getId().equals(layer.getId())) { // first segment layer
+              if (sameLastLayerCount == 0) {
+                sSqlExtraJoinsFirst.append(REGEXP_JOIN.format(oArgs));
+                if (layerMatch.getAnchorStart()) {
+                   // clause to maybe defer until we join to a word layer
+                  anchoredSegmentClause.append(
+                    "  AND search_"+iWordColumn+"_"+layer_id+".start_anchor_id"
+                    +" = word_0.start_anchor_id");
+                  if (!firstPrimaryWordLayer.isPresent()) { // no later word join to defer to
+                    sSqlExtraJoinsFirst.append(anchoredSegmentClause.toString());
+                    anchoredSegmentClause.setLength(0); // don't defer to later word join
+                  }
+                }
+                if (layerMatch.getAnchorEnd()) {
+                  anchoredSegmentClause.append(
+                    "  AND search_"+iWordColumn+"_"+layer_id+".end_anchor_id"
+                    +" = word_0.end_anchor_id");
+                  if (!firstPrimaryWordLayer.isPresent()) { // no later word join to defer to
+                    sSqlExtraJoinsFirst.append(anchoredSegmentClause.toString());
+                    anchoredSegmentClause.setLength(0); // don't defer to later word join
+                  }
+                }
+                if (bUseWordContainsJoins) {
+                  sSqlExtraJoinsFirst.append(
+                    " INNER JOIN anchor segment_"+iWordColumn+"_start"
+                    +" ON segment_"+iWordColumn+"_start.anchor_id"
+                    +" = segment_"+iWordColumn+".start_anchor_id");
+                }
+              } else { // already have a segment condition
+                // join via first segment
                 sSqlExtraJoinsFirst.append(
-                  " INNER JOIN anchor segment_"+iWordColumn+"_start"
-                  +" ON segment_"+iWordColumn+"_start.anchor_id"
-                  +" = segment_"+iWordColumn+".start_anchor_id");
+                  REGEXP_JOIN.format(oArgs)
+                  .replace("word"+oLayerId[1]+".word_annotation_id",
+                           "search_"+iWordColumn+"_"+layer_id+".word_annotation_id"
+                           +" AND search"+oLayerId[1]+"_"+layer_id+".ordinal_in_word"
+                           +" = search_"+iWordColumn+"_"+layer_id+".ordinal_in_word + "
+                           + sameLastLayerCount));
+                if (layerMatch.getAnchorStart()) {
+                  throw new Exception("Can only anchor first segment to word start.");
+                }
+                if (layerMatch.getAnchorEnd()) {
+                  anchoredSegmentClause.append(
+                    "  AND search"+oLayerId[1]+"_"+layer_id+".end_anchor_id"
+                    +" = word_0.end_anchor_id");
+                  if (!firstPrimaryWordLayer.isPresent()) { // no later word join to defer to
+                    sSqlExtraJoinsFirst.append(anchoredSegmentClause.toString());
+                    anchoredSegmentClause.setLength(0); // don't defer to later word join
+                  }
+                }
               }
             } else {
               sSqlExtraJoin.append(SEGMENT_REGEXP_JOIN.format(oArgs));
@@ -390,11 +485,11 @@ public class OneQuerySearch extends SearchTask {
                      && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
             sSqlExtraJoin.append(CONTAINING_WORD_REGEXP_JOIN.format(oArgs));
           } else {
-            if (targetSegmentLayer.isPresent()) {
+            if (columnTargetSegmentLayer.isPresent()) {
               sSqlExtraJoin.append(
                 REGEXP_JOIN.format(oArgs).replace(
                   "word_"+iWordColumn+".",
-                  "search_"+iWordColumn+"_"+schema.getLayer(targetSegmentLayer.get().getId())
+                  "search_"+iWordColumn+"_"+schema.getLayer(columnTargetSegmentLayer.get().getId())
                   .get("layer_id")+"."));
             } else {
               sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
@@ -424,6 +519,14 @@ public class OneQuerySearch extends SearchTask {
           }
           sSqlExtraJoinsFirst.append(sSqlExtraJoin);
         } // use regexp
+
+        // do we need to add a segment-to-word-anchoring clause that was deferred?
+        if (anchoredSegmentClause.length() > 0
+            && firstPrimaryWordLayer.isPresent()
+            && firstPrimaryWordLayer.get() == layerMatch) {
+          sSqlExtraJoinsFirst.append(anchoredSegmentClause.toString());
+          anchoredSegmentClause.setLength(0); // don't defer to later word join
+        }
         
         setStatus(
           "Layer: '" + layer.getId() 
@@ -449,28 +552,45 @@ public class OneQuerySearch extends SearchTask {
         if (targetLayerId.equals(layerMatch.getId()) && iWordColumn == iTargetColumn) {
           sSqlExtraFieldsFirst.append(
             ", search_" + iTargetLayer + ".annotation_id AS target_annotation_id");
-          targetExpression = "search_" + iWordColumn + "_" + iTargetLayer
+          targetExpression = "search_" + iWordColumn
+            +(iTargetIndex==0?"":"_"+iTargetIndex)
+            + "_" + iTargetLayer
             + ".annotation_id";
           bTargetAnnotation = true;
         }
+
+        // note this layer ID, in case the next layer is the same (e.g. intra-word phone context)
+        lastLayerId = layerMatch.getId();
       } // matching this layer
     } // next layer
 
     if (bCancelling) throw new Exception("Cancelled.");
 
-    if (targetSegmentLayer.isPresent()) {
+    if (columnTargetSegmentLayer.isPresent()
+        && columnTargetSegmentLayer.get().getTarget()) {
       sSqlExtraFieldsFirst.append(
-        ", search_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
+        ", search_" + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
         + ".segment_annotation_id AS target_segment_id");
-      targetSegmentExpression = "search_0_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
+      targetSegmentExpression = "search_0_"
+        + (iTargetIndex==0?"":""+iTargetIndex+"_")
+        + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
         + ".segment_annotation_id";
-      targetSegmentOrder = ", search_0_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
+      targetSegmentOrder = ", search_0_"
+        + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
         + ".ordinal_in_word";
+    } else if (alignedWordLayer.isPresent()
+               && alignedWordLayer.get().getId().equals(targetLayerId)
+               && iTargetColumn == iWordColumn) {
+      // if we're targeting a word child layer, we want to add "ordinal" to the ORDER BY
+      targetSegmentOrder = ", search_"+iWordColumn+"_"
+        + schema.getLayer(alignedWordLayer.get().getId()).get("layer_id")
+        + ".ordinal";
     }
 
     // start border condition
     String sStartConditionFirst = "";
     if (matrix.getColumns().get(0).getLayers().values().stream()
+        .flatMap(m -> m.stream())
         .filter(layerMatch -> layerMatch.getAnchorStart()) // start anchored to utterance
         .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
         .findAny().isPresent()) { // start of utterance
@@ -488,6 +608,7 @@ public class OneQuerySearch extends SearchTask {
       }
       sStartConditionFirst = sSqlStartLineCondition;
     } else if (matrix.getColumns().get(0).getLayers().values().stream()
+               .flatMap(m -> m.stream())
                .filter(layerMatch -> layerMatch.getAnchorStart()) // start anchored to turn
                .filter(layerMatch -> schema.getTurnLayerId().equals(layerMatch.getId()))
                .findAny().isPresent()) { // start of turn
@@ -498,6 +619,7 @@ public class OneQuerySearch extends SearchTask {
     if (matrix.getColumns().size() == 1) {   
       // end condition
       if (matrix.getColumns().get(0).getLayers().values().stream()
+          .flatMap(m -> m.stream())
           .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to utterance
           .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
           .findAny().isPresent()) { // end of utterance
@@ -515,6 +637,7 @@ public class OneQuerySearch extends SearchTask {
         }
         sSqlLayerMatchesFirst.append(sqlEndLineCondition.format(columnSuffix));
       } else if (matrix.getColumns().get(0).getLayers().values().stream()
+                 .flatMap(m -> m.stream())
                  .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to turn
                  .filter(layerMatch -> schema.getTurnLayerId().equals(layerMatch.getId()))
                  .findAny().isPresent()) { // end of turn
@@ -538,7 +661,6 @@ public class OneQuerySearch extends SearchTask {
           primaryWordTable = "search_"+iWordColumn+"_"
             +schema.getLayer(firstPrimaryWordLayer.get().getId()).get("layer_id");
         }
-        System.out.println("primaryWordTable " + primaryWordTable);
         sSqlExtraJoinsFirst = new StringBuilder(
           sSqlExtraJoinsFirst.toString().replaceAll(
             " ON word_"+iWordColumn+"_start\\.anchor_id = "+primaryWordTable+"\\.start_anchor_id",
@@ -559,7 +681,7 @@ public class OneQuerySearch extends SearchTask {
             + " AND word_"+iWordColumn+"_end.alignment_status >= "
             + anchorConfidenceThreshold));
       }
-      if (targetSegmentLayer.isPresent()) {
+      if (columnTargetSegmentLayer.isPresent()) {
         // segment threshold too
         if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentStartJoin) < 0) {
           sSqlExtraJoinsFirst.append(
@@ -632,16 +754,26 @@ public class OneQuerySearch extends SearchTask {
       StringBuilder sSqlExtraFields = new StringBuilder();
       StringBuilder sSqlLayerMatches = new StringBuilder();
       Column column = matrix.getColumns().get(iWordColumn);
-      targetSegmentLayer = column
+      segmentMatches = column
         .getLayers().values().stream()
+        .flatMap(m -> m.stream())
         .filter(LayerMatch::HasCondition)
         .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
         .filter(layerMatch -> IsSegmentLayer(schema.getLayer(layerMatch.getId()), schema))
+        .collect(Collectors.toList());
+      // if there's an explicitly targetted one, us that
+      columnTargetSegmentLayer = segmentMatches.stream()
+        .filter(LayerMatch::IsTarget)
         .findAny();
-      primarySegmentLayers.add(targetSegmentLayer);
+      if (!columnTargetSegmentLayer.isPresent()) { // no explicitly targeted layer
+        // target the first segment layer
+        columnTargetSegmentLayer = segmentMatches.stream().findAny();
+      }
+      primarySegmentLayers.add(columnTargetSegmentLayer);
       
       // do we need a word layer to anchor to?
       Optional<LayerMatch> primaryWordLayer = column.getLayers().values().stream()
+        .flatMap(m -> m.stream())
         .filter(LayerMatch::HasCondition)
         // not a "NOT .+" expression
         .filter(layerMatch -> !layerMatch.getNot() || !".+".equals(layerMatch.getPattern()))
@@ -686,16 +818,9 @@ public class OneQuerySearch extends SearchTask {
       sSqlEndLineJoin = sqlEndLineJoin.format(columnSuffix);
       sSqlEndTurnJoin = sqlEndTurnJoin.format(columnSuffix);
       
-      // check for segment layer search
-      // this affects how we match aligned word layers
-      targetSegmentLayer = matrix.getColumns().get(iWordColumn)
-        .getLayers().values().stream()
-        .filter(LayerMatch::HasCondition)
-        .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
-        .filter(layerMatch -> IsSegmentLayer(schema.getLayer(layerMatch.getId()), schema))
-        .findAny();
       alignedWordLayer = matrix.getColumns().get(iWordColumn)
         .getLayers().values().stream()
+        .flatMap(m -> m.stream())
         .filter(LayerMatch::HasCondition)
         .map(layerMatch -> schema.getLayer(layerMatch.getId()))
         .filter(Objects::nonNull)
@@ -703,21 +828,27 @@ public class OneQuerySearch extends SearchTask {
         .filter(layer -> !layer.getId().equals(schema.getWordLayerId()))
         .filter(layer -> layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)
         .findAny();
-      bUseWordContainsJoins = targetSegmentLayer.isPresent()
+      bUseWordContainsJoins = columnTargetSegmentLayer.isPresent()
         && alignedWordLayer.isPresent();
     
       layersPrimaryFirst.clear();
       column.getLayers().values().stream()
+        .flatMap(m -> m.stream())
         .filter(LayerMatch::HasCondition)
         // existing layers
         .filter(layerMatch -> schema.getLayer(layerMatch.getId()) != null)
         // temporal layers
         .filter(layerMatch -> schema.getLayer(layerMatch.getId()).containsKey("layer_id"))
         .forEach(layerMatch -> layersPrimaryFirst.add(layerMatch));
-      if (targetSegmentLayer.isPresent()) { // move primary segment layer to the front
-        if (layersPrimaryFirst.remove(targetSegmentLayer.get())) { // it was there
-          layersPrimaryFirst.add(0, targetSegmentLayer.get());
-        }
+      if (columnTargetSegmentLayer.isPresent()) { // move primary segment layer to the front
+        int i = 0; // there may be multiple matches for the same segment layer
+        for (LayerMatch seg :matrix.getColumns().get(iWordColumn)
+               .getLayers().get(columnTargetSegmentLayer.get().getId())) {
+          if (seg.getTarget()) iTargetIndex = i;
+          if (layersPrimaryFirst.remove(seg)) { // it was there
+            layersPrimaryFirst.add(i++, seg);
+          }
+        } // next segment layer match of the same ID
       } else if (primaryWordLayer.isPresent()) {
         // move it to the front
         if (layersPrimaryFirst.remove(primaryWordLayer.get())) { // it was there
@@ -726,6 +857,9 @@ public class OneQuerySearch extends SearchTask {
       }
       
       // look for a layer with a search specification
+      lastLayerId = null;
+      sameLastLayerCount = 0;
+      anchoredSegmentClause.setLength(0);
       for (LayerMatch layerMatch : layersPrimaryFirst) {
         if (bCancelling) break;
         layerMatch.setNullBooleans();        
@@ -733,6 +867,13 @@ public class OneQuerySearch extends SearchTask {
         Integer layer_id = (Integer)(layer.get("layer_id"));
         StringBuilder sExtraMetaCondition = new StringBuilder();
         Object[] oLayerId = { (Integer)(layer.get("layer_id")), "_" + iWordColumn };
+
+        if (layer.getId().equals(lastLayerId)) {
+          sameLastLayerCount++;
+          oLayerId[1] = "_" + iWordColumn + "_" + sameLastLayerCount;
+        } else {
+          sameLastLayerCount = 0;
+        }
 	
         boolean bPhraseLayer = IsPhraseLayer(layer, schema);
         boolean bSpanLayer = IsSpanLayer(layer, schema);
@@ -771,7 +912,7 @@ public class OneQuerySearch extends SearchTask {
           layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
           sExtraMetaCondition.toString(), // e.g. anchoring to the start of a span
           null,
-          "_" + iWordColumn
+          oLayerId[1]
         };
         
         if (LayerMatch.HasCondition(layerMatch)) {
@@ -897,13 +1038,55 @@ public class OneQuerySearch extends SearchTask {
                 } // un-anchored meta condition
               }
             } else if (bSegmentLayer) {
-              if (targetSegmentLayer.get().getId().equals(layer.getId())) { // first segment layer
-                sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
-                if (bUseWordContainsJoins) {
+              if (segmentMatches.get(0).getId().equals(layer.getId())) { // first segment layer
+                if (sameLastLayerCount == 0) {
+                  sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
+                  if (layerMatch.getAnchorStart()) {
+                    // clause to maybe defer until we join to a word layer
+                    anchoredSegmentClause.append(
+                      "  AND search_"+iWordColumn+"_"+layer_id+".start_anchor_id"
+                      +" = word_"+iWordColumn+".start_anchor_id");
+                    if (!primaryWordLayer.isPresent()) { // no later word join to defer to
+                      sSqlExtraJoin.append(anchoredSegmentClause.toString());
+                      anchoredSegmentClause.setLength(0); // don't defer to later word join
+                    }
+                  }
+                  if (layerMatch.getAnchorEnd()) {
+                    anchoredSegmentClause.append(
+                      "  AND search_"+iWordColumn+"_"+layer_id+".end_anchor_id"
+                      +" = word_"+iWordColumn+".end_anchor_id");
+                    if (!primaryWordLayer.isPresent()) { // no later word join to defer to
+                      sSqlExtraJoin.append(anchoredSegmentClause.toString());
+                      anchoredSegmentClause.setLength(0); // don't defer to later word join
+                    }
+                  }
+                  if (bUseWordContainsJoins) {
+                    sSqlExtraJoin.append(
+                      " INNER JOIN anchor segment_"+iWordColumn+"_start"
+                      +" ON segment_"+iWordColumn+"_start.anchor_id"
+                      +" = segment_"+iWordColumn+".start_anchor_id");
+                  }
+                } else { // already have a segment condition
+                  // join via first segment
                   sSqlExtraJoin.append(
-                    " INNER JOIN anchor segment_"+iWordColumn+"_start"
-                    +" ON segment_"+iWordColumn+"_start.anchor_id"
-                    +" = segment_"+iWordColumn+".start_anchor_id");
+                    REGEXP_JOIN.format(oArgs)
+                    .replace("word"+oLayerId[1]+".word_annotation_id",
+                             "search_"+iWordColumn+"_"+layer_id+".word_annotation_id"
+                             +" AND search"+oLayerId[1]+"_"+layer_id+".ordinal_in_word"
+                             +" = search_"+iWordColumn+"_"+layer_id+".ordinal_in_word + "
+                             + sameLastLayerCount));
+                  if (layerMatch.getAnchorStart()) {
+                    throw new Exception("Can only anchor first segment to word start.");
+                  }
+                  if (layerMatch.getAnchorEnd()) {
+                    anchoredSegmentClause.append(
+                      "  AND search"+oLayerId[1]+"_"+layer_id+".end_anchor_id"
+                      +" = word_"+iWordColumn+".end_anchor_id");
+                    if (!primaryWordLayer.isPresent()) { // no later word join to defer to
+                      sSqlExtraJoin.append(anchoredSegmentClause.toString());
+                      anchoredSegmentClause.setLength(0); // don't defer to later word join
+                    }
+                  }
                 }
               } else {
                 sSqlExtraJoin.append(SEGMENT_REGEXP_JOIN.format(oArgs));
@@ -916,11 +1099,11 @@ public class OneQuerySearch extends SearchTask {
               }
               sSqlExtraJoin.append(CONTAINING_WORD_REGEXP_JOIN.format(oArgs));
             } else {
-              if (targetSegmentLayer.isPresent()) {
+              if (columnTargetSegmentLayer.isPresent()) {
                 sSqlExtraJoin.append(
                   REGEXP_JOIN.format(oArgs).replace(
                     "word_"+iWordColumn+".",
-                    "search_"+iWordColumn+"_"+schema.getLayer(targetSegmentLayer.get().getId())
+                    "search_"+iWordColumn+"_"+schema.getLayer(columnTargetSegmentLayer.get().getId())
                     .get("layer_id")+"."));
               } else {
                 sSqlExtraJoin.append(REGEXP_JOIN.format(oArgs));
@@ -955,10 +1138,23 @@ public class OneQuerySearch extends SearchTask {
             sSqlExtraFields.append(
               ", search_"+iWordColumn+"_" + iTargetLayer
               + ".annotation_id AS target_annotation_id");
-            targetExpression = "search_"+iWordColumn+"_" + iTargetLayer
+            targetExpression = "search_"+iWordColumn
+              +(iTargetIndex==0?"":"_"+iTargetIndex)
+              +"_" + iTargetLayer
               + ".annotation_id";
             bTargetAnnotation = true;
           }
+
+          // note this layer ID, in case the next layer is the same (e.g. intra-word phone context)
+          lastLayerId = layerMatch.getId();
+
+          // do we need to add a segment-to-word-anchoring clause that was deferred?
+          if (anchoredSegmentClause.length() > 0
+              && primaryWordLayer.isPresent()
+              && primaryWordLayer.get() == layerMatch) {
+            sSqlExtraJoins.append(anchoredSegmentClause.toString());
+            anchoredSegmentClause.setLength(0); // don't defer to later word join
+          }        
           
           setStatus(
             "Layer: '" + layer.getId() 
@@ -1016,7 +1212,7 @@ public class OneQuerySearch extends SearchTask {
               + " AND word_"+iWordColumn+"_end.alignment_status >= "
               + anchorConfidenceThreshold));
         }
-        if (targetSegmentLayer.isPresent()) {
+        if (columnTargetSegmentLayer.isPresent()) {
           // segment threshold too
           if (sSqlExtraJoins.indexOf(sSqlSegmentStartJoin) < 0) {
             sSqlExtraJoins.append(
@@ -1056,6 +1252,7 @@ public class OneQuerySearch extends SearchTask {
       if (iWordColumn == matrix.getColumns().size() - 1) {
         // end condition
         if (matrix.getColumns().get(matrix.getColumns().size() - 1).getLayers().values().stream()
+            .flatMap(m -> m.stream())
             .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to utterance
             .filter(layerMatch -> schema.getUtteranceLayerId().equals(layerMatch.getId()))
             .findAny().isPresent()) { // end of utterance
@@ -1074,6 +1271,7 @@ public class OneQuerySearch extends SearchTask {
           sBorderCondition = sqlEndLineCondition.format(columnSuffix);
         } else if (matrix.getColumns().get(matrix.getColumns().size() - 1).getLayers().values()
                    .stream()
+                   .flatMap(m -> m.stream())
                    .filter(layerMatch -> layerMatch.getAnchorEnd()) // end anchored to turn
                    .filter(layerMatch -> schema.getTurnLayerId().equals(layerMatch.getId()))
                    .findAny().isPresent()) { // end of turn
@@ -1084,16 +1282,28 @@ public class OneQuerySearch extends SearchTask {
         }
       } // last column
       
-      if (targetSegmentLayer.isPresent()) {
+      if (columnTargetSegmentLayer.isPresent() // it's the target segment layer
+          && columnTargetSegmentLayer.get().getTarget()) { 
         sSqlExtraFields.append(
-          ", search"+iWordColumn+"_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
+          ", search"+iWordColumn+"_"
+          + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
           + ".segment_annotation_id AS target_segment_id");
         targetSegmentExpression
-          = "search_"+iWordColumn+"_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
+          = "search_"+iWordColumn+"_"
+          + (iTargetIndex==0?"":""+iTargetIndex+"_")
+          + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
           + ".segment_annotation_id"; 
         targetSegmentOrder =
-          ", search_"+iWordColumn+"_" + schema.getLayer(targetSegmentLayer.get().getId()).get("layer_id")
+          ", search_"+iWordColumn+"_"
+          + schema.getLayer(columnTargetSegmentLayer.get().getId()).get("layer_id")
           + ".ordinal_in_word";
+      } else if (alignedWordLayer.isPresent()
+                 && alignedWordLayer.get().getId().equals(targetLayerId)
+                 && iTargetColumn == iWordColumn) {
+        // if we're targeting a word child layer, we want to add "ordinal" to the ORDER BY
+        targetSegmentOrder = ", search_"+iWordColumn+"_"
+          + schema.getLayer(alignedWordLayer.get().getId()).get("layer_id")
+        + ".ordinal";
       }
       
       Object oSubPatternMatchArgs[] = { 
@@ -1316,7 +1526,7 @@ public class OneQuerySearch extends SearchTask {
       // set the WHERE condition for this column
       q.append(c==0?" WHERE ":" AND ");
       // ensure there really is a pattern with a condition
-      LayerMatch match = column.getLayers().get("orthography");
+      LayerMatch match = column.getFirstLayerMatch("orthography");
       if (match == null) throw new Exception("No orthography match for column "+c);
       if (match.getPattern() != null) {
         match.ensurePatternAnchored();
@@ -2495,58 +2705,6 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat sqlWordEndJoin = new MessageFormat(
     " INNER JOIN anchor word{0}_end ON word{0}_end.anchor_id = word{0}.end_anchor_id");
    
-  /**
-   * Query for displaying the static final result for a given match.
-   * <p> Arguments are:
-   * <ul>
-   * <li>0: subclause(s) to add to WHERE condition to identify context
-   * e.g. {@link #sSqlResultsWordCountContext}
-   * </li> 
-   * <li>1: any extra JOINs required e.g. {@link #sqlLineJoin}</li> 
-   * </ul>
-   */
-  static final MessageFormat sqlResultDisplay = new MessageFormat(
-    "SELECT word_0annotation_id, word_0ag_id, word_0label, word_0label_status,"
-    + " word_0start_anchor_id, word_0end_anchor_id, word_0turn_annotation_id,"
-    + " word_0ordinal_in_turn, word_0word_annotation_id,"
-    + " word_0parent_id, word_0ordinal".replaceAll("word\\.", "word_0")
-    + ", COALESCE(speaker.name, transcript_speaker.name) AS name,"
-    + " transcript_speaker.speaker_id,"
-    + " transcript_speaker.speaker_number,"
-    + " transcript_speaker.main_speaker"
-    + " FROM annotation_layer_" + SqlConstants.LAYER_TRANSCRIPTION
-    + " word_0"
-    + " INNER JOIN anchor word_0_start"
-    + " ON word_0_start.anchor_id = word_0.start_anchor_id"
-    + " INNER JOIN anchor word_0_end"
-    + " ON word_0_end.anchor_id = word_0.end_anchor_id "
-    + " INNER JOIN annotation_layer_"+SqlConstants.LAYER_TURN
-    + " turn ON word_0.turn_annotation_id = turn.annotation_id" 
-    + " INNER JOIN transcript_speaker"
-    + " ON turn.label REGEXP '^[0-9]+$'"
-    + " AND transcript_speaker.speaker_number = CAST(turn.label AS SIGNED)" 
-    + " AND transcript_speaker.ag_id = turn.ag_id" 
-    + " LEFT OUTER JOIN speaker ON speaker.speaker_number = CAST(turn.label AS SIGNED)" 
-    + "{1}"
-    + " WHERE word_0.turn_annotation_id = ?"
-    + "{0}"
-    + " ORDER BY word_0.ordinal_in_turn");
-      
-  /** WHERE clause for identifying words within a range of values of
-   * <code>word.ordinal_in_turn</code>, for use as an argument to {@link #sqlResultDisplay}. */
-  static final String sSqlResultsWordCountContext
-  = " AND word.ordinal_in_turn BETWEEN ? AND ?";
-  
-  /** WHERE clause for identifying words within a line, for use as an argument to
-   * {@link #sqlResultDisplay}. Must be used with {@link #sqlLineJoin}
-   */
-  static final String sSqlResultsLineContext
-  //      = " AND (line.annotation_id = ?"
-  = " AND (word_start.offset BETWEEN ? AND ?"
-    // ensure that if the result spills over to a new line, all the words
-    // are returned
-    +" OR word.ordinal_in_turn BETWEEN ? AND ?)";
-
   /**
    * Query for matching start-anchor-sharing layer by numerical maximum
    * - uses <code>DECIMAL</code>

@@ -907,8 +907,34 @@ public class SqlGraphStore implements GraphStore {
               sql.close();               
             }
           } else {
-            throw new StoreException("Layer not found: " + id);
-          }
+            rs.close();
+            sql.close();
+
+            if (id.matches("[0-9]+")) { // numeric
+              // may be a numeric layer_id of a temporal layer
+              sql = getConnection().prepareStatement(
+                "SELECT layer.*,"
+                +" attribute_category.category, parent_layer.short_description AS parent_name"
+                +" FROM layer"
+                +" LEFT OUTER JOIN attribute_category ON layer.category = attribute_category.category"
+                +" LEFT OUTER JOIN layer parent_layer ON layer.parent_id = parent_layer.layer_id"
+                +" WHERE layer.layer_id = ?");
+              sql.setString(1, id);
+              rs = sql.executeQuery();
+              if (rs.next()) {
+                try {
+                  return getTemporalLayer(rs);
+                } finally {
+                  rs.close();
+                  sql.close();               
+                }
+              } else {
+                throw new StoreException("Layer not found: " + id);
+              }
+            } else { // not numeric
+              throw new StoreException("Layer not found: " + id);
+            }
+          } // not a transcript attribute
         } // not a participant attribute
       } // not a temporal layer
     } catch(SQLException exception) {
@@ -1471,8 +1497,8 @@ public class SqlGraphStore implements GraphStore {
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       expression, sqlSelectClause, userWhereClause, publicAttributesOnly, sqlOrderClause);
-    System.out.println("QL: " + expression);
-    System.out.println("SQL: " + q.sql);
+    // System.out.println("QL: " + expression);
+    // System.out.println("SQL: " + q.sql);
     PreparedStatement sql = q.prepareStatement(getConnection());
     return sql;
   } // end of participantMatchSql()
@@ -1625,8 +1651,8 @@ public class SqlGraphStore implements GraphStore {
     GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
     GraphAgqlToSql.Query q = transformer.sqlFor(
       expression, selectClause, userWhereClause, order, limit);
-    System.out.println("QL: " + expression);
-    System.out.println("SQL: " + q.sql);
+    // System.out.println("QL: " + expression);
+    // System.out.println("SQL: " + q.sql);
     PreparedStatement sql = q.prepareStatement(getConnection());
     return sql;
   } // end of graphMatchSql()
@@ -2497,8 +2523,8 @@ public class SqlGraphStore implements GraphStore {
       sSql = query.sql;
     } // no optimization found
       
-    System.out.println("QL: " + expression);
-    System.out.println("SQL: " + sSql);
+    // System.out.println("QL: " + expression);
+    // System.out.println("SQL: " + sSql);
     PreparedStatement sql = getConnection().prepareStatement(sSql);
     return sql;
   } // end of annotationMatchSql()
@@ -2713,13 +2739,13 @@ public class SqlGraphStore implements GraphStore {
       expression, select, userWhereClauseGraph("", "graph"), "");
     String sSql = query.sql
       // remove layer expression from SELECT clause
-      .replaceAll(", '.+' AS layer FROM"," FROM")
+      .replaceAll(", '.+' AS layer(, start.offset, end.offset)? FROM"," FROM")
       // remove ORDER BY clause if any
       .replaceAll(" ORDER BY [a-z_., ]+$","")
       // add our own ORDER/GROUP BY if any
       + suffix;
-    System.out.println("Aggregate QL: ("+operation+") " + expression);
-    System.out.println("Aggregate SQL: " + sSql);
+    // System.out.println("Aggregate QL: ("+operation+") " + expression);
+    // System.out.println("Aggregate SQL: " + sSql);
     try {
       PreparedStatement sql = getConnection().prepareStatement(sSql);
       ResultSet rs = sql.executeQuery();
@@ -2986,12 +3012,14 @@ public class SqlGraphStore implements GraphStore {
             altQueries.put(layerId, null); // there is no alternative query
             altParameterGroups.put(layerId, null);
           }
-        } else if (targetLayer.containsKey("layer_id") // target is segment
-                   && targetLayer.get("layer_id").equals(
-                     Integer.valueOf(SqlConstants.LAYER_SEGMENT))
+        } else if (targetLayer.containsKey("layer_id")
+                   // target is aligned word child
+                   && targetLayer.getParentId().equals(schema.getWordLayerId()) 
+                   && targetLayer.getAlignment() == Constants.ALIGNMENT_INTERVAL
+                   // layer is also word child
                    && (layer.getParentId() != null
                        && layer.getParentId().equals(targetLayer.getParentId()))) {// word child
-          // target is segment layer and layer is word child
+          // target is segment layer (or other aligned word child) and layer is word child
           Integer layer_id = (Integer)layer.get("layer_id");
           String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
             // these required for ORDER BY
@@ -3835,8 +3863,8 @@ public class SqlGraphStore implements GraphStore {
       String delete = query.sql
         .replaceAll("SELECT .* FROM", "DELETE annotation.* FROM")
         .replaceAll("ORDER BY [^)]+$","");
-      System.out.println("QL: " + expression);
-      System.out.println("SQL: " + delete);
+      // System.out.println("QL: " + expression);
+      // System.out.println("SQL: " + delete);
       PreparedStatement sql = getConnection().prepareStatement(delete);
       try {
         return sql.executeUpdate();
@@ -3873,37 +3901,62 @@ public class SqlGraphStore implements GraphStore {
     String expression, String layerId, String label, Integer confidence)
     throws StoreException, PermissionException {
     try {
-      Layer layer = getLayer(layerId);
-      // get the first example to tag so we can get the layer
+      // get the first example to tag so we can get the layer and other info
       Annotation[] toTag = getMatchingAnnotations(expression, 1, 0, false);
       if (toTag.length == 0) return 0; // nothing to tag
-      boolean toTagIsParent = toTag[0].getLayerId().equals(layer.getParentId());
-      if (!toTagIsParent) { // ensure they share a parent layer
-        Layer toTagLayer = getLayer(toTag[0].getLayerId());
-        if (!layer.getParentId().equals(toTagLayer.getParentId())) {
-          throw new StoreException(
-            "Tag layer \""+layerId+"\" is not a child or peer layer of the layer to tag \""
-            +toTag[0].getLayerId()+"\"");
-        }
-      }
+      
+      Layer layer = getSchema().getLayer(layerId);
       // can be optimise for word tagging?
-      Matcher wordByLabel = Pattern.compile("^layer.id =+ 'word' && label =+ '(.*)'$")
+      Matcher wordByLabel = Pattern.compile(
+        "^layer.id =+ '(?<sourceLayer>.*)' (?<extraConditions>.*)&& label =+ '(?<wordLabel>.*)'$")
         .matcher(expression);
-      if (wordByLabel.matches() && toTagIsParent) { // optimise word tagging
-        String wordLabel = wordByLabel.group(1);
+      if (wordByLabel.matches()
+          && "word".equals(layer.getParentId())
+          && (wordByLabel.group("sourceLayer").equals("word")
+              || wordByLabel.group("sourceLayer").equals("orthography"))) {
+        // optimise word tagging via orthography
+        String sourceLayer = wordByLabel.group("sourceLayer");
+        String wordLabel = wordByLabel.group("wordLabel");
+        int ordinal = 0;
         if (!layer.getPeers()) {
           deleteMatchingAnnotations(
-            "layer == '"+esc(layerId)+"' && first('word').label == '"+wordLabel+"'");
+            "layer == '"+esc(layerId)+"' "
+            +wordByLabel.group("extraConditions") // e.g. language conditions etc.
+            +"&& first('"+sourceLayer+"').label == '"+wordLabel+"'");
+          ordinal = 1;
+        } else {
+          // figure out what the ordinal should be by assuming the first match is representative
+          // of all other words
+          String wordId = toTag[0].getId();
+          if (!wordId.startsWith("ew_0")) wordId = toTag[0].getParentId();
+          try {
+            long word_annotation_id = Long.parseLong(wordId.replace("ew_0_",""));
+            PreparedStatement sql = getConnection().prepareStatement(
+              "SELECT COALESCE(MAX(ordinal)+1,1) FROM annotation_layer_"+layer.get("layer_id")
+              +" WHERE word_annotation_id = ?");
+            sql.setLong(1, word_annotation_id);
+            ResultSet rs = sql.executeQuery();
+            try {
+              if (rs.next()) {
+                ordinal = rs.getInt(1);              
+              } else { // should be impossible:
+                System.err.println(
+                  "tagMatchingAnnotations: no next ordinal for "+toTag[0].getId());
+              }
+            } finally {
+              rs.close();
+              sql.close();
+            }
+          } catch(Exception exception) {
+            System.err.println(
+              "tagMatchingAnnotations: cannot compute ordinal for "+toTag[0].getId()
+              +": " + exception);
+          }
         }
         String select = 
           "annotation.ag_id, ?, ?, annotation.start_anchor_id, annotation.end_anchor_id,"
-          +" annotation.turn_annotation_id, annotation.ordinal_in_turn, annotation.annotation_id,"
-          +" annotation.annotation_id, "
-          +(!layer.getPeers()?"1":
-            // there may already be tags, so choose the next ordinal for each parent
-            "(SELECT COUNT(*)+1 FROM annotation_layer_"+layer.get("layer_id")
-            +" WHERE parent_id = annotation.annotation_id)")
-          +", ?, Now()";
+          +" annotation.turn_annotation_id, annotation.ordinal_in_turn,"
+          +" annotation.word_annotation_id, annotation.word_annotation_id, ?, ?, Now()";
         AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
         AnnotationAgqlToSql.Query query = transformer.sqlFor(
           expression, select, userWhereClauseGraph("", "graph"), "");
@@ -3913,14 +3966,41 @@ public class SqlGraphStore implements GraphStore {
           +" parent_id, ordinal, annotated_by, annotated_when) "
           +query.sql
           // remove layer field from SELECT clause generated by AnnotationAgqlToSql
-          .replace(", 'word' AS layer","");
+          .replace(", '"+sourceLayer+"' AS layer","")
+          // remove dummy condition
+          .replace("'"+sourceLayer+"' = '"+sourceLayer+"' AND ", "")
+          // remove order
+          .replace("ORDER BY ag_id, parent_id, annotation_id","");
         try {
+          // System.out.println(insert);
           PreparedStatement sql = getConnection().prepareStatement(insert);
           try {
             sql.setString(1, label);
             sql.setInt(2, confidence);
-            sql.setString(3, getUser());
-            return sql.executeUpdate();
+            sql.setInt(3, ordinal);
+            sql.setString(4, getUser());
+            int count = sql.executeUpdate();
+            if (ordinal == 0) { // need to set ordinal
+              sql.close();
+              // the fastest way is by way of a temporary table
+              sql = getConnection().prepareStatement(
+                "CREATE TEMPORARY TABLE ords"
+                +" SELECT word_annotation_id, MAX(ordinal)+1 AS ordinal, MIN(ordinal) AS min"
+                +" FROM annotation_layer_"+layer.get("layer_id")
+                +" GROUP BY word_annotation_id HAVING MIN(ordinal) = 0");
+              sql.executeUpdate();
+              sql.close();
+              sql = getConnection().prepareStatement(
+                "UPDATE annotation_layer_"+layer.get("layer_id")+" tags"
+                +" INNER JOIN ords ON tags.word_annotation_id = ords.word_annotation_id"
+                +" SET tags.ordinal = ords.ordinal"
+                +" WHERE tags.ordinal = 0");
+              sql.executeUpdate();
+              sql.close();
+              sql = getConnection().prepareStatement("DROP TEMPORARY TABLE ords");
+              sql.executeUpdate();
+            } // need to set ordinal
+            return count;
           } finally {
             sql.close();
           }
@@ -3928,22 +4008,27 @@ public class SqlGraphStore implements GraphStore {
           throw new StoreException(x);
         }
       } else { // this is slow but correct
+        boolean toTagIsParent = toTag[0].getLayerId().equals(layer.getParentId());
+        if (!toTagIsParent) { // ensure they share a parent layer
+          Layer toTagLayer = getLayer(toTag[0].getLayerId());
+          if (!layer.getParentId().equals(toTagLayer.getParentId())) {
+            throw new StoreException(
+              "Tag layer \""+layerId+"\" is not a child or peer layer of the layer to tag \""
+              +toTag[0].getLayerId()+"\"");
+          }
+        }
+        
         // get them all
         toTag = getMatchingAnnotations(expression, null, null, true);
         // for each token...
         for (Annotation token : toTag) {
-          if (!layer.getPeers()) {
-            deleteMatchingAnnotations(
-              "layerId == '"+esc(layerId)+"'"
-              +" && first('"+esc(token.getLayerId())+"').id == '"+token.getId()+"'");
-          }
-          createAnnotation(
+          createAnnotation( // (createAnnotation deletes existing if layer.peers == false)
             token.getGraph().getId(), token.getStartId(), token.getEndId(),
             layerId, label, confidence,
             toTagIsParent? token.getId() : token.getParentId());
         } // next token to tag
+        return toTag.length;
       }
-      return toTag.length;
     } catch(GraphNotFoundException exception) {
       throw new StoreException(exception);
     }
@@ -7113,8 +7198,7 @@ public class SqlGraphStore implements GraphStore {
         sql.executeUpdate();
         sql.close();
       }
-      PreparedStatement sqlInsertAnnotation = getConnection().prepareStatement(
-        "INSERT INTO annotation_layer_?"
+      String sql = "INSERT INTO annotation_layer_?"
         + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
         + " parent_id, ordinal, annotated_by, annotated_when"
         + (!layer.get("scope").equals("F")?
@@ -7126,14 +7210,19 @@ public class SqlGraphStore implements GraphStore {
         + " SELECT ag_id, ?, ?, "
         // non-aligned layers use their parent anchors, regardless of startId/endId
         +(layer.getAlignment()==Constants.ALIGNMENT_NONE?"start_anchor_id, end_anchor_id,":"?, ?,")
-        + " annotation_id, 1, ?, Now()"
+        + " annotation_id,"
+        +(!layer.getPeers()?"1":
+          // there may already be tags, so choose the next ordinal for each parent
+          "(SELECT COUNT(*)+1 FROM annotation_layer_? WHERE parent_id = ?)")
+        +", ?, Now()"
         + (!layer.get("scope").equals("F")?
            ", turn_annotation_id" :"")
         + (layer.get("scope").equals("S")||layer.get("scope").equals("W")?
            ", ordinal_in_turn, word_annotation_id":"")
         + (layer.get("scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
         + " FROM annotation_layer_?"
-        +" WHERE annotation_id = ?");
+        +" WHERE annotation_id = ?";
+      PreparedStatement sqlInsertAnnotation = getConnection().prepareStatement(sql);
       int p = 1;
       sqlInsertAnnotation.setInt(p++, ((Integer)layer.get("layer_id")).intValue());
       sqlInsertAnnotation.setString(p++, label);
@@ -7146,7 +7235,12 @@ public class SqlGraphStore implements GraphStore {
         anchorAttributes = fmtAnchorId.parse(to.getId());
         sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
       }
-	 
+      
+      if (layer.getPeers()) {
+        sqlInsertAnnotation.setInt(p++, ((Integer)layer.get("layer_id")).intValue());
+        sqlInsertAnnotation.setLong(p++, parentAnnotationId);
+      }
+
       sqlInsertAnnotation.setString(p++, getUser());
       sqlInsertAnnotation.setInt(p++, ((Integer)parentLayer.get("layer_id")).intValue());
       sqlInsertAnnotation.setLong(p++, parentAnnotationId);

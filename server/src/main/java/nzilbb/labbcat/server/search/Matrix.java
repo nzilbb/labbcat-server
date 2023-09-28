@@ -211,6 +211,7 @@ public class Matrix implements CloneableBean {
     return columns.stream()
       .map(column -> column.getLayers().values().stream())
       .reduce(Stream.empty(), Stream::concat)
+      .flatMap(m -> m.stream())
       .peek(l -> l.setNullBooleans());
   } // end of layerPatternStream()
   
@@ -237,6 +238,7 @@ public class Matrix implements CloneableBean {
   public int getTargetColumn() {
     for (int c = 0; c < columns.size(); c++) {
       if (columns.get(c).getLayers().values().stream()
+          .flatMap(m -> m.stream())
           .filter(LayerMatch::HasCondition)
           .filter(l -> l.getTarget())
           .findAny().isPresent()) {
