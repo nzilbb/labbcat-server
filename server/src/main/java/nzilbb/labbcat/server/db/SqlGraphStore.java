@@ -3349,6 +3349,43 @@ public class SqlGraphStore implements GraphStore {
             altQueries.put(layerId, null); // there is no alternative query
             altParameterGroups.put(layerId, null);
           } // the MatchId doesn't include the speaker number
+        }  else if (layer.getId().equals("main_participant")) { // main_participant
+          if (ag_id_group != null) { // the MatchId includes to ag_id
+            String sql = "SELECT speaker.name AS label,"
+              +" CONCAT('m_-3', speaker.speaker_number) AS annotation_id,"
+              +" 0 AS ordinal, 100 AS label_status,"
+              +" NULL AS annotated_by, NULL AS annotated_when,"
+              +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+              +" ? AS layer, graph.transcript_id AS graph"
+              +" FROM transcript graph"
+              +" INNER JOIN transcript_speaker ON graph.ag_id = transcript_speaker.ag_id AND transcript_speaker.main_speaker = 1"
+              +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
+              +" WHERE graph.ag_id = ? LIMIT 1";
+            Object[] groups = { layer.getId(), ag_id_group };
+            queries.put(layerId, getConnection().prepareStatement(sql));
+            parameterGroups.put(layerId, groups);
+            altQueries.put(layerId, null); // there is no alternative query
+            altParameterGroups.put(layerId, null);
+          } else { // the MatchId doesn't include to ag_id
+            // get the ag_id from the target
+            String sql = "SELECT speaker.name AS label,"
+              +" CONCAT('m_-3', speaker.speaker_number) AS annotation_id,"
+              +" 0 AS ordinal, 100 AS label_status,"
+              +" NULL AS annotated_by, NULL AS annotated_when,"
+              +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+              +" ? AS layer, graph.transcript_id AS graph"
+              +" FROM transcript graph"
+              +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
+              +" ON graph.ag_id = target.ag_id"
+              +" INNER JOIN transcript_speaker ON graph.ag_id = transcript_speaker.ag_id AND transcript_speaker.main_speaker = 1"
+              +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
+              +" WHERE target.annotation_id = ? LIMIT 1";
+            Object[] groups = { layer.getId(), target_annotation_id_group };
+            queries.put(layerId, getConnection().prepareStatement(sql));
+            parameterGroups.put(layerId, groups);
+            altQueries.put(layerId, null); // there is no alternative query
+            altParameterGroups.put(layerId, null);
+          } // the MatchId doesn't include to ag_id
         } else if (layer.getId().equals(schema.getCorpusLayerId())) { // corpus
           if (ag_id_group != null) { // the MatchId includes to ag_id
             String sql = "SELECT graph.corpus_name AS label,"
