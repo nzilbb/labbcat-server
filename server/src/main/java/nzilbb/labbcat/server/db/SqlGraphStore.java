@@ -40,6 +40,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -83,6 +84,7 @@ import nzilbb.sql.ConnectionFactory;
 import nzilbb.sql.mysql.MySQLConnectionFactory;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableSeries;
+import nzilbb.util.SemanticVersionComparator;
 import nzilbb.util.Timers;
 
 /**
@@ -8660,7 +8662,7 @@ public class SqlGraphStore implements GraphStore {
       }
     } // next possible jar
     return descriptors.values().toArray(new AnnotatorDescriptor[0]);
-  } // end of getAnnotatorDescriptor()
+  } // end of getAnnotatorDescriptors()
    
   /**
    * Gets an instance of the annotator with the given ID.
@@ -8684,11 +8686,25 @@ public class SqlGraphStore implements GraphStore {
    */
   public AnnotatorDescriptor getAnnotatorDescriptor(String annotatorId) {
     File dir = getAnnotatorDir();
-    for (File jar : dir.listFiles(new FileFilter() {
-        public boolean accept(File f) {
+    File[] possibleJars = dir.listFiles(new FileFilter() {
+        public boolean accept(File f) { // select only files prefixed by the annotatorId
           return !f.isDirectory() && f.getName().startsWith(annotatorId + "-")
             && f.getName().endsWith(".jar");
-        }})) {
+        }});
+    // ensure that if there's more than one, the highest version is the one we choose
+    Arrays.sort( // sort files by version...
+      possibleJars,
+      new Comparator<File>() { // use semantic versioning comparator
+        SemanticVersionComparator versionComparator = new SemanticVersionComparator();
+        public int compare(File jar1, File jar2) {
+          return versionComparator.compare(
+            jar1.getName().replace("^"+annotatorId+"-(.*)\\.jar$", "$1"),
+            jar2.getName().replace("^"+annotatorId+"-(.*)\\.jar$", "$1"));
+        }
+      }.reversed() // return highest version first
+      );
+    for (File jar : possibleJars) {
+      System.out.println("jar " + jar.getName());
       try {
         AnnotatorDescriptor descriptor = new AnnotatorDescriptor(jar);
         Annotator annotator = descriptor.getInstance();
