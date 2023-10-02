@@ -790,6 +790,8 @@ public class SqlGraphStoreAdministration
               annotatorId = "CMUDictionaryTagger";
             } else if (layerManagerId.equals("FlatFileDictionary")) {
               annotatorId = "FlatLexiconTagger";
+            } else if (layerManagerId.equals("Unisyn")) {
+              annotatorId = "UnisynTagger";
             } else if (layerManagerId.equals("HTK")) {
               annotatorId = "HTKAligner";
             } else if (layerManagerId.equals("labelmapper")) {
