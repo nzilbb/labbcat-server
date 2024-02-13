@@ -244,11 +244,15 @@ public class AdminSystemAttributes extends LabbcatServlet {
                     writeResponse(
                       response, failureResult(
                         request, "Record not updated: {0}", json.getString("attribute")));
+                  } else {
+                    writeResponse(
+                      response, successResult(request, json, "Record updated."));
                   }
                 } else {
                   writeResponse(
                     response, successResult(request, json, "Record updated."));
                 }
+                getServletContext().setAttribute("system_attribute dirty", Boolean.TRUE);
                 sql.close();
               } else { // readonly
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
