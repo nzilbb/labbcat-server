@@ -546,6 +546,22 @@ export class ParticipantsComponent implements OnInit {
             + this.selectedParticipantsQueryString("participant_id");
     }
 
+    /** Button action */
+    setDefaultFilter(): void {
+        if (confirm("Are you sure you want this to be the default filter for everyone?")) { // TODO i18n
+            this.labbcatService.labbcat.updateSystemAttribute(
+                "defaultParticipantFilter",
+                window.location.search.replace(/^\?/,""),
+                (result, errors, messages) => {
+                    if (errors) {
+                        errors.forEach(m => this.messageService.error(m));
+                        this.loadingList = false;
+                    }
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                });
+        }
+    }
+
     /** Query string for selected participants */
     selectedParticipantsQueryString(participantIdParameter: string): string {
         if (this.selectedIds.length > 0) {

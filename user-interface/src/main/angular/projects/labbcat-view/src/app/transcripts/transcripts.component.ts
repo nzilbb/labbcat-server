@@ -579,6 +579,23 @@ export class TranscriptsComponent implements OnInit {
             + "search?"
             + this.selectedTranscriptsQueryString("participant_id");
     }
+
+    /** Button action */
+    setDefaultFilter(): void {
+        if (confirm("Are you sure you want this to be the default filter for everyone?")) { // TODO i18n
+            this.labbcatService.labbcat.updateSystemAttribute(
+                "defaultTranscriptFilter",
+                window.location.search.replace(/^\?/,""),
+                (result, errors, messages) => {
+                    if (errors) {
+                        errors.forEach(m => this.messageService.error(m));
+                        this.loadingList = false;
+                    }
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                });
+        }
+    }
+
     /** Query string for selected transcripts */
     selectedTranscriptsQueryString(transcriptIdParameter: string): string {
         let queryString = "";
@@ -615,7 +632,6 @@ export class TranscriptsComponent implements OnInit {
         }
         return queryString;
     }
-
 
     /** Query to append to href for links to other pages */
     queryString(): string {

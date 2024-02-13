@@ -20,6 +20,13 @@
       <tr class="controls">
         <td colSpan="{{filterLayers.length}}">
           <lib-button
+            *ngIf="!user || user.roles.includes('admin')"
+            img="filter.svg" icon="👥"
+            (press)="setDefaultFilter()"
+            i18n-label label="Set Default"
+            i18n-title title="Set as default filter for all users"
+            ></lib-button>
+          <lib-button
             *ngIf="user && user.roles.includes('edit') && !nextPage"
             action="create"
             (press)="newParticipant()"
