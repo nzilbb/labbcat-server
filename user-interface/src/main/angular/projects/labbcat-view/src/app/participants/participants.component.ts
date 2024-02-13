@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, Params } from '@angular/router';
 
 import { Response, Layer, User } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
@@ -50,8 +50,11 @@ export class ParticipantsComponent implements OnInit {
             this.route.queryParams.subscribe((params) => {
                 this.p = parseInt(params["p"]) || 1;
                 if (this.p < 1) this.p = 1;
-                if (params["participant"]) {
-                    this.filterValues["participant"] = [params["participant"]];
+                // set any layer parameter values to their corresponding filters
+                for (let layerId in params) {
+                    if (params[layerId]) { // there's a parameter for this filter layer
+                        this.filterValues[layerId] = params[layerId].split(",");
+                    }
                 }
                 if (params["to"]) {
                     this.nextPage = params["to"];
@@ -83,15 +86,15 @@ export class ParticipantsComponent implements OnInit {
                 this.filterLayers.push(schema.layers[schema.episodeLayerId]);
                 this.filterValues[schema.episodeLayerId] = [];
                 // and transcript count - we use a dummy layer to fool the layer-filter
-                schema.layers[" transcript-count"] = {
-                    id: " transcript-count", description: "Transcript count", // TODO i18n
+                schema.layers["--transcript-count"] = {
+                    id: "--transcript-count", description: "Transcript count", // TODO i18n
                     parentId: schema.participantLayerId,                    
                     alignment: 0,
                     peers: false, peersOverlap: false, parentIncludes: true, saturated: true,
                     type: "number", subtype: "integer"
                 }
-                this.filterLayers.push(schema.layers[" transcript-count"]);
-                this.filterValues[" transcript-count"] = [];
+                this.filterLayers.push(schema.layers["--transcript-count"]);
+                this.filterValues["--transcript-count"] = [];
                 // and by selected participant attributes
                 for (let layerId in schema.layers) {
                     const layer = schema.layers[layerId] as Layer;
@@ -160,7 +163,7 @@ export class ParticipantsComponent implements OnInit {
                 this.queryDescription += "ID matches "
                     +this.filterValues[this.schema.participantLayerId][0];
                 
-            } else if (layer.id == " transcript-count"
+            } else if (layer.id == "--transcript-count"
                 && this.filterValues[layer.id].length > 0) {
                 
                 // from?
@@ -326,6 +329,23 @@ export class ParticipantsComponent implements OnInit {
                 
             }
         } // next filter layer
+
+        // change the query string so the user can easily replicate this filter
+        const queryParams: Params = {};
+        if (this.nextPage) queryParams.to = this.nextPage; // pass through context parameters...
+        if (this.participantQuery) queryParams.participant_expression = this.participantQuery;
+        if (this.participantDescription) queryParams.participants = this.participantDescription;
+        for (let layer of this.filterLayers) { // for each filter layer
+            if (this.filterValues[layer.id].length > 0) { // there's at least one value
+                // add it to the query parameters
+                queryParams[layer.id] = this.filterValues[layer.id].join(",");
+            }
+        } // next filter layer
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams
+        });
+        
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
         // count matches
@@ -402,7 +422,7 @@ export class ParticipantsComponent implements OnInit {
                     "labels('"+this.esc(this.schema.participantLayerId)+"')"
                     +".includes('"+this.esc(id)+"')",
                     (count, errors, messages) => {
-                        this.attributeValues[id].annotations[" transcript-count"] = [{
+                        this.attributeValues[id].annotations["--transcript-count"] = [{
                             label : count
                         }];
                     });

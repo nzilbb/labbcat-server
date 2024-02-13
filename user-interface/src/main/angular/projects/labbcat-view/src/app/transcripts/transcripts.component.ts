@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, Inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, Params } from '@angular/router';
 
 import { SerializationDescriptor } from '../serialization-descriptor';
 import { Response, Layer, User } from 'labbcat-common';
@@ -48,6 +48,7 @@ export class TranscriptsComponent implements OnInit {
         private labbcatService: LabbcatService,
         private messageService: MessageService,
         private route: ActivatedRoute,
+        private router: Router,
         @Inject('environment') private environment
     ) {
         this.imagesLocation = this.environment.imagesLocation;
@@ -63,8 +64,11 @@ export class TranscriptsComponent implements OnInit {
             this.route.queryParams.subscribe((params) => {
                 this.p = parseInt(params["p"]) || 1;
                 if (this.p < 1) this.p = 1;
-                if (params["transcript"]) {
-                    this.filterValues["transcript"] = [params["transcript"]];
+                // set any layer parameter values to their corresponding filters
+                for (let layerId in params) {
+                    if (params[layerId]) { // there's a parameter for this filter layer
+                        this.filterValues[layerId] = params[layerId].split(",");
+                    }
                 }
                 if (params["participant_expression"]) {
                     this.participantQuery = params["participant_expression"];
@@ -332,6 +336,24 @@ export class TranscriptsComponent implements OnInit {
                 
             }
         } // next filter layer
+        // change the query string so the user can easily replicate this filter
+        const queryParams: Params = {};
+        if (this.nextPage) queryParams.to = this.nextPage; // pass through context parameters...
+        if (this.participantQuery) queryParams.participant_expression = this.participantQuery;
+        if (this.participantDescription) queryParams.participants = this.participantDescription;
+        if (this.transcriptQuery) queryParams.transcript_expression = this.transcriptQuery;
+        if (this.transcriptDescription) queryParams.transcripts = this.transcriptDescription;
+        for (let layer of this.filterLayers) { // for each filter layer
+            if (this.filterValues[layer.id].length > 0) { // there's at least one value
+                // add it to the query parameters
+                queryParams[layer.id] = this.filterValues[layer.id].join(",");
+            }
+        } // next filter layer
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams
+        });        
+
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
         console.log(`query end ${this.query}`);
