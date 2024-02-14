@@ -20,7 +20,7 @@
       <tr class="controls">
         <td colSpan="{{filterLayers.length}}">
           <lib-button
-            *ngIf="!user || user.roles.includes('admin')"
+            *ngIf="(!user || user.roles.includes('admin')) && !nextPage"
             img="filter.svg" icon="👥"
             (press)="setDefaultFilter()"
             i18n-label label="Set Default"
