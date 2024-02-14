@@ -167,7 +167,7 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
 
     deleteRow(row: Layer) {
         row._deleting = true;
-        if (confirm(`Are you sure you want to delete ${row.id}`)) {
+        if (confirm(`Are you sure you want to delete ${row.id}`)) { // TODO i18n
             this.labbcatService.labbcat.deleteLayer(
                 row.id, (model, errors, messages) => { 
                 row._deleting = false;
