@@ -1870,7 +1870,7 @@ public class SqlGraphStore implements GraphStore {
       graph.put("@series", rs.getString("series"));
       graph.put("@family_id", rs.getInt("family_id"));
       graph.setOrdinal(rs.getInt("family_sequence"));
-      graph.put("@offset_in_series", Double.valueOf(rs.getInt("family_offset")));
+      graph.put("@offset_in_series", rs.getDouble("family_offset"));
       if (rs.getString("divergent") != null) graph.put("@divergent", Boolean.TRUE);
 
       rs.close();
@@ -6660,7 +6660,7 @@ public class SqlGraphStore implements GraphStore {
             } else {
               familyId = rs.getInt("family_id");
               familySequence = rs.getInt("family_sequence");
-              familyOffset = rs.getInt("family_offset");
+              familyOffset = rs.getDouble("family_offset");
             }
             try { rs.close(); } catch(Exception exception) {}
             sql.close();
