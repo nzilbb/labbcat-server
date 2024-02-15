@@ -1067,7 +1067,8 @@ public class SqlGraphStore implements GraphStore {
           PreparedStatement sqlValue = getConnection().prepareStatement(
             "SELECT a.annotation_id, a.speaker_number, a.label, a.annotated_by, a.annotated_when"
             +" FROM annotation_participant a"
-            +" WHERE a.layer = ? and a.speaker_number = ?");
+            +" WHERE a.layer = ? and a.speaker_number = ?"
+            +" ORDER BY a.annotation_id");
           sqlValue.setString(2, speakerNumber);
                
           // load participant attributes
@@ -1109,9 +1110,11 @@ public class SqlGraphStore implements GraphStore {
                 "SELECT c.corpus_id, c.corpus_name"
                 +" FROM speaker_corpus sc"
                 +" INNER JOIN corpus c ON sc.corpus_id = c.corpus_id"
-                +" WHERE sc.speaker_number = ?");
+                +" WHERE sc.speaker_number = ?"
+                +" ORDER BY c.corpus_name");
               sqlCorpora.setString(1, speakerNumber);
               ResultSet rsCorpora = sqlCorpora.executeQuery();
+              int o = 1;
               while (rsCorpora.next()) {                     
                 Object[] annotationIdParts = {
                   layer.get("layer_id"), rsCorpora.getString("corpus_id")};
@@ -1129,14 +1132,15 @@ public class SqlGraphStore implements GraphStore {
                 +" FROM transcript t"
                 +" INNER JOIN transcript_speaker ts ON t.ag_id = ts.ag_id"
                 +" WHERE ts.speaker_number = ?"
-                +" ORDER BY t.family_sequence");
+                +" ORDER BY t.transcript_id, t.family_sequence");
               sqlTranscripts.setString(1, speakerNumber);
               ResultSet rsTranscripts = sqlTranscripts.executeQuery();
+              int o = 1;
               while (rsTranscripts.next()) {                     
                 Annotation transcript = new Annotation(
                   rsTranscripts.getString("transcript_id"), 
-                  rsTranscripts.getString("transcript_id"), layer.getId());
-                transcript.setOrdinal(rsTranscripts.getInt("family_sequence"));
+                  rsTranscripts.getString("transcript_id"), layer.getId())
+                  .setOrdinal(o++);
                 participant.addAnnotation(transcript);
               } // next corpus
               rsTranscripts.close();
@@ -1152,12 +1156,14 @@ public class SqlGraphStore implements GraphStore {
                 +" ORDER BY e.name");
               sqlEpisodes.setString(1, speakerNumber);
               ResultSet rsEpisodes = sqlEpisodes.executeQuery();
+              int o = 1;
               while (rsEpisodes.next()) {                     
                 Object[] annotationIdParts = {
                   layer.get("layer_id"), rsEpisodes.getString("family_id")};
                 Annotation episode = new Annotation(
                   fmtMetaAnnotationId.format(annotationIdParts), 
-                  rsEpisodes.getString("name"), layer.getId());
+                  rsEpisodes.getString("name"), layer.getId())
+                  .setOrdinal(o++);
                 participant.addAnnotation(episode);
               } // next corpus
               rsEpisodes.close();
