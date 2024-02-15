@@ -6624,15 +6624,14 @@ public class SqlGraphStore implements GraphStore {
     try {
       if (annotation.getLayerId().equals("episode")) {
         switch (annotation.getChange()) {
-          case Create:
-          case Update: {
+          case Create: {
             int familyId = -1;
             int familySequence = 1;
             double familyOffset = 0.0;
             PreparedStatement sql = getConnection().prepareStatement(
               "SELECT transcript_family.family_id,"
               + " COALESCE(MAX(family_sequence) + 1, 1) AS family_sequence,"
-              + " COALESCE(MAX(anchor.offset), 0.0) AS family_offset"
+              + " COALESCE(MAX(transcript.family_offset + anchor.offset), 0.0) AS family_offset"
               + " FROM transcript_family"
               + " LEFT OUTER JOIN transcript ON transcript.family_id = transcript_family.family_id"
               + " LEFT OUTER JOIN anchor ON anchor.ag_id = transcript.ag_id"
