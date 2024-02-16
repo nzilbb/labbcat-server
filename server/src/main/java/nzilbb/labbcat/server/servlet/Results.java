@@ -1,5 +1,5 @@
 //
-// Copyright 2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2023-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -94,6 +94,8 @@ import org.apache.commons.csv.CSVPrinter;
  *  <li><i>csv_option</i> - (Optional) Additional fields to include in the output. This
  *      parameter is specified multiple times for multiple values, which can include:
  *      <ul>
+ *       <li><q>labbcat_title</q> - the title of this LaBB-CAT instance </li>
+ *       <li><q>labbcat_version</q> - the current version of this LaBB-CAT instance </li>
  *       <li><q>collection_name</q> - the name/description of the search </li>
  *       <li><q>result_number</q> - the ordinal of each result/match </li>
  *       <li><q>series_offset</q> - how far through the episode, in seconds, this
@@ -156,6 +158,9 @@ import org.apache.commons.csv.CSVPrinter;
 @WebServlet({"/api/results"})
 public class Results extends LabbcatServlet { // TODO unit test
   // TODO add support for annotation anchoring
+
+  /** LaBB-CAT Title, in case it's required */
+  private String labbcatTitle = null;
   
   /**
    * Constructor
@@ -446,6 +451,11 @@ public class Results extends LabbcatServlet { // TODO unit test
               "Content-Disposition", "attachment; filename=" + fileName.toString());            
           }
 
+          if (options.contains("labbcat_title") && labbcatTitle == null) {
+            // they want the LaBB-CAT Title, so we need to fetch it
+            labbcatTitle = GetSystemAttribute("title", connection);
+          }
+
           outputStart(
             jsonOut, csvOut, searchName, results.size(), multiWordMatches, options, layers, csvLayers, schema);
           try {
@@ -592,6 +602,8 @@ public class Results extends LabbcatServlet { // TODO unit test
     throws IOException {
     if (csvOut != null) {
       // Send column headers
+      if (options.contains("labbcat_title")) csvOut.print("Title");
+      if (options.contains("labbcat_version")) csvOut.print("Version");
       if (options.contains("collection_name")) csvOut.print("SearchName");
       if (options.contains("result_number")) csvOut.print("Number");
       if (layers.contains(schema.getRoot().getId())) csvOut.print("Transcript");
@@ -705,6 +717,8 @@ public class Results extends LabbcatServlet { // TODO unit test
     if (csvOut != null) {
       // start new record
       csvOut.println();
+      if (options.contains("labbcat_title")) csvOut.print(labbcatTitle);
+      if (options.contains("labbcat_version")) csvOut.print(version);
       if (options.contains("collection_name")) csvOut.print(searchName);
       if (options.contains("result_number")) {
         csvOut.print(

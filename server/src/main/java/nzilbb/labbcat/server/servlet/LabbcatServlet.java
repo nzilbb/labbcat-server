@@ -225,7 +225,7 @@ public class LabbcatServlet extends HttpServlet {
       RequiredRole requiredRole = getClass().getAnnotation(RequiredRole.class);
       if (requiredRole != null) {
          try {
-            if (!isUserInRole(requiredRole.value(), request, db)) {
+            if (!IsUserInRole(requiredRole.value(), request, db)) {
                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                return false;
             } else {
@@ -257,7 +257,7 @@ public class LabbcatServlet extends HttpServlet {
     * @param db A connected database connection.
     * @return true if the user is in the given role, false otherwise.
     */
-   public static boolean isUserInRole(String role, HttpServletRequest request, Connection db)
+   public static boolean IsUserInRole(String role, HttpServletRequest request, Connection db)
       throws SQLException {
       // load user groups
       if (request.getSession().getAttribute("security") == null) {
@@ -303,7 +303,30 @@ public class LabbcatServlet extends HttpServlet {
       } // security not set yet, must be logging on
          
       return request.getSession().getAttribute("group_" + role) != null;
-   } // end of isUserInRole()
+   } // end of IsUserInRole()
+  
+   /**
+    * Gets the value of the given system attribute.
+    * @param name
+    * @param db
+    * @return Value for the given system attribute, or null if it's not set.
+    * @throws SQLException
+    */
+   public static String GetSystemAttribute(String name, Connection db) throws SQLException {
+     PreparedStatement sql = db.prepareStatement(
+       "SELECT value FROM system_attribute WHERE name = ?");
+     sql.setString(1, name);
+     ResultSet rs = sql.executeQuery();
+     try {
+       if (rs.next()) {
+         return rs.getString(1);
+       }
+       return null;
+     } finally {
+       rs.close();
+       sql.close();
+     }
+   } // end of getSystemAttribute()
    
    /**
     * Creates a JSON object representing a success result, with the given model.
