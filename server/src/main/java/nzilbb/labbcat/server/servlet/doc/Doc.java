@@ -744,7 +744,7 @@ public class Doc extends LabbcatServlet {
     try {
       SqlGraphStoreAdministration store = getStore(request);
       try {
-        return isUserInRole("admin", request, store.getConnection());
+        return IsUserInRole("admin", request, store.getConnection());
       } finally {
         cacheStore(store);
       }

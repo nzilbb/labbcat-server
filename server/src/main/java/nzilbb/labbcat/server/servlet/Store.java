@@ -297,7 +297,7 @@ public class Store extends StoreQuery {
   protected JsonObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
     throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
     try { // check they have edit permission
-      if (!isUserInRole("edit", request, store.getConnection())) {
+      if (!IsUserInRole("edit", request, store.getConnection())) {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         return failureResult(request, "User has no edit permission.");
       }

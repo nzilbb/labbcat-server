@@ -173,7 +173,7 @@ public class Utterances extends LabbcatServlet { // TODO unit test
       if (request.getRemoteUser() != null) {	
         task.setWho(request.getRemoteUser());
         // admin users have access to everything
-        if (!isUserInRole("admin", request, task.getStore().getConnection())
+        if (!IsUserInRole("admin", request, task.getStore().getConnection())
             // if they're using using access permissions in general
             && task.getStore().getPermissionsSpecified()) {
           // other users may have restricted access to some things
