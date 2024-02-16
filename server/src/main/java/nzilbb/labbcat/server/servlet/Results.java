@@ -253,6 +253,8 @@ public class Results extends LabbcatServlet { // TODO unit test
       final LinkedHashSet<String> options = new LinkedHashSet<String>();
       if (csv_option != null) for (String o : csv_option) options.add(o);
       if (options.size() == 0) { // default options
+        options.add("labbcat_title");
+        options.add("labbcat_version");
         options.add("collection_name");
         options.add("result_number");
         options.add("line_time");
@@ -689,6 +691,8 @@ public class Results extends LabbcatServlet { // TODO unit test
       // set initial structure of model
       jsonOut.write("name", searchName);
       jsonOut.write("matchCount", matchCount);
+      if (options.contains("labbcat_title")) jsonOut.write("labbcatTitle", labbcatTitle);
+      if (options.contains("labbcat_version")) jsonOut.write("labbcatVersion", version);
       jsonOut.writeStartArray("matches");      
     }
   } // end of startResults()
