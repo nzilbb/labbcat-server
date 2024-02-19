@@ -2012,7 +2012,8 @@ public class OneQuerySearch extends SearchTask {
       +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_UTTERANCE + " line" 
       +" ON line.annotation_id = word.utterance_annotation_id"
       // get speaker_number from line, optimised orth SQL doesn't include it
-      +" INNER JOIN speaker ON CAST(line.label AS SIGNED) = speaker.speaker_number"
+      +" INNER JOIN speaker ON"
+      +" line.label REGEXP '^[0-9]+$' AND CAST(line.label AS SIGNED) = speaker.speaker_number"
       +" WHERE unsorted.search_id = ? AND complete = 0"
       +" ORDER BY speaker.name, transcript.transcript_id, unsorted.match_id");
     sqlPatternMatch.setLong(1, ((SqlSearchResults)results).getId());      
