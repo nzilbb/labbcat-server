@@ -7740,10 +7740,15 @@ public class SqlGraphStore implements GraphStore {
 
       // determine the destination path
       MediaFile mediaFile = new MediaFile(source, trackSuffix);
-      File mediaDir = new File(episodeDir, mediaFile.getExtension());
+      File mediaDir = new File(
+        episodeDir, mediaFile.getExtension()
+        // downcase media file extensions - i.e. .WAV -> .wav
+        .toLowerCase());
       if (!mediaDir.exists()) mediaDir.mkdir();
       String destinationName = graph.getId().replaceAll("\\.[^.]*$","") 
-        + trackSuffix + "." + mediaFile.getExtension();
+        + trackSuffix + "." + mediaFile.getExtension()
+        // downcase media file extensions - i.e. .WAV -> .wav
+        .toLowerCase();
       File destination = new File(mediaDir, destinationName);
 	 
       // backup old file if it exists
