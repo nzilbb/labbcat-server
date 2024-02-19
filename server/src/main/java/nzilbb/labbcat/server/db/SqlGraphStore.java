@@ -8703,8 +8703,12 @@ public class SqlGraphStore implements GraphStore {
         if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
           annotator.setRdbConnectionFactory(db);
         }
-            
-        descriptors.put(annotator.getAnnotatorId(), descriptor);
+        if (!descriptors.containsKey(annotator.getAnnotatorId()) // descriptor yet
+            // or this one has a higher version than the one we already found
+            || descriptor.compareTo(descriptors.get(annotator.getAnnotatorId())) > 0) {
+          // add the descriptor to the list
+          descriptors.put(annotator.getAnnotatorId(), descriptor);
+        }
       } catch(Exception exception) {
       }
     } // next possible jar
@@ -8738,25 +8742,13 @@ public class SqlGraphStore implements GraphStore {
           return !f.isDirectory() && f.getName().startsWith(annotatorId + "-")
             && f.getName().endsWith(".jar");
         }});
-    // ensure that if there's more than one, the highest version is the one we choose
-    Arrays.sort( // sort files by version...
-      possibleJars,
-      new Comparator<File>() { // use semantic versioning comparator
-        SemanticVersionComparator versionComparator = new SemanticVersionComparator();
-        public int compare(File jar1, File jar2) {
-          return versionComparator.compare(
-            jar1.getName().replace("^"+annotatorId+"-(.*)\\.jar$", "$1"),
-            jar2.getName().replace("^"+annotatorId+"-(.*)\\.jar$", "$1"));
-        }
-      }.reversed() // return highest version first
-      );
+    AnnotatorDescriptor finalDescriptor = null;
     for (File jar : possibleJars) {
-      System.out.println("jar " + jar.getName());
       try {
         AnnotatorDescriptor descriptor = new AnnotatorDescriptor(jar);
         Annotator annotator = descriptor.getInstance();
         if (annotator.getAnnotatorId().equals(annotatorId)) {
-
+          
           // give the annotator the resources it needs
           annotator.setSchema(getSchema());
                
@@ -8773,15 +8765,18 @@ public class SqlGraphStore implements GraphStore {
           if (annotator.getClass().isAnnotationPresent(UsesGraphStore.class)) {
             annotator.setStore(this);
           }
-               
-          return descriptor;
+          
+          if (finalDescriptor == null || finalDescriptor.compareTo(descriptor.getVersion()) < 0) {
+            System.out.println("Winner " + descriptor.getVersion() + " ("+jar.getName()+")");
+            finalDescriptor = descriptor;
+          }
         }
       } catch(Exception exception) {
         System.err.println("getAnnotatorDescriptor " + annotatorId + ": " + exception);
         exception.printStackTrace(System.err);
       }
     } // next possible jar
-    return null;
+    return finalDescriptor;
   } // end of getAnnotatorDescriptor()
 
   /**
