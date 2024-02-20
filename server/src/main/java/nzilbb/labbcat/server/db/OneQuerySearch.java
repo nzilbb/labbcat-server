@@ -719,7 +719,7 @@ public class OneQuerySearch extends SearchTask {
     // access restrictions?
     String strAccessWhere = "";
     if (restrictByUser != null) {
-      strAccessWhere = " AND EXISTS (SELECT * FROM role"
+      strAccessWhere = " AND (EXISTS (SELECT * FROM role"
         + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
         + " INNER JOIN annotation_transcript access_attribute" 
         + " ON access_attribute.layer = role_permission.attribute_name" 
@@ -731,7 +731,7 @@ public class OneQuerySearch extends SearchTask {
         + " AND role_permission.attribute_name = 'corpus'" 
         + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
         + " WHERE transcript.corpus_name REGEXP role_permission.value_pattern"
-        + " AND user_id = ?)";
+        + " AND user_id = ?))";
       if (sSqlExtraJoinsFirst.indexOf(sSqlTranscriptJoin) < 0) {
         sSqlExtraJoinsFirst.append(sSqlTranscriptJoin);
       }
@@ -1519,7 +1519,7 @@ public class OneQuerySearch extends SearchTask {
       q.append(" AND token_"+c+".ordinal_in_turn = token_"+(c-1)+".ordinal_in_turn + 1");
     }
     if (restrictByUser != null) {
-      q.append(sSqlTranscriptJoin);
+      q.append(sSqlTranscriptJoin.replace("turn.ag_id", "token_0.ag_id"));
     } // filtering by role
     int c = 0;
     for (Column column : matrix.getColumns()) {
@@ -1551,19 +1551,19 @@ public class OneQuerySearch extends SearchTask {
       c++;
     } // next column
     if (restrictByUser != null) {
-      q.append(" AND EXISTS (SELECT * FROM role")
+      q.append(" AND (EXISTS (SELECT * FROM role")
         .append(" INNER JOIN role_permission ON role.role_id = role_permission.role_id")
         .append(" INNER JOIN annotation_transcript access_attribute")
         .append(" ON access_attribute.layer = role_permission.attribute_name")
         .append(" AND access_attribute.label REGEXP role_permission.value_pattern")
         .append(" AND role_permission.entity REGEXP '.*t.*'") // transcript access
-        .append(" WHERE user_id = ? AND access_attribute.ag_id = turn.ag_id)")
+        .append(" WHERE user_id = ? AND access_attribute.ag_id = transcript.ag_id)")
         .append(" OR EXISTS (SELECT * FROM role")
         .append(" INNER JOIN role_permission ON role.role_id = role_permission.role_id")
         .append(" AND role_permission.attribute_name = 'corpus'")
         .append(" AND role_permission.entity REGEXP '.*t.*'") // transcript access
         .append(" WHERE transcript.corpus_name REGEXP role_permission.value_pattern")
-        .append(" AND user_id = ?)");
+        .append(" AND user_id = ?))");
     } // filtering by role
     q.append(" ORDER BY token_0.turn_annotation_id, token_0.ordinal_in_turn");
     
