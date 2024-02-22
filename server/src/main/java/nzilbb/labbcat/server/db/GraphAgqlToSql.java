@@ -264,11 +264,22 @@ public class GraphAgqlToSql {
             } else {
               String attribute = attribute(layerId);
               if ("transcript".equals(layer.get("class_id"))) {
-                conditions.push(
-                  "(SELECT DISTINCT label"
-                  +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                  +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                  +" AND annotation_transcript.ag_id = transcript.ag_id)");
+                if ("language".equals(attribute)) { // defaults to corpus.language
+                  conditions.push(
+                    "(SELECT DISTINCT"
+                    +" CASE COALESCE(label,'') WHEN '' THEN corpus_language ELSE label END"
+                    +" FROM corpus"
+                    +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                    +" ON annotation_transcript.layer = 'language'"
+                    +" AND annotation_transcript.ag_id = transcript.ag_id"
+                    +" WHERE transcript.corpus_name = corpus.corpus_name)");
+                } else { // any other transcript attribute
+                  conditions.push(
+                    "(SELECT DISTINCT label"
+                    +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                    +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                    +" AND annotation_transcript.ag_id = transcript.ag_id)");
+                }
               } else if ("speaker".equals(layer.get("class_id"))) {
                 conditions.push(
                   "(SELECT DISTINCT label"

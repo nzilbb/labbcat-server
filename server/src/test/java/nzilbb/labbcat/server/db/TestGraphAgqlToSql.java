@@ -336,6 +336,28 @@ public class TestGraphAgqlToSql {
     assertEquals("Parameter count", 0, q.parameters.size());
   }
 
+  /** Ensure that transcript_language defaults to the corpus language, when using labels() */
+  @Test public void languageLabels() throws AGQLException {
+    GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
+    GraphAgqlToSql.Query q = transformer.sqlFor(
+      "labels('transcript_language').includes('en')",
+      "transcript.transcript_id", null, null, null);
+    assertEquals("Transcript attribute - SQL",
+                 "SELECT transcript.transcript_id FROM transcript"
+                 +" WHERE 'en' IN"
+                 +" (SELECT DISTINCT"
+                 +" CASE COALESCE(label,'') WHEN '' THEN corpus_language ELSE label END"
+                 +" FROM corpus"
+                 +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                 +" ON annotation_transcript.layer = 'language'"
+                 +" AND annotation_transcript.ag_id = transcript.ag_id"
+                 +" WHERE transcript.corpus_name = corpus.corpus_name)"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+
+  }
+
   @Test public void labels() throws AGQLException {
     GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
     GraphAgqlToSql.Query q = transformer.sqlFor(
