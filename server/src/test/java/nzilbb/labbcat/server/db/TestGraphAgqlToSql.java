@@ -450,7 +450,8 @@ public class TestGraphAgqlToSql {
                  +" (SELECT label"
                  +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" WHERE annotation_transcript.layer = 'scribe'"
-                 +" AND annotation_transcript.ag_id = transcript.ag_id ORDER BY annotation_id"
+                 +" AND annotation_transcript.ag_id = transcript.ag_id"
+                 +" ORDER BY annotation_id"
                  +" LIMIT 1) = 'someone'"
                  +" ORDER BY transcript.transcript_id",
                  q.sql);
@@ -503,6 +504,28 @@ public class TestGraphAgqlToSql {
     assertEquals("Parameter count", 0, q.parameters.size());
   }
 
+  /** Ensure that trascript_language defaults to corpus.language when using label attribute. */
+  @Test public void languageAttributeLabel() throws AGQLException {
+    GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
+    GraphAgqlToSql.Query q = transformer.sqlFor(
+      "first('transcript_language').label == 'en'",
+      "transcript.transcript_id", null, null, null);
+    assertEquals("Transcript language inherits from corpus - SQL",
+                 "SELECT transcript.transcript_id FROM transcript"
+                 +" WHERE"
+                 +" (SELECT CASE COALESCE(label,'') WHEN '' THEN corpus_language ELSE label END"
+                 +" FROM corpus"
+                 +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                 +" ON annotation_transcript.layer = 'language'"
+                 +" AND annotation_transcript.ag_id = transcript.ag_id"
+                 +" WHERE transcript.corpus_name = corpus.corpus_name"
+                 +" ORDER BY annotation_id"
+                 +" LIMIT 1) = 'en'"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+  }
+  
   @Test public void listLength() throws AGQLException {
     GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
     GraphAgqlToSql.Query q = transformer.sqlFor(

@@ -176,12 +176,24 @@ public class GraphAgqlToSql {
                 } else {
                   String attribute = attribute(layerId);
                   if ("transcript".equals(layer.get("class_id"))) {
-                    conditions.push(
-                      "(SELECT label"
-                      +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
-                      +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
-                      +" AND annotation_transcript.ag_id = transcript.ag_id"
-                      +" ORDER BY annotation_id LIMIT 1)");
+                    if ("language".equals(attribute)) { // defaults to corpus.language
+                      conditions.push(
+                        "(SELECT"
+                        +" CASE COALESCE(label,'') WHEN '' THEN corpus_language ELSE label END"
+                        +" FROM corpus"
+                        +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                        +" ON annotation_transcript.layer = 'language'"
+                        +" AND annotation_transcript.ag_id = transcript.ag_id"
+                        +" WHERE transcript.corpus_name = corpus.corpus_name"
+                        +" ORDER BY annotation_id LIMIT 1)");
+                    } else { // any other transcript attribute
+                      conditions.push(
+                        "(SELECT label"
+                        +" FROM annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                        +" WHERE annotation_transcript.layer = '"+escape(attribute)+"'"
+                        +" AND annotation_transcript.ag_id = transcript.ag_id"
+                        +" ORDER BY annotation_id LIMIT 1)");
+                    }
                   } else if ("speaker".equals(layer.get("class_id"))) { // participant attribute
                     conditions.push(
                       "(SELECT label"
