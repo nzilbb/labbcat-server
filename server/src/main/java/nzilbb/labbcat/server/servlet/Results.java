@@ -891,9 +891,13 @@ public class Results extends LabbcatServlet { // TODO unit test
         jsonOut, csvOut, "URL",
         store.getId()
         + "transcript?transcript=" + URLEncoder.encode(t.getLabel(), "UTF-8")
-        + "#" + Optional.ofNullable(result.getTargetAnnotationUid())
-        .orElse(Optional.ofNullable(result.getDefiningAnnotationUid())
-                .orElse("")));
+        // skip to the first word 
+        + "#" + Optional.ofNullable(result.getMatchAnnotationUids().get("0"))
+        // or else the target
+        .orElse(Optional.ofNullable(result.getTargetAnnotationUid())
+                // or else the utterance
+                .orElse(Optional.ofNullable(result.getDefiningAnnotationUid()) 
+                        .orElse(""))));
     }
     if (options.contains("result_text")){
       outputMatchAttribute(jsonOut, csvOut, "BeforeMatch", beforeMatch.toString());
