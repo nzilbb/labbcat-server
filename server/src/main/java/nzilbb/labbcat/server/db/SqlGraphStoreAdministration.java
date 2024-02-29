@@ -721,7 +721,7 @@ public class SqlGraphStoreAdministration
           sql.setInt(6, display_order);
           sql.setInt(7, Optional.of((String)layer.get("searchable")).orElse("0").equals("0")?0:1);
           sql.setInt(8, Optional.of((String)layer.get("access")).orElse("0").equals("0")?0:1);
-          sql.setInt(9, layer.getPeers()?0:1);
+          sql.setInt(9, layer.getPeers()?1:0);
           sql.setString(10, (String)layer.get("class_id"));
           sql.setString(11, (String)layer.get("attribute"));
           sql.executeUpdate();
