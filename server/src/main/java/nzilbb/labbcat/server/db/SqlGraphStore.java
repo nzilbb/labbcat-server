@@ -4890,8 +4890,13 @@ public class SqlGraphStore implements GraphStore {
           layer = getLayer("corpus");
           graph.addLayer(layer);
         }
-        if (graph.first("corpus") == null) { // set to the first value
+        // if corpus isn't set, set to the first corpus
+        if (graph.first("corpus") == null) { 
           graph.createTag(graph, layer.getId(), layer.getValidLabels().keySet().iterator().next())
+            .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        } else if (graph.first("corpus").getLabel().length() == 0) {
+          graph.first("corpus")
+            .setLabel(layer.getValidLabels().keySet().iterator().next())
             .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
         }
 
@@ -4900,12 +4905,14 @@ public class SqlGraphStore implements GraphStore {
           layer = getLayer("episode");
           graph.addLayer(layer);
         }
+        // if episode isn't set, set to the graph name without its file extension
         if (graph.first("episode") == null) { // set to the graph name, without the extension
           graph.createTag(graph, layer.getId(), graph.getId().replaceAll("\\.[^.]*$",""))
             .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
         } else if (graph.first("episode").getLabel().length() == 0) {
-          graph.first("corpus").setLabel(graph.getId().replaceAll("\\.[^.]*$",""));
-          graph.first("corpus").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+          graph.first("episode")
+            .setLabel(graph.getId().replaceAll("\\.[^.]*$",""))
+            .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
         }
 
         layer = graph.getLayer("transcript_type");
@@ -4913,8 +4920,13 @@ public class SqlGraphStore implements GraphStore {
           layer = getLayer("transcript_type");
           graph.addLayer(layer);
         }
-        if (graph.first("transcript_type") == null) { // set to the first value
+        // if transcript_type is not set, set it to the first option
+        if (graph.first("transcript_type") == null) {
           graph.createTag(graph, layer.getId(), layer.getValidLabels().keySet().iterator().next())
+            .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        } else if (graph.first("transcript_type").getLabel().length() == 0) {
+          graph.first("transcript_type")
+            .setLabel(layer.getValidLabels().keySet().iterator().next())
             .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
         }
       }
