@@ -90,7 +90,7 @@ public class Files extends LabbcatServlet { // TODO unit test
 
     String name = request.getParameter("name");
     if (name == null || name.trim().length() == 0) {
-      if (mimeType == null) {
+      if (mimeType == null || mimeType.length() == 0) {
         name = "transcripts";
       } else {
         name = "media";
