@@ -152,7 +152,9 @@ export class ParticipantComponent extends EditComponent implements OnInit {
                     console.error("Invalid participant ID");
                     this.messageService.error("Invalid participant ID"); // TODO i18n
                 } else { // valid participant
-                    // ensure all attributes have at lease one annotation
+                    // it might be a brand new participant with no attributes set
+                    if (!participant.annotations) participant.annotations = {};
+                    // ensure all attributes have at least one annotation
                     for (let layerId of this.attributes) {
                         if (this.isMultiValue(layerId)) {
                             if (!participant.annotations[layerId]) {

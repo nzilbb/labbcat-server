@@ -450,8 +450,15 @@ export class ParticipantsComponent implements OnInit {
     newParticipant(): void {
         var name = prompt(
             "Please enter the new participant's name\nor leave this blank to generate a name automatically", ""); // TODO i18n
-        if (name != null) { 
-            window.location.href = this.baseUrl + "edit/participants/new?newSpeakerName="+name;
+        if (name != null) {
+            this.labbcatService.labbcat.saveParticipant(
+                name, name, {}, (nothing, errors, messages) => {
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    if (!errors) {
+                        window.location.href = `${this.baseUrl}edit/participant?id=${name}`;
+                    }
+                });
         }
     }
     
