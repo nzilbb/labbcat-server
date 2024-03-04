@@ -59,10 +59,10 @@ use `ng serve labbcat-view` or `ng serve labbcat-edit` (respectively)
 
 The user interface components are contain `i18n` attributes for resources that require
 translation to other languages. If changes are made, resource files can be generated for
-translation by executing:
+translation by executing the following shell script:
 
 ```
-ant i18n
+./i18n.sh
 ```
 
 This generates localization resources for all three app projects, and merges them
@@ -80,15 +80,20 @@ To localize to a new language/variety:
 ### Deployment into LaBB-CAT
 
 To deploy a production version of the user interface into a local installation of
-LaBB-CAT (correct the tomcat paths below to suit your environment):
+LaBB-CAT, execute the following shell script:
 
-1. `mvn package -pl :nzilbb.labbcat.user-interface`
-2. `rm -r /var/lib/tomcat9/webapps/labbcat/user-interface/*`
-3. `cp -r user-interface/target/labbcat-view/* /var/lib/tomcat9/webapps/labbcat/user-interface/`
-4. `rm -r /var/lib/tomcat9/webapps/labbcat/edit/user-interface/*`
-5. `cp -r user-interface/target/labbcat-edit/* /var/lib/tomcat9/webapps/labbcat/edit/user-interface/`
-6. `rm -r /var/lib/tomcat9/webapps/labbcat/admin/user-interface/*`
-7. `cp -r user-interface/target/labbcat-admin/* /var/lib/tomcat9/webapps/labbcat/admin/user-interface/`
+```
+./deploy-user-interface.sh
+```
+
+The shell script assumed the location of the local LaBB-CAT instance is:\
+`/var/lib/tomcat9/webapps/labbcat`
+
+You can specify a different location as a command-line parameter, e.g.:
+
+```
+./deploy-user-interface.sh /opt/tomcat/webapps/labbcat
+```
 
 ## Wysiwiki
 
