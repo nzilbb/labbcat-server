@@ -593,6 +593,40 @@
         </context-group>
         <note priority="1" from="description">csv options title</note>
       </trans-unit>
+<trans-unit id="9160b4eab9ecae17a3daf1931bbce2e25ec39f84" datatype="html">
+        <source>Title of this LaBB-CAT instance</source>
+        <target state="translated">Título de esta instancia de LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="ddc6ec18c3c5ff5e74965468ba9cafdeb1153665" datatype="html">
+        <source>LaBB-CAT title</source>
+        <target state="translated">Título LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">114</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+<trans-unit id="f252962a2b861470fc155e347aa8efe816a01f02" datatype="html">
+        <source>Version of this LaBB-CAT instance</source>
+        <target state="translated">Versión de esta instancia de LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="eae2bba171174e8fd2e7425a3a7194f381704cce" datatype="html">
+        <source>LaBB-CAT version</source>
+        <target state="translated">Versión LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">118</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
       <trans-unit id="bd4264b6e556feaef24a88f5616f5fdfd538dd5c" datatype="html">
         <source>Identifier for this search</source>
         <target state="translated">Identificador para esta búsqueda</target>
@@ -973,6 +1007,30 @@
           <context context-type="linenumber">8</context>
         </context-group>
         <note priority="1" from="description">Match count: {n}</note>
+      </trans-unit>
+<trans-unit id="0c076d55a3ec5fc88307ce93fed4c5f73f1b28b3" datatype="html">
+        <source>Set Default</source>
+        <target state="translated">Establecer por defecto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3a31e280e1f146dc078c0a8dca6367f5507cb489" datatype="html">
+        <source>Set this as the default filter for all users</source>
+        <target state="translated">Establecer este filtro como predeterminado para todos los usuarios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="ca174fdef187e9bf2ff742a51a91407972da77d1" datatype="html">
         <source>New record</source>
