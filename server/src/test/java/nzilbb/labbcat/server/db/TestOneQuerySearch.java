@@ -216,7 +216,7 @@ public class TestOneQuerySearch {
       +" /* participants */ "
       +" /* main participant clause */"
       +"  /* access clause */ "
-      +" AND EXISTS (SELECT * FROM role"
+      +" AND (EXISTS (SELECT * FROM role"
       +" INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
       +" INNER JOIN annotation_transcript access_attribute" 
       +" ON access_attribute.layer = role_permission.attribute_name" 
@@ -228,7 +228,7 @@ public class TestOneQuerySearch {
       +" AND role_permission.attribute_name = 'corpus'" 
       +" AND role_permission.entity REGEXP '.*t.*'" // transcript access
       +" WHERE transcript.corpus_name REGEXP role_permission.value_pattern"
-      +" AND user_id = ?)"
+      +" AND user_id = ?))"
       +" /* first column: */"
       +" /* border conditions */"
       +"  /* search criteria subqueries */"
