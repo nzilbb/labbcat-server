@@ -179,8 +179,12 @@ public class EditAnnotatorExtWebApp extends LabbcatServlet {
 
         final Annotator annotator = descriptor.getInstance();
         InputStream stream = null;
-            
-        response.setContentType(StandAloneWebApp.ContentTypeForName(resource));
+
+        String contentType = StandAloneWebApp.ContentTypeForName(resource);
+        if (contentType.startsWith("text") || contentType.equals("application/json")) {
+          contentType += ";charset=UTF-8";
+        }          
+        response.setContentType(contentType);
         int status = HttpServletResponse.SC_OK;
             
         // check for getSchema call
