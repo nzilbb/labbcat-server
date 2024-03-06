@@ -669,34 +669,34 @@
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
-      <trans-unit id="05ed4228cf8b37694e1c888acf732150e3f04125" datatype="html">
-        <source>Start time of the transcript relative to the beginning of the whole series</source>
-        <target state="translated">Segundo en que empezó esta transcripción, a partir del principio de la serie entera</target>
+      <trans-unit id="04ab4d48cd14a48197944b051a7e12de8ba465d5" datatype="html">
+        <source>Start time of the transcript relative to the beginning of the whole episode</source>
+        <target state="translated">Segundo en que empezó esta transcripción, a partir del principio del episodio entero</target>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
           <context context-type="linenumber">119</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3d9556a1041326aec23a7d6757603c5dc6c2ca3f" datatype="html">
-        <source>Series offset</source>
-        <target state="translated">Princípio en Serie</target>
+      <trans-unit id="9215a629ebfe36a29a99b48ee89dcc9d5f980818" datatype="html">
+        <source>Episode offset</source>
+        <target state="translated">Princípio en Episodio</target>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
           <context context-type="linenumber">121</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
-      <trans-unit id="7530dd467fbe04d1b78ff7dacf786ab7f077d362" datatype="html">
-        <source>End time of the transcript relative to the beginning of the whole series</source>
-        <target state="translated">Segundo en que terminó esta transcripción, a partir del principio de la serie entera</target>
+      <trans-unit id="38464935358a30fc0b37602a44cf9ac8e4c90620" datatype="html">
+        <source>End time of the transcript relative to the beginning of the whole episode</source>
+        <target state="translated">Segundo en que terminó esta transcripción, a partir del principio del episodio entero</target>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
           <context context-type="linenumber">123</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="d3bdf6d4e710737be5db50cfb4f2f6b8b1949d6e" datatype="html">
-        <source>Series length</source>
-        <target state="translated">Final en Serie</target>
+      <trans-unit id="1f44ad1872571aba96f07fcfb1b0d68dd6c9ea0a" datatype="html">
+        <source>Episode length</source>
+        <target state="translated">Final en Episodio</target>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
           <context context-type="linenumber">125</context>
