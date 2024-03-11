@@ -1,0 +1,10 @@
+.item label {
+    display: inline-block;
+}
+#partcipant-ids {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: 30vh;
+    overflow: scroll;
+}

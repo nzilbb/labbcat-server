@@ -13,6 +13,8 @@ import { PraatComponent } from './praat/praat.component';
 import { TranscriptsComponent } from './transcripts/transcripts.component';
 import { ParticipantComponent } from './participant/participant.component';
 import { TranscriptAttributesComponent } from './transcript-attributes/transcript-attributes.component';
+import { SearchComponent } from './search/search.component';
+import { SearchMatrixComponent } from './search-matrix/search-matrix.component';
 
 @NgModule({
   declarations: [
@@ -22,13 +24,16 @@ import { TranscriptAttributesComponent } from './transcript-attributes/transcrip
       PraatComponent,
       TranscriptsComponent,
       ParticipantComponent,
-      TranscriptAttributesComponent
+      TranscriptAttributesComponent,
+      SearchComponent,
+      SearchMatrixComponent
   ],
   imports: [
       BrowserModule,
       HttpClientModule,
       RouterModule.forRoot([
           { path: 'about', component: AboutComponent },
+          { path: 'search', component: SearchComponent },
           { path: 'matches', component: MatchesComponent },
           { path: 'task', component: TaskComponent },
           { path: 'praat', component: PraatComponent },

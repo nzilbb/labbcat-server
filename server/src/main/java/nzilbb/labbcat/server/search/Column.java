@@ -38,18 +38,27 @@ public class Column implements CloneableBean {
   
   /**
    * The layer patterns that match a word token. Keys are layer IDs.
+   * <p> Generally there will be one {@link LayerMatch} per layer in a column, but for
+   * word-internal segment context matching, there may be more than one, corresponding to
+   * multiple sequential segments within the word.
    * @see #getLayers()
    * @see #setLayers(Map)
    */
   protected Map<String,List<LayerMatch>> layers = new LinkedHashMap<String,List<LayerMatch>>();
   /**
    * Getter for {@link #layers}: The layer patterns that match a word token. Keys are layer IDs.
+   * <p> Generally there will be one {@link LayerMatch} per layer in a column, but for
+   * word-internal segment context matching, there may be more than one, corresponding to
+   * multiple sequential segments within the word.
    * @return The layer patterns that match a word token.
    */
   @ClonedProperty
   public Map<String,List<LayerMatch>> getLayers() { return layers; }
   /**
    * Setter for {@link #layers}: The layer patterns that match a word token. Keys are layer IDs.
+   * <p> Generally there will be one {@link LayerMatch} per layer in a column, but for
+   * word-internal segment context matching, there may be more than one, corresponding to
+   * multiple sequential segments within the word.
    * @param newLayers The layer patterns that match a word token.
    */
   public Column setLayers(Map<String,List<LayerMatch>> newLayers) { layers = newLayers; return this; }

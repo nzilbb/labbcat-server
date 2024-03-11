@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 import { LabbcatService } from '../labbcat.service';
 import { Layer } from '../layer';
@@ -26,14 +26,17 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() phrase: boolean;
     @Input() excludeTurn: boolean;
     @Input() excludeUtterance: boolean;
+    @Input() category: boolean;
     phraseLayers: Layer[];
     @Input() word: boolean;
     wordLayers: Layer[];
     @Input() segment: boolean;
     segmentLayers: Layer[];
     @Input() selected: string[];
+    @Output() selectedChange = new EventEmitter<string[]>();
     schema;
     scopeCount = 0;
+    categorySelections: any;
 
     constructor(
         private labbcatService: LabbcatService
@@ -59,7 +62,8 @@ export class LayerCheckboxesComponent implements OnInit {
             this.phraseLayers = [];
             this.wordLayers = [];
             this.segmentLayers = [];
-            if (!this.selected) this.selected = [];
+            this.categorySelections = {};
+            if (!this.selected) this.selected = [] as string[];
             for (let l in schema.layers) {
                 let layer = schema.layers[l] as Layer;
                 if (this.selected.includes(layer.id)) layer._selected = true;
@@ -94,8 +98,25 @@ export class LayerCheckboxesComponent implements OnInit {
                         this.spanLayers.push(layer);
                     }
                 }
+            } // next layer
+
+            // now list the categories that are present
+            let allLayers = [];
+            if (this.participant) allLayers = allLayers.concat(this.participantAttributes);
+            if (this.transcript) allLayers = allLayers.concat(this.transcriptAttributes);
+            if (this.span) allLayers = allLayers.concat(this.spanLayers);
+            if (this.phrase) allLayers = allLayers.concat(this.phraseLayers);
+            if (this.word) allLayers = allLayers.concat(this.wordLayers);
+            for (let layer of allLayers) {
+                if (layer.category && !this.categorySelections.hasOwnProperty(layer.category)) {
+                    this.categorySelections[layer.category] = false;
+                }
             }
         })
+    }
+    
+    Categories(): string[] {
+        return Object.keys(this.categorySelections || {});
     }
 
     ParticipantLayerLabel(id): string {
@@ -111,4 +132,13 @@ export class LayerCheckboxesComponent implements OnInit {
         return id.replace(/^transcript_/,"");
     }
 
+    handleCheckbox(layerId:string): void {
+        this.schema.layers[layerId]._selected = !this.schema.layers[layerId]._selected;
+        if (this.schema.layers[layerId]._selected) { // is it now selected?
+            this.selected.push(layerId); // add it
+        } else { // no longer selected
+            this.selected = this.selected.filter(l => l != layerId); // remove it
+        }
+        this.selectedChange.emit(this.selected);
+    }
 }

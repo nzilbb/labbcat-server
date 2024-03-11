@@ -1,0 +1,75 @@
+<h3 i18n>Participants</h3>
+
+<div *ngIf="participantIds" class="list" id="partcipant-ids">
+  <label *ngFor="let participantId of participantIds" class="item">
+    <lib-grouped-checkbox
+      group="participant" name="participant"
+      value="{{participantId}}"
+      checked="true"
+      ></lib-grouped-checkbox>
+    <a routerLink="../participant"
+       [queryParams]="{ id: participantId }"
+       i18n-title title="Edit participant"
+       target="participant">{{participantId}}</a>
+  </label>
+</div>
+<p *ngIf="!participantIds" id="filterByParticipantLink">
+  <a routerLink="../participants"
+     [queryParams]="{to:'search'}"
+     i18n-title title="Narrow down the participants to search by filtering by participant attributes"
+     i18n>Filter participants by attribute</a>
+</p>
+
+<!-- TODO specify IDs from file -->
+
+<h3 i18n>Transcripts</h3>
+
+<p *ngIf="!transcriptDescription" id="filterByParticipantLink">
+  <a routerLink="../transcripts"
+     [queryParams]="{to: 'search', participant_expression: matrix.participantQuery }"
+     i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
+     i18n>Filter transcripts by attribute</a>
+</p>
+<p *ngIf="transcriptDescription" id="transcriptDescription" i18n>{{transcriptDescription}}</p>
+
+<h3 i18n>Pattern</h3>
+
+<app-search-matrix
+  [schema]="schema"
+  [(columns)]="matrix.columns"
+  ></app-search-matrix>
+
+<div class="list">
+  <div class="item">
+    <label>
+      <input type="checkbox" name="only_main_speaker" id="only_main_speaker">
+      <span i18n>Only search transcripts for which these are the main participants.</span></label>
+  </div>
+  <div class="item">
+    <label i18n-title
+           title="Return words that have been reliably word-aligned - e.g. by HTK or manually">
+      <input type="checkbox" id="only_aligned" name="only_aligned">
+      <span i18n>Only match words that are aligned.</span></label>
+  </div>
+  <div class="item">
+    <label i18n-title title="Return only the first match in each transcript">
+      <input type="checkbox" name="matches_per_transcript" id="matches_per_transcript" value="1">
+      <span i18n>Only one match per transcript.</span></label>
+  </div>
+  <div class="item">
+    
+    <label i18n-title title="Exclude simultaneous speech">
+      <input type="checkbox"
+             onclick="$('#overlap_threshold').prop('disabled', !this.checked); if (this.checked) { $('#overlap_threshold').val('5').focus(); }">
+      <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
+    <label i18n-title title="Define what counts as simultaneous speech">
+      <input name="overlap_threshold" id="overlap_threshold"
+             class="numeric" style="width: 35px;" type="number" value="" disabled="">
+      <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
+  </div>
+</div>
+<lib-button 
+  i18n-title title="Search for instance of this pattern"
+  label="Search"
+  img="magnifying-glass.svg" icon="🔍">
+</lib-button>

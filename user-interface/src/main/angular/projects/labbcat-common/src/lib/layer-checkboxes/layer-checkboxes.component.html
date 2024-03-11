@@ -1,142 +1,182 @@
-<div *ngIf="participant" class="layers participant-layers">
-  <div class="header"
-       i18n-title title="Participant Attributes"
-       *ngIf="scopeCount > 1"
-       i18n="layer type header">Participant</div>
-  <label *ngFor="let layer of participantAttributes" title="{{layer.description}}">
+<fieldset *ngIf="category && Categories().length > 0" class="categories">
+  <legend class="header"
+          i18n-title title="Layer Categories"
+          *ngIf="scopeCount > 1"
+          i18n="layer type header">Projects</legend>
+  <label *ngFor="let c of Categories()" title="{{c}}">
     <lib-grouped-checkbox
-      group="{{name}}"
-      name="{{name}}"
-      value="{{layer.id}}"
-      [checked]="layer._selected" (change)="layer._selected = !layer._selected"
+      group="category"
+      name="category"
+      value="{{c}}"
+      [checked]="categorySelections[c]"
+      (change)="categorySelections[c] = !categorySelections[c]"
       ></lib-grouped-checkbox>
-    <span class="layer-options" *ngIf="layer._selected">
-      <input *ngIf="includeCounts && layer.peers && layer.id != schema.participantLayerId"
-             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
-             class="include-count"
-             title-i18n title="How many linked annotations to include">
-    </span>
-    {{ParticipantLayerLabel(layer.id)}}
+    {{c}}
   </label>
-</div>
-<div *ngIf="transcript" class="layers transcript-layers">
-  <div class="header"
-       i18n-title title="Transcript Attributes"
-       *ngIf="scopeCount > 1"
-       i18n="layer type header">Transcript</div>
-  <label *ngFor="let layer of transcriptAttributes" title="{{layer.description}}">
-    <lib-grouped-checkbox
-      group="{{name}}"
-      name="{{name}}"
-      value="{{layer.id}}"
-      [checked]="layer._selected" (change)="layer._selected = !layer._selected"
-      ></lib-grouped-checkbox>
-    <span class="layer-options" *ngIf="layer._selected">
-      <input *ngIf="includeCounts && layer.peers && layer.id != schema.corpusLayerId"
-             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
-             class="include-count"
-             title-i18n title="How many linked annotations to include">
-    </span>
-    {{TranscriptLayerLabel(layer.id)}}
-  </label>
-</div>
-<div *ngIf="span" class="layers span-layers">
-  <div class="header"
-       i18n-title title="Span Layers"
-       *ngIf="scopeCount > 1"
-       i18n="layer type header">Span</div>
-  <label *ngFor="let layer of spanLayers" title="{{layer.description}}">
-    <lib-grouped-checkbox
-      group="{{name}}"
-      name="{{name}}"
-      value="{{layer.id}}"
-      [checked]="layer._selected" (change)="layer._selected = !layer._selected"
-      ></lib-grouped-checkbox>
-    <span class="layer-options" *ngIf="layer._selected">
-      <input *ngIf="includeCounts && layer.peers"
-             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
-             class="include-count"
-             title-i18n title="How many linked annotations to include">
-      <select name="relationship_{{layer.id}}" *ngIf="includeRelationship == true">
-	<option value="dominant">containing</option>
-	<option value="subordinate">contained</option>
-      </select>
-    </span>
-    {{layer.id}}
-  </label>
-</div>
-<div *ngIf="phrase" class="layers phrase-layers">
-  <div class="header"
-       i18n-title title="Phrase Layers"
-       *ngIf="scopeCount > 1"
-       i18n="layer type header">Phrase</div>
-  <label *ngFor="let layer of phraseLayers" title="{{layer.description}}">
-    <lib-grouped-checkbox
-      group="{{name}}"
-      name="{{name}}"
-      value="{{layer.id}}"
-      [checked]="layer._selected" (change)="layer._selected = !layer._selected"
-      ></lib-grouped-checkbox>
-    <span class="layer-options" *ngIf="layer._selected">
-      <input *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-             type="checkbox" value="1" name="share_start_{{layer.id}}"
-             class="share-start"
-             id="{{name+'-'+layer.id+'-start'}}" style="display: none;">
-      <label for="{{name+'-'+layer.id+'-start'}}"
-             *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-             class="anchor"
-             title-i18n title="Click to select annotations that start when the target starts"
-             >⚓</label>
-      <input *ngIf="includeCounts && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
-             class="include-count"
-             title-i18n title="How many linked annotations to include">
-      <input *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-             type="checkbox" value="1" name="share_end_{{layer.id}}"
-             class="share-end"
-             id="{{name+'-'+layer.id+'-end'}}" style="display: none;">
-      <label for="{{name+'-'+layer.id+'-end'}}"
-             *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-             class="anchor"
-             title-i18n title="Click to select annotations that end when the target ends"
-             >⚓</label>
-    </span>
-    {{layer.id}}
-  </label>
-</div>
-<div *ngIf="word" class="layers word-layers">
-  <div class="header"
-       i18n-title title="Word Layers"
-       *ngIf="scopeCount > 1"
-       i18n="layer type header">Word</div>
-  <label *ngFor="let layer of wordLayers" title="{{layer.description}}">
-    <lib-grouped-checkbox
-      group="{{name}}"
-      name="{{name}}"
-      value="{{layer.id}}"
-      [checked]="layer._selected" (change)="layer._selected = !layer._selected"
-      ></lib-grouped-checkbox>
-    <span class="layer-options" *ngIf="layer._selected">
-      <input *ngIf="includeCounts && layer.peers && layer.id != schema.wordLayerId"
-             type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
-             class="include-count"
-             title-i18n title="How many linked annotations to include">
-    </span>
-    {{layer.id}}
-  </label>
-</div>
-<div *ngIf="segment" class="layers segment-layers">
-  <div class="header"
-       i18n-title title="Segment Layers"
-       *ngIf="scopeCount > 1"
-       i18n="layer type header" >Segment</div>
-  <label *ngFor="let layer of segmentLayers" title="{{layer.description}}">
-    <lib-grouped-checkbox
-      group="{{name}}"
-      name="{{name}}"
-      value="{{layer.id}}"
-      [checked]="layer._selected" (change)="layer._selected = !layer._selected"
-      ></lib-grouped-checkbox>
-    {{layer.id}}
-  </label>
-</div>
+</fieldset>
+<fieldset *ngIf="participant" class="layers participant-layers">
+  <legend class="header"
+          i18n-title title="Participant Attributes"
+          *ngIf="scopeCount > 1"
+          i18n="layer type header">Participant</legend>
+  <ng-container *ngFor="let layer of participantAttributes">
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+           title="{{layer.description}}">
+      <lib-grouped-checkbox
+        group="{{name}}"
+        name="{{name}}"
+        value="{{layer.id}}"
+        [checked]="layer._selected"
+        (change)="handleCheckbox(layer.id);"
+        ></lib-grouped-checkbox>
+      <span class="layer-options" *ngIf="layer._selected">
+        <input *ngIf="includeCounts && layer.peers && layer.id != schema.participantLayerId"
+               type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+               class="include-count"
+               title-i18n title="How many linked annotations to include">
+      </span>
+      {{ParticipantLayerLabel(layer.id)}}
+    </label>
+  </ng-container>
+</fieldset>
+<fieldset *ngIf="transcript" class="layers transcript-layers">
+  <legend class="header"
+          i18n-title title="Transcript Attributes"
+          *ngIf="scopeCount > 1"
+          i18n="layer type header">Transcript</legend>
+  <ng-container *ngFor="let layer of transcriptAttributes">
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+           title="{{layer.description}}">
+      <lib-grouped-checkbox
+        group="{{name}}"
+        name="{{name}}"
+        value="{{layer.id}}"
+        [checked]="layer._selected"
+        (change)="handleCheckbox(layer.id);"
+        ></lib-grouped-checkbox>
+      <span class="layer-options" *ngIf="layer._selected">
+        <input *ngIf="includeCounts && layer.peers && layer.id != schema.corpusLayerId"
+               type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+               class="include-count"
+               title-i18n title="How many linked annotations to include">
+      </span>
+      {{TranscriptLayerLabel(layer.id)}}
+    </label>
+  </ng-container>
+</fieldset>
+<fieldset *ngIf="span" class="layers span-layers">
+  <legend class="header"
+          i18n-title title="Span Layers"
+          *ngIf="scopeCount > 1"
+          i18n="layer type header">Span</legend>
+  <ng-container *ngFor="let layer of spanLayers">
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+           title="{{layer.description}}">
+      <lib-grouped-checkbox
+        group="{{name}}"
+        name="{{name}}"
+        value="{{layer.id}}"
+        [checked]="layer._selected"
+        (change)="handleCheckbox(layer.id);"
+        ></lib-grouped-checkbox>
+      <span class="layer-options" *ngIf="layer._selected">
+        <input *ngIf="includeCounts && layer.peers"
+               type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+               class="include-count"
+               title-i18n title="How many linked annotations to include">
+        <select name="relationship_{{layer.id}}" *ngIf="includeRelationship == true">
+	  <option value="dominant">containing</option>
+	  <option value="subordinate">contained</option>
+        </select>
+      </span>
+      {{layer.id}}
+    </label>
+  </ng-container>
+</fieldset>
+<fieldset *ngIf="phrase" class="layers phrase-layers">
+  <legend class="header"
+          i18n-title title="Phrase Layers"
+          *ngIf="scopeCount > 1"
+          i18n="layer type header">Phrase</legend>
+  <ng-container *ngFor="let layer of phraseLayers">
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+           title="{{layer.description}}">
+      <lib-grouped-checkbox
+        group="{{name}}"
+        name="{{name}}"
+        value="{{layer.id}}"
+        [checked]="layer._selected"
+        (change)="handleCheckbox(layer.id);"
+        ></lib-grouped-checkbox>
+      <span class="layer-options" *ngIf="layer._selected">
+        <input *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+               type="checkbox" value="1" name="share_start_{{layer.id}}"
+               class="share-start"
+               id="{{name+'-'+layer.id+'-start'}}" style="display: none;">
+        <label for="{{name+'-'+layer.id+'-start'}}"
+               *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+               class="anchor"
+               title-i18n title="Click to select annotations that start when the target starts"
+               >⚓</label>
+        <input *ngIf="includeCounts && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+               type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+               class="include-count"
+               title-i18n title="How many linked annotations to include">
+        <input *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+               type="checkbox" value="1" name="share_end_{{layer.id}}"
+               class="share-end"
+               id="{{name+'-'+layer.id+'-end'}}" style="display: none;">
+        <label for="{{name+'-'+layer.id+'-end'}}"
+               *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+               class="anchor"
+               title-i18n title="Click to select annotations that end when the target ends"
+               >⚓</label>
+      </span>
+      {{layer.id}}
+    </label>
+  </ng-container>
+</fieldset>
+<fieldset *ngIf="word" class="layers word-layers">
+  <legend class="header"
+          i18n-title title="Word Layers"
+          *ngIf="scopeCount > 1"
+          i18n="layer type header">Word</legend>
+  <ng-container *ngFor="let layer of wordLayers">
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+           title="{{layer.description}}">
+      <lib-grouped-checkbox
+        group="{{name}}"
+        name="{{name}}"
+        value="{{layer.id}}"
+        [checked]="layer._selected"
+        (change)="handleCheckbox(layer.id);"
+        ></lib-grouped-checkbox>
+      <span class="layer-options" *ngIf="layer._selected">
+        <input *ngIf="includeCounts && layer.peers && layer.id != schema.wordLayerId"
+               type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+               class="include-count"
+               title-i18n title="How many linked annotations to include">
+      </span>
+      {{layer.id}}
+    </label>
+  </ng-container>
+</fieldset>
+<fieldset *ngIf="segment" class="layers segment-layers">
+  <legend class="header"
+          i18n-title title="Segment Layers"
+          *ngIf="scopeCount > 1"
+          i18n="layer type header" >Segment</legend>
+  <ng-container *ngFor="let layer of segmentLayers">
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+           title="{{layer.description}}">
+      <lib-grouped-checkbox
+        group="{{name}}"
+        name="{{name}}"
+        value="{{layer.id}}"
+        [checked]="layer._selected"
+        (change)="handleCheckbox(layer.id);"
+        ></lib-grouped-checkbox>
+      {{layer.id}}
+    </label>
+  </ng-container>
+</fieldset>

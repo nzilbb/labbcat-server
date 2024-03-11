@@ -19,6 +19,7 @@ export * from './lib/wait/wait.component';
 export * from './lib/grouped-checkbox/grouped-checkbox.component';
 export * from './lib/layer-checkboxes/layer-checkboxes.component';
 export * from './lib/pending-changes.guard';
+export * from './lib/input-regexp/input-regexp.component';
 export * from './lib/disc-helper/disc-helper.component';
 export * from './lib/ipa-helper/ipa-helper.component';
 export * from './lib/valid-label-helper/valid-label-helper.component';

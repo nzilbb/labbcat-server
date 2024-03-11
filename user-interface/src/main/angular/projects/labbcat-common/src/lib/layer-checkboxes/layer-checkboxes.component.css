@@ -1,9 +1,13 @@
-.layers {
+.layers, .categories {
     display: flex;
     flex-direction: column;
 }
-.layers > * {
+.layers > *, .categories > * {
     white-space: nowrap;
+}
+.layers label {
+    animation-name: fade-in;
+    animation-duration: 750ms;
 }
 .include-count {
     width: 4ch;

@@ -1,0 +1,9 @@
+<input
+  type="text"
+  class="regexp {{className}} {{regexpValid?'':'invalid'}}"
+  name="{{name}}"
+  id="{{id}}"
+  title="{{temporaryTitle || title}}"
+  placeholder="{{placeholder}}"
+  (keyup)="checkRegularExpression($event)"
+  [ngModel]="value">

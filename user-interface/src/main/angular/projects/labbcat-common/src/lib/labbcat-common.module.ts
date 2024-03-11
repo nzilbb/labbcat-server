@@ -20,6 +20,7 @@ import { LayerFilterComponent } from './layer-filter/layer-filter.component';
 import { PaginationComponent } from './pagination/pagination.component';
 import { DurationPipe } from './duration.pipe';
 import { ValidLabelHelperComponent } from './valid-label-helper/valid-label-helper.component';
+import { InputRegexpComponent } from './input-regexp/input-regexp.component';
 
 @NgModule({
     declarations: [
@@ -40,7 +41,8 @@ import { ValidLabelHelperComponent } from './valid-label-helper/valid-label-help
         LayerFilterComponent,
         PaginationComponent,
         DurationPipe,
-        ValidLabelHelperComponent
+        ValidLabelHelperComponent,
+        InputRegexpComponent
     ],
     imports: [
         RouterModule, CommonModule, FormsModule
@@ -63,7 +65,8 @@ import { ValidLabelHelperComponent } from './valid-label-helper/valid-label-help
         AutofocusDirective,
         LayerFilterComponent,
         PaginationComponent,
-        DurationPipe
+        DurationPipe,
+        InputRegexpComponent
     ]
 })
 export class LabbcatCommonModule {

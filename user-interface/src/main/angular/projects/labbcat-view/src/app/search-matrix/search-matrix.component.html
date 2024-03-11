@@ -1,0 +1,96 @@
+<lib-layer-checkboxes
+  name="layer"
+  span="true" phrase="true" word="true" segment="true"
+  excludeMainParticipant="true"
+  category="true"
+  [(selected)]="selectedLayerIds"
+  (selectedChange)="syncSelectedLayerIdsWithColumns($event)"
+  ></lib-layer-checkboxes>
+
+<div class="columns">
+  <div class="column" *ngFor="let column of columns; index as c">
+    <div class="layers">
+      <fieldset *ngFor="let layerId of selectedLayerIds"
+                class="layer {{layerId}}"
+                title="{{schema.layers[layerId].description}}">
+        <legend>{{layerId}}</legend>
+        <div class="layer">
+          <div class="match" *ngFor="let match of column.layers[layerId]">
+            <ng-container [ngSwitch]="schema.layers[layerId].type">
+
+              <span *ngSwitchCase="'number'" class="numeric">
+                <span className="ge">&ge;</span>
+                <input
+                  class="numeric minimum"
+                  type="number"
+                  i18n-placeholder placeholder="Minimum"                  
+                  [(value)]="match.min">
+                <span className="lt">&lt;</span>
+                <input
+                  class="numeric maximum"
+                  type="number"
+                  i18n-placeholder placeholder="Maximum"
+                  [(value)]="match.max">
+              </span>
+
+              <span *ngSwitchCase="'ipa'" class="ipa">
+                <span class="not">
+                  <select class="not"
+                          i18n-title title="match or not"
+                          [(ngModel)]="match.not">
+                    <option value="false" i18n>matches</option>
+                    <option value="true" i18n>doesn't match</option>
+                  </select>
+                </span>
+                <span class="match">
+                  <lib-input-regexp
+                    type="text"
+                    i18n-placeholder placeholder="Regular expression"
+                    [(value)]="match.pattern"></lib-input-regexp>
+                </span>
+              </span>
+
+              <span *ngSwitchDefault class="regexp">
+                <span class="not">
+                  <select class="not"
+                          i18n-title title="match or not"
+                          [(ngModel)]="match.not">
+                    <option value="false" i18n>matches</option>
+                    <option value="true" i18n>doesn't match</option>
+                  </select>
+                </span>
+                <span class="match">
+                  <lib-input-regexp
+                    type="text" className="string"
+                    [(value)]="match.pattern"></lib-input-regexp>
+                </span>
+              </span>
+              
+            </ng-container> <!-- switch on layer.type -->
+          </div>    <!-- match -->
+        </div>     <!-- layer -->
+      </fieldset> <!-- layerId -->
+    </div>  <!-- layers -->
+    <div class="adj" *ngIf="c < columns.length - 1">
+      <span i18n="'followed' n words later by...">followed</span>
+      <select i18n-title title="Distance between matches"
+              [(ngModel)]="column.adj">
+        <option value="1" i18n="followed 'immediately' by...">immediately</option>
+        <option value="2" i18n="followed '1 word later' by...">1 word later</option>
+        <option value="3" i18n="followed '2 words later' by...">2 words later</option>
+      </select>
+      <span i18n="followed n words later 'by'...">by</span>
+    </div>
+    <div class="add-column"*ngIf="c == columns.length - 1">
+      <lib-button
+        i18n-title title="Make the search one word wider"
+        icon="➕" img="add.svg"
+        (press)="addColumn()"></lib-button>
+      <lib-button
+        *ngIf="c > 0"
+        icon="➖" img="remove.svg"
+        i18n-title title="Make the search one word narrower"
+        (press)="removeColumn()"></lib-button>
+    </div>
+  </div> <!-- column -->
+</div> <!-- columns -->
