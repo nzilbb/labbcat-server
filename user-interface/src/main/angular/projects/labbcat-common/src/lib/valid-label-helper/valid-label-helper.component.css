@@ -10,6 +10,7 @@
     flex-wrap: wrap;
     min-width: 200px;
     max-width: 400px;
+    z-index: 1;
 }
 .valid-label-helper a {
     padding-left: 4px;

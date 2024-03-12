@@ -13,6 +13,7 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() includeCounts: boolean;
     @Input() includeAnchorSharing: boolean;
     @Input() includeRelationship: boolean;
+    @Input() includeAlignment: boolean;
     @Input() participant: boolean;
     @Input() excludeParticipant: boolean;
     @Input() excludeMainParticipant: boolean;

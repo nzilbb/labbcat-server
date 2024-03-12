@@ -575,8 +575,8 @@ export class TranscriptsComponent implements OnInit {
     
     /** Button action */
     layeredSearch(): void {
-        window.location.href = this.baseUrl
-            + "search?"
+        window.location.href = /* TODO remove comment: this.baseUrl
+            + */"search?"
             + this.selectedTranscriptsQueryString("participant_id");
     }
 

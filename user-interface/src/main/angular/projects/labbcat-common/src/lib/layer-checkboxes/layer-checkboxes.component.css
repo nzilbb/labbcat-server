@@ -34,3 +34,7 @@
     border-top: 1px black solid;
     border-right: 1px black solid;
 }
+img.alignment {
+    height: 70%;
+    padding-right: 3px;
+}

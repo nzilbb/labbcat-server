@@ -548,8 +548,8 @@ export class ParticipantsComponent implements OnInit {
     
     /** Button action */
     layeredSearch(): void {
-        window.location.href = this.baseUrl
-            + "search?"
+        window.location.href = /*TODO remove comment: this.baseUrl
+            + */"search?"
             + this.selectedParticipantsQueryString("participant_id");
     }
 

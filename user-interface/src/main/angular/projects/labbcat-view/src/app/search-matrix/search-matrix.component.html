@@ -1,7 +1,7 @@
 <lib-layer-checkboxes
-  name="layer"
+  name="layer" includeAlignment="true"
   span="true" phrase="true" word="true" segment="true"
-  excludeMainParticipant="true"
+  excludeMainParticipant="true" 
   category="true"
   [(selected)]="selectedLayerIds"
   (selectedChange)="syncSelectedLayerIdsWithColumns($event)"
@@ -12,11 +12,33 @@
     <div class="layers">
       <fieldset *ngFor="let layerId of selectedLayerIds"
                 class="layer {{layerId}}"
+                [class.spanning]="isSpanningLayer(schema.layers[layerId])"
+                [class.anchor-start]="column.layers[layerId][0].anchorStart"
+                [class.anchor-end]="column.layers[layerId][column.layers[layerId].length -1].anchorEnd"
                 title="{{schema.layers[layerId].description}}">
         <legend>{{layerId}}</legend>
         <div class="layer">
+          <span *ngIf=isSpanningLayer(schema.layers[layerId])
+                i18n-title title="Anchor to start of {{layerId}} span"
+                class="anchor-start"> <!-- first match in column -->
+            <img [src]="'assets/lock-'+(column.layers[layerId][0].anchorStart?'locked':'unlocked')+'.svg'"
+                 [alt]="column.layers[layerId][0].anchorStart?'🔒':'🔓'"
+                 (click)="column.layers[layerId][0].anchorStart = !column.layers[layerId][0].anchorStart"
+                 >
+          </span>
           <div class="match" *ngFor="let match of column.layers[layerId]">
-            <ng-container [ngSwitch]="schema.layers[layerId].type">
+            <span *ngIf="schema.layers[layerId].alignment > 0 && layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
+                  class="target"
+                  i18n-title title="Target this match">
+              <img
+                i18n-title title="Target this match"
+                alt="🎯" src="assets/target.svg"
+                [class]="match.target?'selected':'deselected'"
+                (click)="setTarget(match)">
+            </span>
+            <ng-container
+              *ngIf="layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
+              [ngSwitch]="schema.layers[layerId].type">
 
               <span *ngSwitchCase="'number'" class="numeric">
                 <span className="ge">&ge;</span>
@@ -48,6 +70,19 @@
                     i18n-placeholder placeholder="Regular expression"
                     [(value)]="match.pattern"></lib-input-regexp>
                 </span>
+                <span class="help">
+                  <lib-button
+                    i18n-title title="Phoneme symbol selector"
+                    icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
+                    (press)="helperMatch = (helperMatch == match?null:match)"></lib-button>
+                  <lib-disc-helper
+                    *ngIf="!hasValidLabels(schema.layers[layerId]) && helperMatch == match"
+                    (symbolSelected)="appendToPattern(match, $event)"></lib-disc-helper>
+                  <lib-valid-label-helper
+                    *ngIf="hasValidLabels(schema.layers[layerId]) && helperMatch == match"
+                    [layer]="schema.layers[layerId]"
+                    (symbolSelected)="appendToPattern(match, $event)"></lib-valid-label-helper>
+                </span>
               </span>
 
               <span *ngSwitchDefault class="regexp">
@@ -64,10 +99,28 @@
                     type="text" className="string"
                     [(value)]="match.pattern"></lib-input-regexp>
                 </span>
+                <span class="help" *ngIf="hasValidLabels(schema.layers[layerId])">
+                  <lib-button
+                    i18n-title title="Symbol selector"
+                    icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
+                    (press)="helperMatch = (helperMatch == match?null:match)"></lib-button>
+                  <lib-valid-label-helper
+                    *ngIf="helperMatch == match"
+                    [layer]="schema.layers[layerId]"
+                    (symbolSelected)="appendToPattern(match, $event)"></lib-valid-label-helper>
+                </span>
               </span>
               
             </ng-container> <!-- switch on layer.type -->
           </div>    <!-- match -->
+          <span *ngIf=isSpanningLayer(schema.layers[layerId])
+                i18n-title title="Anchor to end of {{layerId}} span"
+                class="anchor-end"> <!-- last match in column -->
+            <img [src]="'assets/lock-'+(column.layers[layerId][column.layers[layerId].length -1].anchorEnd?'locked':'unlocked')+'.svg'"
+                 [alt]="column.layers[layerId][column.layers[layerId].length -1].anchorEnd?'🔒':'🔓'"
+                 (click)="column.layers[layerId][column.layers[layerId].length -1].anchorEnd = !column.layers[layerId][column.layers[layerId].length -1].anchorEnd"
+                 >
+          </span>
         </div>     <!-- layer -->
       </fieldset> <!-- layerId -->
     </div>  <!-- layers -->

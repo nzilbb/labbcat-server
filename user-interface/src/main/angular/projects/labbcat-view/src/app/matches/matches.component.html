@@ -107,8 +107,8 @@
     <fieldset>
       <legend i18n>CSV Columns</legend>
       <div class="csv-checkboxes">
-        <div class="csv-options">
-          <div i18n="csv options title" class="header">Fields:</div>
+        <fieldset class="csv-options">
+          <legend i18n="csv options title" class="header">Fields:</legend>
           <label i18n-title title="Title of this LaBB-CAT instance">
             <input type="checkbox" name="csv_option" value="labbcat_title">
             <span i18n="csv options">LaBB-CAT title</span>
@@ -153,7 +153,7 @@
             <input type="checkbox" name="csv_option" value="result_text" checked>
             <span i18n="csv options">Text</span>
           </label>
-        </div>
+        </fieldset>
         <!-- TODO includeAnchorSharing="true" -->
         <lib-layer-checkboxes
           name="csv_layer"
