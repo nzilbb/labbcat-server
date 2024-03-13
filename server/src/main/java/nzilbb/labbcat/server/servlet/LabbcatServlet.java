@@ -135,14 +135,16 @@ public class LabbcatServlet extends HttpServlet {
       } 
    }
 
+   private String storeBaseUrl = null;
    /**
     * Gets a graph store, creating a new one if required.
     * @return A connected store.
     */
    protected synchronized SqlGraphStoreAdministration getStore(HttpServletRequest request)
       throws SQLException, PermissionException {
+      if (storeBaseUrl == null) storeBaseUrl = baseUrl(request);
       return new SqlGraphStoreAdministration(
-         baseUrl(request), connectionFactory, request.getRemoteUser());
+         storeBaseUrl, connectionFactory, request.getRemoteUser());
    } // end of getStore()
 
    /**
