@@ -83,11 +83,14 @@ div.match {
     padding-right: 10px;
     white-space: nowrap;
 }
+span.help lib-button {
+    position: relative;
+    left: 10px;
+}
 
 .target img {
-    padding-right: 10px;
     vertical-align: middle;
-    height: 70%;
+    height: 10pt;
 }
 .deselected {
     opacity: 0.33;

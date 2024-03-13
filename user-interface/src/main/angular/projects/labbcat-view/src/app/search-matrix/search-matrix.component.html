@@ -16,7 +16,18 @@
                 [class.anchor-start]="column.layers[layerId][0].anchorStart"
                 [class.anchor-end]="column.layers[layerId][column.layers[layerId].length -1].anchorEnd"
                 title="{{schema.layers[layerId].description}}">
-        <legend>{{layerId}}</legend>
+        <legend>
+          <span *ngIf="schema.layers[layerId].alignment > 0 && layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
+                class="target"
+                i18n-title title="Target this match">
+            <img
+              i18n-title title="Target this match"
+              alt="🎯" src="assets/target.svg"
+              [class]="column.layers[layerId][0].target?'selected':'deselected'"
+              (click)="setTarget(column.layers[layerId][0])">
+          </span>
+          {{layerId}}
+        </legend>
         <div class="layer">
           <span *ngIf=isSpanningLayer(schema.layers[layerId])
                 i18n-title title="Anchor to start of {{layerId}} span"
@@ -27,15 +38,6 @@
                  >
           </span>
           <div class="match" *ngFor="let match of column.layers[layerId]">
-            <span *ngIf="schema.layers[layerId].alignment > 0 && layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
-                  class="target"
-                  i18n-title title="Target this match">
-              <img
-                i18n-title title="Target this match"
-                alt="🎯" src="assets/target.svg"
-                [class]="match.target?'selected':'deselected'"
-                (click)="setTarget(match)">
-            </span>
             <ng-container
               *ngIf="layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
               [ngSwitch]="schema.layers[layerId].type">
