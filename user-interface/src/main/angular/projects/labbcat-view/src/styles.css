@@ -203,11 +203,18 @@ button {
     white-space: nowrap;
     min-width: 80px;
     height: 45px;
-    background: #DDDDDD;
+    background: #CCCCCC;
     border: 1px outset;
     font-family: Atkinson-Hyperlegible, sans-serif;
     font-size: 9pt;
     padding: 1px;
+}
+button:hover {
+    background: #DDDDDD;
+}
+button:active {
+    border: 1px inset;
+    background: #BBBBBB;
 }
 button img {
     width: 16px;
