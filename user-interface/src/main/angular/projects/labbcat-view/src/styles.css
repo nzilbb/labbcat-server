@@ -126,6 +126,7 @@ app-root footer {
 
 div.messages div.error { color: red; font-weight: bold; }
 .message { color: black; }
+.error { color: red; }
 
 lib-wait {
     display: block;
