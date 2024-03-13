@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Layer } from 'labbcat-common';
+import { User } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
 import { Matrix } from '../matrix';
@@ -13,11 +14,18 @@ import { Matrix } from '../matrix';
 })
 export class SearchComponent implements OnInit {
     
+    user: User;
     schema: any;
     matrix: Matrix;
     participantDescription: string;
     participantIds: string[];
-    transcriptDescription: string;    
+    transcriptDescription: string;
+    mainParticipantOnly: boolean;
+    onlyAligned: boolean;
+    firstMatchOnly: boolean;
+    excludeSimultaneousSpeech: boolean;
+    overlapThreshold: number;
+    threadId:string;
     
     constructor(
         private labbcatService: LabbcatService,
@@ -32,6 +40,7 @@ export class SearchComponent implements OnInit {
             participantQuery: "",
             transcriptQuery: ""
         }
+        this.readUserInfo();
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
             
@@ -51,6 +60,11 @@ export class SearchComponent implements OnInit {
             });
         });
     }
+    readUserInfo(): void {
+        this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
+            this.user = user as User;
+        });
+    }
     
     /** List participants that match the filters */
     listParticipants(): void {
@@ -62,5 +76,39 @@ export class SearchComponent implements OnInit {
                     this.participantIds = participantIds;
                 });
         } // there is a participantExpression
+    }
+
+    search(): void {
+        if (this.threadId) { // there was a previous search
+            const lastThreadId = this.threadId;
+            // is it still running?
+            this.labbcatService.labbcat.taskStatus(
+                lastThreadId, (task, errors, messages) => {
+                    if (task && task.running) { // last search is still running
+                        // cancel it
+                        this.labbcatService.labbcat.cancelTask(
+                            lastThreadId, (task, errors, messages) => {
+                                if (errors) errors.forEach(m => this.messageService.error(m));
+                                if (messages) messages.forEach(m => this.messageService.info(m));
+                                // release its resources
+                                this.labbcatService.labbcat.releaseTask(
+                                    lastThreadId, (task, errors, messages) => {
+                                    });
+                            });
+                    } // last search is still running
+                });
+        } // there was a previous search
+        
+        this.labbcatService.labbcat.search(
+            this.matrix, null, null,
+            this.mainParticipantOnly,
+            this.onlyAligned?15:null,
+            this.firstMatchOnly?1:null,
+            this.excludeSimultaneousSpeech?this.overlapThreshold:null,
+            (result, errors, messages) => {
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
+                this.threadId = result.threadId;
+        });
     }
 }

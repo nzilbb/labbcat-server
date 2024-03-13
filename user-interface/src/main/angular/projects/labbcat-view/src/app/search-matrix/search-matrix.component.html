@@ -14,7 +14,7 @@
                 class="layer {{layerId}}"
                 [class.spanning]="isSpanningLayer(schema.layers[layerId])"
                 [class.anchor-start]="column.layers[layerId][0].anchorStart"
-                [class.anchor-end]="column.layers[layerId][column.layers[layerId].length -1].anchorEnd"
+                [class.anchor-end]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
                 title="{{schema.layers[layerId].description}}">
         <legend>
           <span *ngIf="schema.layers[layerId].alignment > 0 && layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
@@ -48,7 +48,8 @@
                   class="numeric minimum"
                   type="number"
                   i18n-placeholder placeholder="Minimum"                  
-                  [(value)]="match.min">
+                  [(value)]="match.min"
+                  appAutofocus="true">
                 <span className="lt">&lt;</span>
                 <input
                   class="numeric maximum"
@@ -61,7 +62,7 @@
                 <span class="not">
                   <select class="not"
                           i18n-title title="match or not"
-                          [(ngModel)]="match.not">
+                          [value]="match.not" (change)="match.not = $event.target.value == 'true'">
                     <option value="false" i18n>matches</option>
                     <option value="true" i18n>doesn't match</option>
                   </select>
@@ -70,7 +71,8 @@
                   <lib-input-regexp
                     type="text"
                     i18n-placeholder placeholder="Regular expression"
-                    [(value)]="match.pattern"></lib-input-regexp>
+                    [(value)]="match.pattern"
+                    autofocus="true"></lib-input-regexp>
                 </span>
                 <span class="help">
                   <lib-button
@@ -90,8 +92,8 @@
               <span *ngSwitchDefault class="regexp">
                 <span class="not">
                   <select class="not"
-                          i18n-title title="match or not"
-                          [(ngModel)]="match.not">
+                          i18n-title title="match or not"                          
+                          [value]="match.not" (change)="match.not = $event.target.value == 'true'">
                     <option value="false" i18n>matches</option>
                     <option value="true" i18n>doesn't match</option>
                   </select>
@@ -99,7 +101,8 @@
                 <span class="match">
                   <lib-input-regexp
                     type="text" className="string"
-                    [(value)]="match.pattern"></lib-input-regexp>
+                    [(value)]="match.pattern"
+                    autofocus="true"></lib-input-regexp>
                 </span>
                 <span class="help" *ngIf="hasValidLabels(schema.layers[layerId])">
                   <lib-button
@@ -118,9 +121,9 @@
           <span *ngIf=isSpanningLayer(schema.layers[layerId])
                 i18n-title title="Anchor to end of {{layerId}} span"
                 class="anchor-end"> <!-- last match in column -->
-            <img [src]="'assets/lock-'+(column.layers[layerId][column.layers[layerId].length -1].anchorEnd?'locked':'unlocked')+'.svg'"
-                 [alt]="column.layers[layerId][column.layers[layerId].length -1].anchorEnd?'🔒':'🔓'"
-                 (click)="column.layers[layerId][column.layers[layerId].length -1].anchorEnd = !column.layers[layerId][column.layers[layerId].length -1].anchorEnd"
+            <img [src]="'assets/lock-'+(column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'locked':'unlocked')+'.svg'"
+                 [alt]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'🔒':'🔓'"
+                 (click)="column.layers[layerId][column.layers[layerId].length-1].anchorEnd = !column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
                  >
           </span>
         </div>     <!-- layer -->

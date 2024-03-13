@@ -1,17 +1,11 @@
 <h3 i18n>Participants</h3>
 
-<div *ngIf="participantIds" class="list" id="partcipant-ids">
-  <label *ngFor="let participantId of participantIds" class="item">
-    <lib-grouped-checkbox
-      group="participant" name="participant"
-      value="{{participantId}}"
-      checked="true"
-      ></lib-grouped-checkbox>
-    <a routerLink="../participant"
-       [queryParams]="{ id: participantId }"
-       i18n-title title="Edit participant"
-       target="participant">{{participantId}}</a>
-  </label>
+<div *ngIf="participantIds" class="list" id="participant-ids">
+  <a *ngFor="let participantId of participantIds"
+     [routerLink]="user.roles.includes('edit')?'../edit/participant':'../participant'"
+     [queryParams]="{ id: participantId }"
+     i18n-title title="Edit participant"
+     target="participant">{{participantId}}</a>
 </div>
 <p *ngIf="!participantIds" id="filterByParticipantLink">
   <a routerLink="../participants"
@@ -37,39 +31,43 @@
 <app-search-matrix
   [schema]="schema"
   [(columns)]="matrix.columns"
+  (keydown.enter)="search()"
   ></app-search-matrix>
 
 <div class="list">
   <div class="item">
     <label>
-      <input type="checkbox" name="only_main_speaker" id="only_main_speaker">
+      <input type="checkbox" [(ngModel)]="mainParticipantOnly" id="mainParticipantOnly">
       <span i18n>Only search transcripts for which these are the main participants.</span></label>
   </div>
   <div class="item">
     <label i18n-title
            title="Return words that have been reliably word-aligned - e.g. by HTK or manually">
-      <input type="checkbox" id="only_aligned" name="only_aligned">
+      <input type="checkbox" [(ngModel)]="onlyAligned" id="onlyAligned">
       <span i18n>Only match words that are aligned.</span></label>
   </div>
   <div class="item">
     <label i18n-title title="Return only the first match in each transcript">
-      <input type="checkbox" name="matches_per_transcript" id="matches_per_transcript" value="1">
+      <input type="checkbox" [(ngModel)]="firstMatchOnly" id="firstMatchOnly" >
       <span i18n>Only one match per transcript.</span></label>
   </div>
   <div class="item">
     
     <label i18n-title title="Exclude simultaneous speech">
-      <input type="checkbox"
-             onclick="$('#overlap_threshold').prop('disabled', !this.checked); if (this.checked) { $('#overlap_threshold').val('5').focus(); }">
+      <input type="checkbox"[(ngModel)]="excludeSimultaneousSpeech">
       <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
     <label i18n-title title="Define what counts as simultaneous speech">
       <input name="overlap_threshold" id="overlap_threshold"
-             class="numeric" style="width: 35px;" type="number" value="" disabled="">
+             class="numeric" style="width: 35px;" type="number"
+             value="5"
+             [disabled]="!excludeSimultaneousSpeech">
       <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
   </div>
 </div>
 <lib-button 
   i18n-title title="Search for instance of this pattern"
   label="Search"
-  img="magnifying-glass.svg" icon="🔍">
+  img="magnifying-glass.svg" icon="🔍"
+  (click)="search()">
 </lib-button>
+<lib-task *ngIf="threadId" threadId="{{threadId}}"></lib-task>

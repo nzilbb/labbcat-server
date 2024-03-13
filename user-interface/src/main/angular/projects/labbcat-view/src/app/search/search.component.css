@@ -1,10 +1,13 @@
-.item label {
-    display: inline-block;
-}
-#partcipant-ids {
+#participant-ids {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     max-height: 30vh;
     overflow: scroll;
+}
+#participant-ids a + a:before {
+    content: ', ';
+}
+.item label {
+    display: inline-block;
 }
