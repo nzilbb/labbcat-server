@@ -24,5 +24,7 @@
         <span *ngIf="!task.resultText" i18n="Default task result text">Open Results</span>
       </a>
     </div>
+    <div *ngIf="task.lastException" class="error">{{task.lastException}}</div>
+    <div *ngIf="task.stackTrace" class="error">{{task.stackTrace}}</div>
   </div>
 </div>

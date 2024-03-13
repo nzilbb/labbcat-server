@@ -9,4 +9,6 @@ export interface Task {
     percentComplete: number;
     status: string;
     refreshSeconds: number;
+    lastException: string;
+    stackTrace: string;
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, OnDestroy, ViewChild, ElementRef, EventEmitter, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Task } from '../task';
@@ -10,7 +10,7 @@ import { LabbcatService } from '../labbcat.service';
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.css']
 })
-export class TaskComponent implements OnInit, OnDestroy {
+export class TaskComponent implements OnChanges, OnDestroy {
     @Input() threadId: string;
     @Input() cancelButton = true;
     @Input() showStatus = true;
@@ -28,7 +28,7 @@ export class TaskComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute
     ) { }
     
-    ngOnInit(): void {
+    ngOnChanges(changes: SimpleChanges): void {
         if (!this.threadId) {
             this.route.queryParams.subscribe((params) => {
                 this.threadId = params["threadId"];
