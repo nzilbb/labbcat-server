@@ -24,7 +24,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        console.log("ngOnChanges " + Object.keys(changes));
+        if (!this.columns) this.columns = [];
         // if we haven't set selectedLayerIds yet
         if (this.schema && !this.selectedLayerIds) {
             // if there's no search matrix yet

@@ -628,7 +628,15 @@ export class TranscriptsComponent implements OnInit {
         }
         if (this.participantQuery) {
             if (queryString) queryString += "&";
-            queryString += "participant_expression="+encodeURIComponent(this.participantQuery);
+            // expressions like:
+            // labels("participant").includes(["AP511_MikeThorpe"])
+            // have to be replaced with:
+            // ['AP511_MikeThorpe'].includes(id)
+            queryString += "participant_expression="+encodeURIComponent(
+                this.participantQuery
+                    .replace(/labels\('participant'\).includesAny\((\[.*\])\)/,
+                             "$1\.includes\(id\)")
+            );
         }
         return queryString;
     }

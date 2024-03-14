@@ -1,4 +1,12 @@
-<h3 i18n>Participants</h3>
+<h3>
+  <lib-link
+    i18n-label label="Participants"
+    img="filter.svg"
+    i18n-title title="Narrow down the participants to search by filtering by participant attributes"
+    routerLink="../participants"
+    [queryParams]="{to:'search'}"
+    ></lib-link>
+</h3>
 
 <div *ngIf="participantIds" class="list" id="participant-ids">
   <a *ngFor="let participantId of participantIds"
@@ -7,24 +15,23 @@
      i18n-title title="Edit participant"
      target="participant">{{participantId}}</a>
 </div>
-<p *ngIf="!participantIds" id="filterByParticipantLink">
-  <a routerLink="../participants"
-     [queryParams]="{to:'search'}"
-     i18n-title title="Narrow down the participants to search by filtering by participant attributes"
-     i18n>Filter participants by attribute</a>
-</p>
+<p *ngIf="!participantIds" i18n="Any (participant)">[any]</p>
 
 <!-- TODO specify IDs from file -->
 
-<h3 i18n>Transcripts</h3>
+<h3 i18n></h3>
+<h3>
+  <lib-link
+    i18n-label label="Transcripts"
+    img="filter.svg"
+    i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
+    routerLink="../transcripts"
+    [queryParams]="{to: 'search', participant_expression: participantQueryForTranscripts() }"
+    ></lib-link>
+</h3>
 
-<p *ngIf="!transcriptDescription" id="filterByParticipantLink">
-  <a routerLink="../transcripts"
-     [queryParams]="{to: 'search', participant_expression: matrix.participantQuery }"
-     i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
-     i18n>Filter transcripts by attribute</a>
-</p>
 <p *ngIf="transcriptDescription" id="transcriptDescription" i18n>{{transcriptDescription}}</p>
+<p *ngIf="!transcriptDescription" i18n="Any (transcript)">[any]</p>
 
 <h3 i18n>Pattern</h3>
 
