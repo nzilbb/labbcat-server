@@ -37,7 +37,7 @@
                  (click)="column.layers[layerId][0].anchorStart = !column.layers[layerId][0].anchorStart"
                  >
           </span>
-          <div class="match" *ngFor="let match of column.layers[layerId]">
+          <div class="match" *ngFor="let match of column.layers[layerId]; index as m">
             <ng-container
               *ngIf="layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
               [ngSwitch]="schema.layers[layerId].type">
@@ -72,7 +72,8 @@
                     type="text"
                     i18n-placeholder placeholder="Regular expression"
                     [(value)]="match.pattern"
-                    autofocus="true"></lib-input-regexp>
+                    autofocus="true"
+                    id="regexp-{{c}}-{{layerId}}-{{m}}"></lib-input-regexp>
                 </span>
                 <span class="help">
                   <lib-button
@@ -81,11 +82,11 @@
                     (press)="helperMatch = (helperMatch == match?null:match)"></lib-button>
                   <lib-disc-helper
                     *ngIf="!hasValidLabels(schema.layers[layerId]) && helperMatch == match"
-                    (symbolSelected)="appendToPattern(match, $event)"></lib-disc-helper>
+                    (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-disc-helper>
                   <lib-valid-label-helper
                     *ngIf="hasValidLabels(schema.layers[layerId]) && helperMatch == match"
                     [layer]="schema.layers[layerId]"
-                    (symbolSelected)="appendToPattern(match, $event)"></lib-valid-label-helper>
+                    (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-valid-label-helper>
                 </span>
               </span>
 
@@ -102,7 +103,8 @@
                   <lib-input-regexp
                     type="text" className="string"
                     [(value)]="match.pattern"
-                    autofocus="true"></lib-input-regexp>
+                    autofocus="true"
+                    id="regexp-{{c}}-{{layerId}}-{{m}}"></lib-input-regexp>
                 </span>
                 <span class="help" *ngIf="hasValidLabels(schema.layers[layerId])">
                   <lib-button
@@ -112,7 +114,7 @@
                   <lib-valid-label-helper
                     *ngIf="helperMatch == match"
                     [layer]="schema.layers[layerId]"
-                    (symbolSelected)="appendToPattern(match, $event)"></lib-valid-label-helper>
+                    (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-valid-label-helper>
                 </span>
               </span>
               

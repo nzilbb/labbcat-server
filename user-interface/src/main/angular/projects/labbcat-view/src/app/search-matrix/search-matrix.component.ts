@@ -139,8 +139,13 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         this.columns.pop();
     }
 
-    appendToPattern(match: MatrixLayerMatch, suffix: string): void {
+    appendToPattern(match: MatrixLayerMatch, suffix: string, focusId: string): void {
         match.pattern += suffix;
+        const input = document.getElementById(focusId) as any;
+        if (input) { // set the text cursor to after the inserted text
+            input.focus();
+            input.selectionStart = input.value.length;
+        }
     }
 
     hasValidLabels(layer: Layer): boolean {
