@@ -1,80 +1,112 @@
-<h3>
-  <lib-link
-    i18n-label label="Participants"
-    img="filter.svg"
-    i18n-title title="Narrow down the participants to search by filtering by participant attributes"
-    routerLink="../participants"
-    [queryParams]="{to:'search'}"
-    ></lib-link>
-</h3>
+<div class="search-matrix">
+  <h3>
+    <lib-link
+      i18n-label label="Participants"
+      img="filter.svg"
+      i18n-title title="Narrow down the participants to search by filtering by participant attributes"
+      routerLink="../participants"
+      [queryParams]="{to:'search'}"
+      ></lib-link>
+  </h3>
 
-<div *ngIf="participantIds" class="list" id="participant-ids">
-  <a *ngFor="let participantId of participantIds"
-     [routerLink]="user.roles.includes('edit')?'../edit/participant':'../participant'"
-     [queryParams]="{ id: participantId }"
-     i18n-title title="Edit participant"
-     target="participant">{{participantId}}</a>
+  <p *ngIf="participantDescription" id="participantDescription" i18n>{{participantDescription}}</p>
+  <div *ngIf="participantIds" class="list" id="participant-ids">
+    <a *ngFor="let participantId of participantIds"
+       [routerLink]="user.roles.includes('edit')?'../edit/participant':'../participant'"
+       [queryParams]="{ id: participantId }"
+       i18n-title title="Edit participant"
+       target="participant">{{participantId}}</a>
+  </div>
+  <lib-button
+    *ngIf="participantIds.length < participantCount"
+    i18n-title title="List more participants"
+    img="down-triangle.png" icon="▼"
+    (click)="loadMoreParticipants()"
+    [processing]="loadingParticipants">
+    ></lib-button>
+  <p *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)">[any]</p>
+  <div *ngIf="!participantIds || !participantIds.length" id="file-chooser">
+    <label for="csv" i18n>Or participant IDs from file</label>
+    <input type="file" id="csv" (change)="selectFile($event.target.files)">
+  </div>
+
+  <!-- TODO specify IDs from file -->
+
+  <h3 i18n></h3>
+  <h3>
+    <lib-link
+      i18n-label label="Transcripts"
+      img="filter.svg"
+      i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
+      routerLink="../transcripts"
+      [queryParams]="{to: 'search', participant_expression: participantQueryForTranscripts(), participants: participantDescription }"
+      ></lib-link>
+  </h3>
+
+  <p *ngIf="transcriptDescription" id="transcriptDescription" i18n>{{transcriptDescription}}</p>
+  <div *ngIf="transcriptIds" class="list" id="transcript-ids">
+    <a *ngFor="let transcriptId of transcriptIds"
+       href="transcript?id={{transcriptId}}"
+       i18n-title title="Open transcript"
+       target="{{transcriptId}}">{{transcriptId}}</a>
+  </div>
+  <lib-button
+    *ngIf="transcriptIds.length < transcriptCount"
+    i18n-title title="List more transcripts"
+    img="down-triangle.png" icon="▼"
+    (click)="loadMoreTranscripts()"
+    [processing]="loadingTranscripts">
+    ></lib-button>
+  <p *ngIf="!transcriptDescription" i18n="Any (transcript)">[any]</p>
+
+  <h3 i18n>Pattern</h3>
+
+  <app-search-matrix
+    [schema]="schema"
+    [(columns)]="matrix.columns"
+    (keydown.enter)="search()"
+    ></app-search-matrix>
+
+  <div class="list">
+    <div class="item">
+      <label>
+        <input type="checkbox" [(ngModel)]="mainParticipantOnly" id="mainParticipantOnly">
+        <span i18n>Only search transcripts for which these are the main participants.</span></label>
+    </div>
+    <div class="item">
+      <label i18n-title
+             title="Return words that have been reliably word-aligned - e.g. by HTK or manually">
+        <input type="checkbox" [(ngModel)]="onlyAligned" id="onlyAligned">
+        <span i18n>Only match words that are aligned.</span></label>
+    </div>
+    <div class="item">
+      <label i18n-title title="Return only the first match in each transcript">
+        <input type="checkbox" [(ngModel)]="firstMatchOnly" id="firstMatchOnly" >
+        <span i18n>Only one match per transcript.</span></label>
+    </div>
+    <div class="item">
+      
+      <label i18n-title title="Exclude simultaneous speech">
+        <input type="checkbox"[(ngModel)]="excludeSimultaneousSpeech">
+        <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
+      <label i18n-title title="Define what counts as simultaneous speech">
+        <input name="overlap_threshold" id="overlap_threshold"
+               class="numeric" style="width: 35px;" type="number"
+               value="5"
+               [disabled]="!excludeSimultaneousSpeech">
+        <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
+    </div>
+    <div class="item">
+      <label i18n-title title="Do not open a list of matches when search is complete">
+        <input type="checkbox" [(ngModel)]="suppressResults" id="suppressResults" >
+        <span i18n>No matches, only a summary of results</span></label>
+    </div>
+  </div>
+  <lib-button 
+    i18n-title title="Search for instance of this pattern"
+    label="Search"
+    img="magnifying-glass.svg" icon="🔍"
+    (click)="search()">
+  </lib-button>
+  <lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"></lib-task>
 </div>
-<p *ngIf="!participantIds" i18n="Any (participant)">[any]</p>
-
-<!-- TODO specify IDs from file -->
-
-<h3 i18n></h3>
-<h3>
-  <lib-link
-    i18n-label label="Transcripts"
-    img="filter.svg"
-    i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
-    routerLink="../transcripts"
-    [queryParams]="{to: 'search', participant_expression: participantQueryForTranscripts() }"
-    ></lib-link>
-</h3>
-
-<p *ngIf="transcriptDescription" id="transcriptDescription" i18n>{{transcriptDescription}}</p>
-<p *ngIf="!transcriptDescription" i18n="Any (transcript)">[any]</p>
-
-<h3 i18n>Pattern</h3>
-
-<app-search-matrix
-  [schema]="schema"
-  [(columns)]="matrix.columns"
-  (keydown.enter)="search()"
-  ></app-search-matrix>
-
-<div class="list">
-  <div class="item">
-    <label>
-      <input type="checkbox" [(ngModel)]="mainParticipantOnly" id="mainParticipantOnly">
-      <span i18n>Only search transcripts for which these are the main participants.</span></label>
-  </div>
-  <div class="item">
-    <label i18n-title
-           title="Return words that have been reliably word-aligned - e.g. by HTK or manually">
-      <input type="checkbox" [(ngModel)]="onlyAligned" id="onlyAligned">
-      <span i18n>Only match words that are aligned.</span></label>
-  </div>
-  <div class="item">
-    <label i18n-title title="Return only the first match in each transcript">
-      <input type="checkbox" [(ngModel)]="firstMatchOnly" id="firstMatchOnly" >
-      <span i18n>Only one match per transcript.</span></label>
-  </div>
-  <div class="item">
-    
-    <label i18n-title title="Exclude simultaneous speech">
-      <input type="checkbox"[(ngModel)]="excludeSimultaneousSpeech">
-      <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
-    <label i18n-title title="Define what counts as simultaneous speech">
-      <input name="overlap_threshold" id="overlap_threshold"
-             class="numeric" style="width: 35px;" type="number"
-             value="5"
-             [disabled]="!excludeSimultaneousSpeech">
-      <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
-  </div>
-</div>
-<lib-button 
-  i18n-title title="Search for instance of this pattern"
-  label="Search"
-  img="magnifying-glass.svg" icon="🔍"
-  (click)="search()">
-</lib-button>
-<lib-task *ngIf="threadId" threadId="{{threadId}}"></lib-task>

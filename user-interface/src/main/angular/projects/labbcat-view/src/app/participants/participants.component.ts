@@ -524,10 +524,10 @@ export class ParticipantsComponent implements OnInit {
     /** Button action */
     transcripts(): void {
         let participantQuery = this.query
-        let participantDescription = this.queryDescription
         // if we're matching participant ID, it's "id" here
         // but needs to be "first('participant').label" on the transcripts page 
             .replace(/\.test\(id\)/, ".test(first('participant').label)"); // TODO .test(labels('participant'))
+        let participantDescription = this.queryDescription;
         if (this.selectedIds.length > 0) {
             // query of the form [...].includes(first('participant').label)
             const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
@@ -571,12 +571,22 @@ export class ParticipantsComponent implements OnInit {
 
     /** Query string for selected participants */
     selectedParticipantsQueryString(participantIdParameter: string): string {
+        let participantDescription = this.queryDescription;
         if (this.selectedIds.length > 0) {
+            if (this.selectedIds.length == 1) {
+                participantDescription = this.selectedIds[0];
+            } else if (this.selectedIds.length <= 5) {
+                participantDescription = this.selectedIds.join(", ");
+            } else {
+                participantDescription = ""+this.selectedIds.length + " selected participants"; // TODO i18n
+            }
             return "participant_expression="+encodeURIComponent("["
                 + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                + "].includes(id)");
+                + "].includes(id)")
+                + "&participants="+encodeURIComponent(participantDescription);
         } else if (this.query) {
-            return "participant_expression="+encodeURIComponent(this.query);
+            return "participant_expression="+encodeURIComponent(this.query)
+                + "&participants="+encodeURIComponent(participantDescription);
         }
         return "";
     }

@@ -635,8 +635,8 @@ export class TranscriptsComponent implements OnInit {
             queryString += "participant_expression="+encodeURIComponent(
                 this.participantQuery
                     .replace(/labels\('participant'\).includesAny\((\[.*\])\)/,
-                             "$1\.includes\(id\)")
-            );
+                             "$1\.includes\(id\)"))
+                + "&participants=" + encodeURIComponent(this.participantDescription);
         }
         return queryString;
     }

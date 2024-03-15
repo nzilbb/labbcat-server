@@ -1,13 +1,23 @@
-#participant-ids {
+#participant-ids, #transcript-ids {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     max-height: 30vh;
     overflow: scroll;
 }
-#participant-ids a + a:before {
+#participant-ids a, #transcript-ids a {
+    padding-right: 5px;
+}
+#participant-ids a:after, #transcript-ids a:after  {
     content: ', ';
+}
+#participant-ids a:last-child:after, #transcript-ids a:last-child:after  {
+    content: '';
 }
 .item label {
     display: inline-block;
+}
+div.search-matrix {
+    margin: auto;
+    width: fit-content;
 }
