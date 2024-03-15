@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Inject } from '@angular/core';
 
 import { LabbcatService } from '../labbcat.service';
 import { Layer } from '../layer';
@@ -35,13 +36,17 @@ export class LayerCheckboxesComponent implements OnInit {
     segmentLayers: Layer[];
     @Input() selected: string[];
     @Output() selectedChange = new EventEmitter<string[]>();
+    imagesLocation : string;
     schema;
     scopeCount = 0;
     categorySelections: any;
 
     constructor(
-        private labbcatService: LabbcatService
-    ) { }
+        private labbcatService: LabbcatService,
+        @Inject('environment') private environment
+    ) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
 
     ngOnInit(): void {
         this.loadSchema();

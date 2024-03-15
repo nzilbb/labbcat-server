@@ -22,7 +22,7 @@
                 i18n-title title="Target this match">
             <img
               i18n-title title="Target this match"
-              alt="🎯" src="assets/target.svg"
+              alt="🎯" [src]="imagesLocation+'/target.svg'"
               [class]="column.layers[layerId][0].target?'selected':'deselected'"
               (click)="setTarget(column.layers[layerId][0])">
           </span>
@@ -32,7 +32,7 @@
           <span *ngIf="isAnchorableLayer(schema.layers[layerId])"
                 i18n-title title="Anchor to start of {{layerId}} span"
                 class="anchor-start"> <!-- first match in column -->
-            <img [src]="'assets/lock-'+(column.layers[layerId][0].anchorStart?'locked':'unlocked')+'.svg'"
+            <img [src]="imagesLocation+'/lock-'+(column.layers[layerId][0].anchorStart?'locked':'unlocked')+'.svg'"
                  [alt]="column.layers[layerId][0].anchorStart?'🔒':'🔓'"
                  (click)="column.layers[layerId][0].anchorStart = !column.layers[layerId][0].anchorStart"
                  >
@@ -140,7 +140,7 @@
           <span *ngIf=isAnchorableLayer(schema.layers[layerId])
                 i18n-title title="Anchor to end of {{layerId}} span"
                 class="anchor-end"> <!-- last match in column -->
-            <img [src]="'assets/lock-'+(column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'locked':'unlocked')+'.svg'"
+            <img [src]="imagesLocation+'/lock-'+(column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'locked':'unlocked')+'.svg'"
                  [alt]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'🔒':'🔓'"
                  (click)="column.layers[layerId][column.layers[layerId].length-1].anchorEnd = !column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
                  >

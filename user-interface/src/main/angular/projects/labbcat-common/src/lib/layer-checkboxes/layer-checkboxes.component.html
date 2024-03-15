@@ -36,7 +36,7 @@
                title-i18n title="How many linked annotations to include">
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="/assets/alignment-0.svg" alt="[🏷]">
+           src="{{imagesLocation+'/alignment-0.svg'}}" alt="[🏷]">
       <span class="layer-id">{{ParticipantLayerLabel(layer.id)}}</span>
     </label>
   </ng-container>
@@ -63,7 +63,7 @@
                title-i18n title="How many linked annotations to include">
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="/assets/alignment-0.svg" alt="[🏷]">
+           src="{{imagesLocation+'/alignment-0.svg'}}" alt="[🏷]">
       <span class="layer-id">{{TranscriptLayerLabel(layer.id)}}</span>
     </label>
   </ng-container>
@@ -94,7 +94,7 @@
         </select>
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{'/assets/alignment-'+layer.alignment+'.svg'}}"           
+           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"           
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
@@ -141,7 +141,7 @@
                >⚓</label>
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{'/assets/alignment-'+layer.alignment+'.svg'}}"
+           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
@@ -170,7 +170,7 @@
                title-i18n title="How many linked annotations to include">
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{'/assets/alignment-'+layer.alignment+'.svg'}}"
+           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
@@ -193,7 +193,7 @@
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{'/assets/alignment-'+layer.alignment+'.svg'}}"
+           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>

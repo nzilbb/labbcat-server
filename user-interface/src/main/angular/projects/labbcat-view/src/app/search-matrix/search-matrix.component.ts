@@ -1,4 +1,5 @@
 import { Component, OnInit, OnChanges, SimpleChanges, Input, EventEmitter, Output } from '@angular/core';
+import { Inject } from '@angular/core';
 
 import { Layer } from 'labbcat-common';
 import { MatrixColumn } from '../matrix-column';
@@ -17,8 +18,11 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
     @Output() columnsChange = new EventEmitter<MatrixColumn[]>();
 
     helperMatch: MatrixLayerMatch;
+    imagesLocation : string;
     
-    constructor() { }
+    constructor(@Inject('environment') private environment) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
     }
@@ -130,7 +134,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
 
     addColumn(): void {
         this.columns.push({
-            layers: [],
+            layers: {},
             adj: 1
         });
         this.syncSelectedLayerIdsWithColumns(this.selectedLayerIds);
@@ -141,7 +145,6 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
 
     /** Add word-internal match */
     addMatch(column: MatrixColumn, layerId: string): void {
-        console.log("column " + JSON.stringify(column) + " layerId " + layerId);
         column.layers[layerId].push(this.newLayerMatch(layerId));
     }
     /** Remove word-internal match */
