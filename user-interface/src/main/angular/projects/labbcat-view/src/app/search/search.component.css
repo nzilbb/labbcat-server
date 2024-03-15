@@ -21,3 +21,9 @@ div.search-matrix {
     margin: auto;
     width: fit-content;
 }
+#file-chooser label {
+    padding-right: 5px;
+}
+#file-chooser label:after {
+    content: ':';
+}

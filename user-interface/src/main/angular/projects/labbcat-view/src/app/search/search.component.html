@@ -26,7 +26,7 @@
     ></lib-button>
   <p *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)">[any]</p>
   <div *ngIf="!participantIds || !participantIds.length" id="file-chooser">
-    <label for="csv" i18n>Or participant IDs from file</label>
+    <label for="csv" i18n>Load participants from file</label>
     <input type="file" id="csv" (change)="selectFile($event.target.files)">
   </div>
 
