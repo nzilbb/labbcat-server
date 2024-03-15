@@ -136,7 +136,21 @@ export class LayerCheckboxesComponent implements OnInit {
     handleCheckbox(layerId:string): void {
         this.schema.layers[layerId]._selected = !this.schema.layers[layerId]._selected;
         if (this.schema.layers[layerId]._selected) { // is it now selected?
-            this.selected.push(layerId); // add it
+            // add it, but in hierarchy order
+            const newSelected = [];
+            for (let layer of this.spanLayers) {
+                if (layer._selected) newSelected.push(layer.id);
+            }
+            for (let layer of this.phraseLayers) {
+                if (layer._selected) newSelected.push(layer.id);
+            }
+            for (let layer of this.wordLayers) {
+                if (layer._selected) newSelected.push(layer.id);
+            }
+            for (let layer of this.segmentLayers) {
+                if (layer._selected) newSelected.push(layer.id);
+            }
+            this.selected = newSelected;
         } else { // no longer selected
             this.selected = this.selected.filter(l => l != layerId); // remove it
         }
