@@ -222,6 +222,15 @@ button img {
     height: 16px;
     vertical-align: middle;
 }
+.small button.icon-only {
+    width: 25px;
+    min-width: 25px;
+}
+.small button img {
+    width: 10px;
+    height: 10px;
+    vertical-align: baseline;
+}
 .lnk img, .lnk > span {
     width: 16px;
     height: 16px;
@@ -301,9 +310,11 @@ lib-task progress, lib-task .progress-container, lib-task .progress-container .p
 
 @media all and (min-width: 640px) {
     button {
-        height: unset;
         height: 32px;
         padding: 5px;
+    }
+    .small button {
+        height: unset;
     }
     .buttons a {
         height: auto;

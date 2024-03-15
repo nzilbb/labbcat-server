@@ -31,6 +31,10 @@
     animation-name: fade-down;
     animation-duration: 500ms;
 }
+.match {
+    animation-name: fade-right;
+    animation-duration: 300ms;
+}
 .layers fieldset.spanning {
     border-top: 2px solid black;
     border-bottom-left-radius: 0px;
@@ -115,6 +119,11 @@ input.numeric { width: 45%; }
     display: flex;
     flex-direction: column;
     padding: 5px;
+}
+
+lib-button.small img {
+    width: 10px;
+    height: 10px;
 }
 
 /* Layout on wider screens */

@@ -11,7 +11,7 @@
   <div class="column" *ngFor="let column of columns; index as c">
     <div class="layers">
       <fieldset *ngFor="let layerId of selectedLayerIds"
-                class="layer {{layerId}}"
+                class="layer layer-{{layerId}} parent-{{schema.layers[layerId].parentId}}"
                 [class.spanning]="isSpanningLayer(schema.layers[layerId])"
                 [class.anchor-start]="column.layers[layerId][0].anchorStart"
                 [class.anchor-end]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
@@ -29,7 +29,7 @@
           {{layerId}}
         </legend>
         <div class="layer">
-          <span *ngIf=isSpanningLayer(schema.layers[layerId])
+          <span *ngIf="isAnchorableLayer(schema.layers[layerId])"
                 i18n-title title="Anchor to start of {{layerId}} span"
                 class="anchor-start"> <!-- first match in column -->
             <img [src]="'assets/lock-'+(column.layers[layerId][0].anchorStart?'locked':'unlocked')+'.svg'"
@@ -78,6 +78,7 @@
                 <span class="help">
                   <lib-button
                     i18n-title title="Phoneme symbol selector"
+                    class="small"
                     icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
                     (press)="helperMatch = (helperMatch == match?null:match)"></lib-button>
                   <lib-disc-helper
@@ -109,6 +110,7 @@
                 <span class="help" *ngIf="hasValidLabels(schema.layers[layerId])">
                   <lib-button
                     i18n-title title="Symbol selector"
+                    class="small"
                     icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
                     (press)="helperMatch = (helperMatch == match?null:match)"></lib-button>
                   <lib-valid-label-helper
@@ -117,10 +119,25 @@
                     (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-valid-label-helper>
                 </span>
               </span>
-              
+
             </ng-container> <!-- switch on layer.type -->
           </div>    <!-- match -->
-          <span *ngIf=isSpanningLayer(schema.layers[layerId])
+          
+          <div class="add-match"
+               *ngIf="layerId == 'segment' || schema.layers[layerId].parentId == 'segment'">
+            <lib-button
+              i18n-title title="Add word-internal segment pattern"
+              class="small"
+              icon="➕" img="add.svg"
+              (press)="addMatch(column, layerId)"></lib-button>
+            <lib-button
+              *ngIf="column.layers[layerId].length > 1"
+              class="small"
+              icon="➖" img="remove.svg"
+              i18n-title title="Remove word-internal segment pattern"
+              (press)="removeMatch(column, layerId)"></lib-button>
+          </div>
+          <span *ngIf=isAnchorableLayer(schema.layers[layerId])
                 i18n-title title="Anchor to end of {{layerId}} span"
                 class="anchor-end"> <!-- last match in column -->
             <img [src]="'assets/lock-'+(column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'locked':'unlocked')+'.svg'"

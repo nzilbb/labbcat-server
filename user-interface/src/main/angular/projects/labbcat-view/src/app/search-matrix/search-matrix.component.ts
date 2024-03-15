@@ -139,6 +139,16 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         this.columns.pop();
     }
 
+    /** Add word-internal match */
+    addMatch(column: MatrixColumn, layerId: string): void {
+        console.log("column " + JSON.stringify(column) + " layerId " + layerId);
+        column.layers[layerId].push(this.newLayerMatch(layerId));
+    }
+    /** Remove word-internal match */
+    removeMatch(column: MatrixColumn, layerId: string): void {
+        column.layers[layerId].pop();
+    }
+
     appendToPattern(match: MatrixLayerMatch, suffix: string, focusId: string): void {
         match.pattern += suffix;
         const input = document.getElementById(focusId) as any;
@@ -160,4 +170,8 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
             && layer.id != this.schema.wordLayerId;
     }
 
+    isAnchorableLayer(layer: Layer): boolean {
+        return this.isSpanningLayer(layer)
+            || layer.id == "segment" || layer.parentId == "segment";
+    }
 }
