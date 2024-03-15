@@ -20,7 +20,7 @@
   <lib-button
     *ngIf="participantIds.length < participantCount"
     i18n-title title="List more participants"
-    img="down-triangle.png" icon="▼"
+    img="ellipses.svg" icon="…"
     (click)="loadMoreParticipants()"
     [processing]="loadingParticipants">
     ></lib-button>
@@ -53,7 +53,7 @@
   <lib-button
     *ngIf="transcriptIds.length < transcriptCount"
     i18n-title title="List more transcripts"
-    img="down-triangle.png" icon="▼"
+    img="ellipses.svg" icon="…"
     (click)="loadMoreTranscripts()"
     [processing]="loadingTranscripts">
     ></lib-button>
