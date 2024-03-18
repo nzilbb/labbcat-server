@@ -44,6 +44,8 @@ export class SearchComponent implements OnInit {
             participantQuery: "",
             transcriptQuery: ""
         }
+        this.participantIds = [];
+        this.transcriptIds = [];
         this.readUserInfo();
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
