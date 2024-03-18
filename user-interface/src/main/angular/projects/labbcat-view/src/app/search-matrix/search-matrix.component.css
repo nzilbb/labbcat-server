@@ -131,5 +131,6 @@ lib-button.small img {
     lib-layer-checkboxes {
         display: flex;
         flex-direction: row;
+        justify-content: center;
     }
 }
