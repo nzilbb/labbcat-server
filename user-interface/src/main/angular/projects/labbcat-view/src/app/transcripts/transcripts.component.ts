@@ -575,9 +575,9 @@ export class TranscriptsComponent implements OnInit {
     
     /** Button action */
     layeredSearch(): void {
-        window.location.href = /* TODO remove comment: this.baseUrl
-            + */"search?"
-            + this.selectedTranscriptsQueryString("participant_id");
+        this.router.navigate(["search"], {
+            queryParams: this.selectedTranscriptsQueryParameters("participant_id")
+        });
     }
 
     /** Button action */
@@ -597,8 +597,8 @@ export class TranscriptsComponent implements OnInit {
     }
 
     /** Query string for selected transcripts */
-    selectedTranscriptsQueryString(transcriptIdParameter: string): string {
-        let queryString = "";
+    selectedTranscriptsQueryParameters(transcriptIdParameter: string): Params {
+        let params = {};
         if (this.selectedIds.length > 0) {
             let description = `${this.selectedIds.length} selected transcripts`; // TODO i18n
             switch (this.selectedIds.length) {
@@ -618,27 +618,30 @@ export class TranscriptsComponent implements OnInit {
                         + " ("+this.selectedIds.length+" selected transcripts)"; // TODO i18n
                     break;
             }
-            queryString = "transcript_expression="+encodeURIComponent("["
-                + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                + "].includes(id)")
-                +"&transcripts="+encodeURIComponent(description);
+            params = {
+                transcript_expression : "["
+                    + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                    + "].includes(id)",
+                transcripts: description
+            };
         } else if (this.query) {
-            queryString = "transcript_expression="+encodeURIComponent(this.query)
-                +"&transcripts="+encodeURIComponent(this.queryDescription);
+            params = {
+                transcript_expression: this.query,
+                transcripts: this.queryDescription
+            };
         }
         if (this.participantQuery) {
-            if (queryString) queryString += "&";
             // expressions like:
             // labels("participant").includes(["AP511_MikeThorpe"])
             // have to be replaced with:
             // ['AP511_MikeThorpe'].includes(id)
-            queryString += "participant_expression="+encodeURIComponent(
+            params["participant_expression"] = 
                 this.participantQuery
                     .replace(/labels\('participant'\).includesAny\((\[.*\])\)/,
-                             "$1\.includes\(id\)"))
-                + "&participants=" + encodeURIComponent(this.participantDescription);
+                             "$1\.includes\(id\)");
+            params["participants"] = this.participantDescription;
         }
-        return queryString;
+        return params;
     }
 
     /** Query to append to href for links to other pages */

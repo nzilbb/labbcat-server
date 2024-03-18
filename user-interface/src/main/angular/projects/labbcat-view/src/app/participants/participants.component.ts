@@ -548,9 +548,9 @@ export class ParticipantsComponent implements OnInit {
     
     /** Button action */
     layeredSearch(): void {
-        window.location.href = /*TODO remove comment: this.baseUrl
-            + */"search?"
-            + this.selectedParticipantsQueryString("participant_id");
+        this.router.navigate(["search"], {
+            queryParams: this.selectedParticipantsQueryParameters("participant_id")
+        });
     }
 
     /** Button action */
@@ -589,6 +589,31 @@ export class ParticipantsComponent implements OnInit {
                 + "&participants="+encodeURIComponent(participantDescription);
         }
         return "";
+    }
+    /** Query parameters for selected participants */
+    selectedParticipantsQueryParameters(participantIdParameter: string): Params {
+        let participantDescription = this.queryDescription;
+        if (this.selectedIds.length > 0) {
+            if (this.selectedIds.length == 1) {
+                participantDescription = this.selectedIds[0];
+            } else if (this.selectedIds.length <= 5) {
+                participantDescription = this.selectedIds.join(", ");
+            } else {
+                participantDescription = ""+this.selectedIds.length + " selected participants"; // TODO i18n
+            }
+            return {
+                participant_expression: "["
+                    + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                    + "].includes(id)",
+                participants: participantDescription
+            };
+        } else if (this.query) {
+            return {
+                participant_expression: this.query,
+                participants: participantDescription
+            };
+        }
+        return {};
     }
 
     /** Query to append to href for links to other pages */
