@@ -117,28 +117,36 @@
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <span class="layer-options" *ngIf="layer._selected">
-        <input *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-               type="checkbox" value="1" name="share_start_{{layer.id}}"
-               class="share-start"
-               id="{{name+'-'+layer.id+'-start'}}" style="display: none;">
-        <label for="{{name+'-'+layer.id+'-start'}}"
-               *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-               class="anchor"
-               title-i18n title="Click to select annotations that start when the target starts"
-               >⚓</label>
+        <ng-container *ngIf="IsAnchorable(layer)">
+          <input type="checkbox" value="1" name="share_start_{{layer.id}}"
+                 class="share-start"
+                 id="{{name+'-'+layer.id+'-start'}}" style="display: none;">
+          <label for="{{name+'-'+layer.id+'-start'}}"
+                 class="anchor"
+                 title-i18n title="Click to select annotations that start when the target starts"
+                 >
+            <img class="unlocked" [src]="imagesLocation+'/lock-unlocked.svg'" alt="🔓">
+            <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
+          </label>
+        </ng-container>
         <input *ngIf="includeCounts && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
                type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
                class="include-count"
                title-i18n title="How many linked annotations to include">
-        <input *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-               type="checkbox" value="1" name="share_end_{{layer.id}}"
-               class="share-end"
-               id="{{name+'-'+layer.id+'-end'}}" style="display: none;">
-        <label for="{{name+'-'+layer.id+'-end'}}"
-               *ngIf="includeAnchorSharing && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
-               class="anchor"
-               title-i18n title="Click to select annotations that end when the target ends"
-               >⚓</label>
+        <ng-container *ngIf="IsAnchorable(layer)">
+          <input *ngIf="IsAnchorable(layer)"
+                 type="checkbox" value="1" name="share_end_{{layer.id}}"
+                 class="share-end"
+                 id="{{name+'-'+layer.id+'-end'}}" style="display: none;">
+          <label for="{{name+'-'+layer.id+'-end'}}"
+                 *ngIf="IsAnchorable(layer)"
+                 class="anchor"
+                 title-i18n title="Click to select annotations that end when the target ends"
+                 >
+            <img class="unlocked" [src]="imagesLocation+'/lock-unlocked.svg'" alt="🔓">
+            <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
+          </label>
+        </ng-container>
       </span>
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
@@ -164,10 +172,36 @@
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <span class="layer-options" *ngIf="layer._selected">
+        <ng-container *ngIf="IsAnchorable(layer)">
+          <input type="checkbox" value="1" name="share_start_{{layer.id}}"
+                 class="share-start"
+                 id="{{name+'-'+layer.id+'-start'}}" style="display: none;">
+          <label for="{{name+'-'+layer.id+'-start'}}"
+                 class="anchor"
+                 title-i18n title="Click to select annotations that start when the target starts"
+                 >
+            <img class="unlocked" [src]="imagesLocation+'/lock-unlocked.svg'" alt="🔓">
+            <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
+          </label>
+        </ng-container>
         <input *ngIf="includeCounts && layer.peers && layer.id != schema.wordLayerId"
                type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
                class="include-count"
                title-i18n title="How many linked annotations to include">
+        <ng-container *ngIf="IsAnchorable(layer)">
+          <input *ngIf="IsAnchorable(layer)"
+                 type="checkbox" value="1" name="share_end_{{layer.id}}"
+                 class="share-end"
+                 id="{{name+'-'+layer.id+'-end'}}" style="display: none;">
+          <label for="{{name+'-'+layer.id+'-end'}}"
+                 *ngIf="IsAnchorable(layer)"
+                 class="anchor"
+                 title-i18n title="Click to select annotations that end when the target ends"
+                 >
+            <img class="unlocked" [src]="imagesLocation+'/lock-unlocked.svg'" alt="🔓">
+            <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
+          </label>
+        </ng-container>
       </span>
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
@@ -192,6 +226,38 @@
         [checked]="layer._selected"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
+      <span class="layer-options" *ngIf="layer._selected">
+        <ng-container *ngIf="IsAnchorable(layer)">
+          <input type="checkbox" value="1" name="share_start_{{layer.id}}"
+                 class="share-start"
+                 id="{{name+'-'+layer.id+'-start'}}" style="display: none;">
+          <label for="{{name+'-'+layer.id+'-start'}}"
+                 class="anchor"
+                 title-i18n title="Click to select annotations that start when the target starts"
+                 >
+            <img class="unlocked" [src]="imagesLocation+'/lock-unlocked.svg'" alt="🔓">
+            <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
+          </label>
+        </ng-container>
+        <input *ngIf="includeCounts && layer.peers && layer.id != schema.wordLayerId"
+               type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
+               class="include-count"
+               title-i18n title="How many linked annotations to include">
+        <ng-container *ngIf="IsAnchorable(layer)">
+          <input *ngIf="IsAnchorable(layer)"
+                 type="checkbox" value="1" name="share_end_{{layer.id}}"
+                 class="share-end"
+                 id="{{name+'-'+layer.id+'-end'}}" style="display: none;">
+          <label for="{{name+'-'+layer.id+'-end'}}"
+                 *ngIf="IsAnchorable(layer)"
+                 class="anchor"
+                 title-i18n title="Click to select annotations that end when the target ends"
+                 >
+            <img class="unlocked" [src]="imagesLocation+'/lock-unlocked.svg'" alt="🔓">
+            <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
+          </label>
+        </ng-container>
+      </span>
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"

@@ -137,6 +137,14 @@ export class LayerCheckboxesComponent implements OnInit {
         }
         return id.replace(/^transcript_/,"");
     }
+    IsAnchorable(layer: Layer): boolean {
+        return this.includeAnchorSharing // only if enabled
+            && layer.id != this.schema.turnLayerId // not system layers...
+            && layer.id != this.schema.utteranceLayerId
+            && layer.id != this.schema.wordLayerId
+            && layer.peers // multiple child annotations
+            && layer.alignment == 2; // inntervals
+    }
 
     handleCheckbox(layerId:string): void {
         this.schema.layers[layerId]._selected = !this.schema.layers[layerId]._selected;

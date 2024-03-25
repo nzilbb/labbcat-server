@@ -16,24 +16,41 @@
     width: 20px;
     display: inline-block;
 }
+.share-start + label img, .share-end + label img {
+    width: 15px;
+    vertical-align: bottom;
+}
 .share-start + label {
     border-top-left-radius: 50%;
     border-top: 1px black dashed;
     border-left: 1px transparent solid;
 }
+.share-start + label .locked { display: none; }
+.share-start + label .unlocked { display: inherit; opacity: 0.5; }
+
 .share-start:checked + label {
     border-top: 1px black solid;
     border-left: 1px black solid;
 }
+.share-start:checked + label .locked { display: inherit; }
+.share-start:checked + label .unlocked { display: none; }
+
 .share-end + label {
     border-top-right-radius: 50%;
     border-top: 1px black dashed;
     border-right: 1px transparent solid;
+    text-align: right;
 }
+.share-end + label .locked { display: none; }
+.share-end + label .unlocked { display: inherit; opacity: 0.5; }
+
 .share-end:checked + label {
     border-top: 1px black solid;
     border-right: 1px black solid;
 }
+.share-end:checked + label .locked { display: inherit; }
+.share-end:checked + label .unlocked { display: none; }
+
 img.alignment {
     height: 70%;
     padding-right: 3px;

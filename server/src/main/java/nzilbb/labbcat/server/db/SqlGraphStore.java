@@ -40,6 +40,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2799,7 +2800,7 @@ public class SqlGraphStore implements GraphStore {
     LinkedHashMap<String,Integer> layerIdToMaxAnnotations = new LinkedHashMap<String,Integer>();
     Integer maxAnnotationsPerLayer = Integer.valueOf(annotationsPerLayer);
     for (String id : layerIds) layerIdToMaxAnnotations.put(id, maxAnnotationsPerLayer);
-    getMatchAnnotations(matchIds, layerIdToMaxAnnotations, targetOffset, consumer);
+    getMatchAnnotations(matchIds, layerIdToMaxAnnotations, null, null, targetOffset, consumer);
   }
   
   /**
@@ -2808,6 +2809,10 @@ public class SqlGraphStore implements GraphStore {
    * the MatchId column in exported search results, token URLs, or annotation IDs.
    * @param layerIdToMaxAnnotations A map where the keys are the layer IDs of the layers
    * to get, and each value is the maximum number of annotations to retrieve for that layer.
+   * @param anchorStartLayers A set of layer IDs identifying which layer annotations must
+   * share a start anchor with the target.
+   * @param anchorEndLayers A set of layer IDs identifying which layer annotations must
+   * share a end anchor with the target.
    * @param targetOffset Which token to get the annotations of; 0 means the match target
    * itself, 1 means the token after the target, -1 means the token before the target, etc. 
    * @param consumer A consumer for handling the resulting
@@ -2820,12 +2825,15 @@ public class SqlGraphStore implements GraphStore {
    * @throws PermissionException If the operation is not permitted.
    */
   public void getMatchAnnotations(
-    Iterator<String> matchIds, Map<String,Integer> layerIdToMaxAnnotations, int targetOffset,
+    Iterator<String> matchIds, Map<String,Integer> layerIdToMaxAnnotations,
+    Set<String> anchorStartLayers, Set<String> anchorEndLayers, int targetOffset,
     Consumer<Annotation[]> consumer)
     throws StoreException, PermissionException {
     if (matchIds == null || !matchIds.hasNext()) return; // there were no IDs
     if (layerIdToMaxAnnotations == null) return; // they don't want any layers
     if (consumer == null) return; // they don't want the results
+    if (anchorStartLayers == null) anchorStartLayers = Collections.emptySet(); 
+    if (anchorStartLayers == null) anchorStartLayers = Collections.emptySet(); 
       
     Schema schema = getSchema();
 
@@ -2944,7 +2952,15 @@ public class SqlGraphStore implements GraphStore {
           Integer layer_id = (Integer)layer.get("layer_id");
           String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
             +" FROM annotation_layer_"+layer_id+" annotation"
-            +" WHERE segment_annotation_id = ?"
+            +(!anchorStartLayers.contains(layer.getId())
+              && !anchorEndLayers.contains(layer.getId())?"":
+              " INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
+              +" ON annotation.segment_annotation_id = target.annotation_id")
+            +(!anchorStartLayers.contains(layer.getId())?"":
+              " AND annotation.start_anchor_id = target.start_anchor_id")
+            +(!anchorEndLayers.contains(layer.getId())?"":
+              " AND annotation.end_anchor_id = target.end_anchor_id")
+            +" WHERE annotation.segment_annotation_id = ?"
             +" ORDER BY annotation.ordinal, annotation.annotation_id"
             +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
           if (targetOffset != 0) {
@@ -2955,6 +2971,10 @@ public class SqlGraphStore implements GraphStore {
               +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" token"
               +" ON target.word_annotation_id = token.word_annotation_id"
               +" AND target.ordinal_in_word = token.ordinal_in_word + "+targetOffset
+              +(!anchorStartLayers.contains(layer.getId())?"":
+                " AND token.start_anchor_id = target.start_anchor_id")
+              +(!anchorEndLayers.contains(layer.getId())?"":
+                " AND token.end_anchor_id = target.end_anchor_id")
               +" WHERE token.annotation_id = ?"
               +" ORDER BY annotation.ordinal, annotation.annotation_id"
               +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
@@ -2964,7 +2984,9 @@ public class SqlGraphStore implements GraphStore {
           parameterGroups.put(layerId, groups);
           if (targetOffset != 0 // if we're looking for neighboring segments
               && layer.get("layer_id").equals( // and we're after the segment itself
-                Integer.valueOf(SqlConstants.LAYER_SEGMENT))) {
+                Integer.valueOf(SqlConstants.LAYER_SEGMENT))
+              && !anchorStartLayers.contains(layer.getId())  // and not anchoring to start...
+              && !anchorEndLayers.contains(layer.getId())) { // ...nor end
             // and the query above doesn't return rows, it's because we hit the word boundary
             // but we can look into the neighboring word
             if (targetOffset > 0) { // following segment
@@ -3036,6 +3058,10 @@ public class SqlGraphStore implements GraphStore {
             +" FROM annotation_layer_"+layer_id+" annotation"
             +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
             +" ON annotation.word_annotation_id = target.word_annotation_id"
+            +(!anchorStartLayers.contains(layer.getId())?"":
+              " AND annotation.start_anchor_id = target.start_anchor_id")
+            +(!anchorEndLayers.contains(layer.getId())?"":
+              " AND annotation.end_anchor_id = target.end_anchor_id")
             // annotation anchors
             +" INNER JOIN anchor annotation_start"
             +" ON annotation.start_anchor_id = annotation_start.anchor_id"
@@ -3063,6 +3089,10 @@ public class SqlGraphStore implements GraphStore {
               +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" token"
               +" ON target.turn_annotation_id = token.turn_annotation_id"
               +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
+              +(!anchorStartLayers.contains(layer.getId())?"":
+                " AND token.start_anchor_id = target.start_anchor_id")
+              +(!anchorEndLayers.contains(layer.getId())?"":
+                " AND token.end_anchor_id = target.end_anchor_id")
               // annotation anchors
               +" INNER JOIN anchor annotation_start"
               +" ON annotation.start_anchor_id = annotation_start.anchor_id"
@@ -3126,7 +3156,15 @@ public class SqlGraphStore implements GraphStore {
             // target is transcript layer
             String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
               +" FROM annotation_layer_"+layer_id+" annotation"
-              +" WHERE word_annotation_id = ?"
+              +(!anchorStartLayers.contains(layer.getId())
+                && !anchorEndLayers.contains(layer.getId())?"":
+                " INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
+                +" ON annotation.word_annotation_id = target.word_annotation_id")
+              +" WHERE annotation.word_annotation_id = ?"
+              +(!anchorStartLayers.contains(layer.getId())?"":
+                " AND annotation.start_anchor_id = target.start_anchor_id")
+              +(!anchorEndLayers.contains(layer.getId())?"":
+                " AND annotation.end_anchor_id = target.end_anchor_id")
               +" ORDER BY annotation.ordinal, annotation.annotation_id"
               +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
             if (targetOffset != 0
@@ -3137,7 +3175,15 @@ public class SqlGraphStore implements GraphStore {
                 +" ON annotation.turn_annotation_id = token.turn_annotation_id"
                 +" AND annotation.ordinal_in_turn = token.ordinal_in_turn + "
                 + targetOffset
+                +(!anchorStartLayers.contains(layer.getId())
+                  && !anchorEndLayers.contains(layer.getId())?"":
+                  " INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
+                  +" ON annotation.word_annotation_id = target.word_annotation_id")
                 +" WHERE token.word_annotation_id = ?"
+                +(!anchorStartLayers.contains(layer.getId())?"":
+                  " AND token.start_anchor_id = target.start_anchor_id")
+                +(!anchorEndLayers.contains(layer.getId())?"":
+                  " AND token.end_anchor_id = target.end_anchor_id")
                 +" ORDER BY annotation.ordinal, annotation.annotation_id"
                 +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
             } // offset word
@@ -3168,6 +3214,10 @@ public class SqlGraphStore implements GraphStore {
               +" FROM annotation_layer_"+layer_id+" annotation"
               +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
               +" ON annotation.word_annotation_id = target.word_annotation_id"
+              +(!anchorStartLayers.contains(layer.getId())?"":
+                " AND annotation.start_anchor_id = target.start_anchor_id")
+              +(!anchorEndLayers.contains(layer.getId())?"":
+                " AND annotation.end_anchor_id = target.end_anchor_id")
               +" WHERE target.annotation_id = ?"
               +" ORDER BY annotation.ordinal, annotation.annotation_id"
               +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
@@ -3183,6 +3233,10 @@ public class SqlGraphStore implements GraphStore {
                 +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" token"
                 +" ON target.turn_annotation_id = token.turn_annotation_id"
                 +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
+                +(!anchorStartLayers.contains(layer.getId())?"":
+                  " AND token.start_anchor_id = target.start_anchor_id")
+                +(!anchorEndLayers.contains(layer.getId())?"":
+                  " AND token.end_anchor_id = target.end_anchor_id")
                 +" WHERE token.annotation_id = ?"
                 +" ORDER BY annotation.ordinal, annotation.annotation_id"
                 +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
@@ -3204,6 +3258,10 @@ public class SqlGraphStore implements GraphStore {
               +" ON annotation.ag_id = target.ag_id"
               +" AND start.offset >= target_start.offset"
               +" AND start.offset < target_end.offset"
+              +(!anchorStartLayers.contains(layer.getId())?"":
+                " AND annotation.start_anchor_id = target.start_anchor_id")
+              +(!anchorEndLayers.contains(layer.getId())?"":
+                " AND annotation.end_anchor_id = target.end_anchor_id")
               +" WHERE target.annotation_id = ?"
               +" ORDER BY start.offset, annotation.annotation_id"
               +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
@@ -3599,6 +3657,10 @@ public class SqlGraphStore implements GraphStore {
               // same turn as target
               +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
               +" ON annotation.turn_annotation_id = target.turn_annotation_id"
+              +(!anchorStartLayers.contains(layer.getId())?"":
+                " AND annotation.start_anchor_id = target.start_anchor_id")
+              +(!anchorEndLayers.contains(layer.getId())?"":
+                " AND annotation.end_anchor_id = target.end_anchor_id")
               // annotation anchors
               +" INNER JOIN anchor annotation_start"
               +" ON annotation.start_anchor_id = annotation_start.anchor_id"
@@ -3633,6 +3695,10 @@ public class SqlGraphStore implements GraphStore {
                 +" ON target.turn_annotation_id = token.turn_annotation_id"
                 +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
                         
+                +(!anchorStartLayers.contains(layer.getId())?"":
+                  " AND token.start_anchor_id = target.start_anchor_id")
+                +(!anchorEndLayers.contains(layer.getId())?"":
+                  " AND token.end_anchor_id = target.end_anchor_id")
                 // annotation anchors
                 +" INNER JOIN anchor annotation_start"
                 +" ON annotation.start_anchor_id = annotation_start.anchor_id"
@@ -3677,6 +3743,10 @@ public class SqlGraphStore implements GraphStore {
             // same graph as target
             +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" target"
             +" ON annotation.ag_id = target.ag_id"
+            +(!anchorStartLayers.contains(layer.getId())?"":
+              " AND annotation.start_anchor_id = target.start_anchor_id")
+            +(!anchorEndLayers.contains(layer.getId())?"":
+              " AND annotation.end_anchor_id = target.end_anchor_id")
             // annotation anchors
             +" INNER JOIN anchor annotation_start"
             +" ON annotation.start_anchor_id = annotation_start.anchor_id"
@@ -3710,7 +3780,12 @@ public class SqlGraphStore implements GraphStore {
               +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" token"
               +" ON target.turn_annotation_id = token.turn_annotation_id"
               +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
-                     
+
+              +(!anchorStartLayers.contains(layer.getId())?"":
+                " AND token.start_anchor_id = target.start_anchor_id")
+              +(!anchorEndLayers.contains(layer.getId())?"":
+                " AND token.end_anchor_id = target.end_anchor_id")
+
               // annotation anchors
               +" INNER JOIN anchor annotation_start"
               +" ON annotation.start_anchor_id = annotation_start.anchor_id"
@@ -8756,6 +8831,7 @@ public class SqlGraphStore implements GraphStore {
         }});
     AnnotatorDescriptor finalDescriptor = null;
     for (File jar : possibleJars) {
+      System.out.println("jar " + jar.getName());
       try {
         AnnotatorDescriptor descriptor = new AnnotatorDescriptor(jar);
         Annotator annotator = descriptor.getInstance();

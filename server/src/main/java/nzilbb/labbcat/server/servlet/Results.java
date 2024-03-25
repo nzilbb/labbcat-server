@@ -31,11 +31,14 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -334,7 +337,9 @@ public class Results extends LabbcatServlet { // TODO unit test
       // segment layers
       if (schema.getLayers().containsKey("segment")) {
         if (layers.contains("segment")) {
-          csvLayers.put("segment", 1);
+          csvLayers.put(
+            "segment", Integer.valueOf(
+              Optional.ofNullable(request.getParameter("include_count_segment")).orElse("1")));
         }
         schema.getLayer("segment").getChildren().values().stream()
           .map(l -> l.getId())
@@ -469,10 +474,19 @@ public class Results extends LabbcatServlet { // TODO unit test
             // cache graph/participant IDs to save database lookups
             final HashMap<Integer,Graph> agIdToGraph = new HashMap<Integer,Graph>();
             final HashMap<Integer,String> speakerNumberToName = new HashMap<Integer,String>();
+            final Set<String> anchorStartLayers = csvLayers.keySet().stream()
+              .filter(layerId -> request.getParameter("share_start_"+layerId) != null)
+              .collect(Collectors.toSet());
+            final Set<String> anchorEndLayers = csvLayers.keySet().stream()
+              .filter(layerId -> request.getParameter("share_end_"+layerId) != null)
+              .collect(Collectors.toSet());
+            for (String layerId : csvLayers.keySet())
 
             if (contentType.equals("text/csv")) {
               // process the data rows
-              store.getMatchAnnotations(results, csvLayers, 0, annotations -> {
+              store.getMatchAnnotations(
+                results, csvLayers, anchorStartLayers, anchorEndLayers, 0,
+                annotations -> {
                   search.keepAlive(); // prevent the task from dying while we're still interested
                   try {
                     // write the initial non-layer fields
