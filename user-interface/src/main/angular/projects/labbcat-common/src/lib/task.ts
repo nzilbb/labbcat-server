@@ -1,14 +1,15 @@
 export interface Task {
     threadId: string;
     threadName: string;
-    resultUrl: string;
-    resultText: string;
+    resultUrl?: string;
+    resultText?: string;
     seriesId: string;
     running: boolean;
     duration: number;
     percentComplete: number;
     status: string;
     refreshSeconds: number;
-    lastException: string;
-    stackTrace: string;
+    lastException?: string;
+    stackTrace?: string;
+    targetLayer?: string; // may be present for search threads
 }

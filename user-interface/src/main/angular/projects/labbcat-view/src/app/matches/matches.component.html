@@ -154,13 +154,14 @@
             <span i18n="csv options">Text</span>
           </label>
         </fieldset>
+        <!-- TODO disable segment layer anchoring when segment is targeted -->
         <lib-layer-checkboxes
           name="csv_layer"
           includeCounts="true" 
           participant="true" transcript="true"
           span="true" phrase="true" word="true" segment="true"
           excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true"
-          includeAnchorSharing="true"
+          includeAnchorSharing="true" excludeOptionsForLayerId="{{task.targetLayer}}"
           selected="{{selectedLayers}}"></lib-layer-checkboxes>
       </div>
     </fieldset>

@@ -10,30 +10,52 @@ import { Layer } from '../layer';
   styleUrls: ['./layer-checkboxes.component.css']
 })
 export class LayerCheckboxesComponent implements OnInit {
+    /** name attribute for checkboxes */
     @Input() name: string;
+    /** Allow an annotation count to be specified when a layer is selected */
     @Input() includeCounts: boolean;
+    /** Allow start/end anchoring to be specified when a layer is selected */
     @Input() includeAnchorSharing: boolean;
+    /** Allow the relationship (containing or contained) to be specified when a spanning
+        layer is selected */ 
     @Input() includeRelationship: boolean;
+    /** Show the alignment of each layer */
     @Input() includeAlignment: boolean;
+    /** Allow participant attribute layers to be selected */
     @Input() participant: boolean;
+    /** Don't allow the 'participant' layer to be selected */
     @Input() excludeParticipant: boolean;
+    /** Don't allow the 'main_participant' layer to be selected */
     @Input() excludeMainParticipant: boolean;
     participantAttributes: Layer[];
+    /** Allow transcript attributes to be selected */
     @Input() transcript: boolean;
+    /** Don't allow the 'corpus' layer to be selected */
     @Input() excludeCorpus: boolean;
     transcriptAttributes: Layer[];
+    /** Don't allow the 'transcript' top-level layer to be selected */
     @Input() excludeRoot: boolean;
+    /** Allow span layers to be selected */
     @Input() span: boolean;
     spanLayers: Layer[];
+    /** Allow phrase layers to be selected */
     @Input() phrase: boolean;
+    /** Don't allow the 'turn' layer to be selected */
     @Input() excludeTurn: boolean;
+    /** Don't allow the 'utterance' layer to be selected */
     @Input() excludeUtterance: boolean;
+    /** Include a layer category selector, to hide/reveal layers */
     @Input() category: boolean;
     phraseLayers: Layer[];
+    /** Allow word layers to be selected */
     @Input() word: boolean;
     wordLayers: Layer[];
+    /** Allow segment layers to be selected */
     @Input() segment: boolean;
     segmentLayers: Layer[];
+    /** A layer ID to exclude options (annotation count, anchoring, etc.) for */
+    @Input() excludeOptionsForLayerId: string;
+    /** List of IDs of selected (ticked) layers */
     @Input() selected: string[];
     @Output() selectedChange = new EventEmitter<string[]>();
     imagesLocation : string;
