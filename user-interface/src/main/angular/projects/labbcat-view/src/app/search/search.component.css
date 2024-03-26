@@ -3,7 +3,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     max-height: 30vh;
-    overflow: scroll;
+    overflow: auto;
 }
 #participant-ids a, #transcript-ids a {
     padding-right: 5px;

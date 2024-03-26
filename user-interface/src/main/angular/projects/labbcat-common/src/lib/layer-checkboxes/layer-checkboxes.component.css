@@ -52,6 +52,6 @@
 .share-end:checked + label .unlocked { display: none; }
 
 img.alignment {
-    height: 70%;
+    height: 12px;
     padding-right: 3px;
 }
