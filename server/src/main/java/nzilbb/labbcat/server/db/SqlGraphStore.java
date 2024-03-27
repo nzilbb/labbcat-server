@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -2833,7 +2833,7 @@ public class SqlGraphStore implements GraphStore {
     if (layerIdToMaxAnnotations == null) return; // they don't want any layers
     if (consumer == null) return; // they don't want the results
     if (anchorStartLayers == null) anchorStartLayers = Collections.emptySet(); 
-    if (anchorStartLayers == null) anchorStartLayers = Collections.emptySet(); 
+    if (anchorEndLayers == null) anchorEndLayers = Collections.emptySet(); 
       
     Schema schema = getSchema();
 
