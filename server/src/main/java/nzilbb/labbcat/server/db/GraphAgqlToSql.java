@@ -183,8 +183,9 @@ public class GraphAgqlToSql {
                         +" FROM corpus"
                         +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                         +" ON annotation_transcript.layer = 'language'"
-                        +" AND annotation_transcript.ag_id = transcript.ag_id"
                         +" WHERE transcript.corpus_name = corpus.corpus_name"
+                        +" AND (annotation_transcript.ag_id IS NULL"
+                        +" OR annotation_transcript.ag_id = transcript.ag_id)"
                         +" ORDER BY annotation_id LIMIT 1)");
                     } else { // any other transcript attribute
                       conditions.push(
@@ -283,8 +284,9 @@ public class GraphAgqlToSql {
                     +" FROM corpus"
                     +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                     +" ON annotation_transcript.layer = 'language'"
-                    +" AND annotation_transcript.ag_id = transcript.ag_id"
-                    +" WHERE transcript.corpus_name = corpus.corpus_name)");
+                    +" WHERE transcript.corpus_name = corpus.corpus_name"
+                    +" AND (annotation_transcript.ag_id IS NULL"
+                    +" OR annotation_transcript.ag_id = transcript.ag_id))");
                 } else { // any other transcript attribute
                   conditions.push(
                     "(SELECT DISTINCT label"

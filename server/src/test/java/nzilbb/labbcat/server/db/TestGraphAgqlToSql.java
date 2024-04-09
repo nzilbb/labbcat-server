@@ -350,12 +350,29 @@ public class TestGraphAgqlToSql {
                  +" FROM corpus"
                  +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" ON annotation_transcript.layer = 'language'"
-                 +" AND annotation_transcript.ag_id = transcript.ag_id"
-                 +" WHERE transcript.corpus_name = corpus.corpus_name)"
+                 +" WHERE transcript.corpus_name = corpus.corpus_name"
+                 +" AND (annotation_transcript.ag_id IS NULL"
+                 +" OR annotation_transcript.ag_id = transcript.ag_id))"
                  +" ORDER BY transcript.transcript_id",
                  q.sql);
     assertEquals("Parameter count", 0, q.parameters.size());
-
+    
+    q = transformer.sqlFor(
+      "[\"mi\"].includesAny(labels('transcript_language'))",
+      "COUNT(*)", null, null, null);
+    assertEquals("SQL",
+                 "SELECT COUNT(*) FROM transcript"
+                 +" WHERE ('mi' IN (SELECT DISTINCT"
+                 +" CASE COALESCE(label,'') WHEN '' THEN corpus_language ELSE label END"
+                 +" FROM corpus"
+                 +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
+                 +" ON annotation_transcript.layer = 'language'"
+                 +" WHERE transcript.corpus_name = corpus.corpus_name"
+                 +" AND (annotation_transcript.ag_id IS NULL"
+                 +" OR annotation_transcript.ag_id = transcript.ag_id)))"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
   }
 
   @Test public void labels() throws AGQLException {
@@ -517,8 +534,9 @@ public class TestGraphAgqlToSql {
                  +" FROM corpus"
                  +" LEFT OUTER JOIN annotation_transcript USE INDEX(IDX_AG_ID_NAME)"
                  +" ON annotation_transcript.layer = 'language'"
-                 +" AND annotation_transcript.ag_id = transcript.ag_id"
                  +" WHERE transcript.corpus_name = corpus.corpus_name"
+                 +" AND (annotation_transcript.ag_id IS NULL"
+                 +" OR annotation_transcript.ag_id = transcript.ag_id)"
                  +" ORDER BY annotation_id"
                  +" LIMIT 1) = 'en'"
                  +" ORDER BY transcript.transcript_id",
