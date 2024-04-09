@@ -7772,7 +7772,8 @@ public class SqlGraphStore implements GraphStore {
    * Saves the given media for the given transcript.
    * @param id The transcript ID
    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
-   * @param mediaUrl A URL to the media content.
+   * @param mediaUrl A URL to the media content. If this is a <tt>file:</tt> URL, the file
+   * will be moved rather than copied, if possible. Otherwise, the content will be downloaded.
    * @throws StoreException If an error prevents the media from being saved.
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
