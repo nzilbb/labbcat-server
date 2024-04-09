@@ -157,4 +157,22 @@ public class MultipartRequestParameters extends Hashtable {
     } 
   } // end of getFiles()
   
+  /**
+   * Determines the name of the given file.
+   * @param file The file item.
+   * @return The name of the file, excluding any path information the browser may have included.
+   */
+  public static String SanitizedFileName(FileItem item) {
+    if (item == null) return null;
+    String fileName = item.getName();
+    if (fileName == null) return null;
+    // some browsers provide a full path, which must be truncated
+    int lastSlash = fileName.lastIndexOf('/');
+    if (lastSlash < 0) lastSlash = fileName.lastIndexOf('\\');
+    if (lastSlash >= 0) {
+      fileName = fileName.substring(lastSlash + 1);
+    }
+    return fileName;
+  } // end of SanitizedFileName()
+  
 } // end of class MultipartRequestParameters

@@ -56,6 +56,7 @@ import nzilbb.ag.util.Merger;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.db.*;
+import org.apache.commons.fileupload.FileItem;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -262,6 +263,38 @@ import org.xml.sax.*;
  </dl>
  </li>
  </ul>
+ <a id="saveMedia(String,String,String)">
+ <!--   -->
+ </a>
+ <ul class="blockList">
+ <li class="blockList">
+ <h4>/api/edit/store/saveMedia</h4>
+ <div class="block">Saves the given media for the given transcript.
+ </div>
+ <dl>
+ <dt><span class="paramLabel">Body: multipart POST request, with the following parameters</span></dt>
+ <dd><code>id</code> - The ID of the transcript.</dd>
+ <dd><code>trackSuffix</code> (optional) - The track suffix of the media - see
+      {@link MediaTrackDefinition#suffix}.</dd>  
+ <dd><code>media</code> - The sound or video file to save for the transcript.</dd>
+ </dl>
+ </li>
+ </ul>
+ <a id="saveEpisodeDocument(String,String)">
+ <!--   -->
+ </a>
+ <ul class="blockList">
+ <li class="blockList">
+ <h4>/api/edit/store/saveMedia</h4>
+ <div class="block">Saves the given document for the episode of the given transcript.
+ </div>
+ <dl>
+ <dt><span class="paramLabel">Body: multipart POST request, with the following parameters</span></dt>
+ <dd><code>id</code> - The ID of the transcript.</dd>
+ <dd><code>document</code> - The document file to save for the transcript.</dd>
+ </dl>
+ </li>
+ </ul>
 
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -329,6 +362,10 @@ public class Store extends StoreQuery {
         json = deleteMatchingAnnotations(request, response, store);
       } else if (pathInfo.endsWith("tagmatchingannotations")) {
         json = tagMatchingAnnotations(request, response, store);
+      } else if (pathInfo.endsWith("savemedia")) {
+        json = saveMedia(request, response, store);
+      } else if (pathInfo.endsWith("saveepisodedocument")) {
+        json = saveEpisodeDocument(request, response, store);
       }
     } // only if it's a POST request
       
@@ -344,7 +381,7 @@ public class Store extends StoreQuery {
    * Implementation of {@link nzilbb.ag.GraphStore#saveTranscript(Graph)}, which currently
    * only supports transcript attribute update.
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
@@ -414,7 +451,7 @@ public class Store extends StoreQuery {
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#createAnnotation(String,String,String,String,String,Integer,String)}
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
@@ -452,7 +489,7 @@ public class Store extends StoreQuery {
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#destroyAnnotation(String,String)}
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
@@ -472,7 +509,7 @@ public class Store extends StoreQuery {
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#saveParticipant(Annotation)}
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
@@ -617,14 +654,95 @@ public class Store extends StoreQuery {
     return failureResult(errors);
   }
   
-  // TODO saveMedia
+  /**
+   * Implementation of {@link nzilbb.ag.GraphStore#saveMediaString,String,String)}
+   * @param request The HTTP request.
+   * @param response The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject saveMedia(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    Vector<String> errors = new Vector<String>();
+
+    try {
+      // interpret request parameters
+      MultipartRequestParameters parameters = new MultipartRequestParameters(request);
+      String id = parameters.getString("id");
+      if (id == null) errors.add(localize(request, "No ID specified."));
+      String trackSuffix = parameters.getString("trackSuffix");
+      Vector<FileItem> files =  parameters.getFiles("media");
+      FileItem media = files.size() == 0? null : files.firstElement();
+      if (media == null) errors.add("No media received."); // TODO i18n
+      if (errors.size() > 0) return failureResult(errors);
+
+      String fileName = MultipartRequestParameters.SanitizedFileName(media);
+      // save the file
+      File temporaryMediaFile = File.createTempFile("saveMedia-", "-"+fileName);
+      temporaryMediaFile.delete();
+      temporaryMediaFile.deleteOnExit();
+      media.write(temporaryMediaFile);
+      store.saveMedia(id, trackSuffix, temporaryMediaFile.toURI().toString());
+
+      // ensure the temporary file is deleted
+      temporaryMediaFile.delete();
+
+      return successResult(
+        request, "", "Added {0} to {1}", fileName, id); // TODO i18n
+
+    } catch(Exception ex) {
+      throw new ServletException(ex);
+    }    
+  }
+  
+  /**
+   * Implementation of {@link nzilbb.ag.GraphStore#saveEpisodeDocument(String,String)}
+   * @param request The HTTP request.
+   * @param response The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject saveEpisodeDocument(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    Vector<String> errors = new Vector<String>();
+
+    try {
+      // interpret request parameters
+      MultipartRequestParameters parameters = new MultipartRequestParameters(request);
+      String id = parameters.getString("id");
+      if (id == null) errors.add(localize(request, "No ID specified."));
+      Vector<FileItem> files =  parameters.getFiles("document");
+      FileItem media = files.size() == 0? null : files.firstElement();
+      if (media == null) errors.add("No media received."); // TODO i18n
+      if (errors.size() > 0) return failureResult(errors);
+      
+      String fileName = MultipartRequestParameters.SanitizedFileName(media);
+      // save the file
+      File temporaryMediaFile = File.createTempFile("saveEpisodeDocument-", "-"+fileName);
+      temporaryMediaFile.delete();
+      temporaryMediaFile.deleteOnExit();
+      media.write(temporaryMediaFile);
+      store.saveEpisodeDocument(id, temporaryMediaFile.toURI().toString());
+
+      // ensure the temporary file is deleted
+      temporaryMediaFile.delete();
+      
+      return successResult(
+        request, "", "Added {0} to {1}", fileName, id); // TODO i18n
+      
+    } catch(Exception ex) {
+      throw new ServletException(ex);
+    }    
+  }
+
   // TODO saveSource
-  // TODO saveEpisodeDocument
 
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#deleteTranscript(String)}
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
@@ -642,7 +760,7 @@ public class Store extends StoreQuery {
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#deleteParticipant(String)}
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
@@ -665,7 +783,7 @@ public class Store extends StoreQuery {
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#deleteMatchingAnnotations(String,String)}
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
@@ -683,7 +801,7 @@ public class Store extends StoreQuery {
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#tagMatchingAnnotations(String,String,String,Integer)}
    * @param request The HTTP request.
-   * @param request The HTTP response.
+   * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */

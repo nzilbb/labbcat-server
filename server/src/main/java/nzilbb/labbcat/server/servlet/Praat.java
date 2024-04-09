@@ -277,13 +277,7 @@ public class Praat extends LabbcatServlet { // TODO unit test
       }
       // save the input file
       FileItem csv = files.elementAt(0);
-      String fileName = csv.getName();
-      // some browsers provide a full path, which must be truncated
-      int lastSlash = fileName.lastIndexOf('/');
-      if (lastSlash < 0) lastSlash = fileName.lastIndexOf('\\');
-      if (lastSlash >= 0) {
-        fileName = fileName.substring(lastSlash + 1);
-      }
+      String fileName = MultipartRequestParameters.SanitizedFileName(csv);
       // save the file
       File uploadedCsvFile = File.createTempFile("Praat-", "-"+fileName);
       uploadedCsvFile.delete();

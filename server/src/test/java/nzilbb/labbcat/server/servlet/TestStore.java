@@ -188,6 +188,152 @@ public class TestStore
     l.saveTranscript(graph);
   }
   
+  /** Test transcript media can be saved */
+  @Test public void saveMedia() throws Exception {
+    
+    // first get a corpus and transcript type
+    String[] ids = l.getCorpusIds();
+    assertTrue("There is at least one corpus", ids.length > 0);
+    String corpus = ids[0];
+    Layer typeLayer = l.getLayer("transcript_type");
+    assertTrue("There is at least one transcript type", typeLayer.getValidLabels().size() > 0);
+    String transcriptType = typeLayer.getValidLabels().keySet().iterator().next();
+
+    File transcript = new File(getDir(), "nzilbb.labbcat.server.test.txt");
+    File media = new File(getDir(), "nzilbb.labbcat.server.test.wav");
+    String participantId = "UnitTester";
+    assertTrue("Ensure transcript exists: " + transcript.getPath(), transcript.exists());
+    assertTrue("Ensure media exists: " + media.getPath(), media.exists());
+    try {
+      
+      // ensure transcript/participant don't already exist
+      try {
+        l.deleteTranscript(transcript.getName());
+      } catch(ResponseException exception) {}
+      try {
+        l.deleteParticipant(participantId);
+      } catch(ResponseException exception) {}
+      
+      String threadId = l.newTranscript(
+        transcript, null, null, transcriptType, corpus, "test");      
+      // cancel layer generation, we don't care about it         
+      l.cancelTask(threadId);
+      l.releaseTask(threadId);
+
+      // ensure there is no media
+      MediaFile[] files = l.getAvailableMedia(transcript.getName());
+      assertTrue("No media is present: " + Arrays.asList(files), files.length == 0);
+
+      // upload media
+      l.saveMedia(transcript.getName(), null, media.toURI().toString());
+      
+      // ensure there is now media
+      files = l.getAvailableMedia(transcript.getName());
+      assertTrue("Media is now present", files.length > 0);
+    } finally {
+      try {
+        // delete transcript/participant
+        l.deleteTranscript(transcript.getName());
+        l.deleteParticipant(participantId);
+        
+        // ensure the transcript/participant no longer exist
+        assertEquals("Transcript has been deleted from the store",
+                     0, l.countMatchingTranscriptIds("id = '"+transcript.getName()+"'"));
+        assertEquals("Participant has been deleted from the store",
+                     0, l.countMatchingParticipantIds("id = '"+participantId+"'"));
+      } catch (Exception x) {
+        System.err.println("Unexpectedly can't delete test transcript: " + x);
+      }
+    }
+  }
+  
+  /** Test episode document can be saved */
+  @Test public void saveEpisodeDocument() throws Exception {
+    
+    // first get a corpus and transcript type
+    String[] ids = l.getCorpusIds();
+    assertTrue("There is at least one corpus", ids.length > 0);
+    String corpus = ids[0];
+    Layer typeLayer = l.getLayer("transcript_type");
+    assertTrue("There is at least one transcript type", typeLayer.getValidLabels().size() > 0);
+    String transcriptType = typeLayer.getValidLabels().keySet().iterator().next();
+
+    File transcript = new File(getDir(), "nzilbb.labbcat.server.test.txt");
+    File media = new File(getDir(), "nzilbb.labbcat.server.test.doc");
+    String participantId = "UnitTester";
+    assertTrue("Ensure transcript exists: " + transcript.getPath(), transcript.exists());
+    assertTrue("Ensure document exists: " + media.getPath(), media.exists());
+    try {
+      
+      // ensure transcript/participant don't already exist
+      try {
+        l.deleteTranscript(transcript.getName());
+      } catch(ResponseException exception) {}
+      try {
+        l.deleteParticipant(participantId);
+      } catch(ResponseException exception) {}
+      
+      String threadId = l.newTranscript(
+        transcript, null, null, transcriptType, corpus, "test");      
+      // cancel layer generation, we don't care about it         
+      l.cancelTask(threadId);
+      l.releaseTask(threadId);
+
+      // ensure there is no media
+      MediaFile[] files = l.getEpisodeDocuments(transcript.getName());
+      // TODO need to implement document deletion assertTrue("No documents present: " + Arrays.asList(files), files.length == 0);
+
+      // upload document
+      l.saveEpisodeDocument(transcript.getName(), media.toURI().toString());
+      
+      // ensure there is now media
+      files = l.getEpisodeDocuments(transcript.getName());
+      assertTrue("Document is now present", files.length > 0);
+    } finally {
+      try {
+        // delete transcript/participant
+        l.deleteTranscript(transcript.getName());
+        l.deleteParticipant(participantId);
+        
+        // ensure the transcript/participant no longer exist
+        assertEquals("Transcript has been deleted from the store",
+                     0, l.countMatchingTranscriptIds("id = '"+transcript.getName()+"'"));
+        assertEquals("Participant has been deleted from the store",
+                     0, l.countMatchingParticipantIds("id = '"+participantId+"'"));
+      } catch (Exception x) {
+        System.err.println("Unexpectedly can't delete test transcript: " + x);
+      }
+    }
+  }
+  
+  /**
+   * Directory for text files.
+   * @see #getDir()
+   * @see #setDir(File)
+   */
+  protected File fDir;
+  /**
+   * Getter for {@link #fDir}: Directory for text files.
+   * @return Directory for text files.
+   */
+  public File getDir() { 
+    if (fDir == null) {
+      try {
+        URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
+        File fThisClass = new File(urlThisClass.toURI());
+        fDir = fThisClass.getParentFile();
+      } catch(Throwable t) {
+        System.out.println("" + t);
+      }
+    }
+    return fDir; 
+  }
+  /**
+   * Setter for {@link #fDir}: Directory for text files.
+   * @param fNewDir Directory for text files.
+   */
+  public void setDir(File fNewDir) { fDir = fNewDir; }
+
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestStore");
   }
