@@ -225,7 +225,7 @@ public class TestStore
       assertTrue("No media is present: " + Arrays.asList(files), files.length == 0);
 
       // upload media
-      l.saveMedia(transcript.getName(), null, media.toURI().toString());
+      l.saveMedia(transcript.getName(), media.toURI().toString(), null);
       
       // ensure there is now media
       files = l.getAvailableMedia(transcript.getName());

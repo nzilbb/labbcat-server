@@ -4168,7 +4168,7 @@ public class SqlGraphStore implements GraphStore {
     try {
       Vector<Anchor> anchors = new Vector<Anchor>();
       PreparedStatement sqlAnchor = getConnection().prepareStatement(
-        "SELECT anchor_id, offset, alignment_status, annotated_by, annotated_when"
+        "SELECT anchor_id, `offset`, alignment_status, annotated_by, annotated_when"
         +" FROM anchor"
         +" WHERE anchor_id = ?");
       try {
@@ -5270,7 +5270,7 @@ public class SqlGraphStore implements GraphStore {
       PreparedStatement sqlLastId = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
       PreparedStatement sqlInsertAnchor = getConnection().prepareStatement(
         "INSERT INTO anchor"
-        +" (ag_id, offset, alignment_status, annotated_by, annotated_when)"
+        +" (ag_id, `offset`, alignment_status, annotated_by, annotated_when)"
         +" VALUES (?, ?, ?, ?, ?)");
       sqlInsertAnchor.setInt(1, iAgId);
       PreparedStatement sqlUpdateAnchor = getConnection().prepareStatement(
@@ -7771,14 +7771,14 @@ public class SqlGraphStore implements GraphStore {
   /**
    * Saves the given media for the given transcript.
    * @param id The transcript ID
-   * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @param mediaUrl A URL to the media content. If this is a <tt>file:</tt> URL, the file
    * will be moved rather than copied, if possible. Otherwise, the content will be downloaded.
+   * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @throws StoreException If an error prevents the media from being saved.
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveMedia(String id, String trackSuffix, String mediaUrl)
+  public void saveMedia(String id, String mediaUrl, String trackSuffix)
     throws StoreException, PermissionException, GraphNotFoundException {
     if (trackSuffix == null) trackSuffix = "";
     Vector<File> toDelete = new Vector<File>();

@@ -683,7 +683,7 @@ public class Store extends StoreQuery {
       temporaryMediaFile.delete();
       temporaryMediaFile.deleteOnExit();
       media.write(temporaryMediaFile);
-      store.saveMedia(id, trackSuffix, temporaryMediaFile.toURI().toString());
+      store.saveMedia(id, temporaryMediaFile.toURI().toString(), trackSuffix);
 
       // ensure the temporary file is deleted
       temporaryMediaFile.delete();
