@@ -7828,6 +7828,9 @@ public class SqlGraphStore implements GraphStore {
 
       // determine the destination path
       MediaFile mediaFile = new MediaFile(source, trackSuffix);
+      if (!hasAccess(id, mediaFile.getType().substring(0,1))) { // they have no access to this media
+        throw new PermissionException("No access to: " + mediaFile.getType()); // TODO i18n
+      }
       File mediaDir = new File(
         episodeDir, mediaFile.getExtension()
         // downcase media file extensions - i.e. .WAV -> .wav
@@ -8114,6 +8117,9 @@ public class SqlGraphStore implements GraphStore {
     throws StoreException, PermissionException, GraphNotFoundException {
     try {
       String[] layers = { "corpus", "episode" };
+      if (!hasAccess(id, "o")) { // they have no access to 'other' media
+        throw new PermissionException("No access to documents."); // TODO i18n
+      }
       Graph graph = getTranscript(id, layers);
       File corpusDir = new File(getFiles(), graph.first("corpus").getLabel());
       if (!corpusDir.exists()) corpusDir.mkdir();
@@ -8168,7 +8174,7 @@ public class SqlGraphStore implements GraphStore {
         docUrl.append(resultingFile.getExtension());
         docUrl.append("/");
         docUrl.append(resultingFile.getName());
-        resultingFile.setUrl(url.toString());
+        resultingFile.setUrl(docUrl.toString());
       }
       return resultingFile;
     } catch (URISyntaxException urix) {
@@ -8197,19 +8203,25 @@ public class SqlGraphStore implements GraphStore {
     if (docDir.exists()) {
       for (File f : docDir.listFiles()) {
         MediaFile mediaFile = new MediaFile(f, "");
-        if (getBaseUrl() == null) { // TODO check this isn't a security risk
-          mediaFile.setUrl(f.toURI().toString());
-        } else {
-          StringBuffer url = new StringBuffer(getBaseUrl());
-          url.append("/files/");
-          url.append(graph.first("corpus").getLabel());
-          url.append("/");
-          url.append(graph.first("episode").getLabel());
-          url.append("/doc/");
-          url.append(f.getName());
-          mediaFile.setUrl(url.toString());
+        try {
+          if (hasAccess(id, mediaFile.getType().substring(0,1))) {
+            if (getBaseUrl() == null) { // TODO check this isn't a security risk
+              mediaFile.setUrl(f.toURI().toString());
+            } else {
+              StringBuffer url = new StringBuffer(getBaseUrl());
+              url.append("/files/");
+              url.append(graph.first("corpus").getLabel());
+              url.append("/");
+              url.append(graph.first("episode").getLabel());
+              url.append("/doc/");
+              url.append(f.getName());
+              mediaFile.setUrl(url.toString());
+            }
+            files.add(mediaFile);
+          }
+        } catch (SQLException x) {
+          throw new StoreException(x);
         }
-        files.add(mediaFile);
       } // next doc file
     } // the doc dir exists
     return files.toArray(new MediaFile[0]);      
@@ -8241,10 +8253,19 @@ public class SqlGraphStore implements GraphStore {
     } // media file not found
 
     if (file != null && file.getFile() != null && file.getFile().exists()) { // something to delete
-      // delete the file
-      if (!file.getFile().delete()) {
-        throw new StoreException("Could not delete: " + file.getFile().getPath());
-      }
+
+      try {
+        if (!hasAccess(id, file.getType().substring(0,1))) { // they have no access to this media
+          throw new PermissionException("No access to: " + file.getType()); // TODO i18n
+        }
+        
+        // delete the file
+        if (!file.getFile().delete()) {
+          throw new StoreException("Could not delete: " + file.getFile().getPath());
+        }
+      } catch (SQLException x) {
+        throw new StoreException(x);
+      }      
     } else {
       throw new StoreException("Not found: " + fileName);
     }
