@@ -7778,7 +7778,7 @@ public class SqlGraphStore implements GraphStore {
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveMedia(String id, String mediaUrl, String trackSuffix)
+  public MediaFile saveMedia(String id, String mediaUrl, String trackSuffix)
     throws StoreException, PermissionException, GraphNotFoundException {
     if (trackSuffix == null) trackSuffix = "";
     Vector<File> toDelete = new Vector<File>();
@@ -7989,6 +7989,20 @@ public class SqlGraphStore implements GraphStore {
 
       } // censorship required
 
+      MediaFile resultingFile = new MediaFile(destination, trackSuffix);
+      if (getBaseUrl() != null) {
+        StringBuffer url = new StringBuffer(getBaseUrl());
+        url.append("/files/");
+        url.append(corpusDir.getName());
+        url.append("/");
+        url.append(episodeDir.getName());
+        url.append("/");
+        url.append(resultingFile.getExtension());
+        url.append("/");
+        url.append(resultingFile.getName());
+        resultingFile.setUrl(url.toString());
+      }
+      return resultingFile;
     } catch (URISyntaxException urix) {
       throw new StoreException("Invalid URL: " + mediaUrl, urix);
     } catch (Throwable t) {
@@ -8096,7 +8110,7 @@ public class SqlGraphStore implements GraphStore {
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveEpisodeDocument(String id, String url)
+  public MediaFile saveEpisodeDocument(String id, String url)
     throws StoreException, PermissionException, GraphNotFoundException {
     try {
       String[] layers = { "corpus", "episode" };
@@ -8105,6 +8119,7 @@ public class SqlGraphStore implements GraphStore {
       if (!corpusDir.exists()) corpusDir.mkdir();
       File episodeDir = new File(corpusDir, graph.first("episode").getLabel());	
       if (!episodeDir.exists()) episodeDir.mkdir();
+      File destination = null;
  
       // get the content
       if (url.startsWith("file:")) { // file URL
@@ -8112,7 +8127,7 @@ public class SqlGraphStore implements GraphStore {
         if (!docDir.exists()) docDir.mkdir();
         File source = new File(new URI(url));
         // docs saved with their own name
-        File destination = new File(docDir, source.getName());
+        destination = new File(docDir, source.getName());
 
         // backup old file if it exists
         IO.Backup(destination);
@@ -8134,14 +8149,28 @@ public class SqlGraphStore implements GraphStore {
           destinationName = destinationName.substring(destinationName.lastIndexOf('/') + 1);
           if (destinationName.length() == 0) destinationName = u.getPath();
         }
-        File destination = new File(docDir, destinationName);
+        destination = new File(docDir, destinationName);
         try {
           IO.SaveUrlToFile(u, destination);
         } catch(IOException exception) {
           throw new StoreException(
             "Could not save " + url + " to " + destination.getPath(), exception);
-        }	    
+        }
       } // not file URL
+      MediaFile resultingFile = new MediaFile(destination);
+      if (getBaseUrl() != null) {
+        StringBuffer docUrl = new StringBuffer(getBaseUrl());
+        docUrl.append("/files/");
+        docUrl.append(corpusDir.getName());
+        docUrl.append("/");
+        docUrl.append(episodeDir.getName());
+        docUrl.append("/");
+        docUrl.append(resultingFile.getExtension());
+        docUrl.append("/");
+        docUrl.append(resultingFile.getName());
+        resultingFile.setUrl(url.toString());
+      }
+      return resultingFile;
     } catch (URISyntaxException urix) {
       throw new StoreException("Invalid URL: " + url, urix);
     } catch (Throwable t) {
@@ -8186,6 +8215,40 @@ public class SqlGraphStore implements GraphStore {
     return files.toArray(new MediaFile[0]);      
   }
    
+  /**
+   * Delete a given media or document file.
+   * @param id The associated transcript ID.
+   * @param fileName The media file name, e.g. {@link MediaFile#name}.
+   * @throws StoreException, PermissionException, GraphNotFoundException
+   */
+  public void deleteMedia(String id, String fileName)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    MediaFile file = null;
+    for (MediaFile media : getAvailableMedia(id)) {
+      if (media.getName().equals(fileName)) {
+        file = media;
+        break;
+      }
+    } // next available media file
+    if (file == null) { // media file not found
+      // might be an episode document
+      for (MediaFile media : getEpisodeDocuments(id)) {
+        if (media.getName().equals(fileName)) {
+          file = media;
+          break;
+        }
+      } // next episode document      
+    } // media file not found
+
+    if (file != null && file.getFile() != null && file.getFile().exists()) { // something to delete
+      // delete the file
+      if (!file.getFile().delete()) {
+        throw new StoreException("Could not delete: " + file.getFile().getPath());
+      }
+    } else {
+      throw new StoreException("Not found: " + fileName);
+    }
+  }
    
   /**
    * Generates any media files that are not marked "on demand" and for which there are

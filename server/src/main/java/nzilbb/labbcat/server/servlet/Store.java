@@ -295,6 +295,21 @@ import org.xml.sax.*;
  </dl>
  </li>
  </ul>
+ <a id="deleteMedia(String,String)">
+ <!--   -->
+ </a>
+ <ul class="blockList">
+ <li class="blockList">
+ <h4>/api/edit/store/deleteMedia</h4>
+ <div class="block">Delete a given media or episode document file.
+ </div>
+ <dl>
+ <dt><span class="paramLabel">Body: multipart POST request, with the following parameters</span></dt>
+ <dd><code>id</code> - The associated transcript ID.</dd>
+ <dd><code>fileName</code> - The media file name, e.g. {@link MediaFile#name}.</dd>
+ </dl>
+ </li>
+ </ul>
 
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -366,6 +381,8 @@ public class Store extends StoreQuery {
         json = saveMedia(request, response, store);
       } else if (pathInfo.endsWith("saveepisodedocument")) {
         json = saveEpisodeDocument(request, response, store);
+      } else if (pathInfo.endsWith("deletemedia")) {
+        json = deleteMedia(request, response, store);
       }
     } // only if it's a POST request
       
@@ -683,13 +700,13 @@ public class Store extends StoreQuery {
       temporaryMediaFile.delete();
       temporaryMediaFile.deleteOnExit();
       media.write(temporaryMediaFile);
-      store.saveMedia(id, temporaryMediaFile.toURI().toString(), trackSuffix);
+      MediaFile mediaFile = store.saveMedia(id, temporaryMediaFile.toURI().toString(), trackSuffix);
 
       // ensure the temporary file is deleted
       temporaryMediaFile.delete();
 
       return successResult(
-        request, "", "Added {0} to {1}", fileName, id); // TODO i18n
+        request, mediaFile, "Added {0} to {1}", fileName, id); // TODO i18n
 
     } catch(Exception ex) {
       throw new ServletException(ex);
@@ -724,17 +741,37 @@ public class Store extends StoreQuery {
       temporaryMediaFile.delete();
       temporaryMediaFile.deleteOnExit();
       media.write(temporaryMediaFile);
-      store.saveEpisodeDocument(id, temporaryMediaFile.toURI().toString());
+      MediaFile mediaFile = store.saveEpisodeDocument(id, temporaryMediaFile.toURI().toString());
 
       // ensure the temporary file is deleted
       temporaryMediaFile.delete();
       
       return successResult(
-        request, "", "Added {0} to {1}", fileName, id); // TODO i18n
+        request, mediaFile, "Added {0} to {1}", fileName, id); // TODO i18n
       
     } catch(Exception ex) {
       throw new ServletException(ex);
     }    
+  }
+
+  /**
+   * Implementation of {@link nzilbb.ag.GraphStore#deleteMedia(String,String)}
+   * @param request The HTTP request.
+   * @param response The HTTP response.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject deleteMedia(
+    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
+    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    Vector<String> errors = new Vector<String>();
+    String id = request.getParameter("id");
+    if (id == null) errors.add(localize(request, "No ID specified."));
+    String fileName = request.getParameter("fileName");
+    if (fileName == null) errors.add(localize(request, "No file name specified.")); // TODO i18n
+    if (errors.size() > 0) return failureResult(errors);
+    store.deleteMedia(id, fileName);
+    return successResult(request, null, "Media deleted: {0}", id); // TODO i18n
   }
 
   // TODO saveSource

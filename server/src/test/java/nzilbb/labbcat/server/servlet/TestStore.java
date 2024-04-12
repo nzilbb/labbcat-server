@@ -188,8 +188,8 @@ public class TestStore
     l.saveTranscript(graph);
   }
   
-  /** Test transcript media can be saved */
-  @Test public void saveMedia() throws Exception {
+  /** Test transcript media can be saved and deleted */
+  @Test public void saveDeleteMedia() throws Exception {
     
     // first get a corpus and transcript type
     String[] ids = l.getCorpusIds();
@@ -225,11 +225,20 @@ public class TestStore
       assertTrue("No media is present: " + Arrays.asList(files), files.length == 0);
 
       // upload media
-      l.saveMedia(transcript.getName(), media.toURI().toString(), null);
+      MediaFile file = l.saveMedia(transcript.getName(), media.toURI().toString(), null);
+      assertNotNull("File returned", file);
+      assertNotNull("File name returned", file.getName());
       
       // ensure there is now media
       files = l.getAvailableMedia(transcript.getName());
       assertTrue("Media is now present", files.length > 0);
+
+      // delete media
+      l.deleteMedia(transcript.getName(), file.getName());
+      // ensure the media is now gone
+      files = l.getAvailableMedia(transcript.getName());
+      assertTrue("Media was deleted: " + Arrays.asList(files), files.length == 0);
+
     } finally {
       try {
         // delete transcript/participant
@@ -247,8 +256,8 @@ public class TestStore
     }
   }
   
-  /** Test episode document can be saved */
-  @Test public void saveEpisodeDocument() throws Exception {
+  /** Test episode document can be saved and deleted. */
+  @Test public void saveDeleteEpisodeDocument() throws Exception {
     
     // first get a corpus and transcript type
     String[] ids = l.getCorpusIds();
@@ -281,14 +290,22 @@ public class TestStore
 
       // ensure there is no media
       MediaFile[] files = l.getEpisodeDocuments(transcript.getName());
-      // TODO need to implement document deletion assertTrue("No documents present: " + Arrays.asList(files), files.length == 0);
+      assertTrue("No documents present: " + Arrays.asList(files), files.length == 0);
 
       // upload document
-      l.saveEpisodeDocument(transcript.getName(), media.toURI().toString());
+      MediaFile file = l.saveEpisodeDocument(transcript.getName(), media.toURI().toString());
+      assertNotNull("File returned", file);
+      assertNotNull("File name returned", file.getName());      
       
       // ensure there is now media
       files = l.getEpisodeDocuments(transcript.getName());
       assertTrue("Document is now present", files.length > 0);
+
+      // delete media
+      l.deleteMedia(transcript.getName(), file.getName());
+      // ensure the media is now gone
+      files = l.getEpisodeDocuments(transcript.getName());
+      assertTrue("Document was deleted: " + Arrays.asList(files), files.length == 0);
     } finally {
       try {
         // delete transcript/participant
