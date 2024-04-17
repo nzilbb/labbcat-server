@@ -10,13 +10,15 @@ import { LabbcatCommonModule, PendingChangesGuard } from 'labbcat-common';
 import { MissingAnnotationsComponent } from './missing-annotations/missing-annotations.component';
 import { ParticipantComponent } from './participant/participant.component';
 import { TranscriptAttributesComponent } from './transcript-attributes/transcript-attributes.component';
+import { TranscriptMediaComponent } from './transcript-media/transcript-media.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         MissingAnnotationsComponent,
         ParticipantComponent,
-        TranscriptAttributesComponent
+        TranscriptAttributesComponent,
+        TranscriptMediaComponent
     ],
     imports: [
         BrowserModule,
@@ -27,6 +29,8 @@ import { TranscriptAttributesComponent } from './transcript-attributes/transcrip
             { path: 'edit/participant', component: ParticipantComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'edit/transcript/attributes', component: TranscriptAttributesComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'edit/transcript/media', component: TranscriptMediaComponent,
               canDeactivate: [PendingChangesGuard]}
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,

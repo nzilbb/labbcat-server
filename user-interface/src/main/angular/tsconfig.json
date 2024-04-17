@@ -19,6 +19,9 @@
       "labbcat-common": [
         "dist/labbcat-common/labbcat-common",
         "dist/labbcat-common"
+      ],
+      "testlib": [
+        "./dist/testlib"
       ]
     }
   },

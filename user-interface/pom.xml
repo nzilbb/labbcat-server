@@ -51,8 +51,8 @@
         
         <configuration>
           <!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
-          <nodeVersion>v16.16.0</nodeVersion>
-          <npmVersion>7.24.0</npmVersion>
+          <nodeVersion>v20.12.2</nodeVersion>
+          <npmVersion>10.5.2</npmVersion>
           <workingDirectory>target/angular</workingDirectory>
         </configuration>
         

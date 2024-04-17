@@ -10,7 +10,7 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
               "tsConfig": "projects/labbcat-common/tsconfig.lib.json",
               "project": "projects/labbcat-common/ng-package.json"
@@ -57,12 +57,14 @@
       },
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "../labbcat-view",
             "index": "projects/labbcat-view/src/index.html",
-            "main": "projects/labbcat-view/src/main.ts",
-            "polyfills": "projects/labbcat-view/src/polyfills.ts",
+            "browser": "projects/labbcat-view/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "projects/labbcat-view/tsconfig.app.json",
             "localize": ["es"],
             "aot": true,
@@ -88,11 +90,8 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -111,18 +110,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "labbcat-view:build"
+            "buildTarget": "labbcat-view:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "labbcat-view:build:production"
+              "buildTarget": "labbcat-view:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "labbcat-view:build"
+            "buildTarget": "labbcat-view:build"
           }
         },
         "test": {
@@ -185,12 +184,14 @@
       },
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "../labbcat-edit",
             "index": "projects/labbcat-edit/src/index.html",
-            "main": "projects/labbcat-edit/src/main.ts",
-            "polyfills": "projects/labbcat-edit/src/polyfills.ts",
+            "browser": "projects/labbcat-edit/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "projects/labbcat-edit/tsconfig.app.json",
             "localize": ["es"],
             "aot": true,
@@ -216,11 +217,8 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -239,18 +237,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "labbcat-edit:build"
+            "buildTarget": "labbcat-edit:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "labbcat-edit:build:production"
+              "buildTarget": "labbcat-edit:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "labbcat-edit:build"
+            "buildTarget": "labbcat-edit:build"
           }
         },
         "test": {
@@ -313,12 +311,14 @@
       },
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "../labbcat-admin",
             "index": "projects/labbcat-admin/src/index.html",
-            "main": "projects/labbcat-admin/src/main.ts",
-            "polyfills": "projects/labbcat-admin/src/polyfills.ts",
+            "browser": "projects/labbcat-admin/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "projects/labbcat-admin/tsconfig.app.json",
             "localize": ["es"],
             "aot": true,
@@ -344,11 +344,8 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -367,18 +364,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "labbcat-admin:build"
+            "buildTarget": "labbcat-admin:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "labbcat-admin:build:production"
+              "buildTarget": "labbcat-admin:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "labbcat-admin:build"
+            "buildTarget": "labbcat-admin:build"
           }
         },
         "test": {
@@ -426,6 +423,6 @@
           }
         }
       }
-    }},
-  "defaultProject": "labbcat-admin"
+    }
+  }
 }
