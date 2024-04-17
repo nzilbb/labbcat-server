@@ -471,7 +471,7 @@ export class ParticipantsComponent implements OnInit {
             for (let id of this.selectedIds) {
                 const participantId = id;
                 const component = this;
-                deletions.push(new Promise<null>((accept, reject) => {
+                deletions.push(new Promise<void>((accept, reject) => {
                     this.labbcatService.labbcat.deleteParticipant(
                         participantId, (nothing, errors, messages) => {
                             if (errors) errors.forEach(m => this.messageService.error(m));
