@@ -20,7 +20,7 @@
              title="{{track.description}} - {{mediaFile.type}}"
             class="{{mediaFile.type}} lnk">
           <img src="{{imagesLocation}}/{{mediaFile.type}}.svg" alt="{{mediaFile.type=='audio'?'🔊':mediaFile.type=='video'?'🎥':mediaFile.type=='image'?'📷':'📄'}}">
-          <a href="{{mediaFile.url}}">{{mediaFile.name}}</a>
+          <a href="{{mediaFile.url}}" target="{{mediaFile.name}}">{{mediaFile.name}}</a>
           <lib-button img="trash.svg" icon="➖"
                       i18n-title title="Delete media file"
                       [processing]="fileDeleting[mediaFile.name]"
