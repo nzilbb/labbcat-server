@@ -95,6 +95,20 @@ You can specify a different location as a command-line parameter, e.g.:
 ./deploy-user-interface.sh /opt/tomcat/webapps/labbcat
 ```
 
+#### Troubleshooting
+
+If you get an error something like:
+
+> [INFO] An unhandled exception occurred: The service was stopped: spawn /home/robert/nzilbb/labbcat-server/user-interface/target/angular/node_modules/@esbuild/linux-x64/bin/esbuild EACCES
+> ...
+> [ERROR] Failed to execute goal com.github.eirslett:frontend-maven-plugin:1.12.1:npm (user-interface-view) on project nzilbb.labbcat.user-interface: Failed to run task: 'npm run build-labbcat-view' failed. org.apache.commons.exec.ExecuteException: Process exited with an error: 127 (Exit value: 127) -> [Help 1]
+
+...it means that the *esbuild* command is not marked as executable on your system. To fix that:
+
+```
+chmod a+x user-interface/target/angular/node_modules/@esbuild/linux-x64/bin/esbuild
+```
+
 ## Wysiwiki
 
 Requires Node and npm.

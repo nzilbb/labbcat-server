@@ -17,6 +17,17 @@ user-interface app bundled to a size of 3MB, which over slow networks, caused a 
 delay loading the search results page the first time. After the split, *labbcat-view*
 bundles to 1.1MB, which consequently loads 60% faster.
 
+## npm, node, and angular versions
+
+It's recommended to use a user-based installation of `npm`, etc. to avoid
+permission/version issues - i.e.
+
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+nvm install --lts --latest-npm
+npm install -g @angular/cli
+```
+
 ## Development server
 
 Run `cd src/main/angular` and then `ng serve` for a development server (*labbcat-admin* is the default app). Then

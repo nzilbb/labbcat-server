@@ -59,7 +59,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../labbcat-view",
+            "outputPath": "../../../target/labbcat-view",
             "index": "projects/labbcat-view/src/index.html",
             "browser": "projects/labbcat-view/src/main.ts",
             "polyfills": [
@@ -186,7 +186,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../labbcat-edit",
+            "outputPath": "../../../target/labbcat-edit",
             "index": "projects/labbcat-edit/src/index.html",
             "browser": "projects/labbcat-edit/src/main.ts",
             "polyfills": [
@@ -313,7 +313,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../labbcat-admin",
+            "outputPath": "../../../target/labbcat-admin",
             "index": "projects/labbcat-admin/src/index.html",
             "browser": "projects/labbcat-admin/src/main.ts",
             "polyfills": [
