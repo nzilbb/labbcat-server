@@ -20,21 +20,88 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.12.1</version>
+        
+        <configuration>
+          <!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
+          <nodeVersion>v20.12.2</nodeVersion>
+          <npmVersion>10.5.2</npmVersion>
+          <workingDirectory>src/main/angular</workingDirectory>
+        </configuration>
+        
+        <executions>
+          <execution>
+            <id>install node and npm</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+          </execution>
+          
+          <execution>
+            <id>npm install</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <!-- Optional configuration which provides for running any npm command -->
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+
+          <execution><!-- for some reason 'esbuild' isn't marked as executable during install -->
+            <id>esbuild-executable</id>
+            <phase>initialize</phase>
+            <goals><goal>npm</goal></goals>
+            <configuration><arguments>run esbuild-executable</arguments></configuration>
+          </execution>
+          
+          <execution>
+            <id>user-interface-common</id>
+            <phase>compile</phase>
+            <goals><goal>npm</goal></goals>
+            <configuration><arguments>run build-labbcat-common</arguments></configuration>
+          </execution>
+          <execution>
+            <id>user-interface-view</id>
+            <phase>compile</phase>
+            <goals><goal>npm</goal></goals>
+            <configuration><arguments>run build-labbcat-view</arguments></configuration>
+          </execution>
+          <execution>
+            <id>user-interface-edit</id>
+            <phase>compile</phase>
+            <goals><goal>npm</goal></goals>
+            <configuration><arguments>run build-labbcat-edit</arguments></configuration>
+          </execution>
+          <execution>
+            <id>user-interface-admin</id>
+            <phase>compile</phase>
+            <goals><goal>npm</goal></goals>
+            <configuration><arguments>run build-labbcat-admin</arguments></configuration>
+          </execution>
+        </executions>        
+      </plugin>
+      
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.0.2</version>
         <executions>
           <execution>
-            <id>copy-javascript</id>
-            <phase>generate-sources</phase>
+            <id>copy-dist</id>
+            <phase>prepare-package</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/angular</outputDirectory>
+              <outputDirectory>${basedir}/target</outputDirectory>
               <resources>
                 <resource>
-                  <directory>src/main/angular</directory>
+                  <directory>src/main/angular/dist</directory>
                   <includes>
                     <include>**/*</include>
                   </includes>
@@ -44,59 +111,20 @@
           </execution>
         </executions>
       </plugin>
+      
       <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <version>1.12.1</version>
-        
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.1.0</version>
         <configuration>
-          <!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
-          <nodeVersion>v20.12.2</nodeVersion>
-          <npmVersion>10.5.2</npmVersion>
-          <workingDirectory>target/angular</workingDirectory>
+          <filesets>
+            <fileset>
+              <directory>src/main/angular/dist</directory>
+            </fileset>
+            <fileset>
+              <directory>src/main/angular/node</directory>
+            </fileset>
+          </filesets>
         </configuration>
-        
-        <executions>
-          <execution>
-            <id>install node and npm</id>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-          </execution>
-          
-          <execution>
-            <id>npm install</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <!-- Optional configuration which provides for running any npm command -->
-            <configuration>
-              <arguments>install</arguments>
-            </configuration>
-          </execution>
-          
-          <execution>
-            <id>user-interface-common</id>
-            <goals><goal>npm</goal></goals>
-            <configuration><arguments>run build-labbcat-common</arguments></configuration>
-          </execution>
-          <execution>
-            <id>user-interface-view</id>
-            <goals><goal>npm</goal></goals>
-            <configuration><arguments>run build-labbcat-view</arguments></configuration>
-          </execution>
-          <execution>
-            <id>user-interface-edit</id>
-            <goals><goal>npm</goal></goals>
-            <configuration><arguments>run build-labbcat-edit</arguments></configuration>
-          </execution>
-          <execution>
-            <id>user-interface-admin</id>
-            <goals><goal>npm</goal></goals>
-            <configuration><arguments>run build-labbcat-admin</arguments></configuration>
-          </execution>
-        </executions>
-        
       </plugin>
     </plugins>
     

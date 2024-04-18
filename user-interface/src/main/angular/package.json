@@ -11,7 +11,8 @@
     "build-labbcat-common": "ng build labbcat-common --configuration production",
     "build-labbcat-view": "ng build --localize --project labbcat-view --configuration production",
     "build-labbcat-edit": "ng build --localize --project labbcat-edit --configuration production",
-    "build-labbcat-admin": "ng build --localize --project labbcat-admin --configuration production"
+    "build-labbcat-admin": "ng build --localize --project labbcat-admin --configuration production",
+    "esbuild-executable": "chmod a+x node_modules/@esbuild/linux-x64/bin/esbuild"
   },
   "private": true,
   "dependencies": {

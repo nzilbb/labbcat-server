@@ -12,8 +12,8 @@
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-              "tsConfig": "projects/labbcat-common/tsconfig.lib.json",
-              "project": "projects/labbcat-common/ng-package.json"
+            "tsConfig": "projects/labbcat-common/tsconfig.lib.json",
+            "project": "projects/labbcat-common/ng-package.json"
           },
           "configurations": {
             "production": {
@@ -59,7 +59,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../../../target/labbcat-view",
+            "outputPath": "dist/labbcat-view",
             "index": "projects/labbcat-view/src/index.html",
             "browser": "projects/labbcat-view/src/main.ts",
             "polyfills": [
@@ -186,7 +186,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../../../target/labbcat-edit",
+            "outputPath": "dist/labbcat-edit",
             "index": "projects/labbcat-edit/src/index.html",
             "browser": "projects/labbcat-edit/src/main.ts",
             "polyfills": [
@@ -313,7 +313,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../../../target/labbcat-admin",
+            "outputPath": "dist/labbcat-admin",
             "index": "projects/labbcat-admin/src/index.html",
             "browser": "projects/labbcat-admin/src/main.ts",
             "polyfills": [
