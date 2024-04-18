@@ -17,7 +17,6 @@ li a {
 }
 span.suffix {
     display: inline-block;
-    min-width: 75px;
     padding-right: 5px;
 }
 input {

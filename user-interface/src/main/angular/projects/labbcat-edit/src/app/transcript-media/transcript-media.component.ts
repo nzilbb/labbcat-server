@@ -157,18 +157,20 @@ export class TranscriptMediaComponent extends EditComponent implements OnInit {
             });
     }
     deleteFile(fileName: string): void {
-        this.fileDeleting[fileName] = true;
-        this.labbcatService.labbcat.deleteMedia(
-            this.id, fileName, (result, errors, messages) => {
-                this.fileDeleting[fileName] = false;
-                if (errors) {
-                    errors.forEach(m => this.messageService.error(m));
-                }
-                if (messages) {
-                    messages.forEach(m => this.messageService.info(m));
-                }
-                this.readMedia();
-            });
+        if (confirm(`Are you sure you want to delete ${fileName}?`)) { // TODO i18n
+            this.fileDeleting[fileName] = true;
+            this.labbcatService.labbcat.deleteMedia(
+                this.id, fileName, (result, errors, messages) => {
+                    this.fileDeleting[fileName] = false;
+                    if (errors) {
+                        errors.forEach(m => this.messageService.error(m));
+                    }
+                    if (messages) {
+                        messages.forEach(m => this.messageService.info(m));
+                    }
+                    this.readMedia();
+                });
+        }
     }
     savePrompt(): void {
         this.savingPrompt = true;

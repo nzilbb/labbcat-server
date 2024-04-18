@@ -5,7 +5,6 @@
     <ng-container *ngFor="let track of tracks">
       <dt title="{{track.description}}">
       <span *ngIf="track.suffix" class="suffix">{{track.suffix}}</span>
-      <span *ngIf="!track.suffix" class="suffix" i18n="when trackSuffix is blank">(default)</span>
       <lib-button *ngIf="trackUpload[track.suffix] != 'show'"
                   img="add.svg" icon="➕"
                   i18n-title title="Upload {{track.suffix}} media file"
