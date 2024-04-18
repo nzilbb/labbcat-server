@@ -857,6 +857,22 @@ public class SqlGraphStore implements GraphStore {
           sql.close();
         }
         return layer;
+      } else if (id.equals("audio_prompt")) { // special case
+        return new Layer(id, "Prompt for locally loaded media")
+          .setAlignment(Constants.ALIGNMENT_NONE)
+          .setPeers(false)
+          .setPeersOverlap(false)
+          .setSaturated(true)
+          .setParentId("transcript")
+          .setParentIncludes(true);
+      } else if (id.equals("divergent")) { // special case
+        return new Layer(id, "Whether words/utterances/turns has been edited since upload")
+          .setAlignment(Constants.ALIGNMENT_NONE)
+          .setPeers(false)
+          .setPeersOverlap(false)
+          .setSaturated(true)
+          .setParentId("transcript")
+          .setParentIncludes(true);
       }
 
       PreparedStatement sql = getConnection().prepareStatement(
@@ -1871,8 +1887,10 @@ public class SqlGraphStore implements GraphStore {
 	 
       graph.setId(rs.getString("transcript_id"));
       int iAgId = rs.getInt("ag_id");
+      // these "@" attributes can be included as special layerIds
       graph.put("@ag_id", Integer.valueOf(iAgId));
       graph.setCorpus(rs.getString("corpus_name"));
+      graph.put("@audio_prompt", rs.getString("audio_prompt"));
       graph.put("@transcript_type", rs.getString("transcript_type"));
       graph.put("@series", rs.getString("series"));
       graph.put("@family_id", rs.getInt("family_id"));
@@ -1898,7 +1916,20 @@ public class SqlGraphStore implements GraphStore {
               layersToLoad.add(ancestor.getId());
             }		  
             layersToLoad.add(layerId);
-          } // layer exists
+          } else { // layer doesn't exist
+            // special layer? - e.g. "audio_prompt", "ag_id", etc.
+            if (graph.containsKey("@"+layerId)) {
+              try { // only if getLayer recognizes the id
+                graph.addLayer(getLayer(layerId));
+                Object label = graph.get("@" + layerId);
+                if (label != null) {
+                  graph.addAnnotation(new Annotation(layerId, label.toString(), layerId));
+                } // value set
+              } catch(StoreException exception) { // getLayer didn't like it
+                // just ignore it
+              }
+            } // audio_prompt
+          } // nonexistent layer
         } // next specified layer
 
         // order them top-down to ensure parents are available if required
@@ -5171,6 +5202,8 @@ public class SqlGraphStore implements GraphStore {
               throw new StoreException("Could not parse participant attribute ID:"
                                        + change.getObject().getId());
             }
+          } else if (change.getObject().getId().equals("audio_prompt")) {
+            // no particular validation, so drop through
           } else {
             Layer layer = getLayer(((Annotation)change.getObject()).getLayerId());
             if (layer != null) {
@@ -5454,7 +5487,8 @@ public class SqlGraphStore implements GraphStore {
                 || annotation.getLayerId().equals("corpus")
                 || annotation.getLayerId().equals("transcript_type")
                 || annotation.getLayerId().equals("main_participant")
-                || annotation.getLayerId().equals("participant")) { // special layer annotation
+                || annotation.getLayerId().equals("participant")
+                || annotation.getLayerId().equals("audio_prompt")) { // special layer annotation
               saveSpecialAnnotationChanges(annotation, participantNameToNumber);
             } else if (annotation.getLayer().getAncestors()
                        .contains(graph.getLayer("episode"))) {
@@ -6777,8 +6811,7 @@ public class SqlGraphStore implements GraphStore {
             break;
           }
         } // switch on change type
-      }
-      else if (annotation.getLayerId().equals("corpus")) {
+      } else if (annotation.getLayerId().equals("corpus")) {
         switch (annotation.getChange()) {
           case Create:
           case Update: {
@@ -6792,8 +6825,7 @@ public class SqlGraphStore implements GraphStore {
             break;
           }
         } // switch on change type
-      }
-      else if (annotation.getLayerId().equals("transcript_type")) {
+      } else if (annotation.getLayerId().equals("transcript_type")) {
         switch (annotation.getChange()) {
           case Create:
           case Update: {
@@ -6919,8 +6951,25 @@ public class SqlGraphStore implements GraphStore {
                 break;
               } // Destroy
         } // switch on change type
+      } else if (annotation.getLayerId().equals("audio_prompt")) {
+        System.out.println("saving " + annotation);
+        switch (annotation.getChange()) {
+          case Create:
+          case Update: {
+            int agId = ((Integer)annotation.getGraph().get("@ag_id")).intValue();
+            PreparedStatement sqlUpdate = getConnection().prepareStatement(
+              "UPDATE transcript SET audio_prompt = ? WHERE ag_id = ?");
+            sqlUpdate.setString(1, annotation.getLabel());
+            sqlUpdate.setInt(2, agId);
+            sqlUpdate.executeUpdate();
+            sqlUpdate.close();
+            System.out.println("updated " + annotation);
+            break;
+          }
+        } // switch on change type
       }
-      annotation.put("@SqlUpdated", Boolean.TRUE); // flag the anchor as having been updated
+      System.out.println("finished with " + annotation);
+      annotation.put("@SqlUpdated", Boolean.TRUE); // flag the annotation as having been updated
     } catch(ParseException exception) {
       System.err.println(
         "Error parsing ID for special attribute: "+annotation.getId()

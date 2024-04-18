@@ -517,28 +517,28 @@ public class SqlGraphStoreAdministration
           +" WHERE class_id = ? AND attribute = ?");
         try {
           sql.setString(
-            1, Optional.of(layer.getDescription())
+            1, Optional.ofNullable(layer.getDescription())
             .orElse(oldVersion.getDescription()));
           sql.setString(
-            2, Optional.of(layer.getCategory())
+            2, Optional.ofNullable(layer.getCategory())
             .orElse(oldVersion.getCategory()));
           sql.setString(
-            3, Optional.of((String)layer.get("subtype"))
+            3, Optional.ofNullable((String)layer.get("subtype"))
             .orElse((String)oldVersion.get("subtype")));
           sql.setString(
-            4, Optional.of((String)layer.get("style"))
+            4, Optional.ofNullable((String)layer.get("style"))
             .orElse((String)oldVersion.get("style")));
           sql.setString(
-            5, Optional.of((String)layer.get("hint"))
+            5, Optional.ofNullable((String)layer.get("hint"))
             .orElse((String)oldVersion.get("hint")));
           sql.setInt(
-            6, Optional.of((Integer)layer.get("display_order"))
+            6, Optional.ofNullable((Integer)layer.get("display_order"))
             .orElse((Integer)oldVersion.get("display_order")));
           sql.setInt(
-            7, Optional.of((String)layer.get("searchable"))
+            7, Optional.ofNullable((String)layer.get("searchable"))
             .orElse((String)oldVersion.get("searchable")).equals("0")?0:1);
           sql.setInt(
-            8, Optional.of((String)layer.get("access"))
+            8, Optional.ofNullable((String)layer.get("access"))
             .orElse((String)oldVersion.get("access")).equals("0")?0:1);
           sql.setInt(9, layer.getPeers()?1:0);
           sql.setString(10, (String)oldVersion.get("class_id"));
@@ -665,7 +665,7 @@ public class SqlGraphStoreAdministration
       subtype = "D";
     } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
       subtype = "boolean";
-    }
+    } 
     if (layer.containsKey("subtype")) { // the given subtype trumps the above
       subtype = layer.get("subtype").toString();
     }
@@ -680,7 +680,7 @@ public class SqlGraphStoreAdministration
           +" searchable, access, peers, class_id, attribute)"
           +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         try {
-          sql.setString(1, Optional.of(layer.getDescription()).orElse(layer.getId()));
+          sql.setString(1, Optional.ofNullable(layer.getDescription()).orElse(layer.getId()));
           if (layer.getCategory() == null || layer.getCategory().length() == 0) { // no category
             // select the first category
             PreparedStatement sqlCategory = getConnection().prepareStatement(
@@ -700,9 +700,18 @@ public class SqlGraphStoreAdministration
             }
           }
           sql.setString(2, layer.getCategory());
+          subtype = "string";
+          if (Constants.TYPE_NUMBER.equals(layer.getType())) {
+            subtype = "number";  // TODO handle type = number/integer
+          } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
+            subtype = "boolean";
+          } 
+          if (layer.getValidLabels().keySet().size() > 0) {
+            subtype = "select";
+          } 
           sql.setString(3, subtype);
-          sql.setString(4, Optional.of((String)layer.get("style")).orElse(""));
-          sql.setString(5, Optional.of((String)layer.get("hint")).orElse(""));
+          sql.setString(4, Optional.ofNullable((String)layer.get("style")).orElse(""));
+          sql.setString(5, Optional.ofNullable((String)layer.get("hint")).orElse(""));
           int display_order = -1;
           if (layer.containsKey("display_order")) {
             display_order = (Integer)layer.get("display_order");
@@ -719,8 +728,8 @@ public class SqlGraphStoreAdministration
             sqlDisplayOrder.close();
           }
           sql.setInt(6, display_order);
-          sql.setInt(7, Optional.of((String)layer.get("searchable")).orElse("0").equals("0")?0:1);
-          sql.setInt(8, Optional.of((String)layer.get("access")).orElse("0").equals("0")?0:1);
+          sql.setInt(7, Optional.ofNullable((String)layer.get("searchable")).orElse("0").equals("0")?0:1);
+          sql.setInt(8, Optional.ofNullable((String)layer.get("access")).orElse("0").equals("0")?0:1);
           sql.setInt(9, layer.getPeers()?1:0);
           sql.setString(10, (String)layer.get("class_id"));
           sql.setString(11, (String)layer.get("attribute"));

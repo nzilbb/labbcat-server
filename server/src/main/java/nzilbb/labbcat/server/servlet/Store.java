@@ -441,12 +441,12 @@ public class Store extends StoreQuery {
       
       // merge attribute changes
       Merger merger = new Merger(editedGraph);
-      merger.transform(ag);      
+      merger.transform(ag);
 
       // save changes to graph store
       boolean thereWereChanges = store.saveTranscript(ag);
       if (thereWereChanges) {
-            return successResult(request, true, "Transcript saved: {0}", ag.getId());
+        return successResult(request, true, "Transcript saved: {0}", ag.getId());
       } else {
         return successResult(request, false, "No changes to save: {0}", ag.getId());
       }
@@ -736,15 +736,19 @@ public class Store extends StoreQuery {
       if (errors.size() > 0) return failureResult(errors);
       
       String fileName = MultipartRequestParameters.SanitizedFileName(media);
-      // save the file
-      File temporaryMediaFile = File.createTempFile("saveEpisodeDocument-", "-"+fileName);
-      temporaryMediaFile.delete();
+      // save the file, preserving the name
+      File temporaryMediaDir = File.createTempFile("saveEpisodeDocument-", "-"+fileName);
+      temporaryMediaDir.delete();
+      temporaryMediaDir.mkdir();
+      temporaryMediaDir.deleteOnExit();
+      File temporaryMediaFile = new File(temporaryMediaDir, fileName);
       temporaryMediaFile.deleteOnExit();
       media.write(temporaryMediaFile);
       MediaFile mediaFile = store.saveEpisodeDocument(id, temporaryMediaFile.toURI().toString());
 
-      // ensure the temporary file is deleted
+      // ensure the temporary dir/file is deleted
       temporaryMediaFile.delete();
+      temporaryMediaDir.delete();
       
       return successResult(
         request, mediaFile, "Added {0} to {1}", fileName, id); // TODO i18n
@@ -771,7 +775,7 @@ public class Store extends StoreQuery {
     if (fileName == null) errors.add(localize(request, "No file name specified.")); // TODO i18n
     if (errors.size() > 0) return failureResult(errors);
     store.deleteMedia(id, fileName);
-    return successResult(request, null, "Media deleted: {0}", id); // TODO i18n
+    return successResult(request, null, "Media deleted from {0}: {1}", id, fileName); // TODO i18n
   }
 
   // TODO saveSource

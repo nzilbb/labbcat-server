@@ -1,0 +1,25 @@
+dl {
+    width: fit-content;
+    min-width: 50vw;
+    margin: auto;
+}
+dd {
+    margin-left: 0px;
+}
+ul {
+    list-style: none;
+}
+li a {
+    display: inline-block;
+    min-width: 250px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+span.suffix {
+    display: inline-block;
+    min-width: 75px;
+    padding-right: 5px;
+}
+input {
+    width: 100%;
+}
