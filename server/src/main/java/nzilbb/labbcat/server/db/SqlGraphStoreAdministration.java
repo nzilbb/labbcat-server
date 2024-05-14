@@ -131,7 +131,6 @@ public class SqlGraphStoreAdministration
     super(baseUrl, files, connectString, databaseUser, password, storeUser);
     // if (getUser() != null && !getUserRoles().contains("admin")) throw new PermissionException();
   }
-
    
   /**
    * Checks the user has the 'admin' role, and throws PermissionException if not.
@@ -140,7 +139,6 @@ public class SqlGraphStoreAdministration
   private void requireAdmin() throws PermissionException {
     if (!getUserRoles().contains("admin")) throw new PermissionException("Use does not have admin role"); // TODO i18n
   } // end of requireAdmin()
-
 
   /**
    * Registers a transcript deserializer.
@@ -838,7 +836,7 @@ public class SqlGraphStoreAdministration
             && layer.get("enabled").toString().length() > 0) {
           sql.setString(12, layer.get("enabled").toString());
         } else {
-          sql.setNull(12, java.sql.Types.VARCHAR);
+          sql.setString(12, "WTL"); // generate always
         }
         if (layer.getCategory() != null) {
           sql.setString(13, layer.getCategory());
