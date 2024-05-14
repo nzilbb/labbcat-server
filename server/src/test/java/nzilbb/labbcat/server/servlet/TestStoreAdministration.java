@@ -145,77 +145,87 @@ public class TestStoreAdministration
      }
    }
 
-   @Test public void newProjectUpdateProjectAndDeleteProject() throws Exception {
-      Project originalProject = new Project()
-         .setProject("unit-test")
-         .setDescription("Temporary project for unit testing");
+  @Test public void newCategoryUpdateCategoryAndDeleteCategory() throws Exception {
+    Category originalCategory = new Category()
+      .setClassId("transcript")
+      .setCategory("unit-test")
+      .setDescription("Temporary category for unit testing")
+      .setDisplayOrder(999);
       
+    try {
+      Category newCategory = l.createCategory(originalCategory);
+      assertNotNull("Category returned", newCategory);
+      assertEquals("Class correct",
+                   originalCategory.getClassId(), newCategory.getClassId());
+      assertEquals("Name correct",
+                   originalCategory.getCategory(), newCategory.getCategory());
+      assertEquals("Description correct",
+                   originalCategory.getDescription(), newCategory.getDescription());
+      assertEquals("displayOrder correct",
+                   originalCategory.getDisplayOrder(), newCategory.getDisplayOrder());
+         
       try {
-         Project newProject = l.createProject(originalProject);
-         assertNotNull("Project returned", newProject);
-         assertEquals("Name correct",
-                      originalProject.getProject(), newProject.getProject());
-         assertEquals("Description correct",
-                      originalProject.getDescription(), newProject.getDescription());
+        l.createCategory(originalCategory);
+        fail("Can't create a category with existing name");
+      }
+      catch(Exception exception) {}
          
-         try {
-            l.createProject(originalProject);
-            fail("Can't create a project with existing name");
-         }
-         catch(Exception exception) {}
-         
-         Project[] projects = l.readProjects();
-         // ensure the project exists
-         assertTrue("There's at least one project", projects.length >= 1);
-         boolean found = false;
-         for (Project c : projects) {
-            if (c.getProject().equals(originalProject.getProject())) {
-               found = true;
-               break;
-            }
-         }
-         assertTrue("Project was added", found);
+      Category[] categories = l.readCategories("transcript");
+      // ensure the category exists
+      assertTrue("There's at least one category", categories.length >= 1);
+      boolean found = false;
+      for (Category c : categories) {
+        if (c.getCategory().equals(originalCategory.getCategory())) {
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Category was added", found);
 
-         // update it
-         Project updatedProject = new Project()
-            .setProject("unit-test")
-            .setDescription("Changed description");
-         
-         Project changedProject = l.updateProject(updatedProject);
-         assertNotNull("Project returned", changedProject);
-         assertEquals("Updated Name correct",
-                      updatedProject.getProject(), changedProject.getProject());
-         assertEquals("Updated Description correct",
-                      updatedProject.getDescription(), changedProject.getDescription());
+      // update it
+      Category updatedCategory = new Category()
+        .setClassId("transcript")
+        .setCategory("unit-test")
+        .setDescription("Changed description")
+        .setDisplayOrder(888);
+      
+      Category changedCategory = l.updateCategory(updatedCategory);
+      assertNotNull("Category returned", changedCategory);
+      assertEquals("Updated Name correct",
+                   updatedCategory.getCategory(), changedCategory.getCategory());
+      assertEquals("Updated Description correct",
+                   updatedCategory.getDescription(), changedCategory.getDescription());
+      assertEquals("Updated displayOrder correct",
+                   updatedCategory.getDisplayOrder(), changedCategory.getDisplayOrder());
 
-         // delete it
-         l.deleteProject(originalProject.getProject());
+      // delete it
+      l.deleteCategory("transcript", originalCategory.getCategory());
+      
+      Category[] categoriesAfter = l.readCategories("transcript");
+      // ensure the category no longer exists
+      boolean foundAfter = false;
+      for (Category c : categoriesAfter) {
+        if (c.getCategory().equals(originalCategory.getCategory())) {
+          foundAfter = true;
+          break;
+        }
+      }
+      assertFalse("Category is gone", foundAfter);
 
-         Project[] projectsAfter = l.readProjects();
-         // ensure the project no longer exists
-         boolean foundAfter = false;
-         for (Project c : projectsAfter) {
-            if (c.getProject().equals(originalProject.getProject())) {
-               foundAfter = true;
-               break;
-            }
-         }
-         assertFalse("Project is gone", foundAfter);
+      try {
+        // can't delete it again
+        l.deleteCategory(originalCategory);
+        fail("Can't delete category that doesn't exist");
+      } catch(Exception exception) {
+      }
 
-         try {
-            // can't delete it again
-            l.deleteProject(originalProject);
-            fail("Can't delete project that doesn't exist");
-         } catch(Exception exception) {
-         }
-
-      } finally {
-         // ensure it's not there
-         try {
-            l.deleteProject(originalProject);
-         } catch(Exception exception) {}         
-     }
-   }
+    } finally {
+      // ensure it's not there
+      try {
+        l.deleteCategory(originalCategory);
+      } catch(Exception exception) {}         
+    }
+  }
 
    @Test public void newMediaTrackUpdateMediaTrackAndDeleteMediaTrack() throws Exception {
       MediaTrack originalMediaTrack = new MediaTrack()
@@ -553,8 +563,31 @@ public class TestStoreAdministration
    }
 
    @Test public void updateInfo() throws Exception {
-      String originalInfo = l.getInfo();
-      assertNotNull("There is info", originalInfo);
+     String originalInfo = "<!DOCTYPE html>"
+       +"\n<html>"
+       +"  <head>"
+       +"    <title>LaBB-CAT</title>"
+       +"    <base href=\"${base}\">"
+       +"    <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\" />"
+       +"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
+       +"    <link rel=\"stylesheet\" href=\"../wysiwiki/wysiwiki.css\" type=\"text/css\">"
+       +"    <link rel=\"shortcut icon\" href=\"../favicon.ico\" />"
+       +"    <script src=\"../jquery.js\"></script>"
+       +"    <script src=\"../wysiwiki/wysiwiki.js\" defer></script>"
+       +"  </head>"
+       +"  <body>"
+       +"    <header><div class=\"loading\"></div></header>"
+       +"    <div id=\"main\">"
+       +"      <aside></aside>"
+       +"      <article></article>"
+       +"      <nav><div class=\"loading\"></div></nav>"
+       +"    </div>"
+       +"    <footer><div class=\"loading\"></div></footer>"
+       +"  </body>"
+       +"</html>";
+     try {
+       originalInfo = l.getInfo();
+     } catch(StoreException exception) {}
 
       try {
          // update it

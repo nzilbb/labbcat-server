@@ -203,7 +203,7 @@ public class TestStoreQuery
       assertEquals("getLayer: Correct layer",
                    "orthography", layer.getId());
 
-      String[] attributes = { "participant_gender", "participant_year_of_birth" };
+      String[] attributes = { "participant_gender", "participant_notes" };
       Annotation participant = l.getParticipant(participantId, attributes);
       assertEquals("getParticipant: Correct participant",
                    participantId, participant.getLabel()); // not getId()
