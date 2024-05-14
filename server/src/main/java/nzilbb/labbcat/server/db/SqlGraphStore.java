@@ -438,6 +438,15 @@ public class SqlGraphStore implements GraphStore {
     }
   } // end of finalize()
 
+  
+  /**
+   * Checks the user has the 'edit' role, and throws PermissionException if not.
+   * @throws PermissionException If {@link SqlGraphStore#getUserRoles()} doesn't contain "edit".
+   */
+  private void requireEdit() throws PermissionException {
+    if (!getUserRoles().contains("edit")) throw new PermissionException("Use does not have edit role"); // TODO i18n
+  } // end of requireEdit()
+
   // GraphStore methods
 
   /**
@@ -1210,6 +1219,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public boolean saveParticipant(Annotation participant)
     throws StoreException, PermissionException {
+    requireEdit();
     if (!"participant".equals(participant.getLayerId()))
       throw new StoreException("Annotation is not on the participant layer.");
     if (participant.getChange() == Change.Operation.Destroy )
@@ -4006,6 +4016,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public int deleteMatchingAnnotations(String expression)
     throws StoreException, PermissionException {
+    requireEdit();
     try {
       
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
@@ -4051,6 +4062,7 @@ public class SqlGraphStore implements GraphStore {
   public int tagMatchingAnnotations(
     String expression, String layerId, String label, Integer confidence)
     throws StoreException, PermissionException {
+    requireEdit();
     try {
       // get the first example to tag so we can get the layer and other info
       Annotation[] toTag = getMatchingAnnotations(expression, 1, 0, false);
@@ -4975,6 +4987,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public boolean saveTranscript(Graph transcript) 
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     if (transcript.getChange() == Change.Operation.NoChange) return false;
       
     // Timers timers = new Timers();
@@ -5308,7 +5321,7 @@ public class SqlGraphStore implements GraphStore {
       sqlInsertAnchor.setInt(1, iAgId);
       PreparedStatement sqlUpdateAnchor = getConnection().prepareStatement(
         "UPDATE anchor"
-        +" SET offset = ?, alignment_status = ?, annotated_by = ?, annotated_when = ?"
+        +" SET `offset` = ?, alignment_status = ?, annotated_by = ?, annotated_when = ?"
         +" WHERE anchor_id = ?");
       PreparedStatement sqlCheckAnchor = getConnection().prepareStatement(
         "SELECT COUNT(*) FROM annotation_layer_?"
@@ -6729,7 +6742,6 @@ public class SqlGraphStore implements GraphStore {
 
     annotation.put("@SqlUpdated", Boolean.TRUE); // flag the annotation as having been updated
   } // end of saveAnchorChanges()
-
    
   /**
    * Save changes to a 'special' annotation, e.g. corpus, series, etc.
@@ -7345,6 +7357,7 @@ public class SqlGraphStore implements GraphStore {
     String id, String fromId, String toId, String layerId, String label, Integer confidence,
     String parentId)
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     Schema schema = getSchema();
     Layer layer = schema.getLayer(layerId);
     if (layer.get("scope") == null)
@@ -7452,6 +7465,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public void destroyAnnotation(String id, String annotationId)
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     try {
       Object[] attributes = fmtAnnotationId.parse(annotationId);
       Long layer_id = (Long)attributes[1];
@@ -7829,6 +7843,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public MediaFile saveMedia(String id, String mediaUrl, String trackSuffix)
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     if (trackSuffix == null) trackSuffix = "";
     Vector<File> toDelete = new Vector<File>();
     try {
@@ -8075,6 +8090,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public void saveSource(String id, String url)
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     try {
       String[] layers = { "corpus", "episode" };
       Graph graph = getTranscript(id, layers);
@@ -8164,6 +8180,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public MediaFile saveEpisodeDocument(String id, String url)
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     try {
       String[] layers = { "corpus", "episode" };
       if (!hasAccess(id, "o")) { // they have no access to 'other' media
@@ -8284,6 +8301,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public void deleteMedia(String id, String fileName)
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     MediaFile file = null;
     for (MediaFile media : getAvailableMedia(id)) {
       if (media.getName().equals(fileName)) {
@@ -8462,6 +8480,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public void deleteTranscript(String id)
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     try {
       String[] layers = { "corpus", "episode" };
       Graph graph = getTranscript(id, layers);
@@ -8544,6 +8563,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public void deleteParticipant(String id)
     throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
     if (id == null) {
       throw new StoreException("No participant specified"); // TODO i18n
     } else {
