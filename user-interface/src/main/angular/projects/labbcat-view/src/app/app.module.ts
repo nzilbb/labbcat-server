@@ -15,6 +15,7 @@ import { ParticipantComponent } from './participant/participant.component';
 import { TranscriptAttributesComponent } from './transcript-attributes/transcript-attributes.component';
 import { SearchComponent } from './search/search.component';
 import { SearchMatrixComponent } from './search-matrix/search-matrix.component';
+import { AllUtterancesComponent } from './all-utterances/all-utterances.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { SearchMatrixComponent } from './search-matrix/search-matrix.component';
       ParticipantComponent,
       TranscriptAttributesComponent,
       SearchComponent,
-      SearchMatrixComponent
+      SearchMatrixComponent,
+      AllUtterancesComponent
   ],
   imports: [
       BrowserModule,
@@ -41,6 +43,8 @@ import { SearchMatrixComponent } from './search-matrix/search-matrix.component';
           { path: 'participant', component: ParticipantComponent },
           { path: 'transcripts', component: TranscriptsComponent },
           { path: 'transcript/attributes', component: TranscriptAttributesComponent },
+          { path: 'allUtterances', component: AllUtterancesComponent },
+          { path: 'all-utterances', component: AllUtterancesComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

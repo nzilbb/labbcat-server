@@ -1,0 +1,47 @@
+<h1 i18n>All Utterances</h1>
+
+<p *ngIf="participantDescription && participantIds.length < participantCount" id="participantDescription" i18n>{{participantDescription}}</p>
+<div *ngIf="participantIds" class="list" id="participant-ids">
+  <a *ngFor="let participantId of participantIds"
+     [routerLink]="user.roles.includes('edit')?'../edit/participant':'../participant'"
+     [queryParams]="{ id: participantId }"
+     i18n-title title="Edit participant"
+     target="participant">{{participantId}}</a>
+</div>
+<lib-button
+  *ngIf="participantIds.length < participantCount"
+  i18n-title title="List more participants"
+  img="ellipses.svg" icon="…"
+  (click)="loadMoreParticipants()"
+  [processing]="loadingParticipants">
+  ></lib-button>
+<p *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)">[any]</p>
+<div *ngIf="!participantIds || !participantIds.length" id="file-chooser">
+  <label for="csv" i18n>Load participants from file</label>
+  <input type="file" id="csv" (change)="selectFile($event.target.files)">
+</div>
+
+<div class="list">
+  <div class="item">
+    <label>
+      <input type="checkbox" [(ngModel)]="mainParticipantOnly" id="mainParticipantOnly">
+      <span i18n>Only include transcripts for which these are the main participants.</span></label>
+  </div>
+  <div class="item">
+    <label i18n>Include transcripts of type:</label>
+  </div>
+  <div class="item transcript-type" *ngFor="let transcriptType of transcriptTypes">
+    <label><input type="checkbox"
+                  value="{{transcriptType}}"
+                  checked
+                  (change)="onTranscriptTypeChanged($event)">{{transcriptType}}</label>
+  </div>
+</div>
+<lib-button 
+  i18n-title title="List all utterances"
+  i18n-label label="List"
+  img="magnifying-glass.svg" icon="🔍"
+  (click)="allUtterances()">
+</lib-button>
+<lib-task *ngIf="threadId" [threadId]="threadId"
+          [showLastException]="false"  [showStackTrace]="false"></lib-task>

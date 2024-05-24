@@ -1,0 +1,23 @@
+#participant-ids {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: 30vh;
+    overflow: auto;
+    padding-bottom: 20px;
+}
+#participant-ids a {
+    padding-right: 5px;
+}
+#participant-ids a:after {
+    content: ', ';
+}
+#participant-ids a:last-child:after {
+    content: '';
+}
+#file-chooser label {
+    padding-right: 5px;
+}
+#file-chooser label:after {
+    content: ':';
+}

@@ -71,7 +71,7 @@
     <div class="item">
       <label>
         <input type="checkbox" [(ngModel)]="mainParticipantOnly" id="mainParticipantOnly">
-        <span i18n>Only search transcripts for which these are the main participants.</span></label>
+        <span i18n>Only include transcripts for which these are the main participants.</span></label>
     </div>
     <div class="item">
       <label i18n-title
@@ -104,7 +104,7 @@
   </div>
   <lib-button 
     i18n-title title="Search for instance of this pattern"
-    label="Search"
+    i18n-label label="Search"
     img="magnifying-glass.svg" icon="🔍"
     (click)="search()">
   </lib-button>

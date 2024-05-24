@@ -14,6 +14,8 @@ export class TaskComponent implements OnChanges, OnDestroy {
     @Input() threadId: string;
     @Input() cancelButton = true;
     @Input() showStatus = true;
+    @Input() showLastException = true;
+    @Input() showStackTrace = true;
     @Input() showName = true;
     @Input() autoOpenResults = true;
     @Output() finished = new EventEmitter<Task>();
