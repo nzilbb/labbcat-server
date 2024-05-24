@@ -235,6 +235,29 @@ public abstract class SearchTask extends Task {
    */
   public SearchTask setResults(SearchResults newResults) { results = newResults; return this; }
 
+  
+  /**
+   * Number of words context to specify for the matches page, or null to not specify the
+   * 'wordsContext' URL parameter. 
+   * @see #getWordsContext()
+   * @see #setWordsContext(Integer)
+   */
+  protected Integer wordsContext = Integer.valueOf(1);
+  /**
+   * Getter for {@link #wordsContext}: Number of words context to specify for the matches
+   * page, or null to not specify the 'wordsContext' URL parameter. 
+   * @return Number of words context to specify for the matches page, or null to not
+   * specify the 'wordsContext' URL parameter. 
+   */
+  public Integer getWordsContext() { return wordsContext; }
+  /**
+   * Setter for {@link #wordsContext}: Number of words context to specify for the matches
+   * page, or null to not specify the 'wordsContext' URL parameter. 
+   * @param newWordsContext Number of words context to specify for the matches page, or
+   * null to not specify the 'wordsContext' URL parameter. 
+   */
+  public SearchTask setWordsContext(Integer newWordsContext) { wordsContext = newWordsContext; return this; }
+
   /**
    * Validates the search conditions.
    * @return A message describing a validation error, or null if the conditions are valid
@@ -270,7 +293,8 @@ public abstract class SearchTask extends Task {
           setStatus("No results available.");
         } else {
           if (!suppressResults && results.size() > 0) {
-            setResultUrl(getStore().getId() + "matches?threadId=" + getId() + "&wordsContext=1");
+            setResultUrl(getStore().getId() + "matches?threadId=" + getId()
+                         + (wordsContext==null?"":"&wordsContext="+wordsContext));
             setResultText("Display results");
           }
           

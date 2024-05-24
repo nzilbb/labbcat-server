@@ -83,9 +83,15 @@ public class AllUtterancesTask extends SearchTask {
    */
   @Override public String validate() {
     if (participantQuery == null || participantQuery.trim().length() == 0) {
-      return "No participants specified";// TODO i18n
+      return localize("No participants specified.");
     }
     return null;
+  }
+
+  /** Default constructor. */
+  public AllUtterancesTask() {
+    // no words context on matches page, because they're whole utterances
+    setWordsContext(null);
   }
 
   /**
@@ -109,7 +115,7 @@ public class AllUtterancesTask extends SearchTask {
     for (String participantId : participantIds) {
       participants.add(getStore().getParticipant(participantId));
     }
-    if (participants.size() == 0) throw new Exception("No participants matched."); // TODO i18n
+    if (participants.size() == 0) throw new Exception(localize("No participants matched."));
     StringBuilder speakerNumberList = new StringBuilder(); 
     for (Annotation participant : participants) {
       if (speakerNumberList.length() > 0) speakerNumberList.append(",");
@@ -144,7 +150,10 @@ public class AllUtterancesTask extends SearchTask {
     }
     //setStatus(finalTranscriptQuery);
     String[] transcriptIds = getStore().getMatchingTranscriptIds(finalTranscriptQuery);
-    if (transcriptIds.length == 0) throw new Exception("No transcripts matched."); // TODO i18n
+    if (transcriptIds.length == 0) {
+      iPercentComplete = 100;
+      throw new Exception(localize("No transcripts matched."));
+    }
     transcriptClause.append(" AND transcript.transcript_id IN (");
     transcriptClause.append(Arrays.stream(transcriptIds)
                             .map(id->"'"+id.replace("'","\\'")+"'")
@@ -210,12 +219,12 @@ public class AllUtterancesTask extends SearchTask {
     sql.executeUpdate();
     sql.close();
     
-    setStatus(q.toString());
+    //setStatus(q.toString());
     sql = connection.prepareStatement(q.toString());
     sql.setLong(1, ((SqlSearchResults)results).getId());      
         
     iPercentComplete = SQL_STARTED_PERCENT; 
-    setStatus("Identifying utterances...");        
+    setStatus("Identifying utterances..."); // TODO i18n
     if (!bCancelling) executeUpdate(sql); 
     sql.close();
     iPercentComplete = SQL_FINISHED_PERCENT;
@@ -241,7 +250,7 @@ public class AllUtterancesTask extends SearchTask {
     executeUpdate(sql);
     sql.close();    
 
-    setStatus("Identifying bounding words...");
+    setStatus("Identifying bounding words..."); // TODO i18n
     PreparedStatement sqlResult = connection.prepareStatement(
       "SELECT COUNT(*) FROM result WHERE search_id = ?");
     sqlResult.setLong(1, ((SqlSearchResults)results).getId());      
@@ -318,7 +327,7 @@ public class AllUtterancesTask extends SearchTask {
     int size = results.size();
     setStatus("There " + (size==1?"was ":"were ") + size + (size==1?" utterance":" utterances")
               + " identified in " + (((getDuration()/1000)+30)/60)
-              + " minutes [" + getDuration() + "ms]");
+              + " minutes [" + getDuration() + "ms]");  // TODO i18n
     
     iPercentComplete = 100;
     

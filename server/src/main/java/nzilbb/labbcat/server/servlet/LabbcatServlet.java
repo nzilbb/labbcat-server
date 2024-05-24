@@ -567,6 +567,16 @@ public class LabbcatServlet extends HttpServlet {
     writer.close();
   } // end of writeResponse()
    
+  /**
+   * Escapes quotes in the given string for inclusion in QL or SQL queries.
+   * @param s The string to escape.
+   * @return The given string, with quotes escapeed.
+   */
+  protected String esc(String s) {
+    if (s == null) return "";
+    return s.replace("\\","\\\\").replace("'","\\'");
+  } // end of esc()
+  
   String lastLanguage = "en";
   Locale lastLocale = Locale.UK;
   ResourceBundle lastBundle;
@@ -581,10 +591,7 @@ public class LabbcatServlet extends HttpServlet {
    * @return The localized message (or if the messages couldn't be localized, the
    * original message) with the given arguments substituted. 
    */
-  protected String localize(HttpServletRequest request, String message, Object... args) {
-
-    // determine the Locale/ResourceBundle
-      
+  public ResourceBundle inferResourceBundle(HttpServletRequest request) {
     String language = request.getHeader("Accept-Language");
     if (language == null) language = lastLanguage;
     if (language == null) language = "en";
@@ -608,13 +615,35 @@ public class LabbcatServlet extends HttpServlet {
       resources = ResourceBundle.getBundle(
         "nzilbb.labbcat.server.locale.Resources", locale);
     }
+    lastLanguage = language;
+    lastLocale = locale;
+    lastBundle = resources;
+    return resources;
+  }
+  
+  /**
+   * Localizes the given message to the language found in the "Accept-Language" header of
+   * the given request, substituting in the given arguments if any.
+   * <p> The message is assumed to be a MessageFormat template like 
+   * "Row could not be added: {0}"
+   * @param request The request, for discovering the locale.
+   * @param message The message format to localize.
+   * @param args Arguments to be substituted into the message. 
+   * @return The localized message (or if the messages couldn't be localized, the
+   * original message) with the given arguments substituted. 
+   */
+  protected String localize(HttpServletRequest request, String message, Object... args) {
+
+    // determine the Locale/ResourceBundle
+      
+    ResourceBundle resources = inferResourceBundle(request);
 
     // get the localized version of the message
     String localizedString = message;
     try {
       localizedString = resources.getString(message);
     } catch(Throwable exception) {
-      log("i18n: missing resource in " + language + ": " + message);
+      log("i18n: missing resource in " + resources.getLocale() + ": " + message);
     }
 
     // do we need to substitute in arguments?
@@ -622,9 +651,6 @@ public class LabbcatServlet extends HttpServlet {
       localizedString = new MessageFormat(localizedString).format(args);
     }
 
-    lastLanguage = language;
-    lastLocale = locale;
-    lastBundle = resources;
     return localizedString;
   } // end of localize()
    

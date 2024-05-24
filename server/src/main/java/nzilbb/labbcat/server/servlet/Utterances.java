@@ -25,6 +25,7 @@ package nzilbb.labbcat.server.servlet;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import javax.json.Json;
@@ -105,13 +106,14 @@ public class Utterances extends LabbcatServlet { // TODO unit test
 
     // parameters
     AllUtterancesTask task = new AllUtterancesTask();
+    task.setResources(inferResourceBundle(request));
     task.setParticipantQuery(request.getParameter("participant_expression"));
     if (task.getParticipantQuery() == null) {
       if (request.getParameter("id") != null) {
         task.setParticipantQuery(
           "id IN ("
           +Arrays.stream(request.getParameterValues("id"))
-          .map(id->"'"+id+"'")
+          .map(id->"'"+esc(id)+"'")
           .collect(Collectors.joining(","))
           +")");
       } else if (request.getParameter("speaker_number") != null) {
@@ -138,17 +140,26 @@ public class Utterances extends LabbcatServlet { // TODO unit test
           +Arrays.stream(request.getParameterValues("transcript_type"))
           .collect(Collectors.joining(","))
           + ")");
-        ResultSet rs = sql.executeQuery();
         StringBuilder transcriptQuery = new StringBuilder();
-        while(rs.next()) {
-          // something like ['wordlist','interview'].includes(first('transcript_type').label)
-          if (transcriptQuery.length() == 0) {
-            transcriptQuery.append("[");
-          } else {
-            transcriptQuery.append(",");
-          }
-          transcriptQuery.append("'").append(rs.getString(1).replace("'","\\'")).append("'");
-        } // next transcript type
+        // something like ['wordlist','interview'].includes(first('transcript_type').label)
+        try {
+          ResultSet rs = sql.executeQuery();
+          while(rs.next()) {
+            if (transcriptQuery.length() == 0) {
+              transcriptQuery.append("[");
+            } else {
+              transcriptQuery.append(",");
+            }
+            transcriptQuery.append("'").append(esc(rs.getString(1))).append("'");
+            rs.close();
+          } // next transcript type
+        } catch (SQLException x) { // probably transcript type labels not numeric type_id
+          transcriptQuery.append("[");
+          transcriptQuery.append(Arrays.stream(request.getParameterValues("transcript_type"))
+                                 .map(type -> "'"+esc(type)+"'")
+                                 .collect(Collectors.joining(",")));
+        }
+        sql.close();
         if (transcriptQuery.length() > 0) {
           transcriptQuery.append("].includes(first('transcript_type').label)");
           task.setTranscriptQuery(transcriptQuery.toString());

@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -22,6 +22,8 @@
 package nzilbb.labbcat.server.task;
 
 import java.util.Date;
+import java.util.ResourceBundle;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import nzilbb.util.MonitorableTask;
 import nzilbb.labbcat.server.db.SqlGraphStore;
@@ -286,6 +288,27 @@ public class Task extends Thread implements MonitorableTask {
   public Task setMaxLogSize(int newMaxLogSize) { maxLogSize = newMaxLogSize; return this; }  
   
   /**
+   * Localization resource bundle.
+   * @see #getResources()
+   * @see #setResources(ResourceBundle)
+   */
+  protected ResourceBundle resources;
+  /**
+   * Getter for {@link #resources}: Localization resource bundle.
+   * @return Localization resource bundle.
+   */
+  public ResourceBundle getResources() {
+    if (resources == null) resources = ResourceBundle.getBundle(
+      "nzilbb.labbcat.server.locale.Resources", java.util.Locale.UK);
+    return resources;
+  }
+  /**
+   * Setter for {@link #resources}: Localization resource bundle.
+   * @param newResources Localization resource bundle.
+   */
+  public Task setResources(ResourceBundle newResources) { resources = newResources; return this; }
+  
+  /**
    * Constructor
    */
   public Task() {
@@ -467,4 +490,35 @@ public class Task extends Thread implements MonitorableTask {
     }
     return lDuration;
   }
+
+  /**
+   * Localizes the given message to the language found in the "Accept-Language" header of
+   * the given request, substituting in the given arguments if any.
+   * <p> The message is assumed to be a MessageFormat template like 
+   * "Row could not be added: {0}"
+   * @param request The request, for discovering the locale.
+   * @param message The message format to localize.
+   * @param args Arguments to be substituted into the message. 
+   * @return The localized message (or if the messages couldn't be localized, the
+   * original message) with the given arguments substituted. 
+   */
+  protected String localize(String message, Object... args) {
+
+    // determine the Locale/ResourceBundle
+      
+    // get the localized version of the message
+    String localizedString = message;
+    try {
+      localizedString = getResources().getString(message);
+    } catch(Throwable exception) {
+      System.err.println(
+        "Task: i18n: missing resource in " + resources.getLocale() + ": " + message);
+    }
+
+    // do we need to substitute in arguments?
+    if (args.length > 0) {
+      localizedString = new MessageFormat(localizedString).format(args);
+    }
+    return localizedString;
+  } // end of localize()
 }
