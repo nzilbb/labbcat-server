@@ -36,6 +36,12 @@ export class AllUtterancesComponent {
         // interpret URL parameters
         this.route.queryParams.subscribe((params) => {
             this.participantQuery = params["participant_expression"];
+            if (!this.participantQuery) {
+                const id = params["id"];
+                if (id) {
+                    this.participantQuery = "id = '"+id.replace(/'/g,"\\'")+"'";
+                }
+            }
             if (this.participantQuery) {
                 this.participantDescription = params["participants"]
                     || "Selected participants"; // TODO i18n
