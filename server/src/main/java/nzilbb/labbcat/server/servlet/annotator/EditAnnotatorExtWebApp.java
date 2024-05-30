@@ -191,6 +191,8 @@ public class EditAnnotatorExtWebApp extends LabbcatServlet {
         if (resource.equals("/getSchema")) {
           stream = new ByteArrayInputStream(
             annotator.getSchema().toJson().toString().getBytes());
+          response.setContentType("application/json");
+          
         } else if (resource.equals("/util.js")) {
           URL url = descriptor.getClass().getResource("util.js");
           if (url != null) {
@@ -205,9 +207,16 @@ public class EditAnnotatorExtWebApp extends LabbcatServlet {
             // requests with a dot are taken to be resources for the webapp,
             // e.g. index.html
             try {
-              log("about to get ext" + resource);
+              //log("about to get ext" + resource);
               stream = descriptor.getResource("ext"+resource);
-              log("got ext" +resource);
+              //log("got ext" +resource);
+              if (resource.indexOf(".html") > 0) {
+                response.setContentType("text/html");
+              } else if (resource.indexOf(".js") > 0) {
+                response.setContentType("application/json");
+              } else if (resource.indexOf(".css") > 0) {
+                response.setContentType("text/css");
+              }
             } catch(Throwable exception) {
               log(request.getPathInfo() + " - Could not getResource: "+exception);
             }
@@ -240,6 +249,9 @@ public class EditAnnotatorExtWebApp extends LabbcatServlet {
           return;
         }
         response.setStatus(status);
+        if (stream instanceof ByteArrayInputStream) {
+          response.setCharacterEncoding("UTF-8");
+        }
         IO.Pump(stream, response.getOutputStream());
             
       } finally {

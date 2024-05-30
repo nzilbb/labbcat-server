@@ -196,6 +196,7 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
         if (resource.equals("/getSchema")) {
           stream = new ByteArrayInputStream(
             annotator.getSchema().toJson().toString().getBytes());
+          response.setContentType("application/json");
                
         } else if (resource.equals("/setConfig")) {
           // return something
@@ -261,9 +262,9 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
             // requests with a dot are taken to be resources for the webapp,
             // e.g. index.html
             try {
-              log("about to get " + resource);
+              //log("about to get " + resource);
               stream = descriptor.getResource("config"+resource);
-              log("got " +resource);
+              //log("got " +resource);
             } catch(Throwable exception) {
               log(request.getPathInfo() + " - Could not getResource: "+exception);
             }
@@ -300,6 +301,9 @@ public class AdminAnnotatorConfigWebApp extends LabbcatServlet {
           return;
         }
         response.setStatus(status);
+        if (stream instanceof ByteArrayInputStream) {
+          response.setCharacterEncoding("UTF-8");
+        }
         IO.Pump(stream, response.getOutputStream());
             
       } finally {

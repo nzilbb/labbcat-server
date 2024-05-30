@@ -206,13 +206,18 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
         if (resource.equals("/getSchema")) {
           stream = new ByteArrayInputStream(
             annotator.getSchema().toJson().toString().getBytes());               
-               
+          response.setContentType("application/json");
+          
         } else if (resource.equals("/getTaskParameters")) {
           // get task parameters from database
           String parameters = store.getAnnotatorTaskParameters(taskId);
           if (parameters != null) {
             stream = new ByteArrayInputStream(parameters.getBytes());
-            echoContentType(request, response);
+            if (parameters.startsWith("{") || parameters.startsWith("[")) {
+              response.setContentType("application/json");
+            } else {
+              response.setContentType("text/plain");
+            }
           }
                
         } else if (resource.equals("/setTaskParameters")) {
@@ -267,6 +272,7 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
             try {
               stream = url.openConnection().getInputStream();
               response.setContentType("text/javascript");
+              response.setCharacterEncoding("UTF-8");
             } catch(IOException exception) {}
           }
                   
@@ -275,9 +281,9 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
             // requests with a dot are taken to be resources for the webapp,
             // e.g. index.html
             try {
-              log("about to get task" +resource);
+              //log("about to get task" +resource);
               stream = descriptor.getResource("task"+resource);
-              log("got task" +resource);
+              //log("got task" +resource);
             } catch(Throwable exception) {
               log(request.getPathInfo() + " - Could not getResource: "+exception);
             }
@@ -312,6 +318,9 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
           return;
         }
         response.setStatus(status);
+        if (stream instanceof ByteArrayInputStream) {
+          response.setCharacterEncoding("UTF-8");
+        }
         IO.Pump(stream, response.getOutputStream());
             
       } finally {
@@ -345,6 +354,9 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
       // ignore */*
       if (!contentType.equals("*/*")) {
         response.setContentType(contentType);
+        if (contentType.equals("application/json") || contentType.startsWith("text")) {
+          response.setCharacterEncoding("UTF-8");
+        }
       }
     }
   } // end of echoContentType()
