@@ -5060,7 +5060,7 @@ public class SqlGraphStore implements GraphStore {
             && transcript.getSchema().getWordLayer() != null) { // normalizable
           // normalize
           new Normalizer()
-            .setMinimumTurnPauseLength(0.5)
+            .setMinimumTurnPauseLength(Double.parseDouble(getSystemAttribute("minTurnPause")))
             .transform(transcript);
         }
       } else {
@@ -5071,7 +5071,7 @@ public class SqlGraphStore implements GraphStore {
             && transcript.getSchema().getWordLayer() != null) { // normalizable
           // normalize
           new Normalizer()
-            .setMinimumTurnPauseLength(0.5)
+            .setMinimumTurnPauseLength(Double.parseDouble(getSystemAttribute("minTurnPause")))
             .transform(transcript);
         }
       
