@@ -105,11 +105,28 @@ export class TranscriptsComponent implements OnInit {
         });
     }
 
+    // we try to remember search parameters during the session, but there are some exceptions:
+    passthroughPatterns = [
+        /[?&](to)=([^&]*)/,
+        /[?&](participant_expression)=([^&]*)/,
+        /[?&](participants)=([^&]*)/
+    ];
+    
     /** if no query parameters are passed, load the default from system settings */
     determineQueryParameters(): Promise<void> {
         return new Promise((resolve, reject) => {
             let queryString = window.location.search;
-            if (queryString && queryString.startsWith("?")) { // there is a query string
+            // ensure parameters that are ignored for default query purposes are passed through
+            let passthroughParameters = "";
+            for (let pattern of this.passthroughPatterns) {
+                const match = queryString.match(pattern);
+                if (match) {
+                    passthroughParameters += `&${match[1]}=${match[2]}`;
+                    // remove the parameter from the comparison string
+                    queryString = queryString.replace(pattern, "");
+                }
+            }
+            if (queryString) { // there is a query string
                 // nothing further to do
                 resolve();
             } else {
@@ -117,7 +134,7 @@ export class TranscriptsComponent implements OnInit {
                 queryString = sessionStorage.getItem("lastQueryTranscripts");
                 if (queryString) { // they've previously made a query
                     // use that one
-                    window.location.search = queryString;
+                    window.location.search = `${queryString}${passthroughParameters}`;
                     resolve();
                 } else { // they haven't previously made a query
                     // load the default from system settings
@@ -125,7 +142,7 @@ export class TranscriptsComponent implements OnInit {
                         "defaultTranscriptFilter", (attribute, errors, messages) => {
                             if (attribute.value) {
                                 queryString = "?"+attribute.value;
-                                window.location.search = queryString;
+                                window.location.search = `${queryString}${passthroughParameters}`;
                             }
                             resolve();
                         });
@@ -138,7 +155,14 @@ export class TranscriptsComponent implements OnInit {
     parseQueryParameters(): void {
         this.route.queryParams.subscribe((params) => {
             // remember the query for next time
-            sessionStorage.setItem("lastQueryTranscripts", window.location.search); 
+            let queryString = window.location.search;
+            for (let pattern of this.passthroughPatterns) { // but not the passthrough parameters
+                queryString = queryString.replace(pattern, "");
+            }
+            // strip ay leading/trailing parameter delimiters
+            queryString = queryString.replace(/^[?&]/,"").replace(/[?&]$/,"");
+            // save the query in session storage
+            sessionStorage.setItem("lastQueryTranscripts", queryString); 
             // page number
             this.p = parseInt(params["p"]) || 1;
             if (this.p < 1) this.p = 1;
