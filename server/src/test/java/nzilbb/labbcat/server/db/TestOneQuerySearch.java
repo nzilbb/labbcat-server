@@ -339,11 +339,11 @@ public class TestOneQuerySearch {
       new Matrix().addColumn(
         new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("testing")))
       .addColumn(
-        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMin("1")))
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMin(1.0)))
       .addColumn(
-        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMax("2")))
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMax(2.0)))
       .addColumn(
-        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMin("3").setMax("3"))));
+        new Column().addLayerMatch(new LayerMatch().setId("orthography").setMin(3.0).setMax(3.0))));
     parameters = new Vector<Object>();
     sql = search.generateOrthographySql(parameters, getSchema());
     assertEquals(
@@ -390,7 +390,7 @@ public class TestOneQuerySearch {
     assertEquals(Double.valueOf(3), parameters.get(4));
     assertTrue(parameters.get(4) instanceof Double);
     
-    assertEquals("Description", "_^(testing)$_1_2_3_3", search.getDescription());
+    assertEquals("Description", "_^(testing)$_1.0_2.0_3.0_3.0", search.getDescription());
   }
   
   /** Ensure one-target-span-only searches produce optimised SQL. */
@@ -435,7 +435,7 @@ public class TestOneQuerySearch {
 
     // numeric comparison
     match = new LayerMatch()
-      .setId(spanLayer.getId()).setMin("1").setMax("2").setTarget(true);
+      .setId(spanLayer.getId()).setMin(1.0).setMax(2.0).setTarget(true);
     match.setNullBooleans();
     match.ensurePatternAnchored();
     search.setMatrix(
@@ -472,7 +472,7 @@ public class TestOneQuerySearch {
     assertEquals(Double.valueOf(2), parameters.get(1));
     assertTrue(parameters.get(1) instanceof Double);
     
-    assertEquals("Description", "_1_2", search.getDescription());
+    assertEquals("Description", "_1.0_2.0", search.getDescription());
   }
   
   /** Ensure searching main participant utterances only generates the correct SQL. */
@@ -765,7 +765,7 @@ public class TestOneQuerySearch {
       new Matrix()
       .addColumn(new Column()
                  .addLayerMatch(new LayerMatch().setId("syllableCount")
-                                .setMin("2")))
+                                .setMin(2.0)))
       );
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
@@ -811,7 +811,7 @@ public class TestOneQuerySearch {
       new Matrix()
       .addColumn(new Column()
                  .addLayerMatch(new LayerMatch().setId("syllableCount")
-                                .setMax("3")))
+                                .setMax(3.0)))
       );
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
@@ -857,8 +857,8 @@ public class TestOneQuerySearch {
       new Matrix()
       .addColumn(new Column()
                  .addLayerMatch(new LayerMatch().setId("syllableCount")
-                                .setMin("2")
-                                .setMax("3")))
+                                .setMin(2.0)
+                                .setMax(3.0)))
       );
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");

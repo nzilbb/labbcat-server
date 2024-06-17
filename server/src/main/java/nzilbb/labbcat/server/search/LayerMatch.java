@@ -100,47 +100,62 @@ public class LayerMatch implements CloneableBean {
   /**
    * The minimum value for the label, assuming it represents a number.
    * @see #getMin()
-   * @see #setMin(String)
+   * @see #setMin(Double)
    */
-  protected String min;
+  protected Double min;
   /**
-   * Getter for {@link #min}: The minimum value for the label, assuming it represents a number.
-   * @return The minimum value for the label, assuming it represents a number.
+   * Getter for {@link #min}: The minimum value for the label.
+   * @return The minimum value for the label.
    */
   @ClonedProperty
-  public String getMin() { return min; }
+  public Double getMin() { return min; }
   /**
-   * Setter for {@link #min}: The minimum value for the label, assuming it represents a number.
-   * @param newMin The minimum value for the label, assuming it represents a number. An
+   * Setter for {@link #min}: The minimum value for the label.
+   * @param newMin The minimum value for the label.
+   */
+  public LayerMatch setMin(Double newMin) {
+    min = newMin;
+    return this;
+  }
+  /**
+   * Setter for {@link #min}.
+   * @param newMin A string representing the minimum value for the label. An
    * empty string results in null being assigned.
    */
-  public LayerMatch setMin(String newMin) {
-    min = newMin != null && newMin.length() == 0? null : newMin;
+  public LayerMatch setMinString(String newMin) {
+    min = newMin != null && newMin.length() == 0? null : Double.valueOf(newMin);
     return this;
   }
   
   /**
-   * The maximum value for the label, assuming it represents a number.
+   * The maximum value for the label.
    * @see #getMax()
-   * @see #setMax(String)
+   * @see #setMax(Double)
    */
-  protected String max;
+  protected Double max;
   /**
-   * Getter for {@link #max}: The maximum value for the label, assuming it represents a number.
-   * @return The maximum value for the label, assuming it represents a number.
+   * Getter for {@link #max}: The maximum value for the label.
+   * @return The maximum value for the label.
    */
   @ClonedProperty
-  public String getMax() { return max; }
+  public Double getMax() { return max; }
   /**
-   * Setter for {@link #max}: The maximum value for the label, assuming it represents a number.
-   * @param newMax The maximum value for the label, assuming it represents a number. An
-   * empty string results in null being assigned.
+   * Setter for {@link #max}: The maximum value for the label.
+   * @param newMax The maximum value for the label.
    */
-  public LayerMatch setMax(String newMax) {
-    max = newMax != null && newMax.length() == 0? null : newMax;
+  public LayerMatch setMax(Double newMax) {
+    max = newMax;
     return this;
   }
-  
+  /**
+   * Setter for {@link #max}.
+   * @param newMax A string representing the maximum value for the label.
+   */
+  public LayerMatch setMaxString(String newMax) {
+    max = newMax != null && newMax.length() == 0? null : Double.valueOf(newMax);
+    return this;
+  }
+    
   /**
    * Whether this matrix cell is the target of the search.
    * @see #getTarget()

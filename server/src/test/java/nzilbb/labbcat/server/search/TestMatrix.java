@@ -50,12 +50,12 @@ public class TestMatrix {
                                   .setNot(true)
                                   .setPattern("[aeiou].*")
                                   .setAnchorStart(true)
-                                  .setMin("") // should end up null
-                                  .setMax(""))  // should end up null
+                                  .setMinString("") // should end up null
+                                  .setMaxString(""))  // should end up null
                  .addLayerMatch(new LayerMatch()
                                   .setId("syllableCount")
-                                  .setMin("2")
-                                  .setMax("3")
+                                  .setMin(2.0)
+                                  .setMax(3.0)
                                   .setAnchorEnd(true))
                  .addLayerMatch(new LayerMatch()
                                   .setId("orthography")
@@ -70,7 +70,7 @@ public class TestMatrix {
       +",{\"adj\":1,"
       +"\"layers\":{"
       +"\"phonology\":[{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"}],"
-      +"\"syllableCount\":[{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"}],"
+      +"\"syllableCount\":[{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":3.0,\"min\":2.0}],"
       +"\"orthography\":[{\"id\":\"orthography\",\"target\":true}]}}]}",
       m.toJson().toString());
     
@@ -83,7 +83,7 @@ public class TestMatrix {
       +",{\"adj\":1,"
       +"\"layers\":{"
       +"\"phonology\":[{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"}],"
-      +"\"syllableCount\":[{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"}],"
+      +"\"syllableCount\":[{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":3.0,\"min\":2.0}],"
       +"\"orthography\":[{\"id\":\"orthography\",\"target\":true}]}}]}",
       m.toString());
     
@@ -114,8 +114,8 @@ public class TestMatrix {
                           .add("anchorStart", true))
                      .add("syllableCount", Json.createObjectBuilder()
                           .add("id", "syllableCount")
-                          .add("min", "2")
-                          .add("max", "3")
+                          .add("min", "2") // expressed as a string
+                          .add("max", 3.0) // or as a number
                           .add("anchorEnd", true))
                      .add("orthography", Json.createObjectBuilder()
                           .add("id", "orthography")
@@ -163,8 +163,8 @@ public class TestMatrix {
     assertEquals("Second col: syllableCount layer id", "syllableCount", layerMatch.getId());
     assertNull("Second col: syllableCount layer pattern", layerMatch.getPattern());
     assertNull("Second col: syllableCount negation null", layerMatch.getNot());
-    assertEquals("Second col: syllableCount layer min", "2", layerMatch.getMin());
-    assertEquals("Second col: syllableCount layer max", "3", layerMatch.getMax());
+    assertEquals("Second col: syllableCount layer min", Double.valueOf(2), layerMatch.getMin());
+    assertEquals("Second col: syllableCount layer max", Double.valueOf(3), layerMatch.getMax());
     assertNull("Second col: syllableCount layer target", layerMatch.getTarget());
     assertNull("Second col: syllableCount layer anchorStart", layerMatch.getAnchorStart());
     assertTrue("Second col: syllableCount layer anchorEnd", layerMatch.getAnchorEnd());
@@ -252,8 +252,8 @@ public class TestMatrix {
                           .add("anchorStart", true))
                      .add("syllableCount", Json.createObjectBuilder()
                           .add("id", "syllableCount")
-                          .add("min", "2")
-                          .add("max", "3")
+                          .add("min", 2.0) // number
+                          .add("max", "3") // or string
                           .add("anchorEnd", true))
                      .add("orthography", Json.createObjectBuilder()
                           .add("id", "orthography")
@@ -295,8 +295,8 @@ public class TestMatrix {
     assertNotNull("Second col: syllableCount layer exists", layerMatch);
     assertEquals("Second col: syllableCount layer id", "syllableCount", layerMatch.getId());
     assertNull("Second col: syllableCount layer pattern", layerMatch.getPattern());
-    assertEquals("Second col: syllableCount layer min", "2", layerMatch.getMin());
-    assertEquals("Second col: syllableCount layer max", "3", layerMatch.getMax());
+    assertEquals("Second col: syllableCount layer min", Double.valueOf(2.0), layerMatch.getMin());
+    assertEquals("Second col: syllableCount layer max", Double.valueOf(3.0), layerMatch.getMax());
     assertNull("Second col: syllableCount layer target", layerMatch.getTarget());
     assertNull("Second col: syllableCount layer anchorStart", layerMatch.getAnchorStart());
     assertTrue("Second col: syllableCount layer anchorEnd", layerMatch.getAnchorEnd());
@@ -365,17 +365,17 @@ public class TestMatrix {
                  new Matrix().fromLegacyString("phonemes:tEst").toString());
     assertEquals("Range search",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"max\":\"3\",\"min\":\"2\"}]}}]"
+                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"max\":3.0,\"min\":2.0}]}}]"
                  +"}",
                  new Matrix().fromLegacyString("syllableCount:2<3").toString());
     assertEquals("Range search - min only",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"min\":\"2\"}]}}]"
+                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"min\":2.0}]}}]"
                  +"}",
                  new Matrix().fromLegacyString("syllableCount:2<").toString());
     assertEquals("Range search - max only",
                  "{\"columns\":[{\"adj\":1,\"layers\":"
-                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"max\":\"3\"}]}}]"
+                 +"{\"syllableCount\":[{\"id\":\"syllableCount\",\"max\":3.0}]}}]"
                  +"}",
                  new Matrix().fromLegacyString("syllableCount:<3").toString());
     assertEquals("Multi-row search",
@@ -423,7 +423,7 @@ public class TestMatrix {
                    new LayerMatch().setId("orthography").setPattern("the"))
                  .setAdj(3))
       .addColumn(new Column().addLayerMatch(
-                   new LayerMatch().setId("syllableCount").setMin("2").setMax("3")
+                   new LayerMatch().setId("syllableCount").setMin(2.0).setMax(3.0)
                    .setAnchorEnd(true)
                    .setTarget(true))
                  .addLayerMatch(
@@ -436,7 +436,7 @@ public class TestMatrix {
                    new LayerMatch().setId("orthography").setPattern("the"))
                  .setAdj(3))
       .addColumn(new Column().addLayerMatch(
-                   new LayerMatch().setId("syllableCount").setMin("2").setMax("3")
+                   new LayerMatch().setId("syllableCount").setMin(2.0).setMax(3.0)
                    .setAnchorEnd(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("")));
     assertNull("No target - layer", m.getTargetLayerId());
@@ -447,7 +447,7 @@ public class TestMatrix {
                    new LayerMatch().setId("orthography").setPattern("the"))
                  .setAdj(3))
       .addColumn(new Column().addLayerMatch(
-                   new LayerMatch().setId("syllableCount").setMin("2").setMax("3")
+                   new LayerMatch().setId("syllableCount").setMin(2.0).setMax(3.0)
                    .setAnchorEnd(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("")
                                 .setTarget(true))); // target has no pattern
@@ -460,7 +460,7 @@ public class TestMatrix {
                    .setTarget(true)) // multiple targets
                  .setAdj(3))
       .addColumn(new Column().addLayerMatch(
-                   new LayerMatch().setId("syllableCount").setMin("2").setMax("3")
+                   new LayerMatch().setId("syllableCount").setMin(2.0).setMax(3.0)
                    .setAnchorEnd(true)
                    .setTarget(true)) // multiple targets                 
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("")));

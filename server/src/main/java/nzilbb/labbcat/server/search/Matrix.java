@@ -22,6 +22,7 @@
 package nzilbb.labbcat.server.search;
 
 import java.io.StringReader;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -187,8 +188,8 @@ public class Matrix implements CloneableBean {
         String condition = match.length > 1? match[1] : match[0];
         if (condition.matches("[0-9.]*<[0-9.]*")) {
           String[] limits = condition.split("<", 2);
-          layerMatch.setMin(limits[0]);
-          layerMatch.setMax(limits[1]);
+          layerMatch.setMinString(limits[0]);
+          layerMatch.setMaxString(limits[1]);
         } else {
           if (condition.startsWith("NOT ")) {
             layerMatch.setNot(true);
@@ -267,10 +268,10 @@ public class Matrix implements CloneableBean {
             description.append(layerMatch.getPattern());
           }
           if (layerMatch.getMin() != null) {
-            description.append("≥").append(layerMatch.getMin());
+            description.append("≥").append(new DecimalFormat("#0.#").format(layerMatch.getMin()));
           }
           if (layerMatch.getMax() != null) {
-            description.append("<").append(layerMatch.getMax());
+            description.append("<").append(new DecimalFormat("#0.#").format(layerMatch.getMax()));
           }
           return description.toString();
         })

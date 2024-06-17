@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -332,7 +333,7 @@ public class OneQuerySearch extends SearchTask {
           } else {
             sSqlExtraJoinsFirst.append(NUMERIC_MAX_JOIN.format(oArgs));
           }
-          parameters.add(Double.valueOf(layerMatch.getMax()));
+          parameters.add(layerMatch.getMax());
         } else if (layerMatch.getMin() != null && layerMatch.getMax() == null) { // min only
           if (bPhraseLayer || bSpanLayer) {
             // meta/freeform layer
@@ -362,7 +363,7 @@ public class OneQuerySearch extends SearchTask {
           } else {
             sSqlExtraJoinsFirst.append(NUMERIC_MIN_JOIN.format(oArgs));
           }
-          parameters.add(Double.valueOf(layerMatch.getMin()));
+          parameters.add(layerMatch.getMin());
         } else if (layerMatch.getMin() != null && layerMatch.getMax() != null) { // min & max
           if (bPhraseLayer || bSpanLayer) {
             // meta/freeform layer
@@ -392,8 +393,8 @@ public class OneQuerySearch extends SearchTask {
           } else {
             sSqlExtraJoinsFirst.append(NUMERIC_RANGE_JOIN.format(oArgs));
           }
-          parameters.add(Double.valueOf(layerMatch.getMin()));
-          parameters.add(Double.valueOf(layerMatch.getMax()));
+          parameters.add(layerMatch.getMin());
+          parameters.add(layerMatch.getMax());
         } else if (layerMatch.getPattern() != null) { // use regexp
           StringBuilder sSqlExtraJoin = new StringBuilder();
           if (bPhraseLayer || bSpanLayer) {
@@ -544,10 +545,10 @@ public class OneQuerySearch extends SearchTask {
           description += "_" + layerMatch.getPattern();
         }
         if (layerMatch.getMin() != null) {
-          description += "_" + layerMatch.getMin();
+          description += "_" + new DecimalFormat("#0.#").format(layerMatch.getMin());
         }
         if (layerMatch.getMax() != null) {
-          description += "_" + layerMatch.getMax();
+          description += "_" + new DecimalFormat("#0.#").format(layerMatch.getMax());
         }
         if (targetLayerId.equals(layerMatch.getId()) && iWordColumn == iTargetColumn) {
           sSqlExtraFieldsFirst.append(
@@ -945,7 +946,7 @@ public class OneQuerySearch extends SearchTask {
             } else {
               sSqlExtraJoins.append(NUMERIC_MAX_JOIN.format(oArgs));
             }
-            parameters.add(Double.valueOf(layerMatch.getMax()));
+            parameters.add(layerMatch.getMax());
           } else if (layerMatch.getMin() != null && layerMatch.getMax() == null) { // min only
             if (bPhraseLayer || bSpanLayer) {
               // meta/freeform layer
@@ -975,7 +976,7 @@ public class OneQuerySearch extends SearchTask {
             } else {
               sSqlExtraJoins.append(NUMERIC_MIN_JOIN.format(oArgs));
             }
-            parameters.add(Double.valueOf(layerMatch.getMin()));
+            parameters.add(layerMatch.getMin());
           } else if (layerMatch.getMin() != null && layerMatch.getMax() != null) { // min&max
             if (bPhraseLayer || bSpanLayer) {
               // meta/freeform layer
@@ -1005,8 +1006,8 @@ public class OneQuerySearch extends SearchTask {
             } else {
               sSqlExtraJoins.append(NUMERIC_RANGE_JOIN.format(oArgs));
             }
-            parameters.add(Double.valueOf(layerMatch.getMin()));
-            parameters.add(Double.valueOf(layerMatch.getMax()));
+            parameters.add(layerMatch.getMin());
+            parameters.add(layerMatch.getMax());
           } else if (layerMatch.getPattern() != null) { // use regexp
             StringBuilder sSqlExtraJoin = new StringBuilder();
             if (bPhraseLayer || bSpanLayer) {
@@ -1630,13 +1631,13 @@ public class OneQuerySearch extends SearchTask {
     } else { // numeric
       if (layerMatch.getMin() != null) {
         q.append("CAST(token.label AS DECIMAL) >= ?");
-        parameters.add(Double.valueOf(layerMatch.getMin()));
+        parameters.add(layerMatch.getMin());
         description += "_" + layerMatch.getMin();
       }
       if (layerMatch.getMax() != null) {
         if (layerMatch.getMin() != null) q.append(" AND ");
         q.append("CAST(token.label AS DECIMAL) < ?");
-        parameters.add(Double.valueOf(layerMatch.getMax()));
+        parameters.add(layerMatch.getMax());
         description += "_" + layerMatch.getMax();
       } else if (layerMatch.getMin() == null) { // no condition set at all
         throw new Exception(
