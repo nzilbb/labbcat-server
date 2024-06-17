@@ -93,11 +93,31 @@ export class ParticipantsComponent implements OnInit {
         });
     }
 
+    // we try to remember search parameters during the session, but there are some exceptions:
+    passthroughPatterns = [
+        /[?&](p)=([^&]*)/,
+        /[?&](to)=([^&]*)/,
+        /[?&](transcript_expression)=([^&]*)/,
+        /[?&](transcripts)=([^&]*)/,
+        /[?&](participant_expression)=([^&]*)/,
+        /[?&](participants)=([^&]*)/
+    ];
+    
     /** if no query parameters are passed, load the default from system settings */
     determineQueryParameters(): Promise<void> {
         return new Promise((resolve, reject) => {
             let queryString = window.location.search;
-            if (queryString && queryString.startsWith("?")) { // there is a query string
+            // ensure parameters that are ignored for default query purposes are passed through
+            let passthroughParameters = "";
+            for (let pattern of this.passthroughPatterns) {
+                const match = queryString.match(pattern);
+                if (match) {
+                    passthroughParameters += `&${match[1]}=${match[2]}`;
+                    // remove the parameter from the comparison string
+                    queryString = queryString.replace(pattern, "");
+                }
+            }
+            if (queryString && queryString != "?") { // there is a query string
                 // nothing further to do
                 resolve();
             } else {
@@ -105,7 +125,16 @@ export class ParticipantsComponent implements OnInit {
                 queryString = sessionStorage.getItem("lastQueryParticipants");
                 if (queryString) { // they've previously made a query
                     // use that one
-                    window.location.search = queryString;
+                    const queryParams: Params = {};
+                    for (let param of `${queryString}${passthroughParameters}`.split("&")) {
+                        const parts = param.split("=");
+                        queryParams[parts[0]] = decodeURIComponent(parts[1]);
+                    }
+                    this.router.navigate([], {
+                        relativeTo: this.route,
+                        replaceUrl: true,
+                        queryParams
+                    });        
                     resolve();
                 } else { // they haven't previously made a query
                     // load the default from system settings
@@ -113,7 +142,16 @@ export class ParticipantsComponent implements OnInit {
                         "defaultParticipantFilter", (attribute, errors, messages) => {
                             if (attribute.value) {
                                 queryString = "?"+attribute.value;
-                                window.location.search = queryString;
+                                const queryParams: Params = {};
+                                for (let param of `${queryString}${passthroughParameters}`.split("&")) {
+                                    const parts = param.split("=");
+                                    queryParams[parts[0]] = decodeURIComponent(parts[1]);
+                                }
+                                this.router.navigate([], {
+                                    relativeTo: this.route,
+                                    replaceUrl: true,
+                                    queryParams
+                                });        
                             }
                             resolve();
                         });
@@ -126,7 +164,16 @@ export class ParticipantsComponent implements OnInit {
     parseQueryParameters(): void {
         this.route.queryParams.subscribe((params) => {
             // remember the query for next time
-            sessionStorage.setItem("lastQueryParticipants", window.location.search);
+            // remember the query for next time
+            let queryString = window.location.search;
+            for (let pattern of this.passthroughPatterns) { // but not the passthrough parameters
+                queryString = queryString.replace(pattern, "");
+            }
+            // strip ay leading/trailing parameter delimiters
+            queryString = queryString.replace(/^[?&]/,"").replace(/[?&]$/,"");
+            // save the query in session storage
+            sessionStorage.setItem("lastQueryParticipants", queryString); 
+            
             // page number
             this.p = parseInt(params["p"]) || 1;
             if (this.p < 1) this.p = 1;

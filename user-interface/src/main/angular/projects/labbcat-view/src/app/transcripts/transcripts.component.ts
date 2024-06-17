@@ -107,6 +107,7 @@ export class TranscriptsComponent implements OnInit {
 
     // we try to remember search parameters during the session, but there are some exceptions:
     passthroughPatterns = [
+        /[?&](p)=([^&]*)/,
         /[?&](to)=([^&]*)/,
         /[?&](participant_expression)=([^&]*)/,
         /[?&](participants)=([^&]*)/
@@ -134,20 +135,34 @@ export class TranscriptsComponent implements OnInit {
                 queryString = sessionStorage.getItem("lastQueryTranscripts");
                 if (queryString) { // they've previously made a query
                     // use that one
-                    window.location.search = `${queryString}${passthroughParameters}`;
+                    const queryParams: Params = {};
+                    this.changeUrlParameters(`${queryString}${passthroughParameters}`);        
                     resolve();
                 } else { // they haven't previously made a query
                     // load the default from system settings
                     this.labbcatService.labbcat.getSystemAttribute(
                         "defaultTranscriptFilter", (attribute, errors, messages) => {
                             if (attribute.value) {
-                                queryString = "?"+attribute.value;
-                                window.location.search = `${queryString}${passthroughParameters}`;
+                                queryString = attribute.value;
+                                this.changeUrlParameters(`${queryString}${passthroughParameters}`);        
                             }
                             resolve();
                         });
                 }
             }
+        });        
+    }
+
+    changeUrlParameters(newParameters: string) {
+        const queryParams: Params = {};
+        for (let param of newParameters.split("&")) {
+            const parts = param.split("=", 2);
+            queryParams[parts[0]] = decodeURIComponent(parts[1]);
+        }
+        this.router.navigate([], {
+            relativeTo: this.route,
+            replaceUrl: true,
+            queryParams
         });        
     }
 
@@ -422,6 +437,7 @@ export class TranscriptsComponent implements OnInit {
         } // next filter layer
         this.router.navigate([], {
             relativeTo: this.route,
+            replaceUrl: true,
             queryParams
         });        
 
