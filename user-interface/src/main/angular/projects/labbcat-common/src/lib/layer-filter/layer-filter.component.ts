@@ -47,7 +47,7 @@ export class LayerFilterComponent implements OnInit {
         }
     }
 
-    keyDownEnter(event: any): void {
+    keyDownEnter(event: KeyboardEvent): void {
         event.preventDefault();
         this.enterKey.emit();
     }
