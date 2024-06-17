@@ -8,6 +8,7 @@
       type="text"
       i18n-placeholder placeholder="Regular Expression"
       value="{{values[0]}}"
+      (keydown.enter)="keyDownEnter($event)"
       (input)="handleTextChange($event.target.value)"
       ><!-- TODO validate regexp -->
 
@@ -17,6 +18,7 @@
         i18n-placeholder="range lower bound" placeholder="From"
         i18n-title="range lower bound" title="Lower bound (inclusive)"
         value="{{values[0]}}"
+        (keydown.enter)="keyDownEnter($event)"
         (input)="handleRangeChange(0, $event.target.value)"
         >
       <span>&mdash;</span>
@@ -25,6 +27,7 @@
         i18n-placeholder="range upper bound" placeholder="To"
         i18n-title="range upper bound" title="Upper bound (inclusive)"
         value="{{values[1]}}"
+        (keydown.enter)="keyDownEnter($event)"
         (input)="handleRangeChange(1, $event.target.value)"
         >
     </ng-container>
@@ -35,6 +38,7 @@
         i18n-placeholder="date range lower bound" placeholder="yyyy-mm-dd"
         i18n-title="date range lower bound" title="From (inclusive)"
         value="{{values[0]}}"
+        (keydown.enter)="keyDownEnter($event)"
         (input)="handleRangeChange(0, $event.target.value)"
         >
       <span>&mdash;</span>
@@ -43,6 +47,7 @@
         i18n-placeholder="date range upper bound" placeholder="yyyy-mm-dd"
         i18n-title="date range upper bound" title="To (inclusive)"
         value="{{values[1]}}"
+        (keydown.enter)="keyDownEnter($event)"
         (input)="handleRangeChange(1, $event.target.value)"
         >
     </ng-container>
@@ -55,6 +60,7 @@
             type="checkbox"
             value="{{label}}"
             [checked]="values.includes(label)"
+            (keydown.enter)="keyDownEnter($event)"
             (click)="handleCheckboxClick(label, $event.target.checked)"
             >
           <label for="{{layer.id}}-{{label}}" title="{{layer.validLabels[label]}}">
@@ -68,6 +74,7 @@
           type="checkbox"
           value="!"
           [checked]="values.includes('!')"
+          (keydown.enter)="keyDownEnter($event)"
           (click)="handleCheckboxClick('!', $event.target.checked)"
           >
         <label for="{{layer.id}}_other"
@@ -78,6 +85,7 @@
     
     <div *ngIf="inputType == 'boolean'" class="boolean">
       <select
+        (keydown.enter)="keyDownEnter($event)"
         (input)="handleTextChange($event.target.value)">
         <option value=""></option>
         <option value="1" [selected]="values[0] == '1'">1 - <span i18n="layer filter boolean label">true</span></option>

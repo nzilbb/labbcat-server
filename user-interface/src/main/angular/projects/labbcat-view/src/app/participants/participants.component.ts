@@ -143,6 +143,15 @@ export class ParticipantsComponent implements OnInit {
         }, 2000);
     }
 
+    /** the user can hit enter to skip the deferral */
+    enterKeyPressed(): void {
+        if (this.listParticipantsTimer >= 0) {
+            window.clearTimeout(this.listParticipantsTimer);
+            this.listParticipantsTimer = -1;
+        }
+        this.listParticipants();
+    }
+    
     loadingList = false;
     /** List participants that match the filters */
     listParticipants(): void {
@@ -422,9 +431,11 @@ export class ParticipantsComponent implements OnInit {
                     "labels('"+this.esc(this.schema.participantLayerId)+"')"
                     +".includes('"+this.esc(id)+"')",
                     (count, errors, messages) => {
-                        this.attributeValues[id].annotations["--transcript-count"] = [{
-                            label : count
-                        }];
+                        if (this.attributeValues[id].annotations) {
+                            this.attributeValues[id].annotations["--transcript-count"] = [{
+                                label : count
+                            }];
+                        }
                     });
             });
     }

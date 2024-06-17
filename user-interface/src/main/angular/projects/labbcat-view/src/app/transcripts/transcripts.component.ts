@@ -175,6 +175,15 @@ export class TranscriptsComponent implements OnInit {
             this.listTranscriptsTimer = -1;
         }, 2000);
     }
+
+    /** the user can hit enter to skip the deferral */
+    enterKeyPressed(): void {
+        if (this.listTranscriptsTimer >= 0) {
+            window.clearTimeout(this.listTranscriptsTimer);
+            this.listTranscriptsTimer = -1;
+        }
+        this.listTranscripts();
+    }
     
     loadingList = false;
     /** List transcripts that match the filters */

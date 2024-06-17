@@ -12,6 +12,7 @@ export class LayerFilterComponent implements OnInit {
     @Input() layer: Layer;
     @Input() values: string[];
     @Output() changeValues = new EventEmitter<string[]>();
+    @Output() enterKey = new EventEmitter<string[]>();
     inputType = "regexp";
     otherAllowed = false;
     
@@ -44,6 +45,11 @@ export class LayerFilterComponent implements OnInit {
         } else {
             this.inputType = "regexp";
         }
+    }
+
+    keyDownEnter(event: any): void {
+        event.preventDefault();
+        this.enterKey.emit();
     }
     
     handleTextChange(value: string): void {
