@@ -48,14 +48,14 @@
                   class="numeric minimum"
                   type="number"
                   i18n-placeholder placeholder="Minimum"                  
-                  [(value)]="match.min"
+                  [(ngModel)]="match.min"
                   appAutofocus="true">
                 <span className="lt">&lt;</span>
                 <input
                   class="numeric maximum"
                   type="number"
                   i18n-placeholder placeholder="Maximum"
-                  [(value)]="match.max">
+                  [(ngModel)]="match.max">
               </span>
 
               <span *ngSwitchCase="'ipa'" class="ipa">
