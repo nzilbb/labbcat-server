@@ -54,46 +54,19 @@ export class TranscriptsComponent implements OnInit {
         this.imagesLocation = this.environment.imagesLocation;
     }
     
-    ngOnInit(): void {
+    ngOnInit(): void {        
         this.filterLayers = [];
         this.selectedIds = [];
         this.readUserInfo();
         this.readBaseUrl();
         this.readSerializers();
         this.readSchema().then(()=> {
-            this.route.queryParams.subscribe((params) => {
-                this.p = parseInt(params["p"]) || 1;
-                if (this.p < 1) this.p = 1;
-                // set any layer parameter values to their corresponding filters
-                for (let layerId in params) {
-                    if (params[layerId]) { // there's a parameter for this filter layer
-                        this.filterValues[layerId] = params[layerId].split(",");
-                    }
-                }
-                if (params["participant_expression"]) {
-                    this.participantQuery = params["participant_expression"];
-                    if (params["participants"]) {
-                        this.participantDescription = params["participants"];
-                    } else {
-                        this.participantDescription = "Selected participants";
-                    }
-                }
-                if (params["transcript_expression"]) {
-                    this.transcriptQuery = params["transcript_expression"];
-                    if (params["transcripts"]) {
-                        this.transcriptDescription = params["transcripts"];
-                    } else {
-                        this.transcriptDescription = "Selected transcripts";
-                    }
-                }
-                if (params["to"]) {
-                    this.nextPage = params["to"];
-                }
-                this.listTranscripts();
+            this.determineQueryParameters().then(() => {
+                this.parseQueryParameters();
             });
         });
     }
-    
+
     readSchema(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
@@ -131,6 +104,72 @@ export class TranscriptsComponent implements OnInit {
             });
         });
     }
+
+    /** if no query parameters are passed, load the default from system settings */
+    determineQueryParameters(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            let queryString = window.location.search;
+            if (queryString && queryString.startsWith("?")) { // there is a query string
+                // nothing further to do
+                resolve();
+            } else {
+                // use the last query string for this session
+                queryString = sessionStorage.getItem("lastQueryTranscripts");
+                if (queryString) { // they've previously made a query
+                    // use that one
+                    window.location.search = queryString;
+                    resolve();
+                } else { // they haven't previously made a query
+                    // load the default from system settings
+                    this.labbcatService.labbcat.getSystemAttribute(
+                        "defaultTranscriptFilter", (attribute, errors, messages) => {
+                            if (attribute.value) {
+                                queryString = "?"+attribute.value;
+                                window.location.search = queryString;
+                            }
+                            resolve();
+                        });
+                }
+            }
+        });        
+    }
+
+    /** load config from query parameters */
+    parseQueryParameters(): void {
+        this.route.queryParams.subscribe((params) => {
+            // remember the query for next time
+            sessionStorage.setItem("lastQueryTranscripts", window.location.search); 
+            // page number
+            this.p = parseInt(params["p"]) || 1;
+            if (this.p < 1) this.p = 1;
+            // set any layer parameter values to their corresponding filters
+            for (let layerId in params) {
+                if (params[layerId]) { // there's a parameter for this filter layer
+                    this.filterValues[layerId] = params[layerId].split(",");
+                }
+            }
+            if (params["participant_expression"]) {
+                this.participantQuery = params["participant_expression"];
+                if (params["participants"]) {
+                    this.participantDescription = params["participants"];
+                } else {
+                    this.participantDescription = "Selected participants";
+                }
+            }
+            if (params["transcript_expression"]) {
+                this.transcriptQuery = params["transcript_expression"];
+                if (params["transcripts"]) {
+                    this.transcriptDescription = params["transcripts"];
+                } else {
+                    this.transcriptDescription = "Selected transcripts";
+                }
+            }
+            if (params["to"]) {
+                this.nextPage = params["to"];
+            }
+            this.listTranscripts();
+        });
+    }    
     
     readUserInfo(): void {
         this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
@@ -190,7 +229,6 @@ export class TranscriptsComponent implements OnInit {
     listTranscripts(): void {
         this.query = this.transcriptQuery; // if any
         this.queryDescription = this.transcriptDescription;
-        console.log(`query start ${this.query}`);
         for (let layer of this.filterLayers) {
 
             if (layer.id == this.schema.root.id
@@ -365,7 +403,6 @@ export class TranscriptsComponent implements OnInit {
 
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
-        console.log(`query end ${this.query}`);
         let queryExpression = this.query;
         if (this.participantQuery) {
             if (queryExpression) queryExpression += " && ";
