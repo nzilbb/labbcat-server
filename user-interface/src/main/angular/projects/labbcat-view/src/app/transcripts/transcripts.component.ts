@@ -535,6 +535,11 @@ export class TranscriptsComponent implements OnInit {
         this.p = 1;
         this.listTranscripts();
     }
+
+    /** Button action */
+    newTranscript(): void {
+        document.location = `${this.baseUrl}edit/transcript/new`;
+    }
     
     deleting = false;
     /** Button action */
