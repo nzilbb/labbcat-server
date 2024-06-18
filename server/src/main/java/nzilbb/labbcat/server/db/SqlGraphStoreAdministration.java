@@ -506,7 +506,7 @@ public class SqlGraphStoreAdministration
           }
           sql.close();
         }
-      } else if (layer.get("class_id") != null && layer.get("attribute") != null) {
+      } else if (oldVersion.get("class_id") != null && oldVersion.get("attribute") != null) {
         // transcript/participant attribute
         PreparedStatement sql = getConnection().prepareStatement(
           "UPDATE attribute_definition"
@@ -520,9 +520,19 @@ public class SqlGraphStoreAdministration
           sql.setString(
             2, Optional.ofNullable(layer.getCategory())
             .orElse(oldVersion.getCategory()));
+          String subtype = Optional.ofNullable((String)layer.get("subtype"))
+            .orElse((String)oldVersion.get("subtype"));
+          subtype = subtype.equals("select")?"select":"string";
+          if (Constants.TYPE_NUMBER.equals(layer.getType())) {
+            subtype = "number";  // TODO handle type = number/integer
+          } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
+            subtype = "boolean";
+          } 
+          if (layer.getValidLabels().keySet().size() > 0) {
+            subtype = "select";
+          } 
           sql.setString(
-            3, Optional.ofNullable((String)layer.get("subtype"))
-            .orElse((String)oldVersion.get("subtype")));
+            3, subtype);
           sql.setString(
             4, Optional.ofNullable((String)layer.get("style"))
             .orElse((String)oldVersion.get("style")));
@@ -666,6 +676,7 @@ public class SqlGraphStoreAdministration
     } 
     if (layer.containsKey("subtype")) { // the given subtype trumps the above
       subtype = layer.get("subtype").toString();
+      System.err.println("newLayer: " + layer + " subtype: " + subtype);
     }
     
     try {
@@ -698,7 +709,7 @@ public class SqlGraphStoreAdministration
             }
           }
           sql.setString(2, layer.getCategory());
-          subtype = "string";
+          subtype = subtype.equals("select")?"select":"string";
           if (Constants.TYPE_NUMBER.equals(layer.getType())) {
             subtype = "number";  // TODO handle type = number/integer
           } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
