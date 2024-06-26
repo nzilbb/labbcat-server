@@ -105,7 +105,8 @@ export class TranscriptsComponent implements OnInit {
                         this.filterLayers.push(layer);
                     }
                 }
-                if (layer.layer_manager_id && layer.id != this.schema.wordLayerId) {
+                if (layer.layer_manager_id && layer.id != this.schema.wordLayerId
+                    && /T/.test(layer.enabled)) {
                     this.generableLayers.push(layer);
                 }
             }
