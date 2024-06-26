@@ -60,9 +60,11 @@ export class TranscriptsComponent implements OnInit {
         this.readUserInfo();
         this.readBaseUrl();
         this.readSerializers();
-        this.readSchema().then(()=> {
-            this.determineQueryParameters().then(() => {
-                this.parseQueryParameters();
+        this.readSchema().then(() => {
+            this.initializeFilters().then(() => {
+                this.determineQueryParameters().then(() => {
+                    this.parseQueryParameters();
+                });
             });
         });
     }
@@ -72,39 +74,44 @@ export class TranscriptsComponent implements OnInit {
             this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
                 this.schema = schema;
                 this.schema.root.description = "Transcript";
-                this.transcriptAttributes = [];
-                this.filterLayers = [];
-                this.generableLayers = [];
-                // allow filtering by transcript ID, corpus, episode, and type
-                this.filterLayers.push(schema.root);
-                this.filterValues[schema.root.id] = [];
-                this.filterLayers.push(schema.layers[schema.corpusLayerId]);
-                this.filterValues[schema.corpusLayerId] = [];
-                //TODO this.filterLayers.push(schema.layers[schema.episodeLayerId]);
-                //TODO this.filterValues[schema.episodeLayerId] = [];
-                this.filterLayers.push(schema.layers["transcript_type"]);
-                this.filterValues["transcript_type"] = [];
-                // and by selected transcript attributes
-                for (let layerId in schema.layers) {
-                    const layer = schema.layers[layerId] as Layer;
-                    if (layer.parentId == schema.root.id
-                        && layer.alignment == 0
-                        && layer.id != schema.participantLayerId) {
-                        this.transcriptAttributes.push(layer);
-                        if (schema.layers[layerId].searchable == 1) {
-                            this.filterValues[layer.id] = [];
-                            this.filterLayers.push(layer);
-                        }
-                    }
-                    if (layer.layer_manager_id && layer.id != schema.wordLayerId) {
-                        this.generableLayers.push(layer);
-                    }
-                }
                 resolve();
             });
         });
     }
-
+    
+    initializeFilters(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.transcriptAttributes = [];
+            this.filterLayers = [];
+            this.generableLayers = [];
+            // allow filtering by transcript ID, corpus, episode, and type
+            this.filterLayers.push(this.schema.root);
+            this.filterValues[this.schema.root.id] = [];
+            this.filterLayers.push(this.schema.layers[this.schema.corpusLayerId]);
+            this.filterValues[this.schema.corpusLayerId] = [];
+            //TODO this.filterLayers.push(this.schema.layers[this.schema.episodeLayerId]);
+            //TODO this.filterValues[this.schema.episodeLayerId] = [];
+            this.filterLayers.push(this.schema.layers["transcript_type"]);
+            this.filterValues["transcript_type"] = [];
+            // and by selected transcript attributes
+            for (let layerId in this.schema.layers) {
+                const layer = this.schema.layers[layerId] as Layer;
+                if (layer.parentId == this.schema.root.id
+                    && layer.alignment == 0
+                    && layer.id != this.schema.participantLayerId) {
+                    this.transcriptAttributes.push(layer);
+                    if (this.schema.layers[layerId].searchable == 1) {
+                        this.filterValues[layer.id] = [];
+                        this.filterLayers.push(layer);
+                    }
+                }
+                if (layer.layer_manager_id && layer.id != this.schema.wordLayerId) {
+                    this.generableLayers.push(layer);
+                }
+            }
+            resolve();
+        });
+    }
     // we try to remember search parameters during the session, but there are some exceptions:
     passthroughPatterns = [
         /[?&](p)=([^&]*)/,
@@ -537,8 +544,10 @@ export class TranscriptsComponent implements OnInit {
     }
 
     /** Button action */
-    newTranscript(): void {
-        document.location = `${this.baseUrl}edit/transcript/new`;
+    clearFilters() : void {
+        this.initializeFilters().then(()=>{
+            this.listTranscripts();
+        });
     }
     
     deleting = false;

@@ -29,3 +29,9 @@ span.attribute {
     overflow: clip;
     font-style: italic;
 }
+.buttons {
+    text-align: left;
+}
+.filters .controls {
+    white-space: nowrap;
+}

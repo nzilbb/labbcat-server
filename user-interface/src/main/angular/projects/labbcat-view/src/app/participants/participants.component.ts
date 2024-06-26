@@ -47,8 +47,10 @@ export class ParticipantsComponent implements OnInit {
         this.readUserInfo();
         this.readBaseUrl();
         this.readSchema().then(()=> {
-            this.determineQueryParameters().then(() => {
-                this.parseQueryParameters();
+            this.initializeFilters().then(() => {
+                this.determineQueryParameters().then(() => {
+                    this.parseQueryParameters();
+                });
             });
         });
     }
@@ -57,42 +59,47 @@ export class ParticipantsComponent implements OnInit {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
                 this.schema = schema;
-                this.participantAttributes = [];
-                this.filterLayers = [];
-                // allow filtering by participant ID, corpus, and episode
-                this.filterLayers.push(schema.layers[schema.participantLayerId]);
-                this.filterValues[schema.participantLayerId] = [];
-                this.filterLayers.push(schema.layers[schema.corpusLayerId]);
-                this.filterValues[schema.corpusLayerId] = [];
-                this.filterLayers.push(schema.layers[schema.episodeLayerId]);
-                this.filterValues[schema.episodeLayerId] = [];
-                // and transcript count - we use a dummy layer to fool the layer-filter
-                schema.layers["--transcript-count"] = {
-                    id: "--transcript-count", description: "Transcript count", // TODO i18n
-                    parentId: schema.participantLayerId,                    
-                    alignment: 0,
-                    peers: false, peersOverlap: false, parentIncludes: true, saturated: true,
-                    type: "number", subtype: "integer"
-                }
-                this.filterLayers.push(schema.layers["--transcript-count"]);
-                this.filterValues["--transcript-count"] = [];
-                // and by selected participant attributes
-                for (let layerId in schema.layers) {
-                    const layer = schema.layers[layerId] as Layer;
-                    if (layer.parentId == schema.participantLayerId
-                        && layer.alignment == 0) {
-                        this.participantAttributes.push(layer);
-                        if (schema.layers[layerId].searchable == 1) {
-                            this.filterValues[layer.id] = [];
-                            this.filterLayers.push(layer);
-                        }
-                    }
-                }
                 resolve();
             });
         });
     }
-
+    initializeFilters(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.participantAttributes = [];
+            this.filterLayers = [];
+            // allow filtering by participant ID, corpus, and episode
+            this.filterLayers.push(this.schema.layers[this.schema.participantLayerId]);
+            this.filterValues[this.schema.participantLayerId] = [];
+            this.filterLayers.push(this.schema.layers[this.schema.corpusLayerId]);
+            this.filterValues[this.schema.corpusLayerId] = [];
+            this.filterLayers.push(this.schema.layers[this.schema.episodeLayerId]);
+            this.filterValues[this.schema.episodeLayerId] = [];
+            // and transcript count - we use a dummy layer to fool the layer-filter
+            this.schema.layers["--transcript-count"] = {
+                id: "--transcript-count", description: "Transcript count", // TODO i18n
+                parentId: this.schema.participantLayerId,                    
+                alignment: 0,
+                peers: false, peersOverlap: false, parentIncludes: true, saturated: true,
+                type: "number", subtype: "integer"
+            }
+            this.filterLayers.push(this.schema.layers["--transcript-count"]);
+            this.filterValues["--transcript-count"] = [];
+            // and by selected participant attributes
+            for (let layerId in this.schema.layers) {
+                const layer = this.schema.layers[layerId] as Layer;
+                if (layer.parentId == this.schema.participantLayerId
+                    && layer.alignment == 0) {
+                    this.participantAttributes.push(layer);
+                    if (this.schema.layers[layerId].searchable == 1) {
+                        this.filterValues[layer.id] = [];
+                        this.filterLayers.push(layer);
+                    }
+                }
+            }
+            resolve();
+        });
+    }
+    
     // we try to remember search parameters during the session, but there are some exceptions:
     passthroughPatterns = [
         /[?&](p)=([^&]*)/,
@@ -559,6 +566,13 @@ export class ParticipantsComponent implements OnInit {
         }
     }
     
+    /** Button action */
+    clearFilters() : void {
+        this.initializeFilters().then(()=>{
+            this.listParticipants();
+        });
+    }
+
     deleting = false;
     /** Button action */
     deleteParticipants(): void {

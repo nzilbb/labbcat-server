@@ -23,22 +23,22 @@
               (enterKey)="enterKeyPressed()"
               ></lib-layer-filter>
           </td>
-          <td class="controls"><lib-button
-                *ngIf="(!user || user.roles.includes('admin')) && !nextPage"
-                img="filter.svg" icon="👥"
-                (press)="setDefaultFilter()"
-                i18n-label label="Set Default"
-                i18n-title title="Set this as the default filter for all users"
-                ></lib-button></td>
+          <td class="controls">
+            <lib-button
+              img="delete.svg" icon="⌫"
+              (press)="clearFilters()"
+              i18n-title title="Clear selected filters"
+              ></lib-button>
+            <lib-button
+              *ngIf="(!user || user.roles.includes('admin')) && !nextPage"
+              img="filter.svg" icon="👥"
+              (press)="setDefaultFilter()"
+              i18n-title title="Set this as the default filter for all users"
+              ></lib-button>
+          </td>
         </tr><!-- Select from file -->
         <tr class="controls">
           <td colSpan="{{filterLayers.length}}">
-            <lib-button
-              *ngIf="user && user.roles.includes('edit') && !nextPage"
-              action="create"
-              (press)="newTranscript()"
-              i18n-title title="New record"
-              ></lib-button>
             <lib-button
               *ngIf="user && user.roles.includes('edit') && !nextPage"
               action="delete"
@@ -194,3 +194,23 @@
   [pageLinks]="pageLinks"
   (goToPage)="goToPage($event)"
   (showAllPages)="listAll()"></lib-pagination>
+<div class="buttons">
+  <lib-link
+    *ngIf="user && user.roles.includes('edit') && !nextPage"
+    href="{{baseUrl}}edit/transcript/new"
+    img="document.svg" icon="➕"
+    i18n-label label="Upload Transcript"
+    i18n-title title="Add or update a transcript"></lib-link>
+  <lib-link
+    *ngIf="user && user.roles.includes('edit') && !nextPage"
+    href="{{baseUrl}}edit/transcript/newBatch"
+    img="folder.svg" icon="📁"
+    i18n-label label="Upload Transcript Batch"
+    i18n-title title="Add or update many transcripts at once"></lib-link>
+  <lib-link
+    *ngIf="user && user.roles.includes('edit') && !nextPage"
+    href="{{baseUrl}}edit/transcript/attributesBatch"
+    img="wrench.svg" icon="🔧"
+    i18n-label label="Upload Transcript Data"
+    i18n-title title="Import participant data from a CSV file"></lib-link>
+</div>
