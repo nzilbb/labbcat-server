@@ -242,20 +242,29 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
             // store task parameters in DB
             store.saveAnnotatorTaskParameters(taskId, parameters);
             
-            // create any layers that are required
-            final HashSet<String> existingLayers = new HashSet<String>(
-              Arrays.asList(store.getLayerIds()));
-            // traverse top-down through schema, ensuring that all layers exist
-            Vector<Layer> nonexistentLayers = (new LayerHierarchyTraversal<Vector<Layer>>(
-                                                 new Vector<Layer>(), annotator.getSchema()) {
-                protected void pre(Layer layer) {
-                  if (layer.getId() != null
-                      && !existingLayers.contains(layer.getId())) result.add(layer);
-                }
-              }).getResult();
-            for (Layer layer : nonexistentLayers) {
-              store.newLayer(layer);
-            }
+            // create/update any layers that are required
+            for (String layerId : annotator.getOutputLayers()) {
+              Layer newOutput = annotator.getSchema().getLayer(layerId);
+              Layer existingOutput = store.getLayer(layerId);
+              if (newOutput != null) {
+                if (existingOutput == null) { // output doesn't exist yet
+                  // create new layer
+                  store.newLayer(newOutput);
+                  log("Output layer " + newOutput + " created");
+                } else { // existing layer
+                  
+                  if (!newOutput.getType().equals(existingOutput.getType())
+                      || newOutput.getAlignment() != existingOutput.getAlignment()
+                      || newOutput.getPeers() != existingOutput.getPeers()
+                      || newOutput.getPeersOverlap() != existingOutput.getPeersOverlap()
+                      || newOutput.getParentIncludes() != existingOutput.getParentIncludes()
+                      || newOutput.getSaturated() != existingOutput.getSaturated()) {
+                    store.saveLayer(newOutput);
+                    log("Output layer " + newOutput + " updated");
+                  } // output layer definition has changed
+                } // output layer exists in store
+              } // output layer exists for annotator
+            } // next output layer
           } catch (InvalidConfigurationException x) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             String finishedResponse
