@@ -102,7 +102,7 @@ public class TestMatrix {
                      .add("orthography", Json.createObjectBuilder()
                           .add("id", "orthography")
                           .add("pattern", "the")))
-                .add("adj", 3))
+                .add("adj", "3")) // encoding as string must work too
            .add(Json.createObjectBuilder()
                 .add("layers", Json.createObjectBuilder()
                      .add("phonology", Json.createObjectBuilder()

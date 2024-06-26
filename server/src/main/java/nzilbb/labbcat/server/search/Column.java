@@ -143,7 +143,11 @@ public class Column implements CloneableBean {
       } // next element
     }
     if (json.containsKey("adj")) {
-      setAdj(json.getInt("adj"));
+      if (json.get("adj").getValueType() == JsonValue.ValueType.NUMBER) {
+        setAdj(json.getInt("adj"));
+      } else {
+        setAdj(Integer.valueOf(json.getString("adj")));
+      }
     }
     return this;
   }
