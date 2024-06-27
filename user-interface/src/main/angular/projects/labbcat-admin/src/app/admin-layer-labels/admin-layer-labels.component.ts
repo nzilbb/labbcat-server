@@ -66,7 +66,8 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         }
         let somethingAdded = false;
         for (let label of labels) {
-            if (label) {
+            if (label // no blank labels
+                || !newLabel) { // unless we're adding exactly one label which is blank
                 if (this.labels.indexOf(label) >= 0) {
                     this.messageService.error("Already exists: " + label); // TODO i18n
                 } else {
