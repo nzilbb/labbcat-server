@@ -118,7 +118,9 @@ export class TranscriptsComponent implements OnInit {
         /[?&](p)=([^&]*)/,
         /[?&](to)=([^&]*)/,
         /[?&](participant_expression)=([^&]*)/,
-        /[?&](participants)=([^&]*)/
+        /[?&](participants)=([^&]*)/,
+        /[?&](transcript_expression)=([^&]*)/,
+        /[?&](transcripts)=([^&]*)/
     ];
     
     /** if no query parameters are passed, load the default from system settings */
