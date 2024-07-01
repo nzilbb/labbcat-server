@@ -358,6 +358,7 @@ public class Results extends LabbcatServlet { // TODO unit test
           contentType = request.getHeader("Accept");
         }
       }
+      String language = Optional.ofNullable(request.getHeader("Accept-Language")).orElse("en");
       if ("csv".equalsIgnoreCase(contentType)
           || "text/csv".equalsIgnoreCase(contentType)) {
         contentType = "text/csv";
@@ -369,7 +370,7 @@ public class Results extends LabbcatServlet { // TODO unit test
       final CSVPrinter csvOut = contentType.equals("text/csv")?
         new CSVPrinter(response.getWriter(), CSVFormat.EXCEL.withDelimiter( 
                          // guess the best delimiter - comma if English speaking user, tab otherwise
-                         request.getHeader("Accept-Language").contains("en")?',':'\t')):null;
+                         language.contains("en")?',':'\t')):null;
       final JsonGenerator jsonOut = !contentType.equals("text/csv")?
         Json.createGenerator(response.getWriter()):null;
       
