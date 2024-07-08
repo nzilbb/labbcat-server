@@ -148,7 +148,7 @@ export class ParticipantsComponent implements OnInit {
                     this.labbcatService.labbcat.getSystemAttribute(
                         "defaultParticipantFilter", (attribute, errors, messages) => {
                             if (attribute.value) {
-                                queryString = "?"+attribute.value;
+                                queryString = attribute.value;
                                 const queryParams: Params = {};
                                 for (let param of `${queryString}${passthroughParameters}`.split("&")) {
                                     const parts = param.split("=");
