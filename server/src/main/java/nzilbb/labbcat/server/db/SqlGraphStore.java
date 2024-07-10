@@ -4025,8 +4025,8 @@ public class SqlGraphStore implements GraphStore {
       String delete = query.sql
         .replaceFirst("SELECT .*? FROM", "DELETE annotation.* FROM")
         .replaceAll("ORDER BY [^)]+$","");
-      System.out.println("QL: " + expression);
-      System.out.println("SQL: " + delete);
+      // System.out.println("QL: " + expression);
+      // System.out.println("SQL: " + delete);
       PreparedStatement sql = getConnection().prepareStatement(delete);
       try {
         return sql.executeUpdate();
