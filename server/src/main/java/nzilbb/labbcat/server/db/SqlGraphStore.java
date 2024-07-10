@@ -4023,10 +4023,10 @@ public class SqlGraphStore implements GraphStore {
       AnnotationAgqlToSql.Query query = transformer.sqlFor(
         expression, "annotation_id", userWhereClauseGraph("", "graph"), "");
       String delete = query.sql
-        .replaceAll("SELECT .* FROM", "DELETE annotation.* FROM")
+        .replaceFirst("SELECT .*? FROM", "DELETE annotation.* FROM")
         .replaceAll("ORDER BY [^)]+$","");
-      // System.out.println("QL: " + expression);
-      // System.out.println("SQL: " + delete);
+      System.out.println("QL: " + expression);
+      System.out.println("SQL: " + delete);
       PreparedStatement sql = getConnection().prepareStatement(delete);
       try {
         return sql.executeUpdate();
