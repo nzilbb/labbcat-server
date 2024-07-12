@@ -11,7 +11,7 @@
   <artifactId>nzilbb.labbcat.server</artifactId>
   <name>LaBB-CAT backend</name>
   <description>LaBB-CAT back-end java servlets and services.</description>
-  <version>1.0.3</version>
+  <version>1.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>nz.ilbb.labbcat</groupId>
       <artifactId>nzilbb.labbcat</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

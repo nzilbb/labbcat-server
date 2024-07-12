@@ -42,8 +42,8 @@ of the source files.
 - `ng build labbcat-common` to rebuild the common library so that apps incorporate library
    changes (which they don't automatically)
 - `ng generate component component-name --project project-name` to generate a new 
-   component. You can also use `ng generate
-- directive|pipe|service|class|guard|interface|enum|module`.
+   component. You can also use  
+   `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 - For production builds (outputs go to ../../../dist):
   - `npm run build-labbcat-common`
   - `npm run build-labbcat-view`

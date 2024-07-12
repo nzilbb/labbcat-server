@@ -52,6 +52,33 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         this.changed = false;
     }
 
+    createFullRow(newLabel: string, newLegend: string, newDescription: string,
+              newCategory: string, newSubcategory: string): boolean {
+        if (!newLegend && !newDescription && !newCategory && !newSubcategory) {
+            return this.createRow(newLabel);
+        } else {
+            let somethingAdded = false;
+            if (this.labels.indexOf(newLabel) >= 0) {
+                this.messageService.error("Already exists: " + newLabel); // TODO i18n
+            } else {
+                this.layer.validLabelsDefinition.push({
+                    label: newLabel,
+                    legend: newLegend,
+                    description: newDescription,
+                    category: newCategory,
+                    subcategory: newSubcategory,
+                    display_order: Math.max(0, ...this.layer.validLabelsDefinition
+                        .map(l=>l.display_order)) + 1
+                });
+                somethingAdded = true;
+                this.layer.validLabels[newLabel] = newLegend;
+                this.labels.push(newLabel);
+            }
+            this.changed = somethingAdded;
+            return somethingAdded;
+        }
+    }
+            
     createRow(newLabel: string): boolean {
         let labels = [ newLabel ];        
         // if the label is actually lots of labels, add them all
@@ -65,6 +92,19 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
             }
         }
         let somethingAdded = false;
+        
+        // is this probably a phonological layer?
+        const phonological = this.layer.type == "ipa"
+        // does the addition contain obviously phonological characters?
+            ||  /.*[əː].*/.test(newLabel)
+        // do the current values include them?
+            || this.labels.find(l => /.*[əː].*/.test(l))
+        // is 'vowel' a current category?
+            ||  (this.layer.validLabelsDefinition
+                && this.layer.validLabelsDefinition.find(d => d.category.toLowerCase() == "vowel"))
+        // if there are no labels yet, and there are multiple labels being added
+            || this.labels.length == 0 && possibleLabels.length > 0;
+        
         for (let label of labels) {
             if (label // no blank labels
                 || !newLabel) { // unless we're adding exactly one label which is blank
@@ -74,6 +114,35 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
                     this.layer.validLabels[label] = label||"(not specified)"; // TODO i18n
                     this.labels.push(label);
                     somethingAdded = true;
+
+                    if (this.layer.validLabelsDefinition) {
+                        // add to validLabelsDefinition
+                        const labelDefinition = {
+                            label: label,
+                            legend: label,
+                            description: "",
+                            category: "",
+                            subcategory: "",
+                            display_order: Math.max(0, ...this.layer.validLabelsDefinition
+                                .map(l=>l.display_order)) + 1
+                        }
+                        if (this.layer.parentId == "word") { // a word or segment layer
+                            // can we assume it's phonological?
+                            if (phonological) {
+                                if (/[aeiouyɒɔəɛɜʉʊʎæɐɑɚɪøœʏ]/.test(label.toLowerCase())) {
+                                    labelDefinition.category = "VOWEL";
+                                    if (label.replace(/[ː˥˦˧˨˩]/g,"").length == 1) {
+                                        labelDefinition.subcategory = "Monophthong";
+                                    } else {
+                                        labelDefinition.subcategory = "Diphthong";
+                                    }
+                                } else {
+                                    labelDefinition.category = "CONSONANT";
+                                }
+                            }                            
+                        }
+                        this.layer.validLabelsDefinition.push(labelDefinition);
+                    }
                 }
             }
         } // next label
@@ -86,7 +155,13 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         let found = false;
         if (t > -1) {
             this.labels.splice(t, 1);
-            found = true;
+            found = true;            
+            if (this.layer.validLabelsDefinition) {
+                const d = this.layer.validLabelsDefinition.findIndex(l => l.label == toDelete);
+                if (d > -1) {
+                    this.layer.validLabelsDefinition.splice(d, 1);
+                }
+            }
         }
         this.changed = found;
         return found;

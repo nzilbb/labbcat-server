@@ -1,10 +1,11 @@
 <h2><span i18n="page header">Valid Labels</span> - {{layer.id}}</h2>
 
-<div class="list valid-label-list">
+<div class="list valid-label-list" *ngIf="!layer.validLabelsDefinition">
   <div class="item add-new">
     <span class="valid-label"
           i18n-title="Valid label" title="Label"><legend i18n="Valid label">Label</legend>
-      <input #newType type="text" i18n-placeholder="Valid label" placeholder="Label"></span>
+      <input #newType type="text" i18n-placeholder="Valid label" placeholder="Label"
+             (keydown.enter)="newType.reportValidity() && createRow(newType.value) && newType.value = '';"></span>
     <span class="buttons">
       <lib-button action="create"
                   (press)="newType.reportValidity() && createRow(newType.value) && newType.value = '';"
@@ -26,6 +27,64 @@
     <span class="buttons">
       <lib-button action="delete"
                   (press)="deleteRow(label);"
+                  i18n-title title="Delete record"></lib-button>
+    </span>
+  </div>
+</div>
+
+<div class="list valid-labels-definition" *ngIf="layer.validLabelsDefinition">
+  <div class="item add-new">
+    <span class="valid-label"
+          i18n-title="Valid label" title="Label"><legend i18n="Valid label">Label</legend>
+      <input #newType type="text" i18n-placeholder="Valid label" placeholder="Label"
+             (keydown.enter)="newType.reportValidity() && createFullRow(newType.value, newLegend.value, newDescription.value, newCategory.value, newSubcategory.value) && newType.value = newLegend.value = newDescription.value = '';"></span>
+    <span class="valid-label-legend"
+          i18n-title="Valid label legend" title="Text on the label helper or in the transcript, for this label (e.g. the IPA version of the label)"><legend i18n="Valid label legend">Legend</legend>
+      <input #newLegend i18n-placeholder placeholder="Legend"></span>
+    <span class="valid-label-description"
+          i18n-title="Valid label description" title="Description"><legend i18n="Valid label description">Description</legend>
+      <input #newDescription i18n-placeholder placeholder="Description"></span>
+    <span class="valid-label-category"
+          i18n-title="Valid label category" title="Category"><legend i18n="Valid label category">Category</legend>
+      <input #newCategory i18n-placeholder placeholder="Category"></span>
+    <span class="valid-label-subcategory"
+          i18n-title="Valid label subcategory" title="Subcategory"><legend i18n="Valid label subcategory">Subcategory</legend>
+      <input #newSubcategory i18n-placeholder placeholder="Subcategory"></span>
+    <span class="buttons">
+      <lib-button action="create"
+                  (press)="newType.reportValidity() && createFullRow(newType.value, newLegend.value, newDescription.value, newCategory.value, newSubcategory.value) && newType.value = newLegend.value = newDescription.value = '';"
+                  i18n-title title="Add new record"></lib-button>
+    </span>
+  </div>
+  
+  <lib-wait *ngIf="!labels"></lib-wait>
+  <div class="item" *ngFor="let label of layer.validLabelsDefinition">
+    <span class="valid-label"
+          i18n-title="Valid label" title="Text on the label helper or in the transcript, for this label (e.g. the IPA version of the label)"><legend i18n="Valid label">Label</legend>
+      {{label.label}}</span>
+    <span class="valid-label-legend"
+          i18n-title="Valid label legend" title="Legend"><legend i18n="Valid label legend">Legend</legend>
+      <input [(ngModel)]="label.legend"             
+             (input)="onChange()"
+             i18n-placeholder placeholder="Legend"></span>
+    <span class="valid-label-description"
+          i18n-title="Valid label description" title="Description"><legend i18n="Valid label description">Description</legend>
+      <input [(ngModel)]="label.description"             
+             (input)="onChange()"
+             i18n-placeholder placeholder="Description"></span>
+    <span class="valid-label-category"
+          i18n-title="Valid label category" title="Category"><legend i18n="Valid label category">Category</legend>
+      <input [(ngModel)]="label.category"             
+             (input)="onChange()"
+             i18n-placeholder placeholder="Category"></span>
+    <span class="valid-label-subcategory"
+          i18n-title="Valid label subcategory" title="Subcategory"><legend i18n="Valid label subcategory">Subcategory</legend>
+      <input [(ngModel)]="label.subcategory"             
+             (input)="onChange()"
+             i18n-placeholder placeholder="Subcategory"></span>
+    <span class="buttons">
+      <lib-button action="delete"
+                  (press)="deleteRow(label.label);"
                   i18n-title title="Delete record"></lib-button>
     </span>
   </div>

@@ -123,6 +123,32 @@ import org.xml.sax.*;
  if the layer values are not restricted. The 'key' is the possible label value, and 
  each key is associated with a description of the value (e.g. for displaying to users).  
  </li>
+ <li> <q> validLabelsDefinition </q> : Optional list of valid label values for this layer.  
+    <p> LaBB-CAT extends the {@link Layer#validLabels} funcionality by supporting an
+    alternative layer attribute: <tt>validLabelsDefinition</tt>, which is an array of
+    label definitions, each definition being a map of string to string or integer. Each
+    label definition is expected to have the following attributes:
+    <dl>
+    <dt>label</dt> 
+     <dd>what the underlying label is in LaBB-CAT (i.e. the DISC label, for a DISC layer)</dd> 
+    <dt>legend</dt> 
+     <dd>the symbol on the label helper or in the transcript, for the label (e.g. the IPA
+         version of the label) - if there's no legend specified, then there's no option
+         on the label helper (so that type-able consonants like p, b, t, d etc. don't
+         take up space on the label helper)</dd> 
+    <dt>description</dt> 
+     <dd>tool-tip text that appears if you hover the mouse over the IPA symbol in the helper</dd>
+    <dt>category</dt> 
+     <dd>the broad category of the symbol, for organizing the layout of the helper</dd>
+    <dt>subcategory</dt> 
+     <dd>the narrower category of the symbol, for listing subgroups of symbols together</dd>
+    <dt>display_order</dt> 
+     <dd>the order to process/list the labels in</dd>
+    </dl>
+    <p> <tt>validLabelsDefinition</tt> takes precedence over <tt>validLabels</tt> -
+    i.e. if <tt>validLabelsDefinition</tt> is present, it's label options are
+    saved. Otherwise, the <tt>validLabels</tt> options are saved.
+ </li>
  <li> <q> category </q> : Category for the layer, if any. </li>
  </ul>
  </li>
@@ -159,9 +185,35 @@ import org.xml.sax.*;
  duration (true) or not (false). </li>
  <li> <q> type </q> : The type for labels on this layer, e.g. string, number,
  boolean, ipa. </li>
- <li> <q> validLabels </q> : List of valid label values for this layer, or null 
+ <li> <q> validLabels </q> : Map of valid label values for this layer, which may be empty
  if the layer values are not restricted. The 'key' is the possible label value, and 
  each key is associated with a description of the value (e.g. for displaying to users).  
+ </li>
+ <li> <q> validLabelsDefinition </q> : Optional list of valid label values for this layer.  
+    <p> LaBB-CAT extends the {@link Layer#validLabels} funcionality by supporting an
+    alternative layer attribute: <tt>validLabelsDefinition</tt>, which is an array of
+    label definitions, each definition being a map of string to string or integer. Each
+    label definition is expected to have the following attributes:
+    <dl>
+    <dt>label</dt> 
+     <dd>what the underlying label is in LaBB-CAT (i.e. the DISC label, for a DISC layer)</dd> 
+    <dt>legend</dt> 
+     <dd>the symbol on the label helper or in the transcript, for the label (e.g. the IPA
+         version of the label) - if there's no legend specified, then there's no option
+         on the label helper (so that type-able consonants like p, b, t, d etc. don't
+         take up space on the label helper)</dd> 
+    <dt>description</dt> 
+     <dd>tool-tip text that appears if you hover the mouse over the IPA symbol in the helper</dd>
+    <dt>category</dt> 
+     <dd>the broad category of the symbol, for organizing the layout of the helper</dd>
+    <dt>subcategory</dt> 
+     <dd>the narrower category of the symbol, for listing subgroups of symbols together</dd>
+    <dt>display_order</dt> 
+     <dd>the order to process/list the labels in</dd>
+    </dl>
+    <p> <tt>validLabelsDefinition</tt> takes precedence over <tt>validLabels</tt> -
+    i.e. if <tt>validLabelsDefinition</tt> is present, it's label options are
+    saved. Otherwise, the <tt>validLabels</tt> options are saved.
  </li>
  <li> <q> category </q> : Category for the layer, if any. </li>
  </ul>

@@ -31,9 +31,12 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.IconHelper;
@@ -283,6 +286,30 @@ public class SqlGraphStoreAdministration
   /**
    * Saves changes to a layer.
    * @param layer A modified layer definition.
+   * <p> LaBB-CAT extends the {@link Layer#validLabels} funcionality by supporting an
+   * alternative layer attribute: <tt>validLabelsDefinition</tt>, which is an array of
+   * label definitions, each definition being a map of string to string or integer. Each
+   * label definition is expected to have the following attributes:
+   * <dl>
+   * <dt>label</dt> 
+   *  <dd>what the underlying label is in LaBB-CAT (i.e. the DISC label, for a DISC layer)</dd> 
+   * <dt>legend</dt> 
+   *  <dd>the symbol on the label helper or in the transcript, for the label (e.g. the IPA
+   *      version of the label) - if there's no legend specified, then there's no option
+   *      on the label helper (so that type-able consonants like p, b, t, d etc. don't
+   *      take up space on the label helper)</dd> 
+   * <dt>description</dt> 
+   *  <dd>tool-tip text that appears if you hover the mouse over the IPA symbol in the helper</dd>
+   * <dt>category</dt> 
+   *  <dd>the broad category of the symbol, for organizing the layout of the helper</dd>
+   * <dt>subcategory</dt> 
+   *  <dd>the narrower category of the symbol, for listing subgroups of symbols together</dd>
+   * <dt>display_order</dt> 
+   *  <dd>the order to process/list the labels in</dd>
+   * </dl>
+   * <p> <tt>validLabelsDefinition</tt> takes precedence over <tt>validLabels</tt> -
+   * i.e. if <tt>validLabelsDefinition</tt> is present, it's label options are
+   * saved. Otherwise, the <tt>validLabels</tt> options are saved.
    * @return The resulting layer definition.
    * @throws StoreException If an error prevents the operation.
    * @throws PermissionException If the operation is not permitted.
@@ -450,62 +477,142 @@ public class SqlGraphStoreAdministration
                
         } // non-system layer
 
-        // validLabels
-        HashSet<String> toDelete = new HashSet<String>(oldVersion.getValidLabels().keySet());
-        toDelete.removeAll(layer.getValidLabels().keySet());
-        if (toDelete.size() > 0) {
-          // delete missing options
-          PreparedStatement sql = getConnection().prepareStatement(
-            "DELETE FROM label_option WHERE layer_id = ? AND value = ?");
-          sql.setInt(1, layer_id);
-          for (String option : toDelete) {
-            sql.setString(2, option);
-            sql.executeUpdate();
+        if (layer.containsKey("validLabelsDefinition") // detailed definition of label options
+            && oldVersion.containsKey("validLabelsDefinition")) {
+          
+          List<Map<String,Object>> validLabelsDefinition =
+            (List<Map<String,Object>>) layer.get("validLabelsDefinition");
+          Set<Object> validLabels = validLabelsDefinition.stream()
+            .map(definition -> definition.get("label"))
+            .collect(Collectors.toSet());
+          List<Map<String,Object>> oldValidLabelsDefinition =
+            (List<Map<String,Object>>) oldVersion.get("validLabelsDefinition");
+          Set<Object> oldValidLabels = oldValidLabelsDefinition.stream()
+            .map(definition -> definition.get("label"))
+            .collect(Collectors.toSet());          
+          
+          HashSet<Object> toDelete = new HashSet<Object>(oldValidLabels);
+          toDelete.removeAll(validLabels);
+          if (toDelete.size() > 0) {
+            // delete missing options
+            PreparedStatement sql = getConnection().prepareStatement(
+              "DELETE FROM label_option WHERE layer_id = ? AND value = ?");
+            sql.setInt(1, layer_id);
+            for (Object option : toDelete) {
+              sql.setString(2, option.toString());
+              sql.executeUpdate();
+            }
+            sql.close();
           }
-          sql.close();
-        }
-            
-        HashSet<String> toCreate = new HashSet<String>(layer.getValidLabels().keySet());
-        toCreate.removeAll(oldVersion.getValidLabels().keySet());            
-        if (toCreate.size() > 0) {
+          
+          HashSet<Object> toCreate = new HashSet<Object>(validLabels);
+          toCreate.removeAll(oldValidLabels);
           // insert new options
-          PreparedStatement sql = getConnection().prepareStatement(
-            "SELECT COALESCE(MAX(display_order + 1), 1) FROM label_option WHERE layer_id = ?");
-          sql.setInt(1, layer_id);
-          ResultSet rs = sql.executeQuery();
-          rs.next();
-          int order = rs.getInt(1);
-          rs.close();
-          sql.close();
-          sql = getConnection().prepareStatement(
-            "INSERT INTO label_option (layer_id, value, description, display_order)"
-            +" VALUES (?,?,?,?)");
-          sql.setInt(1, layer_id);
-          for (String option : toCreate) {
-            sql.setString(2, option);
-            sql.setString(3, layer.getValidLabels().get(option));
-            sql.setInt(4, order++);
-            sql.executeUpdate();
+          PreparedStatement sqlInsert = getConnection().prepareStatement(
+            "INSERT INTO label_option"
+            +" (layer_id, value, legend, description, category, subcategory, display_order)"
+            +" VALUES (?,?,?,?,?,?,?)");
+          sqlInsert.setInt(1, layer_id);
+          // update existing options
+          PreparedStatement sqlUpdate = getConnection().prepareStatement(
+            "UPDATE label_option"
+            +" SET legend = ?, description = ?, category = ?, subcategory = ?, display_order = ?"
+            +" WHERE layer_id = ? AND value = ?");
+          sqlUpdate.setInt(6, layer_id);
+          for (Map<String,Object> option : validLabelsDefinition) {
+            if (toCreate.contains(option.get("label"))) { // insert
+              sqlInsert.setString(2, option.get("label").toString());
+              sqlInsert.setString(
+                3, Optional.ofNullable(option.get("legend")).orElse("").toString());
+              sqlInsert.setString(
+                4, Optional.ofNullable(option.get("description")).orElse("").toString());
+              sqlInsert.setString(
+                5, Optional.ofNullable(option.get("category")).orElse("").toString());
+              sqlInsert.setString(
+                6, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
+              sqlInsert.setInt(
+                7, Integer.parseInt(
+                  Optional.ofNullable(option.get("display_order")).orElse("0").toString()));
+              sqlInsert.executeUpdate();
+            } else { // update
+                sqlUpdate.setString(7, (String)option.get("label"));
+              sqlUpdate.setString(
+                1, Optional.ofNullable(option.get("legend")).orElse("").toString());
+              sqlUpdate.setString(
+                2, Optional.ofNullable(option.get("description")).orElse("").toString());
+              sqlUpdate.setString(
+                3, Optional.ofNullable(option.get("category")).orElse("").toString());
+              sqlUpdate.setString(
+                4, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
+              sqlUpdate.setInt(
+                5, Integer.parseInt(
+                  Optional.ofNullable(option.get("display_order")).orElse("0").toString()));
+              sqlUpdate.executeUpdate();
+            }
+          } // next label definition
+          sqlInsert.close();
+          sqlUpdate.close();
+          
+        } else { // validLabels
+          
+          HashSet<String> toDelete = new HashSet<String>(oldVersion.getValidLabels().keySet());
+          toDelete.removeAll(layer.getValidLabels().keySet());
+          if (toDelete.size() > 0) {
+            // delete missing options
+            PreparedStatement sql = getConnection().prepareStatement(
+              "DELETE FROM label_option WHERE layer_id = ? AND value = ?");
+            sql.setInt(1, layer_id);
+            for (String option : toDelete) {
+              sql.setString(2, option);
+              sql.executeUpdate();
+            }
+            sql.close();
           }
-          sql.close();
-        }
-
-        // update the rest
-        HashSet<String> toUpdate = new HashSet<String>(layer.getValidLabels().keySet());
-        toCreate.removeAll(toDelete);
-        toCreate.removeAll(toCreate);
-        if (toUpdate.size() > 0) {
-          // insert new options
-          PreparedStatement sql = getConnection().prepareStatement(
-            "UPDATE label_option SET description = ? WHERE layer_id = ? AND value = ?");
-          sql.setInt(2, layer_id);
-          for (String option : toUpdate) {
-            sql.setString(1, layer.getValidLabels().get(option));
-            sql.setString(3, option);
-            sql.executeUpdate();
+          
+          HashSet<String> toCreate = new HashSet<String>(layer.getValidLabels().keySet());
+          toCreate.removeAll(oldVersion.getValidLabels().keySet());            
+          if (toCreate.size() > 0) {
+            // insert new options
+            PreparedStatement sql = getConnection().prepareStatement(
+              "SELECT COALESCE(MAX(display_order + 1), 1) FROM label_option WHERE layer_id = ?");
+            sql.setInt(1, layer_id);
+            ResultSet rs = sql.executeQuery();
+            rs.next();
+            int order = rs.getInt(1);
+            rs.close();
+            sql.close();
+            sql = getConnection().prepareStatement(
+              "INSERT INTO label_option (layer_id, value, description, display_order)"
+              +" VALUES (?,?,?,?)");
+            sql.setInt(1, layer_id);
+            for (String option : toCreate) {
+              sql.setString(2, option);
+              sql.setString(3, layer.getValidLabels().get(option));
+              sql.setInt(4, order++);
+              sql.executeUpdate();
+            }
+            sql.close();
           }
-          sql.close();
-        }
+          
+          // update the rest
+          HashSet<String> toUpdate = new HashSet<String>(layer.getValidLabels().keySet());
+          toCreate.removeAll(toDelete);
+          toCreate.removeAll(toCreate);
+          if (toUpdate.size() > 0) {
+            // insert new options
+            PreparedStatement sql = getConnection().prepareStatement(
+              "UPDATE label_option SET description = ? WHERE layer_id = ? AND value = ?");
+            sql.setInt(2, layer_id);
+            for (String option : toUpdate) {
+              sql.setString(1, layer.getValidLabels().get(option));
+              sql.setString(3, option);
+              sql.executeUpdate();
+            }
+            sql.close();
+          }
+          
+        } // validLabels
+        
       } else if (oldVersion.get("class_id") != null && oldVersion.get("attribute") != null) {
         // transcript/participant attribute
         PreparedStatement sql = getConnection().prepareStatement(
@@ -621,6 +728,30 @@ public class SqlGraphStoreAdministration
   /**
    * Adds a new layer.
    * @param layer A new layer definition.
+   * <p> LaBB-CAT extends the {@link Layer#validLabels} funcionality by supporting an
+   * alternative layer attribute: <tt>validLabelsDefinition</tt>, which is an array of
+   * label definitions, each definition being a map of string to string or integer. Each
+   * label definition is expected to have the following attributes:
+   * <dl>
+   * <dt>label</dt> 
+   *  <dd>what the underlying label is in LaBB-CAT (i.e. the DISC label, for a DISC layer)</dd> 
+   * <dt>legend</dt> 
+   *  <dd>the symbol on the label helper or in the transcript, for the label (e.g. the IPA
+   *      version of the label) - if there's no legend specified, then there's no option
+   *      on the label helper (so that type-able consonants like p, b, t, d etc. don't
+   *      take up space on the label helper)</dd> 
+   * <dt>description</dt> 
+   *  <dd>tool-tip text that appears if you hover the mouse over the IPA symbol in the helper</dd>
+   * <dt>category</dt> 
+   *  <dd>the broad category of the symbol, for organizing the layout of the helper</dd>
+   * <dt>subcategory</dt> 
+   *  <dd>the narrower category of the symbol, for listing subgroups of symbols together</dd>
+   * <dt>display_order</dt> 
+   *  <dd>the order to process/list the labels in</dd>
+   * </dl>
+   * <p> <tt>validLabelsDefinition</tt> takes precedence over <tt>validLabels</tt> -
+   * i.e. if <tt>validLabelsDefinition</tt> is present, it's label options are
+   * saved. Otherwise, the <tt>validLabels</tt> options are saved.
    * @return The resulting layer definition.
    * @throws StoreException If an error prevents the operation.
    * @throws PermissionException If the operation is not permitted.
@@ -1089,22 +1220,54 @@ public class SqlGraphStoreAdministration
         } finally {
           sql.close();
         }
-        // validLabels
-        int order = 1;
-        sql = getConnection().prepareStatement(
-          "INSERT INTO label_option (layer_id, value, description, display_order)"
-          +" VALUES (?,?,?,?)");
-        try {
-          sql.setInt(1, layer_id);
-          for (String option : layer.getValidLabels().keySet()) {
-            sql.setString(2, option);
-            sql.setString(3, layer.getValidLabels().get(option));
-            sql.setInt(4, order++);
-            sql.executeUpdate();
+        
+        if (layer.containsKey("validLabelsDefinition")) { // detailed definition of label options
+          
+          List<Map<String,Object>> validLabelsDefinition =
+            (List<Map<String,Object>>) layer.get("validLabelsDefinition");
+          // insert new options
+          PreparedStatement sqlInsert = getConnection().prepareStatement(
+            "INSERT INTO label_option"
+            +" (layer_id, value, legend, description, category, subcategory, display_order)"
+            +" VALUES (?,?,?,?,?,?,?)");
+          sqlInsert.setInt(1, layer_id);
+          for (Map<String,Object> option : validLabelsDefinition) {
+            sqlInsert.setString(2, option.get("label").toString());
+            sqlInsert.setString(
+              3, Optional.ofNullable(option.get("legend")).orElse("").toString());
+            sqlInsert.setString(
+              4, Optional.ofNullable(option.get("description")).orElse("").toString());
+            sqlInsert.setString(
+              5, Optional.ofNullable(option.get("category")).orElse("").toString());
+            sqlInsert.setString(
+              6, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
+            sqlInsert.setInt(
+              7, Integer.parseInt(
+                Optional.ofNullable(option.get("display_order")).orElse("0").toString()));
+            sqlInsert.executeUpdate();
+          } // next label definition
+          sqlInsert.close();
+          
+        } else { // validLabels
+          
+          int order = 1;
+          sql = getConnection().prepareStatement(
+            "INSERT INTO label_option (layer_id, value, description, display_order)"
+            +" VALUES (?,?,?,?)");
+          try {
+            sql.setInt(1, layer_id);
+            for (String option : layer.getValidLabels().keySet()) {
+              sql.setString(2, option);
+              sql.setString(3, layer.getValidLabels().get(option));
+              sql.setInt(4, order++);
+              sql.executeUpdate();
+            }
+          } finally {
+            sql.close();
           }
-        } finally {
-          sql.close();
-        }
+          
+        } // validLabels
+        
       } // a temporal layer  
       
       // ensure schema is reloaded with new layer

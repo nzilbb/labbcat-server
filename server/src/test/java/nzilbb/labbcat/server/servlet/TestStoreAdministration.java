@@ -28,8 +28,10 @@ import static org.junit.Assert.*;
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
@@ -660,7 +662,25 @@ public class TestStoreAdministration
       .setParentIncludes(true)
       .setSaturated(true)
       .setType(Constants.TYPE_STRING);
-    // TODO validLabels
+    // validLabelsDefinition
+    Vector<HashMap<String,Object>> validLabelsDefinition = new Vector<HashMap<String,Object>>();
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "valid1");
+      put("legend", "First Valid Label");
+      put("description", "This is the first valid label");
+      put("category", "CONSONANT");
+      put("subcategory", "Plosive");
+      put("display_order", 10);
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "valid2");
+      put("legend", "Second Valid Label");
+      put("description", "This is the second valid label");
+      put("category", "VOWEL");
+      put("subcategory", "Monophthong");
+      put("display_order", 20);
+    }});
+    testLayer.put("validLabelsDefinition", validLabelsDefinition);
 
     try {
       l.getLayer(testLayer.getId());
@@ -677,6 +697,7 @@ public class TestStoreAdministration
     try {
 
       // create the layer
+      l.setVerbose(true);
       Layer newLayer = l.newLayer(testLayer);
       assertNotNull("new layer returned", newLayer);
       assertEquals("created ID",
@@ -697,7 +718,11 @@ public class TestStoreAdministration
                    newLayer.getSaturated(), testLayer.getSaturated());
       assertEquals("created Type",
                    newLayer.getType(), testLayer.getType());
-      // TODO validLabels
+      // validLabels
+      assertEquals("created validLabel - 1",
+                   "First Valid Label", newLayer.getValidLabels().get("valid1"));
+      assertEquals("created validLabel - 2",
+                   "Second Valid Label", newLayer.getValidLabels().get("valid2"));
 
       // ensure it exists
       newLayer = l.getLayer(testLayer.getId());
@@ -720,7 +745,11 @@ public class TestStoreAdministration
                    newLayer.getSaturated(), testLayer.getSaturated());
       assertEquals("created Type",
                    newLayer.getType(), testLayer.getType());
-      // TODO validLabels
+      // validLabels
+      assertEquals("created validLabel - 1",
+                   "First Valid Label", newLayer.getValidLabels().get("valid1"));
+      assertEquals("created validLabel - 2",
+                   "Second Valid Label", newLayer.getValidLabels().get("valid2"));
 
       // can't create it again
       try {
@@ -738,7 +767,26 @@ public class TestStoreAdministration
         .setParentIncludes(false)
         .setSaturated(false)
         .setType(Constants.TYPE_NUMBER);
-      // TODO validLabels
+      
+      validLabelsDefinition = new Vector<HashMap<String,Object>>();
+      validLabelsDefinition.add(new HashMap<String,Object>() {{
+        put("label", "valid3");
+        put("legend", "Third Valid Label");
+        put("description", "This is the third valid label");
+        put("category", "CONSONANT");
+        put("subcategory", "Approximant");
+        put("display_order", 25);
+      }});
+      validLabelsDefinition.add(new HashMap<String,Object>() {{
+        put("label", "valid2");
+        put("legend", "2nd Valid Label");
+        put("description", "This is the second valid label");
+        put("category", "VOWEL");
+        put("subcategory", "Monophthong");
+        put("display_order", 35);
+      }});      
+      testLayer.put("validLabelsDefinition", validLabelsDefinition);
+      
       newLayer = l.saveLayer(testLayer);
       assertNotNull("new layer returned", newLayer);
       assertEquals("saved ID",
@@ -759,8 +807,14 @@ public class TestStoreAdministration
                    newLayer.getSaturated(), testLayer.getSaturated());
       assertEquals("saved Type",
                    newLayer.getType(), testLayer.getType());
-      // TODO validLabels
-         
+      // validLabels
+      assertNull("validLabel deleted - 1",
+                 newLayer.getValidLabels().get("valid1"));
+      assertEquals("Updated validLabel - 2",
+                   "2nd Valid Label", newLayer.getValidLabels().get("valid2"));
+      assertEquals("Created validLabel - 3",
+                   "Third Valid Label", newLayer.getValidLabels().get("valid3"));
+      
       // ensure changes are saved
       newLayer = l.getLayer(testLayer.getId());
       assertNotNull("new layer returned", newLayer);
@@ -782,7 +836,13 @@ public class TestStoreAdministration
                    newLayer.getSaturated(), testLayer.getSaturated());
       assertEquals("saved Type",
                    newLayer.getType(), testLayer.getType());
-      // TODO validLabels
+      // validLabels
+      assertNull("validLabel deleted - 1",
+                 newLayer.getValidLabels().get("valid1"));
+      assertEquals("Updated validLabel - 2",
+                   "2nd Valid Label", newLayer.getValidLabels().get("valid2"));
+      assertEquals("Created validLabel - 3",
+                   "Third Valid Label", newLayer.getValidLabels().get("valid3"));
 
       // delete it
       l.deleteLayer(testLayer.getId());

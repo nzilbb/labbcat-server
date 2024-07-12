@@ -1,3 +1,5 @@
+import { ValidLabelDefinition } from './valid-label-definition';
+
 export interface Layer {
     id: string;
     parentId: string;
@@ -11,6 +13,8 @@ export interface Layer {
     subtype: string;
     category: string;
     validLabels: object;
+
+    validLabelsDefinition: ValidLabelDefinition[];
 
     // temporal layer
     layer_id: string; // TODO - remove this once new automation API is live

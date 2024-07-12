@@ -1,5 +1,31 @@
-<div class="valid-label-helper">
-  <span *ngFor="let label of Object.keys(layer.validLabels)">
-    <a href="#" class="valid-label" title="{{layer.validLabels[label]}}" (click)="select(label)">{{label}}</a>
-  </span>
+<div class="valid-label-helper" [class.hierarchical]="categories">
+  <ng-container *ngIf="!categories"><!-- non-heirarchical picker -->
+    <span *ngFor="let label of Object.keys(layer.validLabels)">
+      <a href="#" class="valid-label" title="{{layer.validLabels[label]}}" (click)="select(label)">{{label}}</a>
+    </span>
+  </ng-container>
+  
+  <ng-container *ngIf="categories"><!-- heirarchical picker -->
+    <ng-container *ngFor="let category of Object.keys(categories)">
+      <div class="category" [class.unlabelled]="category == ''">
+        <span class="title">
+          <a href="#" (click)="selectCategory(category)"
+             i18n-title="Any CATEGORY-NAME" title="Any {{category}}">{{category}}</a>
+        </span>
+        <ng-container *ngFor="let subcategory of Object.keys(categories[category])">
+          <div class="subcategory"
+               [class.unlabelled]="subcategory == ''">
+            <span class="title">
+              <a href="#" (click)="selectSubcategory(category, subcategory)"
+                 i18n-title="Any SUBCATEGORY-NAME" title="Any {{subcategory}}">{{subcategory}}</a>
+            </span>
+            <span class="label" *ngFor="let label of categories[category][subcategory]">
+              <a *ngIf="label.legend"
+                 href="#" class="valid-label" title="{{label.description}}" (click)="select(label.label)">{{label.legend}}</a>
+            </span>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+  </ng-container>
 </div>

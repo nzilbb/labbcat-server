@@ -12,8 +12,33 @@
     max-width: 400px;
     z-index: 1;
 }
+.valid-label-helper.hierarchical {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: max-content;
+    max-width: 50vw;
+}
 .valid-label-helper a {
     padding-left: 4px;
     color: var(--theme-text-color);
     text-decoration: none;
+}
+.title {
+    padding-right: 5px;
+}
+.title:after {
+    content: ':';
+}
+.unlabelled .title {
+    display: none;
+}
+.category {
+    display: flex;
+    flex-direction: column;
+}
+.subcategory {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-left: 10px;
 }
