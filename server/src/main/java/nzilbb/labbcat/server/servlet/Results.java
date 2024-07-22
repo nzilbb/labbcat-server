@@ -456,7 +456,7 @@ public class Results extends LabbcatServlet { // TODO unit test
             if (fileName.length() > 150) fileName = fileName.substring(0, 150);
             fileName = "results_" + fileName + ".csv";
             response.setHeader(
-              "Content-Disposition", "attachment; filename=" + fileName.toString());            
+              "Content-Disposition", "attachment; filename*=\"" + URLEncoder.encode(fileName.toString())+"\"");
           }
 
           if (options.contains("labbcat_title") && labbcatTitle == null) {
