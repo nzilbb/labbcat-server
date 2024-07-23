@@ -23,6 +23,7 @@ package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -282,7 +283,9 @@ public class TableServletBase extends LabbcatServlet {
                      if (keyValues != null) {
                         for (String value : keyValues) name += "-"+value;
                      }
-                     response.setHeader("Content-Disposition", "attachment; filename=" + name + ".csv");
+                     response.setHeader(
+                       "Content-Disposition",
+                       "attachment; filename*=\""+URLEncoder.encode(name, "UTF-8")+".csv\"");
                   }
                   
                   // return a list of rows

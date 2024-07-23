@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Vector;
 import java.util.zip.*;
 import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
@@ -142,13 +143,16 @@ public class Files extends LabbcatServlet { // TODO unit test
           // don't zip a single file, just return the file
           response.setContentType(mimeType);
           File file = files.firstElement();
-          response.addHeader("Content-Disposition", "attachment; filename=" + file.getName());
+          response.addHeader(
+            "Content-Disposition",
+            "attachment; filename*=\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
                
           IO.Pump(new FileInputStream(file), response.getOutputStream());
         } else { // multiple files
           response.setContentType("application/zip");
           response.addHeader(
-            "Content-Disposition", "attachment; filename=" + IO.SafeFileNameUrl(name) + ".zip");
+            "Content-Disposition",
+            "attachment; filename*=\"" + URLEncoder.encode(IO.SafeFileNameUrl(name), "UTF-8") + ".zip\"");
           
           // create a stream to pump from
           PipedInputStream inStream = new PipedInputStream();

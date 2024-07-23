@@ -25,6 +25,7 @@ package nzilbb.labbcat.server.servlet;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.net.URLEncoder;
 import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
@@ -117,7 +118,8 @@ public class Attributes extends LabbcatServlet { // TODO unit test
       }
 
       response.setContentType("text/csv");
-      response.setHeader("Content-Disposition", "attachment; filename="+name+".csv");
+      response.setHeader("Content-Disposition",
+                         "attachment; filename*=\""+URLEncoder.encode(name, "UTF-8")+".csv\"");
       // send headers immediately, so that the browser shows the 'save' prompt
       response.getOutputStream().flush();
       

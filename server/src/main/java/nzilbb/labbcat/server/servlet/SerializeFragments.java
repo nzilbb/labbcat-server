@@ -386,13 +386,14 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
             response.setContentType(mimeType);
             NamedStream stream = files.firstElement();
             response.addHeader(
-              "Content-Disposition", "attachment; filename=" + stream.getName());
+              "Content-Disposition", "attachment; filename*=\""
+              + URLEncoder.encode(stream.getName(), "UTF-8")+"\"");
                
             IO.Pump(stream.getStream(), response.getOutputStream());
           } else { /// multiple files
             response.setContentType("application/zip");
-            response.addHeader("Content-Disposition", "attachment; filename=" 
-                               + IO.SafeFileNameUrl(name) + ".zip");
+            response.addHeader("Content-Disposition", "attachment; filename*=\"" 
+                               + name + ".zip\"");
                
             // create a stream to pump from
             PipedInputStream inStream = new PipedInputStream();

@@ -166,7 +166,8 @@ public class ResultsDictionary extends LabbcatServlet { // TODO unit test
         if (fileName.length() > 150) fileName = fileName.substring(0, 150);
         fileName = "dictionary_" + fileName + ".txt";
         response.setHeader(
-          "Content-Disposition", "attachment; filename=" + fileName.toString());
+          "Content-Disposition",
+          "attachment; filename*=\"" + URLEncoder.encode(fileName.toString(), "UTF-8")+"\"");
 
         // create SQL
         PreparedStatement sql = connection.prepareStatement(
