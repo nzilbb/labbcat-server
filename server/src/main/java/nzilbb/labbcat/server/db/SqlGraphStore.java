@@ -9332,13 +9332,15 @@ public class SqlGraphStore implements GraphStore {
         if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
           annotator.setRdbConnectionFactory(db);
         }
-        if (!descriptors.containsKey(annotator.getAnnotatorId()) // descriptor yet
+        if (!descriptors.containsKey(annotator.getAnnotatorId()) // no descriptor yet
             // or this one has a higher version than the one we already found
             || descriptor.compareTo(descriptors.get(annotator.getAnnotatorId())) > 0) {
           // add the descriptor to the list
           descriptors.put(annotator.getAnnotatorId(), descriptor);
         }
       } catch(Exception exception) {
+        System.err.println("getAnnotatorDescriptors: " + exception);
+        exception.printStackTrace(System.err);
       }
     } // next possible jar
     return descriptors.values().toArray(new AnnotatorDescriptor[0]);
@@ -9373,7 +9375,7 @@ public class SqlGraphStore implements GraphStore {
         }});
     AnnotatorDescriptor finalDescriptor = null;
     for (File jar : possibleJars) {
-      System.out.println("jar " + jar.getName());
+      System.out.println("jar " + jar.getName()); // TODO remove
       try {
         AnnotatorDescriptor descriptor = new AnnotatorDescriptor(jar);
         Annotator annotator = descriptor.getInstance();
@@ -9396,9 +9398,14 @@ public class SqlGraphStore implements GraphStore {
             annotator.setStore(this);
           }
           
-          if (finalDescriptor == null || finalDescriptor.compareTo(descriptor.getVersion()) < 0) {
-            System.out.println("Winner " + descriptor.getVersion() + " ("+jar.getName()+")");
+          if (finalDescriptor == null || finalDescriptor.compareTo(descriptor) < 0) {
+            System.out.println( // TODO remove
+              (finalDescriptor==null?"Found":"Found newer")
+              +" v. " + descriptor.getVersion() + " ("+jar.getName()+")");
             finalDescriptor = descriptor;
+          } else {
+            System.out.println( // TODO remove
+              "Older version ignored: " + descriptor.getVersion() + " ("+jar.getName()+")");
           }
         }
       } catch(Exception exception) {
