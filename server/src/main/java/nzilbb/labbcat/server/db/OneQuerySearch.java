@@ -1876,7 +1876,7 @@ public class OneQuerySearch extends SearchTask {
           parameters, schema,
           layerIsSpanningAndWordAnchored, participantCondition, transcriptCondition);
       }
-      setStatus("SQL: " + q);
+      //setStatus("SQL: " + q);
     } catch (Exception x) {
       setStatus(x.getMessage());
       if (!x.getMessage().equals("Cancelled.")) {
@@ -2045,7 +2045,11 @@ public class OneQuerySearch extends SearchTask {
   
   /**
    * Fills in the token IDs for the result set, assuming they're missing because the
-   * search query identified the target annotation ID but not the word tokens IDs.  
+   * search query identified the target annotation ID but not the word tokens IDs.
+   * <p> This will try to ensure that the token is <i>contained entirely by</i> the
+   * duration of the target annotation, but if that's not possible (e.g. because it's
+   * a noise annotation strung between two words) then the nearest word to the start
+   * of the target will be assigned instead.
    * @param spanLayer The one span layer being searched.
    * @param layerMatch The one span layer's match conditions.
    * @throws SQLException
@@ -2053,12 +2057,15 @@ public class OneQuerySearch extends SearchTask {
   protected void setTokenIds(
     Connection connection, Layer spanLayer, LayerMatch layerMatch,
     UnaryOperator<String> participantCondition) throws Exception {
-    // TODO change this to find the turn that the span starts during,
-    // and finds the word that starts nearest the span start
-    // this will choose the first word in the span, if they share a start time, and
-    // will find the nearest word, if they don't
-    // this catches e.g. noises that are between words or comments that are instantaneous.
-    StringBuilder worldLine = new StringBuilder()
+
+    // try to find a suitable first word token:
+    // 1. try for a token that is temporally contained by the target
+    //  (keeping containment where possible, to match word-based searches), and if not:
+    // 2. try for the nearest linked word (e.g. noise strung between two words)
+    //  (if they're linked to a word, they presumably relate to the word speaker), and if not:
+    // 3. try for the nearest word to the target start (e.g. instantanous/short noise)
+    //  (to maximise possible tokens returned)
+    StringBuilder wordLine = new StringBuilder()
       .append("SELECT")
       .append(" line.label, line.start_anchor_id, line.end_anchor_id,")
       .append(" line.annotation_id AS defining_annotation_id, word.turn_annotation_id,")
@@ -2071,32 +2078,49 @@ public class OneQuerySearch extends SearchTask {
       .append(" INNER JOIN anchor line_start ON line.start_anchor_id = line_start.anchor_id")
       .append(" INNER JOIN anchor line_end ON line.end_anchor_id = line_end.anchor_id");
     if(mainParticipantOnly) {
-      worldLine.append(" INNER JOIN transcript_speaker ON transcript_speaker.ag_id = word.ag_id")
+      wordLine.append(" INNER JOIN transcript_speaker ON transcript_speaker.ag_id = word.ag_id")
         .append(" AND transcript_speaker.speaker_number = line.label AND main_speaker = 1");
     }
-    worldLine.append(" INNER JOIN anchor span_start ON span_start.anchor_id = ?")
+    wordLine.append(" INNER JOIN anchor span_start ON span_start.anchor_id = ?")
       .append(" INNER JOIN anchor span_end ON span_end.anchor_id = ?")
       .append(" AND word.utterance_annotation_id = line.annotation_id")
       .append(" WHERE word.ag_id = ?");
-    if (layerMatch.getAnchorStart()) {
-      worldLine.append(" AND word.start_anchor_id = span_start.anchor_id");
-    }
-    if (layerMatch.getAnchorEnd()) {
-      worldLine.append(" AND word.end_anchor_id = span_end.anchor_id");
-    }
-    if (!layerMatch.getAnchorStart() && !layerMatch.getAnchorEnd()) {
-      worldLine.append(" AND word_start.offset >= span_start.offset")
-        .append(" AND word_start.offset < span_end.offset");
-    }
     String speakerWhere = participantCondition.apply(matrix.getParticipantQuery());
     if (speakerWhere == null && getLastException() != null) {
       throw (Exception)getLastException();
     }
-    worldLine.append(speakerWhere.replace("turn.label","line.label"));
-    worldLine.append(" ORDER BY word_start.offset")
-      .append(" LIMIT 1");
-    setStatus("setTokenIds: " + worldLine.toString());
-    PreparedStatement sqlWordLine = connection.prepareStatement(worldLine.toString());
+    wordLine.append(speakerWhere.replace("turn.label","line.label"));
+    if (layerMatch.getAnchorStart()) {
+      wordLine.append(" AND word.start_anchor_id = span_start.anchor_id");
+    }
+    if (layerMatch.getAnchorEnd()) {
+      wordLine.append(" AND word.end_anchor_id = span_end.anchor_id");
+    }
+
+    // up to here, all of the three possibilities use the same query
+    // but the WHERE/ORDER BY conditions vary for each...
+
+    StringBuilder containedWord = new StringBuilder(wordLine);
+    StringBuilder linkedWord = new StringBuilder(wordLine);
+    StringBuilder nearestWord = new StringBuilder(wordLine);
+    
+    if (!layerMatch.getAnchorStart() && !layerMatch.getAnchorEnd()) {
+      containedWord.append(" AND word_start.offset >= span_start.offset")
+        .append(" AND word_start.offset < span_end.offset");
+      linkedWord.append(" AND (word.start_anchor_id = span_start.anchor_id")
+        .append(" OR word.end_anchor_id = span_start.anchor_id")
+        .append(" OR word.start_anchor_id = span_end.anchor_id")
+        .append(" OR word.end_anchor_id = span_end.anchor_id)");
+    }
+    // first word by offset:
+    containedWord.append(" ORDER BY word_start.offset LIMIT 1");
+    // word nearest to the start of the span:
+    linkedWord.append(" ORDER BY ABS(span_start.offset - word_start.offset) LIMIT 1");
+    nearestWord.append(" ORDER BY ABS(span_start.offset - word_start.offset) LIMIT 1");
+    PreparedStatement sqlContainedWordLine = connection.prepareStatement(containedWord.toString());
+    PreparedStatement sqlLinkedWordLine = connection.prepareStatement(linkedWord.toString());
+    PreparedStatement sqlNearestWordLine = connection.prepareStatement(nearestWord.toString());
+    
     PreparedStatement sqlResults = connection.prepareStatement("SELECT * FROM _result");
     PreparedStatement sqlUpdateResult = connection.prepareStatement(
       "UPDATE _result SET speaker_number = ?, start_anchor_id = ?, end_anchor_id = ?,"
@@ -2108,18 +2132,39 @@ public class OneQuerySearch extends SearchTask {
     ResultSet rsResults = sqlResults.executeQuery();
     try {
       while (rsResults.next() && !bCancelling) {
-        sqlWordLine.setLong(1, rsResults.getLong("start_anchor_id"));
-        sqlWordLine.setLong(2, rsResults.getLong("end_anchor_id"));
-        sqlWordLine.setInt(3, rsResults.getInt("ag_id")); // TODO and main participant?
-        ResultSet rsWordLine = sqlWordLine.executeQuery();
-        if (rsWordLine.next()) { // only the first one
+        sqlContainedWordLine.setLong(1, rsResults.getLong("start_anchor_id"));
+        sqlContainedWordLine.setLong(2, rsResults.getLong("end_anchor_id"));
+        sqlContainedWordLine.setInt(3, rsResults.getInt("ag_id"));
+        ResultSet rsWordLine = sqlContainedWordLine.executeQuery();
+        boolean found = rsWordLine.next();
+        if (!found) { // fall back to linked word
+          rsWordLine.close();
+          sqlLinkedWordLine.setLong(1, rsResults.getLong("start_anchor_id"));
+          sqlLinkedWordLine.setLong(2, rsResults.getLong("end_anchor_id"));
+          sqlLinkedWordLine.setInt(3, rsResults.getInt("ag_id"));
+          rsWordLine = sqlLinkedWordLine.executeQuery();
+          found = rsWordLine.next();
+          if (!found                          // fall back to nearest word
+              && !layerMatch.getAnchorStart() // only if not anchoring to start or end
+              && !layerMatch.getAnchorEnd()) { 
+            rsWordLine.close();
+            sqlNearestWordLine.setLong(1, rsResults.getLong("start_anchor_id"));
+            sqlNearestWordLine.setLong(2, rsResults.getLong("end_anchor_id"));
+            sqlNearestWordLine.setInt(3, rsResults.getInt("ag_id"));
+            rsWordLine = sqlNearestWordLine.executeQuery();
+            found = rsWordLine.next();
+          }
+        }
+        if (found) { // only the first one
           sqlUpdateResult.setString(1, rsWordLine.getString("label")); // speaker_number
           sqlUpdateResult.setLong(2, rsWordLine.getLong("start_anchor_id"));
           sqlUpdateResult.setLong(3, rsWordLine.getLong("end_anchor_id"));
           sqlUpdateResult.setLong(4, rsWordLine.getLong("defining_annotation_id"));
           sqlUpdateResult.setLong(5, rsWordLine.getLong("turn_annotation_id"));
-          sqlUpdateResult.setLong(6, rsWordLine.getLong("first_matched_word_annotation_id"));
-          sqlUpdateResult.setLong(7, rsWordLine.getLong("last_matched_word_annotation_id"));
+          sqlUpdateResult.setLong(
+            6, rsWordLine.getLong("first_matched_word_annotation_id"));
+          sqlUpdateResult.setLong(
+            7, rsWordLine.getLong("last_matched_word_annotation_id"));
           sqlUpdateResult.setInt(8, rsResults.getInt("search_id"));
           sqlUpdateResult.setInt(9, rsResults.getInt("match_id"));
           sqlUpdateResult.executeUpdate();
@@ -2134,7 +2179,9 @@ public class OneQuerySearch extends SearchTask {
     } finally {
       rsResults.close();
       sqlResults.close();
-      sqlWordLine.close();
+      sqlContainedWordLine.close();
+      sqlLinkedWordLine.close();
+      sqlNearestWordLine.close();
       sqlUpdateResult.close();
       sqlDeleteResult.close();
     }
