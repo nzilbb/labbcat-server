@@ -2048,8 +2048,12 @@ public class OneQuerySearch extends SearchTask {
    * search query identified the target annotation ID but not the word tokens IDs.
    * <p> This will try to ensure that the token is <i>contained entirely by</i> the
    * duration of the target annotation, but if that's not possible (e.g. because it's
-   * a noise annotation strung between two words) then the nearest word to the start
-   * of the target will be assigned instead.
+   * a noise annotation strung between two words) then linked words, or the nearest word 
+   * to the start of the target will be assigned instead.
+   * <p> This ensures that single-span-only searches (e.g. for noises) match with words 
+   * whether they're strictly contained within the span or not, so that instantaneous 
+   * noises, noises chained between words, and noises overlap with but don't contain 
+   * words are returned by searches.
    * @param spanLayer The one span layer being searched.
    * @param layerMatch The one span layer's match conditions.
    * @throws SQLException
