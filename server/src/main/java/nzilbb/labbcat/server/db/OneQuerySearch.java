@@ -1,5 +1,5 @@
 //
-// Copyright 2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2023-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1876,6 +1876,7 @@ public class OneQuerySearch extends SearchTask {
           parameters, schema,
           layerIsSpanningAndWordAnchored, participantCondition, transcriptCondition);
       }
+      setStatus("SQL: " + q);
     } catch (Exception x) {
       setStatus(x.getMessage());
       if (!x.getMessage().equals("Cancelled.")) {
@@ -2052,6 +2053,11 @@ public class OneQuerySearch extends SearchTask {
   protected void setTokenIds(
     Connection connection, Layer spanLayer, LayerMatch layerMatch,
     UnaryOperator<String> participantCondition) throws Exception {
+    // TODO change this to find the turn that the span starts during,
+    // and finds the word that starts nearest the span start
+    // this will choose the first word in the span, if they share a start time, and
+    // will find the nearest word, if they don't
+    // this catches e.g. noises that are between words or comments that are instantaneous.
     StringBuilder worldLine = new StringBuilder()
       .append("SELECT")
       .append(" line.label, line.start_anchor_id, line.end_anchor_id,")
@@ -2070,8 +2076,7 @@ public class OneQuerySearch extends SearchTask {
     }
     worldLine.append(" INNER JOIN anchor span_start ON span_start.anchor_id = ?")
       .append(" INNER JOIN anchor span_end ON span_end.anchor_id = ?")
-      .append(" AND word_start.offset >= line_start.offset")
-      .append(" AND word_start.offset < line_end.offset")
+      .append(" AND word.utterance_annotation_id = line.annotation_id")
       .append(" WHERE word.ag_id = ?");
     if (layerMatch.getAnchorStart()) {
       worldLine.append(" AND word.start_anchor_id = span_start.anchor_id");
@@ -2090,6 +2095,7 @@ public class OneQuerySearch extends SearchTask {
     worldLine.append(speakerWhere.replace("turn.label","line.label"));
     worldLine.append(" ORDER BY word_start.offset")
       .append(" LIMIT 1");
+    setStatus("setTokenIds: " + worldLine.toString());
     PreparedStatement sqlWordLine = connection.prepareStatement(worldLine.toString());
     PreparedStatement sqlResults = connection.prepareStatement("SELECT * FROM _result");
     PreparedStatement sqlUpdateResult = connection.prepareStatement(
