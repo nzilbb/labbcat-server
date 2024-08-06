@@ -902,6 +902,135 @@ public class TestOneQuerySearch {
 
     assertEquals("Description", "_2_3", search.getDescription());
   }
+
+  /** Ensure searches with word-start anchoring generate the correct SQL. */
+  @Test public void spanMatching() throws Exception {    
+    OneQuerySearch search = new OneQuerySearch();
+
+    // span layer no target (default to token target)
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("noise").setPattern("haystack"))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
+      );
+    Vector<Object> parameters = new Vector<Object>();
+    String sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // no word linked layers
+      p -> "", t -> "");
+    assertEquals(
+      "span layer no target",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_2.word_annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('ew_0_', search_0_2.word_annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_32 search_0_32"
+      +"  INNER JOIN anchor meta_0_start_32"
+      +"  ON meta_0_start_32.anchor_id = search_0_32.start_anchor_id"
+      +"  INNER JOIN anchor meta_0_end_32"
+      +"  ON meta_0_end_32.anchor_id = search_0_32.end_anchor_id)"
+      +"  ON search_0_32.ag_id = search_0_2.ag_id"
+      +"  AND meta_0_start_32.offset <= word_0_start.offset"
+      +"  AND meta_0_end_32.offset > word_0_start.offset"
+      +"  AND search_0_32.label  REGEXP  ?"
+      +"  /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(haystack)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$_^(haystack)$", search.getDescription());
+
+    // span layer span target
+    search.setMatrix(
+      new Matrix()
+      .addColumn(new Column()
+                 .addLayerMatch(new LayerMatch().setId("noise").setPattern("haystack")
+                                .setTarget(true))
+                 .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
+      );
+    parameters.clear();
+    sql = search.generateSql(
+      parameters, getSchema(),
+      l -> false, // no word linked layers
+      p -> "", t -> "");
+    assertEquals(
+      "span layer span target",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, NULL AS segment_annotation_id,"
+      +" search_0_32.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id,"
+      +" 0 AS complete, CONCAT('e_32_', search_0_32.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.turn_annotation_id = turn.annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN anchor word_0_start ON word_0_start.anchor_id = search_0_2.start_anchor_id"
+      +" INNER JOIN (annotation_layer_32 search_0_32"
+      +"  INNER JOIN anchor meta_0_start_32"
+      +"  ON meta_0_start_32.anchor_id = search_0_32.start_anchor_id"
+      +"  INNER JOIN anchor meta_0_end_32"
+      +"  ON meta_0_end_32.anchor_id = search_0_32.end_anchor_id)"
+      +"  ON search_0_32.ag_id = search_0_2.ag_id"
+      +"  AND meta_0_start_32.offset <= word_0_start.offset"
+      +"  AND meta_0_end_32.offset > word_0_start.offset"
+      +"  AND search_0_32.label  REGEXP  ?"
+      +"  /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn",
+      sql);
+    assertEquals("number of parameters" + parameters, 2, parameters.size());
+    assertEquals("^(needle)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(haystack)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    
+    assertEquals("Description", "_^(needle)$_^(haystack)$", search.getDescription());
+
+  }
   
   /** Ensure searches with word-start anchoring generate the correct SQL. */
   @Test public void anchorStart() throws Exception {    

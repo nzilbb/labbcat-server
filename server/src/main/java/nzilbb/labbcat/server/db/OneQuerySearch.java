@@ -398,9 +398,7 @@ public class OneQuerySearch extends SearchTask {
         } else if (layerMatch.getPattern() != null) { // use regexp
           StringBuilder sSqlExtraJoin = new StringBuilder();
           if (bPhraseLayer || bSpanLayer) {
-            if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT
-                || layer.getId().equals("noise")
-                || layer.getId().equals("comment")) {
+            if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
               if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
                 sSqlExtraJoin.append(sSqlWordEndJoin);
               }
@@ -1011,9 +1009,7 @@ public class OneQuerySearch extends SearchTask {
           } else if (layerMatch.getPattern() != null) { // use regexp
             StringBuilder sSqlExtraJoin = new StringBuilder();
             if (bPhraseLayer || bSpanLayer) {
-              if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT
-                  || layer.getId().equals("noise")
-                  || layer.getId().equals("comment")) {
+              if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
                 // meta/freeform layer
                 if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
                   sSqlExtraJoin.append(sSqlWordEndJoin);
@@ -2816,9 +2812,9 @@ public class OneQuerySearch extends SearchTask {
     + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id"
     + "  INNER JOIN anchor meta_end_{0}"
     + "  ON meta_end_{0}.anchor_id = search_{0}.end_anchor_id)"
-    + "  ON search_{0}.ag_id = word.ag_id"
+    + "  ON search_{0}.ag_id = word.ag_id" // TODO word... is not a thing
     // same turn...
-    + "  AND search_{0}.turn_annotation_id = word.turn_annotation_id"
+    + "  AND search_{0}.turn_annotation_id = word.turn_annotation_id" // TODO word... is not a thing
     // meta bounds enclose word start time...
     + "  AND meta_start_{0}.offset <= word_start.offset"
     + "  AND meta_end_{0}.offset > word_start.offset"
@@ -2841,7 +2837,7 @@ public class OneQuerySearch extends SearchTask {
     + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id"
     + "  INNER JOIN anchor meta_end_{0}"
     + "  ON meta_end_{0}.anchor_id = search_{0}.end_anchor_id)"
-    + "  ON search_{0}.ag_id = word.ag_id"
+    + "  ON search_{0}.ag_id = word.ag_id" // TODO word... is not a thing
     // meta bounds enclose word start time...
     + "  AND meta_start_{0}.offset <= word_start.offset"
     + "  AND meta_end_{0}.offset > word_start.offset"
@@ -3166,7 +3162,7 @@ public class OneQuerySearch extends SearchTask {
     + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id"
     + "  INNER JOIN anchor meta_end_{0}"
     + "  ON meta_end_{0}.anchor_id = search_{0}.end_anchor_id)"
-    + "  ON search_{0}.ag_id = word.ag_id"
+    + "  ON search_{0}.ag_id = word.ag_id" // TODO word... is not a thing
     // meta bounds enclose word end time...
     + "  AND meta_start_{0}.offset <= word_end.offset"
     + "  AND meta_end_{0}.offset >= word_end.offset"
