@@ -1732,14 +1732,15 @@ public class ProcessWithPraat extends Task {
           
           CSVRecord record = records.next();
           
-          // detect change in file 
+          // detect change in file or speaker
           String transcript = record.get(transcriptIdColumn);
           String speaker = record.get(participantNameColumn);
           if (!transcript.equals(currentFile)
               || !speaker.equals(currentSpeaker)) {
             if (currentFile != null && currentSpeaker != null) {
               batchTasks.add(
-                processBatch(currentFile, sqlSpeakerAttribute, currentBatch, format));
+                processBatch(
+                  currentFile, currentSpeaker, sqlSpeakerAttribute, currentBatch, format));
             }
             currentFile = transcript;
             currentSpeaker = speaker;
@@ -1749,7 +1750,8 @@ public class ProcessWithPraat extends Task {
         } // next line
         if (!bCancelling) {
           batchTasks.add(
-            processBatch(currentFile, sqlSpeakerAttribute, currentBatch, format));
+            processBatch(
+              currentFile, currentSpeaker, sqlSpeakerAttribute, currentBatch, format));
         }
       } finally {
         sqlSpeakerAttribute.close();
@@ -1851,10 +1853,11 @@ public class ProcessWithPraat extends Task {
    * is deferred until the returned Callable is invoked.
    * <p> This allows multiple scripts to be executed in parallel, so that processing
    * terminates faster.
-   * @param transcript Name of the transcript
+   * @param transcript Name of the transcript.
+   * @param transcript Name of the participant.
    * @param sqlSpeakerAttribute Prepared query that returns a 'label' field that
    * identifies a given participant attribute (parameter 1) given a participant name
-   * (parameter 2). 
+   * (parameters 2 and 3). 
    * @param batch Collection of source CSV records that make up this batch.
    * @param format Output CSV format.
    * @return A task that will produce a header-less CSV file with the results for this
@@ -1862,9 +1865,9 @@ public class ProcessWithPraat extends Task {
    * @throws Exception
    */
   public FutureTask<File> processBatch(
-    String transcript, PreparedStatement sqlSpeakerAttribute,
+    String transcript, String speaker, PreparedStatement sqlSpeakerAttribute,
     Vector<CSVRecord> batch, CSVFormat format) throws Exception {
-    setStatus(transcript+" : "+batch.size()+" records");
+    setStatus(transcript+" ("+speaker+") : "+batch.size()+" records");
     
     // get media file
     final File baseDir = getStore().getFiles();
@@ -1885,8 +1888,8 @@ public class ProcessWithPraat extends Task {
     
     // get participant attribute values we will need
     HashMap<String,String> attributeValues = new HashMap<String,String>();
-    sqlSpeakerAttribute.setString(2, batch.elementAt(0).get(participantNameColumn));
-    sqlSpeakerAttribute.setString(3, batch.elementAt(0).get(participantNameColumn));
+    sqlSpeakerAttribute.setString(2, speaker);
+    sqlSpeakerAttribute.setString(3, speaker);
     if (getAttributes() != null) {
       for (String layer : getAttributes()) {
         String attribute = layer.replaceFirst("participant_","");
