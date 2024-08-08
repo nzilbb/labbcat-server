@@ -1854,7 +1854,7 @@ public class ProcessWithPraat extends Task {
    * <p> This allows multiple scripts to be executed in parallel, so that processing
    * terminates faster.
    * @param transcript Name of the transcript.
-   * @param transcript Name of the participant.
+   * @param speaker Name of the participant.
    * @param sqlSpeakerAttribute Prepared query that returns a 'label' field that
    * identifies a given participant attribute (parameter 1) given a participant name
    * (parameters 2 and 3). 
