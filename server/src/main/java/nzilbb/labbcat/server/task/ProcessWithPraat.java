@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -23,6 +23,7 @@
 package nzilbb.labbcat.server.task;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -44,8 +45,15 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -1545,7 +1553,28 @@ public class ProcessWithPraat extends Task {
    * analysis. Segments shorter than this will be ignored, and empty values returned. 
    */
   public ProcessWithPraat setFastTrackMinimumDuration(double newFastTrackMinimumDuration) { fastTrackMinimumDuration = newFastTrackMinimumDuration; return this; }
+  
+  /**
+   * Number of Praat scripts to run in parallel. If unset, the default is  the number of
+   * processors available. 
+   * @see #getSimultaneousThreadCount()
+   * @see #setSimultaneousThreadCount(Integer)
+   */
+  protected Integer simultaneousThreadCount;
+  /**
+   * Getter for {@link #simultaneousThreadCount}: Number of Praat scripts to run in parallel.
+   * If unset, the default is the number of processors available. 
+   * @return Number of Praat scripts to run in parallel.
+   */
+  public Integer getSimultaneousThreadCount() { return simultaneousThreadCount; }
+  /**
+   * Setter for {@link #simultaneousThreadCount}: Number of Praat scripts to run in parallel.
+   * @param newSimultaneousThreadCount Number of Praat scripts to run in parallel.
+   */
+  public ProcessWithPraat setSimultaneousThreadCount(Integer newSimultaneousThreadCount) { simultaneousThreadCount = newSimultaneousThreadCount; return this; }
 
+  private Vector<FutureTask<File>> batchTasks = new Vector<FutureTask<File>>();
+  private final int ALL_TASKS_FINISHED_PERCENTAGE = 95;
 
   // Methods:
       
@@ -1564,6 +1593,34 @@ public class ProcessWithPraat extends Task {
       for(String a : attributes) this.attributes.add(a);
     }
   } // end of addAttributes()
+  
+  /**
+   * Determines how far through the task is.
+   * <p> The override will report progress based on current Callable tasks, if any.
+   * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+   */
+  @Override public Integer getPercentComplete() {
+    if (batchTasks.size() > 0) {
+      int completedTasks = batchTasks.stream()
+        .mapToInt(task -> task.isDone()?1:0)
+        .sum();
+      if (completedTasks != batchTasks.size()) {
+        iPercentComplete = (int)((completedTasks * ALL_TASKS_FINISHED_PERCENTAGE)
+                                 / batchTasks.size());
+      }
+    }
+    return super.getPercentComplete();
+  }
+
+  /** Cancels the task. The override cancels any batch tasks that have been created. */
+  @Override public void cancel() {
+    // mark the task as cancelling
+    super.cancel();
+    // cancel any batches that have not finished yet
+    batchTasks.stream()
+      .filter(task -> !task.isDone())
+      .forEach(task -> task.cancel(false));
+  }
 
   /**
    * Run the task.
@@ -1572,7 +1629,6 @@ public class ProcessWithPraat extends Task {
     CSVParser in = null;
     CSVPrinter out = null;
     File outputFile = null;
-    PreparedStatement sqlSpeakerAttribute = null;
     
     String baseUrl = getStore().getBaseUrl();
     // we want file URLs, not http/https, so unset the base URL
@@ -1581,24 +1637,9 @@ public class ProcessWithPraat extends Task {
     try {
       runStart();
 
-      setStatus("Counting records...");
-      long iRecordCount = -1; // don't count header row
-      BufferedReader r =  new BufferedReader(new FileReader(dataFile));
-      while (r.readLine() != null) iRecordCount++;
-      r.close();
-
-      setStatus(
-        "Extracting measurements for "+iRecordCount+" record"+(iRecordCount==1?"":"s")+"...");
+      setStatus("Extracting measurements for "+fileName+" ...");
       iPercentComplete = 1; // so the progress bar stops displaying as 'indeterminate'
 
-      sqlSpeakerAttribute = getStore().getConnection().prepareStatement(
-        "SELECT annotation_participant.label"
-        +" FROM speaker"
-        +" INNER JOIN annotation_participant"
-        +"  ON annotation_participant.speaker_number = speaker.speaker_number"
-        +"  AND annotation_participant.layer = ?"
-        +" WHERE speaker.name = ?" // name, e.g. "BR178LK_MargaretSpencer"
-        +" OR CONCAT('p_', speaker.speaker_number) = ?"); // Annotation ID, e.g. "p_30"
       if (formantDifferentiationLayerId != null)
         attributes.add(formantDifferentiationLayerId);
       if (pitchDifferentiationLayerId != null)
@@ -1607,19 +1648,19 @@ public class ProcessWithPraat extends Task {
         attributes.add(intensityDifferentiationLayerId);
       if (fastTrackDifferentiationLayerId != null)
         attributes.add(fastTrackDifferentiationLayerId);
-
+        
       outputFile = File.createTempFile(
         IO.WithoutExtension(fileName) + "-", ".csv", getStore().getFiles());
       CSVFormat format = CSVFormat.EXCEL.withDelimiter(fieldDelimiter);
       out = new CSVPrinter(new FileWriter(outputFile), format);
       in = new CSVParser(new FileReader(dataFile), format);
       Iterator<CSVRecord> records = in.iterator();
-
+        
       // headers
-         
+        
       CSVRecord headers = records.next();
       if (passThroughData) for (String sHeader : headers) out.print(sHeader);
-
+        
       if (extractF1 || extractF2 || extractF3) {
         if (useFastTrack && fastTrackCoefficients) {
           for (int f = 1; f <= Math.max(3, fastTrackNumberOfFormants); f++) {
@@ -1668,32 +1709,100 @@ public class ProcessWithPraat extends Task {
         }
       }
       out.print("Error");
+      out.close();
+      out = null;
 
+      PreparedStatement sqlSpeakerAttribute
+        = getStore().getConnection().prepareStatement(
+          "SELECT annotation_participant.label"
+          +" FROM speaker"
+          +" INNER JOIN annotation_participant"
+          +"  ON annotation_participant.speaker_number = speaker.speaker_number"
+          +"  AND annotation_participant.layer = ?"
+          +" WHERE speaker.name = ?" // name, e.g. "BR178LK_MargaretSpencer"
+          +" OR CONCAT('p_', speaker.speaker_number) = ?"); // Annotation ID, e.g. "p_30"
+      
       String currentFile = null;
       String currentSpeaker = null;
-      Vector<CSVRecord> batch = new Vector<CSVRecord>();
-      while (records.hasNext()) {
-        if (bCancelling) break;
-	       
-        CSVRecord record = records.next();
-
-        // detect change in file 
-        String transcript = record.get(transcriptIdColumn);
-        String speaker = record.get(participantNameColumn);
-        if (!transcript.equals(currentFile)
-            || !speaker.equals(currentSpeaker)) {
-          if (currentFile != null && currentSpeaker != null) {
-            processBatch(currentFile, sqlSpeakerAttribute, batch, out);
-            iPercentComplete = (int)((record.getRecordNumber() * 100) / iRecordCount);
+      Vector<CSVRecord> currentBatch = new Vector<CSVRecord>();
+      batchTasks = new Vector<FutureTask<File>>();
+      try {
+        while (records.hasNext()) {
+          if (bCancelling) break;
+          
+          CSVRecord record = records.next();
+          
+          // detect change in file 
+          String transcript = record.get(transcriptIdColumn);
+          String speaker = record.get(participantNameColumn);
+          if (!transcript.equals(currentFile)
+              || !speaker.equals(currentSpeaker)) {
+            if (currentFile != null && currentSpeaker != null) {
+              batchTasks.add(
+                processBatch(currentFile, sqlSpeakerAttribute, currentBatch, format));
+            }
+            currentFile = transcript;
+            currentSpeaker = speaker;
+            currentBatch = new Vector<CSVRecord>();
           }
-          currentFile = transcript;
-          currentSpeaker = speaker;
-          batch.clear();
+          currentBatch.add(record);
+        } // next line
+        if (!bCancelling) {
+          batchTasks.add(
+            processBatch(currentFile, sqlSpeakerAttribute, currentBatch, format));
         }
-        batch.add(record);
-      } // next line
-      processBatch(currentFile, sqlSpeakerAttribute, batch, out);
-      setStatus("Finished.");
+      } finally {
+        sqlSpeakerAttribute.close();
+      }
+      iPercentComplete = ALL_TASKS_FINISHED_PERCENTAGE;
+      if (simultaneousThreadCount == null) {
+        simultaneousThreadCount = Runtime.getRuntime().availableProcessors();
+      }
+      setStatus("Starting scripts ("+simultaneousThreadCount+" at once)...");
+      ExecutorService executor = Executors.newFixedThreadPool(simultaneousThreadCount);
+      // submit all tasks
+      for (FutureTask<File> batchTask : batchTasks) {
+        if (bCancelling) break;
+        executor.submit(batchTask);
+      }
+        
+      BufferedWriter w = new BufferedWriter(new FileWriter(outputFile, true));
+      try {
+
+        for (FutureTask<File> batchTask : batchTasks) {
+          try {
+            
+            File batchFile = batchTask.get(); // will wait until it's finished
+            if (batchFile != null) {
+              if (!bCancelling) { // only append the file if we're not cancelling
+                setStatus("Appending measurements from " + batchFile.getName() + "...");
+                BufferedReader reader =  new BufferedReader(new FileReader(batchFile));
+                String line = reader.readLine();
+                while (line != null) {
+                  if (line.length() > 0) { // skip blank lines
+                    w.newLine();
+                    w.write(line);
+                  }
+                  line = reader.readLine();
+                } // next line
+              }
+              // delete the file whether we're cancelling or not
+              batchFile.delete();
+            } // there was an output file
+            
+          } catch (CancellationException cancelled) {
+          }
+        } // next batch output file
+      } finally {
+        w.close();
+        executor.shutdown();
+      }
+      if (bCancelling) {
+        setStatus("Cancelled.");
+      } else {
+        setStatus("Finished.");
+      }
+        
       iPercentComplete = 100;
     } catch (Exception x) {
       setLastException(x);
@@ -1724,9 +1833,6 @@ public class ProcessWithPraat extends Task {
         }
         setResultText("CSV file with measurements");
       }
-      if (sqlSpeakerAttribute != null) {
-        try {sqlSpeakerAttribute.close();} catch(SQLException exception) {}
-      }
       runEnd();
     }
     if (bCancelling) {
@@ -1738,20 +1844,30 @@ public class ProcessWithPraat extends Task {
   }
 
   /**
-   * Process a list of lines, all from the same transcript file
+   * Create a Callable that will process a list of lines, all from the same transcript
+   * file.
+   * <p> The method does some immediate processing, to identify the media file and
+   * retrieve participant attributes, but the execution of the corresponding Praat script
+   * is deferred until the returned Callable is invoked.
+   * <p> This allows multiple scripts to be executed in parallel, so that processing
+   * terminates faster.
    * @param transcript Name of the transcript
    * @param sqlSpeakerAttribute Prepared query that returns a 'label' field that
    * identifies a given participant attribute (parameter 1) given a participant name
    * (parameter 2). 
-   * @param batch Collection of source CSV records that make up this batch
-   * @param out
+   * @param batch Collection of source CSV records that make up this batch.
+   * @param format Output CSV format.
+   * @return A task that will produce a header-less CSV file with the results for this
+   * batch, which the caller should delete when finished. 
    * @throws Exception
    */
-  public void processBatch(
-    String transcript, PreparedStatement sqlSpeakerAttribute, Vector<CSVRecord> batch,
-    CSVPrinter out) throws Exception {
+  public FutureTask<File> processBatch(
+    String transcript, PreparedStatement sqlSpeakerAttribute,
+    Vector<CSVRecord> batch, CSVFormat format) throws Exception {
+    setStatus(transcript+" : "+batch.size()+" records");
     
-    setStatus("processBatch("+transcript+", "+batch.size()+" records)");
+    // get media file
+    final File baseDir = getStore().getFiles();
     File wav = null;
     String wavError = null;
     try {
@@ -1764,7 +1880,9 @@ public class ProcessWithPraat extends Task {
     } catch (GraphNotFoundException x) {
       wavError = "Transcript not found";
     }
-      
+    final File finalWav = wav;
+    final String finalWavError = wavError;
+    
     // get participant attribute values we will need
     HashMap<String,String> attributeValues = new HashMap<String,String>();
     sqlSpeakerAttribute.setString(2, batch.elementAt(0).get(participantNameColumn));
@@ -1786,137 +1904,179 @@ public class ProcessWithPraat extends Task {
           rs.close();
         }	    
       } // next attribute
-    }
-    
-    // participant-differentiatable parameters...
-    int formantCeiling = formantCeilingDefault;
-    if (formantDifferentiationLayerId != null && formantDifferentiationLayerId.length() > 0) {
-      for (int i = 0; i < formantOtherPattern.size(); i++) {
-        Pattern pattern = formantOtherPattern.elementAt(i);
-        String value = attributeValues.get(formantDifferentiationLayerId);
-        if (pattern.matcher(value).matches()) {
-          formantCeiling = formantCeilingOther.get(i);
-          break;
-        }
-      } // next pattern
-    } // differentiate by participant attribute
-    int pitchFloor = pitchFloorDefault;
-    int pitchCeiling = pitchCeilingDefault;
-    double voicingThreshold = voicingThresholdDefault;
-    if (pitchDifferentiationLayerId != null && pitchDifferentiationLayerId.length() > 0) {
-      for (int i = 0; i < pitchOtherPattern.size(); i++) {
-        Pattern pattern = pitchOtherPattern.elementAt(i);
-        String value = attributeValues.get(pitchDifferentiationLayerId);
-        if (pattern.matcher(value).matches()) {
-          pitchCeiling = pitchCeilingOther.get(i);
-          pitchFloor = pitchFloorOther.get(i);
-          pitchCeiling = pitchCeilingOther.get(i);
-          voicingThreshold = voicingThresholdOther.get(i);
-          break;
-        }
-      } // next pattern
-    } // differentiate by participant attribute
-    int intensityPitchFloor = intensityPitchFloorDefault;
-    if (intensityDifferentiationLayerId != null && intensityDifferentiationLayerId.length() > 0) {
-      for (int i = 0; i < intensityOtherPattern.size(); i++) {
-        Pattern pattern = intensityOtherPattern.elementAt(i);
-        String value = attributeValues.get(intensityDifferentiationLayerId);
-        if (pattern.matcher(value).matches()) {
-          intensityPitchFloor = intensityPitchFloorOther.get(i);
-          break;
-        }
-      } // next pattern
-    } // differentiate by participant attribute
-    int fastTrackLowestAnalysisFrequency = fastTrackLowestAnalysisFrequencyDefault;
-    int fastTrackHighestAnalysisFrequency = fastTrackHighestAnalysisFrequencyDefault;
-    if (fastTrackDifferentiationLayerId != null && fastTrackDifferentiationLayerId.length() > 0) {
-      for (int i = 0; i < fastTrackOtherPattern.size(); i++) {
-        Pattern pattern = fastTrackOtherPattern.elementAt(i);
-        String value = attributeValues.get(fastTrackDifferentiationLayerId);
-        if (pattern.matcher(value).matches()) {
-          fastTrackLowestAnalysisFrequency = fastTrackLowestAnalysisFrequencyOther.get(i);
-          fastTrackHighestAnalysisFrequency = fastTrackHighestAnalysisFrequencyOther.get(i);
-          break;
-        }
-      } // next pattern
-    } // differentiate by participant attribute
-      
-    Vector<Vector<Double>> vTargets = new Vector<Vector<Double>>();
-    Vector<String> vErrors = new Vector<String>();
-    for (CSVRecord record : batch) {
-      if (bCancelling) break;
-      String error = "";
-      String mark = record.get(markColumn);
-      String markEnd = null;
-      if (markEndColumn != null) markEnd = record.get(markEndColumn);
-      try {
-        Double startTime = Double.valueOf(mark);
-        Double endTime = Double.valueOf(mark);
-        if (markEnd != null) endTime = Double.valueOf(markEnd);
-        Vector<Double> tuple = new Vector<Double>();
-        tuple.add(startTime);
-        tuple.add(endTime);
-        vTargets.add(tuple);
-        if (useFastTrack
-            && (endTime+windowOffset)-(startTime-windowOffset) < fastTrackMinimumDuration) {
-          // we know this will be skipped, so add an error
-          error = "Duration too short for FastTrack";
-        }
-      } catch (Exception x) {
-        error = "ERROR: " + x.getClass().getSimpleName() + ": " + x.getMessage();
-        Vector<Double> tuple = new Vector<Double>();
-        tuple.add(Double.valueOf(-1));
-        tuple.add(Double.valueOf(-1));
-        vTargets.add(tuple);
-      } 
-      if (wav == null) {
-        error = wavError;
-      }
-      vErrors.add(error);
-    } // next batch line
+    } // there are attributes required
 
-    // run praat
-    Vector<Vector<String>> results = measurementsFromFile(
-      wav, vTargets, formantCeiling, pitchFloor, pitchCeiling, voicingThreshold,
-      intensityPitchFloor, fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency,
-      attributeValues);
-    
-    // collate the results
-    Enumeration<Vector<Double>> enTargets = vTargets.elements();
-    Enumeration<String> enErrors = vErrors.elements();
-    Enumeration<Vector<String>> enResults = results.elements();
-    for (CSVRecord record : batch) {
-      if (bCancelling) break;
-      out.println();
-      // copy through all columns
-      if (passThroughData) for (String sValue : record) out.print(sValue);
-
-      // formants etc.
-      String error = "";
-      try {
-        Vector<String> rowResults = enResults.nextElement();
-        // last 'result' is always the 'error' if any, so pass through all but the last result
-        for (int r = 0 ; r < rowResults.size() - 1; r++) {
-          out.print(rowResults.elementAt(r));
-        } // next result
-        error = rowResults.lastElement();
-      } catch(Exception exception) {
-        out.print(exception.getMessage());
-      }
-
-      // report error if any, and both errors if there was one earlier
-      try {
-        if (error.length() > 0) {
-          error += "\n" + enErrors.nextElement().toString();
-        } else {
-          error = enErrors.nextElement().toString();
-        }
-        out.print(error);
-      } catch(Exception exception) {
-        out.print("missing");
-      }
+    // create a 'Callable' that will generate and execute the Praat script when called...
+    return new FutureTask<File>(
+      new Callable<File>() {
+        public File call() {
+          if (bCancelling) return null;
+          try {    
+            File outputFile = File.createTempFile(transcript + "-", ".csv", baseDir);
+            setStatus(
+              "Computing measurements for "+transcript+" → " + outputFile.getName() + "...");
+            CSVPrinter out = new CSVPrinter(new FileWriter(outputFile), format);
+            
+            try {
+              // participant-differentiatable parameters...
+              int formantCeiling = formantCeilingDefault;
+              if (formantDifferentiationLayerId != null
+                  && formantDifferentiationLayerId.length() > 0) {
+                for (int i = 0; i < formantOtherPattern.size(); i++) {
+                  Pattern pattern = formantOtherPattern.elementAt(i);
+                  String value = attributeValues.get(formantDifferentiationLayerId);
+                  if (pattern.matcher(value).matches()) {
+                    formantCeiling = formantCeilingOther.get(i);
+                    break;
+                  }
+                } // next pattern
+              } // differentiate by participant attribute
+              int pitchFloor = pitchFloorDefault;
+              int pitchCeiling = pitchCeilingDefault;
+              double voicingThreshold = voicingThresholdDefault;
+              if (pitchDifferentiationLayerId != null
+                  && pitchDifferentiationLayerId.length() > 0) {
+                for (int i = 0; i < pitchOtherPattern.size(); i++) {
+                  Pattern pattern = pitchOtherPattern.elementAt(i);
+                  String value = attributeValues.get(pitchDifferentiationLayerId);
+                  if (pattern.matcher(value).matches()) {
+                    pitchCeiling = pitchCeilingOther.get(i);
+                    pitchFloor = pitchFloorOther.get(i);
+                    pitchCeiling = pitchCeilingOther.get(i);
+                    voicingThreshold = voicingThresholdOther.get(i);
+                    break;
+                  }
+                } // next pattern
+              } // differentiate by participant attribute
+              int intensityPitchFloor = intensityPitchFloorDefault;
+              if (intensityDifferentiationLayerId != null
+                  && intensityDifferentiationLayerId.length() > 0) {
+                for (int i = 0; i < intensityOtherPattern.size(); i++) {
+                  Pattern pattern = intensityOtherPattern.elementAt(i);
+                  String value = attributeValues.get(intensityDifferentiationLayerId);
+                  if (pattern.matcher(value).matches()) {
+                    intensityPitchFloor = intensityPitchFloorOther.get(i);
+                    break;
+                  }
+                } // next pattern
+              } // differentiate by participant attribute
+              int fastTrackLowestAnalysisFrequency = fastTrackLowestAnalysisFrequencyDefault;
+              int fastTrackHighestAnalysisFrequency = fastTrackHighestAnalysisFrequencyDefault;
+              if (fastTrackDifferentiationLayerId != null
+                  && fastTrackDifferentiationLayerId.length() > 0) {
+                for (int i = 0; i < fastTrackOtherPattern.size(); i++) {
+                  Pattern pattern = fastTrackOtherPattern.elementAt(i);
+                  String value = attributeValues.get(fastTrackDifferentiationLayerId);
+                  if (pattern.matcher(value).matches()) {
+                    fastTrackLowestAnalysisFrequency = fastTrackLowestAnalysisFrequencyOther.get(i);
+                    fastTrackHighestAnalysisFrequency = fastTrackHighestAnalysisFrequencyOther.get(i);
+                    break;
+                  }
+                } // next pattern
+              } // differentiate by participant attribute
+          
+              Vector<Vector<Double>> vTargets = new Vector<Vector<Double>>();
+              Vector<String> vErrors = new Vector<String>();
+              for (CSVRecord record : batch) {
+                if (bCancelling) break;
+                String error = "";
+                String mark = record.get(markColumn);
+                String markEnd = null;
+                if (markEndColumn != null) markEnd = record.get(markEndColumn);
+                try {
+                  Double startTime = Double.valueOf(mark);
+                  Double endTime = Double.valueOf(mark);
+                  if (markEnd != null) endTime = Double.valueOf(markEnd);
+                  Vector<Double> tuple = new Vector<Double>();
+                  tuple.add(startTime);
+                  tuple.add(endTime);
+                  vTargets.add(tuple);
+                  if (useFastTrack
+                      && (endTime+windowOffset)-(startTime-windowOffset) < fastTrackMinimumDuration) {
+                    // we know this will be skipped, so add an error
+                    error = "Duration too short for FastTrack";
+                  }
+                } catch (Exception x) {
+                  error = "ERROR: " + x.getClass().getSimpleName() + ": " + x.getMessage();
+                  Vector<Double> tuple = new Vector<Double>();
+                  tuple.add(Double.valueOf(-1));
+                  tuple.add(Double.valueOf(-1));
+                  vTargets.add(tuple);
+                } 
+                if (finalWav == null) {
+                  error = finalWavError;
+                }
+                vErrors.add(error);
+              } // next batch line
+          
+              // run praat
+              Vector<Vector<String>> results = measurementsFromFile(
+                finalWav, vTargets, formantCeiling, pitchFloor, pitchCeiling, voicingThreshold,
+                intensityPitchFloor, fastTrackLowestAnalysisFrequency,
+                fastTrackHighestAnalysisFrequency, attributeValues, baseDir);
+          
+              // collate the results
+              Enumeration<Vector<Double>> enTargets = vTargets.elements();
+              Enumeration<String> enErrors = vErrors.elements();
+              Enumeration<Vector<String>> enResults = results.elements();
+              for (CSVRecord record : batch) {
+                if (bCancelling) break;
+                out.println();
+                // copy through all columns
+                if (passThroughData) for (String sValue : record) out.print(sValue);
+            
+                // formants etc.
+                String error = "";
+                try {
+                  Vector<String> rowResults = enResults.nextElement();
+                  // last 'result' is always the 'error' if any,
+                  // so pass through all but the last result
+                  for (int r = 0 ; r < rowResults.size() - 1; r++) {
+                    out.print(rowResults.elementAt(r));
+                  } // next result
+                  error = rowResults.lastElement();
+                } catch(Exception exception) {
+                  out.print(exception.getMessage());
+                }
+            
+                // report error if any, and both errors if there was one earlier
+                try {
+                  if (error.length() > 0) {
+                    error += "\n" + enErrors.nextElement().toString();
+                  } else {
+                    error = enErrors.nextElement().toString();
+                  }
+                  out.print(error);
+                } catch(Exception exception) {
+                  out.print("missing");
+                }
 	    
-    } // next result
+              } // next result
+            } finally {
+              out.close();
+              if (bCancelling) {
+                outputFile.delete();
+                outputFile = null;
+              }
+            }
+            return outputFile;
+          } catch (Exception x) {
+            setStatus("Could not process " + transcript + ": " + x);
+            setLastException(x);
+            try {
+              StringWriter sw = new StringWriter();
+              PrintWriter pw = new PrintWriter(sw);
+              x.printStackTrace(pw);
+              setStatus(sw.toString());
+              sw.close();
+              pw.close();
+            } catch (Exception xx) {}
+            return null;
+          } finally {
+            setStatus("Finished with "+transcript+".");
+          }
+        }
+      });
   } // end of processBatch()
       
   /**
@@ -1940,21 +2100,22 @@ public class ProcessWithPraat extends Task {
     Integer pitchFloor, Integer pitchCeiling, Double voicingThreshold,
     Integer intensityPitchFloor, Integer fastTrackLowestAnalysisFrequency,
     Integer fastTrackHighestAnalysisFrequency,
-    HashMap<String,String> attributeValues)
+    HashMap<String,String> attributeValues,
+    File baseDir)
     throws Exception {
     Vector<Vector<String>> results = new Vector<Vector<String>>();
     if (wav != null)
     {
       setStatus(
-        "Extracting measurements for " + targets.size() 
+        "Generating script for " + targets.size() 
         + " target" + (targets.size()==1?"":"s")
-        + " from: " + wav.getName());
+        + " from " + wav.getName());
 
       // if we have the FastTrack source, run scripts in the Fast Track functions
       // directory, so that FastTrack files can be included
       
       File functions = new File(
-        new File(new File(getStore().getFiles(), "FastTrack-master"), "Fast Track"), "functions");
+        new File(new File(baseDir, "FastTrack-master"), "Fast Track"), "functions");
       
       File script = File.createTempFile("ProcessWithPraat-", ".praat", functions);
       PrintWriter scriptWriter = new PrintWriter(script, "UTF-8");
