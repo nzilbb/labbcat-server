@@ -37,7 +37,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
                 const defaultLayerId = this.schema.layers["orthography"]?
                     "orthography":this.schema.wordLayerId;
                 const layers = {};
-                layers[defaultLayerId] = [this.newLayerMatch(defaultLayerId)];
+                layers[defaultLayerId] = [this.newLayerMatch(defaultLayerId, false)];
                 this.columns.push({
                     layers: layers,
                     adj: 1
@@ -67,7 +67,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
             for (let layerId of selectedLayerIds) { // each selected layer
                 if (!column.layers[layerId]) { // the column doesn't include the layer
                     // create a match for this layer
-                    const newMatch = this.newLayerMatch(layerId);
+                    const newMatch = this.newLayerMatch(layerId, false);
                     if (!target) { // if there's no target yet
                         // could this be the target?
                         if (this.schema.layers[layerId].alignment > 0) { // yep
@@ -119,7 +119,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         return null;
     }
 
-    newLayerMatch(layerId: string): MatrixLayerMatch {
+    newLayerMatch(layerId: string, anchorEnd: boolean): MatrixLayerMatch {
         return {
             id: layerId,
             pattern: "",
@@ -127,7 +127,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
             min: null,
             max: null,
             anchorStart: false,
-            anchorEnd: false,
+            anchorEnd: anchorEnd,
             target: false 
         };
     }
@@ -145,7 +145,9 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
 
     /** Add word-internal match */
     addMatch(column: MatrixColumn, layerId: string): void {
-        column.layers[layerId].push(this.newLayerMatch(layerId));
+        const anchorEnd = column.layers[layerId][column.layers[layerId].length - 1].anchorEnd;
+        column.layers[layerId][column.layers[layerId].length - 1].anchorEnd = false;
+        column.layers[layerId].push(this.newLayerMatch(layerId, anchorEnd));
     }
     /** Remove word-internal match */
     removeMatch(column: MatrixColumn, layerId: string): void {
