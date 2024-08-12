@@ -5502,22 +5502,25 @@ public class SqlGraphStore implements GraphStore {
       // last minute reversed-anchor check, just in case
       for (Annotation a : graph.getAnnotationsById().values()) {
         if (a.getChange() == Change.Operation.Destroy) continue;
-        if (a.getStart() != null) { // (could be in a fragment)
-          if (a.getStart().getOffset() == null) {
-            throw new StoreException(a.getId() + " (" + a.getLabel() + ") - no start offset.");
-          }
-          if (a.getEnd() != null) { // (could be in a fragment)
-            if (a.getEnd().getOffset() == null) {
-              throw new StoreException(a.getId() + " (" + a.getLabel() + ") - no end offset.");
+        Layer layer = a.getLayer();
+        if (layer != null && layer.getAlignment() > 0) {
+          if (a.getStart() != null) { // (could be in a fragment)
+            if (a.getStart().getOffset() == null) {
+              throw new StoreException(a.getId() + " (" + a.getLabel() + ") - no start offset.");
             }
-            if (a.getStart().getOffset() > a.getEnd().getOffset()) {
-              throw new StoreException(
-                a.getId() + " (" + a.getLabel() + ") - backwards: "
-                +a.getStart()+"["+a.getStart().getId()+"]-"
-                +a.getEnd()+"["+a.getEnd().getId()+"].");
-            }
-          } // end is set
-        } // start is set
+            if (a.getEnd() != null) { // (could be in a fragment)
+              if (a.getEnd().getOffset() == null) {
+                throw new StoreException(a.getId() + " (" + a.getLabel() + ") - no end offset.");
+              }
+              if (a.getStart().getOffset() > a.getEnd().getOffset()) {
+                throw new StoreException(
+                  a.getId() + " (" + a.getLabel() + ") - backwards: "
+                  +a.getStart()+"["+a.getStart().getId()+"]-"
+                  +a.getEnd()+"["+a.getEnd().getId()+"].");
+              }
+            } // end is set
+          } // start is set
+        }
       } // next annotation
       
       if (graph.getChange() == Change.Operation.Create) {
