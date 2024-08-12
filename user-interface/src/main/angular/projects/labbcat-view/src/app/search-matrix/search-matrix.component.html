@@ -30,7 +30,7 @@
         </legend>
         <div class="layer">
           <span *ngIf="isAnchorableLayer(schema.layers[layerId])"
-                i18n-title title="Anchor to start of {{layerId}} span"
+                i18n-title title="Anchor to start of {{schema.wordLayerId}}"
                 class="anchor-start"> <!-- first match in column -->
             <img [src]="imagesLocation+'/lock-'+(column.layers[layerId][0].anchorStart?'locked':'unlocked')+'.svg'"
                  [alt]="column.layers[layerId][0].anchorStart?'🔒':'🔓'"
@@ -138,7 +138,7 @@
               (press)="removeMatch(column, layerId)"></lib-button>
           </div>
           <span *ngIf=isAnchorableLayer(schema.layers[layerId])
-                i18n-title title="Anchor to end of {{layerId}} span"
+                i18n-title title="Anchor to end of {{schema.wordLayerId}}"
                 class="anchor-end"> <!-- last match in column -->
             <img [src]="imagesLocation+'/lock-'+(column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'locked':'unlocked')+'.svg'"
                  [alt]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'🔒':'🔓'"
