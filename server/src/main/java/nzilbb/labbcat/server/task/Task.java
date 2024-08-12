@@ -40,7 +40,7 @@ public class Task extends Thread implements MonitorableTask {
 
   private static SimpleDateFormat logTimeFormat = new SimpleDateFormat("dd MMM HH:mm:ss");
 
-  /** Determines how far through the task is is. */
+  /** Determines how far through the task is. */
   protected int iPercentComplete = 1; // TODO rename as percentComplete
   /**
    * Determines how far through the task is is.
