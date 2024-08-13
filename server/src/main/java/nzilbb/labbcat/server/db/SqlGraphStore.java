@@ -809,7 +809,7 @@ public class SqlGraphStore implements GraphStore {
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "#");
-      put("legend", "ɑː"); put("description", "BATH");
+      put("legend", "ɑː"); put("description", "START");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
