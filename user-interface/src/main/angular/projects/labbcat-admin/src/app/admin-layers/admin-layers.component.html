@@ -112,7 +112,7 @@
         </select>
       </span>
       <span class="buttons">
-        <lib-link *ngIf="(layer.type == 'string' || layer.type == 'ipa') && layer.id != 'orthography'"
+        <lib-link *ngIf="(layer.type == 'string' || layer.type == 'ipa') && layer.id != 'orthography' && scope != 'phrase' && scope != 'span'"
                   i18n-title title="Valid labels"
                   img="tag.svg" icon="🏷"
                   href="admin/layers/validLabels/{{layer.id}}"></lib-link>
