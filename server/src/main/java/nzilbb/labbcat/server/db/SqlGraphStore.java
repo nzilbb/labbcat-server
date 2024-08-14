@@ -5134,12 +5134,24 @@ public class SqlGraphStore implements GraphStore {
                     // label is speaker.speaker_number but should be speaker.name
                     String id = "m_-2_" + annotation.getLabel();
                     try {
-                      Annotation participant = getParticipant(id);
+                      // the participant may already be in the fragment
+                      Annotation participant = fragment.getAnnotation(id);
+                      if (participant == null) { // if not...
+                        // ...load it from the database...
+                        participant = getParticipant(id);
+                        if (participant != null) { // ... and add it to the fragment
+                          if (fragment.getLayer(participant.getLayerId()) == null) {
+                            fragment.addLayer(
+                              (Layer)schema.getLayer(participant.getLayerId()).clone());
+                          }
+                          fragment.addAnnotation(participant);
+                        }
+                      }
                       if (participant != null) {
                         annotation.setLabel(participant.getLabel());
+                        // add participant to graph (it wouldn't otherwise be loaded)
                       }
-                    }
-                    catch(Exception exception) {
+                    } catch(Exception exception) {
                     }
                   }
                   

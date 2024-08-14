@@ -296,6 +296,7 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
     } catch(Exception exception) {
       System.err.println(
         "FragmentSeries: Could not get fragment from spec \""+spec+"\": " + exception);
+      exception.printStackTrace(System.err);
       running = false;
       return false;
     }
