@@ -52,9 +52,9 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         this.changed = false;
     }
 
-    createFullRow(newLabel: string, newLegend: string, newDescription: string,
-              newCategory: string, newSubcategory: string): boolean {
-        if (!newLegend && !newDescription && !newCategory && !newSubcategory) {
+    createFullRow(newLabel: string, newDisplay: string, newSelector: string,
+                  newDescription: string, newCategory: string, newSubcategory: string): boolean {
+        if (!newDisplay && !newSelector && !newDescription && !newCategory && !newSubcategory) {
             return this.createRow(newLabel);
         } else {
             let somethingAdded = false;
@@ -63,7 +63,8 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
             } else {
                 this.layer.validLabelsDefinition.push({
                     label: newLabel,
-                    legend: newLegend,
+                    display: newDisplay,
+                    selector: newSelector,
                     description: newDescription,
                     category: newCategory,
                     subcategory: newSubcategory,
@@ -71,7 +72,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
                         .map(l=>l.display_order)) + 1
                 });
                 somethingAdded = true;
-                this.layer.validLabels[newLabel] = newLegend;
+                this.layer.validLabels[newLabel] = newDisplay;
                 this.labels.push(newLabel);
             }
             this.changed = somethingAdded;
@@ -119,7 +120,8 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
                         // add to validLabelsDefinition
                         const labelDefinition = {
                             label: label,
-                            legend: label,
+                            display: label,
+                            selector: "",
                             description: "",
                             category: "",
                             subcategory: "",

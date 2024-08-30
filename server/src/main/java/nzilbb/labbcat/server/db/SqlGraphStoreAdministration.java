@@ -293,9 +293,13 @@ public class SqlGraphStoreAdministration
    * <dl>
    * <dt>label</dt> 
    *  <dd>what the underlying label is in LaBB-CAT (i.e. the DISC label, for a DISC layer)</dd> 
-   * <dt>legend</dt> 
-   *  <dd>the symbol on the label helper or in the transcript, for the label (e.g. the IPA
-   *      version of the label) - if there's no legend specified, then there's no option
+   * <dt>display</dt> 
+   *  <dd>the symbol in the transcript, for the label (e.g. the IPA
+   *      version of the label)</dd> 
+   * <dt>selector</dt> 
+   *  <dd>the symbol on the label helper, for the label (e.g. the IPA
+   *      version of the label) - if there's no selector specified, then the value for display is
+   *      used, and if there's no value for display specified, then there's no option
    *      on the label helper (so that type-able consonants like p, b, t, d etc. don't
    *      take up space on the label helper)</dd> 
    * <dt>description</dt> 
@@ -510,42 +514,46 @@ public class SqlGraphStoreAdministration
           // insert new options
           PreparedStatement sqlInsert = getConnection().prepareStatement(
             "INSERT INTO label_option"
-            +" (layer_id, value, legend, description, category, subcategory, display_order)"
-            +" VALUES (?,?,?,?,?,?,?)");
+            +" (layer_id, value, display, selector, description, category, subcategory, display_order)"
+            +" VALUES (?,?,?,?,?,?,?,?)");
           sqlInsert.setInt(1, layer_id);
           // update existing options
           PreparedStatement sqlUpdate = getConnection().prepareStatement(
             "UPDATE label_option"
-            +" SET legend = ?, description = ?, category = ?, subcategory = ?, display_order = ?"
+            +" SET display = ?, selector = ?, description = ?, category = ?, subcategory = ?, display_order = ?"
             +" WHERE layer_id = ? AND value = ?");
-          sqlUpdate.setInt(6, layer_id);
+          sqlUpdate.setInt(7, layer_id);
           for (Map<String,Object> option : validLabelsDefinition) {
             if (toCreate.contains(option.get("label"))) { // insert
               sqlInsert.setString(2, option.get("label").toString());
               sqlInsert.setString(
-                3, Optional.ofNullable(option.get("legend")).orElse("").toString());
+                3, Optional.ofNullable(option.get("display")).orElse("").toString());
               sqlInsert.setString(
-                4, Optional.ofNullable(option.get("description")).orElse("").toString());
+                4, Optional.ofNullable(option.get("selector")).orElse("").toString());
               sqlInsert.setString(
-                5, Optional.ofNullable(option.get("category")).orElse("").toString());
+                5, Optional.ofNullable(option.get("description")).orElse("").toString());
               sqlInsert.setString(
-                6, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
+                6, Optional.ofNullable(option.get("category")).orElse("").toString());
+              sqlInsert.setString(
+                7, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
               sqlInsert.setInt(
-                7, Integer.parseInt(
+                8, Integer.parseInt(
                   Optional.ofNullable(option.get("display_order")).orElse("0").toString()));
               sqlInsert.executeUpdate();
             } else { // update
                 sqlUpdate.setString(7, (String)option.get("label"));
               sqlUpdate.setString(
-                1, Optional.ofNullable(option.get("legend")).orElse("").toString());
+                1, Optional.ofNullable(option.get("display")).orElse("").toString());
               sqlUpdate.setString(
-                2, Optional.ofNullable(option.get("description")).orElse("").toString());
+                2, Optional.ofNullable(option.get("selector")).orElse("").toString());
               sqlUpdate.setString(
-                3, Optional.ofNullable(option.get("category")).orElse("").toString());
+                3, Optional.ofNullable(option.get("description")).orElse("").toString());
               sqlUpdate.setString(
-                4, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
+                4, Optional.ofNullable(option.get("category")).orElse("").toString());
+              sqlUpdate.setString(
+                5, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
               sqlUpdate.setInt(
-                5, Integer.parseInt(
+                6, Integer.parseInt(
                   Optional.ofNullable(option.get("display_order")).orElse("0").toString()));
               sqlUpdate.executeUpdate();
             }
@@ -735,9 +743,13 @@ public class SqlGraphStoreAdministration
    * <dl>
    * <dt>label</dt> 
    *  <dd>what the underlying label is in LaBB-CAT (i.e. the DISC label, for a DISC layer)</dd> 
-   * <dt>legend</dt> 
-   *  <dd>the symbol on the label helper or in the transcript, for the label (e.g. the IPA
-   *      version of the label) - if there's no legend specified, then there's no option
+   * <dt>display</dt> 
+   *  <dd>the symbol in the transcript, for the label (e.g. the IPA
+   *      version of the label)</dd> 
+   * <dt>selector</dt> 
+   *  <dd>the symbol on the label helper, for the label (e.g. the IPA
+   *      version of the label) - if there's no selector specified, then the value for display is
+   *      used, and if there's no value for display specified, then there's no option
    *      on the label helper (so that type-able consonants like p, b, t, d etc. don't
    *      take up space on the label helper)</dd> 
    * <dt>description</dt> 
@@ -1228,21 +1240,23 @@ public class SqlGraphStoreAdministration
           // insert new options
           PreparedStatement sqlInsert = getConnection().prepareStatement(
             "INSERT INTO label_option"
-            +" (layer_id, value, legend, description, category, subcategory, display_order)"
-            +" VALUES (?,?,?,?,?,?,?)");
+            +" (layer_id, value, display, selector, description, category, subcategory, display_order)"
+            +" VALUES (?,?,?,?,?,?,?,?)");
           sqlInsert.setInt(1, layer_id);
           for (Map<String,Object> option : validLabelsDefinition) {
             sqlInsert.setString(2, option.get("label").toString());
             sqlInsert.setString(
-              3, Optional.ofNullable(option.get("legend")).orElse("").toString());
+              3, Optional.ofNullable(option.get("display")).orElse("").toString());
             sqlInsert.setString(
-              4, Optional.ofNullable(option.get("description")).orElse("").toString());
+              4, Optional.ofNullable(option.get("selector")).orElse("").toString());
             sqlInsert.setString(
-              5, Optional.ofNullable(option.get("category")).orElse("").toString());
+              5, Optional.ofNullable(option.get("description")).orElse("").toString());
             sqlInsert.setString(
-              6, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
+              6, Optional.ofNullable(option.get("category")).orElse("").toString());
+            sqlInsert.setString(
+              7, Optional.ofNullable(option.get("subcategory")).orElse("").toString());
             sqlInsert.setInt(
-              7, Integer.parseInt(
+              8, Integer.parseInt(
                 Optional.ofNullable(option.get("display_order")).orElse("0").toString()));
             sqlInsert.executeUpdate();
           } // next label definition

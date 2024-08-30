@@ -695,7 +695,8 @@ public class SqlGraphStore implements GraphStore {
       while(rsOption.next()) {
         validLabelsDefinition.add(new HashMap<String,Object>() {{
           put("label", rsOption.getString("value"));
-          put("legend", rsOption.getString("legend"));
+          put("display", rsOption.getString("display"));
+          put("selector", rsOption.getString("selector"));
           put("description", rsOption.getString("description"));
           put("category", rsOption.getString("category"));
           put("subcategory", rsOption.getString("subcategory"));
@@ -720,7 +721,7 @@ public class SqlGraphStore implements GraphStore {
         LinkedHashMap<String,String> validLabels = new LinkedHashMap<String,String>();
         for (HashMap<String,Object> label : validLabelsDefinition) {
           validLabels.put(label.get("label").toString(),
-                          Optional.ofNullable(label.get("legend"))
+                          Optional.ofNullable(label.get("display"))
                           .orElse(label.get("label")).toString());
         }
         layer.setValidLabels(validLabels);
@@ -743,221 +744,221 @@ public class SqlGraphStore implements GraphStore {
     // diphthongs
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "1");
-      put("legend", "eɪ"); put("description", "FACE");
+      put("display", "eɪ"); put("description", "FACE");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "2");
-      put("legend", "aɪ"); put("description", "PRICE");
+      put("display", "aɪ"); put("description", "PRICE");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "5");
-      put("legend", "əʊ"); put("description", "GOAT");
+      put("display", "əʊ"); put("description", "GOAT");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "4");
-      put("legend", "ɔɪ"); put("description", "CHOICE");
+      put("display", "ɔɪ"); put("description", "CHOICE");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "6");
-      put("legend", "aʊ"); put("description", "MOUTH");
+      put("display", "aʊ"); put("description", "MOUTH");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "7");
-      put("legend", "ɪə"); put("description", "NEAR");
+      put("display", "ɪə"); put("description", "NEAR");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "8");
-      put("legend", "ɛə"); put("description", "SQUARE");
+      put("display", "ɛə"); put("description", "SQUARE");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "9");
-      put("legend", "ʊə"); put("description", "CURE");
+      put("display", "ʊə"); put("description", "CURE");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "W");
-      put("legend", "ai"); put("description", "weit (German)");
+      put("display", "ai"); put("description", "weit (German)");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "B");
-      put("legend", "au"); put("description", "Haut (German)");
+      put("display", "au"); put("description", "Haut (German)");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "X");
-      put("legend", "ɔy"); put("description", "freut (German)");
+      put("display", "ɔy"); put("description", "freut (German)");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "L");
-      put("legend", "œy"); put("description", "huis (Dutch)");
+      put("display", "œy"); put("description", "huis (Dutch)");
       put("category", "VOWEL"); put("subcategory", "Diphthong");
     }});
         
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "&");
-      put("legend", "a"); //put("description", "X");h<b>a</b>t</td><td>(German)
+      put("display", "a"); //put("description", "X");h<b>a</b>t</td><td>(German)
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "#");
-      put("legend", "ɑː"); put("description", "START");
+      put("display", "ɑː"); put("description", "START");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "A");
-      put("legend", "ɑ"); //put("description", "X"); // k<b>a</b>levala</td><td>(German)
+      put("display", "ɑ"); //put("description", "X"); // k<b>a</b>levala</td><td>(German)
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "E");
-      put("legend", "ɛ"); // put("description", "X");
+      put("display", "ɛ"); // put("description", "X");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});                  
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", ")");
-      put("legend", "ɛː"); put("description", "Käse (German)");
+      put("display", "ɛː"); put("description", "Käse (German)");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "i");
-      put("legend", "iː"); put("description", "FLEECE");
+      put("display", "iː"); put("description", "FLEECE");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "y");
-      put("legend", "yː"); put("description", "für (German)");
+      put("display", "yː"); put("description", "für (German)");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "o");
-      put("legend", "oː"); put("description", "boot (German)");
+      put("display", "oː"); put("description", "boot (German)");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "|");
-      put("legend", "øː"); put("description", "Möbel (German)");
+      put("display", "øː"); put("description", "Möbel (German)");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "^");
-      put("legend", "œ̃ː"); put("description", "Parfum (German)");
+      put("display", "œ̃ː"); put("description", "Parfum (German)");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "/");
-      put("legend", "œ");       put("description", "Götter (German)");
+      put("display", "œ");       put("description", "Götter (German)");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "u");
-      put("legend", "uː"); put("description", "GOOSE");
+      put("display", "uː"); put("description", "GOOSE");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "3");
-      put("legend", "ɜː"); put("description", "NURSE");
+      put("display", "ɜː"); put("description", "NURSE");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "{");
-      put("legend", "æ"); put("description", "TRAP");
+      put("display", "æ"); put("description", "TRAP");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "}");
-      put("legend", "ʉ"); put("description", "put (Dutch)");
+      put("display", "ʉ"); put("description", "put (Dutch)");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "$");
-      put("legend", "ɔː"); put("description", "THOUGHT");
+      put("display", "ɔː"); put("description", "THOUGHT");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "I");
-      put("legend", "ɪ"); put("description", "KIT");
+      put("display", "ɪ"); put("description", "KIT");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "Y");
-      put("legend", "ʏ"); put("description", "Pfütze");
+      put("display", "ʏ"); put("description", "Pfütze");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "V");
-      put("legend", "ʌ"); put("description", "STRUT");
+      put("display", "ʌ"); put("description", "STRUT");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "Q");
-      put("legend", "ɒ"); put("description", "LOT");
+      put("display", "ɒ"); put("description", "LOT");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "O");
-      put("legend", "ɔ"); put("description", "Glocke (German)");
+      put("display", "ɔ"); put("description", "Glocke (German)");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "U");
-      put("legend", "ʊ"); put("description", "FOOT");
+      put("display", "ʊ"); put("description", "FOOT");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "@");
-      put("legend", "ə"); put("description", "schwa");
+      put("display", "ə"); put("description", "schwa");
       put("category", "VOWEL"); put("subcategory", "Monophthong");
     }});
         
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "c");
-      put("legend", "æ̃"); put("description", "timbre");
+      put("display", "æ̃"); put("description", "timbre");
       put("category", "VOWEL"); put("subcategory", "Nasal");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "q");
-      put("legend", "ɑ̃ː"); put("description", "détente");
+      put("display", "ɑ̃ː"); put("description", "détente");
       put("category", "VOWEL"); put("subcategory", "Nasal");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "0");
-      put("legend", "æ̃ː"); put("description", "lingerie");
+      put("display", "æ̃ː"); put("description", "lingerie");
       put("category", "VOWEL"); put("subcategory", "Nasal");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "~");
-      put("legend", "ɒ̃ː"); put("description", "bouillon");
+      put("display", "ɒ̃ː"); put("description", "bouillon");
       put("category", "VOWEL"); put("subcategory", "Nasal");
     }});
         
     // syllabics
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "C");
-      put("legend", "ŋ̩"); put("description", "bacon");
+      put("display", "ŋ̩"); put("description", "bacon");
       put("category", "VOWEL"); put("subcategory", "Syllabic");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "F");
-      put("legend", "m̩"); put("description", "idealism");
+      put("display", "m̩"); put("description", "idealism");
       put("category", "VOWEL"); put("subcategory", "Syllabic");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "H");
-      put("legend", "n̩"); put("description", "burden");
+      put("display", "n̩"); put("description", "burden");
       put("category", "VOWEL"); put("subcategory", "Syllabic");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "P");
-      put("legend", "l̩"); put("description", "dangle");
+      put("display", "l̩"); put("description", "dangle");
       put("category", "VOWEL"); put("subcategory", "Syllabic");
     }});
                 
@@ -966,64 +967,64 @@ public class SqlGraphStore implements GraphStore {
     // affricates
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "_");
-      put("legend", "d͜ʒ"); // put("description", "X");
+      put("display", "d͜ʒ"); // put("description", "X");
       put("category", "CONSONANT"); put("subcategory", "");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "J");
-      put("legend", "t͜ʃ"); // put("description", "X");
+      put("display", "t͜ʃ"); // put("description", "X");
       put("category", "CONSONANT"); put("subcategory", "");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "=");
-      put("legend", "t͜s"); // put("description", "X");
+      put("display", "t͜s"); // put("description", "X");
       put("category", "CONSONANT"); put("subcategory", "");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "+");
-      put("legend", "pf");
+      put("display", "pf");
       put("category", "CONSONANT"); put("subcategory", "");
     }});
         
     // glottal stop
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "?");
-      put("legend", "ʔ"); put("description", "Glottal stop");
+      put("display", "ʔ"); put("description", "Glottal stop");
       put("category", "CONSONANT"); put("subcategory", "");
     }});
          
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "r");
-      put("legend", "ɹ"); //put("description", "X");
+      put("display", "ɹ"); //put("description", "X");
       put("category", "CONSONANT"); put("subcategory", "");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "N");
-      put("legend", "ŋ"); 
+      put("display", "ŋ"); 
       put("category", "CONSONANT"); put("subcategory", "");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "T");
-      put("legend", "θ"); 
+      put("display", "θ"); 
       put("category", "CONSONANT"); put("subcategory", "");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "D");
-      put("legend", "ð"); 
+      put("display", "ð"); 
       put("category", "CONSONANT"); put("subcategory", "");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "S");
-      put("legend", "ʃ"); 
+      put("display", "ʃ"); 
       put("category", "CONSONANT"); put("subcategory", "");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "Z");
-      put("legend", "ʒ"); 
+      put("display", "ʒ"); 
       put("category", "CONSONANT"); put("subcategory", "");
     }});
 
-    // consontants with the same character in DISC and IPA (no legend so there's no picker)
+    // consontants with the same character in DISC and IPA (no display/selector so there's no picker)
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "p"); put("category", "CONSONANT"); }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
@@ -1210,9 +1211,13 @@ public class SqlGraphStore implements GraphStore {
    * <dl>
    * <dt>label</dt> 
    *  <dd>what the underlying label is in LaBB-CAT (i.e. the DISC label, for a DISC layer)</dd> 
-   * <dt>legend</dt> 
-   *  <dd>the symbol on the label helper or in the transcript, for the label (e.g. the IPA
-   *      version of the label) - if there's no legend specified, then there's no option
+   * <dt>display</dt> 
+   *  <dd>the symbol in the transcript, for the label (e.g. the IPA
+   *      version of the label)</dd> 
+   * <dt>selector</dt> 
+   *  <dd>the symbol on the label helper, for the label (e.g. the IPA
+   *      version of the label) - if there's no selector specified, then the value for display is
+   *      used, and if there's no value for display specified, then there's no option
    *      on the label helper (so that type-able consonants like p, b, t, d etc. don't
    *      take up space on the label helper)</dd> 
    * <dt>description</dt> 
@@ -1226,7 +1231,7 @@ public class SqlGraphStore implements GraphStore {
    * </dl>
    * <p> <tt>validLabelsDefinition</tt> is returned if there is a hierarchical set of
    * options defined. Either way, <tt>validLabels</tt> (specifying the valid labels and
-   * their 'legend' values) is always returned.
+   * their 'display' values) is always returned.
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    */

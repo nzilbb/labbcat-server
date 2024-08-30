@@ -37,10 +37,13 @@
     <span class="valid-label"
           i18n-title="Valid label" title="Label"><legend i18n="Valid label">Label</legend>
       <input #newType type="text" i18n-placeholder="Valid label" placeholder="Label"
-             (keydown.enter)="newType.reportValidity() && createFullRow(newType.value, newLegend.value, newDescription.value, newCategory.value, newSubcategory.value) && newType.value = newLegend.value = newDescription.value = '';"></span>
-    <span class="valid-label-legend"
-          i18n-title="Valid label legend" title="Text on the label helper or in the transcript, for this label (e.g. the IPA version of the label)"><legend i18n="Valid label legend">Legend</legend>
-      <input #newLegend i18n-placeholder placeholder="Legend"></span>
+             (keydown.enter)="newType.reportValidity() && createFullRow(newType.value, newDisplay.value, newSelector.value, newDescription.value, newCategory.value, newSubcategory.value) && newType.value = newDisplay.value = newSelector.value = newDescription.value = '';"></span>
+    <span class="valid-label-display"
+          i18n-title="Valid label display" title="Text on the label in the transcript for this label (e.g. the IPA version of the label) - blank to use Label"><legend i18n="Valid label display">Display</legend>
+      <input #newDisplay i18n-placeholder placeholder="Display (blank to use Label)"></span>
+    <span class="valid-label-selector"
+          i18n-title="Valid label selector" title="Text on the label helper for this label (e.g. the IPA version of the label) - blank to use Display"><legend i18n="Valid label selector">Selector</legend>
+      <input #newSelector i18n-placeholder placeholder="Selector (blank to use Display)"></span>
     <span class="valid-label-description"
           i18n-title="Valid label description" title="Description"><legend i18n="Valid label description">Description</legend>
       <input #newDescription i18n-placeholder placeholder="Description"></span>
@@ -52,7 +55,7 @@
       <input #newSubcategory i18n-placeholder placeholder="Subcategory"></span>
     <span class="buttons">
       <lib-button action="create"
-                  (press)="newType.reportValidity() && createFullRow(newType.value, newLegend.value, newDescription.value, newCategory.value, newSubcategory.value) && newType.value = newLegend.value = newDescription.value = '';"
+                  (press)="newType.reportValidity() && createFullRow(newType.value, newDisplay.value, newSelector.value, newDescription.value, newCategory.value, newSubcategory.value) && newType.value = newDisplay.value = newSelector.value = newDescription.value = '';"
                   i18n-title title="Add new record"></lib-button>
     </span>
   </div>
@@ -62,11 +65,16 @@
     <span class="valid-label"
           i18n-title="Valid label" title="Text on the label helper or in the transcript, for this label (e.g. the IPA version of the label)"><legend i18n="Valid label">Label</legend>
       {{label.label}}</span>
-    <span class="valid-label-legend"
-          i18n-title="Valid label legend" title="Legend"><legend i18n="Valid label legend">Legend</legend>
-      <input [(ngModel)]="label.legend"             
+    <span class="valid-label-display"
+          i18n-title="Valid label display" title="Display"><legend i18n="Valid label display">Display</legend>
+      <input [(ngModel)]="label.display"             
              (input)="onChange()"
-             i18n-placeholder placeholder="Legend"></span>
+             placeholder="{{label.label}}"></span>
+    <span class="valid-label-selector"
+          i18n-title="Valid label selector" title="Selector"><legend i18n="Valid label selector">Selector</legend>
+      <input [(ngModel)]="label.selector"             
+             (input)="onChange()"
+             placeholder="{{label.display || 'None'}}"></span>
     <span class="valid-label-description"
           i18n-title="Valid label description" title="Description"><legend i18n="Valid label description">Description</legend>
       <input [(ngModel)]="label.description"             

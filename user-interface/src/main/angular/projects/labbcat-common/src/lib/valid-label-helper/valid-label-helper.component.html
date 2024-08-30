@@ -20,8 +20,8 @@
                  i18n-title="Any SUBCATEGORY-NAME" title="Any {{subcategory}}">{{subcategory}}</a>
             </span>
             <span class="label" *ngFor="let label of categories[category][subcategory]">
-              <a *ngIf="label.legend"
-                 href="#" class="valid-label" title="{{label.description}}" (click)="select(label.label)">{{label.legend}}</a>
+              <a *ngIf="label.selector || label.display"
+                 href="#" class="valid-label" title="{{label.description}}" (click)="select(label.label)">{{label.selector || label.display}}</a>
             </span>
           </div>
         </ng-container>
