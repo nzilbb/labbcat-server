@@ -86,6 +86,7 @@
                     (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-disc-helper>
                   <lib-valid-label-helper
                     *ngIf="hasValidLabels(schema.layers[layerId]) && helperMatch == match"
+                    regularExpression="{{true}}"
                     [layer]="schema.layers[layerId]"
                     (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-valid-label-helper>
                 </span>

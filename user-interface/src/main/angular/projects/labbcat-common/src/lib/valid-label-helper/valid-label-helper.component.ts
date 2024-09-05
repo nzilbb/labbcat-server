@@ -10,6 +10,7 @@ import { ValidLabelDefinition } from '../valid-label-definition';
 })
 export class ValidLabelHelperComponent implements OnInit {
     @Input() layer: Layer;
+    @Input() regularExpression: boolean;
     @Output() symbolSelected = new EventEmitter<string>();
 
     categories: any;
@@ -39,8 +40,10 @@ export class ValidLabelHelperComponent implements OnInit {
     }
     
     select(symbol: string): boolean {
-        // escape for regular expression
-        symbol = symbol.replace(/(\?\.\*\|\^\$)/g,"\\$1");
+        if (this.regularExpression) {
+            // escape for regular expression
+            symbol = symbol.replace(/([\?\.\*\|\^\$])/g,"\\$1");
+        }
         this.symbolSelected.emit(symbol);
         return false;
     }

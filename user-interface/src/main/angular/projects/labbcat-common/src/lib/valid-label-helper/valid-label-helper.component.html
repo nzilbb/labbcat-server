@@ -8,17 +8,23 @@
   <ng-container *ngIf="categories"><!-- heirarchical picker -->
     <ng-container *ngFor="let category of Object.keys(categories)">
       <div class="category" [class.unlabelled]="category == ''">
-        <span class="title">
+        
+        <span *ngIf="regularExpression" class="title">
           <a href="#" (click)="selectCategory(category)"
              i18n-title="Any CATEGORY-NAME" title="Any {{category}}">{{category}}</a>
         </span>
+        <span *ngIf="!regularExpression" class="title">{{category}}</span>
+        
         <ng-container *ngFor="let subcategory of Object.keys(categories[category])">
           <div class="subcategory"
                [class.unlabelled]="subcategory == ''">
-            <span class="title">
+            
+            <span *ngIf="regularExpression" class="title">
               <a href="#" (click)="selectSubcategory(category, subcategory)"
                  i18n-title="Any SUBCATEGORY-NAME" title="Any {{subcategory}}">{{subcategory}}</a>
             </span>
+            <span *ngIf="!regularExpression" class="title">{{subcategory}}</span>
+            
             <span class="label" *ngFor="let label of categories[category][subcategory]">
               <a *ngIf="label.selector || label.display"
                  href="#" class="valid-label" title="{{label.description}}" (click)="select(label.label)">{{label.selector || label.display}}</a>
