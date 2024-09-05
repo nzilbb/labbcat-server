@@ -1570,8 +1570,15 @@ public class ProcessWithPraat extends Task {
   /**
    * Setter for {@link #simultaneousThreadCount}: Number of Praat scripts to run in parallel.
    * @param newSimultaneousThreadCount Number of Praat scripts to run in parallel.
+   * <p> If <var>newSimultaneousThreadCount</var> &lt; 1 then 1 is used instead.
    */
-  public ProcessWithPraat setSimultaneousThreadCount(Integer newSimultaneousThreadCount) { simultaneousThreadCount = newSimultaneousThreadCount; return this; }
+  public ProcessWithPraat setSimultaneousThreadCount(Integer newSimultaneousThreadCount) {
+    if (newSimultaneousThreadCount != null && newSimultaneousThreadCount < 1) {
+      newSimultaneousThreadCount = Integer.valueOf(1);
+    }
+    simultaneousThreadCount = newSimultaneousThreadCount;
+    return this;
+  }
 
   private Vector<FutureTask<File>> batchTasks = new Vector<FutureTask<File>>();
   private final int ALL_TASKS_FINISHED_PERCENTAGE = 95;
@@ -1758,10 +1765,10 @@ public class ProcessWithPraat extends Task {
       }
       iPercentComplete = ALL_TASKS_FINISHED_PERCENTAGE;
       if (simultaneousThreadCount == null) {
-        simultaneousThreadCount = Runtime.getRuntime().availableProcessors();
+        setSimultaneousThreadCount(Runtime.getRuntime().availableProcessors());
       }
-      setStatus("Starting scripts ("+simultaneousThreadCount+" at once)...");
-      ExecutorService executor = Executors.newFixedThreadPool(simultaneousThreadCount);
+      setStatus("Starting scripts ("+getSimultaneousThreadCount()+" at once)...");
+      ExecutorService executor = Executors.newFixedThreadPool(getSimultaneousThreadCount());
       // submit all tasks
       for (FutureTask<File> batchTask : batchTasks) {
         if (bCancelling) break;
