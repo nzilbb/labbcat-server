@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -377,6 +377,73 @@ public class TestProcessWithPraat {
     } else {
       actual.delete();
     }
+  }
+
+  /** Ensure that script fragments that read/write files on the server can be detected. */
+  @Test public void fileAccessDetection() throws Exception {
+    String[] fileAccessScripts = {
+      
+      // read a server file
+      
+      "file$ = readFile$ (\"proc_textGridChopper.praat\")" // an existing FastTrack file
+      +"\nprint 'file$' 'newline$'",
+      
+      // create a file on the server
+      
+      "fileName$ = \"TestWriteFile.txt\""
+      +"\nwriteFile: fileName$, \"Created by test\""
+      +"\nprint 'fileName$' 'newline$'",
+      
+      "fileName$ = \"TestWriteFileLine.txt\""
+      +"\nwriteFileLine: fileName$, \"Created by test\""
+      +"\nprint 'fileName$' 'newline$'",
+      
+      // update a file on the server
+      
+      "fileName$ = \"TestAppendFile.txt\""
+      +"\nappendFile: fileName$, \"Appended by test\""
+      +"\nprint 'fileName$' 'newline$'",
+      
+      "fileName$ = \"TestAppendFileLine.txt\""
+      +"\nappendFileLine: fileName$, \"Appended by test\""
+      +"\nprint 'fileName$' 'newline$'",
+      
+      // create a directory on the server
+      
+      "dirName$ = \"testCreateFolder\""
+      +"\ncreateFolder: dirName$"
+      +"\nprint 'dirName$' 'newline$'",
+      
+      // delete a file on the server
+      
+      "fileName$ = \"TestDeleteFile.txt\""
+      +"\ndeleteFile: dirName$"
+      +"\nprint 'fileName$' 'newline$'"
+      
+    };
+
+    for (String script : fileAccessScripts) {
+      ProcessWithPraat p = new ProcessWithPraat()
+        .setCustomScript(script);
+      assertTrue("Custom script file access: " + script,
+                 p.filesAccessed());
+      p = new ProcessWithPraat()
+        .setScriptFormant(script+"\n"+p.getScriptFormant());
+      assertTrue("Formant script file access: " + p.getScriptFormant(),
+                 p.filesAccessed());
+      p = new ProcessWithPraat()
+        .setScriptPitch(script+"\n"+p.getScriptPitch());
+      assertTrue("Pitch script file access: " + p.getScriptPitch(),
+                 p.filesAccessed());
+      p = new ProcessWithPraat()
+        .setScriptIntensity(script+"\n"+p.getScriptIntensity());
+      assertTrue("Intensity script file access: " + p.getScriptIntensity(),
+                 p.filesAccessed());
+      p = new ProcessWithPraat()
+        .setScriptSpectrum(script+"\n"+p.getScriptSpectrum());
+      assertTrue("Spectrum script file access: " + p.getScriptSpectrum(),
+                 p.filesAccessed());
+    } // next file access script
   }
 
   /**

@@ -316,6 +316,6 @@ public class TestStoreQuery
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestStoreQuery");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestStoreQuery");
    }
 }

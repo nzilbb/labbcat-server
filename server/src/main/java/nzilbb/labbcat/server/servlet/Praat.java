@@ -888,6 +888,24 @@ public class Praat extends LabbcatServlet { // TODO unit test
         return;
       }
 
+      // are they a non-admin user?
+      Connection db = newConnection();
+      try {
+        if (!IsUserInRole("admin", request, db)) {
+          if (task.filesAccessed()) {
+            writeResponse(
+              response, failureResult(
+                request,
+                "The Praat script contains operations like readFile, writeFile, or deleteFile"
+                +" that could access arbitrary files on the server."
+                +" As this is a security risk, such scripts can only be executed by 'admin' users."));
+            return;
+          }
+        }
+      } finally {
+        db.close();
+      }
+
       // start the task
       task.setName(uploadedCsvFile.getName());
       if (request.getRemoteUser() != null) {	

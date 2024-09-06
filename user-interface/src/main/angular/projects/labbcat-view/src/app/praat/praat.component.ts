@@ -309,9 +309,11 @@ export class PraatComponent implements OnInit {
     }
 
     processing = false;
+    processingError = "";
     /** start processing */
     process(): void {
         this.processing = true;
+        this.processingError = "";
         this.threadId = null;
         this.labbcatService.labbcat.praat(
             this.csv, this.transcriptColumn, this.participantColumn, this.startTimeColumn,
@@ -392,7 +394,12 @@ export class PraatComponent implements OnInit {
                 
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
-                this.threadId = response.threadId;
+                if (response) {
+                    this.threadId = response.threadId;
+                } else {
+                    this.processing = false;
+                    if (errors && errors[0]) this.processingError = errors[0];
+                }
             }, (evt) => {
                 if (evt.lengthComputable) {
   	            const percentComplete = Math.round(evt.loaded * 100 / evt.total);
