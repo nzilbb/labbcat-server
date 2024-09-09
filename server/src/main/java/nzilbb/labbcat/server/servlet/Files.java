@@ -143,16 +143,11 @@ public class Files extends LabbcatServlet { // TODO unit test
           // don't zip a single file, just return the file
           response.setContentType(mimeType);
           File file = files.firstElement();
-          response.addHeader(
-            "Content-Disposition",
-            "attachment; filename*=\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
-               
+          ResponseAttachmentName(response, file.getName());               
           IO.Pump(new FileInputStream(file), response.getOutputStream());
         } else { // multiple files
           response.setContentType("application/zip");
-          response.addHeader(
-            "Content-Disposition",
-            "attachment; filename*=\"" + URLEncoder.encode(IO.SafeFileNameUrl(name), "UTF-8") + ".zip\"");
+          ResponseAttachmentName(response, IO.SafeFileNameUrl(name) + ".zip");
           
           // create a stream to pump from
           PipedInputStream inStream = new PipedInputStream();

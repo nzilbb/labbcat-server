@@ -118,8 +118,7 @@ public class Attributes extends LabbcatServlet { // TODO unit test
       }
 
       response.setContentType("text/csv");
-      response.setHeader("Content-Disposition",
-                         "attachment; filename*=\""+URLEncoder.encode(name, "UTF-8")+".csv\"");
+      ResponseAttachmentName(response, name);
       // send headers immediately, so that the browser shows the 'save' prompt
       response.getOutputStream().flush();
       

@@ -283,9 +283,7 @@ public class TableServletBase extends LabbcatServlet {
                      if (keyValues != null) {
                         for (String value : keyValues) name += "-"+value;
                      }
-                     response.setHeader(
-                       "Content-Disposition",
-                       "attachment; filename*=\""+URLEncoder.encode(name, "UTF-8")+".csv\"");
+                     ResponseAttachmentName(response, name+".csv");
                   }
                   
                   // return a list of rows

@@ -329,6 +329,23 @@ public class LabbcatServlet extends HttpServlet {
       sql.close();
     }
   } // end of getSystemAttribute()
+  
+  /**
+   * Sets the Content-Disposition header of the given Response correctly for saving a file
+   * to the given name. 
+   * <p> This should handle special characters/spaces in the file name correctly.
+   * @param response The response to set the header of.
+   * @param fileName The file name to save the response body as.
+   */
+  public static void ResponseAttachmentName(HttpServletResponse response, String fileName) {
+    if (fileName.indexOf(' ') >= 0){
+      fileName = "\""+fileName+"\"";
+    }
+    // MDN recommends not to use URLEncoder.encode so we don't
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
+    // TODO include both filename*= and filename= parameters, once labbcat-R can handle it
+    response.addHeader("Content-Disposition", "attachment; filename*="+fileName);
+  } // end of ResponseAttachmentName()
    
   /**
    * Creates a JSON object representing a success result, with the given model.

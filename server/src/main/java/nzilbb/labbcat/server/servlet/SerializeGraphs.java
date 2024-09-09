@@ -243,9 +243,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
                       if (bCancelling) return;
                       try {
                         setStatus(stream.getName());
-                        finalResponse.addHeader(
-                          "Content-Disposition", "attachment; filename*=\""
-                          + URLEncoder.encode(stream.getName(), "UTF-8")+"\"");
+                        ResponseAttachmentName(finalResponse, stream.getName());
                         IO.Pump(stream.getStream(), outStream);
                         outStream.flush();
                         outStream.close();
@@ -273,17 +271,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
                   
                   // send headers
                   finalResponse.setContentType("application/zip");
-                  try {
-                    finalResponse.addHeader(
-                      "Content-Disposition",
-                      "attachment; filename*=\""
-                      + URLEncoder.encode(IO.SafeFileNameUrl(finalName), "UTF-8") + ".zip\"");
-                  } catch(Exception exception) {
-                    finalResponse.addHeader(
-                      "Content-Disposition",
-                      "attachment; filename*=\""
-                      + IO.SafeFileNameUrl(finalName) + ".zip\"");
-                  }
+                  ResponseAttachmentName(finalResponse, finalName + ".zip");
                   final ZipOutputStream zipOut = new ZipOutputStream(outStream);
                   try {
                     
