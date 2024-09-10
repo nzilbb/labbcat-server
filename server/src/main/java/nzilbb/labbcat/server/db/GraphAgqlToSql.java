@@ -167,6 +167,15 @@ public class GraphAgqlToSql {
                   +" WHERE transcript_speaker.ag_id = transcript.ag_id"
                   // the first one
                   +" ORDER BY speaker.name LIMIT 1)");
+              } else if (layerId.equals("main_participant")) { // main participant
+                conditions.push(
+                  "(SELECT speaker.name"
+                  +" FROM transcript_speaker"
+                  +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
+                  +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+                  +" AND main_speaker = 1"
+                  // the first one
+                  +" ORDER BY speaker.name LIMIT 1)");
               } else if (layerId.equals(schema.getRoot().getId())) { // graph
                 conditions.push("transcript.transcript_id");
               } else { // other layer
@@ -270,6 +279,13 @@ public class GraphAgqlToSql {
               +" FROM transcript_speaker"
               +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
               +" WHERE transcript_speaker.ag_id = transcript.ag_id)");
+          } else if (layerId.equals("main_participant")) { // main participant
+            conditions.push(
+              "(SELECT speaker.name"
+              +" FROM transcript_speaker"
+              +" INNER JOIN speaker ON transcript_speaker.speaker_number = speaker.speaker_number"
+              +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+              +" AND main_speaker = 1)");
           } else { // other layer
             Layer layer = getSchema().getLayer(layerId);
             if (layer == null) {

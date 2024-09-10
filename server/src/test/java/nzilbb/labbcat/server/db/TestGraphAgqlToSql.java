@@ -336,6 +336,67 @@ public class TestGraphAgqlToSql {
     assertEquals("Parameter count", 0, q.parameters.size());
   }
 
+  /** Ensures that the 'main_participant' layer is correctly handled. */
+  @Test public void mainParticipantLabels() throws AGQLException {
+    GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
+    GraphAgqlToSql.Query q = transformer.sqlFor(
+      "labels('main_participant').includes('someone')",
+      "transcript.transcript_id", null, null, null);
+    assertEquals("Transcript attribute - SQL",
+                 "SELECT transcript.transcript_id FROM transcript"
+                 +" WHERE 'someone' IN"
+                 +" (SELECT speaker.name"
+                 +" FROM transcript_speaker"
+                 +" INNER JOIN speaker"
+                 +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+                 +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+                 +" AND main_speaker = 1)"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+
+    q = transformer.sqlFor(
+      "labels('main_participant').includesAny(['someone','other'])",
+      "transcript.transcript_id", null, null, null);
+    assertEquals("Transcript attribute - SQL",
+                 "SELECT transcript.transcript_id FROM transcript"
+                 +" WHERE ('someone' IN"
+                 +" (SELECT speaker.name"
+                 +" FROM transcript_speaker"
+                 +" INNER JOIN speaker"
+                 +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+                 +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+                 +" AND main_speaker = 1)"
+                 +" OR 'other' IN"
+                 +" (SELECT speaker.name"
+                 +" FROM transcript_speaker"
+                 +" INNER JOIN speaker"
+                 +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+                 +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+                 +" AND main_speaker = 1)"
+                 +")"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+    
+    q = transformer.sqlFor(
+      "first('main_participant').label == 'someone'",
+      "transcript.transcript_id", null, null, null);
+    assertEquals("Transcript attribute - SQL",
+                 "SELECT transcript.transcript_id FROM transcript"
+                 +" WHERE"
+                 +" (SELECT speaker.name"
+                 +" FROM transcript_speaker"
+                 +" INNER JOIN speaker"
+                 +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+                 +" WHERE transcript_speaker.ag_id = transcript.ag_id"
+                 +" AND main_speaker = 1"
+                 +" ORDER BY speaker.name LIMIT 1) = 'someone'"
+                 +" ORDER BY transcript.transcript_id",
+                 q.sql);
+    assertEquals("Parameter count", 0, q.parameters.size());
+  }
+
   /** Ensure that transcript_language defaults to the corpus language, when using labels() */
   @Test public void languageLabels() throws AGQLException {
     GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
