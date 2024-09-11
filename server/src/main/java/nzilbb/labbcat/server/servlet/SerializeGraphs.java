@@ -193,6 +193,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
 
         // make the serialization a monitorable, cancelable task 
         // create a stream to pump from
+        final HttpServletRequest finalRequest = request;
         final HttpServletResponse finalResponse = response;
         final String finalName = name;
         PipedInputStream inStream = new PipedInputStream();
@@ -243,7 +244,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
                       if (bCancelling) return;
                       try {
                         setStatus(stream.getName());
-                        ResponseAttachmentName(finalResponse, stream.getName());
+                        ResponseAttachmentName(finalRequest, finalResponse, stream.getName());
                         IO.Pump(stream.getStream(), outStream);
                         outStream.flush();
                         outStream.close();
@@ -271,7 +272,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
                   
                   // send headers
                   finalResponse.setContentType("application/zip");
-                  ResponseAttachmentName(finalResponse, finalName + ".zip");
+                  ResponseAttachmentName(finalRequest, finalResponse, finalName + ".zip");
                   final ZipOutputStream zipOut = new ZipOutputStream(outStream);
                   try {
                     

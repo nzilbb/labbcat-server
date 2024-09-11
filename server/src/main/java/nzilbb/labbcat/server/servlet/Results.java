@@ -455,7 +455,7 @@ public class Results extends LabbcatServlet { // TODO unit test
             String fileName = IO.SafeFileNameUrl(searchName);
             if (fileName.length() > 150) fileName = fileName.substring(0, 150);
             fileName = "results_" + fileName + ".csv";
-            ResponseAttachmentName(response, fileName);
+            ResponseAttachmentName(request, response, fileName);
           }
 
           if (options.contains("labbcat_title") && labbcatTitle == null) {

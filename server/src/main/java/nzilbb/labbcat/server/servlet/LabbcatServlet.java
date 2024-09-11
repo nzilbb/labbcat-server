@@ -24,10 +24,12 @@ package nzilbb.labbcat.server.servlet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -61,6 +63,7 @@ import nzilbb.sql.ConnectionFactory;
 import nzilbb.sql.mysql.MySQLConnectionFactory;
 import nzilbb.util.CloneableBean;
 import nzilbb.util.IO;
+import nzilbb.util.SemanticVersionComparator;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -337,14 +340,53 @@ public class LabbcatServlet extends HttpServlet {
    * @param response The response to set the header of.
    * @param fileName The file name to save the response body as.
    */
-  public static void ResponseAttachmentName(HttpServletResponse response, String fileName) {
-    if (fileName.indexOf(' ') >= 0){
-      fileName = "\""+fileName+"\"";
+  public static void ResponseAttachmentName(
+    HttpServletRequest request, HttpServletResponse response, String fileName) {
+    if (fileName == null) return;
+    fileName = IO.SafeFileNameUrl(fileName);
+    String onlyASCIIFileName = IO.OnlyASCII(fileName);    
+    String onlyASCIIFileNameNoQuotes = onlyASCIIFileName;
+    
+    if (fileName.indexOf(' ') >= 0 // contains spaces
+        || fileName.indexOf(';') >= 0 // contains semicolon
+        || !fileName.equals(onlyASCIIFileName)) { // contains non-ascii
+      try {
+        fileName = "\""+URLEncoder.encode(fileName, "UTF-8")+"\"";
+      } catch(UnsupportedEncodingException exception) {
+        fileName = "\""+fileName+"\"";
+      }
+    } else {
+      try {
+        fileName = URLEncoder.encode(fileName, "UTF-8");
+      } catch(UnsupportedEncodingException exception) {
+      }
     }
-    // MDN recommends not to use URLEncoder.encode so we don't
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
-    // TODO include both filename*= and filename= parameters, once labbcat-R can handle it
-    response.addHeader("Content-Disposition", "attachment; filename*="+fileName);
+    if (onlyASCIIFileName.indexOf(' ') >= 0 || onlyASCIIFileName.indexOf(';') >= 0){
+      onlyASCIIFileName = "\""+onlyASCIIFileName+"\"";
+    }
+    
+    // are we being called by the nzilbb.labbcat R package?
+    String userAgent = Optional.ofNullable(request.getHeader("User-Agent")).orElse("");
+    String labbcatRVersion = null;
+    if (userAgent.startsWith("labbcat-R")) {
+      String[] parts = userAgent.split("/");
+      if (parts.length > 1) {
+        labbcatRVersion = parts[1];
+      }
+    }
+    if (labbcatRVersion != null // nzilbb.labbcat R package
+        // and version <= 1.3-0
+        && new SemanticVersionComparator().compare(labbcatRVersion, "1.3-0") <= 0) {
+      // specify only 'filename' without quotes
+      response.addHeader(
+        "Content-Disposition", "attachment; filename="+onlyASCIIFileNameNoQuotes); 
+    } else {
+      // MDN recommends not to use URLEncoder.encode so we don't
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
+      // TODO we can use User-Agent to send un-URL-encoded responses to Sarari only
+      response.addHeader(
+        "Content-Disposition", "attachment; filename="+onlyASCIIFileName+"; filename*="+fileName);
+    }
   } // end of ResponseAttachmentName()
    
   /**

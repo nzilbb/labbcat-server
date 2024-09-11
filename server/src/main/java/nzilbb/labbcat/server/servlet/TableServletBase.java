@@ -283,7 +283,7 @@ public class TableServletBase extends LabbcatServlet {
                      if (keyValues != null) {
                         for (String value : keyValues) name += "-"+value;
                      }
-                     ResponseAttachmentName(response, name+".csv");
+                     ResponseAttachmentName(request, response, name+".csv");
                   }
                   
                   // return a list of rows

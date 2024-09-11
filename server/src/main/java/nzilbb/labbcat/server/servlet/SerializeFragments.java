@@ -385,11 +385,11 @@ public class SerializeFragments extends LabbcatServlet { // TODO unit test
             // don't zip a single file, just return the file
             response.setContentType(mimeType);
             NamedStream stream = files.firstElement();
-            ResponseAttachmentName(response, stream.getName());               
+            ResponseAttachmentName(request, response, stream.getName());               
             IO.Pump(stream.getStream(), response.getOutputStream());
           } else { /// multiple files
             response.setContentType("application/zip");
-            ResponseAttachmentName(response, name + ".zip");
+            ResponseAttachmentName(request, response, name + ".zip");
                
             // create a stream to pump from
             PipedInputStream inStream = new PipedInputStream();
