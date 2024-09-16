@@ -7901,13 +7901,17 @@ public class SqlGraphStore implements GraphStore {
           try {
             StringBuffer url = new StringBuffer(getBaseUrl());
             url.append("/files/");
-            url.append(URLEncoder.encode(graph.first("corpus").getLabel(), "UTF-8"));
+            url.append(URLEncoder.encode(graph.first("corpus").getLabel(), "UTF-8")
+                       .replace("+", "%20"));
             url.append("/");
-            url.append(URLEncoder.encode(graph.first("episode").getLabel(), "UTF-8"));
+            url.append(URLEncoder.encode(graph.first("episode").getLabel(), "UTF-8")
+                       .replace("+", "%20"));
             url.append("/");
-            url.append(URLEncoder.encode(extension, "UTF-8"));
+            url.append(URLEncoder.encode(extension, "UTF-8")
+                       .replace("+", "%20"));
             url.append("/");
-            url.append(URLEncoder.encode(fileName, "UTF-8"));
+            url.append(URLEncoder.encode(fileName, "UTF-8")
+                       .replace("+", "%20"));
             return url.toString();
           } catch(UnsupportedEncodingException exception) {
             throw new StoreException(exception);
@@ -7949,7 +7953,8 @@ public class SqlGraphStore implements GraphStore {
           url.append("/soundfragment");
           url.append("?id=");
           try {
-            url.append(URLEncoder.encode(id, "UTF-8"));
+            url.append(URLEncoder.encode(id, "UTF-8")
+                       .replace("+", "%20"));
           } catch(UnsupportedEncodingException exception) {
             throw new StoreException(exception);
           }
