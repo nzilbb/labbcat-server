@@ -365,7 +365,7 @@ public class LabbcatServlet extends HttpServlet {
       onlyASCIIFileName = "\""+onlyASCIIFileName+"\"";
     }
     
-    // are we being called by the nzilbb.labbcat R package?
+    // are we being called by the nzilbb.labbcat R package or by java (jsendpraat)?
     String userAgent = Optional.ofNullable(request.getHeader("User-Agent")).orElse("");
     String labbcatRVersion = null;
     if (userAgent.startsWith("labbcat-R")) {
@@ -374,9 +374,11 @@ public class LabbcatServlet extends HttpServlet {
         labbcatRVersion = parts[1];
       }
     }
-    if (labbcatRVersion != null // nzilbb.labbcat R package
-        // and version <= 1.3-0
-        && new SemanticVersionComparator().compare(labbcatRVersion, "1.3-0") <= 0) {
+    if (userAgent != null
+        && (userAgent.startsWith("Java/") // plain Java connection (probably jsendpraat)
+            || (labbcatRVersion != null // nzilbb.labbcat R package
+                // and version <= 1.3-0
+                && new SemanticVersionComparator().compare(labbcatRVersion, "1.3-0") <= 0))) {
       // specify only 'filename' without quotes
       response.addHeader(
         "Content-Disposition", "attachment; filename="+onlyASCIIFileNameNoQuotes); 
