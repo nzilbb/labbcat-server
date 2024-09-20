@@ -264,21 +264,13 @@ public class AllUtterancesTask extends SearchTask {
       ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
     sqlResult.setLong(1, ((SqlSearchResults)results).getId());      
     String selectUtteranceWords = "SELECT word.word_annotation_id"
-      +" FROM result"
-      +" INNER JOIN annotation_layer_12 utterance"
-      +" ON result.defining_annotation_id = utterance.annotation_id" 
-      +" INNER JOIN anchor utterance_start"
-      +" ON utterance.start_anchor_id = utterance_start.anchor_id" 
-      +" INNER JOIN anchor utterance_end"
-      +" ON utterance.end_anchor_id = utterance_end.anchor_id" 
-      // use orthography layer to exclude utterances with not orthography
-      +" INNER JOIN annotation_layer_2 word" 
-      +" ON utterance.turn_annotation_id = word.turn_annotation_id" 
+      +" FROM annotation_layer_0 word" 
+      // join to orthography layer to exclude utterances with not orthography
+      +" INNER JOIN annotation_layer_2 orth" 
+      +" ON orth.word_annotation_id = word.annotation_id" 
       +" INNER JOIN anchor word_start"
       +" ON word.start_anchor_id = word_start.anchor_id"
-      +" AND word_start.offset >= utterance_start.offset"
-      +" AND word_start.offset < utterance_end.offset"
-      +" WHERE search_id = ? AND utterance.annotation_id = ?";
+      +" WHERE word.utterance_annotation_id = ?";
     PreparedStatement sqlFirstWord = connection.prepareStatement(
       selectUtteranceWords+" ORDER BY word_start.offset ASC LIMIT 1");
     PreparedStatement sqlLastWord = connection.prepareStatement(
@@ -287,16 +279,14 @@ public class AllUtterancesTask extends SearchTask {
     int r = 0;
     try {
       while (rsResult.next() && !bCancelling) {
-        sqlFirstWord.setLong(1, ((SqlSearchResults)results).getId());      
-        sqlFirstWord.setLong(2, rsResult.getLong("defining_annotation_id"));
+        sqlFirstWord.setLong(1, rsResult.getLong("defining_annotation_id"));
         ResultSet rsWord = sqlFirstWord.executeQuery();
         if (rsWord.next()) { // there is a first word
           rsResult.updateLong("target_annotation_id", rsWord.getLong(1));
           rsResult.updateLong("first_matched_word_annotation_id", rsWord.getLong(1));
           rsResult.updateString("target_annotation_uid", "ew_0_"+rsWord.getLong(1));
           rsWord.close();
-          sqlLastWord.setLong(1, ((SqlSearchResults)results).getId());      
-          sqlLastWord.setLong(2, rsResult.getLong("defining_annotation_id"));
+          sqlLastWord.setLong(1, rsResult.getLong("defining_annotation_id"));
           rsWord = sqlLastWord.executeQuery();
           if (rsWord.next()) {
             rsResult.updateLong("last_matched_word_annotation_id", rsWord.getLong(1));
