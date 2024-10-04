@@ -11,6 +11,7 @@ import { ClassicEditor, UploadAdapter, FileRepository,
 import { LabbcatUploadAdapterPlugin } from '../labbcat-upload-adapter';
 
 import { MessageService, LabbcatService } from 'labbcat-common';
+import { AdminComponent } from '../admin-component';
 
 @Component({
     selector: 'app-admin-agreement',
@@ -18,7 +19,7 @@ import { MessageService, LabbcatService } from 'labbcat-common';
     styleUrl: './admin-agreement.component.css',
     encapsulation: ViewEncapsulation.None
 })
-export class AdminAgreementComponent implements OnInit {
+export class AdminAgreementComponent extends AdminComponent implements OnInit {
 
     public Editor = ClassicEditor;
     public config = {
@@ -86,15 +87,15 @@ export class AdminAgreementComponent implements OnInit {
     }
 
     agreementExists = false;
-    changed = false;
     updating = false;
     deleting = false;
     agreementHtml: string;
     
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService,
+        labbcatService: LabbcatService,
+        messageService: MessageService,
     ) {
+        super(labbcatService, messageService);
     }
 
     ngOnInit(): void {
@@ -125,12 +126,14 @@ export class AdminAgreementComponent implements OnInit {
             });
     }
     deleteAgreement(): void {
-        this.deleting = true;
-        this.labbcatService.labbcat.deleteAgreement((result, errors, messages) => {
-            if (errors) errors.forEach(m => this.messageService.error(m));
-            if (messages) messages.forEach(m => this.messageService.info(m));
-            this.readAgreement();
-        });
+        if (confirm("Are you sure you want to delete your custome agreement and revert to the default software license?")) { // TODO i18n
+            this.deleting = true;
+            this.labbcatService.labbcat.deleteAgreement((result, errors, messages) => {
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
+                this.readAgreement();
+            });
+        }
     }
 
 }

@@ -97,7 +97,8 @@ import { AdminAgreementComponent } from './admin-agreement/admin-agreement.compo
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
             { path: 'admin/attributes/:scope', component: AdminAttributesComponent},
             { path: 'admin/categories/:scope', component: AdminCategoriesComponent},
-            { path: 'admin/agreement', component: AdminAgreementComponent},
+            { path: 'admin/agreement', component: AdminAgreementComponent,
+              canDeactivate: [PendingChangesGuard]},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)

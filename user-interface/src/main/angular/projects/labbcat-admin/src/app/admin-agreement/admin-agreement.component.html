@@ -10,7 +10,7 @@
               *ngIf="changed"
               i18n-title title="Save license agreement"></lib-button>
   <lib-button action="delete"
-              *ngIf="agreementHtml"
+              *ngIf="agreementExists"
               (press)="deleteAgreement();"  [processing]="deleting"
               i18n-title title="Delete license agreement"></lib-button>
 </div>
