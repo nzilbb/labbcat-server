@@ -140,24 +140,29 @@
     var errors = null;
     var messages = null;
     try {
-      var response = JSON.parse(this.responseText);
-      if (response.model != null) {
-        if (response.model.result) {
-          result = response.model.result;
+      if (evt.target.raw) {
+        result = this.responseText;
+      } else {
+        var response = JSON.parse(this.responseText);
+        if (response.model != null) {
+          if (response.model.result) {
+            result = response.model.result;
+          }
+	  if (!result && result != 0) result = response.model;
         }
-	if (!result && result != 0) result = response.model;
+        if (exports.verbose) console.log("result: " + JSON.stringify(result));
+        var errors = response.errors;
+        if (!errors || errors.length == 0) errors = null;
+        var messages = response.messages;
+        if (!messages || messages.length == 0) messages = null;
       }
-      if (exports.verbose) console.log("result: " + JSON.stringify(result));
-      var errors = response.errors;
-      if (!errors || errors.length == 0) errors = null;
-      var messages = response.messages;
-      if (!messages || messages.length == 0) messages = null;
     } catch(exception) {
       result = null;
       errors = ["" +exception+ ": " + this.responseText];
       messages = [];
     }
     if (evt.target.onResult) {
+      if (exports.verbose) console.log("onResult: " + result);
       evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
     }
   }
@@ -270,9 +275,10 @@
     // @param {string} [method=GET] The HTTP method e.g. "POST"
     // @param {string} [storeUrl=null] The URL for the graph store.
     // @param {string} [contentTypeHeader=null] The request content type e.g "application/x-www-form-urlencoded".
+    // @param {boolean} [raw=false] Whether the result should be the un-parsed request response text.
     // @return {XMLHttpRequest} An open request.
     //
-    createRequest(call, parameters, onResult, url, method, storeUrl, contentTypeHeader) {
+    createRequest(call, parameters, onResult, url, method, storeUrl, contentTypeHeader, raw) {
       if (exports.verbose)  {
         console.log("createRequest "+method+" "+url + " "
                     + call + " " + JSON.stringify(parameters));
@@ -307,7 +313,12 @@
       if (exports.language) {
 	xhr.setRequestHeader("Accept-Language", exports.language);
       }
-      xhr.setRequestHeader("Accept", "application/json");
+      if (raw) {
+        xhr.raw = true;
+        xhr.setRequestHeader("Accept", "text/plain");
+      } else {
+        xhr.setRequestHeader("Accept", "application/json");
+      }
       return xhr;
     }
     
@@ -2375,6 +2386,17 @@
         }, onResult, `${this.baseUrl}api/categories/${class_id}`)
         .send();
     }
+
+    /**
+     * Reads the current license agreement (HTML) document.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be a string containing the HTML document.
+     */
+    readAgreement(onResult) {
+      this.createRequest(
+        "readAgreement", null, onResult, `${this.baseUrl}agreement.html`, "GET", null, null, true)
+        .send();
+    }
     
   } // class LabbcatView
 
@@ -3293,9 +3315,9 @@
     
     /**
      * Creates a new project record.
-     * @see LabbcatAdmin#readProjects
-     * @see LabbcatAdmin#updateProject
-     * @see LabbcatAdmin#deleteProject
+     * @deprecated since version 1.6.0: 'projects' are now categories with classId = 'layer'
+     * - use createCategory instead. 
+     * @see LabbcatAdmin#createCategory
      * @param {string} project The name/ID of the project.
      * @param {string} description The description of the project.
      * @param {resultCallback} onResult Invoked when the request has returned a 
@@ -3303,19 +3325,14 @@
      * including <em> project_id </em> - The database key for the record. 
      */
     createProject(project, description, onResult) {
-      this.createRequest(
-        "projects", null, onResult, this.baseUrl+"api/admin/projects", "POST",
-        null, "application/json")
-        .send(JSON.stringify({
-          project : project,
-          description : description}));
+      this.createCategory("layer", project, description, 0, onResult);
     }
     
     /**
      * Reads a list of project records.
-     * @see LabbcatAdmin#createProject
-     * @see LabbcatAdmin#updateProject
-     * @see LabbcatAdmin#deleteProject
+     * @deprecated since version 1.6.0: 'projects' are now categories with classId = 'layer'
+     * - use readCategories('layer') instead. 
+     * @see LabbcatAdmin#readCategories
      * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
      * records will be returned). 
      * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -3332,27 +3349,14 @@
      * </dl>
      */
     readProjects(pageNumber, pageLength, onResult) {
-      if (typeof pageNumber === "function") { // (onResult)
-        onResult = pageNumber;
-        pageNumber = null;
-        pageLength = null;
-      } else if (typeof l === "function") { // (p, onResult)
-        onResult = l;
-        pageLength = null;
-      }
-      this.createRequest(
-        "projects", {
-          pageNumber:pageNumber,
-          pageLength:pageLength
-        }, onResult, this.baseUrl+"api/admin/projects")
-        .send();
+      this.readCategories("layer", pageNumber, pageLength, onResult);
     }
     
     /**
      * Updates an existing project record.
-     * @see LabbcatAdmin#createProject
-     * @see LabbcatAdmin#readProjects
-     * @see LabbcatAdmin#deleteProject
+     * @deprecated since version 1.6.0: 'projects' are now categories with classId = 'layer'
+     * - use updateCategory instead. 
+     * @see LabbcatAdmin#updateCategory
      * @param {string} project_id The database key for the record. // TODO eliminate project_id
      * @param {string} project The name/ID of the project.
      * @param {string} description The description of the project.
@@ -3360,25 +3364,19 @@
      * <var>result</var> which will be: A copy of the project record. 
      */
     updateProject(project, description, onResult) {
-      this.createRequest(
-        "projects", null, onResult, this.baseUrl+"api/admin/projects", "PUT")
-        .send(JSON.stringify({
-          project : project,
-          description : description}));
+      this.updateCategory("layer", project, description, 0, onResult);
     }
     
     /**
      * Deletes an existing project record.
-     * @see LabbcatAdmin#createProject
-     * @see LabbcatAdmin#readProjects
-     * @see LabbcatAdmin#updateProject
+     * @deprecated Deprecated as 'projects' are now categories with classId = 'layer' 
+     * - use deleteCategory instead.
+     * @see LabbcatAdmin#deleteCategory
      * @param {string} project The name/ID of the project.
      * @param {resultCallback} onResult Invoked when the request has completed.
      */
     deleteProject(project, onResult) {
-      this.createRequest(
-        "projects", null, onResult, `${this.baseUrl}api/admin/projects/${project}`,
-        "DELETE").send();
+      this.deleteCategory("layer", project, onResult);
     }
     
     /**
@@ -4355,7 +4353,31 @@
           password : password,
           resetPassword : resetPassword}));
     }
-    
+
+    /**
+     * Updates the current license agreement (HTML) document (creating it if it 
+     * doesn't already exist).
+     * @param {string} agreementHtml The HTML content of the document. 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be "OK" if the operation succeeded.
+     */
+    updateAgreement(agreementHtml, onResult) {
+      this.createRequest(
+        "updateAgreement", null, onResult, this.baseUrl+"agreement.html", "PUT")
+        .send(agreementHtml);
+    }
+
+    /**
+     * Deletes the current license agreement (HTML) document.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be "OK" if the operation succeeded.
+     */
+    deleteAgreement(onResult) {
+      this.createRequest(
+        "deleteAgreement", null, onResult, `${this.baseUrl}agreement.html`, "DELETE")
+        .send();
+    }
+
   }
   
   /**

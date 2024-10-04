@@ -1,0 +1,17 @@
+<h2 *ngIf="!agreementExists" i18n>Add Data License Agreement</h2>
+<h2 *ngIf="agreementExists" i18n>Edit Data License Agreement</h2>
+<ckeditor [editor]="Editor"
+          [config]="config"
+          (change)="onChange()"
+          [(ngModel)]="agreementHtml"></ckeditor>
+<div class="buttons">
+  <lib-button action="save"
+              (press)="updateAgreement();"  [processing]="updating"
+              *ngIf="changed"
+              i18n-title title="Save license agreement"></lib-button>
+  <lib-button action="delete"
+              *ngIf="agreementHtml"
+              (press)="deleteAgreement();"  [processing]="deleting"
+              i18n-title title="Delete license agreement"></lib-button>
+</div>
+

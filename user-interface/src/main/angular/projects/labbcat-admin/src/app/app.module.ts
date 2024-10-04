@@ -29,6 +29,7 @@ import { AdminLayersComponent } from './admin-layers/admin-layers.component';
 import { AdminLayerLabelsComponent } from './admin-layer-labels/admin-layer-labels.component';
 import { AdminAttributesComponent } from './admin-attributes/admin-attributes.component';
 import { AdminCategoriesComponent } from './admin-categories/admin-categories.component';
+import { AdminAgreementComponent } from './admin-agreement/admin-agreement.component';
 
 @NgModule({
     declarations: [
@@ -52,7 +53,8 @@ import { AdminCategoriesComponent } from './admin-categories/admin-categories.co
         AdminLayersComponent,
         AdminLayerLabelsComponent,
         AdminAttributesComponent,
-        AdminCategoriesComponent
+        AdminCategoriesComponent,
+        AdminAgreementComponent
     ],
     imports: [
         BrowserModule,
@@ -95,6 +97,7 @@ import { AdminCategoriesComponent } from './admin-categories/admin-categories.co
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
             { path: 'admin/attributes/:scope', component: AdminAttributesComponent},
             { path: 'admin/categories/:scope', component: AdminCategoriesComponent},
+            { path: 'admin/agreement', component: AdminAgreementComponent},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)
