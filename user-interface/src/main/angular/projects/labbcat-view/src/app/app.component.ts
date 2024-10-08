@@ -27,7 +27,7 @@ export class AppComponent {
                     app: "labbcat-view",
                     url: event.url
                 });
-                const h1 = document.getElementById("title");
+                let h1 = document.getElementById("title");
                 if (h1 && h1.textContent) {
                     this.setPageTitle(h1.textContent);
                 } else { // no title element, so use URL
