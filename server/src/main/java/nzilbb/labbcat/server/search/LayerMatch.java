@@ -218,11 +218,12 @@ public class LayerMatch implements CloneableBean {
    * Ensures that Boolean attributes ({@link #target}, {@link #not}, {@link #anchorStart},
    * {@link #anchorEnd}) have non-null values. Any with null values are assumed to be false.
    */
-  public void setNullBooleans() {
+  public LayerMatch setNullBooleans() {
     if (target == null) target = Boolean.FALSE;
     if (not == null) not = Boolean.FALSE;
     if (anchorStart == null) anchorStart = Boolean.FALSE;
     if (anchorEnd == null) anchorEnd = Boolean.FALSE;
+    return this;
   } // end of setNullBooleans()  
   
   /**
@@ -231,11 +232,12 @@ public class LayerMatch implements CloneableBean {
    * <p> After this method is called, <q><var>pattern</var></q> will instead be
    * <q>^(<var>pattern</var>)$</q>
    */
-  public void ensurePatternAnchored() {
+  public LayerMatch ensurePatternAnchored() {
     if (pattern != null) {
       if (!pattern.startsWith("^")) pattern = "^(" + pattern + ")";
       if (!pattern.endsWith("$")) pattern += "$";
     }
+    return this;
   } // end of ensurePatternAnchored()
 
   /**

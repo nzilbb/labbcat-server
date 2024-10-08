@@ -261,14 +261,20 @@ public class Matrix implements CloneableBean {
           StringBuilder description = new StringBuilder(layerMatch.getId());
           if (layerMatch.getPattern() != null) {
             if (layerMatch.getNot() != null && layerMatch.getNot()) {
-              description.append("≉");
+              //GRR description.append("≉");
+              description.append("-NOT-");
             } else {
-              description.append("≈");
+              //GRR description.append("≈");
+              description.append("=");
             }
-            description.append(layerMatch.getPattern());
+            description.append(
+              layerMatch.getPattern()
+              // strip anchoring ^(...)$ for readability
+              .replaceAll("\\^\\((.*)\\)\\$", "$1"));
           }
           if (layerMatch.getMin() != null) {
-            description.append("≥").append(new DecimalFormat("#0.#").format(layerMatch.getMin()));
+            //GRR description.append("≥").append(new DecimalFormat("#0.#").format(layerMatch.getMin()));
+            description.append(">=").append(new DecimalFormat("#0.#").format(layerMatch.getMin()));
           }
           if (layerMatch.getMax() != null) {
             description.append("<").append(new DecimalFormat("#0.#").format(layerMatch.getMax()));

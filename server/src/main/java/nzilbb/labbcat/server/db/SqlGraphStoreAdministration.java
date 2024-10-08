@@ -555,6 +555,7 @@ public class SqlGraphStoreAdministration
               sqlUpdate.setInt(
                 6, Integer.parseInt(
                   Optional.ofNullable(option.get("display_order")).orElse("0").toString()));
+              sqlUpdate.setString(8, option.get("label").toString());
               sqlUpdate.executeUpdate();
             }
           } // next label definition

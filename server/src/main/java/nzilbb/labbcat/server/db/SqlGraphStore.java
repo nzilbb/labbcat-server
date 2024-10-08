@@ -75,6 +75,7 @@ import nzilbb.ag.util.Normalizer;
 import nzilbb.ag.util.Validator;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.encoding.ValidLabelsDefinitions;
 import nzilbb.media.MediaCensor;
 import nzilbb.media.MediaConverter;
 import nzilbb.media.MediaException;
@@ -762,16 +763,8 @@ public class SqlGraphStore implements GraphStore {
       layer.put("validLabelsDefinition", validLabelsDefinition);
       
       if (validLabelsDefinition.size() > 0) { // valid labels are defined
-        
-        // generate the validLabels attribute from the definitions
-        // (validLabels is the more basic, general representation)
-        LinkedHashMap<String,String> validLabels = new LinkedHashMap<String,String>();
-        for (Map<String,Object> label : validLabelsDefinition) {
-          validLabels.put(label.get("label").toString(),
-                          Optional.ofNullable(label.get("display"))
-                          .orElse(label.get("label")).toString());
-        }
-        layer.setValidLabels(validLabels);
+        layer.setValidLabels(
+          ValidLabelsDefinitions.ValidLabelsFromDefinition(validLabelsDefinition));
       }
       rsOption.close();
       sql.close();

@@ -70,7 +70,6 @@ public class OneQuerySearch extends SearchTask {
     Schema schema, Predicate<Layer> layerIsSpanningAndWordAnchored,
     UnaryOperator<String> participantCondition, UnaryOperator<String> transcriptCondition)
     throws Exception {
-    description = "";
     
     // if there's no explicit target layer
     if (matrix.getTargetLayerId() == null) {
@@ -535,19 +534,6 @@ public class OneQuerySearch extends SearchTask {
           + " " + (layerMatch.getAnchorStart()?"[":"")
           + " " + (layerMatch.getAnchorEnd()?"]":""));
 	       
-        // for export filename
-        if (layerMatch.getNot()) {
-          description += "_NOT";
-        }
-        if (layerMatch.getPattern() != null) {
-          description += "_" + layerMatch.getPattern();
-        }
-        if (layerMatch.getMin() != null) {
-          description += "_" + new DecimalFormat("#0.#").format(layerMatch.getMin());
-        }
-        if (layerMatch.getMax() != null) {
-          description += "_" + new DecimalFormat("#0.#").format(layerMatch.getMax());
-        }
         if (targetLayerId.equals(layerMatch.getId()) && iWordColumn == iTargetColumn) {
           sSqlExtraFieldsFirst.append(
             ", search_" + iTargetLayer + ".annotation_id AS target_annotation_id");
@@ -1161,22 +1147,9 @@ public class OneQuerySearch extends SearchTask {
             + " " + (layerMatch.getAnchorStart()?"[":"")
             + " " + (layerMatch.getAnchorEnd()?"]":""));
           
-          // for export filename
-          if (layerMatch.getNot()) {
-            description += "_NOT";
-          }
-          if (layerMatch.getPattern() != null) {
-            description += "_" + layerMatch.getPattern();
-          }
-          if (layerMatch.getMin() != null) {
-            description += "_" + layerMatch.getMin();
-          }
-          if (layerMatch.getMax() != null) {
-            description += "_" + layerMatch.getMax();
-          }
         } // matching this layer
       } // next layer
-      if (results != null) ((SqlSearchResults)results).setName(description);
+      if (results != null) ((SqlSearchResults)results).setName(matrix.getDescription());
       if (bCancelling) throw new Exception("Cancelled.");
       
       // aligned words only?
@@ -1492,7 +1465,6 @@ public class OneQuerySearch extends SearchTask {
    */
   public String generateOrthographySql(Vector<Object> parameters, Schema schema)
     throws Exception {
-    description = "";
     int iWordColumn = 0;
     StringBuffer q = new StringBuffer();
     q.append("INSERT INTO _result");
@@ -1529,18 +1501,15 @@ public class OneQuerySearch extends SearchTask {
         match.ensurePatternAnchored();
         q.append("token_"+c+".label REGEXP ?");
         parameters.add(match.getPattern());
-        description += "_" + match.getPattern();
       } else { // numeric
         if (match.getMin() != null) {
           q.append("CAST(token_"+c+".label AS DECIMAL) >= ?");
           parameters.add(Double.valueOf(match.getMin()));
-          description += "_" + match.getMin();
         }
         if (match.getMax() != null) {
           if (match.getMin() != null) q.append(" AND ");
           q.append("CAST(token_"+c+".label AS DECIMAL) < ?");
           parameters.add(Double.valueOf(match.getMax()));
-          description += "_" + match.getMax();
         } else if (match.getMin() == null) { // no condition set at all
           throw new Exception("No orthography condition for column "+c); // TODO i18n
         }
@@ -1592,7 +1561,6 @@ public class OneQuerySearch extends SearchTask {
   public String generateOneSpanSql(
     Vector<Object> parameters, Schema schema, Layer spanLayer, LayerMatch layerMatch)
     throws Exception {
-    description = "";
     StringBuilder q = new StringBuilder()
       .append("INSERT INTO _result")
       .append(" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,")
@@ -1623,18 +1591,15 @@ public class OneQuerySearch extends SearchTask {
         if (layerMatch.getNot()) q.append("NOT ");
         q.append("token.label REGEXP ?");
         parameters.add(layerMatch.getPattern());
-        description += "_" + layerMatch.getPattern();
     } else { // numeric
       if (layerMatch.getMin() != null) {
         q.append("CAST(token.label AS DECIMAL) >= ?");
         parameters.add(layerMatch.getMin());
-        description += "_" + layerMatch.getMin();
       }
       if (layerMatch.getMax() != null) {
         if (layerMatch.getMin() != null) q.append(" AND ");
         q.append("CAST(token.label AS DECIMAL) < ?");
         parameters.add(layerMatch.getMax());
-        description += "_" + layerMatch.getMax();
       } else if (layerMatch.getMin() == null) { // no condition set at all
         throw new Exception(
           "No span condition specified on layer " + layerMatch.getId()); // TODO i18n
@@ -1684,6 +1649,7 @@ public class OneQuerySearch extends SearchTask {
     Connection connection = getStore().getConnection();
     final Schema schema = getStore().getSchema();
     if (matrix != null) setName(matrix.getDescription());
+    setDescription(matrix.getDescription());
 
     // word columns
 	 

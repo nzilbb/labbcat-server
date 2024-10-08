@@ -51,7 +51,8 @@ public class TestMatrix {
                                   .setPattern("[aeiou].*")
                                   .setAnchorStart(true)
                                   .setMinString("") // should end up null
-                                  .setMaxString(""))  // should end up null
+                                  .setMaxString("")  // should end up null
+                                  .ensurePatternAnchored()) // test effects of anchoring 
                  .addLayerMatch(new LayerMatch()
                                   .setId("syllableCount")
                                   .setMin(2.0)
@@ -69,7 +70,7 @@ public class TestMatrix {
       +"\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"the\"}]}}"
       +",{\"adj\":1,"
       +"\"layers\":{"
-      +"\"phonology\":[{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"}],"
+      +"\"phonology\":[{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"^([aeiou].*)$\"}],"
       +"\"syllableCount\":[{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":3.0,\"min\":2.0}],"
       +"\"orthography\":[{\"id\":\"orthography\",\"target\":true}]}}]}",
       m.toJson().toString());
@@ -82,14 +83,14 @@ public class TestMatrix {
       +"\"orthography\":[{\"id\":\"orthography\",\"pattern\":\"the\"}]}}"
       +",{\"adj\":1,"
       +"\"layers\":{"
-      +"\"phonology\":[{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"[aeiou].*\"}],"
+      +"\"phonology\":[{\"anchorStart\":true,\"id\":\"phonology\",\"not\":true,\"pattern\":\"^([aeiou].*)$\"}],"
       +"\"syllableCount\":[{\"anchorEnd\":true,\"id\":\"syllableCount\",\"max\":3.0,\"min\":2.0}],"
       +"\"orthography\":[{\"id\":\"orthography\",\"target\":true}]}}]}",
       m.toString());
     
     assertEquals(
       "Description",
-      "orthography≈the phonology≉[aeiou].* syllableCount≥2<3",
+      "orthography=the phonology-NOT-[aeiou].* syllableCount>=2<3",
       m.getDescription());
   }
 
@@ -328,7 +329,7 @@ public class TestMatrix {
       +"\"transcriptQuery\":\"first('transcript_type').label != 'wordlist'\""
       +"}",
       m.toString());    
-    assertEquals("Description ignores queries", "orthography≈the", m.getDescription());
+    assertEquals("Description ignores queries", "orthography=the", m.getDescription());
 
     m = new Matrix().fromJsonString(m.toString());
     assertEquals("participantQuery deserialized",
