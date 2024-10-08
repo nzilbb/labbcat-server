@@ -258,7 +258,9 @@ public class AdminAnnotatorTaskWebApp extends LabbcatServlet {
                       || newOutput.getPeers() != existingOutput.getPeers()
                       || newOutput.getPeersOverlap() != existingOutput.getPeersOverlap()
                       || newOutput.getParentIncludes() != existingOutput.getParentIncludes()
-                      || newOutput.getSaturated() != existingOutput.getSaturated()) {
+                      || newOutput.getSaturated() != existingOutput.getSaturated()
+                      || !newOutput.getValidLabels().keySet().equals(
+                        existingOutput.getValidLabels().keySet())) {
                     store.saveLayer(newOutput);
                     log("Output layer " + newOutput + " updated");
                   } // output layer definition has changed
