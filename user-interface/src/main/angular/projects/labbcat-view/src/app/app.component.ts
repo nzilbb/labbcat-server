@@ -35,14 +35,13 @@ export class AppComponent {
                         .replace(/^\//,"") // strip initial slash
                         .replace(/\//g," » ") // transform remaining slashes
                         .replace(/[\?#].*/,"")); // strip off request parameters
-                    if (h1) { // there is an element, it might just not have been populated yet
-                        // wait half a sec and try again
-                        setTimeout(()=>{
-                            if (h1.textContent) {
-                                this.setPageTitle(h1.textContent);
-                            }
-                        }, 500);
-                    }
+                    // wait half a sec and try again
+                    setTimeout(()=>{
+                        h1 = document.getElementById("title");
+                        if (h1 && h1.textContent) {
+                            this.setPageTitle(h1.textContent);
+                        }
+                    }, 500);
                 }
             }
         });

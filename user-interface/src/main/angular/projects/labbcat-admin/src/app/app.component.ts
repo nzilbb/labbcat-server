@@ -24,13 +24,21 @@ export class AppComponent {
                     app: "labbcat-view",
                     url: event.url
                 });
-                const h1 = document.getElementById("title");
-                if (h1) {
+                let h1 = document.getElementById("title");
+                if (h1 && h1.textContent) {
                     this.setPageTitle(h1.textContent);
                 } else { // no title element, so use URL
                     this.setPageTitle(event.url
                         .replace(/^\//,"") // strip initial slash
-                        .replace(/\//g," » ")); // transform remaining slashes
+                        .replace(/\//g," » ") // transform remaining slashes
+                        .replace(/[\?#].*/,"")); // strip off request parameters
+                    // wait half a sec and try again
+                    setTimeout(()=>{
+                        h1 = document.getElementById("title");
+                        if (h1 && h1.textContent) {
+                            this.setPageTitle(h1.textContent);
+                        }
+                    }, 500);
                 }
             }
         });
