@@ -1,6 +1,6 @@
 <lib-wait *ngIf="!loaded"></lib-wait>
 <ng-container *ngIf="loaded">
-  <h2><span i18n="Media for {transcript}">Media for</span> <a href="{{baseUrl}}transcript?id={{id}}">{{id}}</a></h2>
+  <h2 id="title"><span i18n="Media for {transcript}">Media for</span> <a href="{{baseUrl}}transcript?id={{id}}">{{id}}</a></h2>
   <dl class="media">
     <ng-container *ngFor="let track of tracks">
       <dt title="{{track.description}}">
