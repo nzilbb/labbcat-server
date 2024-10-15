@@ -11,7 +11,7 @@
   <artifactId>nzilbb.labbcat.server</artifactId>
   <name>LaBB-CAT backend</name>
   <description>LaBB-CAT back-end java servlets and services.</description>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.4</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -72,7 +72,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>true</trimStackTrace>
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
       <plugin>

@@ -127,7 +127,8 @@ app-root article, app-root nav, app-root aside { order: 0; }
 app-root article { flex: 3 1 60%; min-height: 100px; }
 app-root nav { flex: 1 6 20%; }
 app-root aside { flex: 1 6 10%; min-height: 100px; }
-app-root header, app-root footer { min-height: 50px; }
+app-root header { min-height: 0px; }
+app-root footer { min-height: 50px; }
 /* Layout on wider screens - 3 columns */
 @media all and (min-width: 640px) {
     #main { flex-direction: row; }

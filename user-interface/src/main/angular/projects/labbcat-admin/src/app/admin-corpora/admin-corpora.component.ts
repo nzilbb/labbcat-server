@@ -69,7 +69,7 @@ export class AdminCorporaComponent extends AdminComponent implements OnInit {
 
     deleteRow(row: Corpus) {
         row._deleting = true;
-        if (confirm(`Are you sure you want to delete ${row.corpus_name}`)) {
+        if (confirm(`Are you sure you want to delete ${row.corpus_name}?`)) {
             this.labbcatService.labbcat.deleteCorpus(row.corpus_name, (model, errors, messages) => {
                 row._deleting = false;
                 if (errors) errors.forEach(m => this.messageService.error(m));

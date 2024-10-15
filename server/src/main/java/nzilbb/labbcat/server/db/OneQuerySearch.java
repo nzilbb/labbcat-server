@@ -81,6 +81,7 @@ public class OneQuerySearch extends SearchTask {
         // make the segment condition the target
         .ifPresent(match -> match.setTarget(true));
     }
+    setDescription(matrix.getDescription());
     
     // column 0 first
     int iWordColumn = 0;
@@ -1465,6 +1466,7 @@ public class OneQuerySearch extends SearchTask {
    */
   public String generateOrthographySql(Vector<Object> parameters, Schema schema)
     throws Exception {
+    setDescription(matrix.getDescription().replaceAll("orthography=",""));
     int iWordColumn = 0;
     StringBuffer q = new StringBuffer();
     q.append("INSERT INTO _result");
@@ -1561,6 +1563,7 @@ public class OneQuerySearch extends SearchTask {
   public String generateOneSpanSql(
     Vector<Object> parameters, Schema schema, Layer spanLayer, LayerMatch layerMatch)
     throws Exception {
+    setDescription(matrix.getDescription());
     StringBuilder q = new StringBuilder()
       .append("INSERT INTO _result")
       .append(" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,")
