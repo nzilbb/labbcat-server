@@ -63,7 +63,7 @@
         <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION"/>}}</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/button/button.component.html</context>
-          <context context-type="linenumber">6,8</context>
+          <context context-type="linenumber">7,9</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4473506671411540349" datatype="html">
@@ -150,11 +150,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">12,13</context>
+          <context context-type="linenumber">13,14</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">46,47</context>
+          <context context-type="linenumber">47,48</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
@@ -398,6 +398,18 @@
         </context-group>
         <note priority="1" from="description">Default task result text</note>
       </trans-unit>
+<trans-unit id="3593984582899464681" datatype="html">
+        <source>Any <x id="INTERPOLATION" equiv-text="{{category}}"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <note priority="1" from="description">Any CATEGORY-NAME</note>
+      </trans-unit>
 <trans-unit id="2357645764289315007" datatype="html">
         <source>Please wait...</source>
         <context-group purpose="location">
@@ -428,7 +440,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">17,20</context>
+          <context context-type="linenumber">18,21</context>
         </context-group>
       </trans-unit>
 <trans-unit id="833858151759601501" datatype="html">
@@ -439,7 +451,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">22,25</context>
+          <context context-type="linenumber">23,26</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1602839245445894329" datatype="html">
@@ -450,11 +462,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">27,29</context>
+          <context context-type="linenumber">28,30</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">60,66</context>
+          <context context-type="linenumber">61,67</context>
         </context-group>
         <note priority="1" from="description">Any (participant)</note>
       </trans-unit>
@@ -466,7 +478,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">29,30</context>
+          <context context-type="linenumber">30,31</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3917029645634017156" datatype="html">
@@ -477,7 +489,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">74,78</context>
+          <context context-type="linenumber">75,79</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6560985415537536220" datatype="html">
@@ -613,7 +625,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">50,53</context>
+          <context context-type="linenumber">51,54</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5151265108963234895" datatype="html">
@@ -990,7 +1002,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">38,40</context>
+          <context context-type="linenumber">39,41</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
@@ -1023,7 +1035,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">4,6</context>
+          <context context-type="linenumber">5,7</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
@@ -2180,14 +2192,14 @@
         <source>Start processing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
-          <context context-type="linenumber">765,767</context>
+          <context context-type="linenumber">766,768</context>
         </context-group>
       </trans-unit>
 <trans-unit id="467152698327190533" datatype="html">
         <source>Process</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
-          <context context-type="linenumber">767,769</context>
+          <context context-type="linenumber">768,770</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7106595252899199576" datatype="html">
@@ -2201,8 +2213,8 @@
           <context context-type="linenumber">24,26</context>
         </context-group>
       </trans-unit>
-<trans-unit id="6278040204017045420" datatype="html">
-        <source>Anchor to start of <x id="INTERPOLATION" equiv-text="{{layerId}}"/> span</source>
+<trans-unit id="2921151104759780624" datatype="html">
+        <source>Anchor to start of <x id="INTERPOLATION" equiv-text="{{schema.wordLayerId}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
           <context context-type="linenumber">33,34</context>
@@ -2216,7 +2228,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">97,98</context>
+          <context context-type="linenumber">98,99</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3217830042880509138" datatype="html">
@@ -2227,7 +2239,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">99,100</context>
+          <context context-type="linenumber">100,101</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1987778970113179364" datatype="html">
@@ -2238,7 +2250,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">100,103</context>
+          <context context-type="linenumber">101,104</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1338733395833138319" datatype="html">
@@ -2259,35 +2271,35 @@
         <source>Symbol selector</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">112,114</context>
+          <context context-type="linenumber">113,115</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5458511976969720024" datatype="html">
         <source>Add word-internal segment pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">129,132</context>
+          <context context-type="linenumber">130,133</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7177968829236844694" datatype="html">
         <source>Remove word-internal segment pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">137,139</context>
+          <context context-type="linenumber">138,140</context>
         </context-group>
       </trans-unit>
-<trans-unit id="7590448955990113352" datatype="html">
-        <source>Anchor to end of <x id="INTERPOLATION" equiv-text="{{layerId}}"/> span</source>
+<trans-unit id="142567873907021545" datatype="html">
+        <source>Anchor to end of <x id="INTERPOLATION" equiv-text="{{schema.wordLayerId}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">141,142</context>
+          <context context-type="linenumber">142,143</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1069686183681032115" datatype="html">
         <source>followed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">152,154</context>
+          <context context-type="linenumber">153,155</context>
         </context-group>
         <note priority="1" from="description">'followed' n words later by...</note>
       </trans-unit>
@@ -2295,14 +2307,14 @@
         <source>Distance between matches</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">153,155</context>
+          <context context-type="linenumber">154,156</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7803787878526251041" datatype="html">
         <source>immediately</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">155,157</context>
+          <context context-type="linenumber">156,158</context>
         </context-group>
         <note priority="1" from="description">followed 'immediately' by...</note>
       </trans-unit>
@@ -2310,7 +2322,7 @@
         <source>1 word later</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">156,158</context>
+          <context context-type="linenumber">157,159</context>
         </context-group>
         <note priority="1" from="description">followed '1 word later' by...</note>
       </trans-unit>
@@ -2318,7 +2330,7 @@
         <source>2 words later</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">157,161</context>
+          <context context-type="linenumber">158,162</context>
         </context-group>
         <note priority="1" from="description">followed '2 words later' by...</note>
       </trans-unit>
@@ -2326,7 +2338,7 @@
         <source>by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">159,163</context>
+          <context context-type="linenumber">160,164</context>
         </context-group>
         <note priority="1" from="description">followed n words later 'by'...</note>
       </trans-unit>
@@ -2334,84 +2346,95 @@
         <source>Make the search one word wider</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">163,165</context>
+          <context context-type="linenumber">164,166</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4534321503092527386" datatype="html">
         <source>Make the search one word narrower</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">169,172</context>
+          <context context-type="linenumber">170,173</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4580988005648117665" datatype="html">
+        <source>Search</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">1,5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">109,111</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7252410407453361287" datatype="html">
         <source>Narrow down the participants to search by filtering by participant attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">6,9</context>
+          <context context-type="linenumber">7,10</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4495164935618002952" datatype="html">
         <source>Narrow down the transcripts to search by filtering by transcript attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">40,42</context>
+          <context context-type="linenumber">41,43</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1057592339589740606" datatype="html">
         <source>List more transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">55,58</context>
+          <context context-type="linenumber">56,59</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6986498555441317551" datatype="html">
         <source>Pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">62,66</context>
+          <context context-type="linenumber">63,67</context>
         </context-group>
       </trans-unit>
 <trans-unit id="426041029217844666" datatype="html">
         <source>Return words that have been reliably word-aligned - e.g. by HTK or manually</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">78,79</context>
+          <context context-type="linenumber">79,80</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3711337075658905974" datatype="html">
         <source>Only match words that are aligned.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">80,83</context>
+          <context context-type="linenumber">81,84</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4979708585759352745" datatype="html">
         <source>Return only the first match in each transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">83,84</context>
+          <context context-type="linenumber">84,85</context>
         </context-group>
       </trans-unit>
 <trans-unit id="9171906402072521489" datatype="html">
         <source>Only one match per transcript.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">85,89</context>
+          <context context-type="linenumber">86,90</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2287378034795981120" datatype="html">
         <source>Exclude simultaneous speech</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">89,91</context>
+          <context context-type="linenumber">90,92</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1930098652065133255" datatype="html">
         <source>Exclude utterances with more than</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">91,92</context>
+          <context context-type="linenumber">92,93</context>
         </context-group>
         <note priority="1" from="description">... [n]% overlap</note>
       </trans-unit>
@@ -2419,14 +2442,14 @@
         <source>Define what counts as simultaneous speech</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">92,94</context>
+          <context context-type="linenumber">93,95</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6711803987257877773" datatype="html">
         <source>% overlap</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">97,100</context>
+          <context context-type="linenumber">98,101</context>
         </context-group>
         <note priority="1" from="description">Exclude utterances with more than [n] ...</note>
       </trans-unit>
@@ -2434,28 +2457,21 @@
         <source>Do not open a list of matches when search is complete</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">100,101</context>
+          <context context-type="linenumber">101,102</context>
         </context-group>
       </trans-unit>
 <trans-unit id="9140653115889850979" datatype="html">
         <source>No matches, only a summary of results</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">102,106</context>
+          <context context-type="linenumber">103,107</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1700570971584489561" datatype="html">
         <source>Search for instance of this pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">106,109</context>
-        </context-group>
-      </trans-unit>
-<trans-unit id="4580988005648117665" datatype="html">
-        <source>Search</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">108,110</context>
+          <context context-type="linenumber">107,110</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2492080039919389729" datatype="html">
@@ -2677,7 +2693,7 @@
         <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION"/>}}</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/button/button.component.html</context>
-          <context context-type="linenumber">6,8</context>
+          <context context-type="linenumber">7,9</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4473506671411540349" datatype="html">
@@ -2984,6 +3000,18 @@
         </context-group>
         <note priority="1" from="description">Default task result text</note>
       </trans-unit>
+<trans-unit id="3593984582899464681" datatype="html">
+        <source>Any <x id="INTERPOLATION" equiv-text="{{category}}"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <note priority="1" from="description">Any CATEGORY-NAME</note>
+      </trans-unit>
 <trans-unit id="2357645764289315007" datatype="html">
         <source>Please wait...</source>
         <context-group purpose="location">
@@ -3075,7 +3103,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">193,198</context>
+          <context context-type="linenumber">194,199</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5162686434580248853" datatype="html">
@@ -3123,11 +3151,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">68,70</context>
+          <context context-type="linenumber">69,71</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">179,181</context>
+          <context context-type="linenumber">180,182</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8693603235657020323" datatype="html">
@@ -3142,11 +3170,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">70,72</context>
+          <context context-type="linenumber">71,73</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">181,182</context>
+          <context context-type="linenumber">182,183</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2858184975402899754" datatype="html">
@@ -3202,14 +3230,14 @@
         <source>Participants</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">201,202</context>
+          <context context-type="linenumber">202,203</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2492080039919389729" datatype="html">
         <source>List participant that are included in this transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">202,204</context>
+          <context context-type="linenumber">203,205</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1933251247056465837" datatype="html">
@@ -3239,6 +3267,34 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-media/transcript-media.component.html</context>
           <context context-type="linenumber">35,37</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4409341297488013901" datatype="html">
+        <source>Add Data License Agreement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-agreement/admin-agreement.component.html</context>
+          <context context-type="linenumber">1,3</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6930191723128905764" datatype="html">
+        <source>Edit Data License Agreement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-agreement/admin-agreement.component.html</context>
+          <context context-type="linenumber">2,5</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8203071628491026183" datatype="html">
+        <source>Save license agreement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-agreement/admin-agreement.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="373175491551959051" datatype="html">
+        <source>Delete license agreement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-agreement/admin-agreement.component.html</context>
+          <context context-type="linenumber">15,17</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1184554349704304482" datatype="html">
@@ -3434,15 +3490,39 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">21,23</context>
+          <context context-type="linenumber">22,24</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">21,23</context>
+          <context context-type="linenumber">22,24</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">25,28</context>
+          <context context-type="linenumber">26,29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">48,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">48,50</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">49,51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">79,80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">79,81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">82,84</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
@@ -3561,7 +3641,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">11,15</context>
+          <context context-type="linenumber">12,16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">59,63</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
@@ -3619,7 +3703,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">37,39</context>
+          <context context-type="linenumber">104,106</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
@@ -4125,15 +4209,31 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">7,10</context>
+          <context context-type="linenumber">8</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">18,20</context>
+          <context context-type="linenumber">19,21</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">18,21</context>
+          <context context-type="linenumber">19,22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">66,69</context>
         </context-group>
         <note priority="1" from="description">Layer Label</note>
       </trans-unit>
@@ -4301,6 +4401,30 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
           <context context-type="linenumber">112,114</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">51,52</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">51,53</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">52,54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">84,85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">84,86</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">87,89</context>
         </context-group>
       </trans-unit>
 <trans-unit id="786491961416948073" datatype="html">
@@ -4764,7 +4888,7 @@
         <source>Valid Labels</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">1,4</context>
+          <context context-type="linenumber">1,3</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -4772,12 +4896,114 @@
         <source>Delete record</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">29,34</context>
+          <context context-type="linenumber">30,35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">96,101</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-transcript-types/admin-transcript-types.component.html</context>
           <context context-type="linenumber">24,29</context>
         </context-group>
+      </trans-unit>
+<trans-unit id="223172376012651961" datatype="html">
+        <source>Text on the label in the transcript for this label (e.g. the IPA version of the label) - blank to use Label</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">42,43</context>
+        </context-group>
+        <note priority="1" from="description">Valid label display</note>
+      </trans-unit>
+<trans-unit id="6812930637022637485" datatype="html">
+        <source>Display</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">42,43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">69,70</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">69,71</context>
+        </context-group>
+        <note priority="1" from="description">Valid label display</note>
+      </trans-unit>
+<trans-unit id="435041830632197437" datatype="html">
+        <source>Display (blank to use Label)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3165635301654110452" datatype="html">
+        <source>Text on the label helper for this label (e.g. the IPA version of the label) - blank to use Display</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">45,46</context>
+        </context-group>
+        <note priority="1" from="description">Valid label selector</note>
+      </trans-unit>
+<trans-unit id="3540108566782816830" datatype="html">
+        <source>Selector</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">45,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">74,75</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">74,76</context>
+        </context-group>
+        <note priority="1" from="description">Valid label selector</note>
+      </trans-unit>
+<trans-unit id="6743801292750783487" datatype="html">
+        <source>Selector (blank to use Display)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">46,48</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8950076974301590939" datatype="html">
+        <source>Subcategory</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">54,55</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">55,58</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">89,90</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">89,91</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">92,95</context>
+        </context-group>
+        <note priority="1" from="description">Valid label subcategory</note>
+      </trans-unit>
+<trans-unit id="7147858120925390867" datatype="html">
+        <source>Text on the label helper or in the transcript, for this label (e.g. the IPA version of the label)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">66,68</context>
+        </context-group>
+        <note priority="1" from="description">Valid label</note>
       </trans-unit>
 <trans-unit id="8182848103654776930" datatype="html">
         <source>Segment Layers</source>
@@ -5317,6 +5543,22 @@
         </context-group>
         <note priority="1" from="description">menu title</note>
       </trans-unit>
+<trans-unit id="4204023624947970320" datatype="html">
+        <source>Edit the data access license agreement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">68,71</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+<trans-unit id="5863970746693480286" datatype="html">
+        <source>Data License Agreement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">69,71</context>
+        </context-group>
+        <note priority="1" from="description">menu label</note>
+      </trans-unit>
 <trans-unit id="3445826262718645246" datatype="html">
         <source>Role Permissions for</source>
         <context-group purpose="location">
@@ -5697,7 +5939,7 @@
         <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION"/>}}</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/button/button.component.html</context>
-          <context context-type="linenumber">6,8</context>
+          <context context-type="linenumber">7,9</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4473506671411540349" datatype="html">
@@ -5920,6 +6162,18 @@
         </context-group>
         <note priority="1" from="description">Default task result text</note>
       </trans-unit>
+<trans-unit id="3593984582899464681" datatype="html">
+        <source>Any <x id="INTERPOLATION" equiv-text="{{category}}"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <note priority="1" from="description">Any CATEGORY-NAME</note>
+      </trans-unit>
 <trans-unit id="2357645764289315007" datatype="html">
         <source>Please wait...</source>
         <context-group purpose="location">
@@ -5927,6 +6181,184 @@
           <context context-type="linenumber">1,2</context>
         </context-group>
       </trans-unit>
++      <trans-unit id="4409341297488013901" datatype="html">
++        <source>Add Data License Agreement</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-agreement/admin-agreement.component.html</context>
++          <context context-type="linenumber">1,3</context>
++        </context-group>
++      </trans-unit>
++      <trans-unit id="6930191723128905764" datatype="html">
++        <source>Edit Data License Agreement</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-agreement/admin-agreement.component.html</context>
++          <context context-type="linenumber">2,5</context>
++        </context-group>
++      </trans-unit>
++      <trans-unit id="8203071628491026183" datatype="html">
++        <source>Save license agreement</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-agreement/admin-agreement.component.html</context>
++          <context context-type="linenumber">11,13</context>
++        </context-group>
++      </trans-unit>
++      <trans-unit id="373175491551959051" datatype="html">
++        <source>Delete license agreement</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-agreement/admin-agreement.component.html</context>
++          <context context-type="linenumber">15,17</context>
++        </context-group>
++      </trans-unit>
++      <trans-unit id="223172376012651961" datatype="html">
++        <source>Text on the label in the transcript for this label (e.g. the IPA version of the label) - blank to use Label</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">42,43</context>
++        </context-group>
++        <note priority="1" from="description">Valid label display</note>
++      </trans-unit>
++      <trans-unit id="6812930637022637485" datatype="html">
++        <source>Display</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">42,43</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">69,70</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">69,71</context>
++        </context-group>
++        <note priority="1" from="description">Valid label display</note>
++      </trans-unit>
++      <trans-unit id="435041830632197437" datatype="html">
++        <source>Display (blank to use Label)</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">43,45</context>
++        </context-group>
++      </trans-unit>
++      <trans-unit id="3165635301654110452" datatype="html">
++        <source>Text on the label helper for this label (e.g. the IPA version of the label) - blank to use Display</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">45,46</context>
++        </context-group>
++        <note priority="1" from="description">Valid label selector</note>
++      </trans-unit>
++      <trans-unit id="3540108566782816830" datatype="html">
++        <source>Selector</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">45,46</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">74,75</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">74,76</context>
++        </context-group>
++        <note priority="1" from="description">Valid label selector</note>
++      </trans-unit>
++      <trans-unit id="6743801292750783487" datatype="html">
++        <source>Selector (blank to use Display)</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">46,48</context>
++        </context-group>
++      </trans-unit>
++      <trans-unit id="8950076974301590939" datatype="html">
++        <source>Subcategory</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">54,55</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">54,56</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">55,58</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">89,90</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">89,91</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">92,95</context>
++        </context-group>
++        <note priority="1" from="description">Valid label subcategory</note>
++      </trans-unit>
++      <trans-unit id="7147858120925390867" datatype="html">
++        <source>Text on the label helper or in the transcript, for this label (e.g. the IPA version of the label)</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
++          <context context-type="linenumber">66,68</context>
++        </context-group>
++        <note priority="1" from="description">Valid label</note>
++      </trans-unit>
++      <trans-unit id="4204023624947970320" datatype="html">
++        <source>Edit the data access license agreement</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
++          <context context-type="linenumber">68,71</context>
++        </context-group>
++        <note priority="1" from="description">menu title</note>
++      </trans-unit>
++      <trans-unit id="5863970746693480286" datatype="html">
++        <source>Data License Agreement</source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
++          <context context-type="linenumber">69,71</context>
++        </context-group>
++        <note priority="1" from="description">menu label</note>
++      </trans-unit>
++      <trans-unit id="3593984582899464681" datatype="html">
++        <source>Any <x id="INTERPOLATION" equiv-text="{{category}}"/></source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
++          <context context-type="linenumber">14</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
++          <context context-type="linenumber">24</context>
++        </context-group>
++        <note priority="1" from="description">Any CATEGORY-NAME</note>
++      </trans-unit>
++      <trans-unit id="3593984582899464681" datatype="html">
++        <source>Any <x id="INTERPOLATION" equiv-text="{{category}}"/></source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
++          <context context-type="linenumber">14</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
++          <context context-type="linenumber">24</context>
++        </context-group>
++        <note priority="1" from="description">Any CATEGORY-NAME</note>
++      </trans-unit>
++      <trans-unit id="3593984582899464681" datatype="html">
++        <source>Any <x id="INTERPOLATION" equiv-text="{{category}}"/></source>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
++          <context context-type="linenumber">14</context>
++        </context-group>
++        <context-group purpose="location">
++          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
++          <context context-type="linenumber">24</context>
++        </context-group>
++        <note priority="1" from="description">Any CATEGORY-NAME</note>
++      </trans-unit>
     </body>
   </file>
 </xliff>

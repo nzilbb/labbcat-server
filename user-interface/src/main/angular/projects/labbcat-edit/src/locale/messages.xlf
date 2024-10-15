@@ -63,7 +63,7 @@
         <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION"/>}}</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/button/button.component.html</context>
-          <context context-type="linenumber">6,8</context>
+          <context context-type="linenumber">7,9</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4473506671411540349" datatype="html">
@@ -370,6 +370,18 @@
         </context-group>
         <note priority="1" from="description">Default task result text</note>
       </trans-unit>
+      <trans-unit id="3593984582899464681" datatype="html">
+        <source>Any <x id="INTERPOLATION" equiv-text="{{category}}"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/valid-label-helper/valid-label-helper.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <note priority="1" from="description">Any CATEGORY-NAME</note>
+      </trans-unit>
       <trans-unit id="2357645764289315007" datatype="html">
         <source>Please wait...</source>
         <context-group purpose="location">
@@ -461,7 +473,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">193,198</context>
+          <context context-type="linenumber">194,199</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5162686434580248853" datatype="html">
@@ -509,11 +521,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">68,70</context>
+          <context context-type="linenumber">69,71</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">179,181</context>
+          <context context-type="linenumber">180,182</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8693603235657020323" datatype="html">
@@ -528,11 +540,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">70,72</context>
+          <context context-type="linenumber">71,73</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">181,182</context>
+          <context context-type="linenumber">182,183</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2858184975402899754" datatype="html">
@@ -588,14 +600,14 @@
         <source>Participants</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">201,202</context>
+          <context context-type="linenumber">202,203</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2492080039919389729" datatype="html">
         <source>List participant that are included in this transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
-          <context context-type="linenumber">202,204</context>
+          <context context-type="linenumber">203,205</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1933251247056465837" datatype="html">
