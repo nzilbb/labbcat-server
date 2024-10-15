@@ -666,7 +666,7 @@ public class TestStoreAdministration
     Vector<HashMap<String,Object>> validLabelsDefinition = new Vector<HashMap<String,Object>>();
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "valid1");
-      put("legend", "First Valid Label");
+      put("display", "First Valid Label");
       put("description", "This is the first valid label");
       put("category", "CONSONANT");
       put("subcategory", "Plosive");
@@ -674,7 +674,7 @@ public class TestStoreAdministration
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "valid2");
-      put("legend", "Second Valid Label");
+      put("display", "Second Valid Label");
       put("description", "This is the second valid label");
       put("category", "VOWEL");
       put("subcategory", "Monophthong");
@@ -771,7 +771,7 @@ public class TestStoreAdministration
       validLabelsDefinition = new Vector<HashMap<String,Object>>();
       validLabelsDefinition.add(new HashMap<String,Object>() {{
         put("label", "valid3");
-        put("legend", "Third Valid Label");
+        put("display", "Third Valid Label");
         put("description", "This is the third valid label");
         put("category", "CONSONANT");
         put("subcategory", "Approximant");
@@ -779,7 +779,7 @@ public class TestStoreAdministration
       }});
       validLabelsDefinition.add(new HashMap<String,Object>() {{
         put("label", "valid2");
-        put("legend", "2nd Valid Label");
+        put("display", "2nd Valid Label");
         put("description", "This is the second valid label");
         put("category", "VOWEL");
         put("subcategory", "Monophthong");
