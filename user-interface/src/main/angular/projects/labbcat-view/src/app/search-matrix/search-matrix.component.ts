@@ -160,6 +160,10 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         if (input) { // set the text cursor to after the inserted text
             input.focus();
             input.selectionStart = input.value.length;
+            // make sure toolip is updated:
+            window.setTimeout(()=>{
+                input.dispatchEvent(new Event('input'));
+            }, 200);
         }
     }
 
