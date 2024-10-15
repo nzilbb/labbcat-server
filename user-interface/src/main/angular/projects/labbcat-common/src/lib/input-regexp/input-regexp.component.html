@@ -5,7 +5,7 @@
   id="{{id}}"
   title="{{temporaryTitle || title}}"
   placeholder="{{placeholder}}"
-  (keyup)="checkRegularExpression($event)"
+  (input)="checkRegularExpression($event)"
   [(ngModel)]="value"
   (ngModelChange)="valueChange.emit(value)"
   [appAutofocus]="autofocus?true:false">
