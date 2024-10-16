@@ -665,6 +665,39 @@
     }
     
     /**
+     * Identifies a list of annotations that match a particular pattern, and aggregates
+     * their labels. <p> This allows for counting, listing distinct labels, etc. 
+     * @param {string} operation The aggregation operation(s) - e.g. 
+     *  <dl>
+     *   <dt> DISTINCT </dt><dd> List the distinct labels. </dd>
+     *   <dt> MAX </dt><dd> Return the highest label. </dd>
+     *   <dt> MIN </dt><dd> Return the lowest label. </dd>
+     *   <dt> COUNT </dt><dd> Return the number of annotations. </dd>
+     *   <dt> COUNT DISTINCT </dt><dd> Return the number of distinct labels. </dd>
+     *  </dl>
+     *  More than one operation can be specified, by using a comma delimiter. 
+     *  e.g. "DISTINCT,COUNT" will return each distinct label, followed by its count
+     *  (i.e. the array will have twice the number of elements as there are distinct words,
+     *  even-indexed elements are the word labels, and odd-indexed elements are the counts).
+     * @param {string} expression An expression that determines which participants match.
+     * <p> The expression language is loosely based on JavaScript; expressions such as
+     * the following can be used:
+     * <ul>
+     *  <li><code>layer.id == 'orthography'</code></li>
+     *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography'</code></li>
+     * </ul>
+     * <p><em>NB</em> all expressions must match by either id or layer.id.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be: The number of matching annotations.
+     */
+    aggregateMatchingAnnotations(operation, expression, onResult) {
+      this.createRequest("aggregateMatchingAnnotations", {
+        operation : operation,
+        expression : expression
+      }, onResult).send();
+    }
+    
+    /**
      * Counts the number of annotations that match a particular pattern.
      * @param {string} expression An expression that determines which participants match.
      * <p> The expression language is loosely based on JavaScript; expressions such as

@@ -6463,6 +6463,34 @@
         </context-group>
         <note priority="1" from="description">Any CATEGORY-NAME</note>
       </trans-unit>
+      <trans-unit id="5193539160604294602" datatype="html">
+        <source>Generate</source>
+        <target state="translated">Generar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">61,63</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">95,97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4877962667018150164" datatype="html">
+        <source>Generate labels from existing layer data</source>
+        <target state="translated">Generar etiquetas de los datos existentes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">64,68</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

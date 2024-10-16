@@ -247,15 +247,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">79,80</context>
+          <context context-type="linenumber">84,85</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">79,81</context>
+          <context context-type="linenumber">84,86</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">82,84</context>
+          <context context-type="linenumber">87,89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
@@ -378,7 +378,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">59,63</context>
+          <context context-type="linenumber">59,61</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
@@ -436,7 +436,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">104,106</context>
+          <context context-type="linenumber">109,111</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
@@ -966,7 +966,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">66,69</context>
+          <context context-type="linenumber">71,74</context>
         </context-group>
         <note priority="1" from="description">Layer Label</note>
       </trans-unit>
@@ -1149,15 +1149,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">84,85</context>
+          <context context-type="linenumber">89,90</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">84,86</context>
+          <context context-type="linenumber">89,91</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">87,89</context>
+          <context context-type="linenumber">92,94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="786491961416948073" datatype="html">
@@ -1633,7 +1633,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">96,101</context>
+          <context context-type="linenumber">101,106</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-transcript-types/admin-transcript-types.component.html</context>
@@ -1656,11 +1656,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">69,70</context>
+          <context context-type="linenumber">74,75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">69,71</context>
+          <context context-type="linenumber">74,76</context>
         </context-group>
         <note priority="1" from="description">Valid label display</note>
       </trans-unit>
@@ -1687,11 +1687,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">74,75</context>
+          <context context-type="linenumber">79,80</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">74,76</context>
+          <context context-type="linenumber">79,81</context>
         </context-group>
         <note priority="1" from="description">Valid label selector</note>
       </trans-unit>
@@ -1718,23 +1718,49 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">89,90</context>
+          <context context-type="linenumber">94,95</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">89,91</context>
+          <context context-type="linenumber">94,96</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">92,95</context>
+          <context context-type="linenumber">97,100</context>
         </context-group>
         <note priority="1" from="description">Valid label subcategory</note>
+      </trans-unit>
+      <trans-unit id="5193539160604294602" datatype="html">
+        <source>Generate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">61,63</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
+          <context context-type="linenumber">95,97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4877962667018150164" datatype="html">
+        <source>Generate labels from existing layer data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
+          <context context-type="linenumber">64,68</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="7147858120925390867" datatype="html">
         <source>Text on the label helper or in the transcript, for this label (e.g. the IPA version of the label)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
-          <context context-type="linenumber">66,68</context>
+          <context context-type="linenumber">71,73</context>
         </context-group>
         <note priority="1" from="description">Valid label</note>
       </trans-unit>
@@ -1920,21 +1946,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
           <context context-type="linenumber">95,96</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="5193539160604294602" datatype="html">
-        <source>Generate</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
-          <context context-type="linenumber">38,40</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
-          <context context-type="linenumber">40,42</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
-          <context context-type="linenumber">95,97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9212449559226155586" datatype="html">

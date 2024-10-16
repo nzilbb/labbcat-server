@@ -57,6 +57,11 @@
       <lib-button action="create"
                   (press)="newType.reportValidity() && createFullRow(newType.value, newDisplay.value, newSelector.value, newDescription.value, newCategory.value, newSubcategory.value) && newType.value = newDisplay.value = newSelector.value = newDescription.value = '';"
                   i18n-title title="Add new record"></lib-button>
+      <lib-button *ngIf="canGenerateLabels"
+                  i18n-label label="Generate"
+                  (press)="generateLabelsFromLayer();"
+                  img="cog.svg" icon="⚙"
+                  i18n-title title="Generate labels from existing layer data"></lib-button>
     </span>
   </div>
   

@@ -13,6 +13,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
     layerId: string;
     layer: Layer;
     labels: string[];
+    canGenerateLabels = false;
     
     constructor(
         labbcatService: LabbcatService,
@@ -50,6 +51,40 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
             this.labels.push(label);
         }
         this.changed = false;
+        
+        this.canGenerateLabels = false;
+        if (this.labels.length == 0) { // there are no labels currently
+            // maybe we can generate labels from existing values?
+            this.checkDistinctLabels();
+        }
+    }
+
+    checkDistinctLabels(): void {
+        this.labbcatService.labbcat.aggregateMatchingAnnotations(
+            "COUNT DISTINCT",
+            "layer.id == '"+this.layer.id.replace(/'/g, "\\'")+"'",
+            (countDistinctArray, errors, messages) => {
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
+                if (countDistinctArray && countDistinctArray.length == 1) {
+                    const distinctLabelCount = parseInt(countDistinctArray[0]);
+                    this.canGenerateLabels = distinctLabelCount < 100;
+                }
+            });
+    }
+
+    generateLabelsFromLayer(): void {
+        this.labbcatService.labbcat.aggregateMatchingAnnotations(
+            "DISTINCT",
+            "layer.id == '"+this.layer.id.replace(/'/g, "\\'")+"'",
+            (distinctLabels, errors, messages) => {
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
+                if (distinctLabels && distinctLabels.length) {
+                    this.canGenerateLabels = false;
+                    this.createRows(distinctLabels);
+                }
+            });
     }
 
     createFullRow(newLabel: string, newDisplay: string, newSelector: string,
@@ -79,7 +114,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
             return somethingAdded;
         }
     }
-            
+    
     createRow(newLabel: string): boolean {
         let labels = [ newLabel ];        
         // if the label is actually lots of labels, add them all
@@ -92,23 +127,25 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
                 labels = possibleLabels;
             }
         }
+        return this.createRows(labels);
+    }
+    
+    createRows(newLabels: string[]): boolean {
         let somethingAdded = false;
         
         // is this probably a phonological layer?
         const phonological = this.layer.type == "ipa"
         // does the addition contain obviously phonological characters?
-            ||  /.*[əː].*/.test(newLabel)
+            ||  newLabels.find(l => /.*[əː].*/.test(l))
         // do the current values include them?
             || this.labels.find(l => /.*[əː].*/.test(l))
         // is 'vowel' a current category?
             ||  (this.layer.validLabelsDefinition
-                && this.layer.validLabelsDefinition.find(d => d.category.toLowerCase() == "vowel"))
-        // if there are no labels yet, and there are multiple labels being added
-            || this.labels.length == 0 && possibleLabels.length > 0;
-        
-        for (let label of labels) {
+                && this.layer.validLabelsDefinition.find(d => d.category.toLowerCase() == "vowel"));
+
+        for (let label of newLabels) {
             if (label // no blank labels
-                || !newLabel) { // unless we're adding exactly one label which is blank
+                || newLabels.length == 1) { // unless we're adding exactly one label which is blank
                 if (this.labels.indexOf(label) >= 0) {
                     this.messageService.error("Already exists: " + label); // TODO i18n
                 } else {
