@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -185,7 +185,8 @@ public class TestAnnotationAgqlToSql {
     
   }
 
-  @Test public void layerId() throws AGQLException {
+  /** Ensure that identifying by a temporal layer works */
+  @Test public void temporalLayerId() throws AGQLException {
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
     AnnotationAgqlToSql.Query q = transformer.sqlFor(
       "layer.id == 'orthography'",
@@ -224,6 +225,71 @@ public class TestAnnotationAgqlToSql {
                  +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.annotation_id LIMIT 1,1",
                  q.sql);
   }
+  
+  /** Ensure that identifying by a participant attribute layer ID works */
+  @Test public void participantLayerId() throws AGQLException {
+    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+    AnnotationAgqlToSql.Query q = transformer.sqlFor(
+      "layer.id == 'participant_gender'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals(
+      "SQL - layer.id ==",
+      "SELECT DISTINCT annotation.label AS label, annotation.annotation_id AS annotation_id,"
+      +" annotation.label_status AS label_status, 0 AS ordinal,"
+      +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+      +" annotation.annotated_by AS annotated_by,"
+      +" annotation.annotated_when AS annotated_when,"
+      +" 'participant_gender' AS layer"
+      +" FROM annotation_participant annotation"
+      +" INNER JOIN speaker ON annotation.speaker_number = speaker.speaker_number"
+      +" INNER JOIN transcript_speaker"
+      +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+      +" INNER JOIN transcript graph ON transcript_speaker.ag_id = graph.ag_id"
+      +" WHERE annotation.layer = 'gender'"
+      +" AND 'participant_gender' = 'participant_gender'"
+      +" ORDER BY graph.transcript_id, annotation.annotation_id",
+      q.sql);
+      
+    q = transformer.sqlFor(
+      "graph.id == 'AdaAicheson-01.trs' && layerId == 'participant_gender'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals(
+      "SQL - graph.id and layerId ==",
+      "SELECT DISTINCT annotation.label AS label, annotation.annotation_id AS annotation_id,"
+      +" annotation.label_status AS label_status, 0 AS ordinal,"
+      +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+      +" annotation.annotated_by AS annotated_by,"
+      +" annotation.annotated_when AS annotated_when,"
+      +" 'participant_gender' AS layer"
+      +" FROM annotation_participant annotation"
+      +" INNER JOIN speaker ON annotation.speaker_number = speaker.speaker_number"
+      +" INNER JOIN transcript_speaker"
+      +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+      +" INNER JOIN transcript graph ON transcript_speaker.ag_id = graph.ag_id"
+      +" WHERE annotation.layer = 'gender'"
+      +" AND graph.transcript_id = 'AdaAicheson-01.trs'"
+      +" AND 'participant_gender' = 'participant_gender'"
+      +" ORDER BY graph.transcript_id, annotation.annotation_id",
+      q.sql);
+
+    q = transformer.sqlFor(
+      "layer.id == 'participant_gender'",
+      "DISTINCT annotation.label", null, null);
+    assertEquals(
+      "SQL - DISTINCT label",
+      "SELECT DISTINCT annotation.label,"
+      +" 'participant_gender' AS layer"
+      +" FROM annotation_participant annotation"
+      +" INNER JOIN speaker ON annotation.speaker_number = speaker.speaker_number"
+      +" INNER JOIN transcript_speaker"
+      +" ON transcript_speaker.speaker_number = speaker.speaker_number"
+      +" INNER JOIN transcript graph ON transcript_speaker.ag_id = graph.ag_id"
+      +" WHERE annotation.layer = 'gender'"
+      +" AND 'participant_gender' = 'participant_gender'"
+      +" ORDER BY graph.transcript_id, annotation.annotation_id",
+      q.sql);
+  }
+
 
   @Test public void parentId() throws AGQLException {
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());

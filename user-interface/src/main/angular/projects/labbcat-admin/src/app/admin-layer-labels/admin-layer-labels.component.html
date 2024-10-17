@@ -6,10 +6,16 @@
           i18n-title="Valid label" title="Label"><legend i18n="Valid label">Label</legend>
       <input #newType type="text" i18n-placeholder="Valid label" placeholder="Label"
              (keydown.enter)="newType.reportValidity() && createRow(newType.value) && newType.value = '';"></span>
+    <span class="valid-label-description"></span>
     <span class="buttons">
       <lib-button action="create"
                   (press)="newType.reportValidity() && createRow(newType.value) && newType.value = '';"
                   i18n-title title="Add new record"></lib-button>
+      <lib-button *ngIf="canGenerateLabels"
+                  i18n-label label="Generate"
+                  (press)="generateLabelsFromLayer();"
+                  img="cog.svg" icon="⚙"
+                  i18n-title title="Generate labels from existing layer data"></lib-button>
     </span>
   </div>
   
