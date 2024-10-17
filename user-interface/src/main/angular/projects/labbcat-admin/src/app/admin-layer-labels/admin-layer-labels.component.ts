@@ -64,8 +64,8 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
             "COUNT DISTINCT",
             "layer.id == '"+this.layer.id.replace(/'/g, "\\'")+"'",
             (countDistinctArray, errors, messages) => {
-                if (errors) errors.forEach(m => this.messageService.error(m));
-                if (messages) messages.forEach(m => this.messageService.info(m));
+                if (errors) errors.forEach(m => console.error(m));
+                if (messages) messages.forEach(m => console.log(m));
                 if (countDistinctArray && countDistinctArray.length == 1) {
                     const distinctLabelCount = parseInt(countDistinctArray[0]);
                     this.canGenerateLabels = distinctLabelCount < 100;

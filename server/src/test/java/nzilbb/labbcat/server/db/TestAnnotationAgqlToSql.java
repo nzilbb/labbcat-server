@@ -290,6 +290,60 @@ public class TestAnnotationAgqlToSql {
       q.sql);
   }
 
+  /** Ensure that identifying by a transcript attribute layer ID works */
+  @Test public void transcriptAttributeLayerId() throws AGQLException {
+    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+    AnnotationAgqlToSql.Query q = transformer.sqlFor(
+      "layer.id == 'transcript_language'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals(
+      "SQL - layer.id ==",
+      "SELECT DISTINCT annotation.label AS label, annotation.annotation_id AS annotation_id,"
+      +" annotation.label_status AS label_status, 0 AS ordinal,"
+      +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+      +" annotation.annotated_by AS annotated_by,"
+      +" annotation.annotated_when AS annotated_when,"
+      +" 'transcript_language' AS layer"
+      +" FROM annotation_transcript annotation"
+      +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+      +" WHERE annotation.layer = 'language'"
+      +" AND 'transcript_language' = 'transcript_language'"
+      +" ORDER BY graph.transcript_id, annotation.annotation_id",
+      q.sql);
+      
+    q = transformer.sqlFor(
+      "graph.id == 'AdaAicheson-01.trs' && layerId == 'transcript_language'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals(
+      "SQL - graph.id and layerId ==",
+      "SELECT DISTINCT annotation.label AS label, annotation.annotation_id AS annotation_id,"
+      +" annotation.label_status AS label_status, 0 AS ordinal,"
+      +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
+      +" annotation.annotated_by AS annotated_by,"
+      +" annotation.annotated_when AS annotated_when,"
+      +" 'transcript_language' AS layer"
+      +" FROM annotation_transcript annotation"
+      +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+      +" WHERE annotation.layer = 'language'"
+      +" AND graph.transcript_id = 'AdaAicheson-01.trs'"
+      +" AND 'transcript_language' = 'transcript_language'"
+      +" ORDER BY graph.transcript_id, annotation.annotation_id",
+      q.sql);
+
+    q = transformer.sqlFor(
+      "layer.id == 'transcript_language'",
+      "DISTINCT annotation.label", null, null);
+    assertEquals(
+      "SQL - DISTINCT label",
+      "SELECT DISTINCT annotation.label,"
+      +" 'transcript_language' AS layer"
+      +" FROM annotation_transcript annotation"
+      +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+      +" WHERE annotation.layer = 'language'"
+      +" AND 'transcript_language' = 'transcript_language'"
+      +" ORDER BY graph.transcript_id, annotation.annotation_id",
+      q.sql);
+  }
 
   @Test public void parentId() throws AGQLException {
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
