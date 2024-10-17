@@ -270,8 +270,9 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
  	            if (range != "") {
  	                const bar = range.indexOf('|');
  	                if (bar >= 0) {
- 		            layer.minLabel = range.substring(0, bar);
- 		            layer.maxLabel = range.substring(bar + 1);
+                            // underscores in the labels are actually spaces
+ 		            layer.minLabel = range.substring(0, bar).replace(/_/g, " ");
+ 		            layer.maxLabel = range.substring(bar + 1).replace(/_/g, " ");;
  	                }
  	            }
  	        }
@@ -293,10 +294,11 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
             layer.style += "-"
             if (layer.max) layer.style += layer.max;
             if (layer.minLabel || layer.maxLabel) {
+                // labels can't contain spaces, so convert them to underscores
                 layer.style += " "
-                if (layer.minLabel) layer.style += layer.minLabel;
+                if (layer.minLabel) layer.style += layer.minLabel.replace(/ /g, "_");
                 layer.style += "|"
-                if (layer.maxLabel) layer.style += layer.maxLabel;
+                if (layer.maxLabel) layer.style += layer.maxLabel.replace(/ /g, "_");
             }
         }
         if (layer.slider) layer.style += " slider";
