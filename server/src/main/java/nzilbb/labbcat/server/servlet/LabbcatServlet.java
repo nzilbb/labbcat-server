@@ -351,13 +351,13 @@ public class LabbcatServlet extends HttpServlet {
         || fileName.indexOf(';') >= 0 // contains semicolon
         || !fileName.equals(onlyASCIIFileName)) { // contains non-ascii
       try {
-        fileName = "\""+URLEncoder.encode(fileName, "UTF-8")+"\"";
+        fileName = "\""+URLEncoder.encode(fileName, "UTF-8").replace('+',' ')+"\"";
       } catch(UnsupportedEncodingException exception) {
         fileName = "\""+fileName+"\"";
       }
     } else {
       try {
-        fileName = URLEncoder.encode(fileName, "UTF-8");
+        fileName = URLEncoder.encode(fileName, "UTF-8").replace('+',' ');
       } catch(UnsupportedEncodingException exception) {
       }
     }
@@ -383,9 +383,9 @@ public class LabbcatServlet extends HttpServlet {
       response.addHeader(
         "Content-Disposition", "attachment; filename="+onlyASCIIFileNameNoQuotes); 
     } else {
-      // MDN recommends not to use URLEncoder.encode so we don't
+      // MDN recommends not to use URLEncoder.encode
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
-      // TODO we can use User-Agent to send un-URL-encoded responses to Sarari only
+      // TODO we can use User-Agent to send un-URL-encoded responses to Safari only
       response.addHeader(
         "Content-Disposition", "attachment; filename="+onlyASCIIFileName+"; filename*="+fileName);
     }
