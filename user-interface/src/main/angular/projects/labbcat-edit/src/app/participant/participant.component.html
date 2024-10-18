@@ -123,7 +123,7 @@
                 </div>
                 <span *ngIf="layer.type == 'number'" class="number">
                   <label *ngIf="layer.type == 'number' && layer.style.endsWith('slider') && layer.style.split('|').length>1">
-                    {{layer.style.split(' ')[2].split('|')[0]}}
+                    {{layer.style.split(' ')[2].split('|')[0].replaceAll('_',' ')}}
                   </label>
                   <input *ngIf="layer.type == 'number'"
                          type="{{layer.style.endsWith('slider')?'range':'number'}}"
@@ -134,7 +134,7 @@
                          id="{{layer.id}}"
                          placeholder="{{layer.hint}}"/>
                   <label *ngIf="layer.type == 'number' && layer.style.endsWith('slider') && layer.style.split('|').length>1">
-                    {{layer.style.split(' ')[2].split('|')[1]}}
+                    {{layer.style.split(' ')[2].split('|')[1].replaceAll('_',' ')}}
                   </label>
                 </span>
                 
