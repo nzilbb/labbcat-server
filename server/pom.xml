@@ -11,7 +11,7 @@
   <artifactId>nzilbb.labbcat.server</artifactId>
   <name>LaBB-CAT backend</name>
   <description>LaBB-CAT back-end java servlets and services.</description>
-  <version>1.0.5-SNAPSHOT</version>
+  <version>1.0.5</version>
   <packaging>jar</packaging>
 
   <properties>
