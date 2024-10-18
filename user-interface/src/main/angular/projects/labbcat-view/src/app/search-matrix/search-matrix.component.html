@@ -116,6 +116,7 @@
                     (press)="helperMatch = (helperMatch == match?null:match)"></lib-button>
                   <lib-valid-label-helper
                     *ngIf="helperMatch == match"
+                    regularExpression="{{true}}"
                     [layer]="schema.layers[layerId]"
                     (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-valid-label-helper>
                 </span>

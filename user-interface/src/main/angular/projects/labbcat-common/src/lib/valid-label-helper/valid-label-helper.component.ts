@@ -42,7 +42,7 @@ export class ValidLabelHelperComponent implements OnInit {
     select(symbol: string): boolean {
         if (this.regularExpression) {
             // escape for regular expression
-            symbol = symbol.replace(/([\?\.\*\|\^\$])/g,"\\$1");
+            symbol = symbol.replace(/([\?\.\*\|\^\$\(\)])/g,"\\$1");
         }
         this.symbolSelected.emit(symbol);
         return false;
@@ -70,7 +70,8 @@ export class ValidLabelHelperComponent implements OnInit {
                 }
                 let symbol = label.label;
                 // escape for regular expression
-                if (symbol == "|" || symbol == ")" || symbol == "^" || symbol == "$") {
+                if (symbol == "|" || symbol == "(" || symbol == ")"
+                    || symbol == "^" || symbol == "$") {
                     symbol = "\\" + symbol;
                 }
                 pattern += symbol;
