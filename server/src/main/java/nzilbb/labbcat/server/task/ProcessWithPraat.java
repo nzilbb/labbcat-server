@@ -58,6 +58,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import nzilbb.ag.GraphNotFoundException;
+import nzilbb.ag.PermissionException;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 import org.apache.commons.csv.CSVFormat;
@@ -1887,6 +1888,8 @@ public class ProcessWithPraat extends Task {
       } else {
         wavError = "Transcript has no accessible audio";
       }
+    } catch (PermissionException x) {
+      wavError = "Access to audio denied";
     } catch (GraphNotFoundException x) {
       wavError = "Transcript not found";
     }
