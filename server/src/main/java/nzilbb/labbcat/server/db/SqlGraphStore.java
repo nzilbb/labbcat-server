@@ -1055,10 +1055,10 @@ public class SqlGraphStore implements GraphStore {
                   sql.close();               
                 }
               } else {
-                throw new StoreException("Layer not found: " + id);
+                return null;
               }
             } else { // not numeric
-              throw new StoreException("Layer not found: " + id);
+              return null;
             }
           } // not a transcript attribute
         } // not a participant attribute
