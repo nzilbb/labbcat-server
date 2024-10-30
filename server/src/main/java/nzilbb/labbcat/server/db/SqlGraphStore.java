@@ -2873,7 +2873,7 @@ public class SqlGraphStore implements GraphStore {
       suffix = " ORDER BY annotation.label";
     } else if (operation.equalsIgnoreCase("DISTINCT BINARY")) { // case/accent sensitive
       select = "DISTINCT CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin)";
-      suffix = " ORDER BY annotation.label";
+      suffix = " ORDER BY CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin)";
     } else if (operation.equalsIgnoreCase("MAX")) {
       select = "MAX(annotation.label)";
       suffix = " ORDER BY annotation.label";
@@ -2881,17 +2881,17 @@ public class SqlGraphStore implements GraphStore {
       select = "MIN(annotation.label)";
       suffix = " ORDER BY annotation.label";
     } else if (operation.equalsIgnoreCase("COUNT DISTINCT")) {
-      select = "COUNT (DISTINCT annotation.label)";
+      select = "COUNT(DISTINCT annotation.label)";
       suffix = "";
     } else if (operation.equalsIgnoreCase("COUNT DISTINCT BINARY")) { // case/accent sensitive
-      select = "COUNT (DISTINCT CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin))";
+      select = "COUNT(DISTINCT CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin))";
       suffix = "";
     } else if (operation.equalsIgnoreCase("DISTINCT,COUNT")) {
       select = "annotation.label, COUNT(*)";
       suffix = " GROUP BY annotation.label";
     } else if (operation.equalsIgnoreCase("DISTINCT BINARY,COUNT")) {
       select = "CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin), COUNT(*)";
-      suffix = " GROUP BY annotation.label";
+      suffix = " GROUP BY CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin)";
     }
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
     AnnotationAgqlToSql.Query query = transformer.sqlFor(
@@ -4191,10 +4191,11 @@ public class SqlGraphStore implements GraphStore {
         String wordLabel = wordByLabel.group("wordLabel");
         int ordinal = 0;
         if (!layer.getPeers()) {
+          String equals = expression.indexOf("===") > 0?"===":"==="; // match exactitude
           deleteMatchingAnnotations(
             "layer == '"+esc(layerId)+"' "
             +wordByLabel.group("extraConditions") // e.g. language conditions etc.
-            +"&& first('"+sourceLayer+"').label == '"+wordLabel+"'");
+            +"&& first('"+sourceLayer+"').label "+equals+" '"+wordLabel+"'");
           ordinal = 1;
         } else {
           // figure out what the ordinal should be by assuming the first match is representative

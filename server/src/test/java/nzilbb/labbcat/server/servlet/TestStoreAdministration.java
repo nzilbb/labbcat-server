@@ -682,11 +682,7 @@ public class TestStoreAdministration
     }});
     testLayer.put("validLabelsDefinition", validLabelsDefinition);
 
-    try {
-      l.getLayer(testLayer.getId());
-      fail("Test layer doesn't already exist: " + testLayer.getId());
-    } catch (StoreException x) {
-    }
+    assertNull("Test layer doesn't already exist", l.getLayer(testLayer.getId()));
       
     try {
       l.saveLayer(testLayer);
@@ -848,11 +844,8 @@ public class TestStoreAdministration
       l.deleteLayer(testLayer.getId());
 
       // ensure it's been deleted
-      try {
-        l.getLayer(testLayer.getId());
-        fail("Should not be able to get layer that has been deleted: " + testLayer.getId());
-      } catch (StoreException x) {
-      }
+      assertNull("Should not be able to get layer that has been deleted",
+                 l.getLayer(testLayer.getId()));
          
     } finally {
       // ensure layer is deleted
@@ -875,11 +868,7 @@ public class TestStoreAdministration
     testLayer.put("subtype", "select"); // ensure 'select' layers are correctly created
     // TODO validLabels
 
-    try {
-      l.getLayer(testLayer.getId());
-      fail("Test layer doesn't already exist: " + testLayer.getId());
-    } catch (StoreException x) {
-    }
+    assertNull("Test layer doesn't already exist", l.getLayer(testLayer.getId()));
       
     try {
       l.saveLayer(testLayer);
@@ -1009,11 +998,8 @@ public class TestStoreAdministration
       l.deleteLayer(testLayer.getId());
 
       // ensure it's been deleted
-      try {
-        l.getLayer(testLayer.getId());
-        fail("Should not be able to get layer that has been deleted: " + testLayer.getId());
-      } catch (StoreException x) {
-      }
+      assertNull("Should not be able to get layer that has been deleted",
+                 l.getLayer(testLayer.getId()));
          
     } finally {
       // ensure layer is deleted

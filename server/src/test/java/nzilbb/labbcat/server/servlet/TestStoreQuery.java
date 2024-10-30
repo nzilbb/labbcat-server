@@ -265,6 +265,30 @@ public class TestStoreQuery
                    2 * typeCount, values.length);
 
       values = l.aggregateMatchingAnnotations(
+        "DISTINCT BINARY", "layer.id == 'orthography' && /^a.*/.test(label)");
+      assertTrue("aggregateMatchingAnnotations(DISTINCT BINARY): Some values returned",
+                 values.length > 0);
+      typeCount = values.length;
+      
+      values = l.aggregateMatchingAnnotations(
+        "COUNT DISTINCT BINARY", "layer.id == 'orthography' && /^a.*/.test(label)");
+      assertEquals("aggregateMatchingAnnotations(COUNT DISTINCT BINARY): One value returned",
+                   1, values.length);
+      assertEquals("aggregateMatchingAnnotations(COUNT DISTINCT BINARY): Correct value returned",
+                   typeCount, Integer.parseInt(values[0]));
+      
+      values = l.aggregateMatchingAnnotations(
+        "DISTINCT BINARY,COUNT", "layer.id == 'orthography' && /^a.*/.test(label)");
+      assertTrue("aggregateMatchingAnnotations(DISTINCT BINARY,COUNT): Some values returned",
+                 values.length > 0);
+      assertEquals("aggregateMatchingAnnotations(DISTINCT BINARY,COUNT): Even number of values returned",
+                   0, values.length % 2);
+      assertTrue("aggregateMatchingAnnotations(DISTINCT BINARY,COUNT): First value looks like an orthography",
+                 values[0].matches("[a-z0-9]+"));
+      assertEquals("aggregateMatchingAnnotations(DISTINCT BINARY,COUNT): 2x typeCount",
+                   2 * typeCount, values.length);
+      
+      values = l.aggregateMatchingAnnotations(
         "MAX", "layer.id == 'orthography' && /^a.*/.test(label)");
       assertEquals("aggregateMatchingAnnotations(MAX): One value returned",
                    1, values.length);
