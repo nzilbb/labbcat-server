@@ -338,6 +338,7 @@ public class AnnotationAgqlToSql {
         @Override public void exitLabelExpression(AGQLParser.LabelExpressionContext ctx) {
           space();
           if (ctx.other == null) {
+            // annotation label comparisons are always case sensitive
             conditions.push("annotation.label");
           } else { // other.label
             if (ctx.other.firstMethodCall() == null) {
@@ -944,6 +945,7 @@ public class AnnotationAgqlToSql {
           space();
           String operator = ctx.operator.getText().trim();
           if (operator.equals("==")) operator = "=";
+          else if (operator.equals("===")) operator = "= BINARY"; // case/accent sensitive
           else if (operator.equals("≠")) operator = "<>";
           else if (operator.equals("≤")) operator = "<=";
           else if (operator.equals("≥")) operator = ">=";

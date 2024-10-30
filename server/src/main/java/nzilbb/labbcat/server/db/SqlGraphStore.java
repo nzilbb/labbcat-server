@@ -2834,11 +2834,13 @@ public class SqlGraphStore implements GraphStore {
    * <p> This allows for counting, listing distinct labels, etc.
    * @param operation The aggregation operation(s) - e.g. 
    * <dl>
-   *  <dt> DISTINCT </dt><dd> List the distinct labels. </dd>
+   *  <dt> DISTINCT </dt><dd> List the distinct labels (case/accent insensitive). </dd>
+   *  <dt> DISTINCT BINARY </dt><dd> List the distinct labels (case/accent sensitive). </dd>
    *  <dt> MAX </dt><dd> Return the highest label. </dd>
    *  <dt> MIN </dt><dd> Return the lowest label. </dd>
    *  <dt> COUNT </dt><dd> Return the number of annotations. </dd>
-   *  <dt> COUNT DISTINCT </dt><dd> Return the number of distinct labels. </dd>
+   *  <dt> COUNT DISTINCT </dt><dd> Return the number of distinct labels (case/accent insensitive). </dd>
+   *  <dt> COUNT DISTINCT BINARY</dt><dd> Return the number of distinct labels (case/accent sensitive). </dd>
    * </dl>
    * More than one operation can be specified, by using a comma delimiter. 
    * e.g. "DISTINCT,COUNT" will return each distinct label, followed by its count
@@ -2869,6 +2871,9 @@ public class SqlGraphStore implements GraphStore {
     if (operation.equalsIgnoreCase("DISTINCT")) {
       select = "DISTINCT annotation.label";
       suffix = " ORDER BY annotation.label";
+    } else if (operation.equalsIgnoreCase("DISTINCT BINARY")) { // case/accent sensitive
+      select = "DISTINCT CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin)";
+      suffix = " ORDER BY annotation.label";
     } else if (operation.equalsIgnoreCase("MAX")) {
       select = "MAX(annotation.label)";
       suffix = " ORDER BY annotation.label";
@@ -2876,10 +2881,16 @@ public class SqlGraphStore implements GraphStore {
       select = "MIN(annotation.label)";
       suffix = " ORDER BY annotation.label";
     } else if (operation.equalsIgnoreCase("COUNT DISTINCT")) {
-      select = "COUNT(DISTINCT annotation.label)";
+      select = "COUNT (DISTINCT annotation.label)";
+      suffix = "";
+    } else if (operation.equalsIgnoreCase("COUNT DISTINCT BINARY")) { // case/accent sensitive
+      select = "COUNT (DISTINCT CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin))";
       suffix = "";
     } else if (operation.equalsIgnoreCase("DISTINCT,COUNT")) {
       select = "annotation.label, COUNT(*)";
+      suffix = " GROUP BY annotation.label";
+    } else if (operation.equalsIgnoreCase("DISTINCT BINARY,COUNT")) {
+      select = "CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin), COUNT(*)";
       suffix = " GROUP BY annotation.label";
     }
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());

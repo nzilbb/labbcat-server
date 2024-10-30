@@ -415,6 +415,43 @@ public class TestAnnotationAgqlToSql {
                  q.sql);
   }
 
+
+  @Test public void annotationLabels() throws AGQLException {
+    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+    AnnotationAgqlToSql.Query q = transformer.sqlFor(
+      "layer.id == 'orthography' && label = 'test'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("single =",
+                 "SELECT DISTINCT annotation.*, 'orthography' AS layer"
+                 +" FROM annotation_layer_2 annotation"
+                 +" WHERE 'orthography' = 'orthography'"
+                 +" AND annotation.label = 'test'"
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
+                 q.sql);
+    
+    q = transformer.sqlFor(
+      "layer.id == 'orthography' && label == 'test'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("double ==",
+                 "SELECT DISTINCT annotation.*, 'orthography' AS layer"
+                 +" FROM annotation_layer_2 annotation"
+                 +" WHERE 'orthography' = 'orthography'"
+                 +" AND annotation.label = 'test'"
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
+                 q.sql);
+    
+    q = transformer.sqlFor(
+      "layer.id == 'orthography' && label === 'test'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("triple === - BINARY comparison",
+                 "SELECT DISTINCT annotation.*, 'orthography' AS layer"
+                 +" FROM annotation_layer_2 annotation"
+                 +" WHERE 'orthography' = 'orthography'"
+                 +" AND annotation.label = BINARY 'test'"
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.annotation_id",
+                 q.sql);
+  }
+  
   @Test public void whoLabels() throws AGQLException {
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
     AnnotationAgqlToSql.Query q = transformer.sqlFor(
