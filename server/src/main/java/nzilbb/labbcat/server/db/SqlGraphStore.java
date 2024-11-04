@@ -2872,8 +2872,8 @@ public class SqlGraphStore implements GraphStore {
       select = "DISTINCT annotation.label";
       suffix = " ORDER BY annotation.label";
     } else if (operation.equalsIgnoreCase("DISTINCT BINARY")) { // case/accent sensitive
-      select = "DISTINCT CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin)";
-      suffix = " ORDER BY CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin)";
+      select = "DISTINCT annotation.label COLLATE utf8mb4_bin";
+      suffix = " ORDER BY annotation.label COLLATE utf8mb4_bin";
     } else if (operation.equalsIgnoreCase("MAX")) {
       select = "MAX(annotation.label)";
       suffix = " ORDER BY annotation.label";
@@ -2884,14 +2884,14 @@ public class SqlGraphStore implements GraphStore {
       select = "COUNT(DISTINCT annotation.label)";
       suffix = "";
     } else if (operation.equalsIgnoreCase("COUNT DISTINCT BINARY")) { // case/accent sensitive
-      select = "COUNT(DISTINCT CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin))";
+      select = "COUNT(DISTINCT annotation.label COLLATE utf8mb4_bin)";
       suffix = "";
     } else if (operation.equalsIgnoreCase("DISTINCT,COUNT")) {
       select = "annotation.label, COUNT(*)";
       suffix = " GROUP BY annotation.label";
     } else if (operation.equalsIgnoreCase("DISTINCT BINARY,COUNT")) {
-      select = "CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin), COUNT(*)";
-      suffix = " GROUP BY CAST(annotation.label AS VARCHAR(247) COLLATE utf8_bin)";
+      select = "annotation.label COLLATE utf8mb4_bin, COUNT(*)";
+      suffix = " GROUP BY annotation.label COLLATE utf8mb4_bin";
     }
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
     AnnotationAgqlToSql.Query query = transformer.sqlFor(
