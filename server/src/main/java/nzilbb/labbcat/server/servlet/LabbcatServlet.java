@@ -344,8 +344,9 @@ public class LabbcatServlet extends HttpServlet {
     HttpServletRequest request, HttpServletResponse response, String fileName) {
     if (fileName == null) return;
     fileName = IO.SafeFileNameUrl(fileName);
-    String onlyASCIIFileName = IO.OnlyASCII(fileName);    
-    String onlyASCIIFileNameNoQuotes = onlyASCIIFileName;
+    String onlyASCIIFileName = IO.OnlyASCII(fileName)
+      .replace(",","-"); // Chrome/Edge don't like commas
+    String onlyASCIIFileNameNoQuotes = onlyASCIIFileName.replace(" ","_");
     
     if (fileName.indexOf(' ') >= 0 // contains spaces
         || fileName.indexOf(';') >= 0 // contains semicolon
