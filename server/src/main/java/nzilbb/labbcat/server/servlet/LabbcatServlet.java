@@ -346,7 +346,8 @@ public class LabbcatServlet extends HttpServlet {
     fileName = IO.SafeFileNameUrl(fileName);
     String onlyASCIIFileName = IO.OnlyASCII(fileName)
       .replace(",","-"); // Chrome/Edge don't like commas
-    String onlyASCIIFileNameNoQuotes = onlyASCIIFileName.replace(" ","_");
+    String onlyASCIIFileNameNoQuotes = onlyASCIIFileName
+      .replace(" ","_").replace(";","_");
     
     if (fileName.indexOf(' ') >= 0 // contains spaces
         || fileName.indexOf(';') >= 0 // contains semicolon
@@ -388,7 +389,7 @@ public class LabbcatServlet extends HttpServlet {
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
       // TODO we can use User-Agent to send un-URL-encoded responses to Safari only
       response.addHeader(
-        "Content-Disposition", "attachment; filename="+onlyASCIIFileName+"; filename*="+fileName);
+        "Content-Disposition", "attachment; filename*="+fileName+"; filename="+onlyASCIIFileName);
     }
   } // end of ResponseAttachmentName()
    
