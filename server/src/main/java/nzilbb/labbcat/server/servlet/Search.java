@@ -218,14 +218,10 @@ public class Search extends LabbcatServlet {
     }
     
     try {
+      final SqlGraphStoreAdministration store = getStore(request);
       task.setStoreCache(new StoreCache() {
           public SqlGraphStore get() {
-            try {
-              return getStore(request);
-            } catch(Exception exception) {
-              System.err.println("Search.StoreCache: " + exception);
-              return null;
-            }
+            return store;
           }
           public void accept(SqlGraphStore store) {
             cacheStore((SqlGraphStoreAdministration)store);
