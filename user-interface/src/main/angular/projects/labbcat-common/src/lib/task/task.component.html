@@ -2,7 +2,8 @@
   <h1 *ngIf="showName">{{task.threadName}}</h1>
   <div class="components">
     <progress value="{{task.percentComplete}}" max="100"
-              title="{{task.percentComplete + '% ' + task.status}}">
+              title="{{task.percentComplete + '% ' + task.status}}"
+              #progress>
       <div class="progress-container">
         <div class="progress"
              title="{{task.percentComplete + '% ' + task.status}}"

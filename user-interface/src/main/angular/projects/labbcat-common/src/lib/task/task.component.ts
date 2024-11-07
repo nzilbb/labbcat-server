@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, OnDestroy, ViewChild, ElementRef, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, ElementRef, EventEmitter, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Task } from '../task';
@@ -10,7 +10,7 @@ import { LabbcatService } from '../labbcat.service';
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.css']
 })
-export class TaskComponent implements OnChanges, OnDestroy {
+export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     @Input() threadId: string;
     @Input() cancelButton = true;
     @Input() showStatus = true;
@@ -22,6 +22,7 @@ export class TaskComponent implements OnChanges, OnDestroy {
     task: Task;
     timeout: number;
     cancelling = false;
+    @ViewChild('progress', {static: false}) progressBar: ElementRef;    
     @ViewChild('resultAnchor', {static: false}) taskResultAnchor: ElementRef;    
         
     constructor(
@@ -30,6 +31,11 @@ export class TaskComponent implements OnChanges, OnDestroy {
         private route: ActivatedRoute
     ) { }
     
+    ngOnInit(): void {
+        window.setTimeout(()=>{
+            this.progressBar.nativeElement.scrollIntoView();
+        }, 500);
+    }
     ngOnChanges(changes: SimpleChanges): void {
         if (!this.threadId) {
             this.route.queryParams.subscribe((params) => {
@@ -39,6 +45,7 @@ export class TaskComponent implements OnChanges, OnDestroy {
         } else {
             this.readTaskStatus();
         }
+        this.progressBar.nativeElement.scrollIntoView();
     }
     ngOnDestroy(): void {
         clearTimeout(this.timeout);
