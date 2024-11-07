@@ -1629,6 +1629,26 @@ public class ProcessWithPraat extends Task {
       .filter(task -> !task.isDone())
       .forEach(task -> task.cancel(false));
   }
+  
+  /**
+   * Generates a descriptive name for the processing.
+   * @return A name that hints at the processing being done (e.g. "praat-F1-F2") if possible, 
+   * or "praat" if not.
+   */
+  public String descriptiveName() {
+    StringBuilder name = new StringBuilder("praat");
+    if (extractF1) name.append("-F1");
+    if (extractF2) name.append("-F2");
+    if (extractF3) name.append("-F3");
+    if (extractMinimumPitch) name.append("-minPitch");
+    if (extractMeanPitch) name.append("-meanPitch");
+    if (extractMaximumPitch) name.append("-maxPitch");
+    if (extractMaximumIntensity) name.append("-maxIntensity");
+    if (extractCOG1) name.append("-COG1");
+    if (extractCOG2) name.append("-COG2");
+    if (extractCOG23) name.append("-COG⅔");
+    return name.toString();
+  } // end of descriptiveName()
 
   /**
    * Run the task.
@@ -1658,7 +1678,11 @@ public class ProcessWithPraat extends Task {
         attributes.add(fastTrackDifferentiationLayerId);
         
       outputFile = File.createTempFile(
-        IO.WithoutExtension(fileName) + "-", ".csv", getStore().getFiles());
+        IO.WithoutExtension(fileName)
+        + "-"+descriptiveName()
+        +"-__-", "-__.csv", // ...-__-xxx-__. will have the -__-xxx-__ removed by MediaServlet
+        getStore().getFiles());
+      outputFile.deleteOnExit();
       CSVFormat format = CSVFormat.EXCEL.withDelimiter(fieldDelimiter);
       out = new CSVPrinter(new FileWriter(outputFile), format);
       in = new CSVParser(new FileReader(dataFile), format);
