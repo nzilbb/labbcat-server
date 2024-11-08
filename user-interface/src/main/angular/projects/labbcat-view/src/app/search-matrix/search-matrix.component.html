@@ -17,7 +17,7 @@
                 [class.anchor-end]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
                 title="{{schema.layers[layerId].description}}">
         <legend>
-          <span *ngIf="layerId == 'orthography' || (schema.layers[layerId].alignment > 0 && layerId != schema.turnLayerId && layerId != schema.utteranceLayerId)"
+          <span *ngIf="isTargetableLayer(schema.layers[layerId])"
                 class="target"
                 i18n-title title="Target this match">
             <img
@@ -38,6 +38,15 @@
                  >
           </span>
           <div class="match" *ngFor="let match of column.layers[layerId]; index as m">
+            <span *ngIf="isSegmentLayer(schema.layers[layerId])"
+                  class="target segment"
+                  i18n-title title="Target this match">
+              <img
+                i18n-title title="Target this match"
+                alt="🎯" [src]="imagesLocation+'/target.svg'"
+                [class]="column.layers[layerId][m].target?'selected':'deselected'"
+                (click)="setTarget(column.layers[layerId][m])">
+            </span>
             <ng-container
               *ngIf="layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
               [ngSwitch]="schema.layers[layerId].type">

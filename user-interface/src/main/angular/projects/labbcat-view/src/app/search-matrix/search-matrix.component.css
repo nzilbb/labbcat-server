@@ -10,7 +10,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    max-width: 400px;
+    max-width: 500px;
     flex-grow: 2;
     flex-shrink: 1;
     background: #F9F9F9;
@@ -87,6 +87,13 @@ div.match {
     flex-direction: row;
     padding-right: 10px;
     white-space: nowrap;
+    flex-grow: 1;
+}
+div.match > span {
+    flex-grow: 1;
+}
+div.match > .target.segment {
+    flex-grow: revert;
 }
 span.help lib-button {
     position: relative;
@@ -95,6 +102,10 @@ span.help lib-button {
 
 .target img {
     vertical-align: middle;
+    height: 10pt;
+}
+.segment.target img {
+    vertical-align: bottom;
     height: 10pt;
 }
 .deselected {

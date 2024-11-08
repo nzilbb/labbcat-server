@@ -183,4 +183,17 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         return this.isSpanningLayer(layer)
             || layer.id == "segment" || layer.parentId == "segment";
     }
+    
+    isTargetableLayer(layer: Layer): boolean {
+        return layer.id == 'orthography' 
+            || (this.schema.layers[layer.id].alignment > 0
+                && layer.id != this.schema.turnLayerId
+                && layer.id != this.schema.utteranceLayerId
+                // not segment layers, these are identified below
+                && !this.isSegmentLayer(layer));
+    }
+    isSegmentLayer(layer: Layer): boolean {
+        return layer.id == 'segment'
+            || layer.parentId == 'segment';
+    }
 }
