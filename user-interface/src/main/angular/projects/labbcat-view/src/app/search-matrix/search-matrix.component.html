@@ -17,7 +17,7 @@
                 [class.anchor-end]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
                 title="{{schema.layers[layerId].description}}">
         <legend>
-          <span *ngIf="schema.layers[layerId].alignment > 0 && layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
+          <span *ngIf="layerId == 'orthography' || (schema.layers[layerId].alignment > 0 && layerId != schema.turnLayerId && layerId != schema.utteranceLayerId)"
                 class="target"
                 i18n-title title="Target this match">
             <img

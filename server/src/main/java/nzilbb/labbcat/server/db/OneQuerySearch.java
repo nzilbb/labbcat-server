@@ -1467,6 +1467,7 @@ public class OneQuerySearch extends SearchTask {
   public String generateOrthographySql(Vector<Object> parameters, Schema schema)
     throws Exception {
     setDescription(matrix.getDescription().replaceAll("orthography=",""));
+    int targetCol = matrix.getTargetColumn();
     int iWordColumn = 0;
     StringBuffer q = new StringBuffer();
     q.append("INSERT INTO _result");
@@ -1475,13 +1476,15 @@ public class OneQuerySearch extends SearchTask {
     q.append(" turn_annotation_id, first_matched_word_annotation_id,");
     q.append(" last_matched_word_annotation_id, complete, target_annotation_uid)");
     q.append(" SELECT ?, token_0.ag_id AS ag_id, 0 AS speaker_number,");
-    q.append(" token_0.start_anchor_id, token_0.end_anchor_id, 0, NULL AS segment_annotation_id,");
-    q.append(" token_0.word_annotation_id AS target_annotation_id,");
+    q.append(" token_"+targetCol+".start_anchor_id, token_"+targetCol+".end_anchor_id,");
+    q.append(" 0, NULL AS segment_annotation_id,");
+    q.append(" token_"+targetCol+".word_annotation_id AS target_annotation_id,");
     q.append(" token_0.turn_annotation_id AS turn_annotation_id,");
     q.append(" token_0.word_annotation_id AS first_matched_word_annotation_id,");
     q.append(" token_"+(matrix.getColumns().size()-1)+".word_annotation_id")
       .append(" AS last_matched_word_annotation_id,");
-    q.append(" 0 AS complete, CONCAT('ew_2_', token_0.annotation_id) AS target_annotation_uid");
+    q.append(" 0 AS complete,");
+    q.append(" CONCAT('ew_2_', token_"+targetCol+".annotation_id) AS target_annotation_uid");
     q.append(" FROM annotation_layer_2 token_0");
     // susequent word joins
     for (int c = 1; c < matrix.getColumns().size(); c++) {
