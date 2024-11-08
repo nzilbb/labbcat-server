@@ -383,7 +383,10 @@ public class LabbcatServlet extends HttpServlet {
                 && new SemanticVersionComparator().compare(labbcatRVersion, "1.3-0") <= 0))) {
       // specify only 'filename' without quotes
       response.addHeader(
-        "Content-Disposition", "attachment; filename="+onlyASCIIFileNameNoQuotes); 
+        "Content-Disposition", "attachment; filename="+onlyASCIIFileNameNoQuotes);
+    } else if ("jsendpraat 20240927.1325".equals(userAgent)) {
+      response.addHeader( // this jsendpraat version prefers filename* second...
+        "Content-Disposition", "attachment; filename="+onlyASCIIFileName+"; filename*="+fileName);
     } else {
       // MDN recommends not to use URLEncoder.encode
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
