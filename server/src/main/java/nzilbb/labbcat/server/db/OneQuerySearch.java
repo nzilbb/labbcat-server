@@ -1467,7 +1467,7 @@ public class OneQuerySearch extends SearchTask {
   public String generateOrthographySql(Vector<Object> parameters, Schema schema)
     throws Exception {
     setDescription(matrix.getDescription().replaceAll("orthography=",""));
-    int targetCol = matrix.getTargetColumn();
+    int targetCol = Math.max(0, matrix.getTargetColumn());
     int iWordColumn = 0;
     StringBuffer q = new StringBuffer();
     q.append("INSERT INTO _result");
