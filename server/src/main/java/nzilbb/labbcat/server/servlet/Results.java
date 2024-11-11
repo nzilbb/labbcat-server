@@ -366,6 +366,7 @@ public class Results extends LabbcatServlet { // TODO unit test
         contentType = "application/json";
       }
       response.setContentType(contentType);
+      response.setCharacterEncoding("UTF-8");
       // output will be either CSV or JSON - define an appropriate output streamer
       final CSVPrinter csvOut = contentType.equals("text/csv")?
         new CSVPrinter(response.getWriter(), CSVFormat.EXCEL.withDelimiter( 
