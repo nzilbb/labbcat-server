@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -92,6 +92,9 @@ public class Attributes extends LabbcatServlet { // TODO unit test
     String name = request.getParameter("name");
     if (name == null || name.trim().length() == 0) name = "list";
     name = IO.SafeFileNameUrl(name.trim());
+    if (!name.endsWith(".csv")) {
+      name += ".csv";
+    }
       
     try {
       
