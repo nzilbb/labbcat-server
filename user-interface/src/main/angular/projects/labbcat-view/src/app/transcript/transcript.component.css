@@ -1,0 +1,46 @@
+
+/* consecutive blocks are vertical, simultaneous are horizontal */
+#temporal-blocks .block {
+    display: flex;
+}
+#temporal-blocks .consecutive {
+    flex-direction: column;
+}
+#temporal-blocks .simultaneous {
+    flex-direction: row;
+}
+#temporal-blocks .simultaneous .utterance {
+    flex-grow: 1;
+}
+#temporal-blocks .consecutive, #temporal-blocks .simultaneous .utterance {
+    border-left: 1px darkgray solid;
+    border-bottom: 1px darkgray solid;
+    border-bottom-left-radius: 5px;
+    margin: 5px;
+    margin-top: 15px;
+    padding: 5px;
+}
+
+/* only the first consecutive utterance, simultaneous utterances are all labelled */
+.words {
+    margin-left: 5%;
+}
+#temporal-blocks .block legend {
+    display: block;
+    font-style: italic;
+    color: darkgray;
+    position: relative;
+    top: -12pt;
+    margin-bottom: -12pt; /* so the legend doesn't displace the words below */
+}
+#temporal-blocks .consecutive legend {
+    display: none;
+}
+#temporal-blocks .consecutive .utterance:first-child legend {
+    display: block;
+}
+
+/* main partcipants */
+.main-participant {
+    font-weight: bold;
+}

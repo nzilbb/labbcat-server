@@ -1,0 +1,21 @@
+<lib-wait *ngIf="!loaded"></lib-wait>
+<div *ngIf="transcript" id="transcript">
+  <h1 *ngIf="id">{{transcript.id}}</h1>
+
+  <div id="temporal-blocks">
+    <div *ngFor="let block of temporalBlocks"
+         [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
+      <div *ngFor="let utterance of block.utterances"
+           [ngClass]="{ 'utterance': true, 'main-participant': annotations[annotations[utterance.parentId].parentId].annotations['main_participant'] }"
+           id="{{utterance.id}}">
+        <legend class="participant">{{utterance.label}}</legend>
+        <div class="words">
+          <span *ngFor="let word of utterance.annotations[schema.wordLayerId]"
+                class="word" id="{{word.id}}">
+            {{word.label}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

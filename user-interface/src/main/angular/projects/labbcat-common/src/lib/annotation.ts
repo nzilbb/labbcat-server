@@ -4,6 +4,7 @@ export interface Annotation {
     label: string;
     startId: string;
     endId: string;
+    parentId: string;
     ordinal: number;
     annotations: object;
     
