@@ -123,6 +123,12 @@
             }
             return null;
         },
+        last : function(layerId) {
+            if (this.layers[layerId] && this.layers[layerId].annotations.length > 0) {
+                return this.layers[layerId].annotations[this.layers[layerId].annotations.length-1];
+            }
+            return null;
+        },
         all : function(layerId) {
             if (this.layers[layerId]) {
                 return this.layers[layerId].annotations;
@@ -410,6 +416,28 @@
             if (this[layerId]) {
                 if (this[layerId].length > 0) {
                     return this[layerId][0];
+                }
+            }
+            // go up through ancestors
+            var ancestor = this.parent;
+            while (ancestor != null && ancestor.layerId != layerId) {
+                ancestor = ancestor.parent;
+            } // next
+            if (ancestor != null && ancestor.layerId == layerId) {
+                return ancestor;
+            }
+            // TODO traverse schema
+            return null;
+        },
+        last : function(layerId) {
+            // is it me?
+            if (this.layerId == layerId) {
+                return this;
+            }
+            // is it a child layer?
+            if (this[layerId]) {
+                if (this[layerId].length > 0) {
+                    return this[layerId][this[layerId].length - 1];
                 }
             }
             // go up through ancestors

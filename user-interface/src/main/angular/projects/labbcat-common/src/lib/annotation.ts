@@ -35,6 +35,7 @@ export interface Annotation {
     successorOf : (annotation: Annotation) => boolean;
     tagOn : (layerId: string) => boolean;
     first : (layerId: string) => Annotation;
+    last : (layerId: string) => Annotation;
     all : (layerId: string) => Annotation[];
     
     _changed: boolean;

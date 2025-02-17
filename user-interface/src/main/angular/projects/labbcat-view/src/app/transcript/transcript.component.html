@@ -7,16 +7,18 @@
          [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
       <div *ngFor="let utterance of block.utterances"
            [ngClass]="{ 'utterance': true, 'main-participant': utterance.first('participant').first('main_participant') }"
-           id="{{utterance.id}}">
+           id="{{utterance.id}}"
+           title="{{utterance.label}}: {{utterance.start.offset}}-{{utterance.end.offset}} ({{utterance.duration()}}s)">
         <legend class="participant">{{utterance.label}}</legend>
         <a id="{{utterance.startId}}" class="anchor"></a>
         <div class="words">
           <span *ngFor="let word of utterance.all(schema.wordLayerId)"
                 class="word" id="{{word.id}}">
             <a id="{{word.startId}}" class="anchor">&nbsp;</a>
-            <span id="{{word.id}}" title="{{word.layerId}}">{{word.label}}</span>
+            <span id="{{word.id}}">{{word.label}}</span>
           </span>
         </div>
+        <a id="{{utterance.last(schema.wordLayerId).startId}}" class="anchor"></a>
       </div>
     </div>
   </div>
