@@ -76,7 +76,8 @@
               "projects/labbcat-view/src/styles.css"
             ],
               "scripts": [
-                "projects/labbcat-common/src/nzilbb.labbcat.js"
+                "projects/labbcat-common/src/nzilbb.labbcat.js",
+                "projects/labbcat-common/src/nzilbb.ag.js"
               ]
           },
           "configurations": {
@@ -139,7 +140,8 @@
               "projects/labbcat-view/src/styles.css"
             ],
               "scripts": [
-                  "projects/labbcat-common/src/nzilbb.labbcat.js"
+                "projects/labbcat-common/src/nzilbb.labbcat.js",
+                "projects/labbcat-common/src/nzilbb.ag.js"
               ]
           }
         },
@@ -203,7 +205,8 @@
               "projects/labbcat-edit/src/styles.css"
             ],
             "scripts": [
-                "projects/labbcat-common/src/nzilbb.labbcat.js"
+                "projects/labbcat-common/src/nzilbb.labbcat.js",
+                "projects/labbcat-common/src/nzilbb.ag.js"
             ]
           },
           "configurations": {
@@ -266,7 +269,8 @@
               "projects/labbcat-edit/src/styles.css"
             ],
             "scripts": [
-                "projects/labbcat-common/src/nzilbb.labbcat.js"
+                "projects/labbcat-common/src/nzilbb.labbcat.js",
+                "projects/labbcat-common/src/nzilbb.ag.js"
             ]
           }
         },
@@ -330,7 +334,8 @@
               "projects/labbcat-admin/src/styles.css"
             ],
             "scripts": [
-                "projects/labbcat-common/src/nzilbb.labbcat.js"
+                "projects/labbcat-common/src/nzilbb.labbcat.js",
+                "projects/labbcat-common/src/nzilbb.ag.js"
             ]
           },
           "configurations": {
@@ -393,7 +398,8 @@
               "projects/labbcat-admin/src/styles.css"
             ],
             "scripts": [
-                "projects/labbcat-common/src/nzilbb.labbcat.js"
+                "projects/labbcat-common/src/nzilbb.labbcat.js",
+                "projects/labbcat-common/src/nzilbb.ag.js"
             ]
           }
         },

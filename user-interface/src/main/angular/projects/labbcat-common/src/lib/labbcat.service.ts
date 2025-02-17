@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 
 import { MessageService } from './message.service';
 
-declare var labbcat:  any;
+declare var labbcat:  any; // nzilbb.labbcat.js
+declare var ag:  any; // nzibb.ag.js
 
 @Injectable({
   providedIn: 'root'
@@ -42,5 +43,9 @@ export class LabbcatService {
                 this.router.navigateByUrl(url);
             }
         });
+    }
+
+    annotationGraph(jsonObject: any) {
+        return ag.Graph.activateObject(jsonObject);
     }
 }

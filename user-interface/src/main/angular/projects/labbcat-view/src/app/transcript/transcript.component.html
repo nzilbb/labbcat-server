@@ -6,12 +6,12 @@
     <div *ngFor="let block of temporalBlocks"
          [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
       <div *ngFor="let utterance of block.utterances"
-           [ngClass]="{ 'utterance': true, 'main-participant': annotations[annotations[utterance.parentId].parentId].annotations['main_participant'] }"
+           [ngClass]="{ 'utterance': true, 'main-participant': utterance.first('participant').first('main_participant') }"
            id="{{utterance.id}}">
         <legend class="participant">{{utterance.label}}</legend>
         <a id="{{utterance.startId}}" class="anchor"></a>
         <div class="words">
-          <span *ngFor="let word of utterance.annotations[schema.wordLayerId]"
+          <span *ngFor="let word of utterance.all(schema.wordLayerId)"
                 class="word" id="{{word.id}}">
             <a id="{{word.startId}}" class="anchor">&nbsp;</a>
             <span id="{{word.id}}" title="{{word.layerId}}">{{word.label}}</span>

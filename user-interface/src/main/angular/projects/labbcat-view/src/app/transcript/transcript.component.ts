@@ -104,7 +104,7 @@ export class TranscriptComponent implements OnInit {
                     console.error("Invalid transcript ID");
                     this.messageService.error("Invalid transcript ID"); // TODO i18n
                 } else { // valid transcript
-                    this.transcript = transcript;
+                    this.transcript = this.labbcatService.annotationGraph(transcript);
                     this.parseTranscript();
                 } // valid transcript
             });       
@@ -115,6 +115,7 @@ export class TranscriptComponent implements OnInit {
         const turnLayerId = this.schema.turnLayerId;
         const utteranceLayerId = this.schema.utteranceLayerId;
         const wordLayerId = this.schema.wordLayerId;
+        
         // index anchors
         this.anchors = {};
         for (let id in this.transcript.anchors) {
@@ -138,76 +139,41 @@ export class TranscriptComponent implements OnInit {
         this.utterances = [];
         this.words = [];
         // for each participant
-        for (let p in this.transcript.participant) {
-            const participant = this.transcript.participant[p];
-            participant.layerId = participantLayerId;
-            participant.ordinal = p+1; // set ordinal
-            participant.annotations = []
-            participant.annotations[turnLayerId] = participant.turn;
-            participant.annotations["main_participant"] = participant.main_participant;
+        for (let participant of this.transcript.all(participantLayerId)) {
             this.annotations[participant.id] = participant as Annotation;
-            this.participants.push(participant as Annotation);            
+            this.participants.push(participant as Annotation);
             // for each turn
-            for (let t in participant.turn) {
-                const turn = participant.turn[t];
-                turn.layerId = turnLayerId;
-                turn.parentId = participant.id;
-                turn.ordinal = t+1; // set ordinal
-                turn.annotations = {};
-                turn.annotations[utteranceLayerId] = turn.utterance;
-                turn.annotations[wordLayerId] = turn.word;
-                this.annotations[turn.id] = turn as Annotation;
-                // link to anchors
-                this.anchors[turn.startId].startOf[turnLayerId].push(turn);
-                this.anchors[turn.endId].endOf[turnLayerId].push(turn);
-                
+            for (let turn of participant.all(turnLayerId)) {
                 // for each utterance
-                for (let u in turn.utterance) {
-                    const utterance = turn.utterance[u];
-                    utterance.layerId = utteranceLayerId;
-                    utterance.parentId = turn.id;
-                    utterance.ordinal = u+1; // set ordinal
+                for (let utterance of turn.all(utteranceLayerId)) {
                     this.annotations[utterance.id] = utterance as Annotation;
-                    // we're going to link words to utterances
-                    utterance.annotations = {};
-                    utterance.annotations[wordLayerId] = [];
-                    // link to anchors
-                    this.anchors[utterance.startId].startOf[utteranceLayerId].push(utterance);
-                    this.anchors[utterance.endId].endOf[utteranceLayerId].push(utterance);
-                    
                     this.utterances.push(utterance as Annotation);
+                    // we're going to link words to utterances
+                    utterance[wordLayerId] = [];
+                    
                 } // next utterance
 
                 // parse words and distribute them into utterances
                 let u = 0;
-                const utterances = turn.utterance as Annotation[];
+                const utterances = turn.all(utteranceLayerId) as Annotation[];
                 // for each word
-                for (let w in turn.word) {
-                    const word = turn.word[w];
-                    word.layerId = wordLayerId;
-                    word.parentId = turn.id;
-                    word.ordinal = w+1; // set ordinal
-                    this.annotations[word.id] = word as Annotation;
-                    // link to anchors
-                    this.anchors[word.startId].startOf[wordLayerId].push(word);
-                    this.anchors[word.endId].endOf[wordLayerId].push(word);
-                    
+                for (let word of turn.all(wordLayerId)) {
+                    this.annotations[word.id] = word as Annotation;                    
                     this.words.push(word as Annotation);
 
                     // add to the current utterance
-                    const wordStart = this.startOffset(word);
                     // if the words starts after utterance u ends, increment
-                    while (wordStart >= this.endOffset(utterances[u])
+                    while (word.start.offset >= utterances[u].end.offset
                         && u < utterances.length) {
                         u++;
                     }
-                    utterances[u].annotations[wordLayerId].push(word);
+                    utterances[u][wordLayerId].push(word);
                 } // next word
             } // next turn
         } // next participant
 
         // now sort utterances by start offset, across participants
-        this.utterances.sort((a,b) => this.startOffset(a) - this.startOffset(b));
+        this.utterances.sort((a,b) => a.start.offset - b.start.offset);
 
         // now divide utterances into 'temporal blocks'
         this.temporalBlocks = [];
@@ -230,12 +196,12 @@ export class TranscriptComponent implements OnInit {
                 }
                 const nextUtterance = this.utterances[parseInt(u)+1]; // why is parseInt required?
                 if (nextUtterance // the next utterance is during this one
-                    && this.startOffset(nextUtterance) < this.endOffset(utterance)) {
+                    && nextUtterance.start.offset < utterance.end.offset) {
                     newBlock = true;
                     consecutive = false;
                 }
                 // but if this is during the last utterance
-                if (this.startOffset(utterance) < this.endOffset(lastUtterance)) {
+                if (utterance.start.offset < lastUtterance.end.offset) {
                     // this is a simultaneous speech block, so don't start a new one
                     newBlock = false;
                 }
@@ -251,20 +217,4 @@ export class TranscriptComponent implements OnInit {
         } // there are utterances
     }
 
-    /** Get start offset of the given annotation. */
-    startOffset(annotation : Annotation) : number {
-        if (!annotation) return null;
-        const anchor = this.anchors[annotation.startId];
-        if (!anchor) return null;
-        return anchor.offset;
-    }
-    /** Get end offset of the given annotation. */
-    endOffset(annotation : Annotation) : number {
-        if (!annotation) return null;
-        const anchor = this.anchors[annotation.endId];
-        if (!anchor) return null;
-        return anchor.offset;
-    }
-
-    /** Infer whether this temporal block is simultaneous or consecutive */ 
 }
