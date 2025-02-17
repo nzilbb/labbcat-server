@@ -3,7 +3,8 @@
           i18n-title title="Layer Categories"
           *ngIf="scopeCount > 1"
           i18n="layer type header">Projects</legend>
-  <label *ngFor="let c of Categories()" title="{{c}}">
+  <label *ngFor="let c of Categories()" title="{{c}}"
+         class="category-{{c}}">
     <lib-grouped-checkbox
       group="category"
       name="category"
@@ -21,7 +22,9 @@
           i18n="layer type header">Participant</legend>
   <ng-container *ngFor="let layer of participantAttributes">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
-           title="{{layer.description}}">
+           title="{{layer.description}}"
+           class="layer-{{layer.id}}"
+           style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
@@ -48,7 +51,9 @@
           i18n="layer type header">Transcript</legend>
   <ng-container *ngFor="let layer of transcriptAttributes">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
-           title="{{layer.description}}">
+           title="{{layer.description}}"
+           class="layer-{{layer.id}}"
+           style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
@@ -75,7 +80,9 @@
           i18n="layer type header">Span</legend>
   <ng-container *ngFor="let layer of spanLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
-           title="{{layer.description}}">
+           title="{{layer.description}}"
+           class="layer-{{layer.id}}"
+           style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
@@ -108,7 +115,9 @@
           i18n="layer type header">Phrase</legend>
   <ng-container *ngFor="let layer of phraseLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
-           title="{{layer.description}}">
+           title="{{layer.description}}"
+           class="layer-{{layer.id}}"
+           style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
@@ -163,7 +172,9 @@
           i18n="layer type header">Word</legend>
   <ng-container *ngFor="let layer of wordLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
-           title="{{layer.description}}">
+           title="{{layer.description}}"
+           class="layer-{{layer.id}}"
+           style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
@@ -218,7 +229,9 @@
           i18n="layer type header" >Segment</legend>
   <ng-container *ngFor="let layer of segmentLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
-           title="{{layer.description}}">
+           title="{{layer.description}}"
+           class="layer-{{layer.id}}"
+           [ngStyle]="styles[layer.id]">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"

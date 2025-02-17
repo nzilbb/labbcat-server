@@ -1,3 +1,4 @@
+lib-wait { position: absolute; }
 
 /* consecutive blocks are vertical, simultaneous are horizontal */
 #temporal-blocks .block {
@@ -40,7 +41,27 @@
     display: block;
 }
 
-/* main partcipants */
+.token {
+    display: inline-block;
+}
+.token .layer {
+    display: flex;
+    flex-direction: row;
+}
+.token .alignment-0 .annotation:not(:first-child) {
+    position: fixed;
+    opacity: 0;
+}
+
+/* main participants */
 .main-participant {
     font-weight: bold;
+}
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    lib-layer-checkboxes { /* layer selector is horizontal*/
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
 }

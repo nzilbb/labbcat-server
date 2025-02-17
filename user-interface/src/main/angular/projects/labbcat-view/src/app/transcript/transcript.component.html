@@ -1,7 +1,19 @@
-<lib-wait *ngIf="!loaded"></lib-wait>
-<div *ngIf="transcript" id="transcript">
-  <h1 *ngIf="id">{{transcript.id}}</h1>
+<lib-wait *ngIf="loading"></lib-wait>
 
+<h1 *ngIf="transcript">{{transcript.id}}</h1>
+
+<lib-layer-checkboxes
+  name="layer" includeAlignment="true"
+  span="true" phrase="true" word="true" segment="true"
+  excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true" excludeWord="true"
+  category="true"
+  [styles]="layerStyles"
+  ([selectedLayerIds])="selectedLayerIds"
+  (selectedChange)="layersChanged($event)"></lib-layer-checkboxes>
+
+<div *ngIf="transcript" id="transcript">
+
+  <!-- transcript... -->
   <div id="temporal-blocks">
     <div *ngFor="let block of temporalBlocks"
          [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
@@ -15,7 +27,33 @@
           <span *ngFor="let word of utterance.all(schema.wordLayerId)"
                 class="word" id="{{word.id}}">
             <a id="{{word.startId}}" class="anchor">&nbsp;</a>
-            <span id="{{word.id}}">{{word.label}}</span>
+            <span class="token">
+              <ng-container *ngFor="let l of selectedLayerIds">
+                <span *ngIf="schema.layers[l].parentId == 'word' && l != 'segment'"
+                      class="layer layer-{{l}} alignment-{{schema.layers[l].alignment}}"
+                      style="color: {{schema.layers[l].colour}};"
+                      title="{{l}}: {{word.labels(l).join(' ')}}">
+                  <span *ngFor="let annotation of word.all(l)"
+                        id="{{annotation.id}}" class="annotation">{{annotation.label}}&nbsp;</span>
+                  <span *ngIf="word.all(l).length == 0"
+                        class="annotation">&nbsp;</span>
+                </span>
+              </ng-container>
+              <span class="layer layer-{{word.layerId}}">
+                <span id="{{word.id}}" class="annotation">{{word.label}}</span>
+              </span>
+              <ng-container *ngFor="let l of selectedLayerIds">
+                <span *ngIf="schema.layers[l].parentId == 'segment' || l == 'segment'"
+                      class="layer layer-{{l}}"
+                      style="color: {{schema.layers[l].colour}};"
+                      title="{{l}}: {{word.labels(l).join(' ')}}">
+                  <span *ngFor="let annotation of word.all(l)"
+                        id="{{annotation.id}}" class="annotation">{{annotation.label}}&nbsp;</span>
+                  <span *ngIf="word.all(l).length == 0"
+                        class="annotation">&nbsp;</span>
+                </span>
+              </ng-container>
+            </span>
           </span>
         </div>
         <a id="{{utterance.last(schema.wordLayerId).startId}}" class="anchor"></a>

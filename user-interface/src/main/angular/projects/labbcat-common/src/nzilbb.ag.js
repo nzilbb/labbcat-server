@@ -109,12 +109,27 @@
 	    this.annotations[annotation.id] = annotation;
 	    if (!this[annotation.layerId]) this[annotation.layerId] = [];
 	    this[annotation.layerId].push(annotation);
+	    if (!annotation.parent && annotation.parentId) {
+              annotation.parent = this.annotations[annotation.parentId];
+            }
 	    if (annotation.parent) {
-	        if (!annotation.parent[annotation.layerId]) annotation.parent[annotation.layerId] = [];
+	      if (!annotation.parent[annotation.layerId]) annotation.parent[annotation.layerId] = [];
+              var existing = annotation.parent[annotation.layerId].findIndex(
+                a => a.id == annotation.id);
+              if (existing >= 0) { // replace existing
+                annotation.parent[annotation.layerId][existing] = annotation;
+              } else {
 	        annotation.parent[annotation.layerId].push(annotation);
+              }
 	    }
-	    if (!annotation.layer.annotations) annotation.layer.annotations = []
+	  if (!annotation.layer.annotations) annotation.layer.annotations = []
+          var existing = annotation.layer.annotations.findIndex(
+            a => a.id == annotation.id);
+          if (existing >= 0) { // replace existing
+            annotation.layer.annotations[existing] = annotation;
+          } else {
 	    annotation.layer.annotations.push(annotation);
+          }
         },
         
         first : function(layerId) {
@@ -326,13 +341,14 @@
     }
 
     // Annotation class
-    nzilbb.ag.Annotation = function(layerId, label, graph, startId, endId) {
+  nzilbb.ag.Annotation = function(layerId, label, graph, startId, endId, id, parentId) {
         // only set attribute values if they're not already set
-        if (!this.id) this.id = null;
+        if (!this.id) this.id = id;
         if (!this.label) this.label = label;
         if (!this.startId) this.startId = startId;
         if (!this.endId) this.endId = endId;
-        if (!this.graph) this.graph = graph;    
+        if (!this.graph) this.graph = graph;
+        if (!this.parentId) this.parentId = parentId;
         if (!this.parent) this.parent = null;
         if (!this.layerId) this.layerId = layerId;
         return this;
@@ -471,6 +487,10 @@
             }
             // TODO traverse schema
             return [];
+        },
+
+        labels : function(layerId) {
+          return this.all(layerId).map(a => a.label);
         },
 
         // annotation methods

@@ -5,6 +5,16 @@ import { SerializationDescriptor } from '../serialization-descriptor';
 import { Response, Layer, User, Annotation, Anchor } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
+// TODO Dan's layer order
+// TODO layer selection from URL parameters
+// TODO optionally hide empty layers
+// TODO interpreted/raw selector
+// TODO word menu
+// TODO media
+// TODO participant list with links
+// TODO meta-data
+// TODO format conversion
+
 @Component({
   selector: 'app-transcript',
   templateUrl: './transcript.component.html',
@@ -13,17 +23,20 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 export class TranscriptComponent implements OnInit {
     
     schema: any;
+    layerStyles: { [key: string] : any };
     user: User;
     baseUrl: string;
     imagesLocation: string;
     id: string;
-    loaded = false;
+    loading = true;
     transcript : any;
     anchors : { [key: string] : Anchor };
     annotations : { [key: string] : Annotation };
     participants : Annotation[];
     utterances : Annotation[];
     words : Annotation[];
+
+    selectedLayerIds: string[];
 
     temporalBlocks : { consecutive : boolean, utterances : Annotation[] }[];
     
@@ -38,6 +51,8 @@ export class TranscriptComponent implements OnInit {
         @Inject('environment') private environment
     ) {
         this.imagesLocation = this.environment.imagesLocation;
+        this.selectedLayerIds = [];
+        this.layerStyles = {};
     }
     
     ngOnInit(): void {        
@@ -97,7 +112,7 @@ export class TranscriptComponent implements OnInit {
         ];
         this.labbcatService.labbcat.getTranscript(
             this.id, structuralLayerIds, (transcript, errors, messages) => {
-                this.loaded = true;
+                this.loading = false;
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 if (!transcript) {
@@ -106,6 +121,27 @@ export class TranscriptComponent implements OnInit {
                 } else { // valid transcript
                     this.transcript = this.labbcatService.annotationGraph(transcript);
                     this.parseTranscript();
+
+                    // grey out empty layers
+                    for (let l in this.schema.layers) {
+                        const layer = this.schema.layers[l];
+                        if (layer.parentId == this.schema.root.id
+                            && layer.alignment == 0) continue;
+                        if (layer.parentId == this.schema.participantLayerId) continue;
+                        if (layer.id == this.schema.root.id) continue;
+                        if (layer.id == this.schema.corpusLayerId) continue;
+                        if (layer.id == this.schema.episodeLayerId) continue;
+                        if (layer.id == this.schema.participantLayerId) continue;
+                        if (layer.id == this.schema.utteranceLayerId) continue;
+                        if (layer.id == this.schema.wordLayerId) continue;
+                        // a temporal layer
+                        this.labbcatService.labbcat.countAnnotations(
+                            this.transcript.id, l, (count, errors, messages) => {
+                                if (!count) { // no annotations in this layer
+                                    this.layerStyles[l] = { color: "silver" };
+                                }
+                            });
+                    } // next temporal layer
                 } // valid transcript
             });       
     }
@@ -217,4 +253,58 @@ export class TranscriptComponent implements OnInit {
         } // there are utterances
     }
 
+    layersChanged(selectedLayerIds : string[]) : void {
+        const addedLayerIds = selectedLayerIds.filter((x)=>this.selectedLayerIds.indexOf(x) < 0);
+        const loadingLayers = [] as Promise<string>[];
+        this.loading = true;
+        // load layers one at a time
+        for (let layerId of addedLayerIds) {
+            loadingLayers.push(new Promise((resolve, reject) => {
+
+                if (this.transcript.layers[layerId]) { // have already loaded this layer
+                    resolve(layerId);
+                } else {
+                    // load the layer definition
+                    this.transcript.schema.layers[layerId] = this.schema.layers[layerId];
+                    this.transcript.schema.layers[layerId].colour = this.stringToColour(layerId);
+                    this.layerStyles[layerId] = {color : this.transcript.schema.layers[layerId].colour};
+                    
+                    // load annotations
+                    this.labbcatService.labbcat.getAnnotations(
+                        this.transcript.id, layerId, (annotations, errors, messages) => {
+                            if (errors) errors.forEach(m => 
+                                this.messageService.error(`${layerId}: ${m}`));
+                            if (messages) messages.forEach(m =>
+                                this.messageService.info(`${layerId}: ${m}`));
+                            for (let a of annotations) {
+                                const annotation = new this.labbcatService.ag.Annotation(
+                                    layerId, a.label, this.transcript, a.startId, a.endId,
+                                    a.id, a.parentId)
+                                this.transcript.addAnnotation(annotation);
+                            } // next annotation
+                            resolve(layerId);
+                        });
+                }
+            }));
+        } // next newly selected layer
+        Promise.all(loadingLayers).then(()=>{
+            this.loading = false;
+            // set attribute to refresh visualization
+            this.selectedLayerIds = selectedLayerIds;
+        });
+    }
+    
+    // https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript#16348977
+    stringToColour(str : string) :string {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var colour = '#';
+        for (var i = 0; i < 3; i++) {
+            var value = (hash >> (i * 8)) & 0xFF;
+            colour += ('00' + value.toString(16)).substr(-2);
+        }
+        return colour;
+    }
 }

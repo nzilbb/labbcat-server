@@ -4,6 +4,10 @@ import { Inject } from '@angular/core';
 import { LabbcatService } from '../labbcat.service';
 import { Layer } from '../layer';
 
+// TODO layer order first by project then by name, with 'orthogrpahy' and 'word' last among word layers
+// TODO allow selective exclusion of layers by list
+// TODO interpreted/raw selector
+
 @Component({
   selector: 'lib-layer-checkboxes',
   templateUrl: './layer-checkboxes.component.html',
@@ -44,6 +48,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() excludeTurn: boolean;
     /** Don't allow the 'utterance' layer to be selected */
     @Input() excludeUtterance: boolean;
+    /** Don't allow the 'word' layer to be selected */
+    @Input() excludeWord: boolean;
     /** Include a layer category selector, to hide/reveal layers */
     @Input() category: boolean;
     phraseLayers: Layer[];
@@ -53,6 +59,8 @@ export class LayerCheckboxesComponent implements OnInit {
     /** Allow segment layers to be selected */
     @Input() segment: boolean;
     segmentLayers: Layer[];
+    /** Layer styles - key is the layerId, value is the CSS style definition for the layer */
+    @Input() styles: { [key: string] : any };
     /** A layer ID to exclude options (annotation count, anchoring, etc.) for */
     @Input() excludeOptionsForLayerId: string;
     /** List of IDs of selected (ticked) layers */
@@ -79,6 +87,7 @@ export class LayerCheckboxesComponent implements OnInit {
         if (this.phrase) this.scopeCount++;
         if (this.word) this.scopeCount++;
         if (this.segment) this.scopeCount++;
+        if (!this.styles) this.styles = {};
     }
 
     loadSchema(): void {
@@ -100,8 +109,9 @@ export class LayerCheckboxesComponent implements OnInit {
                 } else if (layer.id == "segment"
                     || layer.parentId == "segment") {
                     this.segmentLayers.push(layer);
-                } else if (layer.id == schema.wordLayerId
-                    || layer.parentId == schema.wordLayerId) {
+                } else if (layer.id == schema.wordLayerId) {
+                    if (!this.excludeWord) this.phraseLayers.push(layer);
+                } else if (layer.parentId == schema.wordLayerId) {
                     this.wordLayers.push(layer);
                 } else if (layer.id == schema.turnLayerId) {
                     if (!this.excludeTurn) this.phraseLayers.push(layer);
@@ -127,6 +137,9 @@ export class LayerCheckboxesComponent implements OnInit {
                     }
                 }
             } // next layer
+
+            // list word layers in reverse order so "word" is at the bottom
+            this.wordLayers.reverse();
 
             // now list the categories that are present
             let allLayers = [];

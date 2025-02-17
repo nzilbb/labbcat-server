@@ -12,6 +12,7 @@ declare var ag:  any; // nzibb.ag.js
 })
 export class LabbcatService {
     labbcat: any;
+    ag: any;
     title: "";
     
     constructor(
@@ -20,6 +21,7 @@ export class LabbcatService {
         @Inject('environment') private environment,
         @Inject(LOCALE_ID) public locale: string
     ) {
+        this.ag = ag;
         this.labbcat = new labbcat.LabbcatAdmin(this.environment.baseUrl); // TODO username/password
         labbcat.language = this.locale;
         this.labbcat.getSystemAttribute("title", (attribute: any) => {
