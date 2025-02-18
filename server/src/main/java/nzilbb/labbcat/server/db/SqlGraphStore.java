@@ -87,6 +87,7 @@ import nzilbb.media.wav.Resampler;
 import nzilbb.sql.ConnectionFactory;
 import nzilbb.sql.mysql.MySQLConnectionFactory;
 import nzilbb.util.IO;
+import nzilbb.util.ISO639;
 import nzilbb.util.MonitorableSeries;
 import nzilbb.util.SemanticVersionComparator;
 import nzilbb.util.Timers;
@@ -705,6 +706,17 @@ public class SqlGraphStore implements GraphStore {
           put("display_order", rsOption.getInt("display_order"));
         }});
       } // next validLabel
+
+      if (layer.getId().equals("language") && validLabelsDefinition.size() == 0) {
+        // add definitions for ISO639 2-letter codes
+        ISO639 iso639 = new ISO639();
+        for (String code : iso639.alpha2Codes()) {
+          validLabelsDefinition.add(new HashMap<String,Object>() {{
+            put("label", code);
+            put("display", iso639.nameFromAlpha2(code).get());
+          }});
+        }
+      }
 
       if (validLabelsDefinition.size() == 0 // no valid labels defined
             && rs.getString("type").equals("D")) { // but it's a Phonological layer

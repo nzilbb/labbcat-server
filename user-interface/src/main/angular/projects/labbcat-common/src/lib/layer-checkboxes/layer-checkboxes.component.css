@@ -55,3 +55,10 @@ img.alignment {
     height: 12px;
     padding-right: 3px;
 }
+.interpreted-selector {
+    margin-left: 10px;
+    height: 15px;
+}
+.deselected {
+    opacity: 0.33;
+}

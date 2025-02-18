@@ -8,12 +8,12 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 // TODO Dan's layer order
 // TODO layer selection from URL parameters
 // TODO optionally hide empty layers
-// TODO interpreted/raw selector
 // TODO word menu
 // TODO media
 // TODO participant list with links
 // TODO meta-data
 // TODO format conversion
+// TODO remember layer selections
 
 @Component({
   selector: 'app-transcript',
@@ -22,12 +22,12 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 })
 export class TranscriptComponent implements OnInit {
     
-    schema: any;
-    layerStyles: { [key: string] : any };
-    user: User;
-    baseUrl: string;
-    imagesLocation: string;
-    id: string;
+    schema : any;
+    layerStyles : { [key: string] : any };
+    user : User;
+    baseUrl : string;
+    imagesLocation : string;
+    id : string;
     loading = true;
     transcript : any;
     anchors : { [key: string] : Anchor };
@@ -36,26 +36,28 @@ export class TranscriptComponent implements OnInit {
     utterances : Annotation[];
     words : Annotation[];
 
-    selectedLayerIds: string[];
+    selectedLayerIds : string[];
+    interpretedRaw: { [key: string] : boolean };
 
     temporalBlocks : { consecutive : boolean, utterances : Annotation[] }[];
     
-    serializers: SerializationDescriptor[];
+    serializers : SerializationDescriptor[];
     mimeTypeToSerializer = {};
 
     constructor(
-        private labbcatService: LabbcatService,
-        private messageService: MessageService,
-        private route: ActivatedRoute,
-        private router: Router,
+        private labbcatService : LabbcatService,
+        private messageService : MessageService,
+        private route : ActivatedRoute,
+        private router : Router,
         @Inject('environment') private environment
     ) {
         this.imagesLocation = this.environment.imagesLocation;
         this.selectedLayerIds = [];
+        this.interpretedRaw = {};
         this.layerStyles = {};
     }
     
-    ngOnInit(): void {        
+    ngOnInit() : void {        
         this.readUserInfo();
         this.readBaseUrl();
         this.readSerializers();
@@ -67,29 +69,42 @@ export class TranscriptComponent implements OnInit {
         });
     }
     
-    readSchema(): Promise<void> {
+    readSchema() : Promise<void> {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
                 this.schema = schema;
                 this.schema.root.description = "Transcript";
+                // determine which layers have interpreted/raw selectors
+                for (let l in this.schema.layers) {
+                    const layer = this.schema.layers[l];
+                    if (layer.validLabelsDefinition && layer.validLabelsDefinition.length) {
+                        // are there keys that are different from labels?
+                        for (let definition of layer.validLabelsDefinition) {
+                            if (definition.display && definition.display != definition.label) {
+                                this.interpretedRaw[layer.id] = true; // interpreted by default
+                                break; // only need one
+                            }
+                        } // next label
+                    }
+                } // next layer
                 resolve();
             });
         });
     }
     
-    readUserInfo(): void {
+    readUserInfo() : void {
         this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
             this.user = user as User;
         });
     }
     
-    readBaseUrl(): void {
+    readBaseUrl() : void {
         this.labbcatService.labbcat.getId((url, errors, messages) => {
             this.baseUrl = url;
         });
     }
     
-    readSerializers(): void {
+    readSerializers() : void {
         this.labbcatService.labbcat.getSerializerDescriptors((descriptors, errors, messages) => {
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
@@ -102,7 +117,7 @@ export class TranscriptComponent implements OnInit {
         });
     }
 
-    readTranscript(): void {
+    readTranscript() : void {
         const structuralLayerIds = [
             this.schema.participantLayerId,
             "main_participant",
@@ -146,7 +161,7 @@ export class TranscriptComponent implements OnInit {
             });       
     }
 
-    parseTranscript(): void {
+    parseTranscript() : void {
         const participantLayerId = this.schema.participantLayerId;
         const turnLayerId = this.schema.turnLayerId;
         const utteranceLayerId = this.schema.utteranceLayerId;
@@ -295,27 +310,16 @@ export class TranscriptComponent implements OnInit {
                             } // next annotation
                             
                             if (unknownAnchorIds.length) {
-                                this.labbcatService.labbcat.getAnchors(
-                                    this.transcript.id, unknownAnchorIds,
-                                    (anchors, errors, messages) => {
-                                        if (errors) errors.forEach(m => 
-                                            this.messageService.error(`Load anchors: ${m}`));
-                                        if (messages) messages.forEach(m =>
-                                            this.messageService.info(`Load anchors: ${m}`));
-                                        for (let a of anchors) {
-                                            const anchor = new this.labbcatService.ag.Anchor(
-                                                a.offset, this.transcript);
-                                            Object.assign(anchor, a);
-                                            this.transcript.addAnchor(anchor);
-                                        } // next anchor
-                                        
-                                        // phrase/span layers index the token words they contain
-                                        if (this.isSpanningLayer(layer)) {
-                                            this.indexTokensOnLayer(layer);
-                                        } // phrase/spanning layer
-                                        
-                                        resolve(layerId);
-                                    });
+                                // there might be a lot of anchors to load,
+                                // making one request too large
+                                // so we break the anchor list into chunks
+                                this.loadAnchorsIncrementally(unknownAnchorIds).then(()=>{
+                                    // phrase/span layers index the token words they contain
+                                    if (this.isSpanningLayer(layer)) {
+                                        this.indexTokensOnLayer(layer);
+                                    } // phrase/spanning layer
+                                    resolve(layerId);
+                                });
                             } else { // all anchors are already loaded
                                 // phrase/span layers index the token words they contain
                                 if (layer.parentId == this.schema.turnLayerId
@@ -337,6 +341,33 @@ export class TranscriptComponent implements OnInit {
         });
     }
 
+    /** recursive anchor loading, to prevent requests from becoming too large */
+    loadAnchorsIncrementally(unknownAnchorIds : string[]) : Promise<void> {
+        const maxIds = 150;
+        return new Promise<void>((resolve, reject) => {
+            let idsToLoadNow = unknownAnchorIds.slice(0, maxIds);
+            let idsToLoadLater = unknownAnchorIds.slice(maxIds);
+            this.labbcatService.labbcat.getAnchors(
+                this.transcript.id, idsToLoadNow, (anchors, errors, messages) => {
+                    if (errors) errors.forEach(m => 
+                        this.messageService.error(`Load anchors: ${m}`));
+                    if (messages) messages.forEach(m =>
+                        this.messageService.info(`Load anchors: ${m}`));
+                    for (let a of anchors) {
+                        const anchor = new this.labbcatService.ag.Anchor(
+                            a.offset, this.transcript);
+                        Object.assign(anchor, a);
+                        this.transcript.addAnchor(anchor);
+                    } // next anchor
+                    if (idsToLoadLater.length) {
+                        this.loadAnchorsIncrementally(idsToLoadLater).then(resolve);
+                    } else { // finished!
+                        resolve();
+                    }
+                });
+        });
+    }
+    
     indexTokensOnLayer(layer : Layer) : void {
         const wordLayerId = this.schema.wordLayerId;
         for (let span of this.transcript.all(layer.id)) {
@@ -360,7 +391,7 @@ export class TranscriptComponent implements OnInit {
     }
     
     // https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript#16348977
-    stringToColour(str : string) :string {
+    stringToColour(str : string) : string {
         var hash = 0;
         for (var i = 0; i < str.length; i++) {
             hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -373,8 +404,26 @@ export class TranscriptComponent implements OnInit {
         return colour;
     }
 
+    renderLabel(annotation: Annotation) : string {
+        let display = annotation.label;
+        if (this.interpretedRaw[annotation.layer.id]) {
+            for (let definition of annotation.layer.validLabelsDefinition) {
+                if (definition.display
+                    && (display == definition.label // replace whole labels only
+                        || annotation.layer.type == "ipa") // unless it's a phonological layer
+                   ) { // there is a display version of this label
+                    display = display.replace(definition.label, definition.display);
+                    if (annotation.layer.type != "ipa") { // whole label replaced
+                        break;
+                    }
+                }
+            } // next definition
+        } // a conversion is required
+        return display;
+    }
+
     /** Test whether the layer is phrase/span layer */
-    isSpanningLayer(layer: Layer) : boolean {
+    isSpanningLayer(layer : Layer) : boolean {
         return (layer.parentId == this.schema.turnLayerId
             && layer.id != this.schema.utteranceLayerId 
             && layer.id != this.schema.wordLayerId)
@@ -382,11 +431,11 @@ export class TranscriptComponent implements OnInit {
                 && layer.alignment > 0);
     }
     /** Test whether the layer is word scope layer */
-    isWordLayer(layer: Layer) : boolean {
+    isWordLayer(layer : Layer) : boolean {
         return layer.parentId == this.schema.wordLayerId && layer.id != "segment";
     }
     /** Test whether the layer is segment scope layer */
-    isSegmentLayer(layer: Layer) : boolean {
+    isSegmentLayer(layer : Layer) : boolean {
         return layer.parentId == "segment" || layer.id == "segment";
     }
 }

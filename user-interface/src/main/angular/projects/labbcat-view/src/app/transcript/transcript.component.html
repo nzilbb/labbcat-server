@@ -8,6 +8,7 @@
   excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true" excludeWord="true"
   category="true"
   [styles]="layerStyles"
+  [interpretedRaw]="interpretedRaw"
   ([selectedLayerIds])="selectedLayerIds"
   (selectedChange)="layersChanged($event)"></lib-layer-checkboxes>
 
@@ -38,7 +39,7 @@
                         [attr.id]="word == annotation.first('word')?annotation.id:(annotation.id+'-'+annotation.all('word').indexOf(word))"
                         [ngClass]="{ 'annotation' : true, 'first' : word == annotation.first('word'), 'during' : true, 'last' : word == annotation.last('word') && word.end.offset <= annotation.end.offset }"
                         title="{{l}}: {{annotation.label}}"
-                        ><label *ngIf="word == annotation.first('word') || word == utterance.first('word')">{{annotation.label}}</label>&nbsp;</span>
+                        ><label *ngIf="word == annotation.first('word') || word == utterance.first('word')">{{renderLabel(annotation)}}</label>&nbsp;</span>
                   <span *ngIf="word.all(l).length == 0"
                         class="annotation">&nbsp;</span>
                 </span>
@@ -50,14 +51,14 @@
                       style="color: {{schema.layers[l].colour}};"
                       title="{{l}}: {{word.labels(l).join(' ')}}">
                   <span *ngFor="let annotation of word.all(l)"
-                        id="{{annotation.id}}" class="annotation">{{annotation.label}}&nbsp;</span>
+                        id="{{annotation.id}}" class="annotation">{{renderLabel(annotation)}}&nbsp;</span>
                   <span *ngIf="word.all(l).length == 0"
                         class="annotation">&nbsp;</span>
                 </span>
               </ng-container>
               <!-- word token -->
               <span class="layer layer-{{word.layerId}}">
-                <span id="{{word.id}}" class="annotation">{{word.label}}&nbsp;</span>
+                <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>
               </span>
               <!-- segment layers -->
               <ng-container *ngFor="let l of selectedLayerIds">
@@ -66,7 +67,7 @@
                       style="color: {{schema.layers[l].colour}};"
                       title="{{l}}: {{word.labels(l).join(' ')}}">
                   <span *ngFor="let annotation of word.all(l)"
-                        id="{{annotation.id}}" class="annotation">{{annotation.label}}&nbsp;</span>
+                        id="{{annotation.id}}" class="annotation">{{renderLabel(annotation)}}&nbsp;</span>
                   <span *ngIf="word.all(l).length == 0"
                         class="annotation">&nbsp;</span>
                 </span>

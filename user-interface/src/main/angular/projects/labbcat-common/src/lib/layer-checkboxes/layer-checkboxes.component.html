@@ -41,6 +41,11 @@
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-0.svg'}}" alt="[🏷]">
       <span class="layer-id">{{ParticipantLayerLabel(layer.id)}}</span>
+      <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
+           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
+           (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -70,6 +75,11 @@
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-0.svg'}}" alt="[🏷]">
       <span class="layer-id">{{TranscriptLayerLabel(layer.id)}}</span>
+      <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
+           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
+           (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -105,6 +115,11 @@
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
+      <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
+           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
+           (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -162,6 +177,11 @@
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
+      <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
+           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
+           (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -219,6 +239,11 @@
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
+      <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
+           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
+           (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -276,6 +301,11 @@
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
+      <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
+           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
+           (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
   </ng-container>
 </fieldset>

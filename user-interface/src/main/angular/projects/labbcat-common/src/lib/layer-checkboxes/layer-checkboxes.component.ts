@@ -6,7 +6,6 @@ import { Layer } from '../layer';
 
 // TODO layer order first by project then by name, with 'orthogrpahy' and 'word' last among word layers
 // TODO allow selective exclusion of layers by list
-// TODO interpreted/raw selector
 
 @Component({
   selector: 'lib-layer-checkboxes',
@@ -31,17 +30,14 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() excludeParticipant: boolean;
     /** Don't allow the 'main_participant' layer to be selected */
     @Input() excludeMainParticipant: boolean;
-    participantAttributes: Layer[];
     /** Allow transcript attributes to be selected */
     @Input() transcript: boolean;
     /** Don't allow the 'corpus' layer to be selected */
     @Input() excludeCorpus: boolean;
-    transcriptAttributes: Layer[];
     /** Don't allow the 'transcript' top-level layer to be selected */
     @Input() excludeRoot: boolean;
     /** Allow span layers to be selected */
     @Input() span: boolean;
-    spanLayers: Layer[];
     /** Allow phrase layers to be selected */
     @Input() phrase: boolean;
     /** Don't allow the 'turn' layer to be selected */
@@ -52,20 +48,29 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() excludeWord: boolean;
     /** Include a layer category selector, to hide/reveal layers */
     @Input() category: boolean;
-    phraseLayers: Layer[];
     /** Allow word layers to be selected */
     @Input() word: boolean;
-    wordLayers: Layer[];
     /** Allow segment layers to be selected */
     @Input() segment: boolean;
-    segmentLayers: Layer[];
     /** Layer styles - key is the layerId, value is the CSS style definition for the layer */
     @Input() styles: { [key: string] : any };
     /** A layer ID to exclude options (annotation count, anchoring, etc.) for */
     @Input() excludeOptionsForLayerId: string;
-    /** List of IDs of selected (ticked) layers */
+    /** Input list of IDs of selected (ticked) layers */
     @Input() selected: string[];
+    /** Output list of IDs of selected (ticked) layers */
     @Output() selectedChange = new EventEmitter<string[]>();
+    /** Input list of layers with interpreted (true) or raw (false) labels */
+    @Input() interpretedRaw: { [key: string] : any };
+    /** Output list of layers with interpreted (true) or raw (false) labels */
+    @Output() interpretedRawChange = new EventEmitter<{ [key: string] : any }>();
+    
+    participantAttributes: Layer[];
+    transcriptAttributes: Layer[];
+    spanLayers: Layer[];
+    phraseLayers: Layer[];
+    wordLayers: Layer[];
+    segmentLayers: Layer[];
     imagesLocation : string;
     schema;
     scopeCount = 0;
@@ -88,6 +93,8 @@ export class LayerCheckboxesComponent implements OnInit {
         if (this.word) this.scopeCount++;
         if (this.segment) this.scopeCount++;
         if (!this.styles) this.styles = {};
+        if (!this.interpretedRaw) this.interpretedRaw = {};
+        console.log(JSON.stringify(this.interpretedRaw));
     }
 
     loadSchema(): void {
@@ -203,5 +210,9 @@ export class LayerCheckboxesComponent implements OnInit {
             this.selected = this.selected.filter(l => l != layerId); // remove it
         }
         this.selectedChange.emit(this.selected);
+    }
+    handleInterpretedRaw(layerId:string): void {
+        this.interpretedRaw[layerId] = !this.interpretedRaw[layerId];
+        this.interpretedRawChange.emit(this.interpretedRaw);
     }
 }
