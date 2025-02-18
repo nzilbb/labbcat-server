@@ -130,6 +130,11 @@
       } else {
 	annotation.layer.annotations.push(annotation);
       }
+    },    
+    addAnchor : function(anchor) {
+      anchor.graph = this;
+      if (!anchor.id) anchor.id = "+" + (++nzilbb.ag._lastId);
+      this.anchors[anchor.id] = anchor;
     },
     
     first : function(layerId) {
@@ -371,7 +376,9 @@
     },
     includes : function(annotation) {
       try {
-        return this.includesOffset(annotation.start.offset) && this.includesOffset(annotation.end.offset);
+        return this.includesOffset(annotation.start.offset)
+          && (this.includesOffset(annotation.end.offset)
+              || this.end.offset == annotation.end.offset);
       } catch(x) { return false; }
     },
     includesMidpoint : function(annotation) {
@@ -442,7 +449,15 @@
       if (ancestor != null && ancestor.layerId == layerId) {
         return ancestor;
       }
-      // TODO traverse schema
+      // are their annotations on the other layer that contain or are contained by this annotation?
+      var annotations = []
+      for (var a in this.graph.layers[layerId].annotations) {
+        var annotation = this.graph.layers[layerId].annotations[a];
+        if (annotation.includes(this) || this.includes(annotation)) {
+          // TODO weed out the ones that aren't connected by a shared parent
+          return annotation;
+        }
+      } // next annotation
       return null;
     },
     last : function(layerId) {
@@ -464,7 +479,10 @@
       if (ancestor != null && ancestor.layerId == layerId) {
         return ancestor;
       }
-      // TODO traverse schema
+      // traverse schema
+      var all = this.all(layerId);
+      if (all.length > 0) return all[all.length - 1];
+      
       return null;
     },
     
@@ -485,8 +503,30 @@
       if (ancestor != null && ancestor.layerId == layerId) {
         return [ancestor];
       }
-      // TODO traverse schema
-      return [];
+      // are their annotations on the other layer that contain or are contained by this annotation?
+      var firstCommonAncestorLayerId = firstCommonAncestorLayer(this.graph.schema, this.layerId, layerId);
+      var annotations = [];
+      if (firstCommonAncestorLayerId && firstCommonAncestorLayerId != "transcript") {
+        var ancestor = this.first(firstCommonAncestorLayerId);
+        if (ancestor) { // there is a possibly common ancestor annotation
+          for (var annotation of ancestor.all(layerId)) {
+            if (annotation.includes(this) || this.includes(annotation)) {
+              annotations.push(annotation);
+            }
+          } // next annotation
+        }
+      } else { // no common ancestor layer
+        // so scan the whole graph and use 'includes'
+        for (var a in this.graph.layers[layerId].annotations) {
+          var annotation = this.graph.layers[layerId].annotations[a];
+          if (annotation.includes(this) || this.includes(annotation)) {
+            annotations.push(annotation);
+          }
+        } // next annotation
+      }
+      return annotations
+      // ordered by offset
+        .toSorted((a,b)=> a.start.offset - b.start.offset);
     },
 
     labels : function(layerId) {
@@ -509,6 +549,25 @@
     }
     
   } // Annotation methods
+
+  layerAndAncestors = function(schema, layerId) {
+    var ancestors = [ schema.layers[layerId] ];
+    while (ancestors[ancestors.length-1].parent
+           && !ancestors.includes(ancestors[ancestors.length-1].parent)) {
+      ancestors.push(ancestors[ancestors.length-1].parent);
+    }
+    return ancestors.map(l=>l.id);
+  }
+
+  firstCommonAncestorLayer = function(schema, layer1, layer2) {
+    if (layer1 == layer2) return layer1;
+    var ancestors1 = layerAndAncestors(schema, layer1).filter(l=>l!=layer1);
+    var ancestors2 = layerAndAncestors(schema, layer2).filter(l=>l!=layer2);
+    
+    var intersection = ancestors1.filter(l => ancestors2.includes(l));
+    if (intersection.length) return intersection[0];
+    return null;
+  }
 
   // Anchor class
   nzilbb.ag.Anchor = function(offset, graph) {

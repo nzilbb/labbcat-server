@@ -256,6 +256,7 @@ export class TranscriptComponent implements OnInit {
     layersChanged(selectedLayerIds : string[]) : void {
         const addedLayerIds = selectedLayerIds.filter((x)=>this.selectedLayerIds.indexOf(x) < 0);
         const loadingLayers = [] as Promise<string>[];
+        const wordLayerId = this.schema.wordLayerId;
         this.loading = true;
         // load layers one at a time
         for (let layerId of addedLayerIds) {
@@ -265,9 +266,12 @@ export class TranscriptComponent implements OnInit {
                     resolve(layerId);
                 } else {
                     // load the layer definition
-                    this.transcript.schema.layers[layerId] = this.schema.layers[layerId];
-                    this.transcript.schema.layers[layerId].colour = this.stringToColour(layerId);
-                    this.layerStyles[layerId] = {color : this.transcript.schema.layers[layerId].colour};
+                    const layer = this.schema.layers[layerId];
+                    this.transcript.schema.layers[layerId] = layer;
+                    layer.parent = this.transcript.schema.layers[layer.parentId];
+                    layer.colour = this.stringToColour(layerId);
+                    this.layerStyles[layerId] = {
+                        color : layer.colour, borderColour: layer.colour };
                     
                     // load annotations
                     this.labbcatService.labbcat.getAnnotations(
@@ -276,13 +280,54 @@ export class TranscriptComponent implements OnInit {
                                 this.messageService.error(`${layerId}: ${m}`));
                             if (messages) messages.forEach(m =>
                                 this.messageService.info(`${layerId}: ${m}`));
+                            const unknownAnchorIds = [] as string[];
                             for (let a of annotations) {
                                 const annotation = new this.labbcatService.ag.Annotation(
                                     layerId, a.label, this.transcript, a.startId, a.endId,
                                     a.id, a.parentId)
+                                if (!this.transcript.anchors[a.startId]) {
+                                    unknownAnchorIds.push(a.startId);
+                                }
+                                if (!this.transcript.anchors[a.endId]) {
+                                    unknownAnchorIds.push(a.endId);
+                                }
                                 this.transcript.addAnnotation(annotation);
                             } // next annotation
-                            resolve(layerId);
+                            
+                            if (unknownAnchorIds.length) {
+                                this.labbcatService.labbcat.getAnchors(
+                                    this.transcript.id, unknownAnchorIds,
+                                    (anchors, errors, messages) => {
+                                        if (errors) errors.forEach(m => 
+                                            this.messageService.error(`Load anchors: ${m}`));
+                                        if (messages) messages.forEach(m =>
+                                            this.messageService.info(`Load anchors: ${m}`));
+                                        for (let a of anchors) {
+                                            const anchor = new this.labbcatService.ag.Anchor(
+                                                a.offset, this.transcript);
+                                            Object.assign(anchor, a);
+                                            this.transcript.addAnchor(anchor);
+                                        } // next anchor
+                                        
+                                        // phrase/span layers index the token words they contain
+                                        if (layer.parentId == this.schema.turnLayerId
+                                            || (layer.parentId == this.schema.root.id
+                                                && layer.alignment > 0)) {
+                                            this.indexTokensOnLayer(layer);
+                                        } // phrase/spanning layer
+                                        
+                                        resolve(layerId);
+                                    });
+                            } else { // all anchors are already loaded
+                                // phrase/span layers index the token words they contain
+                                if (layer.parentId == this.schema.turnLayerId
+                                    || (layer.parentId == this.schema.root.id
+                                        && layer.alignment > 0)) {
+                                    this.indexTokensOnLayer(layer);
+                                } // phrase/spanning layer
+                                
+                                resolve(layerId);
+                            }                                                        
                         });
                 }
             }));
@@ -292,6 +337,28 @@ export class TranscriptComponent implements OnInit {
             // set attribute to refresh visualization
             this.selectedLayerIds = selectedLayerIds;
         });
+    }
+
+    indexTokensOnLayer(layer : Layer) : void {
+        const wordLayerId = this.schema.wordLayerId;
+        for (let span of this.transcript.all(layer.id)) {
+            if (!span[wordLayerId]) {
+                const tokens = [];
+                // link it to all the words it contains
+                for (let token of span.all(wordLayerId)) {
+                    tokens.push(token);
+                    // and linkeach word with the span
+                    if (!token[layer.id]) token[layer.id] = [];
+                    token[layer.id].push(span);
+                } // next contained token
+                span[wordLayerId] = tokens;
+                // were there any?
+                if (span[wordLayerId].length == 0) { // no tokens
+                    // TODO make sure it appears somewhere
+                    console.log("could not visualize: " +span+" ("+span.start+"-"+span.end+")");
+                }
+            } // not already done
+        } // next span
     }
     
     // https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript#16348977

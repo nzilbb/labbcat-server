@@ -26,6 +26,10 @@ lib-wait { position: absolute; }
 .words {
     margin-left: 5%;
 }
+.words > .word  {
+    padding-left: 0px;
+    padding-right: 0px;
+}
 #temporal-blocks .block legend {
     display: block;
     font-style: italic;
@@ -47,6 +51,33 @@ lib-wait { position: absolute; }
 .token .layer {
     display: flex;
     flex-direction: row;
+}
+.token .layer.span {
+    display: flex;
+    flex-direction: column;
+}
+.token .layer.span .annotation.during {
+    border-top: 1px solid;
+}
+.token .layer.span .annotation.during label {
+    position: absolute;
+}
+.token .layer.span .annotation.first {
+    border-top: 1px solid;
+    border-left: 1px solid;
+    border-top-left-radius: 5px;
+}
+.token .layer.span.alignment-2 .annotation.last {
+    border-top: 1px solid;
+    border-right: 1px solid;
+    border-top-right-radius: 5px;
+}
+.token .layer.span .annotation.only {
+    border-top: 1px solid;
+    border-left: 1px solid;
+    border-top-left-radius: 5px;
+    border-right: 1px solid;
+    border-top-right-radius: 5px;
 }
 .token .alignment-0 .annotation:not(:first-child) {
     position: fixed;
