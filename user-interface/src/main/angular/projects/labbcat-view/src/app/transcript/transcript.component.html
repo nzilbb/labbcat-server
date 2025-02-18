@@ -30,7 +30,7 @@
             <span class="token">
               <!-- phrase/span layers -->
               <ng-container *ngFor="let l of selectedLayerIds">
-                <span *ngIf="schema.layers[l].parentId == 'turn' || (schema.layers[l].parentId == 'transcript' && schema.layers[l].alignment > 0)"
+                <span *ngIf="isSpanningLayer(schema.layers[l])"
                       class="layer layer-{{l}} alignment-{{schema.layers[l].alignment}} span"
                       style="color: {{schema.layers[l].colour}};"
                       title="{{l}}">
@@ -45,7 +45,7 @@
               </ng-container>
               <!-- word layers -->
               <ng-container *ngFor="let l of selectedLayerIds">
-                <span *ngIf="schema.layers[l].parentId == 'word' && l != 'segment'"
+                <span *ngIf="isWordLayer(schema.layers[l])"
                       class="layer layer-{{l}} alignment-{{schema.layers[l].alignment}}"
                       style="color: {{schema.layers[l].colour}};"
                       title="{{l}}: {{word.labels(l).join(' ')}}">
@@ -61,7 +61,7 @@
               </span>
               <!-- segment layers -->
               <ng-container *ngFor="let l of selectedLayerIds">
-                <span *ngIf="schema.layers[l].parentId == 'segment' || l == 'segment'"
+                <span *ngIf="isSegmentLayer(schema.layers[l])"
                       class="layer layer-{{l}}"
                       style="color: {{schema.layers[l].colour}};"
                       title="{{l}}: {{word.labels(l).join(' ')}}">

@@ -310,9 +310,7 @@ export class TranscriptComponent implements OnInit {
                                         } // next anchor
                                         
                                         // phrase/span layers index the token words they contain
-                                        if (layer.parentId == this.schema.turnLayerId
-                                            || (layer.parentId == this.schema.root.id
-                                                && layer.alignment > 0)) {
+                                        if (this.isSpanningLayer(layer)) {
                                             this.indexTokensOnLayer(layer);
                                         } // phrase/spanning layer
                                         
@@ -373,5 +371,22 @@ export class TranscriptComponent implements OnInit {
             colour += ('00' + value.toString(16)).substr(-2);
         }
         return colour;
+    }
+
+    /** Test whether the layer is phrase/span layer */
+    isSpanningLayer(layer: Layer) : boolean {
+        return (layer.parentId == this.schema.turnLayerId
+            && layer.id != this.schema.utteranceLayerId 
+            && layer.id != this.schema.wordLayerId)
+            || (layer.parentId == this.schema.root.id
+                && layer.alignment > 0);
+    }
+    /** Test whether the layer is word scope layer */
+    isWordLayer(layer: Layer) : boolean {
+        return layer.parentId == this.schema.wordLayerId && layer.id != "segment";
+    }
+    /** Test whether the layer is segment scope layer */
+    isSegmentLayer(layer: Layer) : boolean {
+        return layer.parentId == "segment" || layer.id == "segment";
     }
 }

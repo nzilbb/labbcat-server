@@ -55,6 +55,7 @@ lib-wait { position: absolute; }
 .token .layer.span {
     display: flex;
     flex-direction: column;
+    text-align: center;
 }
 .token .layer.span .annotation.during {
     border-top: 1px solid;
