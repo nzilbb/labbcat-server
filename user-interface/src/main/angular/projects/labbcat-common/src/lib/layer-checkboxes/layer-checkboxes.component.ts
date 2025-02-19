@@ -145,9 +145,6 @@ export class LayerCheckboxesComponent implements OnInit {
                 }
             } // next layer
 
-            // list word layers in reverse order so "word" is at the bottom
-            this.wordLayers.reverse();
-
             // now list the categories that are present
             let allLayers = [];
             if (this.participant) allLayers = allLayers.concat(this.participantAttributes);

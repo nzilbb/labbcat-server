@@ -16,7 +16,8 @@ lib-wait { position: absolute; }
 #temporal-blocks .consecutive, #temporal-blocks .simultaneous .utterance {
     border-left: 1px darkgray solid;
     border-bottom: 1px darkgray solid;
-    border-bottom-left-radius: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
     margin: 5px;
     margin-top: 15px;
     padding: 5px;

@@ -5,7 +5,6 @@ import { SerializationDescriptor } from '../serialization-descriptor';
 import { Response, Layer, User, Annotation, Anchor } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
-// TODO Dan's layer order
 // TODO layer selection from URL parameters
 // TODO optionally hide empty layers
 // TODO word menu
@@ -14,6 +13,7 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 // TODO meta-data
 // TODO format conversion
 // TODO remember layer selections
+// TODO ensure incoming URLs with hashes work properly
 
 @Component({
   selector: 'app-transcript',

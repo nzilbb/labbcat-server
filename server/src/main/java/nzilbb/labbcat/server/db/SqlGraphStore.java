@@ -463,7 +463,11 @@ public class SqlGraphStore implements GraphStore {
     try {
       // temporal layers
       PreparedStatement sql = getConnection().prepareStatement(
-        "SELECT short_description FROM layer ORDER BY short_description");
+        "SELECT short_description FROM layer"
+        +" LEFT OUTER JOIN attribute_category ON layer.category = attribute_category.category"
+        +" ORDER BY COALESCE(attribute_category.display_order, 100),"
+        + " IF (layer_id <= 2, POWER(layer_id-1,2), 100) DESC," // orthography/word/segment last
+        +" short_description");
       ResultSet rs = sql.executeQuery();
       Vector<String> layerIds = new Vector<String>();
       layerIds.add("main_participant"); // transcript_speaker.main_speaker
@@ -536,7 +540,11 @@ public class SqlGraphStore implements GraphStore {
         +" FROM layer"
         +" LEFT OUTER JOIN attribute_category ON layer.category = attribute_category.category"
         +" LEFT OUTER JOIN layer parent_layer ON layer.parent_id = parent_layer.layer_id"
-        +" ORDER BY attribute_category.display_order, layer.layer_id");
+        +" ORDER BY COALESCE(attribute_category.display_order, 100),"
+        // orthography/word/segment last
+        +" IF (layer.layer_id <= 2, POWER(layer.layer_id-1,2), 100) DESC," 
+        +" short_description,"
+        +" layer.layer_id");
       ResultSet rs = sql.executeQuery();
       try {
         while (rs.next()) {
