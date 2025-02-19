@@ -1,8 +1,9 @@
 <lib-wait *ngIf="loading"></lib-wait>
 
-<h1 *ngIf="transcript">{{transcript.id}}</h1>
+<h1>{{transcript?transcript.id:id}}</h1>
 
 <lib-layer-checkboxes
+  *ngIf="schema" [schema]="schema"
   name="layer" includeAlignment="true"
   span="true" phrase="true" word="true" segment="true"
   excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true" excludeWord="true"

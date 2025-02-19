@@ -13,6 +13,8 @@ import { Layer } from '../layer';
   styleUrls: ['./layer-checkboxes.component.css']
 })
 export class LayerCheckboxesComponent implements OnInit {
+    /** optional already-loaded schema */
+    @Input() schema: any;
     /** name attribute for checkboxes */
     @Input() name: string;
     /** Allow an annotation count to be specified when a layer is selected */
@@ -72,7 +74,6 @@ export class LayerCheckboxesComponent implements OnInit {
     wordLayers: Layer[];
     segmentLayers: Layer[];
     imagesLocation : string;
-    schema;
     scopeCount = 0;
     categorySelections: any;
 
@@ -84,8 +85,12 @@ export class LayerCheckboxesComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.loadSchema();
         this.scopeCount = 0;
+        if (this.schema) {
+            this.processSchema();
+        } else {
+            this.loadSchema();
+        }
         if (this.participant) this.scopeCount++;
         if (this.transcript) this.scopeCount++;
         if (this.span) this.scopeCount++;
@@ -94,70 +99,72 @@ export class LayerCheckboxesComponent implements OnInit {
         if (this.segment) this.scopeCount++;
         if (!this.styles) this.styles = {};
         if (!this.interpretedRaw) this.interpretedRaw = {};
-        console.log(JSON.stringify(this.interpretedRaw));
     }
 
     loadSchema(): void {
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
-            this.participantAttributes = [];
-            this.transcriptAttributes = [];
-            this.spanLayers = [];
-            this.phraseLayers = [];
-            this.wordLayers = [];
-            this.segmentLayers = [];
-            this.categorySelections = {};
-            if (!this.selected) this.selected = [] as string[];
-            for (let l in schema.layers) {
-                let layer = schema.layers[l] as Layer;
-                if (this.selected.includes(layer.id)) layer._selected = true;
-                if (layer.id == schema.root.id) {
-                    if (!this.excludeRoot) this.transcriptAttributes.push(layer);
-                } else if (layer.id == "segment"
-                    || layer.parentId == "segment") {
-                    this.segmentLayers.push(layer);
-                } else if (layer.id == schema.wordLayerId) {
-                    if (!this.excludeWord) this.phraseLayers.push(layer);
-                } else if (layer.parentId == schema.wordLayerId) {
-                    this.wordLayers.push(layer);
-                } else if (layer.id == schema.turnLayerId) {
-                    if (!this.excludeTurn) this.phraseLayers.push(layer);
-                } else if (layer.id == schema.utteranceLayerId) {
-                    if (!this.excludeUtterance) this.phraseLayers.push(layer);
-                } else if (layer.parentId == schema.turnLayerId) {
-                    this.phraseLayers.push(layer);
-                } else if (layer.id == schema.participantLayerId) {
-                    if (!this.excludeParticipant) this.participantAttributes.push(layer);
-                } else if (layer.id == "main_participant") {
-                    if (!this.excludeMainParticipant) this.participantAttributes.push(layer);
-                } else if (layer.parentId == schema.participantLayerId
-                    && layer.alignment == 0
-                    && layer.access == "1") { // only 'public' attributes
-                    this.participantAttributes.push(layer);
-                } else if (layer.id == schema.corpusLayerId) {
-                    if (!this.excludeCorpus) this.transcriptAttributes.push(layer);
-                } else if (layer.parentId == schema.root.id) {
-                    if (layer.alignment == 0) {
-                        this.transcriptAttributes.push(layer);
-                    } else {
-                        this.spanLayers.push(layer);
-                    }
-                }
-            } // next layer
-
-            // now list the categories that are present
-            let allLayers = [];
-            if (this.participant) allLayers = allLayers.concat(this.participantAttributes);
-            if (this.transcript) allLayers = allLayers.concat(this.transcriptAttributes);
-            if (this.span) allLayers = allLayers.concat(this.spanLayers);
-            if (this.phrase) allLayers = allLayers.concat(this.phraseLayers);
-            if (this.word) allLayers = allLayers.concat(this.wordLayers);
-            for (let layer of allLayers) {
-                if (layer.category && !this.categorySelections.hasOwnProperty(layer.category)) {
-                    this.categorySelections[layer.category] = false;
+            this.processSchema();
+        })
+    }
+    processSchema(): void {
+        this.participantAttributes = [];
+        this.transcriptAttributes = [];
+        this.spanLayers = [];
+        this.phraseLayers = [];
+        this.wordLayers = [];
+        this.segmentLayers = [];
+        this.categorySelections = {};
+        if (!this.selected) this.selected = [] as string[];
+        for (let l in this.schema.layers) {
+            let layer = this.schema.layers[l] as Layer;
+            if (this.selected.includes(layer.id)) layer._selected = true;
+            if (layer.id == this.schema.root.id) {
+                if (!this.excludeRoot) this.transcriptAttributes.push(layer);
+            } else if (layer.id == "segment"
+                || layer.parentId == "segment") {
+                this.segmentLayers.push(layer);
+            } else if (layer.id == this.schema.wordLayerId) {
+                if (!this.excludeWord) this.phraseLayers.push(layer);
+            } else if (layer.parentId == this.schema.wordLayerId) {
+                this.wordLayers.push(layer);
+            } else if (layer.id == this.schema.turnLayerId) {
+                if (!this.excludeTurn) this.phraseLayers.push(layer);
+            } else if (layer.id == this.schema.utteranceLayerId) {
+                if (!this.excludeUtterance) this.phraseLayers.push(layer);
+            } else if (layer.parentId == this.schema.turnLayerId) {
+                this.phraseLayers.push(layer);
+            } else if (layer.id == this.schema.participantLayerId) {
+                if (!this.excludeParticipant) this.participantAttributes.push(layer);
+            } else if (layer.id == "main_participant") {
+                if (!this.excludeMainParticipant) this.participantAttributes.push(layer);
+            } else if (layer.parentId == this.schema.participantLayerId
+                && layer.alignment == 0
+                && layer.access == "1") { // only 'public' attributes
+                this.participantAttributes.push(layer);
+            } else if (layer.id == this.schema.corpusLayerId) {
+                if (!this.excludeCorpus) this.transcriptAttributes.push(layer);
+            } else if (layer.parentId == this.schema.root.id) {
+                if (layer.alignment == 0) {
+                    this.transcriptAttributes.push(layer);
+                } else {
+                    this.spanLayers.push(layer);
                 }
             }
-        })
+        } // next layer
+
+        // now list the categories that are present
+        let allLayers = [];
+        if (this.participant) allLayers = allLayers.concat(this.participantAttributes);
+        if (this.transcript) allLayers = allLayers.concat(this.transcriptAttributes);
+        if (this.span) allLayers = allLayers.concat(this.spanLayers);
+        if (this.phrase) allLayers = allLayers.concat(this.phraseLayers);
+        if (this.word) allLayers = allLayers.concat(this.wordLayers);
+        for (let layer of allLayers) {
+            if (layer.category && !this.categorySelections.hasOwnProperty(layer.category)) {
+                this.categorySelections[layer.category] = false;
+            }
+        }
     }
     
     Categories(): string[] {

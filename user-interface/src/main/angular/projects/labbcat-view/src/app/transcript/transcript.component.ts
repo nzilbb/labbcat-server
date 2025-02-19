@@ -155,10 +155,12 @@ export class TranscriptComponent implements OnInit {
                             this.transcript.id, l, (count, errors, messages) => {
                                 if (count) { // annotations in this layer
                                     // remove grey-out style
+                                    this.schema.layers[l].description += ` (${count})`;
                                     this.layerStyles[l] = {};
                                 }
                             });
                     } // next temporal layer
+
                 } // valid transcript
             });       
     }
@@ -168,7 +170,7 @@ export class TranscriptComponent implements OnInit {
         const turnLayerId = this.schema.turnLayerId;
         const utteranceLayerId = this.schema.utteranceLayerId;
         const wordLayerId = this.schema.wordLayerId;
-        
+
         // index anchors
         this.anchors = {};
         for (let id in this.transcript.anchors) {
@@ -392,7 +394,7 @@ export class TranscriptComponent implements OnInit {
                     // longer durations are earlier
                         || b.duration()-a.duration()
                     // if same start and duration, reverse sort by id
-                        || b.id.localeCompare(a.id);
+                        || (""+b.id).localeCompare(""+a.id);
                 });
             // set depth of each span to the minimum possible value without overlap
             const maxOffset = []; // register the highest offset at a given depth
@@ -409,45 +411,94 @@ export class TranscriptComponent implements OnInit {
                 maxOffset[span._depth] = span.end.offset;
                 maxDepth = Math.max(maxDepth, span._depth);
             } // next span
-            // now drop spans so that annotations are as near as possible to the tokens they annotate
-            let keepScanning = true;
-            while (keepScanning) {
-                keepScanning = false;
-                for (let span of spans) {
-                    let newDepth = maxDepth;
-                    for (let otherSpan of spans) {
-                        if (otherSpan != span // not the same span
-                            && span.overlaps(otherSpan) // overlapping
-                            && otherSpan._depth > span._depth) { // deeper than this one
-                            // maybe drop to above that span
-                            newDepth = Math.min(newDepth, otherSpan._depth - 1);
-                        }                    
-                    } // next other span
-                    if (newDepth > span._depth) {
-                        span._depth = newDepth;
-                        keepScanning = true;
-                    } // changed depth
-                } // next span
-            } // next scan
+            // now drop spans so that they're as near as possible to the tokens they annotate
+            if (spans.length > 1000) { // but not for lots of number of spans, coz it'll be slow
+                let keepScanning = true;
+                while (keepScanning) {
+                    keepScanning = false;
+                    for (let span of spans) {
+                        let newDepth = maxDepth;
+                        for (let otherSpan of spans) {
+                            if (otherSpan != span // not the same span
+                                && span.overlaps(otherSpan) // overlapping
+                                && otherSpan._depth > span._depth) { // deeper than this one
+                                // maybe drop to above that span
+                                newDepth = Math.min(newDepth, otherSpan._depth - 1);
+                            }                    
+                        } // next other span
+                        if (newDepth > span._depth) {
+                            span._depth = newDepth;
+                            keepScanning = true;
+                        } // changed depth
+                    } // next span
+                } // next scan
+            }
     
             // link words to spans that contain them
             const wordLayerId = this.schema.wordLayerId;
+            // first create levels for every word token
+            for (let token of parent.all(wordLayerId)) token[layer.id] = new Array(maxDepth+1);
+            // now link 'included' spans to word tokens
             for (let span of spans) {
                 if (!span[wordLayerId]) {
                     const tokens = [];
                     // link it to all the words it contains
                     for (let token of span.all(wordLayerId)) {
                         tokens.push(token);
-                        // and link each word with the span
                         if (!token[layer.id]) token[layer.id] = new Array(maxDepth+1);
                         token[layer.id][span._depth] = span;
                     } // next contained token
                     span[wordLayerId] = tokens;
                     // were there any?
-                    if (span[wordLayerId].length == 0) { // no tokens
-                        // TODO make sure it appears somewhere
-                        console.log("could not visualize: " +span+" ("+span.start+"-"+span.end+")");
-                    }
+                    if (span[wordLayerId].length == 0) { // no tokens included
+                        let nearestWord = null;
+                        
+                        if (span.end.startOf[wordLayerId] // immediately precedes a word?
+                            && span.end.startOf[wordLayerId].length) {
+                            nearestWord = span.end.startOf[wordLayerId][0];
+                        } else if (span.start.endOf[wordLayerId] // immediately follows a word?
+                            && span.start.endOf[wordLayerId].length) {
+                            nearestWord = span.start.endOf[wordLayerId][0];
+                        } else if (span.start.startOf[wordLayerId] // starts with word?
+                            && span.start.startOf[wordLayerId].length) {
+                            nearestWord = span.start.startOf[wordLayerId][0];
+                        } else if (span.end.endOf[wordLayerId] // ends with a word?
+                            && span.end.endOf[wordLayerId].length) {
+                            nearestWord = span.end.endOf[wordLayerId][0];
+                        } else { // pick the nearest word
+                            const allWords = this.transcript.all(wordLayerId);
+                            // overlap?
+                            for (let word of allWords) {
+                                if (span.overlaps(word)) {
+                                    nearestWord = word;
+                                    break;
+                                }
+                            } // next word
+                            if (!nearestWord) {
+                                // first word that starts after the span start
+                                for (let word of allWords) {
+                                    if (span.start.offset < word.start.offset) {
+                                        nearestWord = word;
+                                        break;
+                                    }
+                                } // next word
+                            }
+                            if (!nearestWord) {
+                                // no following word, so select last word
+                                nearestWord = allWords[allWords.length-1];
+                            }
+                        } // pick nearest word
+                        if (nearestWord) {
+                            // link it to the span
+                            tokens.push(nearestWord);
+                            if (!nearestWord[layer.id]) {
+                                nearestWord[layer.id] = new Array(maxDepth+1);
+                            }
+                            nearestWord[layer.id][span._depth] = span;
+                        } else {
+                            console.error(`Could not visualize: ${span.label}#${span.id} (${span.start}-${span.end})`);
+                        }
+                    } // no tokens included
                 } // not already done
             } // next span
         } // next parent
