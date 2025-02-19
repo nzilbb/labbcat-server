@@ -414,6 +414,8 @@ public class SqlGraphStoreAdministration
               subtype = "D";
             } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
               subtype = "boolean";
+            } else if (Constants.TYPE_TREE.equals(layer.getType())) {
+              subtype = "X";
             }
             PreparedStatement sql = getConnection().prepareStatement(
               "UPDATE layer SET type = ? WHERE layer_id = ?");
@@ -817,6 +819,8 @@ public class SqlGraphStoreAdministration
       subtype = "D";
     } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
       subtype = "boolean";
+    } else if (Constants.TYPE_TREE.equals(layer.getType())) {
+      subtype = "X";
     } 
     if (layer.containsKey("subtype")) { // the given subtype trumps the above
       subtype = layer.get("subtype").toString();

@@ -39,4 +39,6 @@ export interface Annotation {
     all : (layerId: string) => Annotation[];
     
     _changed: boolean;
+    // for spanning annotations that might overlap, how 'deep' (low) is their visualization:
+    _depth: number;
 }

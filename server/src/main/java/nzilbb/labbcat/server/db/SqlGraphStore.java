@@ -671,6 +671,8 @@ public class SqlGraphStore implements GraphStore {
       layer.setType(Constants.TYPE_IPA);
     } else if (rs.getString("type").equals("boolean")) {
       layer.setType(Constants.TYPE_BOOLEAN);
+    } else if (rs.getString("type").equals("X")) {
+      layer.setType(Constants.TYPE_TREE);
     } else {
       layer.setType(Constants.TYPE_STRING);
     }

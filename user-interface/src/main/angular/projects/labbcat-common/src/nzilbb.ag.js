@@ -150,6 +150,9 @@
       return null;
     },
     all : function(layerId) {
+      if (layerId == "transcript") {
+        return [ this ];
+      }
       if (this.layers[layerId]) {
         return this.layers[layerId].annotations;
       }

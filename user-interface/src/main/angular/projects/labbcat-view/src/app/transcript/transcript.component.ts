@@ -150,10 +150,12 @@ export class TranscriptComponent implements OnInit {
                         if (layer.id == this.schema.utteranceLayerId) continue;
                         if (layer.id == this.schema.wordLayerId) continue;
                         // a temporal layer
+                        this.layerStyles[l] = { color: "silver" };
                         this.labbcatService.labbcat.countAnnotations(
                             this.transcript.id, l, (count, errors, messages) => {
-                                if (!count) { // no annotations in this layer
-                                    this.layerStyles[l] = { color: "silver" };
+                                if (count) { // annotations in this layer
+                                    // remove grey-out style
+                                    this.layerStyles[l] = {};
                                 }
                             });
                     } // next temporal layer
@@ -369,25 +371,86 @@ export class TranscriptComponent implements OnInit {
     }
     
     indexTokensOnLayer(layer : Layer) : void {
-        const wordLayerId = this.schema.wordLayerId;
-        for (let span of this.transcript.all(layer.id)) {
-            if (!span[wordLayerId]) {
-                const tokens = [];
-                // link it to all the words it contains
-                for (let token of span.all(wordLayerId)) {
-                    tokens.push(token);
-                    // and linkeach word with the span
-                    if (!token[layer.id]) token[layer.id] = [];
-                    token[layer.id].push(span);
-                } // next contained token
-                span[wordLayerId] = tokens;
-                // were there any?
-                if (span[wordLayerId].length == 0) { // no tokens
-                    // TODO make sure it appears somewhere
-                    console.log("could not visualize: " +span+" ("+span.start+"-"+span.end+")");
+        // spans can overlap (e.g. n-gram annotations, syntactic parses)
+        // we want
+        //  a) each span to be visualised at the same height across all tokens, and
+        //  b) the visualisation to be visually compact
+        // so, we have each words' span array use the array index to determine the height,
+        // and compress the indices so that spans fit into available gaps
+
+        // process them by parent, so that phrases from one speaker can't interfere with
+        // those of another speaker
+        for (let parent of this.transcript.all(layer.parentId)) {
+            const spans = parent.all(layer.id)
+            // first, order all annotations so that
+            // i) annotations with earlier starts are earlier
+            // ii) where starts are equal, longer annotations are earlier
+                .toSorted((a,b)=>{
+                    if (a==b) return 0; // just in case
+                    // earlier starts are earlier
+                    return a.start.offset - b.start.offset
+                    // longer durations are earlier
+                        || b.duration()-a.duration()
+                    // if same start and duration, reverse sort by id
+                        || b.id.localeCompare(a.id);
+                });
+            // set depth of each span to the minimum possible value without overlap
+            const maxOffset = []; // register the highest offset at a given depth
+            let maxDepth = -1;
+            for (let s in spans) {
+                const span = spans[s];
+                // check each height to see if this span will fit
+                let shallowestDepth = maxOffset.findIndex(
+                    endOffset=>endOffset <= span.start.offset);
+                if (shallowestDepth < 0) { // if not, plumb new depths
+                    shallowestDepth = maxDepth+1;
                 }
-            } // not already done
-        } // next span
+                span._depth = shallowestDepth;
+                maxOffset[span._depth] = span.end.offset;
+                maxDepth = Math.max(maxDepth, span._depth);
+            } // next span
+            // now drop spans so that annotations are as near as possible to the tokens they annotate
+            let keepScanning = true;
+            while (keepScanning) {
+                keepScanning = false;
+                for (let span of spans) {
+                    let newDepth = maxDepth;
+                    for (let otherSpan of spans) {
+                        if (otherSpan != span // not the same span
+                            && span.overlaps(otherSpan) // overlapping
+                            && otherSpan._depth > span._depth) { // deeper than this one
+                            // maybe drop to above that span
+                            newDepth = Math.min(newDepth, otherSpan._depth - 1);
+                        }                    
+                    } // next other span
+                    if (newDepth > span._depth) {
+                        span._depth = newDepth;
+                        keepScanning = true;
+                    } // changed depth
+                } // next span
+            } // next scan
+    
+            // link words to spans that contain them
+            const wordLayerId = this.schema.wordLayerId;
+            for (let span of spans) {
+                if (!span[wordLayerId]) {
+                    const tokens = [];
+                    // link it to all the words it contains
+                    for (let token of span.all(wordLayerId)) {
+                        tokens.push(token);
+                        // and link each word with the span
+                        if (!token[layer.id]) token[layer.id] = new Array(maxDepth+1);
+                        token[layer.id][span._depth] = span;
+                    } // next contained token
+                    span[wordLayerId] = tokens;
+                    // were there any?
+                    if (span[wordLayerId].length == 0) { // no tokens
+                        // TODO make sure it appears somewhere
+                        console.log("could not visualize: " +span+" ("+span.start+"-"+span.end+")");
+                    }
+                } // not already done
+            } // next span
+        } // next parent
     }
     
     // https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript#16348977
@@ -437,5 +500,17 @@ export class TranscriptComponent implements OnInit {
     /** Test whether the layer is segment scope layer */
     isSegmentLayer(layer : Layer) : boolean {
         return layer.parentId == "segment" || layer.id == "segment";
+    }
+
+    /** Visualize a given tree */
+    showTree(annotation : Annotation) : boolean {
+        const turn = annotation.first(this.schema.turnLayerId);
+        const turn_id = turn.id.replace("em_11_","");
+        window.open(
+            `${this.baseUrl}tree?layer_id=${this.schema.layers[annotation.layerId].layer_id}&start_uid=${annotation.start.id}&end_uid=${annotation.end.id}&turn=${turn_id}`, 
+            "tree",
+            "height=600,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
+        ).focus();
+        return false;
     }
 }

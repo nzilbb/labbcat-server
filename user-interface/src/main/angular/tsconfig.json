@@ -13,7 +13,7 @@
     "target": "ES2022",
     "useDefineForClassFields": false,
     "lib": [
-      "es2018",
+      "es2023",
       "dom"
     ],
     "paths": {

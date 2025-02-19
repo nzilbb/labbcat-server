@@ -35,13 +35,22 @@
                       class="layer layer-{{l}} alignment-{{schema.layers[l].alignment}} span"
                       style="color: {{schema.layers[l].colour}};"
                       title="{{l}}">
-                  <span *ngFor="let annotation of word.all(l)"
-                        [attr.id]="word == annotation.first('word')?annotation.id:(annotation.id+'-'+annotation.all('word').indexOf(word))"
-                        [ngClass]="{ 'annotation' : true, 'first' : word == annotation.first('word'), 'during' : true, 'last' : word == annotation.last('word') && word.end.offset <= annotation.end.offset }"
-                        title="{{l}}: {{annotation.label}}"
-                        ><label *ngIf="word == annotation.first('word') || word == utterance.first('word')">{{renderLabel(annotation)}}</label>&nbsp;</span>
-                  <span *ngIf="word.all(l).length == 0"
-                        class="annotation">&nbsp;</span>
+                  <ng-container *ngFor="let annotation of word.all(l)">
+                    <span *ngIf="annotation"
+                          [attr.id]="word == annotation.first('word')?annotation.id:(annotation.id+'-'+annotation.all('word').indexOf(word))"
+                          [ngClass]="{ 'annotation' : true, 'first' : word == annotation.first('word'), 'during' : true, 'last' : word == annotation.last('word') && word.end.offset <= annotation.end.offset }"
+                          title="{{l}}: {{annotation.label}}"
+                          ><label
+                             *ngIf="word == annotation.first('word') || word == utterance.first('word')">
+                        <ng-container [ngSwitch]="annotation.layer.type">
+                          <a *ngSwitchCase="'tree'"
+                             class="tree" href="#{{annotation.id}}"
+                             (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
+                          <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
+                        </ng-container>
+                      </label>&nbsp;</span>
+                    <span *ngIf="!annotation" class="annotation empty">&nbsp;</span>
+                  </ng-container>
                 </span>
               </ng-container>
               <!-- word layers -->
