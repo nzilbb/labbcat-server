@@ -5,7 +5,6 @@ import { SerializationDescriptor } from '../serialization-descriptor';
 import { Response, Layer, User, Annotation, Anchor } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
-// TODO layer selection from URL parameters
 // TODO optionally hide empty layers
 // TODO word menu
 // TODO media
@@ -24,6 +23,7 @@ export class TranscriptComponent implements OnInit {
     baseUrl : string;
     imagesLocation : string;
     id : string;
+    originalFile : string;
     loading = true;
     transcript : any;
 
@@ -70,9 +70,23 @@ export class TranscriptComponent implements OnInit {
         this.readSchema().then(() => {
             this.route.queryParams.subscribe((params) => {
                 this.id = params["id"]||params["transcript"]||params["ag_id"];
-                this.readTranscript();
-            });
-        });
+                this.readTranscript().then(()=>{ // some have to wait until transcript is loaded
+                    // preselect layers?
+                    let layerIds = params["layerId"]||params["l"]
+                    if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
+                        layerIds = JSON.parse(sessionStorage.getItem("selectedLayerIds"));
+                    }
+                    if (layerIds) {
+                        if (Array.isArray(layerIds)) {
+                            this.layersChanged(layerIds);
+                        } else {
+                            this.layersChanged([ layerIds ]);
+                        }
+                    }
+                    this.setOriginalFile();
+                }); // transcript read
+            }); // subscribed to queryParams
+        }); // after readSchema
         addEventListener("hashchange", (event) => {
             this.highlight(window.location.hash.substring(1));
         });
@@ -177,52 +191,58 @@ export class TranscriptComponent implements OnInit {
                 });
         });
     }
-    readTranscript() : void {
+    readTranscript() : Promise<void> {
         const structuralLayerIds = [
+            this.schema.corpusLayerId,
+            this.schema.episodeLayerId,
             this.schema.participantLayerId,
             "main_participant",
             this.schema.turnLayerId,
             this.schema.utteranceLayerId,
             this.schema.wordLayerId
         ];
-        this.labbcatService.labbcat.getTranscript(
-            this.id, structuralLayerIds.concat(this.attributes),
-            (transcript, errors, messages) => {
-                this.loading = false;
-                if (errors) errors.forEach(m => this.messageService.error(m));
-                if (messages) messages.forEach(m => this.messageService.info(m));
-                if (!transcript) {
-                    console.error("Invalid transcript ID");
-                    this.messageService.error("Invalid transcript ID"); // TODO i18n
-                } else { // valid transcript
-                    this.transcript = this.labbcatService.annotationGraph(transcript);
-                    this.parseTranscript();
-
-                    // grey out empty layers
-                    for (let l in this.schema.layers) {
-                        const layer = this.schema.layers[l];
-                        if (layer.parentId == this.schema.root.id
-                            && layer.alignment == 0) continue;
-                        if (layer.parentId == this.schema.participantLayerId) continue;
-                        if (layer.id == this.schema.root.id) continue;
-                        if (layer.id == this.schema.corpusLayerId) continue;
-                        if (layer.id == this.schema.episodeLayerId) continue;
-                        if (layer.id == this.schema.participantLayerId) continue;
-                        if (layer.id == this.schema.utteranceLayerId) continue;
-                        if (layer.id == this.schema.wordLayerId) continue;
-                        // a temporal layer
-                        this.layerStyles[l] = { color: "silver" };
-                        this.labbcatService.labbcat.countAnnotations(
-                            this.transcript.id, l, (count, errors, messages) => {
-                                if (count) { // annotations in this layer
-                                    // remove grey-out style
-                                    this.schema.layers[l].description += ` (${count})`;
-                                    this.layerStyles[l] = {};
-                                }
-                            });
-                    } // next temporal layer
-                } // valid transcript
-            });       
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.getTranscript(
+                this.id, structuralLayerIds.concat(this.attributes),
+                (transcript, errors, messages) => {
+                    this.loading = false;
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    if (!transcript) {
+                        console.error("Invalid transcript ID");
+                        this.messageService.error("Invalid transcript ID"); // TODO i18n
+                        reject();
+                    } else { // valid transcript
+                        this.transcript = this.labbcatService.annotationGraph(transcript);
+                        this.parseTranscript();
+                        
+                        // grey out empty layers
+                        for (let l in this.schema.layers) {
+                            const layer = this.schema.layers[l];
+                            if (layer.parentId == this.schema.root.id
+                                && layer.alignment == 0) continue;
+                            if (layer.parentId == this.schema.participantLayerId) continue;
+                            if (layer.id == this.schema.root.id) continue;
+                            if (layer.id == this.schema.corpusLayerId) continue;
+                            if (layer.id == this.schema.episodeLayerId) continue;
+                            if (layer.id == this.schema.participantLayerId) continue;
+                            if (layer.id == this.schema.utteranceLayerId) continue;
+                            if (layer.id == this.schema.wordLayerId) continue;
+                            // a temporal layer
+                            this.layerStyles[l] = { color: "silver" };
+                            this.labbcatService.labbcat.countAnnotations(
+                                this.transcript.id, l, (count, errors, messages) => {
+                                    if (count) { // annotations in this layer
+                                        // remove grey-out style
+                                        this.schema.layers[l].description += ` (${count})`;
+                                        this.layerStyles[l] = {};
+                                    }
+                                });
+                        } // next temporal layer
+                        resolve();
+                    } // valid transcript
+                });
+        });
     }
 
     parseTranscript() : void {
@@ -338,6 +358,24 @@ export class TranscriptComponent implements OnInit {
         }
     }
 
+    setOriginalFile(): void {
+        // only set origial file URL if we don't censor transcripts/media
+        this.labbcatService.labbcat.getSystemAttribute(
+            "censorshipRegexp", (attribute, errors, messages) => {
+                if (!attribute.value
+	            // or this is a super user
+	            || this.user.roles.includes("admin")) {
+	            this.originalFile = this.baseUrl
+                        + "files"
+	                + "/" + encodeURIComponent(
+                            this.transcript.first(this.schema.corpusLayerId).label)
+	                + "/" + encodeURIComponent(
+                            this.transcript.first(this.schema.episodeLayerId).label)
+	                + "/trs/"+encodeURIComponent(this.transcript.id);
+                }
+            });
+    }
+
     layersChanged(selectedLayerIds : string[]) : void {
         const addedLayerIds = selectedLayerIds.filter((x)=>this.selectedLayerIds.indexOf(x) < 0);
         const loadingLayers = [] as Promise<string>[];
@@ -408,6 +446,8 @@ export class TranscriptComponent implements OnInit {
             this.loading = false;
             // set attribute to refresh visualization
             this.selectedLayerIds = selectedLayerIds;
+            // and remember the selections for next time
+            sessionStorage.setItem("selectedLayerIds", JSON.stringify(this.selectedLayerIds));
         });
     }
 

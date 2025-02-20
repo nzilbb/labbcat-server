@@ -27,7 +27,7 @@
           category="true"
           [styles]="layerStyles"
           [interpretedRaw]="interpretedRaw"
-          ([selectedLayerIds])="selectedLayerIds"
+          [selected]="selectedLayerIds"
           (selectedChange)="layersChanged($event)"></lib-layer-checkboxes>
         <div *ngIf="user && user.roles.includes('edit')" class="generate-layer">
           <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
@@ -67,6 +67,12 @@
                class="lnk">
               <img src="{{serializer.icon}}" alt="⚙">
               {{serializer.name}}
+            </a>
+          </li>
+          <li *ngIf="originalFile">
+            <a href="{{originalFile}}" class="lnk" download="{{transcript.id}}">
+              <img src="{{imagesLocation}}/document.svg" alt="🗎">
+              {{transcript.id}}
             </a>
           </li>
         </ul>
