@@ -104,6 +104,7 @@
       <div *ngFor="let utterance of block.utterances"
            [ngClass]="{ 'utterance': true, 'main-participant': utterance.first('participant').first('main_participant') }"
            id="{{utterance.id}}"
+           [class.highlight]="utterance.id == highlitId"
            title="{{utterance.label}}: {{utterance.start.offset}}-{{utterance.end.offset}} ({{utterance.duration()}}s)">
         <legend class="participant">{{utterance.label}}</legend>
         <a id="{{utterance.startId}}" class="anchor"></a>
@@ -162,7 +163,7 @@
                      href="#{{utterance.id}}"
                      i18n>Utterance</a>
                 </div>
-                <div class="item" id="extract-audio-option">
+                <div *ngIf="hasWAV" class="item" id="extract-audio-option">
                   <lib-menu-option        
                     (press)="utteranceAudio(utterance)"
                     img="audio.svg" icon="🔊"

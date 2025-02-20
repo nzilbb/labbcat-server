@@ -2,7 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { SerializationDescriptor } from '../serialization-descriptor';
-import { Response, Layer, User, Annotation, Anchor } from 'labbcat-common';
+import { Response, Layer, User, Annotation, Anchor, MediaFile } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
 // TODO media
@@ -23,7 +23,6 @@ export class TranscriptComponent implements OnInit {
     originalFile : string;
     loading = true;
     transcript : any;
-    hasAudio = true; // TODO
     correctionEnabled = false;
 
     // temporal annotations
@@ -48,6 +47,9 @@ export class TranscriptComponent implements OnInit {
     
     serializers : SerializationDescriptor[];
     mimeTypeToSerializer = {};
+
+    hasWAV: boolean;
+    availableMedia: MediaFile[];
 
     menuId: string;
 
@@ -88,6 +90,7 @@ export class TranscriptComponent implements OnInit {
                         }
                     }
                     this.setOriginalFile();
+                    this.readAvailableMedia();
                 }); // transcript read
             }); // subscribed to queryParams
         }); // after readSchema
@@ -402,6 +405,19 @@ export class TranscriptComponent implements OnInit {
         }
     }
 
+    readAvailableMedia() : Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.getAvailableMedia(
+                this.transcript.id, (mediaTracks, errors, messages) => {
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    this.availableMedia = mediaTracks;
+                    this.hasWAV = this.availableMedia.find(file=>file.mimeType == "audio/wav") != null;
+                    resolve();
+                });
+        });
+    }
+    
     layersChanged(selectedLayerIds : string[]) : void {
         const addedLayerIds = selectedLayerIds.filter((x)=>this.selectedLayerIds.indexOf(x) < 0);
         const loadingLayers = [] as Promise<string>[];
