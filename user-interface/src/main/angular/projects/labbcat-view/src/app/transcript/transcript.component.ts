@@ -9,11 +9,8 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 // TODO optionally hide empty layers
 // TODO word menu
 // TODO media
-// TODO participant list with links
-// TODO meta-data
 // TODO format conversion
 // TODO remember layer selections
-// TODO ensure incoming URLs with hashes work properly
 
 @Component({
   selector: 'app-transcript',
@@ -30,11 +27,21 @@ export class TranscriptComponent implements OnInit {
     id : string;
     loading = true;
     transcript : any;
+
+    // temporal annotations
     anchors : { [key: string] : Anchor };
     annotations : { [key: string] : Annotation };
     participants : Annotation[];
     utterances : Annotation[];
     words : Annotation[];
+    generableLayers: Layer[];
+
+    // transcript attributes
+    attributes: string[];
+    categoryLayers: object; // string->Layer
+    categoryLabels: string[];
+    currentCategory: string;
+    categories: object; // string->Category
 
     selectedLayerIds : string[];
     interpretedRaw: { [key: string] : boolean };
@@ -63,10 +70,14 @@ export class TranscriptComponent implements OnInit {
         this.readSerializers();
         this.readSchema().then(() => {
             this.route.queryParams.subscribe((params) => {
-                this.id = params["id"]
+                this.id = params["id"]||params["transcript"]||params["ag_id"];
                 this.readTranscript();
             });
         });
+        addEventListener("hashchange", (event) => {
+            this.highlight(window.location.hash.substring(1));
+        });
+        this.readCategories();
     }
     
     readSchema() : Promise<void> {
@@ -74,9 +85,18 @@ export class TranscriptComponent implements OnInit {
             this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
                 this.schema = schema;
                 this.schema.root.description = "Transcript";
-                // determine which layers have interpreted/raw selectors
-                for (let l in this.schema.layers) {
-                    const layer = this.schema.layers[l];
+                this.generableLayers = [];
+                this.attributes = [];
+                this.categoryLayers = {};
+                this.categoryLabels = ["Participants", "Layers"]; // TODO i18n
+                for (let layerId in this.schema.layers) {
+                    const layer = this.schema.layers[layerId] as Layer;
+                    // detemine which layers can be regenerated
+                    if (layer.layer_manager_id && layer.id != this.schema.wordLayerId
+                        && /T/.test(layer.enabled)) {
+                        this.generableLayers.push(layer);
+                    }
+                    // determine which layers have interpreted/raw selectors
                     if (layer.validLabelsDefinition && layer.validLabelsDefinition.length) {
                         // are there keys that are different from labels?
                         for (let definition of layer.validLabelsDefinition) {
@@ -85,6 +105,25 @@ export class TranscriptComponent implements OnInit {
                                 break; // only need one
                             }
                         } // next label
+                    }
+                    // identify transcript attribute layers
+                    if (layer.parentId == "transcript"
+                        && layer.alignment == 0
+                        && layer.id != schema.participantLayerId
+                        && layer.id != schema.episodeLayerId
+                        && layer.id != schema.corpusLayerId) {
+
+                        // ensure we can iterate all layer IDs
+                        this.attributes.push(layer.id);
+                        
+                        // ensure the transcript type layer has a category
+                        if (layer.id == "transcript_type") layer.category = "General";
+                        
+                        if (!this.categoryLayers[layer.category]) {
+                            this.categoryLayers[layer.category] = [];
+                            this.categoryLabels.push(layer.category);
+                        }
+                        this.categoryLayers[layer.category].push(layer);
                     }
                 } // next layer
                 resolve();
@@ -117,6 +156,26 @@ export class TranscriptComponent implements OnInit {
         });
     }
 
+    readCategories(): Promise<void> {
+        this.categories = {};
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.readOnlyCategories(
+                "transcript", (categories, errors, messages) => {
+                    for (let category of categories) {
+                        if (!category.description) {
+                            category.description = `Attributes: ${category.category}`; // TODO i18n
+                        }
+                        this.categories[category.category] = category;
+                    }
+                    // extra pseudo categories
+                    this.categories["Layers"] = {
+                        description: "Annotation layers for display"};
+                    this.categories["Participants"] = {
+                        description: "The participants in the transcript"};
+                    resolve();
+                });
+        });
+    }
     readTranscript() : void {
         const structuralLayerIds = [
             this.schema.participantLayerId,
@@ -126,7 +185,8 @@ export class TranscriptComponent implements OnInit {
             this.schema.wordLayerId
         ];
         this.labbcatService.labbcat.getTranscript(
-            this.id, structuralLayerIds, (transcript, errors, messages) => {
+            this.id, structuralLayerIds.concat(this.attributes),
+            (transcript, errors, messages) => {
                 this.loading = false;
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
@@ -160,7 +220,6 @@ export class TranscriptComponent implements OnInit {
                                 }
                             });
                     } // next temporal layer
-
                 } // valid transcript
             });       
     }
@@ -270,6 +329,12 @@ export class TranscriptComponent implements OnInit {
                 lastUtterance = utterance;
             } // next utterance
         } // there are utterances
+
+        if (window.location.hash) {
+            window.setTimeout(()=>{ // give time for the page to render
+                this.highlight(window.location.hash.substring(1));
+            }, 500);
+        }
     }
 
     layersChanged(selectedLayerIds : string[]) : void {
@@ -412,7 +477,7 @@ export class TranscriptComponent implements OnInit {
                 maxDepth = Math.max(maxDepth, span._depth);
             } // next span
             // now drop spans so that they're as near as possible to the tokens they annotate
-            if (spans.length > 1000) { // but not for lots of number of spans, coz it'll be slow
+            if (spans.length < 1000) { // but not for lots of number of spans, coz it'll be slow
                 let keepScanning = true;
                 while (keepScanning) {
                     keepScanning = false;
@@ -553,6 +618,13 @@ export class TranscriptComponent implements OnInit {
         return layer.parentId == "segment" || layer.id == "segment";
     }
 
+    /** Highlight the annotation with the given ID */
+    highlitId: string;
+    highlight(id: string): void {
+        this.highlitId = id;
+        document.getElementById(id).scrollIntoView();
+    }
+
     /** Visualize a given tree */
     showTree(annotation : Annotation) : boolean {
         const turn = annotation.first(this.schema.turnLayerId);
@@ -563,5 +635,17 @@ export class TranscriptComponent implements OnInit {
             "height=600,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
         ).focus();
         return false;
+    }
+    
+    showGenerateLayerSelection = false;
+    generateLayerId = "";
+    /** Generate annotation layers */
+    generate(): void {
+        if (!this.showGenerateLayerSelection) { // show options
+            this.showGenerateLayerSelection = true;
+        } else { // options selected, so go ahead and do it
+            const url = `${this.baseUrl}edit/layers/regenerate?id=${this.transcript.id}&layer_id=${this.generateLayerId}`;
+            document.location = url;
+        }
     }
 }

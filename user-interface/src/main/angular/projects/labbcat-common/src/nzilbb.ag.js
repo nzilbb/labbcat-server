@@ -47,7 +47,7 @@
 
     // top level layer
     if (!this.schema) this.schema = {
-      graph: {
+      transcript: {
         id: "transcript",
         description: "The graph as a whole",
         children: {},
@@ -131,6 +131,15 @@
 	annotation.layer.annotations.push(annotation);
       }
     },    
+    removeAnnotation : function(id) {
+      var annotation = this.annotations[id];
+      this[annotation.layerId] = this[annotation.layerId].filter(a=>a.id != id);
+      if (annotation.parent) {
+	annotation.parent[annotation.layerId]
+          = annotation.parent[annotation.layerId].filter(a=>a.id != id);
+      }
+      annotation.layer.annotations = annotation.layer.annotations.filter(a=>a.id != id);
+    },    
     addAnchor : function(anchor) {
       anchor.graph = this;
       if (!anchor.id) anchor.id = "+" + (++nzilbb.ag._lastId);
@@ -163,7 +172,12 @@
     for (var layerId in layers) {
       var layer = layers[layerId];
       layer.id = layerId;
-      if (parent) layer.parent = parent;
+      if (parent) {
+        layer.parentId = parent.id;
+        layer.parent = parent;
+      } else {
+        layer.parentId = "transcript";
+      }
       layer.annotations = []; // allow enumeration by layer
       top[layerId] = layer;
       if (top[layerId].children)
@@ -434,15 +448,20 @@
     },
 
     first : function(layerId) {
+      var layer = this.graph.layers[layerId];
       // is it me?
       if (this.layerId == layerId) {
         return this;
       }
+      if (layerId == "main_participant") console.log(`${this.id} ${this.layerId} parent? ${layer.parentId}`);
       // is it a child layer?
       if (this[layerId]) {
         if (this[layerId].length > 0) {
           return this[layerId][0];
         }
+        return null;
+      } else  if (layer.parentId == this.layerId) { // it's *meant* to be a child
+        return null;
       }
       // go up through ancestors
       var ancestor = this.parent;
@@ -473,6 +492,8 @@
         if (this[layerId].length > 0) {
           return this[layerId][this[layerId].length - 1];
         }
+      } else  if (layer.parentId == this.layerId) { // it's *meant* to be a child
+        return null;
       }
       // go up through ancestors
       var ancestor = this.parent;
@@ -490,13 +511,18 @@
     },
     
     all : function(layerId) {
+      var layer = this.graph.layers[layerId];
+      if (!layer) return [];
+      
       // is it me?
       if (this.layerId == layerId) {
         return [this];
       }
       // is it a child layer?
-      if (this[layerId]) {
+      if (this[layerId]) { // there's a 'child' layer (which may or may not be official)
         return this[layerId];
+      } else  if (layer.parentId == this.layerId) { // it's *meant* to be a child
+        return [];
       }
       // go up through ancestors
       var ancestor = this.parent;
