@@ -4,24 +4,26 @@
 
 <div *ngIf="transcript" id="transcript">
 
-  <div *ngIf="transcript.first('previous-transcript')"
-       id="previous-transcript-link">
-    <a rel="prev" href="transcript?id={{transcript.first('previous-transcript').label}}"
-       i18n-title title="Previous">
-      <img src="{{imagesLocation}}/previous.svg"
-           i18n-alt alt="Previous"
-           i18n-title title="Previous transcript in the episode">
-    </a>
-  </div>
-  <div *ngIf="transcript.first('next-transcript')"
-       id="next-transcript-link">
-    <a rel="next" href="transcript?id={{transcript.first('next-transcript').label}}"
-       i18n-title title="Next">
-      <img src="{{imagesLocation}}/next.svg"
-           i18n-alt alt="Next"
-           i18n-title title="Next transcript in the episode">
-    </a>
-  </div>
+  <nav>
+    <div *ngIf="transcript.first('previous-transcript')"
+         id="previous-transcript-link">
+      <a rel="prev" href="transcript?id={{transcript.first('previous-transcript').label}}"
+         i18n-title title="Previous">
+        <img src="{{imagesLocation}}/previous.svg"
+             i18n-alt alt="Previous"
+             i18n-title title="Previous transcript in the episode">
+      </a>
+    </div>
+    <div *ngIf="transcript.first('next-transcript')"
+         id="next-transcript-link">
+      <a rel="next" href="transcript?id={{transcript.first('next-transcript').label}}"
+         i18n-title title="Next">
+        <img src="{{imagesLocation}}/next.svg"
+             i18n-alt alt="Next"
+             i18n-title title="Next transcript in the episode">
+      </a>
+    </div>
+  </nav>
 
   <!-- layer selector, attributes etc. -->
   <div id="attributes" class="attribute-list tabs">

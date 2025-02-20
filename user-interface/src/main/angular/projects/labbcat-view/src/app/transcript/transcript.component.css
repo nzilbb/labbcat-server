@@ -20,9 +20,11 @@ lib-wait { position: absolute; }
 .permalink:hover::after {
     content: ' ' url('/assets/link.svg#xywh=0,0,4,4') / '🔗';
 }
-#previous-transcript-link {
+nav, nav > div {
     position: fixed;
     top: 50%;
+}
+#previous-transcript-link {
     left: 0px;
     text-align: left;
 }
@@ -31,8 +33,6 @@ lib-wait { position: absolute; }
     background-color: var(--theme-background-color);
 }
 #next-transcript-link {
-    position: fixed;
-    top: 50%;
     right: 0px;
     text-align: right;
 }
