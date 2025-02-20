@@ -9,7 +9,6 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 // TODO optionally hide empty layers
 // TODO word menu
 // TODO media
-// TODO format conversion
 // TODO remember layer selections
 
 @Component({
@@ -88,7 +87,7 @@ export class TranscriptComponent implements OnInit {
                 this.generableLayers = [];
                 this.attributes = [];
                 this.categoryLayers = {};
-                this.categoryLabels = ["Participants", "Layers"]; // TODO i18n
+                this.categoryLabels = ["Participants", "Layers", "Formats"]; // TODO i18n
                 for (let layerId in this.schema.layers) {
                     const layer = this.schema.layers[layerId] as Layer;
                     // detemine which layers can be regenerated
@@ -168,10 +167,12 @@ export class TranscriptComponent implements OnInit {
                         this.categories[category.category] = category;
                     }
                     // extra pseudo categories
-                    this.categories["Layers"] = {
-                        description: "Annotation layers for display"};
-                    this.categories["Participants"] = {
-                        description: "The participants in the transcript"};
+                    this.categories["Layers"] = { // TODO i18n
+                        description: "Annotation layers for display"}; // TODO i18n
+                    this.categories["Participants"] = { // TODO i18n
+                        description: "The participants in the transcript"}; // TODO i18n
+                    this.categories["Formats"] = { // TODO i18n
+                        description: "Export the transcript in a selected format"}; // TODO i18n
                     resolve();
                 });
         });
@@ -647,5 +648,12 @@ export class TranscriptComponent implements OnInit {
             const url = `${this.baseUrl}edit/layers/regenerate?id=${this.transcript.id}&layer_id=${this.generateLayerId}`;
             document.location = url;
         }
+    }
+
+    /* convert selectedLayerIds array into a series of URL parameters with the given name */
+    selectedLayerIdParameters(parameterName: string): string {
+        return this.selectedLayerIds
+            .map(layerId => "&"+parameterName+"="+encodeURIComponent(layerId))
+            .join("");
     }
 }

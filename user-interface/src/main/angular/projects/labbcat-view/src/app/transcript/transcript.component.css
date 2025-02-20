@@ -103,9 +103,20 @@ lib-wait { position: absolute; }
 .generate-layer {
     display: flex;
     flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Meta-data */
+
+.participants ul {
+    list-style: circle;
+    list-style-image: url('/assets/person.svg');
+}
+.formats ul {
+    list-style: none;
+}
+
 #attributes {
     width: 100%;
 }

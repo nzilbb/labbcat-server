@@ -453,7 +453,6 @@
       if (this.layerId == layerId) {
         return this;
       }
-      if (layerId == "main_participant") console.log(`${this.id} ${this.layerId} parent? ${layer.parentId}`);
       // is it a child layer?
       if (this[layerId]) {
         if (this[layerId].length > 0) {

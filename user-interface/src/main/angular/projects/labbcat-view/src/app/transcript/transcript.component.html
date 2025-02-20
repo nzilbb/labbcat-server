@@ -49,10 +49,27 @@
       </div>
       <!-- participants tab -->
       <div *ngIf="currentCategory == 'Participants'" class="participants">
-        <div *ngFor="let participant of transcript.all('participant')"
-             [ngClass]="{'participant':true, 'main-participant': participant.first('main_participant')}">
-          <a href="{{baseUrl}}{{user && user.roles.includes('edit')?'edit/':''}}participant?id={{participant.label}}">{{participant.label}}</a>
-        </div>
+        <ul>
+          <li *ngFor="let participant of transcript.all('participant')"
+              [ngClass]="{'participant':true, 'main-participant': participant.first('main_participant')}">
+            <a href="{{baseUrl}}{{user && user.roles.includes('edit')?'edit/':''}}participant?id={{participant.label}}">
+              {{participant.label}}
+            </a>
+          </li>
+        </ul>
+      </div>
+      <!-- formats tab -->
+      <div *ngIf="currentCategory == 'Formats'" class="formats">
+        <ul>
+          <li *ngFor="let serializer of serializers"
+              i18n-title title="Convert to selected format">
+            <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.wordLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
+               class="lnk">
+              <img src="{{serializer.icon}}" alt="⚙">
+              {{serializer.name}}
+            </a>
+          </li>
+        </ul>
       </div>
       <!-- attribute category tabs -->
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
