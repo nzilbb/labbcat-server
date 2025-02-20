@@ -1002,6 +1002,22 @@ public class SqlGraphStore implements GraphStore {
           .setSaturated(true)
           .setParentId("transcript")
           .setParentIncludes(true);
+      } else if (id.equals("next-transcript")) { // special case
+        return new Layer(id, "ID of the next transcript in the episode")
+          .setAlignment(Constants.ALIGNMENT_NONE)
+          .setPeers(false)
+          .setPeersOverlap(false)
+          .setSaturated(true)
+          .setParentId("transcript")
+          .setParentIncludes(true);
+      } else if (id.equals("previous-transcript")) { // special case
+        return new Layer(id, "ID of the previous transcript in the episode")
+          .setAlignment(Constants.ALIGNMENT_NONE)
+          .setPeers(false)
+          .setPeersOverlap(false)
+          .setSaturated(true)
+          .setParentId("transcript")
+          .setParentIncludes(true);
       }
 
       PreparedStatement sql = getConnection().prepareStatement(
@@ -2058,7 +2074,37 @@ public class SqlGraphStore implements GraphStore {
               } catch(StoreException exception) { // getLayer didn't like it
                 // just ignore it
               }
-            } // audio_prompt
+            } else if (layerId.equals("previous-transcript")) { // Previous transcript in episode
+              graph.addLayer(getLayer(layerId));
+              PreparedStatement adjacentTranscript = getConnection().prepareStatement(
+                "SELECT transcript_id FROM transcript"
+                +" WHERE family_id = ? AND family_sequence < ?"
+                +" ORDER BY family_sequence DESC LIMIT 1");
+              adjacentTranscript.setInt(1, (Integer)graph.get("@family_id"));
+              adjacentTranscript.setInt(2, graph.getOrdinal());
+              ResultSet rsAdjacent = adjacentTranscript.executeQuery();
+              if (rsAdjacent.next()) {
+                graph.addAnnotation(
+                  new Annotation(layerId, rsAdjacent.getString("transcript_id"), layerId));
+              }
+              rsAdjacent.close();
+              adjacentTranscript.close();
+            } else if (layerId.equals("next-transcript")) { // Next transcript in episode
+              graph.addLayer(getLayer(layerId));
+              PreparedStatement adjacentTranscript = getConnection().prepareStatement(
+                "SELECT transcript_id FROM transcript"
+                +" WHERE family_id = ? AND family_sequence > ?"
+                +" ORDER BY family_sequence ASC LIMIT 1");
+              adjacentTranscript.setInt(1, (Integer)graph.get("@family_id"));
+              adjacentTranscript.setInt(2, graph.getOrdinal());
+              ResultSet rsAdjacent = adjacentTranscript.executeQuery();
+              if (rsAdjacent.next()) {
+                graph.addAnnotation(
+                  new Annotation(layerId, rsAdjacent.getString("transcript_id"), layerId));
+              }
+              rsAdjacent.close();
+              adjacentTranscript.close();
+            }
           } // nonexistent layer
         } // next specified layer
 

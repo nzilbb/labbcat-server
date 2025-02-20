@@ -6,6 +6,7 @@ import { Response, Layer, User, Annotation, Anchor, MediaFile } from 'labbcat-co
 import { MessageService, LabbcatService } from 'labbcat-common';
 
 // TODO media
+// TODO next/previous
 
 @Component({
   selector: 'app-transcript',
@@ -195,11 +196,17 @@ export class TranscriptComponent implements OnInit {
                     }
                     // extra pseudo categories
                     this.categories["Layers"] = { // TODO i18n
-                        description: "Annotation layers for display"}; // TODO i18n
+                        description: "Annotation layers for display",
+                        icon: "layers.svg"
+                    }; // TODO i18n
                     this.categories["Participants"] = { // TODO i18n
-                        description: "The participants in the transcript"}; // TODO i18n
+                        description: "The participants in the transcript",
+                        icon: "people.svg"
+                    }; // TODO i18n
                     this.categories["Formats"] = { // TODO i18n
-                        description: "Export the transcript in a selected format"}; // TODO i18n
+                        description: "Export the transcript in a selected format",
+                        icon: "document.svg"
+                    }; // TODO i18n
                     resolve();
                 });
         });
@@ -212,7 +219,9 @@ export class TranscriptComponent implements OnInit {
             "main_participant",
             this.schema.turnLayerId,
             this.schema.utteranceLayerId,
-            this.schema.wordLayerId
+            this.schema.wordLayerId,
+            // unnofficial layers to link to neighbors
+            "previous-transcript", "next-transcript"
         ];
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getTranscript(

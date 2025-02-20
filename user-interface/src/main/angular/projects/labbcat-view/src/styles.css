@@ -3,8 +3,9 @@
 /* some things used in lots of places: */
 :root {
     --progress-size: 22px;
-    --theme-block-color: #96A339; /* from NZILBB logo*/
+    --theme-block-color: #96A339; /* from NZILBB logo */
     --theme-text-color: #78832E;  /* darkened for legibility */
+    --theme-background-color: white; /* for elements that can't be transparent */
 }
 
 /* animations */

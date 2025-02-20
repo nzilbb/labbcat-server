@@ -4,6 +4,25 @@
 
 <div *ngIf="transcript" id="transcript">
 
+  <div *ngIf="transcript.first('previous-transcript')"
+       id="previous-transcript-link">
+    <a rel="prev" href="transcript?id={{transcript.first('previous-transcript').label}}"
+       i18n-title title="Previous">
+      <img src="{{imagesLocation}}/previous.svg"
+           i18n-alt alt="Previous"
+           i18n-title title="Previous transcript in the episode">
+    </a>
+  </div>
+  <div *ngIf="transcript.first('next-transcript')"
+       id="next-transcript-link">
+    <a rel="next" href="transcript?id={{transcript.first('next-transcript').label}}"
+       i18n-title title="Next">
+      <img src="{{imagesLocation}}/next.svg"
+           i18n-alt alt="Next"
+           i18n-title title="Next transcript in the episode">
+    </a>
+  </div>
+
   <!-- layer selector, attributes etc. -->
   <div id="attributes" class="attribute-list tabs">
     <div class="tab-labels">
@@ -11,6 +30,8 @@
              [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
              (click)="currentCategory = currentCategory == category?null:category"
              title="{{categories[category].description}}">
+        <img *ngIf="categories[category].icon"
+             src="{{imagesLocation}}/{{categories[category].icon}}" alt="{{categories[category].description}}">
         {{category}}
       </label>
     </div>
@@ -219,7 +240,8 @@
             </span>
           </span>
         </div>
-        <a id="{{utterance.last(transcript.schema.wordLayerId).endId}}" class="anchor"></a>
+        <a *ngIf="utterance.last(transcript.schema.wordLayerId)"
+           id="{{utterance.last(transcript.schema.wordLayerId).endId}}" class="anchor"></a>
       </div>
     </div>
   </div>

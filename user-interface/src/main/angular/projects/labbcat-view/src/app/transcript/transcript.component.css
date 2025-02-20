@@ -20,6 +20,31 @@ lib-wait { position: absolute; }
 .permalink:hover::after {
     content: ' ' url('/assets/link.svg#xywh=0,0,4,4') / '🔗';
 }
+#previous-transcript-link {
+    position: fixed;
+    top: 50%;
+    left: 0px;
+    text-align: left;
+}
+#previous-transcript-link a:hover::after {
+    content: attr(title);
+    background-color: var(--theme-background-color);
+}
+#next-transcript-link {
+    position: fixed;
+    top: 50%;
+    right: 0px;
+    text-align: right;
+}
+#next-transcript-link a:hover::before {
+    content: attr(title);
+    background-color: var(--theme-background-color);
+}
+#previous-transcript-link img, #next-transcript-link img {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
 /* consecutive blocks are vertical, simultaneous are horizontal */
 #temporal-blocks .block {
     display: flex;
@@ -122,6 +147,14 @@ lib-wait { position: absolute; }
 
 /* Meta-data */
 
+.tab-labels label {
+    cursor: context-menu;
+}
+.tab-labels label img {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
 .participants ul {
     list-style: circle;
     list-style-image: url('/assets/person.svg');
