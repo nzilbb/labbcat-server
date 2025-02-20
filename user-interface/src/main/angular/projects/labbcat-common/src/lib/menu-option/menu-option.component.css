@@ -1,0 +1,13 @@
+label {
+    padding-left: 3px;
+    font-weight: normal;
+}
+.disabled {
+    color: darkgray;
+}
+img {
+    width: 16px;
+    height: 16px;
+    vertical-align: baseline;
+}
+

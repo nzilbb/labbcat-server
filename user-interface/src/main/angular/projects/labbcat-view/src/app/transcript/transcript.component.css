@@ -6,7 +6,20 @@ lib-wait { position: absolute; }
 .highlight {
     background-color: yellow;
 }
-
+.layer-word {
+    cursor: default;
+    cursor: context-menu;
+}
+#word-menu {
+    position: absolute;
+    z-index: 10;
+}
+#word-menu .header {
+    height: 18px;
+}
+.permalink:hover::after {
+    content: ' ' url('/assets/link.svg#xywh=0,0,4,4') / '🔗';
+}
 /* consecutive blocks are vertical, simultaneous are horizontal */
 #temporal-blocks .block {
     display: flex;

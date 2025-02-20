@@ -5,10 +5,7 @@ import { SerializationDescriptor } from '../serialization-descriptor';
 import { Response, Layer, User, Annotation, Anchor } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
-// TODO optionally hide empty layers
-// TODO word menu
 // TODO media
-// TODO remember layer selections
 
 @Component({
   selector: 'app-transcript',
@@ -26,6 +23,8 @@ export class TranscriptComponent implements OnInit {
     originalFile : string;
     loading = true;
     transcript : any;
+    hasAudio = true; // TODO
+    correctionEnabled = false;
 
     // temporal annotations
     anchors : { [key: string] : Anchor };
@@ -50,6 +49,8 @@ export class TranscriptComponent implements OnInit {
     serializers : SerializationDescriptor[];
     mimeTypeToSerializer = {};
 
+    menuId: string;
+
     constructor(
         private labbcatService : LabbcatService,
         private messageService : MessageService,
@@ -64,8 +65,11 @@ export class TranscriptComponent implements OnInit {
     }
     
     ngOnInit() : void {        
-        this.readUserInfo();
-        this.readBaseUrl();
+        this.readUserInfo().then(()=>{
+            this.readBaseUrl().then(()=>{
+                this.setCorrectionsEnabled();
+            });
+        });
         this.readSerializers();
         this.readSchema().then(() => {
             this.route.queryParams.subscribe((params) => {
@@ -144,15 +148,21 @@ export class TranscriptComponent implements OnInit {
         });
     }
     
-    readUserInfo() : void {
-        this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
-            this.user = user as User;
+    readUserInfo() : Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
+                this.user = user as User;
+                resolve();
+            });
         });
     }
     
-    readBaseUrl() : void {
-        this.labbcatService.labbcat.getId((url, errors, messages) => {
-            this.baseUrl = url;
+    readBaseUrl(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.getId((url, errors, messages) => {
+                this.baseUrl = url;
+                resolve();
+            });
         });
     }
     
@@ -374,6 +384,22 @@ export class TranscriptComponent implements OnInit {
 	                + "/trs/"+encodeURIComponent(this.transcript.id);
                 }
             });
+    }
+
+    setCorrectionsEnabled(): void {        
+        // correctionEnabled if they're not an edit user
+        // and requests to the corrections URL return 200 status (not 400 error)
+        if (!this.user.roles.includes("edit")) {
+            this.labbcatService.labbcat.createRequest(
+                "correction", null, (r, errors, messages) => {
+                    console.log(errors);
+                    if (!errors) {
+                        this.correctionEnabled = true;
+                    }
+                },
+                this.baseUrl+"correction")
+                .send();        
+        }
     }
 
     layersChanged(selectedLayerIds : string[]) : void {
@@ -666,6 +692,13 @@ export class TranscriptComponent implements OnInit {
         document.getElementById(id).scrollIntoView();
     }
 
+    /* convert selectedLayerIds array into a series of URL parameters with the given name */
+    selectedLayerIdParameters(parameterName: string): string {
+        return this.selectedLayerIds
+            .map(layerId => "&"+parameterName+"="+encodeURIComponent(layerId))
+            .join("");
+    }
+    
     /** Visualize a given tree */
     showTree(annotation : Annotation) : boolean {
         const turn = annotation.first(this.schema.turnLayerId);
@@ -674,6 +707,39 @@ export class TranscriptComponent implements OnInit {
             `${this.baseUrl}tree?layer_id=${this.schema.layers[annotation.layerId].layer_id}&start_uid=${annotation.start.id}&end_uid=${annotation.end.id}&turn=${turn_id}`, 
             "tree",
             "height=600,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
+        ).focus();
+        return false;
+    }
+    
+    editUtterance(utterance : Annotation) : boolean {
+        const url = this.baseUrl
+            +"edit/correction"
+            +"?id="+encodeURIComponent(this.transcript.id)
+            +"&annotation_uid="+utterance.id;
+        window.open(
+            url, "correction",
+            "height=350,width=600,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
+        ).focus();
+        return false;
+    }
+    
+    suggestCorrection(utterance : Annotation) : boolean {
+        const url = this.baseUrl
+            +"correction"
+            +"?id="+encodeURIComponent(this.transcript.id)
+            +"&annotation_uid="+utterance.id;
+        window.open(
+            url, "correction",
+            "height=350,width=600,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
+        ).focus();
+        return false;
+    }
+    
+    editWord(word : Annotation) : boolean {
+        const url = `${this.baseUrl}edit/annotation?annotation_uid=${word.id}`;
+        window.open(
+            url, "word",
+            "height=300,width=400,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
         ).focus();
         return false;
     }
@@ -689,11 +755,12 @@ export class TranscriptComponent implements OnInit {
             document.location = url;
         }
     }
+    
+    /** Export utterance audio */
+    utteranceAudio(utterance : Annotation) : boolean {
+        const url = `${this.baseUrl}soundfragment?id=${this.transcript.id}&start=${utterance.start.offset}&end=${utterance.end.offset}`;
+        document.location = url;
+        return false;
+    }    
 
-    /* convert selectedLayerIds array into a series of URL parameters with the given name */
-    selectedLayerIdParameters(parameterName: string): string {
-        return this.selectedLayerIds
-            .map(layerId => "&"+parameterName+"="+encodeURIComponent(layerId))
-            .join("");
-    }
 }

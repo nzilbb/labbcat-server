@@ -1,0 +1,8 @@
+<div (click)="handlePress()"
+     title="{{error || title}}"
+     class="{{classes}}"
+     [class.disabled]="disabled"
+     [class.error]="error">
+  <img src="{{processing?imagesLocation+'/wait.gif':img.startsWith('http')?img:imagesLocation+'/'+img}}" alt="{{icon}}">
+  <label>{{label}}</label>
+</div>

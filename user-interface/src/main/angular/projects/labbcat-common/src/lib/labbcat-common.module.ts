@@ -6,6 +6,7 @@ import { UrlEncodePipe } from './url-encode.pipe';
 import { MessagesComponent } from './messages/messages.component';
 import { KeepAliveComponent } from './keep-alive/keep-alive.component';
 import { ButtonComponent } from './button/button.component';
+import { MenuOptionComponent } from './menu-option/menu-option.component';
 import { TaskComponent } from './task/task.component';
 import { WaitComponent } from './wait/wait.component';
 import { GroupedCheckboxComponent } from './grouped-checkbox/grouped-checkbox.component';
@@ -27,6 +28,7 @@ import { InputRegexpComponent } from './input-regexp/input-regexp.component';
         UrlEncodePipe,
         MessagesComponent,
         ButtonComponent,
+        MenuOptionComponent,
         KeepAliveComponent,
         WaitComponent,
         TaskComponent,
@@ -51,6 +53,7 @@ import { InputRegexpComponent } from './input-regexp/input-regexp.component';
         UrlEncodePipe,
         MessagesComponent,
         ButtonComponent,
+        MenuOptionComponent,
         KeepAliveComponent,
         WaitComponent,
         TaskComponent,

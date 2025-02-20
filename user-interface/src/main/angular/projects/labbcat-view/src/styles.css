@@ -200,6 +200,19 @@ input[type=number] {
     vertical-align: middle;
 }
 
+.menu {
+    background: lightgray;
+    width: max-content;
+    border: 1px outset;
+    padding: 2px;
+}
+.menu .item {
+    padding: 4px;
+}
+.menu .item:hover {
+    background: #DDDDDD;
+}
+
 /* Copied styles from legacy stylesheet - TODO revise these when migration complete */
 button {
     white-space: nowrap;

@@ -9,7 +9,7 @@
     <div class="tab-labels">
       <label *ngFor="let category of categoryLabels"
              [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
-             (click)="currentCategory != category?currentCategory = category:currentCategory = null"
+             (click)="currentCategory = currentCategory == category?null:category"
              title="{{categories[category].description}}">
         {{category}}
       </label>
@@ -151,9 +151,58 @@
               </ng-container>
               <!-- word token -->
               <span class="layer layer-{{word.layerId}}"
-                    [class.highlight]="word.id == highlitId">
+                    [class.highlight]="word.id == highlitId"
+                    (click)="menuId = menuId == word.id?null:word.id">
                 <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>
               </span>
+              <div *ngIf="menuId == word.id" id="word-menu" class="menu">
+                <div class="header" id="utterance-options">
+                  <a class="permalink"
+                     i18n-title title="Permalink to utterance"
+                     href="#{{utterance.id}}"
+                     i18n>Utterance</a>
+                </div>
+                <div class="item" id="extract-audio-option">
+                  <lib-menu-option        
+                    (press)="utteranceAudio(utterance)"
+                    img="audio.svg" icon="🔊"
+                    i18n-label label="Audio"
+                    i18n-title title="Extract utterance audio fragment"
+                    ></lib-menu-option>
+                </div>
+                <div *ngIf="user.roles.includes('edit')"
+                     class="item" id="edit-utterance-option">
+                  <lib-menu-option        
+                    (press)="editUtterance(utterance)"
+                    img="edit.svg" icon="✎"
+                    i18n-label label="Edit Transcript"
+                    i18n-title title="Edit utterance transcript"
+                    ></lib-menu-option>
+                </div>
+                <div *ngIf="correctionEnabled"
+                     class="item" id="suggest-correction-option">
+                  <lib-menu-option        
+                    (press)="suggestCorrection(utterance)"
+                    img="edit.svg" icon="✎"
+                    i18n-label label="Suggest Correction"
+                    i18n-title title="Suggest a correction to the transcription of this utterance"
+                    ></lib-menu-option>
+                </div>
+                <div class="header" id="word-options">
+                  <a class="permalink"
+                     i18n-title title="Permalink to word"
+                     href="#{{word.id}}"
+                     i18n>Word</a>
+                </div>
+                <div class="item" id="edit-word-option">
+                  <lib-menu-option        
+                    (press)="editWord(word)"
+                    img="edit.svg" icon="✎"
+                    i18n-label label="Edit"
+                    i18n-title title="Edit word token layers"
+                    ></lib-menu-option>
+                </div>
+              </div>
               <!-- segment layers -->
               <ng-container *ngFor="let l of selectedLayerIds">
                 <span *ngIf="isSegmentLayer(transcript.schema.layers[l])"
