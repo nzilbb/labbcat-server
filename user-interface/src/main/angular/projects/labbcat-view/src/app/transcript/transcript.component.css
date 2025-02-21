@@ -11,6 +11,9 @@ lib-wait { position: absolute; }
 .highlight {
     background-color: yellow;
 }
+.playing {
+    background-color: lightgrey;
+}
 .layer-word {
     cursor: default;
     cursor: context-menu;
@@ -195,6 +198,48 @@ nav, nav > div {
     padding: 5px;
 }
 
+/* Media */
+
+#media {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    min-width: 300px;
+    background: var(--theme-background-color);
+    padding: 0px;
+    max-height: 100%;
+    overflow: auto;
+    white-space: nowrap;
+    cursor: default;
+}
+#media img.icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+#media input {
+    vertical-align: middle;
+}
+#media .file-link, #media .file-name {
+    margin-left: 3px;
+}
+#media .visualization img {
+    width: 300px;
+}
+#media .visualization video {
+    width: 300px;
+}
+#transcript.video-zoomed {
+    margin-left: 0px;
+}
+.video-zoomed #media video, .video-zoomed #temporal-blocks {
+    width: 47vw;
+}
+/* subtitle voice colours */
+::cue(v.speaker1) { color: MistyRose; }
+::cue(v.speaker2) { color: LightSkyBlue; }
+::cue(v.speaker3) { color: Moccasin; }
+::cue(v.speaker4) { color: PaleGreen; }
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {

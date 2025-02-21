@@ -51,6 +51,9 @@ export class TranscriptComponent implements OnInit {
 
     hasWAV: boolean;
     availableMedia: MediaFile[];
+    media : { [key: string] : { [key: string] : MediaFile[] } }; // type->trackSuffix->file
+    selectableMediaCount = 0;
+    videoZoomed = false;
 
     menuId: string;
 
@@ -65,6 +68,7 @@ export class TranscriptComponent implements OnInit {
         this.selectedLayerIds = [];
         this.interpretedRaw = {};
         this.layerStyles = {};
+        this.playingId = [];
     }
     
     ngOnInit() : void {        
@@ -222,7 +226,7 @@ export class TranscriptComponent implements OnInit {
             this.schema.utteranceLayerId,
             this.schema.wordLayerId,
             // unnofficial layers to link to neighbors
-            "previous-transcript", "next-transcript"
+            "previous-transcript", "next-transcript", "audio_prompt"
         ];
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getTranscript(
@@ -379,6 +383,7 @@ export class TranscriptComponent implements OnInit {
                 this.highlight(window.location.hash.substring(1));
             }, 500);
         }
+        this.showMediaPrompt();
     }
 
     setOriginalFile(): void {
@@ -423,6 +428,34 @@ export class TranscriptComponent implements OnInit {
                     if (messages) messages.forEach(m => this.messageService.info(m));
                     this.availableMedia = mediaTracks;
                     this.hasWAV = this.availableMedia.find(file=>file.mimeType == "audio/wav") != null;
+                    this.media = {};
+                    for (let file of this.availableMedia) {
+                        if (!this.media[file.type]) {
+                            this.media[file.type] = {};
+                        }
+                        if (!this.media[file.type][file.trackSuffix]) {
+                            this.media[file.type][file.trackSuffix] = [];
+                        }
+                        this.media[file.type][file.trackSuffix].push(file);
+                    } // next file
+                    // remove any tracks that have only generated content
+                    for (let t in this.media) {
+                        const mediaType = this.media[t];
+                        for (let s in mediaType) {
+                            const trackSuffix = mediaType[s];
+                            if (!trackSuffix.find(file=>!file.generateFrom)) {
+                                delete mediaType[s];
+                            }
+                        } // next media type
+                    }
+                    // how many media visualizations are possible?
+                    this.selectableMediaCount = 0;
+                    for (let t in this.media) {
+                        const mediaType = this.media[t];
+                        for (let s in mediaType) {
+                            this.selectableMediaCount++;
+                        } // next media type
+                    }
                     resolve();
                 });
         });
@@ -723,6 +756,80 @@ export class TranscriptComponent implements OnInit {
         return this.selectedLayerIds
             .map(layerId => "&"+parameterName+"="+encodeURIComponent(layerId))
             .join("");
+    }
+
+    canSelectMultipleVisualizations = false;
+    multipleVisualizationsTimer = null;
+    visibleVideoCount = 0;
+    /** Select media for visualization */
+    showMedia(file: MediaFile):void {
+        const originallySelected = file._selected;
+        if (!originallySelected && !this.canSelectMultipleVisualizations) {
+            // unselect all others
+            for (let file of this.availableMedia) file._selected = false;
+        }
+        // toggle rather than select, so that all media can be hidden
+        file._selected = !originallySelected;
+        if (this.selectableMediaCount > 1 // if there's more than one selection available
+            && file._selected) { // and we're ticking not unticking
+            // for a short while, multiple visualizations can be selected
+            this.canSelectMultipleVisualizations = true;
+            this.loading = true;
+            if (this.multipleVisualizationsTimer) {
+                window.clearTimeout(this.multipleVisualizationsTimer)
+            }
+            this.multipleVisualizationsTimer = window.setTimeout(()=>{
+                this.canSelectMultipleVisualizations = false;
+                this.loading = false;
+                this.multipleVisualizationsTimer = null;
+            }, 2000);
+        }
+        window.setTimeout(()=>{ // give the visualization a chance to update before counting videos
+            this.visibleVideoCount = document.getElementsByTagName('video').length;
+        }, 100);
+    }
+
+    playingId : string[];
+    /** Event handler for when the time of a media player is updated */
+    mediaTimeUpdate(event: Event): void {
+        const player = event.target as HTMLMediaElement;
+        console.log(`${player.id} ${player.currentTime}`);
+        // safari: player.controller.currentTime
+        this.playingId =
+            (this.transcript.annotationsAt(player.currentTime, this.schema.utteranceLayerId)||[])
+                .map(annotation=>annotation.id);
+        if (this.playingId.length) document.getElementById(this.playingId[0]).scrollIntoView();
+
+    }
+    /** Event handler for when a media player is paused */
+    mediaPause(event: Event): void {
+        const player = event.target as HTMLMediaElement;
+        console.log(`${player.id} paused`);
+    }
+    /** Event handler for when a media player starts playing */
+    mediaPlay(event: Event): void {
+        const player = event.target as HTMLMediaElement;
+        console.log(`${player.id} play...`);
+    }
+    /** Event handler for when a media player encounters an error */
+    mediaError(event: Event): void {
+        const player = event.target as HTMLMediaElement;
+        this.messageService.error(`Media error: ${player.id} - ${player.error.code}:${player.error.message}`);
+    }
+    /** Show the media prompt if there is one (e.g. 'Insert CD 99' for local media) */
+    showMediaPrompt() {
+        if (this.transcript.first("audio_prompt")) {
+            this.messageService.info(this.transcript.first("audio_prompt").label);
+        }
+    }
+    localMediaUrl: string;
+    localMediaType: string;
+    /** User has selected a local media file */    
+    useLocalMedia(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files[0];
+        this.localMediaUrl = URL.createObjectURL(file);
+        this.localMediaType = file.type.substring(0,5);
     }
     
     /** Visualize a given tree */

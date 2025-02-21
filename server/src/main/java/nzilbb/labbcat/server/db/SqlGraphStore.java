@@ -2032,6 +2032,7 @@ public class SqlGraphStore implements GraphStore {
       }
 	 
       graph.setId(rs.getString("transcript_id"));
+      graph.setOffsetUnits(rs.getString("offset_units"));
       int iAgId = rs.getInt("ag_id");
       // these "@" attributes can be included as special layerIds
       graph.put("@ag_id", Integer.valueOf(iAgId));

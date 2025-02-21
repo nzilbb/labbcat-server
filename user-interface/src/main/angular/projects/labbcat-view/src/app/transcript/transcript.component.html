@@ -2,8 +2,10 @@
 
 <h1>{{transcript?transcript.id:id}}</h1>
 
-<div *ngIf="transcript" id="transcript">
+<div *ngIf="transcript" id="transcript"
+     [ngClass]="{'video-zoomed': videoZoomed}">
 
+  <!-- previous/next transcript -->
   <nav>
     <div *ngIf="transcript.first('previous-transcript')"
          id="previous-transcript-link">
@@ -24,6 +26,193 @@
       </a>
     </div>
   </nav>
+
+  <!-- media -->
+  <div *ngIf="media" id="media" class="media">
+    <div *ngIf="media['video']" class="media-type video">
+      <div *ngFor="let trackSuffix of media['video'] | keyvalue"
+           class="track {{trackSuffix.key}}"
+           i18n-title title="video {{trackSuffix.key}}">
+        <div class="controls">
+          <label>
+            <input type="checkbox"
+                   i18n-title title="Tick to show media"
+                   [checked]="trackSuffix.value[0]._selected"
+                   (change)="showMedia(trackSuffix.value[0])">
+            <img class="icon" src="{{imagesLocation}}/video.svg" i18n-alt alt="video">
+            <span class="file-name">{{trackSuffix.value[0].nameWithoutSuffix}}</span>
+          </label>
+          <span *ngFor="let file of trackSuffix.value"
+                class="file-link {{file.extension}}">
+            <a *ngIf="!file.generateFrom && (user.roles.includes('admin') || !user.roles.includes('edit'))"
+               href="{{file.url}}" download="{{file.name}}"
+               i18n-title title="Download {{file.name}}">{{file.extension}}</a>
+          </span>
+        </div>
+        <div *ngIf="trackSuffix.value[0]._selected" class="visualization">
+          <video id="video-{{trackSuffix.value[0].nameWithoutSuffix}}"
+                 preload="auto" 
+                 title="{{trackSuffix.key}}"
+                 controls
+                 controlsList="{{!user.roles.includes('admin')&&!user.roles.includes('edit')?'nodownload':''}}"
+                 (timeupdate)="mediaTimeUpdate($event);"
+                 (play)="mediaPlay($event);"
+                 (pause)="mediaPause($event);"
+                 (error)="mediaError($event);"
+                 >
+            <source *ngFor="let file of trackSuffix.value"
+                    src="{{file.url}}"
+                    type="{{file.mimeType}}"/>
+            <track *ngIf="mimeTypeToSerializer['text/vtt']"
+                   kind="captions"
+                   src="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType=text/vtt&layerId=word"
+                   srclang="{{transcript.first('transcript_language').label||'en'}}"
+                   i18n-label label="Transcript"
+                   default/>
+          </video>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="media['audio']" class="media-type audio">
+      <div *ngFor="let trackSuffix of media['audio'] | keyvalue"
+           class="track {{trackSuffix.key}}"
+           i18n-title title="audio {{trackSuffix.key}}">
+        <div class="controls">
+          <label>
+            <input type="checkbox"
+                   i18n-title title="Tick to show media"
+                   [checked]="trackSuffix.value[0]._selected"
+                   (change)="showMedia(trackSuffix.value[0])">
+            <img class="icon" src="{{imagesLocation}}/audio.svg" i18n-alt alt="audio">
+            <span class="file-name">{{trackSuffix.value[0].nameWithoutSuffix}}</span>
+          </label>
+          <span *ngFor="let file of trackSuffix.value"
+                class="file-link {{file.extension}}">
+            <a *ngIf="!file.generateFrom && (user.roles.includes('admin') || !user.roles.includes('edit'))"
+               href="{{file.url}}" download="{{file.name}}"
+               i18n-title title="Download {{file.name}}">{{file.extension}}</a>
+          </span>
+        </div>
+        <div *ngIf="trackSuffix.value[0]._selected" class="visualization">
+          <audio id="audio-{{trackSuffix.value[0].nameWithoutSuffix}}"
+                 preload="auto" 
+                 title="{{trackSuffix.key}}"
+                 controls
+                 controlsList="{{!user.roles.includes('admin')&&!user.roles.includes('edit')?'nodownload':''}}"
+                 (timeupdate)="mediaTimeUpdate($event);"
+                 (play)="mediaPlay($event);"
+                 (pause)="mediaPause($event);"
+                 (error)="mediaError($event);"
+                 >
+            <source *ngFor="let file of trackSuffix.value"
+                    src="{{file.url}}"
+                    type="{{file.mimeType}}">
+          </audio>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="media['image']" class="media-type image">
+      <div *ngFor="let trackSuffix of media['image'] | keyvalue"
+           class="track {{trackSuffix.key}}"
+           i18n-title title="image {{trackSuffix.key}}">
+        <div class="controls">
+          <label>
+            <input type="checkbox"
+                   i18n-title title="Tick to show media"
+                   [checked]="trackSuffix.value[0]._selected"
+                   (change)="showMedia(trackSuffix.value[0])">
+            <img class="icon" src="{{imagesLocation}}/image.svg" i18n-alt alt="image">
+            <span class="file-name">{{trackSuffix.value[0].nameWithoutSuffix}}</span>
+          </label>
+          <span *ngFor="let file of trackSuffix.value"
+                class="file-link {{file.extension}}">
+            <a *ngIf="!file.generateFrom && (user.roles.includes('admin') || !user.roles.includes('edit'))"
+               href="{{file.url}}" download="{{file.name}}"
+               i18n-title title="Download {{file.name}}">{{file.extension}}</a>
+          </span>
+        </div>
+        <div *ngIf="trackSuffix.value[0]._selected" class="visualization">
+          <a href="{{trackSuffix.value[0].url}}"
+             target="image"
+             title="{{trackSuffix.value[0].name}}">
+            <img src="{{trackSuffix.value[0].url}}" alt="{{trackSuffix.value[0].name}}">
+          </a>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="media['other']" class="media-type other">
+      <div *ngFor="let trackSuffix of media['other'] | keyvalue"
+           class="track {{trackSuffix.key}}"
+           i18n-title title="other {{trackSuffix.key}}">
+        <div class="controls">
+          <img class="icon" src="{{imagesLocation}}/other.svg" i18n-alt alt="other">
+          <span class="file-name">{{trackSuffix.value[0].nameWithoutSuffix}}</span>
+          <span *ngFor="let file of trackSuffix.value"
+                class="file-link {{file.extension}}">
+            <a *ngIf="!file.generateFrom"
+               href="{{file.url}}" download="{{file.name}}"
+               i18n-title title="Download {{file.name}}">{{file.extension}}</a>
+          </span>
+        </div>
+      </div>
+    </div>    
+    <div *ngIf="availableMedia.length == 0 && transcript.offsetUnits == 's'"
+         id="local-media" >
+      <!-- A local media file can be selected if there's no online media 
+           and it's a temporal transcript -->
+      <input *ngIf="!localMediaType"
+             id="local-media-file"
+             type="file"
+             i18n-placeholder placeholder="Local media file"
+             i18n-title title="Local media file"
+             (click)="showMediaPrompt()"
+             (change)="useLocalMedia($event)">
+      <video *ngIf="localMediaType == 'video'"
+             id="video-local"
+             preload="auto" 
+             i18n-title title="Local media"
+             controls
+             (timeupdate)="mediaTimeUpdate($event);"
+             (play)="mediaPlay($event);"
+             (pause)="mediaPause($event);"
+             (error)="mediaError($event);"
+             >
+        <source src="{{localMediaUrl}}"/>
+        <track *ngIf="mimeTypeToSerializer['text/vtt']"
+               kind="captions"
+               src="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType=text/vtt&layerId=word"
+               srclang="{{transcript.first('transcript_language').label||'en'}}"
+               i18n-label label="Transcript"
+               default/>
+      </video>
+      <audio *ngIf="localMediaType == 'audio'"
+             id="video-local"
+             preload="auto" 
+             i18n-title title="Local media"
+             controls
+             (timeupdate)="mediaTimeUpdate($event);"
+             (play)="mediaPlay($event);"
+             (pause)="mediaPause($event);"
+             (error)="mediaError($event);"
+             >
+        <source src="{{localMediaUrl}}"/>
+      </audio>
+    </div>
+    <div *ngIf="visibleVideoCount"
+      id="video-controls">
+      <lib-button
+        (press)="videoZoomed = !videoZoomed"
+        [img]="(videoZoomed?'zoom-out':'zoom-in')+'.svg'" icon="🔍"
+        i18n-title title="Large video"
+        ></lib-button>
+      <lib-button
+        (press)="videoZoomed = !videoZoomed"
+        img="media-skip-backward.svg" icon="⏪"
+        i18n-title title="Repeat"
+        ></lib-button>
+      
+    </div>
+  </div>
 
   <!-- layer selector, attributes etc. -->
   <div id="attributes" class="attribute-list tabs">
@@ -62,7 +251,7 @@
               </ng-container>
             </select>
           </div>
-          <lib-button            
+          <lib-button
             (press)="generate()"
             img="cog.svg" icon="⚙"
             i18n-label label="Generate"
@@ -134,6 +323,7 @@
            [ngClass]="{ 'utterance': true, 'main-participant': utterance.first('participant').first('main_participant') }"
            id="{{utterance.id}}"
            [class.highlight]="utterance.id == highlitId"
+           [class.playing]="playingId.includes(utterance.id)"
            title="{{utterance.label}}: {{utterance.start.offset}}-{{utterance.end.offset}} ({{utterance.duration()}}s)">
         <legend class="participant">{{utterance.label}}</legend>
         <a id="{{utterance.startId}}" class="anchor"></a>
