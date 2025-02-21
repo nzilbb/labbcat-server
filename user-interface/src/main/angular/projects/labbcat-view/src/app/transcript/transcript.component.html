@@ -89,13 +89,19 @@
             <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.wordLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
                class="lnk">
               <img src="{{serializer.icon}}" alt="⚙">
-              {{serializer.name}}
+              <span>{{serializer.name}}</span>
             </a>
           </li>
-          <li *ngIf="originalFile">
+          <li *ngIf="originalFile" id="original-file-link">
             <a href="{{originalFile}}" class="lnk" download="{{transcript.id}}">
-              <img src="{{imagesLocation}}/document.svg" alt="🗎">
-              {{transcript.id}}
+              <img src="{{imagesLocation}}/other.svg" alt="🗎">
+              <span>{{transcript.id}}</span>
+            </a>
+          </li>
+          <li id="episode-documents-link">
+            <a href="{{baseUrl}}seriesFiles?family_id={{transcript.first('episode').id}}" class="lnk">
+              <img src="{{imagesLocation}}/folder.svg" alt="📁" i18n>
+              <span i18n>Documents for this episode</span>
             </a>
           </li>
         </ul>

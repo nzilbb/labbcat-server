@@ -176,7 +176,7 @@
                       href="edit/transcript/media?id={{id | urlEncode}}"></lib-link>
             <lib-link *ngIf="user && user.roles.includes('edit')"
                       i18n-title title="Attributes"
-                      img="wrench.svg" icon="🔧"
+                      img="attributes.svg" icon="🔧"
                       href="edit/transcript/attributes?id={{id | urlEncode}}"></lib-link>
             <lib-link *ngIf="!user || !user.roles.includes('edit')"
                       i18n-title title="Attributes"

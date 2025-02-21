@@ -192,6 +192,7 @@ export class TranscriptComponent implements OnInit {
                         if (!category.description) {
                             category.description = `Attributes: ${category.category}`; // TODO i18n
                         }
+                        category.icon = "attributes.svg";
                         this.categories[category.category] = category;
                     }
                     // extra pseudo categories
