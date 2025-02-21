@@ -784,32 +784,116 @@ export class TranscriptComponent implements OnInit {
                 this.multipleVisualizationsTimer = null;
             }, 2000);
         }
+        if (!file._selected) { // removing player
+            const elementId = file.type+"-"+file.nameWithoutSuffix;
+            if (this.player && this.player.id == elementId) {
+                // removing main player, so enable other players to become main player
+                const audios = document.getElementsByTagName('audio');
+                for (let p = 0; p < audios.length; p++) {
+                    const player = audios.item(p);
+                    player.setAttribute("controls","");
+                    player.pause();
+                } // next player
+                const videos = document.getElementsByTagName('video');
+                for (let p = 0; p < videos.length; p++) {
+                    const player = videos.item(p);
+                    player.setAttribute("controls","");
+                    player.pause();
+                } // next player
+                this.player = null;
+            } // player is main player
+        } // removing player
         window.setTimeout(()=>{ // give the visualization a chance to update before counting videos
             this.visibleVideoCount = document.getElementsByTagName('video').length;
         }, 100);
     }
 
     playingId : string[];
+    player: HTMLMediaElement;
     /** Event handler for when the time of a media player is updated */
     mediaTimeUpdate(event: Event): void {
-        const player = event.target as HTMLMediaElement;
-        console.log(`${player.id} ${player.currentTime}`);
-        // safari: player.controller.currentTime
-        this.playingId =
-            (this.transcript.annotationsAt(player.currentTime, this.schema.utteranceLayerId)||[])
-                .map(annotation=>annotation.id);
-        if (this.playingId.length) document.getElementById(this.playingId[0]).scrollIntoView();
+        // only pay attention to the main player
+        if (this.player == event.target) {
+            console.log(`${this.player.id} ${this.player.currentTime}`);
+            // safari: player.controller.currentTime
+            this.playingId =(this.transcript.annotationsAt(
+                this.player.currentTime, this.schema.utteranceLayerId)||[])
+                                .map(annotation=>annotation.id);
+            if (this.playingId.length) document.getElementById(this.playingId[0]).scrollIntoView();
 
+            // keep all other media elements synchronized
+            const videos = document.getElementsByTagName('video');
+            for (let p = 0; p < videos.length; p++) {
+                const player = videos.item(p);
+                if (player != this.player) {
+                    player.currentTime = this.player.currentTime;
+                }
+            } // next player
+            const audios = document.getElementsByTagName('audio');
+            for (let p = 0; p < audios.length; p++) {
+                const player = audios.item(p);
+                if (player != this.player) {
+                    player.currentTime = this.player.currentTime;
+                }
+            } // next player
+        }
     }
     /** Event handler for when a media player is paused */
     mediaPause(event: Event): void {
-        const player = event.target as HTMLMediaElement;
-        console.log(`${player.id} paused`);
+        // only pay attention to the main player
+        if (this.player == event.target) {
+            console.log(`${this.player.id} paused...`);
+            // tell all other media elements to play
+            const videos = document.getElementsByTagName('video');
+            for (let p = 0; p < videos.length; p++) {
+                const player = videos.item(p);
+                if (player != this.player) {
+                    player.pause();
+                }
+            } // next player
+            const audios = document.getElementsByTagName('audio');
+            for (let p = 0; p < audios.length; p++) {
+                const player = audios.item(p);
+                if (player != this.player) {
+                    player.pause();
+                }
+            } // next player
+        } // main player event
     }
     /** Event handler for when a media player starts playing */
     mediaPlay(event: Event): void {
         const player = event.target as HTMLMediaElement;
-        console.log(`${player.id} play...`);
+        if (!this.player || this.player != document.getElementById(this.player.id)) {
+            this.player = player;
+            // if it's a video, it may have been previosly muted
+            this.player.muted = false;
+            console.log(`Main player is now ${this.player.id}`);
+        }
+        // only pay attention to the main player
+        if (this.player == event.target) {
+            console.log(`${this.player.id} play...`);
+            // tell all other media elements to play
+            const audios = document.getElementsByTagName('audio');
+            for (let p = 0; p < audios.length; p++) {
+                const player = audios.item(p);
+                if (player != this.player) {
+                    player.play();
+                    player.removeAttribute("controls");
+                }
+            } // next player
+            const videos = document.getElementsByTagName('video');
+            for (let p = 0; p < videos.length; p++) {
+                const player = videos.item(p);
+                // mute videos if there is audio
+                player.muted = audios.length > 0
+                // and all but the first video
+                    || p > 0;
+                if (player != this.player) {
+                    player.play();
+                    player.removeAttribute("controls");
+                }
+            } // next player
+        } // main player event
     }
     /** Event handler for when a media player encounters an error */
     mediaError(event: Event): void {
