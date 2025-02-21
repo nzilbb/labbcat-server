@@ -69,6 +69,7 @@ export class TranscriptComponent implements OnInit {
         this.interpretedRaw = {};
         this.layerStyles = {};
         this.playingId = [];
+        this.previousPlayingId = [];
     }
     
     ngOnInit() : void {        
@@ -450,12 +451,19 @@ export class TranscriptComponent implements OnInit {
                     }
                     // how many media visualizations are possible?
                     this.selectableMediaCount = 0;
-                    for (let t in this.media) {
-                        const mediaType = this.media[t];
-                        for (let s in mediaType) {
-                            this.selectableMediaCount++;
-                        } // next media type
-                    }
+                    const mediaPeckingOrder = ["video", "audio", "image"];
+                    for (let t of mediaPeckingOrder) {
+                        if (this.media[t]) {
+                            const mediaType = this.media[t];
+                            for (let s in mediaType) {
+                                this.selectableMediaCount++;
+                                if (this.selectableMediaCount == 1) { // first media found
+                                    // select it
+                                    this.showMedia(mediaType[s][0]);
+                                }
+                            } // next media type
+                        } // has this type
+                    } // next media type
                     resolve();
                 });
         });
@@ -748,7 +756,10 @@ export class TranscriptComponent implements OnInit {
     highlitId: string;
     highlight(id: string): void {
         this.highlitId = id;
-        document.getElementById(id).scrollIntoView();
+        document.getElementById(id).scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
     }
 
     /* convert selectedLayerIds array into a series of URL parameters with the given name */
@@ -761,6 +772,7 @@ export class TranscriptComponent implements OnInit {
     canSelectMultipleVisualizations = false;
     multipleVisualizationsTimer = null;
     visibleVideoCount = 0;
+    visibleAudioCount = 0;
     /** Select media for visualization */
     showMedia(file: MediaFile):void {
         const originallySelected = file._selected;
@@ -804,38 +816,64 @@ export class TranscriptComponent implements OnInit {
             } // player is main player
         } // removing player
         window.setTimeout(()=>{ // give the visualization a chance to update before counting videos
-            this.visibleVideoCount = document.getElementsByTagName('video').length;
+            this.visibleVideoCount = document.getElementsByTagName("video").length;
+            this.visibleAudioCount = document.getElementsByTagName("audio").length;
         }, 100);
     }
 
-    playingId : string[];
+    playingId : string[]; // IDs of currently playing utterances
+    previousPlayingId : string[]; // keep a buffer of old IDs, so we can fade them out
     player: HTMLMediaElement;
+    stopAfter : number; // sto time for playing a selection
     /** Event handler for when the time of a media player is updated */
     mediaTimeUpdate(event: Event): void {
         // only pay attention to the main player
         if (this.player == event.target) {
-            console.log(`${this.player.id} ${this.player.currentTime}`);
             // safari: player.controller.currentTime
-            this.playingId =(this.transcript.annotationsAt(
-                this.player.currentTime, this.schema.utteranceLayerId)||[])
-                                .map(annotation=>annotation.id);
-            if (this.playingId.length) document.getElementById(this.playingId[0]).scrollIntoView();
 
-            // keep all other media elements synchronized
-            const videos = document.getElementsByTagName('video');
-            for (let p = 0; p < videos.length; p++) {
-                const player = videos.item(p);
-                if (player != this.player) {
-                    player.currentTime = this.player.currentTime;
-                }
-            } // next player
+            // identify utterance(s) that is/are currently playing
+            const lastPlayingId = this.playingId || [];
+            const newPlayingId = (this.transcript.annotationsAt(
+                this.player.currentTime, this.schema.utteranceLayerId)||[])
+                                     .map(annotation=>annotation.id);
+            // fade in IDs that are now playing
+            this.playingId = newPlayingId;            
+            // fade out the IDs that are no longer playing
+            this.previousPlayingId = lastPlayingId.filter(id=>!this.playingId.includes(id));
+            if (this.playingId.length) {
+                document.getElementById(this.playingId[0]).scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }
+
             const audios = document.getElementsByTagName('audio');
-            for (let p = 0; p < audios.length; p++) {
-                const player = audios.item(p);
-                if (player != this.player) {
-                    player.currentTime = this.player.currentTime;
-                }
-            } // next player
+            const videos = document.getElementsByTagName('video');
+            if (this.stopAfter && this.stopAfter <= this.player.currentTime) {
+                // arrived at stop time
+                this.stopAfter = null;
+                // stop all media
+                for (let p = 0; p < audios.length; p++) {
+                    audios.item(p).pause();
+                } // next player
+                for (let p = 0; p < videos.length; p++) {
+                    videos.item(p).pause();
+                } // next player
+            } else { // haven't reached stop time
+                // keep all other media elements synchronized
+                for (let p = 0; p < audios.length; p++) {
+                    const player = audios.item(p);
+                    if (player != this.player) {
+                        player.currentTime = this.player.currentTime;
+                    }
+                } // next player
+                for (let p = 0; p < videos.length; p++) {
+                    const player = videos.item(p);
+                    if (player != this.player) {
+                        player.currentTime = this.player.currentTime;
+                    }
+                } // next player
+            } // haven't reached stop time
         }
     }
     /** Event handler for when a media player is paused */
@@ -844,13 +882,6 @@ export class TranscriptComponent implements OnInit {
         if (this.player == event.target) {
             console.log(`${this.player.id} paused...`);
             // tell all other media elements to play
-            const videos = document.getElementsByTagName('video');
-            for (let p = 0; p < videos.length; p++) {
-                const player = videos.item(p);
-                if (player != this.player) {
-                    player.pause();
-                }
-            } // next player
             const audios = document.getElementsByTagName('audio');
             for (let p = 0; p < audios.length; p++) {
                 const player = audios.item(p);
@@ -858,6 +889,15 @@ export class TranscriptComponent implements OnInit {
                     player.pause();
                 }
             } // next player
+            const videos = document.getElementsByTagName('video');
+            for (let p = 0; p < videos.length; p++) {
+                const player = videos.item(p);
+                if (player != this.player) {
+                    player.pause();
+                }
+            } // next player
+            this.previousPlayingId = this.playingId;
+            this.playingId = [];
         } // main player event
     }
     /** Event handler for when a media player starts playing */
@@ -904,6 +944,58 @@ export class TranscriptComponent implements OnInit {
     showMediaPrompt() {
         if (this.transcript.first("audio_prompt")) {
             this.messageService.info(this.transcript.first("audio_prompt").label);
+        }
+    }
+    /** Rewind all media by a second */
+    mediaRepeat(): void {
+        const audios = document.getElementsByTagName('audio');
+        for (let p = 0; p < audios.length; p++) {
+            audios.item(p).currentTime -= 1;
+        } // next player
+        const videos = document.getElementsByTagName('video');
+        for (let p = 0; p < videos.length; p++) {
+            videos.item(p).currentTime -= 1;
+        } // next player
+    }
+    /** Play a selected utterance */
+    playSpan(annotation: Annotation): void {
+        console.log(`playSpan ${annotation.id} (${annotation.start.offset}-${annotation.end.offset}))`);
+        if (!annotation || !annotation.anchored()) return;
+        // is there a player yet?
+        if (!this.player || this.player != document.getElementById(this.player.id)) { // no player
+            const audios = document.getElementsByTagName('audio');
+            if (audios.length > 0) {
+                this.player = audios.item(0);
+                console.log(`Main player is now ${this.player.id}`);
+            } else { // no audio elements
+                const videos = document.getElementsByTagName('video');
+                if (videos.length > 0) {
+                    this.player = videos.item(0);
+                    console.log(`Main player is now ${this.player.id}`);
+                }
+            }
+        }
+        if (this.player) {
+            // set time of all first
+            console.log(`setting time to ${annotation.start.offset}`);
+            const audios = document.getElementsByTagName('audio');
+            const videos = document.getElementsByTagName('video');
+            for (let p = 0; p < audios.length; p++) {
+                audios.item(p).currentTime = annotation.start.offset;
+            }
+            for (let p = 0; p < videos.length; p++) {
+                videos.item(p).currentTime = annotation.start.offset;
+            }
+            // then play all
+            console.log(`play ${audios.length} audios and ${videos.length} videos`);
+            for (let p = 0; p < audios.length; p++) {
+                audios.item(p).play();
+            }
+            for (let p = 0; p < videos.length; p++) {
+                videos.item(p).play();
+            }
+            // then stop after the end time
+            this.stopAfter = annotation.end.offset;
         }
     }
     localMediaUrl: string;

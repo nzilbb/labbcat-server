@@ -242,6 +242,9 @@
 
     } // next annotation
 
+    // sort layer annotations by offset
+    ag.schema.layers[layerId].annotations.sort((a,b) => a.start.offset - b.start.offset);
+
     // ensure children are the Annotation objects
     if (parent) parent[layerId] = children;
   }
@@ -418,6 +421,9 @@
       } catch(x) {return null; }
     },
     instantaneous : function() { return this.startId == this.endId; },
+    anchored : function() {
+      return this.start && this.start.offset >= 0 && this.end && this.end.offset >= 0;
+    },
     toString : function Annotation_toString() { return this.label; },
 
     sharesStart : function(layerId) {

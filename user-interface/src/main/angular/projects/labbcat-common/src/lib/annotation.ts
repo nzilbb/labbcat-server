@@ -25,6 +25,7 @@ export interface Annotation {
     duration : () => number;
     midpoint : () => number;
     instantaneous : () => boolean;
+    anchored : () => boolean;
     toString :  () => string;
     sharesStart : (layerId: string) => boolean;
     sharesEnd : (layerId: string) => boolean;

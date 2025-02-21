@@ -197,18 +197,16 @@
         <source src="{{localMediaUrl}}"/>
       </audio>
     </div>
-    <div *ngIf="visibleVideoCount"
-      id="video-controls">
-      <lib-button
-        (press)="videoZoomed = !videoZoomed"
-        [img]="(videoZoomed?'zoom-out':'zoom-in')+'.svg'" icon="🔍"
-        i18n-title title="Large video"
-        ></lib-button>
-      <lib-button
-        (press)="videoZoomed = !videoZoomed"
-        img="media-skip-backward.svg" icon="⏪"
-        i18n-title title="Repeat"
-        ></lib-button>
+    <div *ngIf="player" id="media-controls">
+      <lib-button *ngIf="visibleVideoCount"
+                  (press)="videoZoomed = !videoZoomed"
+                  [img]="(videoZoomed?'zoom-out':'zoom-in')+'.svg'" icon="🔍"
+                  i18n-title title="Large video"
+                  ></lib-button>
+      <lib-button (press)="mediaRepeat();"
+                  img="media-skip-backward.svg" icon="⏪"
+                  i18n-title title="Repeat"
+                  ></lib-button>
       
     </div>
   </div>
@@ -319,10 +317,12 @@
     <div *ngFor="let block of temporalBlocks"
          [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
       <div *ngFor="let utterance of block.utterances"
-           [ngClass]="{ 'utterance': true, 'main-participant': utterance.first('participant').first('main_participant') }"
            id="{{utterance.id}}"
+           [class.utterance]="true"
+           [class.main-participant]="utterance.first('participant').first('main_participant')"
            [class.highlight]="utterance.id == highlitId"
-           [class.playing]="playingId.includes(utterance.id)"
+           [class.playing]="player && !player.paused && playingId.includes(utterance.id)"
+           [class.played]="previousPlayingId.includes(utterance.id)"
            title="{{utterance.label}}: {{utterance.start.offset}}-{{utterance.end.offset}} ({{utterance.duration()}}s)">
         <legend class="participant">{{utterance.label}}</legend>
         <a id="{{utterance.startId}}" class="anchor"></a>
@@ -374,25 +374,36 @@
                     (click)="menuId = menuId == word.id?null:word.id">
                 <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>
               </span>
-              <div *ngIf="menuId == word.id" id="word-menu" class="menu">
+              <div *ngIf="menuId == word.id"
+                   id="word-menu" class="menu">
                 <div class="header" id="utterance-options">
                   <a class="permalink"
                      i18n-title title="Permalink to utterance"
                      href="#{{utterance.id}}"
                      i18n>Utterance</a>
                 </div>
-                <div *ngIf="hasWAV" class="item" id="extract-audio-option">
+                <div *ngIf="hasWAV"
+                     class="item" id="extract-audio-option">
                   <lib-menu-option        
-                    (press)="utteranceAudio(utterance)"
+                    (press)="utteranceAudio(utterance); menuId = null;"
                     img="audio.svg" icon="🔊"
                     i18n-label label="Audio"
                     i18n-title title="Extract utterance audio fragment"
                     ></lib-menu-option>
                 </div>
+                <div *ngIf="visibleVideoCount + visibleAudioCount > 0"
+                     class="item" id="play-utterance-option">
+                  <lib-menu-option        
+                    (press)="playSpan(utterance); menuId = null;"
+                    img="play.svg" icon="▶"
+                    i18n-label label="Play"
+                    i18n-title title="Play this utterance"
+                    ></lib-menu-option>
+                </div>
                 <div *ngIf="user.roles.includes('edit')"
                      class="item" id="edit-utterance-option">
                   <lib-menu-option        
-                    (press)="editUtterance(utterance)"
+                    (press)="editUtterance(utterance); menuId = null;"
                     img="edit.svg" icon="✎"
                     i18n-label label="Edit Transcript"
                     i18n-title title="Edit utterance transcript"
@@ -401,7 +412,7 @@
                 <div *ngIf="correctionEnabled"
                      class="item" id="suggest-correction-option">
                   <lib-menu-option        
-                    (press)="suggestCorrection(utterance)"
+                    (press)="suggestCorrection(utterance); menuId = null;"
                     img="edit.svg" icon="✎"
                     i18n-label label="Suggest Correction"
                     i18n-title title="Suggest a correction to the transcription of this utterance"
@@ -415,7 +426,7 @@
                 </div>
                 <div class="item" id="edit-word-option">
                   <lib-menu-option        
-                    (press)="editWord(word)"
+                    (press)="editWord(word); menuId = null;"
                     img="edit.svg" icon="✎"
                     i18n-label label="Edit"
                     i18n-title title="Edit word token layers"

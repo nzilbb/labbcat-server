@@ -11,8 +11,23 @@ lib-wait { position: absolute; }
 .highlight {
     background-color: yellow;
 }
+@keyframes fade-background-in {
+    from { background-color: transparent; }
+    to { background-color: lightgray; }
+}
 .playing {
-    background-color: lightgrey;
+    animation-name: fade-background-in;
+    animation-duration: 2s;
+    background-color: lightgray;
+}
+@keyframes fade-background-out {
+    from { background-color: lightgray; }
+    to { background-color: white; }
+}
+.played {
+    animation-name: fade-background-out;
+    animation-duration: 2s;
+    background-color: transparent;
 }
 .layer-word {
     cursor: default;
