@@ -1,5 +1,10 @@
 lib-wait { position: absolute; }
 
+#transcript {
+    max-width: 1000px;
+    margin: auto;
+}
+
 .main-participant {
     font-weight: bold;
 }

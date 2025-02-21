@@ -83,7 +83,7 @@
 }
 
 /* general look and feel */
-h1 { font-size: 17pt; color: black; }
+h1 { font-size: 17pt; color: black; text-align: center; }
 h2 { font-size: 16pt; color: black; }
 h3 { font-size: 15pt; color: var(--theme-text-color); font-style:italic; }
 h4 { font-size: 14pt; color: var(--theme-text-color); }
