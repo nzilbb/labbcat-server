@@ -9,7 +9,7 @@
   <nav>
     <div *ngIf="transcript.first('previous-transcript')"
          id="previous-transcript-link">
-      <a rel="prev" href="transcript?id={{transcript.first('previous-transcript').label}}"
+      <a rel="prev" href="transcript?id={{transcript.first('previous-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
          i18n-title title="Previous">
         <img src="{{imagesLocation}}/previous.svg"
              i18n-alt alt="Previous"
@@ -18,7 +18,7 @@
     </div>
     <div *ngIf="transcript.first('next-transcript')"
          id="next-transcript-link">
-      <a rel="next" href="transcript?id={{transcript.first('next-transcript').label}}"
+      <a rel="next" href="transcript?id={{transcript.first('next-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
          i18n-title title="Next">
         <img src="{{imagesLocation}}/next.svg"
              i18n-alt alt="Next"
@@ -199,11 +199,14 @@
     </div>
     <div *ngIf="hasWAV || player" id="media-controls">
       <div *ngIf="hasWAV && praatIntegration" id="praat-integration">
+        <label
+          id="praat-message"
+          title="{{praatProgress.error}} {{praatProgress.message}}"
+          for="praat-progress">{{praatProgress.error}} {{praatProgress.message}}</label>
         <progress id="praat-progress"
                   [max]="praatProgress.maximum"
                   [ngClass]="{error : praatProgress.error != null}"
-                  [value]="praatProgress.value"
-                  title="{{praatProgress.error}} {{praatProgress.message}} {{praatProgress.value?praatProgress.value*100/praatProgress.maximum:''}}%">
+                  [value]="praatProgress.value">
           {{praatProgress.error}} {{praatProgress.message}}
           {{praatProgress.value?praatProgress.value*100/praatProgress.maximum:""}}%
         </progress>
@@ -393,7 +396,9 @@
               <!-- word token -->
               <span class="layer layer-{{word.layerId}}"
                     [class.highlight]="word.id == highlitId"
-                    (click)="menuId = menuId == word.id?null:word.id">
+                    [class.match]="word.id != highlitId && matchTokens[word.id]"
+                    (click)="menuId = menuId == word.id?null:word.id"
+                    title="{{matchTokens[word.id]?'Result '+matchTokens[word.id]:''}}">
                 <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>
               </span>
               <div *ngIf="menuId == word.id"

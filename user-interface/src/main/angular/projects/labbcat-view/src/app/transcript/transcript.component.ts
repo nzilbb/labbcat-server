@@ -7,9 +7,6 @@ import { ProgressUpdate } from '../progress-update';
 import { Response, Layer, User, Annotation, Anchor, MediaFile } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
-// TODO praat
-// TODO highlight search results
-
 @Component({
   selector: 'app-transcript',
   templateUrl: './transcript.component.html',
@@ -66,6 +63,9 @@ export class TranscriptComponent implements OnInit {
 
     menuId: string;
 
+    threadId : string;
+    matchTokens = {} as { [key: string] : number };
+    
     constructor(
         private labbcatService : LabbcatService,
         private messageService : MessageService,
@@ -92,6 +92,7 @@ export class TranscriptComponent implements OnInit {
         this.readSchema().then(() => {
             this.route.queryParams.subscribe((params) => {
                 this.id = params["id"]||params["transcript"]||params["ag_id"];
+                this.threadId = params["threadId"];
                 this.readTranscript().then(()=>{ // some have to wait until transcript is loaded
                     // preselect layers?
                     let layerIds = params["layerId"]||params["l"]
@@ -105,6 +106,7 @@ export class TranscriptComponent implements OnInit {
                             this.layersChanged([ layerIds ]);
                         }
                     }
+                    if (this.threadId) this.loadThread();
                     this.setOriginalFile();
                     this.readAvailableMedia().then(()=>{
                         this.praatService.initialize().then((version: string)=>{
@@ -416,6 +418,50 @@ export class TranscriptComponent implements OnInit {
             }, 500);
         }
         this.showMediaPrompt();
+    }
+
+    loadThread(): void {
+        this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
+            if (task) {
+                if (task.layers) this.layersChanged(task.layers.filter(l=>l!="orthography"));
+                this.highlightSearchResults(0);
+            }
+        });
+    }
+    
+    highlightSearchResults(pageNumber: number) : void {
+        const transcriptId = this.transcript.id;
+        this.labbcatService.labbcat.getMatches(
+            this.threadId, 0, 100, pageNumber,
+            (results, errors, messages) => {
+                for (let match of results.matches) {                    
+                    if (match.Transcript == transcriptId) {
+                        // for now just highlight the first word                        
+                        const firstWordId = match.MatchId.replace(/.*\[0\]=(ew_0_[0-9]*).*/,"$1");
+                        const lastWordId = match.MatchId.replace(/.*\[1\]=(ew_0_[0-9]*).*/,"$1");
+                        const resultNumber = parseInt(match.MatchId
+                            .replace(/.*prefix=([0-9]*)-.*/,"$1"));
+                        this.matchTokens[firstWordId] = resultNumber;
+                        if (lastWordId && lastWordId != firstWordId) {
+                            // tag subsequent tokens
+                            const firstWord = this.transcript.annotations[firstWordId];
+                            if (firstWord) {
+                                let nextWord = firstWord.next;
+                                let c = 1;
+                                while (nextWord && nextWord.id != lastWordId
+                                      && ++c < 20) { // not for thn 20 words for safety
+                                    this.matchTokens[nextWord.id] = resultNumber;
+                                    nextWord = nextWord.next;
+                                }
+                                this.matchTokens[lastWordId] = resultNumber;
+                            }
+                        }
+                    }
+                } // next match
+                if (results.matches.length) {
+                    this.highlightSearchResults(pageNumber+1);
+                }
+            });
     }
 
     setOriginalFile(): void {
@@ -1333,7 +1379,7 @@ export class TranscriptComponent implements OnInit {
                         this.praatUtterance = null;
                     }
                     this.praatProgress = {
-                        message: "Changes imported", // TODO i18n
+                        message: "",
                         value: 100,
                         maximum: 100,
                         code: code

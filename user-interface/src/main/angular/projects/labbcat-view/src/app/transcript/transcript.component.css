@@ -11,6 +11,9 @@ lib-wait { position: absolute; }
 .highlight {
     background-color: yellow;
 }
+.match {
+    background-color: lightgreen;
+}
 @keyframes fade-background-in {
     from { background-color: transparent; }
     to { background-color: lightgray; }
@@ -40,9 +43,10 @@ lib-wait { position: absolute; }
 #word-menu .header {
     height: 18px;
 }
+/* This does't work in production because the URL fails:
 .permalink:hover::after {
-    content: ' ' url('/assets/link.svg#xywh=0,0,4,4') / '🔗';
-}
+    content: ' ' url('/assets/link.svg') / '🔗';
+}*/
 nav, nav > div {
     position: fixed;
     top: 50%;
@@ -254,7 +258,7 @@ lib-layer-checkboxes {  /* layer selection on top of media */
     margin-left: 0px;
 }
 .video-zoomed #media video, .video-zoomed #temporal-blocks {
-    width: 47vw;
+    width: 44vw;
 }
 /* subtitle voice colours */
 ::cue(v.speaker1) { color: MistyRose; }

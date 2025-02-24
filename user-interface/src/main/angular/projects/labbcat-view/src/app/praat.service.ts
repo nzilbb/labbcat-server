@@ -15,10 +15,10 @@ export class PraatService {
     nativeMessagingVersion: string;
     progress: Subject<ProgressUpdate>;
     
-    sendPraatResolve: (code: string) => void;
-    sendPraatReject: (code: string) => void;
-    uploadResolve: (code: string) => void;
-    uploadReject: (code: string) => void;
+    sendPraatResolve: (message: string) => void;
+    sendPraatReject: (error: string) => void;
+    uploadResolve: (message: string) => void;
+    uploadReject: (error: string) => void;
 
     constructor(private messageService: MessageService) {
         this.progress = new Subject<ProgressUpdate>();
@@ -34,10 +34,8 @@ export class PraatService {
      */
     initialize(): Promise<string> {
         return new Promise((resolve, reject) => {
-            console.log("nzilbb.jsendpraat.detectExtension...");
             if (nzilbb.jsendpraat.detectExtension(
                 (version) => { // onExtensionDetected
-                    console.log(`onExtensionDetected ${version}`);
                     this.extensionVersion = version;
                     resolve(version);
                 }, // onExtensionDetected
@@ -92,23 +90,22 @@ export class PraatService {
                             });
                         }
                     } else if (this.uploadResolve) {
-                        this.uploadResolve(code);
+                        this.uploadResolve(summary);
                     }
                     this.uploadResolve = null;
                     this.uploadReject = null;
-                },
+                },  // onUploadResponse
                 
                 (version) => { // onNativeMessagingHostDetected
                     this.nativeMessagingVersion = version;
                 }, // onExtensionDetected
-            )) { // onUploadResponse
+            )) {
                 
                 // we've called nzilbb.jsendpraat.detectExtension, which send's a message to
                 // the extension. If we never hear back, that means it's not installed,
                 // but the browser is compatible
 
                 setTimeout(()=>{ // wait a short while
-                    console.log(`Timeout`);
                     // if we haven't heard back yet, reject
                     if (nzilbb.jsendpraat.isInstalled == null) {
                         reject(true); // true: browser is compatible
