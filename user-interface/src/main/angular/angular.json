@@ -77,7 +77,8 @@
             ],
               "scripts": [
                 "projects/labbcat-common/src/nzilbb.labbcat.js",
-                "projects/labbcat-common/src/nzilbb.ag.js"
+                "projects/labbcat-common/src/nzilbb.ag.js",
+                "projects/labbcat-view/src/nzilbb.jsendpraat.js"
               ]
           },
           "configurations": {
@@ -141,7 +142,8 @@
             ],
               "scripts": [
                 "projects/labbcat-common/src/nzilbb.labbcat.js",
-                "projects/labbcat-common/src/nzilbb.ag.js"
+                "projects/labbcat-common/src/nzilbb.ag.js",
+                "projects/labbcat-view/src/nzilbb.jsendpraat.js"
               ]
           }
         },

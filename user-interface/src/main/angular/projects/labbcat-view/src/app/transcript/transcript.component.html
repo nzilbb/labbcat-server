@@ -197,17 +197,26 @@
         <source src="{{localMediaUrl}}"/>
       </audio>
     </div>
-    <div *ngIf="player" id="media-controls">
+    <div *ngIf="hasWAV || player" id="media-controls">
+      <div *ngIf="hasWAV && praatIntegration" id="praat-integration">
+        <div id="praat-message" [title]="praatMessage">{{praatMessage}}</div>
+        <progress id="praat-progress" max="100" [value]="praatProgress"></progress>
+      </div>
+      <lib-button *ngIf="hasWAV && praatIntegration == ''"
+                  (press)="installPraatIntegration()"
+                  img="praat.png" icon="👄"
+                  i18n-title title="Set up Praat integration"
+                  ></lib-button>        
       <lib-button *ngIf="visibleVideoCount"
                   (press)="videoZoomed = !videoZoomed"
                   [img]="(videoZoomed?'zoom-out':'zoom-in')+'.svg'" icon="🔍"
                   i18n-title title="Large video"
                   ></lib-button>
-      <lib-button (press)="mediaRepeat();"
+      <lib-button *ngIf="player"
+                  (press)="mediaRepeat();"
                   img="media-skip-backward.svg" icon="⏪"
                   i18n-title title="Repeat"
-                  ></lib-button>
-      
+                  ></lib-button>      
     </div>
   </div>
 
@@ -326,6 +335,13 @@
            title="{{utterance.label}}: {{utterance.start.offset}}-{{utterance.end.offset}} ({{utterance.duration()}}s)">
         <legend class="participant">{{utterance.label}}</legend>
         <a id="{{utterance.startId}}" class="anchor"></a>
+        <lib-button *ngIf="praatUtterance == utterance"
+                    class="import-changes"
+                    (press)="praatImportChanges()"
+                    img="save.svg" icon="✅"
+                    i18n-label label="Import Changes"
+                    i18n-title title="Import changes made to TextGrid into LaBB-CAT"
+                    ></lib-button>        
         <div class="words">
           <span *ngFor="let word of utterance.all(schema.wordLayerId)"
                 class="word" id="{{word.id}}">
@@ -381,6 +397,33 @@
                      i18n-title title="Permalink to utterance"
                      href="#{{utterance.id}}"
                      i18n>Utterance</a>
+                </div>
+                <div *ngIf="hasWAV"
+                     class="item" id="praat-open">
+                  <lib-menu-option        
+                    (press)="praatUtteranceAudio(utterance); menuId = null;"
+                    img="praat.png" icon="👄"
+                    i18n-label label="Open in Praat"
+                    i18n-title title="Open utterance audio in Praat"
+                    ></lib-menu-option>
+                </div>
+                <div *ngIf="hasWAV"
+                     class="item" id="praat-open-textgrid">
+                  <lib-menu-option        
+                    (press)="praatUtteranceTextGrid(utterance); menuId = null;"
+                    img="praat.png" icon="👄"
+                    i18n-label label="Open TextGrid"
+                    i18n-title title="Open utterance audio and TextGrid in Praat"
+                    ></lib-menu-option>
+                </div>
+                <div *ngIf="hasWAV"
+                     class="item" id="praat-open-textgrid">
+                  <lib-menu-option        
+                    (press)="praatUtteranceContextTextGrid(utterance); menuId = null;"
+                    img="praat.png" icon="👄"
+                    i18n-label label="Open TextGrid ± 1 utterance"
+                    i18n-title title="Open utterance audio and TextGrid in Praat, including previous and next utterances"
+                    ></lib-menu-option>
                 </div>
                 <div *ngIf="hasWAV"
                      class="item" id="extract-audio-option">

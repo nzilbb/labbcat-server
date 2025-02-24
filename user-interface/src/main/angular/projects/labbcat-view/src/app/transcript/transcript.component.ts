@@ -2,11 +2,12 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { SerializationDescriptor } from '../serialization-descriptor';
+import { PraatService } from '../praat.service';
 import { Response, Layer, User, Annotation, Anchor, MediaFile } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
-// TODO media
-// TODO next/previous
+// TODO praat
+// TODO highlight search results
 
 @Component({
   selector: 'app-transcript',
@@ -50,6 +51,14 @@ export class TranscriptComponent implements OnInit {
     mimeTypeToSerializer = {};
 
     hasWAV: boolean;
+    praatIntegration: string; // version number, or "" if installable
+    authorization:string;
+    praatProgress: number;
+    praatMessage: string;
+    textGridUrl: string;
+    praatUtteranceName: string;
+    praatUtterance: Annotation;
+    
     availableMedia: MediaFile[];
     media : { [key: string] : { [key: string] : MediaFile[] } }; // type->trackSuffix->file
     selectableMediaCount = 0;
@@ -60,6 +69,7 @@ export class TranscriptComponent implements OnInit {
     constructor(
         private labbcatService : LabbcatService,
         private messageService : MessageService,
+        private praatService : PraatService,
         private route : ActivatedRoute,
         private router : Router,
         @Inject('environment') private environment
@@ -100,6 +110,21 @@ export class TranscriptComponent implements OnInit {
                 }); // transcript read
             }); // subscribed to queryParams
         }); // after readSchema
+        this.praatService.initialize().then((version: string)=>{
+            console.log(`Praat integration version ${version}`);
+            this.praatIntegration = version;
+            this.praatProgress = 0;
+            this.praatMessage = `Praat Integration ${this.praatIntegration}`;
+            this.authorization = ""; // TODO figure this out
+        }, (canInstall: boolean)=>{
+            if (canInstall) {
+                console.log("Praat integration not installed but it could be");
+                this.praatIntegration = "";
+            } else {
+                console.log("Incompatible browser");
+                this.praatIntegration = null;
+            }
+        });
         addEventListener("hashchange", (event) => {
             this.highlight(window.location.hash.substring(1));
         });
@@ -156,7 +181,7 @@ export class TranscriptComponent implements OnInit {
             });
         });
     }
-    
+
     readUserInfo() : Promise<void> {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
@@ -1071,5 +1096,159 @@ export class TranscriptComponent implements OnInit {
         document.location = url;
         return false;
     }    
+
+    /** Install Praat integration */
+    installPraatIntegration(): void {
+        // start plugin installer
+        if(navigator.userAgent.indexOf("Firefox") != -1 ) {
+            // Firefox can get the extension directly from LaBB-CAT
+            if (confirm("You need to install the 'Praat Integration' browser extension." // TODO i18n
+                +"\nWhen you are asked to install the extension, click 'Allow' and then 'Install'.")) {
+                this.downloadURI(`${this.baseUrl}/utilities/jsendpraat.xpi?3.0`);
+                window.setTimeout(function() { 
+                    window.onfocus = function() {
+                        // do this once only
+                        window.onfocus = null; 
+                        // offer to reload the page
+                        if (confirm("Once the 'Praat Integration' extension is installed, you must refresh this page to activate it.\nWould you like to refresh the page now?")) { // TODO i18n
+                            window.location.reload();
+                        }
+                    }
+                }, 5000);
+            }
+        } else  if (confirm("You need to install the 'Praat Integration' browser extension." // TODO i18n
+            +"\nYou will be taken to the Chrome Web Store now."
+            +"\nOnce the store opens, click the 'Add to Chrome' button.")) {
+            window.open("https://chrome.google.com/webstore/detail/praat-integration/hmmnebkieionilgpepijmfabdickmnig", "chromewebstore");
+            window.setTimeout(function() { 
+                window.onfocus = function() {
+                    // do this once only
+                    window.onfocus = null; 
+                    // offer to reload the page
+                    if (confirm("Once the 'Praat Integration' extension is installed, you must refresh this page to activate it.\nWould you like to refresh the page now?")) { // TODO i18n
+                        window.location.reload();
+                    }
+                }
+            }, 2000);
+        } // not Firefox, assume Chrome-like browser
+    }
+
+    /** Opens a download for the given URI */
+    downloadURI(uri: string): void {
+        const link = document.createElement("a");
+        link.href = uri;
+        document.body.appendChild(link);
+        link.click();
+    }
+
+    /** Open utterance audio in Praat */
+    praatUtteranceAudio(utterance: Annotation): void {
+        const audioUrl = this.baseUrl+"soundfragment"
+            +"?id="+this.transcript.id
+            +"&start="+utterance.start.offset
+            +"&end="+utterance.end.offset;
+        this.praatService.sendPraat([
+            "Read from file... "+audioUrl,
+            "Edit"
+        ], this.authorization).then((code: string)=>{
+            console.log(`sendPraat ${code}`);
+        });
+    }
+
+    /** Open utterance audio and TextGrid in Praat */
+    praatUtteranceTextGrid(utterance: Annotation): void {
+        const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
+        this.praatUtteranceName = this.transcript.id.replace(/\....$/,"")
+            +("__"+utterance.start.offset).replace(".","_")
+            +("_"+utterance.end.offset).replace(".","_");
+        const audioUrl = this.baseUrl+"soundfragment"
+            +"?id="+this.transcript.id
+            +"&start="+utterance.start.offset
+            +"&end="+utterance.end.offset;
+        this.textGridUrl = this.baseUrl
+            +"serialize/fragment?mimeType=text/praat-textgrid"
+            +"&id="+transcriptIdForUrl
+            +"&layerId="+this.schema.utteranceLayerId
+            +"&layerId="+this.schema.wordLayerId
+            +this.selectedLayerIds.map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
+            +"&start="+utterance.start.offset
+            +"&end="+utterance.end.offset
+            +"&filter="+utterance.parentId
+            +"&nonce="+Math.random();
+        this.praatService.sendPraat([
+            "Read from file... "+audioUrl,
+            "Rename... "+this.praatUtteranceName,
+            "Read from file... "+this.textGridUrl,
+            "Rename... "+this.praatUtteranceName,
+            "plus Sound "+this.praatUtteranceName,
+            "Edit"
+        ], this.authorization).then((code: string)=>{
+            if (code == "0") {
+                this.praatUtterance = utterance;
+            }
+            console.log(`sendPraat ${code}`);
+        });
+    }
+
+    /** Open utterance and context audio and TextGrid in Praat */
+    praatUtteranceContextTextGrid(utterance: Annotation): void {
+        const firstUtterance = utterance.previous||utterance;
+        const lastUtterance = utterance.next||utterance;
+        const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
+        this.praatUtteranceName = this.transcript.id.replace(/\....$/,"")
+            +("__"+firstUtterance.start.offset).replace(".","_")
+            +("_"+lastUtterance.end.offset).replace(".","_");
+        const audioUrl = this.baseUrl+"soundfragment"
+            +"?id="+this.transcript.id
+            +"&start="+firstUtterance.start.offset
+            +"&end="+lastUtterance.end.offset;
+        this.textGridUrl = this.baseUrl
+            +"serialize/fragment?mimeType=text/praat-textgrid"
+            +"&id="+transcriptIdForUrl
+            +"&layerId="+this.schema.utteranceLayerId
+            +"&layerId="+this.schema.wordLayerId
+            +this.selectedLayerIds.map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
+            +"&start="+firstUtterance.start.offset
+            +"&end="+lastUtterance.end.offset
+            +"&filter="+utterance.parentId
+            +"&nonce="+Math.random();
+        const zoomStart = utterance.start.offset - firstUtterance.start.offset;
+        const zoomEnd = utterance.end.offset - firstUtterance.start.offset;
+        this.praatService.sendPraat([
+            "Read from file... "+audioUrl,
+            "Rename... "+this.praatUtteranceName,
+            "Read from file... "+this.textGridUrl,
+            "Rename... "+this.praatUtteranceName,
+            "plus Sound "+this.praatUtteranceName,
+            "Edit",
+            "editor TextGrid "+this.praatUtteranceName,
+            "Zoom... " + zoomStart + " " + zoomEnd,
+            "endeditor"
+        ], this.authorization).then((code: string)=>{
+            if (code == "0") {
+                this.praatUtterance = utterance;
+            }
+            console.log(`sendPraat ${code}`);
+        });
+    }
+
+    /** Import changes from Praat */
+    praatImportChanges(): void {
+        const uploadUrl = this.baseUrl+"edit/uploadFragment";
+        this.praatService.upload(
+            [ // script
+                "select TextGrid "+this.praatUtteranceName,
+                "Write to text file... "+this.textGridUrl
+            ], uploadUrl, // URL to upload to
+            "uploadfile", // name of file HTTP parameter
+            this.textGridUrl, // original URL for the file to upload
+            { automaticMapping: "true", todo: "upload" }, // extra HTTP request parameters
+            this.authorization).then((code: string)=>{
+                if (code == "0") {
+                    this.praatUtterance = null;
+                }
+                console.log(`upload ${code}`);
+            });
+    }
 
 }

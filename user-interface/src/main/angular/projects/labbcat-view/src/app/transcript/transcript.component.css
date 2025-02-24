@@ -215,6 +215,12 @@ nav, nav > div {
 
 /* Media */
 
+lib-layer-checkboxes {  /* layer selection on top of media */
+    background-color: var(--theme-background-color);
+    position: relative;
+    z-index: 5;
+}
+
 #media {
     position: fixed;
     top: 60px;
@@ -255,6 +261,30 @@ nav, nav > div {
 ::cue(v.speaker2) { color: LightSkyBlue; }
 ::cue(v.speaker3) { color: Moccasin; }
 ::cue(v.speaker4) { color: PaleGreen; }
+
+/* Praat */
+
+#media-controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+#praat-integration {
+    flex-grow: 1;
+}
+#praat-message {
+    white-space: nowrap;
+    width: 90%;
+    position: absolute;
+    text-align: center;
+    overflow: clip;    
+}
+#praat-progress {
+    width: 99%
+}
+.import-changes {
+    position: absolute;
+}
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
