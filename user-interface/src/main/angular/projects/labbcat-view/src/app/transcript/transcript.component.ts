@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { SerializationDescriptor } from '../serialization-descriptor';
 import { PraatService } from '../praat.service';
+import { ProgressUpdate } from '../progress-update';
 import { Response, Layer, User, Annotation, Anchor, MediaFile } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
@@ -53,8 +54,7 @@ export class TranscriptComponent implements OnInit {
     hasWAV: boolean;
     praatIntegration: string; // version number, or "" if installable
     authorization: string;
-    praatProgress: number;
-    praatMessage: string;
+    praatProgress: ProgressUpdate;
     textGridUrl: string;
     praatUtteranceName: string;
     praatUtterance: Annotation;
@@ -113,8 +113,14 @@ export class TranscriptComponent implements OnInit {
         this.praatService.initialize().then((version: string)=>{
             console.log(`Praat integration version ${version}`);
             this.praatIntegration = version;
-            this.praatProgress = 0;
-            this.praatMessage = `Praat Integration ${this.praatIntegration}`;
+            this.praatProgress = {
+                message: `Praat Integration ${this.praatIntegration}`,
+                value: 0,
+                maximum: 100
+            };
+            this.praatService.progressUpdates().subscribe((progress) => {
+                this.praatProgress = progress;
+            });
         }, (canInstall: boolean)=>{
             if (canInstall) {
                 console.log("Praat integration not installed but it could be");
@@ -1169,8 +1175,9 @@ export class TranscriptComponent implements OnInit {
     /** Open utterance audio in Praat */
     praatUtteranceAudio(utterance: Annotation): void {
         this.getAuthorization().then((authorization: string)=>{
+            const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
             const audioUrl = this.baseUrl+"soundfragment"
-                +"?id="+this.transcript.id
+                +"?id="+transcriptIdForUrl
                 +"&start="+utterance.start.offset
                 +"&end="+utterance.end.offset;
             this.praatService.sendPraat([
@@ -1178,6 +1185,12 @@ export class TranscriptComponent implements OnInit {
                 "Edit"
             ], authorization).then((code: string)=>{
                 console.log(`sendPraat ${code}`);
+                this.praatProgress = {
+                    message: `Opened: ${transcriptIdForUrl} (${utterance.start}-${utterance.end})`, // TODO i18n
+                    value: 100,
+                    maximum: 100,
+                    code: code
+                }
             });
         });
     }
@@ -1215,6 +1228,12 @@ export class TranscriptComponent implements OnInit {
                     this.praatUtterance = utterance;
                 }
                 console.log(`sendPraat ${code}`);
+                this.praatProgress = {
+                    message: `Opened: ${this.praatUtteranceName}`, // TODO i18n
+                    value: 100,
+                    maximum: 100,
+                    code: code
+                }
             });
         });
     }
@@ -1259,6 +1278,12 @@ export class TranscriptComponent implements OnInit {
                     this.praatUtterance = utterance;
                 }
                 console.log(`sendPraat ${code}`);
+                    this.praatProgress = {
+                        message: `Opened: ${this.praatUtteranceName}`, // TODO i18n
+                        value: 100,
+                        maximum: 100,
+                        code: code
+                    }
             });
         });
     }
@@ -1280,6 +1305,12 @@ export class TranscriptComponent implements OnInit {
                         this.praatUtterance = null;
                     }
                     console.log(`upload ${code}`);
+                    this.praatProgress = {
+                        message: "Changes imported", // TODO i18n
+                        value: 100,
+                        maximum: 100,
+                        code: code
+                    }
                 });
         });
     }

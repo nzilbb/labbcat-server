@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 
 import { MessageService } from 'labbcat-common';
+
+import { ProgressUpdate } from './progress-update';
 
 declare var nzilbb:  any; // nzilbb.jsendpraat.js
 
@@ -10,6 +13,7 @@ declare var nzilbb:  any; // nzilbb.jsendpraat.js
 export class PraatService {
     extensionVersion: string;
     nativeMessagingVersion: string;
+    progress: Subject<ProgressUpdate>;
     
     sendPraatResolve: (code: string) => void;
     sendPraatReject: (code: string) => void;
@@ -17,6 +21,7 @@ export class PraatService {
     uploadReject: (code: string) => void;
 
     constructor(private messageService: MessageService) {
+        this.progress = new Subject<ProgressUpdate>();
     }
 
     /** 
@@ -53,9 +58,14 @@ export class PraatService {
                     this.sendPraatReject = null;
                 }, // onSendPraatResponse
                 
-                (string, value, maximum, error, code) => { // onProgress
-                    console.log(`praat progress ${string} ${value} ${maximum} ${error} ${code}`);
-                    // TODO make this a subscription thing
+                (message, value, maximum, error, code) => { // onProgress
+                    this.progress.next({
+                        message: message,
+                        value: value || 0,
+                        maximum: maximum || 100,
+                        error: error,
+                        code: code
+                    });
                 }, // onProgress
                 
                 (code, summary, error) => { // onUploadResponse
@@ -94,7 +104,14 @@ export class PraatService {
             }            
         });
     }
-
+    
+    /**
+     * Send a script for Praat to execute.
+     * @param {string[]} script The script to send to Praat. 
+     *  (e.g. ["Read from file... http://myserver/myfile.wav, "Edit"]). 
+     * @param {string} authorization The Authorization header to be sent with any HTTP requests. 
+     * @returns A promise of the code returned by the request.
+     */
     sendPraat(script: string[], authorization: string): Promise<string> {
         return new Promise((resolve, reject) => {
             this.sendPraatResolve = resolve;
@@ -103,6 +120,18 @@ export class PraatService {
         });
     }
 
+    /**
+     * Send a script for Praat to execute, and then upload a file to the server. 
+     * This can be used to upload to a the server a previously downloaded and then edited TextGrid.
+     * @param {string[]} script The script to send to Praat. 
+     * e.g. ["Read from file... http://myserver/myfile.wav, "Edit"]). 
+     * @param {string} uploadUrl URL to upload to.
+     * @param {string} fileParameter name of file HTTP parameter.
+     * @param {string} fileUrl original URL for the file to upload.
+     * @param {Object} otherParameters extra HTTP request parameters.
+     * @param {string} authorization The Authorization header to be sent with any HTTP requests. 
+     * @returns A promise of the code returned by the request.
+     */
     upload(
         script: string[], uploadUrl: string, fileParameter: string, fileUrl: string,
         otherParameters: any, authorization: string): Promise<string> {
@@ -113,4 +142,10 @@ export class PraatService {
                 script, uploadUrl, fileParameter, fileUrl, otherParameters, authorization);
         });
     }
+
+    /** Provides a subscription to progress updates when interacting with Praat. */
+    progressUpdates() : Observable<ProgressUpdate> {
+        return this.progress.asObservable();
+    }
+
 }
