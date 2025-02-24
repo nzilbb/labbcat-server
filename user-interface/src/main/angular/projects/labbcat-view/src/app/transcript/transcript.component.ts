@@ -52,7 +52,7 @@ export class TranscriptComponent implements OnInit {
 
     hasWAV: boolean;
     praatIntegration: string; // version number, or "" if installable
-    authorization:string;
+    authorization: string;
     praatProgress: number;
     praatMessage: string;
     textGridUrl: string;
@@ -115,7 +115,6 @@ export class TranscriptComponent implements OnInit {
             this.praatIntegration = version;
             this.praatProgress = 0;
             this.praatMessage = `Praat Integration ${this.praatIntegration}`;
-            this.authorization = ""; // TODO figure this out
         }, (canInstall: boolean)=>{
             if (canInstall) {
                 console.log("Praat integration not installed but it could be");
@@ -436,7 +435,6 @@ export class TranscriptComponent implements OnInit {
         if (!this.user.roles.includes("edit")) {
             this.labbcatService.labbcat.createRequest(
                 "correction", null, (r, errors, messages) => {
-                    console.log(errors);
                     if (!errors) {
                         this.correctionEnabled = true;
                     }
@@ -1141,114 +1139,149 @@ export class TranscriptComponent implements OnInit {
         link.click();
     }
 
+    /** Determines how the Praat browser extension will authenticate itself with the server */
+    getAuthorization(): Promise<string> {
+        // make asking for authorization as late and infrequent as possible
+        if (this.authorization != null) {
+            return Promise.resolve(this.authorization);
+        } else {
+            return new Promise<string>((resolve, reject) => {
+                // ask for the current authorization
+                this.labbcatService.labbcat.createRequest(
+                    "a", null, (a, errors, messages) => {
+                        if (!errors) {
+                            if (typeof a === 'string') {
+                                this.authorization = a;
+                            } else {
+                                this.authorization = "";
+                            }
+                            resolve(this.authorization);
+                        } else {
+                            reject(errors);
+                        }                        
+                    },
+                    this.baseUrl+"a")
+                    .send();        
+            });
+        }
+    }
+
     /** Open utterance audio in Praat */
     praatUtteranceAudio(utterance: Annotation): void {
-        const audioUrl = this.baseUrl+"soundfragment"
-            +"?id="+this.transcript.id
-            +"&start="+utterance.start.offset
-            +"&end="+utterance.end.offset;
-        this.praatService.sendPraat([
-            "Read from file... "+audioUrl,
-            "Edit"
-        ], this.authorization).then((code: string)=>{
-            console.log(`sendPraat ${code}`);
+        this.getAuthorization().then((authorization: string)=>{
+            const audioUrl = this.baseUrl+"soundfragment"
+                +"?id="+this.transcript.id
+                +"&start="+utterance.start.offset
+                +"&end="+utterance.end.offset;
+            this.praatService.sendPraat([
+                "Read from file... "+audioUrl,
+                "Edit"
+            ], authorization).then((code: string)=>{
+                console.log(`sendPraat ${code}`);
+            });
         });
     }
 
     /** Open utterance audio and TextGrid in Praat */
     praatUtteranceTextGrid(utterance: Annotation): void {
-        const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
-        this.praatUtteranceName = this.transcript.id.replace(/\....$/,"")
-            +("__"+utterance.start.offset).replace(".","_")
-            +("_"+utterance.end.offset).replace(".","_");
-        const audioUrl = this.baseUrl+"soundfragment"
-            +"?id="+this.transcript.id
-            +"&start="+utterance.start.offset
-            +"&end="+utterance.end.offset;
-        this.textGridUrl = this.baseUrl
-            +"serialize/fragment?mimeType=text/praat-textgrid"
-            +"&id="+transcriptIdForUrl
-            +"&layerId="+this.schema.utteranceLayerId
-            +"&layerId="+this.schema.wordLayerId
-            +this.selectedLayerIds.map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
-            +"&start="+utterance.start.offset
-            +"&end="+utterance.end.offset
-            +"&filter="+utterance.parentId
-            +"&nonce="+Math.random();
-        this.praatService.sendPraat([
-            "Read from file... "+audioUrl,
-            "Rename... "+this.praatUtteranceName,
-            "Read from file... "+this.textGridUrl,
-            "Rename... "+this.praatUtteranceName,
-            "plus Sound "+this.praatUtteranceName,
-            "Edit"
-        ], this.authorization).then((code: string)=>{
-            if (code == "0") {
-                this.praatUtterance = utterance;
-            }
-            console.log(`sendPraat ${code}`);
+        this.getAuthorization().then((authorization: string)=>{
+            const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
+            this.praatUtteranceName = this.transcript.id.replace(/\....$/,"")
+                +("__"+utterance.start.offset).replace(".","_")
+                +("_"+utterance.end.offset).replace(".","_");
+            const audioUrl = this.baseUrl+"soundfragment"
+                +"?id="+this.transcript.id
+                +"&start="+utterance.start.offset
+                +"&end="+utterance.end.offset;
+            this.textGridUrl = this.baseUrl
+                +"serialize/fragment?mimeType=text/praat-textgrid"
+                +"&id="+transcriptIdForUrl
+                +"&layerId="+this.schema.utteranceLayerId
+                +"&layerId="+this.schema.wordLayerId
+                +this.selectedLayerIds.map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
+                +"&start="+utterance.start.offset
+                +"&end="+utterance.end.offset
+                +"&filter="+utterance.parentId
+                +"&nonce="+Math.random();
+            this.praatService.sendPraat([
+                "Read from file... "+audioUrl,
+                "Rename... "+this.praatUtteranceName,
+                "Read from file... "+this.textGridUrl,
+                "Rename... "+this.praatUtteranceName,
+                "plus Sound "+this.praatUtteranceName,
+                "Edit"
+            ], authorization).then((code: string)=>{
+                if (code == "0") {
+                    this.praatUtterance = utterance;
+                }
+                console.log(`sendPraat ${code}`);
+            });
         });
     }
 
     /** Open utterance and context audio and TextGrid in Praat */
     praatUtteranceContextTextGrid(utterance: Annotation): void {
-        const firstUtterance = utterance.previous||utterance;
-        const lastUtterance = utterance.next||utterance;
-        const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
-        this.praatUtteranceName = this.transcript.id.replace(/\....$/,"")
-            +("__"+firstUtterance.start.offset).replace(".","_")
-            +("_"+lastUtterance.end.offset).replace(".","_");
-        const audioUrl = this.baseUrl+"soundfragment"
-            +"?id="+this.transcript.id
-            +"&start="+firstUtterance.start.offset
-            +"&end="+lastUtterance.end.offset;
-        this.textGridUrl = this.baseUrl
-            +"serialize/fragment?mimeType=text/praat-textgrid"
-            +"&id="+transcriptIdForUrl
-            +"&layerId="+this.schema.utteranceLayerId
-            +"&layerId="+this.schema.wordLayerId
-            +this.selectedLayerIds.map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
-            +"&start="+firstUtterance.start.offset
-            +"&end="+lastUtterance.end.offset
-            +"&filter="+utterance.parentId
-            +"&nonce="+Math.random();
-        const zoomStart = utterance.start.offset - firstUtterance.start.offset;
-        const zoomEnd = utterance.end.offset - firstUtterance.start.offset;
-        this.praatService.sendPraat([
-            "Read from file... "+audioUrl,
-            "Rename... "+this.praatUtteranceName,
-            "Read from file... "+this.textGridUrl,
-            "Rename... "+this.praatUtteranceName,
-            "plus Sound "+this.praatUtteranceName,
-            "Edit",
-            "editor TextGrid "+this.praatUtteranceName,
-            "Zoom... " + zoomStart + " " + zoomEnd,
-            "endeditor"
-        ], this.authorization).then((code: string)=>{
-            if (code == "0") {
-                this.praatUtterance = utterance;
-            }
-            console.log(`sendPraat ${code}`);
+        this.getAuthorization().then((authorization: string)=>{
+            const firstUtterance = utterance.previous||utterance;
+            const lastUtterance = utterance.next||utterance;
+            const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
+            this.praatUtteranceName = this.transcript.id.replace(/\....$/,"")
+                +("__"+firstUtterance.start.offset).replace(".","_")
+                +("_"+lastUtterance.end.offset).replace(".","_");
+            const audioUrl = this.baseUrl+"soundfragment"
+                +"?id="+this.transcript.id
+                +"&start="+firstUtterance.start.offset
+                +"&end="+lastUtterance.end.offset;
+            this.textGridUrl = this.baseUrl
+                +"serialize/fragment?mimeType=text/praat-textgrid"
+                +"&id="+transcriptIdForUrl
+                +"&layerId="+this.schema.utteranceLayerId
+                +"&layerId="+this.schema.wordLayerId
+                +this.selectedLayerIds.map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
+                +"&start="+firstUtterance.start.offset
+                +"&end="+lastUtterance.end.offset
+                +"&filter="+utterance.parentId
+                +"&nonce="+Math.random();
+            const zoomStart = utterance.start.offset - firstUtterance.start.offset;
+            const zoomEnd = utterance.end.offset - firstUtterance.start.offset;
+            this.praatService.sendPraat([
+                "Read from file... "+audioUrl,
+                "Rename... "+this.praatUtteranceName,
+                "Read from file... "+this.textGridUrl,
+                "Rename... "+this.praatUtteranceName,
+                "plus Sound "+this.praatUtteranceName,
+                "Edit",
+                "editor TextGrid "+this.praatUtteranceName,
+                "Zoom... " + zoomStart + " " + zoomEnd,
+                "endeditor"
+            ], authorization).then((code: string)=>{
+                if (code == "0") {
+                    this.praatUtterance = utterance;
+                }
+                console.log(`sendPraat ${code}`);
+            });
         });
     }
 
     /** Import changes from Praat */
     praatImportChanges(): void {
-        const uploadUrl = this.baseUrl+"edit/uploadFragment";
-        this.praatService.upload(
-            [ // script
-                "select TextGrid "+this.praatUtteranceName,
-                "Write to text file... "+this.textGridUrl
-            ], uploadUrl, // URL to upload to
-            "uploadfile", // name of file HTTP parameter
-            this.textGridUrl, // original URL for the file to upload
-            { automaticMapping: "true", todo: "upload" }, // extra HTTP request parameters
-            this.authorization).then((code: string)=>{
-                if (code == "0") {
-                    this.praatUtterance = null;
-                }
-                console.log(`upload ${code}`);
-            });
+        this.getAuthorization().then((authorization: string)=>{
+            const uploadUrl = this.baseUrl+"edit/uploadFragment";
+            this.praatService.upload(
+                [ // script
+                    "select TextGrid "+this.praatUtteranceName,
+                    "Write to text file... "+this.textGridUrl
+                ], uploadUrl, // URL to upload to
+                "uploadfile", // name of file HTTP parameter
+                this.textGridUrl, // original URL for the file to upload
+                { automaticMapping: "true", todo: "upload" }, // extra HTTP request parameters
+                authorization).then((code: string)=>{
+                    if (code == "0") {
+                        this.praatUtterance = null;
+                    }
+                    console.log(`upload ${code}`);
+                });
+        });
     }
 
 }
