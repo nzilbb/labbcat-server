@@ -49,7 +49,15 @@ export class PraatService {
                     if (error) {
                         this.messageService.error(error);
                         if (this.sendPraatReject) {
-                            this.sendPraatReject(code);
+                            this.sendPraatReject(code+": "+error);
+                        } else {
+                            this.progress.next({
+                                message: "",
+                                value: 100,
+                                maximum: 100,
+                                error: error,
+                                code: code
+                            });
                         }
                     } else if (this.sendPraatResolve) {
                         this.sendPraatResolve(code);
@@ -73,7 +81,15 @@ export class PraatService {
                     if (error) {
                         this.messageService.error(error);
                         if (this.uploadReject) {
-                            this.uploadReject(code);
+                            this.uploadReject(code+": "+error);
+                        } else {
+                            this.progress.next({
+                                message: "",
+                                value: 100,
+                                maximum: 100,
+                                error: error,
+                                code: code
+                            });
                         }
                     } else if (this.uploadResolve) {
                         this.uploadResolve(code);

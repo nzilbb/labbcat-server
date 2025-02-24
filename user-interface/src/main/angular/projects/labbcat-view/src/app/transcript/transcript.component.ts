@@ -1192,6 +1192,15 @@ export class TranscriptComponent implements OnInit {
                     maximum: 100,
                     code: code
                 }
+            }).catch((error: string)=>{
+                console.log(`sendpraat error ${error}`);
+                this.praatProgress = {
+                    message: "",
+                    value: 100,
+                    maximum: 100,
+                    code: error,
+                    error: error
+                }
             });
         });
     }
@@ -1234,6 +1243,15 @@ export class TranscriptComponent implements OnInit {
                     value: 100,
                     maximum: 100,
                     code: code
+                }
+            }).catch((error: string)=>{
+                console.log(`sendpraat error ${error}`);
+                this.praatProgress = {
+                    message: "",
+                    value: 100,
+                    maximum: 100,
+                    code: error,
+                    error: error
                 }
             });
         });
@@ -1285,6 +1303,15 @@ export class TranscriptComponent implements OnInit {
                         maximum: 100,
                         code: code
                     }
+            }).catch((error: string)=>{
+                console.log(`sendpraat error ${error}`);
+                this.praatProgress = {
+                    message: "",
+                    value: 100,
+                    maximum: 100,
+                    code: error,
+                    error: error
+                }
             });
         });
     }
@@ -1305,12 +1332,20 @@ export class TranscriptComponent implements OnInit {
                     if (code == "0") {
                         this.praatUtterance = null;
                     }
-                    console.log(`upload ${code}`);
                     this.praatProgress = {
                         message: "Changes imported", // TODO i18n
                         value: 100,
                         maximum: 100,
                         code: code
+                    }
+                }).catch((error: string)=>{
+                    console.log(`upload error ${error}`);
+                    this.praatProgress = {
+                        message: "",
+                        value: 100,
+                        maximum: 100,
+                        code: error,
+                        error: error
                     }
                 });
         });

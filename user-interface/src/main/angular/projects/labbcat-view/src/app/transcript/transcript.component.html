@@ -199,13 +199,14 @@
     </div>
     <div *ngIf="hasWAV || player" id="media-controls">
       <div *ngIf="hasWAV && praatIntegration" id="praat-integration">
-        <div id="praat-message"
-             [ngClass]="{error : praatProgress.error != null}"
-             [title]="praatProgress.message"
-             >{{praatProgress.message}} {{praatProgress.error}}</div>
         <progress id="praat-progress"
                   [max]="praatProgress.maximum"
-                  [value]="praatProgress.value"></progress>
+                  [ngClass]="{error : praatProgress.error != null}"
+                  [value]="praatProgress.value"
+                  title="{{praatProgress.error}} {{praatProgress.message}} {{praatProgress.value?praatProgress.value*100/praatProgress.maximum:''}}%">
+          {{praatProgress.error}} {{praatProgress.message}}
+          {{praatProgress.value?praatProgress.value*100/praatProgress.maximum:""}}%
+        </progress>
       </div>
       <lib-button *ngIf="hasWAV && praatIntegration == ''"
                   (press)="installPraatIntegration()"

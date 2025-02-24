@@ -282,7 +282,10 @@ lib-layer-checkboxes {  /* layer selection on top of media */
     overflow: clip;    
 }
 #praat-progress {
-    width: 99%
+    width: 99%;
+}
+#praat-progress.error::-webkit-progress-value, #praat-progress.error::-moz-progress-bar {
+    background-color: red;
 }
 .import-changes {
     position: absolute;
