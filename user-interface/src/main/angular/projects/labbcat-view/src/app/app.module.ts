@@ -48,6 +48,7 @@ import { TranscriptComponent } from './transcript/transcript.component';
           { path: 'allUtterances', component: AllUtterancesComponent },
           { path: 'all-utterances', component: AllUtterancesComponent },
           { path: 'transcript', component: TranscriptComponent },
+          { path: 'text', component: TranscriptComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

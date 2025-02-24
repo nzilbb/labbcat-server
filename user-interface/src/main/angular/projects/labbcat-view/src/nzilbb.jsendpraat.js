@@ -233,8 +233,7 @@ nzilbb.jsendpraat.sendpraat = function(script, authorization) {
   } else { // not an array, presumably a one-line script string
     script = [ "praat", script ];
   }
-  window.postMessage(
-    { 
+  window.postMessage({ 
       "type": "FROM_PRAAT_PAGE", 
       "message": "sendpraat",
       "sendpraat": script,

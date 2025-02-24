@@ -106,30 +106,31 @@ export class TranscriptComponent implements OnInit {
                         }
                     }
                     this.setOriginalFile();
-                    this.readAvailableMedia();
+                    this.readAvailableMedia().then(()=>{
+                        this.praatService.initialize().then((version: string)=>{
+                            console.log(`Praat integration version ${version}`);
+                            this.praatIntegration = version;
+                            this.praatProgress = {
+                                message: `Praat Integration ${this.praatIntegration}`,
+                                value: 0,
+                                maximum: 100
+                            };
+                            this.praatService.progressUpdates().subscribe((progress) => {
+                                this.praatProgress = progress;
+                            });
+                        }, (canInstall: boolean)=>{
+                            if (canInstall) {
+                                console.log("Praat integration not installed but it could be");
+                                this.praatIntegration = "";
+                            } else {
+                                console.log("Incompatible browser");
+                                this.praatIntegration = null;
+                            }
+                        });
+                    });
                 }); // transcript read
             }); // subscribed to queryParams
         }); // after readSchema
-        this.praatService.initialize().then((version: string)=>{
-            console.log(`Praat integration version ${version}`);
-            this.praatIntegration = version;
-            this.praatProgress = {
-                message: `Praat Integration ${this.praatIntegration}`,
-                value: 0,
-                maximum: 100
-            };
-            this.praatService.progressUpdates().subscribe((progress) => {
-                this.praatProgress = progress;
-            });
-        }, (canInstall: boolean)=>{
-            if (canInstall) {
-                console.log("Praat integration not installed but it could be");
-                this.praatIntegration = "";
-            } else {
-                console.log("Incompatible browser");
-                this.praatIntegration = null;
-            }
-        });
         addEventListener("hashchange", (event) => {
             this.highlight(window.location.hash.substring(1));
         });

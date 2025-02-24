@@ -400,36 +400,35 @@
                 <div class="header" id="utterance-options">
                   <a class="permalink"
                      i18n-title title="Permalink to utterance"
-                     href="#{{utterance.id}}"
+                     href="{{baseUrl}}transcript?id={{transcript.id}}#{{utterance.id}}"
                      i18n>Utterance</a>
                 </div>
-                <div *ngIf="hasWAV"
-                     class="item" id="praat-open">
-                  <lib-menu-option        
-                    (press)="praatUtteranceAudio(utterance); menuId = null;"
-                    img="praat.png" icon="👄"
-                    i18n-label label="Open in Praat"
-                    i18n-title title="Open utterance audio in Praat"
-                    ></lib-menu-option>
-                </div>
-                <div *ngIf="hasWAV"
-                     class="item" id="praat-open-textgrid">
-                  <lib-menu-option        
-                    (press)="praatUtteranceTextGrid(utterance); menuId = null;"
-                    img="praat.png" icon="👄"
-                    i18n-label label="Open TextGrid"
-                    i18n-title title="Open utterance audio and TextGrid in Praat"
-                    ></lib-menu-option>
-                </div>
-                <div *ngIf="hasWAV"
-                     class="item" id="praat-open-textgrid">
-                  <lib-menu-option        
-                    (press)="praatUtteranceContextTextGrid(utterance); menuId = null;"
-                    img="praat.png" icon="👄"
-                    i18n-label label="Open TextGrid ± 1 utterance"
-                    i18n-title title="Open utterance audio and TextGrid in Praat, including previous and next utterances"
-                    ></lib-menu-option>
-                </div>
+                <ng-container *ngIf="hasWAV && praatIntegration">
+                  <div class="item" id="praat-open">
+                    <lib-menu-option        
+                      (press)="praatUtteranceAudio(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open in Praat"
+                      i18n-title title="Open utterance audio in Praat"
+                      ></lib-menu-option>
+                  </div>
+                  <div class="item" id="praat-open-textgrid">
+                    <lib-menu-option        
+                      (press)="praatUtteranceTextGrid(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open TextGrid"
+                      i18n-title title="Open utterance audio and TextGrid in Praat"
+                      ></lib-menu-option>
+                  </div>
+                  <div class="item" id="praat-open-textgrid">
+                    <lib-menu-option        
+                      (press)="praatUtteranceContextTextGrid(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open TextGrid ± 1 utterance"
+                      i18n-title title="Open utterance audio and TextGrid in Praat, including previous and next utterances"
+                      ></lib-menu-option>
+                  </div>
+                </ng-container>
                 <div *ngIf="hasWAV"
                      class="item" id="extract-audio-option">
                   <lib-menu-option        
@@ -469,7 +468,7 @@
                 <div class="header" id="word-options">
                   <a class="permalink"
                      i18n-title title="Permalink to word"
-                     href="#{{word.id}}"
+                     href="{{baseUrl}}transcript?id={{transcript.id}}#{{word.id}}"
                      i18n>Word</a>
                 </div>
                 <div class="item" id="edit-word-option">
