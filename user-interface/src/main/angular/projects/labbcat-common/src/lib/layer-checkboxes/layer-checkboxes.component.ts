@@ -4,7 +4,6 @@ import { Inject } from '@angular/core';
 import { LabbcatService } from '../labbcat.service';
 import { Layer } from '../layer';
 
-// TODO layer order first by project then by name, with 'orthogrpahy' and 'word' last among word layers
 // TODO allow selective exclusion of layers by list
 
 @Component({
@@ -118,7 +117,10 @@ export class LayerCheckboxesComponent implements OnInit {
         if (!this.selected) this.selected = [] as string[];
         for (let l in this.schema.layers) {
             let layer = this.schema.layers[l] as Layer;
-            if (this.selected.includes(layer.id)) layer._selected = true;
+            if (this.selected.includes(layer.id)) {
+                layer._selected = true;
+                this.categorySelections[layer.category] = true;
+            }
             if (layer.id == this.schema.root.id) {
                 if (!this.excludeRoot) this.transcriptAttributes.push(layer);
             } else if (layer.id == "segment"
