@@ -277,6 +277,8 @@ export class TranscriptComponent implements OnInit {
                         reject();
                     } else { // valid transcript
                         this.transcript = this.labbcatService.annotationGraph(transcript);
+                        // id might have been ag_id or something else non-canonical, correct it:
+                        this.id = this.transcript.id;
                         this.parseTranscript();
                         
                         // grey out empty layers
@@ -620,7 +622,11 @@ export class TranscriptComponent implements OnInit {
             // and remember the selections for next time
             sessionStorage.setItem("selectedLayerIds", JSON.stringify(this.selectedLayerIds));
             // if there's a highlight, make sure it scrolls back into view after the layer changes
-            if (this.highlitId) this.highlight(this.highlitId);
+            if (this.highlitId) {
+                setTimeout(()=>{ // give the UI a chance to update
+                    this.highlight(this.highlitId);
+                }, 200);
+            }
         });
     }
 
