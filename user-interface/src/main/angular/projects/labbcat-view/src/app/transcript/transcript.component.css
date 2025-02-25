@@ -124,7 +124,7 @@ nav, nav > div {
 .token {
     display: inline-block;
 }
-.token .layer {
+.token .layer.segment {
     display: flex;
     flex-direction: row;
     align-items: baseline;
