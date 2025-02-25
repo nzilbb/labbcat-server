@@ -2558,7 +2558,7 @@ public class SqlGraphStore implements GraphStore {
           +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
           +" WHERE word_annotation_id = " + word_annotation_id
           + userWhereClauseGraph("AND", "graph")
-          +" ORDER BY annotation_id"
+          +" ORDER BY annotation.parent_id, annotation.ordinal, annotation_id"
           + " " + limit;
       } else if ("transcript".equals(layer.get("class_id"))) { // transcript attribute
         if (!publicOnly || "1".equals(layer.get("access"))) {
@@ -2722,7 +2722,7 @@ public class SqlGraphStore implements GraphStore {
           +" WHERE word.annotation_id = '" + wordId + "'"
           +" AND word_start.offset BETWEEN start.offset AND end.offset"
           + userWhereClauseGraph("AND", "graph")
-          +" ORDER BY annotation_id"
+          +" ORDER BY annotation.parent_id, annotation.ordinal, annotation_id"
           + " " + limit; 
     } // optimization for utterance given word ID query
       

@@ -1166,7 +1166,7 @@ public class AnnotationAgqlToSql {
       sql.append(flags.transcriptJoin?"graph.transcript_id":"ag_id");
       sql.append(", ");
       if (flags.anchorsJoin) sql.append("start.offset, end.offset, ");
-      sql.append("annotation.parent_id, annotation.annotation_id");
+      sql.append("annotation.parent_id, annotation.ordinal, annotation.annotation_id");
       if (sqlLimitClause != null) sql.append(" " + sqlLimitClause);
     }
 
