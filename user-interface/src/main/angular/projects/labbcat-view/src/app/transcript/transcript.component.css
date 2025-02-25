@@ -1,4 +1,7 @@
-lib-wait { position: absolute; }
+lib-wait {
+    position: absolute;
+    left: 0px;
+}
 
 #transcript {
     max-width: 1000px;
@@ -43,7 +46,7 @@ lib-wait { position: absolute; }
 #word-menu .header {
     height: 18px;
 }
-/* This does't work in production because the URL fails:
+/* TODO This does't work in production because the URL fails:
 .permalink:hover::after {
     content: ' ' url('/assets/link.svg') / '🔗';
 }*/
@@ -124,6 +127,7 @@ nav, nav > div {
 .token .layer {
     display: flex;
     flex-direction: row;
+    align-items: baseline;
 }
 .token .layer.span {
     display: flex;
@@ -182,10 +186,12 @@ nav, nav > div {
     height: 16px;
     vertical-align: middle;
 }
+/* TODO This does't work in production because the URL fails:
 .participants ul {
     list-style: circle;
     list-style-image: url('/assets/person.svg');
 }
+*/
 .formats ul {
     list-style: none;
 }
@@ -289,6 +295,9 @@ lib-layer-checkboxes {  /* layer selection on top of media */
     display: flex;
     align-items: center;
 }
+#media-controls lib-button { /* Buttons after praat-message are on top */
+    z-index: 2;
+}
 #praat-message {
     white-space: nowrap;
     width: 90%;
@@ -304,6 +313,7 @@ lib-layer-checkboxes {  /* layer selection on top of media */
 }
 .import-changes {
     position: absolute;
+    z-index: 5;
 }
 
 /* Layout on wider screens */
