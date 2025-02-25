@@ -119,7 +119,9 @@ export class LayerCheckboxesComponent implements OnInit {
             let layer = this.schema.layers[l] as Layer;
             if (this.selected.includes(layer.id)) {
                 layer._selected = true;
-                this.categorySelections[layer.category] = true;
+                if (layer.category) {
+                    this.categorySelections[layer.category] = true;
+                }
             }
             if (layer.id == this.schema.root.id) {
                 if (!this.excludeRoot) this.transcriptAttributes.push(layer);
