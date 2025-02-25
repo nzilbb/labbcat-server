@@ -40,6 +40,13 @@ export class AppComponent {
                         h1 = document.getElementById("title");
                         if (h1 && h1.textContent) {
                             this.setPageTitle(h1.textContent);
+                        } else { // try one more time
+                            setTimeout(()=>{
+                                h1 = document.getElementById("title");
+                                if (h1 && h1.textContent) {
+                                    this.setPageTitle(h1.textContent);
+                                }
+                            }, 2000);
                         }
                     }, 500);
                 }
