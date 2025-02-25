@@ -22,3 +22,6 @@ span.suffix {
 input {
     width: 100%;
 }
+#title a {
+    padding-left: 5px;
+}
