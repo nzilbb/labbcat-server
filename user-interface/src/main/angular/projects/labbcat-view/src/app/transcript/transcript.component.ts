@@ -617,6 +617,8 @@ export class TranscriptComponent implements OnInit {
             this.selectedLayerIds = selectedLayerIds;
             // and remember the selections for next time
             sessionStorage.setItem("selectedLayerIds", JSON.stringify(this.selectedLayerIds));
+            // if there's a highlight, make sure it scrolls back into view after the layer changes
+            if (this.highlitId) this.highlight(this.highlitId);
         });
     }
 
