@@ -341,7 +341,7 @@
            [class.highlight]="utterance.id == highlitId"
            [class.playing]="player && !player.paused && playingId.includes(utterance.id)"
            [class.played]="previousPlayingId.includes(utterance.id)"
-           title="{{utterance.label}}: {{utterance.start.offset}}-{{utterance.end.offset}} ({{utterance.duration()}}s)">
+           title="{{utterance.label}}: {{utterance.start.offset | number:'1.1-4'}}-{{utterance.end.offset | number:'1.1-4'}} ({{utterance.duration() | number:'1.1-4'}}s)">
         <legend class="participant">{{utterance.label}}</legend>
         <a id="{{utterance.startId}}" class="anchor"></a>
         <lib-button *ngIf="praatUtterance == utterance"
@@ -398,7 +398,7 @@
                     [class.highlight]="word.id == highlitId"
                     [class.match]="word.id != highlitId && matchTokens[word.id]"
                     (click)="menuId = menuId == word.id?null:word.id"
-                    title="{{matchTokens[word.id]?'Result '+matchTokens[word.id]:''}}">
+                    [attr.title]="matchTokens[word.id]?'Result '+matchTokens[word.id]:null">
                 <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>
               </span>
               <div *ngIf="menuId == word.id"
