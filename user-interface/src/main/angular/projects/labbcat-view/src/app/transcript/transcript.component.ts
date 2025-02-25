@@ -83,16 +83,16 @@ export class TranscriptComponent implements OnInit {
     }
     
     ngOnInit() : void {        
-        this.readUserInfo().then(()=>{
-            this.readBaseUrl().then(()=>{
-                this.setCorrectionsEnabled();
+        this.route.queryParams.subscribe((params) => {
+            this.id = params["id"]||params["transcript"]||params["ag_id"];
+            this.threadId = params["threadId"];
+            this.readUserInfo().then(()=>{
+                this.readBaseUrl().then(()=>{
+                    this.setCorrectionsEnabled();
+                });
             });
-        });
-        this.readSerializers();
-        this.readSchema().then(() => {
-            this.route.queryParams.subscribe((params) => {
-                this.id = params["id"]||params["transcript"]||params["ag_id"];
-                this.threadId = params["threadId"];
+            this.readSerializers();
+            this.readSchema().then(() => {
                 this.readTranscript().then(()=>{ // some have to wait until transcript is loaded
                     // preselect layers?
                     let layerIds = params["layerId"]||params["l"]
