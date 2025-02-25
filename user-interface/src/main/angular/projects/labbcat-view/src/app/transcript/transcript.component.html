@@ -44,7 +44,7 @@
           </label>
           <span *ngFor="let file of trackSuffix.value"
                 class="file-link {{file.extension}}">
-            <a *ngIf="!file.generateFrom && (user.roles.includes('admin') || !user.roles.includes('edit'))"
+            <a *ngIf="!file.generateFrom && user && (user.roles.includes('admin') || !user.roles.includes('edit'))"
                href="{{file.url}}" download="{{file.name}}"
                i18n-title title="Download {{file.name}}">{{file.extension}}</a>
           </span>
@@ -54,7 +54,7 @@
                  preload="auto" 
                  title="{{trackSuffix.key}}"
                  controls
-                 controlsList="{{!user.roles.includes('admin')&&!user.roles.includes('edit')?'nodownload':''}}"
+                 controlsList="{{user && !user.roles.includes('admin')&&!user.roles.includes('edit')?'nodownload':''}}"
                  (timeupdate)="mediaTimeUpdate($event);"
                  (play)="mediaPlay($event);"
                  (pause)="mediaPause($event);"
@@ -88,7 +88,7 @@
           </label>
           <span *ngFor="let file of trackSuffix.value"
                 class="file-link {{file.extension}}">
-            <a *ngIf="!file.generateFrom && (user.roles.includes('admin') || !user.roles.includes('edit'))"
+            <a *ngIf="!file.generateFrom && user && (user.roles.includes('admin') || !user.roles.includes('edit'))"
                href="{{file.url}}" download="{{file.name}}"
                i18n-title title="Download {{file.name}}">{{file.extension}}</a>
           </span>
@@ -98,7 +98,7 @@
                  preload="auto" 
                  title="{{trackSuffix.key}}"
                  controls
-                 controlsList="{{!user.roles.includes('admin')&&!user.roles.includes('edit')?'nodownload':''}}"
+                 controlsList="{{user && !user.roles.includes('admin')&&!user.roles.includes('edit')?'nodownload':''}}"
                  (timeupdate)="mediaTimeUpdate($event);"
                  (play)="mediaPlay($event);"
                  (pause)="mediaPause($event);"
@@ -126,7 +126,7 @@
           </label>
           <span *ngFor="let file of trackSuffix.value"
                 class="file-link {{file.extension}}">
-            <a *ngIf="!file.generateFrom && (user.roles.includes('admin') || !user.roles.includes('edit'))"
+            <a *ngIf="!file.generateFrom && user && (user.roles.includes('admin') || !user.roles.includes('edit'))"
                href="{{file.url}}" download="{{file.name}}"
                i18n-title title="Download {{file.name}}">{{file.extension}}</a>
           </span>
@@ -230,7 +230,7 @@
   </div>
 
   <!-- layer selector, attributes etc. -->
-  <div id="attributes" class="attribute-list tabs">
+  <header id="attributes" class="attribute-list tabs">
     <div class="tab-labels">
       <label *ngFor="let category of categoryLabels"
              [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
@@ -284,6 +284,12 @@
             </a>
           </li>
         </ul>
+        <lib-link *ngIf="user && user.roles.includes('edit')"
+                  class="buttons"
+                  i18n-title title="Main Participants"
+                  i18n-label label="Main Participants"
+                  img="people.svg" icon="👥"
+                  href="edit/transcript/mainParticipants?id={{id | urlEncode}}"></lib-link>
       </div>
       <!-- formats tab -->
       <div *ngIf="currentCategory == 'Formats'" class="formats">
@@ -296,24 +302,33 @@
               <span>{{serializer.name}}</span>
             </a>
           </li>
-          <li *ngIf="originalFile" id="original-file-link">
-            <a href="{{originalFile}}" class="lnk" download="{{transcript.id}}">
+          <li *ngIf="originalFile"
+              id="original-file-link"
+              i18n-title title="Original transcript file"
+              [ngClass]="{'divergent': transcript.first('divergent')}"
+              [attr.title]="transcript.first('divergent')?'The text of this transcript may have changed since the original file was uploaded':null"><!-- TODO i18n -->
+            <a href="{{originalFile}}"
+               class="lnk"
+               (click)="divergentCheck();"
+               download="{{transcript.id}}">
               <img src="{{imagesLocation}}/other.svg" alt="🗎">
               <span>{{transcript.id}}</span>
             </a>
           </li>
-          <li id="episode-documents-link">
-            <a href="{{baseUrl}}seriesFiles?family_id={{transcript.first('episode').id}}" class="lnk">
-              <img src="{{imagesLocation}}/folder.svg" alt="📁" i18n>
-              <span i18n>Documents for this episode</span>
-            </a>
-          </li>
         </ul>
+        <lib-link *ngIf="transcript.first('episode')"
+                  id="episode-documents-link"
+                  class="buttons"
+                  href="{{baseUrl}}seriesFiles?family_id={{transcript.first('episode').id.replace('m_-50_','')}}"
+                  img="folder.svg" icon="📁"
+                  i18n-label label="Episode Documents"
+                  i18n-title title="Documents for this episode"
+                  ></lib-link>
       </div>
       <!-- attribute category tabs -->
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
         <label for="{{layer.id}}" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">{{layer.description}}</label>
-        <span *ngIf="transcript[layer.id]"
+        <div *ngIf="transcript[layer.id]"
               id="{{layer.id}}" class="values">
           <div *ngFor="let annotation of transcript[layer.id]" class="value">
             <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
@@ -325,10 +340,17 @@
               <span class="description">{{layer.validLabels[annotation.label]}}</span>
             </ng-container>
           </div>
-        </span>
+        </div>
       </div>
+      <lib-link *ngIf="category == 'General' && user && user.roles.includes('edit')"
+                class="buttons"
+                href="{{baseUrl}}edit/transcript/attributes?id={{transcript.id}}"
+                img="wrench.svg" icon="🔧"
+                i18n-label label="Edit"
+                i18n-title title="Edit transcript attributes"
+                ></lib-link>
     </div>
-  </div>
+  </header>
 
   <!-- transcript... -->
   <div id="temporal-blocks">
@@ -344,7 +366,7 @@
            title="{{utterance.label}}: {{utterance.start.offset | number:'1.1-4'}}-{{utterance.end.offset | number:'1.1-4'}} ({{utterance.duration() | number:'1.1-4'}}s)">
         <legend class="participant">{{utterance.label}}</legend>
         <a id="{{utterance.startId}}" class="anchor"></a>
-        <lib-button *ngIf="praatUtterance == utterance"
+        <lib-button *ngIf="praatUtterance == utterance && user && user.roles.includes('edit')"
                     class="import-changes"
                     (press)="praatImportChanges()"
                     img="save.svg" icon="✅"
@@ -365,6 +387,7 @@
                   <ng-container *ngFor="let annotation of word.all(l)">
                     <span *ngIf="annotation"
                           [attr.id]="word == annotation.first('word')?annotation.id:(annotation.id+'-'+annotation.all('word').indexOf(word))"
+                          [class.highlight]="annotation.id == highlitId"
                           [ngClass]="{ 'annotation' : true, 'first' : word == annotation.first('word'), 'during' : true, 'last' : word == annotation.last('word') && word.end.offset <= annotation.end.offset }"
                           title="{{l}}: {{annotation.label}}"
                           ><label
@@ -388,7 +411,9 @@
                       style="color: {{transcript.schema.layers[l].colour}};"
                       title="{{l}}: {{word.labels(l).join(' ')}}">
                   <span *ngFor="let annotation of word.all(l)"
-                        id="{{annotation.id}}" class="annotation">{{renderLabel(annotation)}}&nbsp;</span>
+                        id="{{annotation.id}}"
+                        [class.highlight]="annotation.id == highlitId"
+                        class="annotation">{{renderLabel(annotation)}}&nbsp;</span>
                   <span *ngIf="word.all(l).length == 0"
                         class="annotation">&nbsp;</span>
                 </span>
@@ -453,7 +478,7 @@
                     i18n-title title="Play this utterance"
                     ></lib-menu-option>
                 </div>
-                <div *ngIf="user.roles.includes('edit')"
+                <div *ngIf="user && user.roles.includes('edit')"
                      class="item" id="edit-utterance-option">
                   <lib-menu-option        
                     (press)="editUtterance(utterance); menuId = null;"
@@ -477,7 +502,8 @@
                      href="{{baseUrl}}transcript?id={{transcript.id}}#{{word.id}}"
                      i18n>Word</a>
                 </div>
-                <div class="item" id="edit-word-option">
+                <div *ngIf="user && user.roles.includes('edit')"
+                     class="item" id="edit-word-option">
                   <lib-menu-option        
                     (press)="editWord(word); menuId = null;"
                     img="edit.svg" icon="✎"
@@ -493,7 +519,10 @@
                       style="color: {{transcript.schema.layers[l].colour}};"
                       title="{{l}}: {{word.labels(l).join(' ')}}">
                   <span *ngFor="let annotation of word.all(l)"
-                        id="{{annotation.id}}" class="annotation">{{renderLabel(annotation)}}&nbsp;</span>
+                        id="{{annotation.id}}"
+                        [class.highlight]="annotation.id == highlitId"
+                        class="annotation">{{renderLabel(annotation)}}
+                    <ng-container *ngIf="annotation.layer.type != 'ipa'">&nbsp;</ng-container></span>
                   <span *ngIf="word.all(l).length == 0"
                         class="annotation">&nbsp;</span>
                 </span>

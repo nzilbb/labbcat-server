@@ -168,7 +168,7 @@ nav, nav > div {
 .generate-layer {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: end;
     align-items: center;
 }
 
@@ -195,6 +195,12 @@ nav, nav > div {
 
 #attributes {
     width: 100%;
+    text-align: left;
+}
+.buttons {
+    display: block;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 .attribute .value .description {
     padding-left: 10px;
@@ -216,7 +222,12 @@ nav, nav > div {
 .attribute-list .participant {
     padding: 5px;
 }
-
+.divergent::before {
+    content: '⚠';
+    color: var(--theme-warning-color);
+    display: inline-block;
+    vertical-align: middle;
+}
 /* Media */
 
 lib-layer-checkboxes {  /* layer selection on top of media */
@@ -289,7 +300,7 @@ lib-layer-checkboxes {  /* layer selection on top of media */
     width: 99%;
 }
 #praat-progress.error::-webkit-progress-value, #praat-progress.error::-moz-progress-bar {
-    background-color: red;
+    background-color: var(--theme-error-color);
 }
 .import-changes {
     position: absolute;
