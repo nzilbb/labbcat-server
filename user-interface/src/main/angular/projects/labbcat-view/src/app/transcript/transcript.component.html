@@ -1,6 +1,6 @@
 <lib-wait *ngIf="loading"></lib-wait>
 
-<h1>{{transcript?transcript.id:id}}</h1>
+<h1 id="title">{{id}}</h1>
 
 <div *ngIf="transcript" id="transcript"
      [ngClass]="{'video-zoomed': videoZoomed}">
@@ -9,7 +9,7 @@
   <nav>
     <div *ngIf="transcript.first('previous-transcript')"
          id="previous-transcript-link">
-      <a rel="prev" href="transcript?id={{transcript.first('previous-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
+      <a rel="prev" href="transcript?transcript={{transcript.first('previous-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
          i18n-title title="Previous">
         <img src="{{imagesLocation}}/previous.svg"
              i18n-alt alt="Previous"
@@ -18,7 +18,7 @@
     </div>
     <div *ngIf="transcript.first('next-transcript')"
          id="next-transcript-link">
-      <a rel="next" href="transcript?id={{transcript.first('next-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
+      <a rel="next" href="transcript?transcript={{transcript.first('next-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
          i18n-title title="Next">
         <img src="{{imagesLocation}}/next.svg"
              i18n-alt alt="Next"
@@ -431,7 +431,7 @@
                 <div class="header" id="utterance-options">
                   <a class="permalink"
                      i18n-title title="Permalink to utterance"
-                     href="{{baseUrl}}transcript?id={{transcript.id}}#{{utterance.id}}"
+                     href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{utterance.id}}"
                      i18n>Utterance</a>
                 </div>
                 <ng-container *ngIf="hasWAV && praatIntegration">
@@ -499,7 +499,7 @@
                 <div class="header" id="word-options">
                   <a class="permalink"
                      i18n-title title="Permalink to word"
-                     href="{{baseUrl}}transcript?id={{transcript.id}}#{{word.id}}"
+                     href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{word.id}}"
                      i18n>Word</a>
                 </div>
                 <div *ngIf="user && user.roles.includes('edit')"
