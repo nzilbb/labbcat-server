@@ -566,6 +566,8 @@ export class TranscriptComponent implements OnInit {
 
         // remove unticked layers
         this.selectedLayerIds = selectedLayerIds.filter((x)=>addedLayerIds.indexOf(x) < 0);
+        // remember the deselections for next time
+        sessionStorage.setItem("selectedLayerIds", JSON.stringify(this.selectedLayerIds));
 
         // load new layers one at a time
         for (let layerId of addedLayerIds) {
