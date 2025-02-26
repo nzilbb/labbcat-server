@@ -2,6 +2,9 @@ lib-wait {
     position: absolute;
     left: 0px;
 }
+.loading, .loading * {
+    cursor: progress; 
+}
 
 #transcript {
     max-width: 1000px;
