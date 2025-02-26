@@ -253,6 +253,7 @@ lib-layer-checkboxes {  /* layer selection on top of media */
     overflow: auto;
     white-space: nowrap;
     cursor: default;
+    z-index: 2;
 }
 #media img.icon {
     width: 16px;
@@ -296,7 +297,7 @@ lib-layer-checkboxes {  /* layer selection on top of media */
     align-items: center;
 }
 #media-controls lib-button { /* Buttons after praat-message are on top */
-    z-index: 2;
+    z-index: 3;
 }
 #praat-message {
     white-space: nowrap;
