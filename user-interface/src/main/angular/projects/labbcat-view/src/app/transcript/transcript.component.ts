@@ -713,6 +713,7 @@ export class TranscriptComponent implements OnInit {
     }
     
     indexTokensOnLayer(layer : Layer) : void {
+        const wordLayerId = this.schema.wordLayerId;
         // spans can overlap (e.g. n-gram annotations, syntactic parses)
         // we want
         //  a) each span to be visualised at the same height across all tokens, and
@@ -751,31 +752,8 @@ export class TranscriptComponent implements OnInit {
                 maxOffset[span._depth] = span.end.offset;
                 maxDepth = Math.max(maxDepth, span._depth);
             } // next span
-            // now drop spans so that they're as near as possible to the tokens they annotate
-            if (spans.length < 10000) { // but not for lots of number of spans, coz it'll be slow
-                let keepScanning = true;
-                while (keepScanning) {
-                    keepScanning = false;
-                    for (let span of spans) {
-                        let newDepth = maxDepth;
-                        for (let otherSpan of spans) {
-                            if (otherSpan != span // not the same span
-                                && span.overlaps(otherSpan) // overlapping
-                                && otherSpan._depth > span._depth) { // deeper than this one
-                                // maybe drop to above that span
-                                newDepth = Math.min(newDepth, otherSpan._depth - 1);
-                            }                    
-                        } // next other span
-                        if (newDepth > span._depth) {
-                            span._depth = newDepth;
-                            keepScanning = true;
-                        } // changed depth
-                    } // next span
-                } // next scan
-            }
     
             // link words to spans that contain them
-            const wordLayerId = this.schema.wordLayerId;
             // first create levels for every word token
             for (let token of parent.all(wordLayerId)) token[layer.id] = new Array(maxDepth+1);
             // now link 'included' spans to word tokens
@@ -842,6 +820,26 @@ export class TranscriptComponent implements OnInit {
                 } // not already done
             } // next span
         } // next parent
+
+        // for each utterance
+        for (let utterance of this.transcript.all(this.schema.utteranceLayerId)) {
+            // drop spans so that they're as near as possible to their tokens
+            const utteranceWords = utterance.all(wordLayerId);
+            const maxSpanIndexDuringUtterance = utteranceWords.reduce((maxSoFar, word) => {
+                const wordSpans = word.all(layer.id);
+                const firstNonSpanIndexForWord = wordSpans.findIndex(span=>!span);
+                return Math.max(
+                    maxSoFar,
+                    firstNonSpanIndexForWord == -1?wordSpans.length
+                        :firstNonSpanIndexForWord - 1);
+            }, -1);
+            console.log(`utterance ${utterance.id} maxSpanIndexDuringUtterance ${maxSpanIndexDuringUtterance}`);
+            utteranceWords.forEach((word)=>{
+                word.all(layer.id).length = maxSpanIndexDuringUtterance + 1;
+            });
+            
+        }
+
     }
     
     // https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript#16348977
