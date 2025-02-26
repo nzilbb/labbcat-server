@@ -385,8 +385,8 @@ export class TranscriptComponent implements OnInit {
         if (this.utterances.length > 0) {
             let currentTurnId = this.utterances[0].parentId;
             let currentBlock = { consecutive : true, utterances : [] };
-            let lastUtterance = this.utterances[0];
-            this.temporalBlocks.push(currentBlock);
+            let lastUtterance = null;
+            
             for (let u in this.utterances) {
                 let newBlock = false;
                 let consecutive = true; // as opposed to simultaneous
@@ -401,19 +401,27 @@ export class TranscriptComponent implements OnInit {
                     consecutive = false;
                 }
                 // but if this is during the last utterance
-                if (utterance.start.offset < lastUtterance.end.offset) {
+                if (lastUtterance && utterance.start.offset < lastUtterance.end.offset
+                    // and we it's  not a participant we've already seen
+                    && !currentBlock.utterances.find(u=>u.label == utterance.label)) {
                     // this is a simultaneous speech block, so don't start a new one
                     newBlock = false;
+                    currentTurnId = "";
                 }
                 if (newBlock) {
                     currentTurnId = utterance.parentId;
+                    if (currentBlock.utterances.length) { // add last block
+                        this.temporalBlocks.push(currentBlock);
+                    }
                     currentBlock = { consecutive : consecutive, utterances : [] };
-                    this.temporalBlocks.push(currentBlock);
                 }
                 currentBlock.utterances.push(utterance);
                 
                 lastUtterance = utterance;
             } // next utterance
+            if (currentBlock.utterances.length) { // add last block
+                this.temporalBlocks.push(currentBlock);
+            }
         } // there are utterances
 
         if (window.location.hash) {
