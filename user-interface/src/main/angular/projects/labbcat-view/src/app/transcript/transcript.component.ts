@@ -125,7 +125,7 @@ export class TranscriptComponent implements OnInit {
                                 console.log("Praat integration not installed but it could be");
                                 this.praatIntegration = "";
                             } else {
-                                console.log("Incompatible browser");
+                                console.log("Praat integration: Incompatible browser");
                                 this.praatIntegration = null;
                             }
                         });
@@ -577,7 +577,6 @@ export class TranscriptComponent implements OnInit {
                 // defer visualization until all annotations are loaded and indexed
                 deferredLayerIds.push(layerId);
             } else { // immediate incremental vizualization is ok
-                console.log("selecting " + layerId);
                 this.selectedLayerIds.push(layerId);
             }
         } // next newly selected layer
@@ -588,7 +587,6 @@ export class TranscriptComponent implements OnInit {
 
             // visualize deferred layers
             for (let layerId of deferredLayerIds) {
-                console.log("selecting span " + layerId);
                 this.selectedLayerIds.push(layerId);
             }
             
@@ -835,7 +833,6 @@ export class TranscriptComponent implements OnInit {
                     firstNonSpanIndexForWord == -1?wordSpans.length
                         :firstNonSpanIndexForWord - 1);
             }, -1);
-            console.log(`utterance ${utterance.id} maxSpanIndexDuringUtterance ${maxSpanIndexDuringUtterance}`);
             utteranceWords.forEach((word)=>{
                 word.all(layer.id).length = maxSpanIndexDuringUtterance + 1;
             });
@@ -1021,7 +1018,6 @@ export class TranscriptComponent implements OnInit {
     mediaPause(event: Event): void {
         // only pay attention to the main player
         if (this.player == event.target) {
-            console.log(`${this.player.id} paused...`);
             // tell all other media elements to play
             const audios = document.getElementsByTagName('audio');
             for (let p = 0; p < audios.length; p++) {
@@ -1048,11 +1044,9 @@ export class TranscriptComponent implements OnInit {
             this.player = player;
             // if it's a video, it may have been previosly muted
             this.player.muted = false;
-            console.log(`Main player is now ${this.player.id}`);
         }
         // only pay attention to the main player
         if (this.player == event.target) {
-            console.log(`${this.player.id} play...`);
             // tell all other media elements to play
             const audios = document.getElementsByTagName('audio');
             for (let p = 0; p < audios.length; p++) {
@@ -1100,25 +1094,21 @@ export class TranscriptComponent implements OnInit {
     }
     /** Play a selected utterance */
     playSpan(annotation: Annotation): void {
-        console.log(`playSpan ${annotation.id} (${annotation.start.offset}-${annotation.end.offset}))`);
         if (!annotation || !annotation.anchored()) return;
         // is there a player yet?
         if (!this.player || this.player != document.getElementById(this.player.id)) { // no player
             const audios = document.getElementsByTagName('audio');
             if (audios.length > 0) {
                 this.player = audios.item(0);
-                console.log(`Main player is now ${this.player.id}`);
             } else { // no audio elements
                 const videos = document.getElementsByTagName('video');
                 if (videos.length > 0) {
                     this.player = videos.item(0);
-                    console.log(`Main player is now ${this.player.id}`);
                 }
             }
         }
         if (this.player) {
             // set time of all first
-            console.log(`setting time to ${annotation.start.offset}`);
             const audios = document.getElementsByTagName('audio');
             const videos = document.getElementsByTagName('video');
             for (let p = 0; p < audios.length; p++) {
@@ -1128,7 +1118,6 @@ export class TranscriptComponent implements OnInit {
                 videos.item(p).currentTime = annotation.start.offset;
             }
             // then play all
-            console.log(`play ${audios.length} audios and ${videos.length} videos`);
             for (let p = 0; p < audios.length; p++) {
                 audios.item(p).play();
             }
@@ -1276,7 +1265,7 @@ export class TranscriptComponent implements OnInit {
         } else {
             return new Promise<string>((resolve, reject) => {
                 // ask for the current authorization
-                this.labbcatService.labbcat.createRequest(
+                const a = this.labbcatService.labbcat.createRequest(
                     "a", null, (a, errors, messages) => {
                         if (!errors) {
                             if (typeof a === 'string') {
@@ -1285,19 +1274,46 @@ export class TranscriptComponent implements OnInit {
                                 this.authorization = "";
                             }
                             resolve(this.authorization);
-                        } else {
-                            reject(errors);
+                        } else { 
+                            // no authorization might be fine?
+                            errors.forEach(m => this.messageService.error("Authorization error: " + m));
+                            this.authorization = "";
+                            resolve(this.authorization);
                         }                        
                     },
-                    this.baseUrl+"a")
-                    .send();        
+                    this.baseUrl+"a");
+                const mainScript = document.querySelector("script[src*=main]");
+                if (mainScript && mainScript.getAttribute("src")) {
+                    // ensure the server knows it's us asking...
+                    const nonce = mainScript.getAttribute("src").replace(/.*main(.*)\.js/,"$1");
+                    a.setRequestHeader("If-Match", nonce);
+                }
+                try {
+                    a.send();
+                } catch (x) {
+                    // no authorization might be fine?
+                    // this is most likely a cross-origin browser error from working
+                    // in the development environment, where there's not auth anyway
+                    this.messageService.error("Authorization request error: " + x);
+                    this.authorization = "";
+                    resolve(this.authorization);
+                }
             });
         }
     }
 
     /** Open utterance audio in Praat */
     praatUtteranceAudio(utterance: Annotation): void {
-        this.getAuthorization().then((authorization: string)=>{
+        this.getAuthorization().catch((errors: string[])=>{
+            errors.forEach(m => this.messageService.error("Authorization error: " + m));
+            this.praatProgress = {
+                message: "",
+                value: 100,
+                maximum: 100,
+                code: errors.join(", "),
+                error: "Authorization error: "+errors.join(", ")
+            }
+        }).then((authorization: string)=>{ // getAuthorization...
             const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
             const audioUrl = this.baseUrl+"soundfragment"
                 +"?id="+transcriptIdForUrl
@@ -1306,22 +1322,20 @@ export class TranscriptComponent implements OnInit {
             this.praatService.sendPraat([
                 "Read from file... "+audioUrl,
                 "Edit"
-            ], authorization).then((code: string)=>{
-                console.log(`sendPraat ${code}`);
+            ], authorization).catch((errors: string[])=>{
+                this.praatProgress = {
+                    message: "",
+                    value: 100,
+                    maximum: 100,
+                    code: errors.join(", "),
+                    error: errors.join(", ")
+                }
+            }).then((code: string)=>{ // sendPraat...
                 this.praatProgress = {
                     message: `Opened: ${transcriptIdForUrl} (${utterance.start}-${utterance.end})`, // TODO i18n
                     value: 100,
                     maximum: 100,
                     code: code
-                }
-            }).catch((error: string)=>{
-                console.log(`sendpraat error ${error}`);
-                this.praatProgress = {
-                    message: "",
-                    value: 100,
-                    maximum: 100,
-                    code: error,
-                    error: error
                 }
             });
         });
@@ -1331,7 +1345,8 @@ export class TranscriptComponent implements OnInit {
     praatUtteranceTextGrid(utterance: Annotation): void {
         this.getAuthorization().then((authorization: string)=>{
             const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
-            this.praatUtteranceName = this.transcript.id.replace(/\....$/,"")
+            this.praatUtteranceName = this.transcript.id
+                .replace(/\.[a-zA-Z][^.]*$/,"") // remove extension
                 +("__"+utterance.start.offset).replace(".","_")
                 +("_"+utterance.end.offset).replace(".","_");
             const audioUrl = this.baseUrl+"soundfragment"
@@ -1359,7 +1374,6 @@ export class TranscriptComponent implements OnInit {
                 if (code == "0") {
                     this.praatUtterance = utterance;
                 }
-                console.log(`sendPraat ${code}`);
                 this.praatProgress = {
                     message: `Opened: ${this.praatUtteranceName}`, // TODO i18n
                     value: 100,
@@ -1367,7 +1381,6 @@ export class TranscriptComponent implements OnInit {
                     code: code
                 }
             }).catch((error: string)=>{
-                console.log(`sendpraat error ${error}`);
                 this.praatProgress = {
                     message: "",
                     value: 100,
@@ -1385,7 +1398,8 @@ export class TranscriptComponent implements OnInit {
             const firstUtterance = utterance.previous||utterance;
             const lastUtterance = utterance.next||utterance;
             const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
-            this.praatUtteranceName = this.transcript.id.replace(/\....$/,"")
+            this.praatUtteranceName = this.transcript.id
+                .replace(/\.[a-zA-Z][^.]*$/,"") // remove extension
                 +("__"+firstUtterance.start.offset).replace(".","_")
                 +("_"+lastUtterance.end.offset).replace(".","_");
             const audioUrl = this.baseUrl+"soundfragment"
@@ -1418,7 +1432,6 @@ export class TranscriptComponent implements OnInit {
                 if (code == "0") {
                     this.praatUtterance = utterance;
                 }
-                console.log(`sendPraat ${code}`);
                     this.praatProgress = {
                         message: `Opened: ${this.praatUtteranceName}`, // TODO i18n
                         value: 100,
@@ -1426,7 +1439,6 @@ export class TranscriptComponent implements OnInit {
                         code: code
                     }
             }).catch((error: string)=>{
-                console.log(`sendpraat error ${error}`);
                 this.praatProgress = {
                     message: "",
                     value: 100,
@@ -1462,7 +1474,6 @@ export class TranscriptComponent implements OnInit {
                             code: code
                         }
                     }).catch((error: string)=>{
-                        console.log(`upload error ${error}`);
                         this.praatProgress = {
                             message: "",
                             value: 100,
