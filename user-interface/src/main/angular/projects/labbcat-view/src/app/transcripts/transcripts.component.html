@@ -76,7 +76,7 @@
               (press)="exportTranscripts()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
               img="document.svg" icon="📄"
-              i18n-label label="Export Transcripts"
+              i18n-label label="Export Original"
               i18n-title title="Save original transcript of all selected transcripts"
               ></lib-button>
             <span id="attributesSelection" *ngIf="showAttributesSelection">
@@ -118,7 +118,7 @@
               (press)="exportFormat()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
               img="{{serializeImg}}" icon="⚙"
-              i18n-label label="Export Format"
+              i18n-label label="Export Formatted"
               i18n-title title="Convert to selected format"
               ></lib-button>
             <lib-button

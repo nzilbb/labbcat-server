@@ -73,7 +73,7 @@ export class TranscriptsComponent implements OnInit {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
                 this.schema = schema;
-                this.schema.root.description = "Transcript";
+                this.schema.root.description = "Transcript name";
                 resolve();
             });
         });
