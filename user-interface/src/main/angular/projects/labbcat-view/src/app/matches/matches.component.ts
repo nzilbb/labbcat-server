@@ -105,7 +105,7 @@ export class MatchesComponent implements OnInit {
             this.zeroPad = (""+task.size).length;
             this.searchedLayers = task.layers || [];
             this.selectedLayers = this.searchedLayers
-                .concat([ "word", "participant", "transcript", "corpus" ]);
+                .concat([ "word", "participant", "transcript" ]);
             // if they searched the segment layer
             if (this.searchedLayers.includes("segment")) {
                 // include segments in serialization by default
