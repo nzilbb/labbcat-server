@@ -69,7 +69,7 @@
               [disabled]="!transcriptIds || transcriptIds.length == 0"
               img="audio.svg" icon="🔊"
               i18n-label label="Export Media"
-              i18n-title title="Save media files of all selected transcripts"
+              i18n-title title="Export media files of all selected transcripts"
             ></lib-button>
             <lib-button
               *ngIf="!nextPage"
@@ -77,7 +77,30 @@
               [disabled]="!transcriptIds || transcriptIds.length == 0"
               img="document.svg" icon="📄"
               i18n-label label="Export Original"
-              i18n-title title="Save original transcript of all selected transcripts"
+              i18n-title title="Export original transcript of all selected transcripts"
+              ></lib-button>
+            <lib-button
+              *ngIf="!nextPage"
+              (press)="exportFormat()"
+              [disabled]="!transcriptIds || transcriptIds.length == 0"
+              img="{{serializeImg}}" icon="⚙"
+              i18n-label label="Export Formatted"
+              i18n-title title="Convert to selected format"
+              ></lib-button>
+            <select name="mimeType" *ngIf="showSerializationOptions"
+                      i18n-title title="Format to convert to"
+                      [(ngModel)]="mimeType"
+                      (change)="onChangeMimeType()">
+                <option *ngFor="let serializer of serializers"
+                        value="{{serializer.mimeType}}">{{serializer.name}}</option>
+              </select>
+            <lib-button
+              *ngIf="!nextPage"
+              (press)="exportAttributes()"
+              [disabled]="!transcriptIds || transcriptIds.length == 0"
+              img="csv.svg" icon=",a,"
+              i18n-label label="Export Attributes"
+              i18n-title title="Export attributes to CSV"
               ></lib-button>
             <span id="attributesSelection" *ngIf="showAttributesSelection">
               <lib-layer-checkboxes
@@ -88,12 +111,12 @@
                 ></lib-layer-checkboxes>
             </span>
             <lib-button
-              *ngIf="!nextPage"
-              (press)="exportAttributes()"
+              *ngIf="!nextPage || nextPage == 'search'"
+              (press)="layeredSearch()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
-              img="csv.svg" icon=",a,"
-              i18n-label label="Export Attributes"
-              i18n-title title="Export attributes to CSV"
+              img="magnifying-glass.svg" icon="🔍"
+              i18n-label label="Layered Search"
+              i18n-title title="Search selected transcripts"
               ></lib-button>
             <div id="serializationOptions" *ngIf="showSerializationOptions">
               <fieldset i18n-title title="Annotation layers to include in the exported files">
@@ -105,30 +128,7 @@
                   selected="{{[schema.wordLayerId]}}"
                   ></lib-layer-checkboxes>
               </fieldset>
-              <select name="mimeType"
-                      i18n-title title="Format to convert to"
-                      [(ngModel)]="mimeType"
-                      (change)="onChangeMimeType()">
-                <option *ngFor="let serializer of serializers"
-                        value="{{serializer.mimeType}}">{{serializer.name}}</option>
-              </select>
             </div>
-            <lib-button
-              *ngIf="!nextPage"
-              (press)="exportFormat()"
-              [disabled]="!transcriptIds || transcriptIds.length == 0"
-              img="{{serializeImg}}" icon="⚙"
-              i18n-label label="Export Formatted"
-              i18n-title title="Convert to selected format"
-              ></lib-button>
-            <lib-button
-              *ngIf="!nextPage || nextPage == 'search'"
-              (press)="layeredSearch()"
-              [disabled]="!transcriptIds || transcriptIds.length == 0"
-              img="magnifying-glass.svg" icon="🔍"
-              i18n-label label="Layered Search"
-              i18n-title title="Search transcripts including these transcripts"
-              ></lib-button>
           </td>
         </tr>
       </thead>
@@ -180,7 +180,7 @@
                       href="edit/transcript/attributes?id={{id | urlEncode}}"></lib-link>
             <lib-link *ngIf="!user || !user.roles.includes('edit')"
                       i18n-title title="Attributes"
-                      img="wrench.svg" icon="🔧"
+                      img="csv.svg" icon=",a,"
                       href="transcript/attributes?id={{id | urlEncode}}"></lib-link>
           </td>
         </tr>
