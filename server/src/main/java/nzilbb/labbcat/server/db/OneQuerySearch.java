@@ -1878,8 +1878,17 @@ public class OneQuerySearch extends SearchTask {
       +" PRIMARY KEY  (search_id, match_id),"
       +" INDEX IDX_UID (search_id, target_annotation_uid)"
       +") ENGINE=MyISAM;");
-    sqlPatternMatch.executeUpdate();
-    sqlPatternMatch.close();
+    try {
+      if (!bCancelling) executeUpdate(sqlPatternMatch);
+    } catch (Exception x) {
+      if (bCancelling) {
+        setStatus("Cancelled.");
+      } else {
+        throw x;
+      }
+    } finally {
+      sqlPatternMatch.close();
+    }
     
     // setStatus(q);
     sqlPatternMatch = connection.prepareStatement(q);
@@ -1903,8 +1912,17 @@ public class OneQuerySearch extends SearchTask {
     
     iPercentComplete = SQL_STARTED_PERCENT; 
     setStatus("Querying...");
-    if (!bCancelling) executeUpdate(sqlPatternMatch); 
-    sqlPatternMatch.close();
+    try {
+      if (!bCancelling) executeUpdate(sqlPatternMatch);
+    } catch (Exception x) {
+      if (bCancelling) {
+        setStatus("Cancelled.");
+      } else {
+        throw x;
+      }
+    } finally {
+      sqlPatternMatch.close();
+    }
     iPercentComplete = SQL_FINISHED_PERCENT;
 
     // if it's a single-span search, we need to fill in the token IDs
@@ -1933,12 +1951,30 @@ public class OneQuerySearch extends SearchTask {
       +" PRIMARY KEY  (search_id, match_id),"
       +" INDEX IDX_UID (search_id, target_annotation_uid)"
       +") ENGINE=MyISAM;");
-    if (!bCancelling) executeUpdate(sqlPatternMatch);
-    sqlPatternMatch.close();
+    try {
+      if (!bCancelling) executeUpdate(sqlPatternMatch);
+    } catch (Exception x) {
+      if (bCancelling) {
+        setStatus("Cancelled.");
+      } else {
+        throw x;
+      }
+    } finally {
+      sqlPatternMatch.close();
+    }
     sqlPatternMatch = connection.prepareStatement(
       "INSERT INTO _result_copy SELECT * FROM _result");
-    if (!bCancelling) executeUpdate(sqlPatternMatch);
-    sqlPatternMatch.close();
+    try {
+      if (!bCancelling) executeUpdate(sqlPatternMatch);
+    } catch (Exception x) {
+      if (bCancelling) {
+        setStatus("Cancelled.");
+      } else {
+        throw x;
+      }
+    } finally {
+      sqlPatternMatch.close();
+    }
 
     sqlPatternMatch = connection.prepareStatement(
       "DELETE dup.*"
@@ -1948,13 +1984,25 @@ public class OneQuerySearch extends SearchTask {
       +" AND dup.match_id > orig.match_id"
       +" WHERE dup.search_id = ?");
     sqlPatternMatch.setLong(1, ((SqlSearchResults)results).getId());      
-    if (!bCancelling) executeUpdate(sqlPatternMatch);
-    sqlPatternMatch.close();
+    try {
+      if (!bCancelling) executeUpdate(sqlPatternMatch);
+    } catch (Exception x) {
+      if (bCancelling) {
+        setStatus("Cancelled.");
+      } else {
+        throw x;
+      }
+    } finally {
+      sqlPatternMatch.close();
+    }
 
     sqlPatternMatch = connection.prepareStatement(
       "DROP TABLE _result_copy");
-    if (!bCancelling) executeUpdate(sqlPatternMatch);
-    sqlPatternMatch.close();      
+    try {
+      sqlPatternMatch.executeUpdate();
+    } finally {
+      sqlPatternMatch.close();
+    }
 
     iPercentComplete = 92;
     
@@ -1987,19 +2035,37 @@ public class OneQuerySearch extends SearchTask {
       +" WHERE unsorted.search_id = ? AND complete = 0"
       +" ORDER BY speaker.name, transcript.transcript_id, unsorted.match_id");
     sqlPatternMatch.setLong(1, ((SqlSearchResults)results).getId());      
-    if (!bCancelling) executeUpdate(sqlPatternMatch);
-    sqlPatternMatch.close();
+    try {
+      if (!bCancelling) executeUpdate(sqlPatternMatch);
+    } catch (Exception x) {
+      if (bCancelling) {
+        setStatus("Cancelled.");
+      } else {
+        throw x;
+      }
+    } finally {
+      sqlPatternMatch.close();
+    }
 
     // delete the unsorted results
     sqlPatternMatch = connection.prepareStatement(
       "DROP TABLE _result");
-    executeUpdate(sqlPatternMatch);
-    sqlPatternMatch.close();
+    try {
+      sqlPatternMatch.executeUpdate();
+    } catch (Exception x) {
+      if (bCancelling) {
+        setStatus("Cancelled.");
+      } else {
+        throw x;
+      }
+    } finally {
+      sqlPatternMatch.close();
+    }
     
     iPercentComplete = 95;
-      
+    
     results.reset();
-
+    
     // exclude simultaneous speech, etc.
     filterResults(); 
 
