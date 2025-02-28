@@ -57,6 +57,9 @@ lib-layer-checkboxes {
     display: flex;
     flex-direction: column;
 }
+input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+}
 .controls lib-button[label], label > span {
     min-width: 150px;
 }
