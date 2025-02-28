@@ -109,23 +109,23 @@
       <div class="csv-checkboxes">
         <fieldset class="csv-options">
           <legend i18n="csv options title" class="header">Fields:</legend>
-          <label i18n-title title="Title of this LaBB-CAT instance">
+          <label i18n-title title="Title of this LaBB-CAT database - always exported">
             <input type="checkbox" name="csv_option" value="labbcat_title" checked disabled="disabled">
             <input type="hidden" name="csv_option" value="labbcat_title" checked>
-            <span i18n="csv options">LaBB-CAT title</span>
+            <span i18n="csv options">Database title</span>
           </label>
-          <label i18n-title title="Version of this LaBB-CAT instance">
+          <label i18n-title title="This database's LaBB-CAT version">
             <input type="checkbox" name="csv_option" value="labbcat_version">
             <span i18n="csv options">LaBB-CAT version</span>
           </label>
-          <label i18n-title title="Identifier for this search">
+          <label i18n-title title="Identifier for this search - always exported">
             <input type="checkbox" name="csv_option" value="collection_name" checked disabled="disabled">
             <input type="hidden" name="csv_option" value="collection_name" checked>
             <span i18n="csv options">Search name</span>
           </label>
           <label i18n-title title="Result number">
             <input type="checkbox" name="csv_option" value="result_number" checked>
-            <span i18n="csv options">Number</span>
+            <span i18n="csv options">Result number</span>
           </label>
           <label i18n-title title="Start time of the transcript relative to the beginning of the whole episode">
             <input type="checkbox" name="csv_option" value="series_offset">
@@ -137,20 +137,20 @@
           </label>
           <label i18n-title title="Start time of the utterance relative to the beginning of the transcript">
             <input type="checkbox" name="csv_option" value="line_time" checked>
-            <span i18n="csv options">Line</span>
+            <span i18n="csv options">Line start</span>
           </label>
           <label i18n-title title="End time of the utterance relative to the beginning of the transcript">
             <input type="checkbox" name="csv_option" value="line_end_time" checked>
             <span i18n="csv options">Line end</span>
           </label>
-          <label i18n-title title="Unique identifier for the match">
+          <label i18n-title title="Unique identifier for the match - always exported">
             <input type="checkbox" name="csv_option" value="match" checked disabled="disabled">
             <input type="hidden" name="csv_option" value="match" checked>
             <span i18n="csv options">Match ID</span>
           </label>
-          <label i18n-title title="URL for the match">
+          <label i18n-title title="URL for the match - always exported">
             <input type="checkbox" name="csv_option" value="word_url" checked disabled="disabled">
-            <input type="checkbox" name="csv_option" value="word_url" checked>
+            <input type="hidden" name="csv_option" value="word_url" checked>
             <span i18n="csv options">URL</span>
           </label>
           <label i18n-title title="The transcription of the match and its surrounding context">
