@@ -244,7 +244,7 @@
     <div *ngFor="let category of categoryLabels"
          [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
       <!-- layers tab -->
-      <div *ngIf="currentCategory == 'Layers'" class="layers">
+      <div *ngIf="currentCategory == 'Layers'" id="layers">
         <lib-layer-checkboxes
           *ngIf="currentCategory == 'Layers'"
           [class.loading]="loading"
@@ -276,7 +276,7 @@
         </div>
       </div>
       <!-- participants tab -->
-      <div *ngIf="currentCategory == 'Participants'" class="participants">
+      <div *ngIf="currentCategory == 'Participants'" id="participants">
         <ul>
           <li *ngFor="let participant of transcript.all('participant')"
               [ngClass]="{'participant':true, 'main-participant': participant.first('main_participant')}">
@@ -293,7 +293,7 @@
                   href="edit/transcript/mainParticipants?id={{id | urlEncode}}"></lib-link>
       </div>
       <!-- formats tab -->
-      <div *ngIf="currentCategory == 'Formats'" class="formats">
+      <div *ngIf="currentCategory == 'Formats'" id="formats">
         <ul>
           <li *ngFor="let serializer of serializers"
               i18n-title title="Convert to selected format">

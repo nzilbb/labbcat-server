@@ -191,6 +191,9 @@ nav, nav > div {
     height: 16px;
     vertical-align: middle;
 }
+#layers, #participants, #formats {
+    padding-top: 10px;
+}
 /* TODO This does't work in production because the URL fails:
 .participants ul {
     list-style: circle;
