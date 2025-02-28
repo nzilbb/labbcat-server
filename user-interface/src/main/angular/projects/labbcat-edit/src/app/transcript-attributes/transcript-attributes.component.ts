@@ -80,9 +80,7 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                     const layer = schema.layers[layerId] as Layer;
                     if (layer.parentId == "transcript"
                         && layer.alignment == 0
-                        && layer.id != schema.participantLayerId
-                        && layer.id != schema.episodeLayerId
-                        && layer.id != schema.corpusLayerId) {
+                        && layer.id != schema.participantLayerId) {
 
                         // ensure we can iterate all layer IDs
                         this.attributes.push(layer.id);
@@ -90,24 +88,27 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                         // ensure the transcript type layer has a category
                         if (layer.id == "transcript_type") layer.category = "General";
                         
-                        // categorise layers by category
-                        if (!this.categoryLayers[layer.category]) {
-                            this.categoryLayers[layer.category] = [];
-                            this.categoryLabels.push(layer.category);
-                            // select first category by default
-                            if (!this.currentCategory) this.currentCategory = layer.category;
-                        }
-                        this.categoryLayers[layer.category].push(layer);
+                        if (layer.category) {
+                            
+                            // categorise layers by category
+                            if (!this.categoryLayers[layer.category]) {
+                                this.categoryLayers[layer.category] = [];
+                                this.categoryLabels.push(layer.category);
+                                // select first category by default
+                                if (!this.currentCategory) this.currentCategory = layer.category;
+                            }
+                            this.categoryLayers[layer.category].push(layer);
                         // track multi-value attributes
-                        if (layer.peers && this.definesValidLabels(layer)) {
-                            this.multiValueAttributes[layer.id] = {};
-                            for (let label of Object.keys(layer.validLabels)) {
-                                this.multiValueAttributes[layer.id][label] = false; // unchecked
-                            } // next valid label
-                        } // multi-value attribute
-                        this.otherValues[layer.id] = "";
-                        if (layer.type == 'string' && layer.subtype == 'text') {
-                            this.textAreas.push(layer.id); // track textareas for auto-resize
+                            if (layer.peers && this.definesValidLabels(layer)) {
+                                this.multiValueAttributes[layer.id] = {};
+                                for (let label of Object.keys(layer.validLabels)) {
+                                    this.multiValueAttributes[layer.id][label] = false; // unchecked
+                                } // next valid label
+                            } // multi-value attribute
+                            this.otherValues[layer.id] = "";
+                            if (layer.type == 'string' && layer.subtype == 'text') {
+                                this.textAreas.push(layer.id); // track textareas for auto-resize
+                            }
                         }
                     }
                 }

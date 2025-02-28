@@ -12,6 +12,14 @@
       </div>
     </span>
   </div>
+  <div class="attribute">
+    <label for="episode-attribute" i18n>Episode</label>
+    <span id="episode-attribute" class="values"><div id="episode" class="value">{{transcript['episode'][0].label}}</div></span>
+  </div>
+  <div class="attribute">
+    <label for="corpus-attribute" i18n>Corpus</label>
+    <span id="corpus-attribute" class="values"><div id="corpus" class="value">{{transcript['corpus'][0].label}}</div></span>
+  </div>
 </div>
 <div *ngIf="transcript" id="attributes" class="attribute-list tabs">
   <div class="tab-labels">
