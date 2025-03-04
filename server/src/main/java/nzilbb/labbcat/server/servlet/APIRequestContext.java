@@ -1,20 +1,24 @@
 //
-// (c) 2015, Robert Fromont - robert@fromont.net.nz
+// Copyright 2025 New Zealand Institute of Language, Brain and Behaviour, 
+// University of Canterbury
+// Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
+//    This file is part of LaBB-CAT.
 //
-//    This module is free software; you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation; either version 2 of the License, or
+//    LaBB-CAT is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as published by
+//    the Free Software Foundation; either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    This module is distributed in the hope that it will be useful,
+//    LaBB-CAT is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
 //
 //    You should have received a copy of the GNU General Public License
-//    along with this module; if not, write to the Free Software
+//    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
 package nzilbb.labbcat.server.servlet;
 
 import java.util.ResourceBundle;
@@ -58,6 +62,13 @@ public interface APIRequestContext {
    * @return The value of the named parameter.
    */
   public String getInitParameter(String name);
+
+  /**
+   * Generates an instance-wide notification that an underlying object has been updated,
+   * and cached versions of that object should be flushed. 
+   * @param name Name of the object that has been updated.
+   */
+  public void cacheNotification(String name);
   
   /**
    * Access the localization resources for the correct locale.

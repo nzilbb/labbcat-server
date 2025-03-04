@@ -22,21 +22,19 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
+import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.stream.JsonGenerator;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * <tt>/api/admin/systemattributes</tt> : Administration of <em> system attribute </em> records.
@@ -87,32 +85,28 @@ import javax.servlet.http.HttpServletResponse;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet({"/api/admin/systemattributes"} )
 @RequiredRole("admin")
-public class AdminSystemAttributes extends LabbcatServlet {
-
+public class AdminSystemAttributes extends APIRequestHandler {
+  
   /**
    * Default constructor.
    */
   public AdminSystemAttributes() {
   } // end of constructor
-   
+  
   /**
    * GET handler lists all rows. 
    * <p> The return is JSON encoded, unless the "Accept" request header, or the "Accept"
    * request parameter, is "text/csv", in which case CSV is returned.
    */
-  @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+  public void get(JsonGenerator jsonOut, Consumer<Integer> httpStatus) {
     try {
       Connection connection = newConnection();
       try {
-        if (!hasAccess(request, response, connection)) {
+        if (!hasAccess(connection)) {
+          httpStatus.accept(SC_FORBIDDEN);
           return;
         } else {
-          response.setContentType("application/json");               
-          response.setCharacterEncoding("UTF-8");
           try {
             PreparedStatement sql = connection.prepareStatement(
               "SELECT attribute, type, style, label, description, value"
@@ -127,7 +121,6 @@ public class AdminSystemAttributes extends LabbcatServlet {
               +" WHERE class_id = '' AND attribute = ?"
               +" ORDER BY value");
             ResultSet rs = sql.executeQuery();
-            JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
             startResult(jsonOut, true);
             try {
               while (rs.next()) {
@@ -178,45 +171,38 @@ public class AdminSystemAttributes extends LabbcatServlet {
               sql.close();
               sqlOptions.close();
             }
-            endSuccessResult(request, jsonOut, null);
+            endSuccessResult(jsonOut, null);
           } catch(SQLException exception) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            log("AdminSystemAttributes GET: ERROR: " + exception);
-            response.setContentType("application/json");
-            writeResponse(response, failureResult(exception));
+            httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+            System.err.println("AdminSystemAttributes GET: ERROR: " + exception);
+            endFailureResult(jsonOut, exception);
           }
         }
       } finally {
         connection.close();
       }
     } catch(SQLException exception) {
-      log("AdminSystemAttributes GET: Couldn't connect to database: " + exception);
-      response.setContentType("application/json");
-      response.setCharacterEncoding("UTF-8");
-      writeResponse(response, failureResult(exception));
+      System.err.println("AdminSystemAttributes GET: Couldn't connect to database: " + exception);
+      endFailureResult(jsonOut, exception);
     }      
   }
-
+  
   /**
    * PUT handler - update an existing row.
    */
-  @Override
-  protected void doPut(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+  public JsonObject put(InputStream requestBody, Consumer<Integer> httpStatus) {
     try {
       Connection connection = newConnection();
       try {
-        if (!hasAccess(request, response, connection)) {
-          return;
+        if (!hasAccess(connection)) {
+          httpStatus.accept(SC_FORBIDDEN);
+          return null;
         } else {
-          response.setContentType("application/json");
-          response.setCharacterEncoding("UTF-8");
-               
           JsonReader reader = Json.createReader( // ensure we read as UTF-8
-            new InputStreamReader(request.getInputStream(), "UTF-8"));
+            new InputStreamReader(requestBody, "UTF-8"));
           // incoming object:
           JsonObject json = reader.readObject();
-
+          
           // check it exists and isn't readonly
           PreparedStatement sqlCheck = connection.prepareStatement(
             "SELECT type FROM attribute_definition"
@@ -231,40 +217,35 @@ public class AdminSystemAttributes extends LabbcatServlet {
                 sql.setString(1, json.getString("value"));
                 sql.setString(2, json.getString("attribute"));
                 int rows = sql.executeUpdate();
-                if (rows == 0) { // no value row yet
-                  // insert one
-                  sql.close();
-                  sql = connection.prepareStatement(
-                    "INSERT INTO system_attribute (value, name) VALUES (?, ?)");
-                  sql.setString(1, json.getString("value"));
-                  sql.setString(2, json.getString("attribute"));
-                  rows = sql.executeUpdate();
-                  if (rows == 0) { // shouldn't be possible
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    writeResponse(
-                      response, failureResult(
-                        request, "Record not updated: {0}", json.getString("attribute")));
+                try {
+                  if (rows == 0) { // no value row yet
+                    // insert one
+                    sql.close();
+                    sql = connection.prepareStatement(
+                      "INSERT INTO system_attribute (value, name) VALUES (?, ?)");
+                    sql.setString(1, json.getString("value"));
+                    sql.setString(2, json.getString("attribute"));
+                    rows = sql.executeUpdate();
+                    if (rows == 0) { // shouldn't be possible
+                      httpStatus.accept(SC_NOT_FOUND);
+                      return failureResult("Record not updated: {0}", json.getString("attribute"));
+                    } else {
+                      return successResult(json, "Record updated.");
+                    }
                   } else {
-                    writeResponse(
-                      response, successResult(request, json, "Record updated."));
+                    return successResult(json, "Record updated.");
                   }
-                } else {
-                  writeResponse(
-                    response, successResult(request, json, "Record updated."));
+                } finally {
+                  context.cacheNotification("system_attribute");
+                  sql.close();
                 }
-                getServletContext().setAttribute("system_attribute dirty", Boolean.TRUE);
-                sql.close();
               } else { // readonly
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                writeResponse(
-                  response, failureResult(
-                    request, "Read-only record: {0}", json.getString("attribute")));
+                httpStatus.accept(SC_BAD_REQUEST);
+                return failureResult("Read-only record: {0}", json.getString("attribute"));
               }
             } else { // not found
-              response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-              writeResponse(
-                response, failureResult(
-                  request, "Record not found: {0}", json.getString("attribute")));
+              httpStatus.accept(SC_NOT_FOUND);
+              return failureResult("Record not found: {0}", json.getString("attribute"));
             }
           } finally {
             rsCheck.close();
@@ -274,13 +255,9 @@ public class AdminSystemAttributes extends LabbcatServlet {
       } finally {
         connection.close();
       }
-    } catch(SQLException exception) {
-      log("TableServletBase PUT: Couldn't connect to database: " + exception);
-      response.setContentType("application/json");
-      response.setCharacterEncoding("UTF-8");
-      writeResponse(response, failureResult(exception));
+    } catch(Exception exception) {
+      System.err.println("AdminSystemAttributes.put: Couldn't connect to database: " + exception);
+      return failureResult(exception);
     }      
   }
-   
-  private static final long serialVersionUID = 1;
 }

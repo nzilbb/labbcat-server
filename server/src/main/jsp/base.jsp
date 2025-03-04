@@ -182,6 +182,17 @@
         public String getInitParameter(String name) {
           return getServletContext().getInitParameter(name);
         }
+        
+        /**
+         * Generates an instance-wide notification that an underlying object has been updated,
+         * and cached versions of that object should be flushed. 
+         * @param name Name of the object that has been updated.
+         */
+        public void cacheNotification(String name) {
+          // servlet context attribute
+          // use a timestamp so servlets can know if the notification is old
+          getServletContext().setAttribute(name+" dirty", new java.util.Date());
+        }
   
         /**
          * Access the localization resources for the correct locale.

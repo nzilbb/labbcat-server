@@ -347,6 +347,47 @@ public class APIRequestHandler {
   } // end of endFailureResult()
   
   /**
+   * Finish writing a standard JSON failure result that was started with 
+   * {@link #startResult(JsonGenerator)}
+   * @param writer The object to write to.
+   * @param message An error message
+   * @param args Arguments to be substituted into the message, if any
+   * @return The given writer.
+   */
+  protected JsonGenerator endFailureResult(
+    JsonGenerator writer, Throwable t) {
+    String message = ""+t.getMessage();
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    t.printStackTrace(pw);
+    
+    writer.writeStartArray("errors");
+    if (message != null) writer.write(message);
+    writer.writeEnd(); // errors
+    writer.writeStartObject("exception");
+    writer.write("type", t.getClass().getSimpleName());
+    writer.write("message", message);
+    writer.write("stackTrace", sw.toString());
+    if (t.getCause() != null) {
+      sw = new StringWriter();
+      pw = new PrintWriter(sw);
+      t.getCause().printStackTrace(pw);
+      writer.writeStartObject("cause");
+      writer.write("type", t.getCause().getClass().getSimpleName());
+      writer.write("message", ""+t.getCause().getMessage());
+      writer.write("stackTrace", sw.toString());
+      writer.writeEnd(); // cause
+    }
+    writer.writeEnd(); // exception
+    
+    writer.write("code", 1); // TODO deprecate?
+    writer.writeStartArray("messages").writeEnd(); // array
+    writer.writeEnd(); // obect started in startResult
+    writer.flush();
+    return writer;
+  } // end of endFailureResult()
+  
+  /**
    * Escapes quotes in the given string for inclusion in QL or SQL queries.
    * @param s The string to escape.
    * @return The given string, with quotes escapeed.
