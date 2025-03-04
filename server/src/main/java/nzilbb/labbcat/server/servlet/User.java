@@ -70,63 +70,50 @@ import nzilbb.util.IO;
  *  </p>
  * @author Robert Fromont
  */
-@WebServlet("/api/user")
-public class User extends LabbcatServlet {
-   
-   // Attributes:
-
-   /**
-    * Constructor
-    */
-   public User() {
-   } // end of constructor
-
-   // Servlet methods
-   
-   /**
-    * The GET method for the servlet.
-    * <p> This returns information about the current user - their ID and the roles they have.
-    * @param request HTTP request
-    * @param response HTTP response
-    */
-   @Override
-   public void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {      
-      response.setContentType("application/json");
-      JsonGenerator jsonOut = Json.createGenerator(response.getWriter());
-      startResult(jsonOut, false);
-      String user = request.getRemoteUser();
-      if (user != null) {
-         jsonOut.write("user", user);
+public class User extends APIRequestHandler {
+  
+  /**
+   * Constructor
+   */
+  public User() {
+  } // end of constructor
+  
+  /**
+   * Generate the to a request.
+   * <p> This returns information about the current user - their ID and the roles they have.
+   * @param jsonOut A JSON generator for writing the response to
+   * @param user The current user logged in, or null if user authentication is not being used.
+   */
+  public void handleRequest(JsonGenerator jsonOut, String user) {      
+    startResult(jsonOut, false);    
+    if (user != null) {
+      jsonOut.write("user", user);
+    }
+    jsonOut.writeStartArray("roles");
+    try {
+      if (user == null) { // not using authentication
+        jsonOut
+          .write("view")
+          .write("edit")
+          .write("admin");
+      } else {
+        Connection db = newConnection();
+        PreparedStatement sqlUserGroups = db.prepareStatement(
+          "SELECT role_id FROM role WHERE user_id = ?");
+        sqlUserGroups.setString(1, user);
+        ResultSet rstUserGroups = sqlUserGroups.executeQuery();
+        while (rstUserGroups.next()) {
+          jsonOut.write(rstUserGroups.getString("role_id"));
+        } // next group
+        rstUserGroups.close();
+        sqlUserGroups.close();
+        db.close();
       }
-      jsonOut.writeStartArray("roles");
-      try {
-         if (user == null) { // not using authentication
-         jsonOut
-            .write("view")
-            .write("edit")
-            .write("admin");
-         } else {
-            Connection db = newConnection();
-            PreparedStatement sqlUserGroups = db.prepareStatement(
-               "SELECT role_id FROM role WHERE user_id = ?");
-            sqlUserGroups.setString(1, user);
-            ResultSet rstUserGroups = sqlUserGroups.executeQuery();
-            while (rstUserGroups.next()) {
-               jsonOut.write(rstUserGroups.getString("role_id"));
-            } // next group
-            rstUserGroups.close();
-            sqlUserGroups.close();
-            db.close();
-         }
-         jsonOut.writeEnd(); // array
-         endSuccessResult(request, jsonOut, null);
-      } catch(SQLException exception) {
-         log("User GET: Database operation failed: " + exception);
-         jsonOut.writeEnd(); // array
-         endFailureResult(request, jsonOut, exception.getMessage());
-      }
-   }
-   
-   private static final long serialVersionUID = -1;
+      jsonOut.writeEnd(); // array
+      endSuccessResult(jsonOut, null);
+    } catch(SQLException exception) {
+      jsonOut.writeEnd(); // array
+      endFailureResult(jsonOut, exception.getMessage());
+    }
+  }
 } // end of class User
