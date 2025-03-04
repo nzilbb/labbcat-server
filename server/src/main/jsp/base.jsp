@@ -12,6 +12,7 @@
     import = "java.sql.PreparedStatement"
     import = "java.sql.ResultSet"
     import = "java.sql.SQLException"
+    import = "java.util.Enumeration"
     import = "java.util.Locale"
     import = "java.util.Optional"
     import = "java.util.ResourceBundle"
@@ -20,6 +21,7 @@
     import = "nzilbb.labbcat.server.db.*"
     import = "nzilbb.labbcat.server.servlet.APIRequestContext"
     import = "nzilbb.labbcat.server.servlet.APIRequestHandler"
+    import = "nzilbb.labbcat.server.servlet.RequestParameters"
     import = "nzilbb.sql.ConnectionFactory"
     import = "nzilbb.sql.mysql.MySQLConnectionFactory"
     import = "nzilbb.util.IO"
@@ -27,6 +29,21 @@
     import = "org.w3c.dom.*"
     import = "org.xml.sax.*"
 %><%!
+    
+  /**
+   * Load http paramaters into a map.
+   * @param request
+   * @return A map of parameter names to the String values.
+   */
+  public RequestParameters parseParameters(HttpServletRequest request) {
+    RequestParameters parameters = new RequestParameters();
+    Enumeration<String> names = request.getParameterNames();
+    while(names.hasMoreElements()) {
+      String name = names.nextElement();
+      parameters.put(name, request.getParameterValues(name));
+    }
+    return parameters;
+  } // end of parseParameters()
   
   protected String driverName;
   protected String connectionURL;
@@ -103,6 +120,14 @@
          * @return The server version.
          */
         public String getVersion() { return version; }
+
+        /**
+         * Get the base URL for the server.
+         * @return The base URL for the server, or null if it can't be determined.
+         */
+        public String getBaseUrl() {
+          return inferBaseUrl(request);
+        }
   
         /**
          * The ID of the logged-in user.
@@ -236,36 +261,40 @@
       });
     return handler;
   }
-    
+
+  String baseUrl;
   /**
    * Determine the baseUrl for the server.
    * @param request The request.
    * @return The baseUrl.
    */
-  protected String baseUrl(HttpServletRequest request) {
-    if (Optional.ofNullable(System.getenv("LABBCAT_BASE_URL")).orElse("").length() > 0) {
-      // get it from the environment variable
-      return System.getenv("LABBCAT_BASE_URL");
-    } else if (request.getSession() != null
-               && request.getSession().getAttribute("baseUrl") != null) {
-      // get it from the session
-      return request.getSession().getAttribute("baseUrl").toString();
-    } else if (Optional.ofNullable(getServletContext().getInitParameter("baseUrl"))
-               .orElse("").length() > 0) {
-      // get it from the webapp configuration
-      return getServletContext().getInitParameter("baseUrl");
-    } else { // infer it from the request itself
-      try {
-        URL url = new URL(request.getRequestURL().toString());
-        return url.getProtocol() + "://"
-          + url.getHost() + (url.getPort() < 0?"":":"+url.getPort())
-          + ("/".equals(
-               getServletContext().getContextPath())?""
-             :getServletContext().getContextPath());
-      } catch(MalformedURLException exception) {
-        return request.getRequestURI().replaceAll("/api/store/.*","");
+  protected String inferBaseUrl(HttpServletRequest request) {
+    if (baseUrl == null) {
+      if (Optional.ofNullable(System.getenv("LABBCAT_BASE_URL")).orElse("").length() > 0) {
+        // get it from the environment variable
+        baseUrl = System.getenv("LABBCAT_BASE_URL");
+      } else if (request.getSession() != null
+                 && request.getSession().getAttribute("baseUrl") != null) {
+        // get it from the session
+        baseUrl = request.getSession().getAttribute("baseUrl").toString();
+      } else if (Optional.ofNullable(getServletContext().getInitParameter("baseUrl"))
+                 .orElse("").length() > 0) {
+        // get it from the webapp configuration
+        baseUrl = getServletContext().getInitParameter("baseUrl");
+      } else { // infer it from the request itself
+        try {
+          URL url = new URL(request.getRequestURL().toString());
+          baseUrl = url.getProtocol() + "://"
+            + url.getHost() + (url.getPort() < 0?"":":"+url.getPort())
+            + ("/".equals(
+                 getServletContext().getContextPath())?""
+               :getServletContext().getContextPath());
+        } catch(MalformedURLException exception) {
+          baseUrl = request.getRequestURI().replaceAll("/api/store/.*","");
+        }
       }
     }
+    return baseUrl;
   } // end of baseUrl()
 
   /**
@@ -275,7 +304,7 @@
    * @param response The response to set the header of.
    * @param fileName The file name to save the response body as.
    */
-  public static void ResponseAttachmentName(
+  public void ResponseAttachmentName(
     HttpServletRequest request, HttpServletResponse response, String fileName) {
     if (fileName == null) return;
     fileName = IO.SafeFileNameUrl(fileName);
@@ -311,23 +340,30 @@
         labbcatRVersion = parts[1];
       }
     }
-    if (userAgent != null
-        && (userAgent.startsWith("Java/") // plain Java connection (probably jsendpraat)
-            || (labbcatRVersion != null // nzilbb.labbcat R package
-                // and version <= 1.3-0
-                && new SemanticVersionComparator().compare(labbcatRVersion, "1.3-0") <= 0))) {
-      // specify only 'filename' without quotes
-      response.addHeader(
-        "Content-Disposition", "attachment; filename="+onlyASCIIFileNameNoQuotes);
-    } else if ("jsendpraat 20240927.1325".equals(userAgent)) {
-      response.addHeader( // this jsendpraat version prefers filename* second...
-        "Content-Disposition", "attachment; filename="+onlyASCIIFileName+"; filename*="+fileName);
-    } else {
-      // MDN recommends not to use URLEncoder.encode
-      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
-      // TODO we can use User-Agent to send un-URL-encoded responses to Safari only
-      response.addHeader(
-        "Content-Disposition", "attachment; filename*="+fileName+"; filename="+onlyASCIIFileName);
+    try {
+      if (userAgent != null
+          && (userAgent.startsWith("Java/") // plain Java connection (probably jsendpraat)
+              || (labbcatRVersion != null // nzilbb.labbcat R package
+                  // and version <= 1.3-0
+                  && new SemanticVersionComparator().compare(labbcatRVersion, "1.3-0") <= 0))) {
+        // specify only 'filename' without quotes
+        response.addHeader(
+          "Content-Disposition", "attachment; filename="+onlyASCIIFileNameNoQuotes);
+      } else if ("jsendpraat 20240927.1325".equals(userAgent)) {
+        response.addHeader( // this jsendpraat version prefers filename* second...
+          "Content-Disposition", "attachment; filename="+onlyASCIIFileName+"; filename*="+fileName);
+      } else {
+        // MDN recommends not to use URLEncoder.encode
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
+        // TODO we can use User-Agent to send un-URL-encoded responses to Safari only
+        response.addHeader(
+          "Content-Disposition", "attachment; filename*="+fileName+"; filename="+onlyASCIIFileName);
+      }
+      // send headers immediately, so that the browser shows the 'save' prompt
+      response.getOutputStream().flush();
+    }
+    catch(IOException exception) {
+      log("base.jsp:ResponseAttachmentName - " + exception);
     }
   } // end of ResponseAttachmentName()
   

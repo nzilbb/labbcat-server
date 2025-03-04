@@ -452,5 +452,27 @@ public class APIRequestHandler {
     }
   }
 
+  private String storeBaseUrl = null;
+  /**
+   * Gets a graph store, creating a new one if required.
+   * @return A connected store.
+   */
+  protected synchronized SqlGraphStoreAdministration getStore()
+    throws SQLException, PermissionException {
+    if (storeBaseUrl == null) storeBaseUrl = context.getBaseUrl();
+    return new SqlGraphStoreAdministration(
+      storeBaseUrl, context.getConnectionFactory(), context.getUser());
+  } // end of getStore()
+
+  /**
+   * Saves a store for later use.
+   * @param store
+   */
+  protected synchronized void cacheStore(SqlGraphStoreAdministration store) {
+    // disconnect database connection
+    try {
+      store.getConnection().close();
+    } catch(SQLException exception) {}
+  } // end of cacheStore()
 
 } // end of class APIRequestHandler

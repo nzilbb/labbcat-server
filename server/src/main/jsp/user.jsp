@@ -6,7 +6,6 @@
     if (!"GET".equals(request.getMethod())) { // GET only
       response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     } else {
-      String user = request.getRemoteUser();
       User handler = new User();
       initializeHandler(handler, request);
       handler.get(Json.createGenerator(out));

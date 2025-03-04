@@ -44,6 +44,12 @@ public interface APIRequestContext {
   public String getVersion();
   
   /**
+   * Get the base URL for the server.
+   * @return The base URL for the server, or null if it can't be determined.
+   */
+  public String getBaseUrl();
+  
+  /**
    * The ID of the logged-in user.
    * @return The ID of the logged-in user, on null if no user is logged in.
    */

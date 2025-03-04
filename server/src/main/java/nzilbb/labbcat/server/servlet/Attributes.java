@@ -23,12 +23,11 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URLEncoder;
-import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import java.util.function.Consumer;
 import nzilbb.ag.Graph;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.util.IO;
@@ -52,33 +51,28 @@ import org.apache.commons.csv.*;
  * <p><b>Output</b>: A CSV file with a column for each attribute, and a row for each transcript. 
  * @author Robert Fromont
  */
-@WebServlet({"/api/attributes"} )
-public class Attributes extends LabbcatServlet { // TODO unit test
+public class Attributes extends APIRequestHandler { // TODO unit test
    
   /**
    * Constructor
    */
   public Attributes() {
   } // end of constructor
-
+  
   // Servlet methods
-   
+  
   /**
    * The GET method for the servlet.
    * @param request HTTP request
    * @param response HTTP response
    */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-      
-    ServletContext context = getServletContext();
-      
+  public void get(RequestParameters parameters, OutputStream out, Consumer<String> fileName, Consumer<Integer> httpStatus) {
+    
     // check parameters
     String[] nameOnly = { "transcript" };
-    String[] selectedAttributes = request.getParameterValues("layer");
+    String[] selectedAttributes = parameters.getStrings("layer");
     if (selectedAttributes == null) {
-      String layers = request.getParameter("layers");
+      String layers = parameters.getString("layers");
       if (layers != null) {
         // R can't send multiple parameters with the same value, so the workaround is
         // to send one parameter with the values delimited by newline
@@ -88,53 +82,50 @@ public class Attributes extends LabbcatServlet { // TODO unit test
     if (selectedAttributes == null) {
       selectedAttributes = nameOnly;
     }
-
-    String name = request.getParameter("name");
+    
+    String name = parameters.getString("name");
     if (name == null || name.trim().length() == 0) name = "list";
     name = IO.SafeFileNameUrl(name.trim());
     if (!name.endsWith(".csv")) {
       name += ".csv";
     }
-      
+    
     try {
       
-      SqlGraphStoreAdministration store = getStore(request);
+      SqlGraphStoreAdministration store = getStore();
       // arrays of transcripts and delimiters
-      String[] id = request.getParameterValues("id");
+      String[] id = parameters.getStrings("id");
       if (id == null) {
-        String ids = request.getParameter("ids");
+        String ids = parameters.getString("ids");
         if (ids != null) {
           // R can't send multiple parameters with the same value, so the workaround is
           // to send one parameter with the values delimited by newline
           id = ids.split("\n");
         } else {
           // have they specified a query?
-          String query = request.getParameter("query");
+          String query = parameters.getString("query");
           if (query != null) {
             id = store.getMatchingTranscriptIds(query);
           } // "query" parameter
         } // no "ids" parameter
       } // no "id" parameter values
       if (id == null || id.length == 0) {
-        response.sendError(400, "No graph IDs specified");
+        httpStatus.accept(SC_BAD_REQUEST);
+        out.write("No graph IDs specified".getBytes());
         return;
       }
-
-      response.setContentType("text/csv");
-      ResponseAttachmentName(request, response, name);
-      // send headers immediately, so that the browser shows the 'save' prompt
-      response.getOutputStream().flush();
+      
+      fileName.accept(name);
       
       try {
         char delimiter = ',';
-        if (request.getParameter("csvFieldDelimiter") != null
-            && request.getParameter("csvFieldDelimiter").length() > 0) {
-          delimiter = request.getParameter("csvFieldDelimiter").charAt(0);
+        if (parameters.containsKey("csvFieldDelimiter")
+            && parameters.getString("csvFieldDelimiter").length() > 0) {
+          delimiter = parameters.getString("csvFieldDelimiter").charAt(0);
         }
         
         CSVPrinter csvOut = new CSVPrinter(
-          new OutputStreamWriter(
-            response.getOutputStream(), "UTF-8"), CSVFormat.EXCEL.withDelimiter(delimiter));
+          new OutputStreamWriter(out, "UTF-8"), CSVFormat.EXCEL.withDelimiter(delimiter));
         // write headers
         for (String layer : selectedAttributes) csvOut.print(layer);
         csvOut.println();
@@ -169,7 +160,10 @@ public class Attributes extends LabbcatServlet { // TODO unit test
         cacheStore(store);
       }
     } catch(Exception ex) {
-      throw new ServletException(ex);
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(("\n"+ex).getBytes());
+      } catch(IOException exception) {}
     }
   }
   
