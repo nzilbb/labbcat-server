@@ -3,8 +3,12 @@
     import = "nzilbb.labbcat.server.servlet.User" 
     import = "javax.json.Json" 
 %><%@ include file="base.jsp" %><%{
-    String user = request.getRemoteUser();
-    User handler = new User();
-    initializeHandler(handler, request);
-    handler.handleRequest(Json.createGenerator(out), user);
+    if (!"GET".equals(request.getMethod())) { // GET only
+      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    } else {
+      String user = request.getRemoteUser();
+      User handler = new User();
+      initializeHandler(handler, request);
+      handler.get(Json.createGenerator(out));
+    }
 }%>

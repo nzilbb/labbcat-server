@@ -18,6 +18,7 @@
     import = "javax.xml.parsers.*"
     import = "javax.xml.xpath.*"
     import = "nzilbb.labbcat.server.db.*"
+    import = "nzilbb.labbcat.server.servlet.APIRequestContext"
     import = "nzilbb.labbcat.server.servlet.APIRequestHandler"
     import = "nzilbb.sql.ConnectionFactory"
     import = "nzilbb.sql.mysql.MySQLConnectionFactory"
@@ -34,6 +35,9 @@
   protected ConnectionFactory connectionFactory;
   protected String title;
   protected String version;
+  private String lastLanguage = "en";
+  private Locale lastLocale = Locale.UK;
+  private ResourceBundle lastBundle;
     
   /** 
    * Initialise the servlet by loading the database connection settings.
@@ -86,7 +90,139 @@
    * @return The handler.
    */
   APIRequestHandler initializeHandler(APIRequestHandler handler, HttpServletRequest request) {
-    handler.init(title, version, connectionFactory, inferResourceBundle(request));
+    handler.init(new APIRequestContext() {
+        
+        /**
+         * Access the title of the request endpoint.
+         * @return The title of the endpoint.
+         */
+        public String getTitle() { return title; }
+        
+        /**
+         * Determine the version of the server software.
+         * @return The server version.
+         */
+        public String getVersion() { return version; }
+  
+        /**
+         * The ID of the logged-in user.
+         * @return The ID of the logged-in user, on null if no user is logged in.
+         */
+        public String getUser() {
+          return request.getRemoteUser();
+        }
+        
+        /**
+         * Determines whether the logged-in user is in the given role.
+         * @param role The desired role.
+         * @return true if the user is in the given role, false otherwise.
+         */
+        public boolean isUserInRole(String role) {
+          try {
+            Connection db = connectionFactory.newConnection();
+            try {
+              // load user groups
+              if (request.getSession().getAttribute("security") == null) {
+                String user = request.getRemoteUser();
+                if (user == null) { // not using authentication
+                  request.getSession().setAttribute("security", "none");
+                  request.getSession().setAttribute("group_view", Boolean.TRUE);
+                  request.getSession().setAttribute("group_edit", Boolean.TRUE);
+                  request.getSession().setAttribute("group_admin", Boolean.TRUE);
+                } else { // using authentication
+                  PreparedStatement sqlUserGroups = db.prepareStatement(
+                    "SELECT role_id FROM role WHERE user_id = ?");
+                  sqlUserGroups.setString(1, user);
+                  ResultSet rstUserGroups = sqlUserGroups.executeQuery();
+                  while (rstUserGroups.next()) {
+                    request.getSession().setAttribute(
+                      "group_" + rstUserGroups.getString("role_id"), Boolean.TRUE);
+                  } // next group
+                  rstUserGroups.close();
+                  sqlUserGroups.close();
+                  
+                  // check what kind of security we're using
+                  PreparedStatement sqlUser = db.prepareStatement(
+                    "SELECT reset_password FROM miner_user WHERE user_id = ?");
+                  sqlUser.setString(1, user);
+                  ResultSet rstUser = sqlUser.executeQuery();
+                  if (rstUser.next()) {
+                    // this user id is in the user table - this means we're
+                    // using JDBCRealm security to connect to our own DB
+                    request.getSession().setAttribute("security", "JDBCRealm");
+                    if (rstUser.getInt("reset_password") == 1) {
+                      request.setAttribute("reset_password", Boolean.TRUE);
+                    }
+                  } else {
+                    // this user id is not in the user table - this means
+                    // we're using some other security mechanism - probably
+                    // LDAP via JNDI
+                    request.getSession().setAttribute("security", "JNDIRealm");
+                  } // user is in user table
+                  rstUser.close();
+                  sqlUser.close();
+                } // using authentication
+              } // security not set yet, must be logging on
+              
+              return request.getSession().getAttribute("group_" + role) != null;
+            } finally {
+              db.close();
+            }
+          } catch (Exception x) {
+            log("isUserInRole: " + x);
+            return false;
+          }
+        }
+  
+        /**
+         * Access the value of an instance-wide named parameter.
+         * @param name The name of the parameter.
+         * @return The value of the named parameter.
+         */
+        public String getInitParameter(String name) {
+          return getServletContext().getInitParameter(name);
+        }
+  
+        /**
+         * Access the localization resources for the correct locale.
+         * @return The localization resources for the correct local.
+         */
+        public ResourceBundle getResourceBundle() {
+          String language = request.getHeader("Accept-Language");
+          if (language == null) language = lastLanguage;
+          if (language == null) language = "en";
+          language = language
+            // if multiple are specified, use the first one TODO process all possibilities?
+            .replaceAll(",.*","")
+            // and ignore q-factor weighting
+            .replaceAll(";.*","");
+          // fall back to English if they don't care
+          if (language.equals("*")) language = "en";
+          Locale locale = lastLocale; // keep a local locale for thread safety
+          ResourceBundle resources = lastBundle;
+          if (!language.equals(lastLanguage)) {
+            // is it just a language code ("en")? or does it include th country ("en-NZ")?
+            int dash = language.indexOf('-');
+            if (dash < 0) {
+              locale = new Locale(language);
+            } else {
+              locale = new Locale(language.substring(0, dash), language.substring(dash+1));
+            }
+            resources = ResourceBundle.getBundle(
+              "nzilbb.labbcat.server.locale.Resources", locale);
+          }
+          lastLanguage = language;
+          lastLocale = locale;
+          lastBundle = resources;
+          return resources;
+        }
+  
+        /**
+         * Accesses a database connection factory.
+         * @return An object that can provide database connections.
+         */
+        public ConnectionFactory getConnectionFactory() { return connectionFactory; }
+      });
     return handler;
   }
     
@@ -183,51 +319,7 @@
         "Content-Disposition", "attachment; filename*="+fileName+"; filename="+onlyASCIIFileName);
     }
   } // end of ResponseAttachmentName()
-   
-  String lastLanguage = "en";
-  Locale lastLocale = Locale.UK;
-  ResourceBundle lastBundle;
-  /**
-   * Localizes the given message to the language found in the "Accept-Language" header of
-   * the given request, substituting in the given arguments if any.
-   * <p> The message is assumed to be a MessageFormat template like 
-   * "Row could not be added: {0}"
-   * @param request The request, for discovering the locale.
-   * @param message The message format to localize.
-   * @param args Arguments to be substituted into the message. 
-   * @return The localized message (or if the messages couldn't be localized, the
-   * original message) with the given arguments substituted. 
-   */
-  public ResourceBundle inferResourceBundle(HttpServletRequest request) {
-    String language = request.getHeader("Accept-Language");
-    if (language == null) language = lastLanguage;
-    if (language == null) language = "en";
-    language = language
-      // if multiple are specified, use the first one TODO process all possibilities?
-      .replaceAll(",.*","")
-      // and ignore q-factor weighting
-      .replaceAll(";.*","");
-    // fall back to English if they don't care
-    if (language.equals("*")) language = "en";
-    Locale locale = lastLocale; // keep a local locale for thread safety
-    ResourceBundle resources = lastBundle;
-    if (!language.equals(lastLanguage)) {
-      // is it just a language code ("en")? or does it include th country ("en-NZ")?
-      int dash = language.indexOf('-');
-      if (dash < 0) {
-        locale = new Locale(language);
-      } else {
-        locale = new Locale(language.substring(0, dash), language.substring(dash+1));
-      }
-      resources = ResourceBundle.getBundle(
-        "nzilbb.labbcat.server.locale.Resources", locale);
-    }
-    lastLanguage = language;
-    lastLocale = locale;
-    lastBundle = resources;
-    return resources;
-  }
-
+  
   /**
    * Returns the root of the persistent file system.
    * @return The "files" directory.

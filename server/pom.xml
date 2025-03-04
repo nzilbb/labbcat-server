@@ -60,7 +60,7 @@
       </resource>
       <resource>
         <directory>src/main/jsp</directory>
-        <includes><include>*.jsp</include></includes>
+        <includes><include>**/*.jsp</include></includes>
         <targetPath>META-INF/resources/jsp</targetPath>
       </resource>
       <resource>

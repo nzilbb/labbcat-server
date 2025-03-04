@@ -5,4 +5,6 @@
 	version="5.0" metadata-complete="false">
   <servlet><servlet-name>user.jsp</servlet-name><jsp-file>/jsp/user.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>user.jsp</servlet-name><url-pattern>/api/user</url-pattern></servlet-mapping>
+  <servlet><servlet-name>admin/password.jsp</servlet-name><jsp-file>/jsp/admin/password.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/password.jsp</servlet-name><url-pattern>/api/admin/password</url-pattern></servlet-mapping>
 </web-fragment>

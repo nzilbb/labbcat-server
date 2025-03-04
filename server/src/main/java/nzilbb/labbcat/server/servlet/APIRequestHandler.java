@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.util.function.Function;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -67,19 +68,20 @@ import org.xml.sax.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class APIRequestHandler {
+
+  // Constants
+  
+  public static final int SC_BAD_REQUEST = 400;
+  public static final int SC_FORBIDDEN = 403;
+  public static final int SC_NOT_FOUND = 404;
+  public static final int SC_INTERNAL_SERVER_ERROR = 500;
   
   // Attributes:   
   
-  protected String driverName;
-  protected String connectionURL;
-  protected String connectionName;
-  protected String connectionPassword;
-  protected ConnectionFactory connectionFactory;
-  
-  protected String title;
-  protected String version;
+  protected String defaultTitle;
+  protected ResourceBundle defaultResourceBundle;
 
-  protected ResourceBundle resources;
+  protected APIRequestContext context;
   
   // Methods:
   
@@ -88,21 +90,16 @@ public class APIRequestHandler {
    */
   public APIRequestHandler() {
     // load a default set of localization resources
-    resources = ResourceBundle.getBundle(
+    defaultResourceBundle = ResourceBundle.getBundle(
       "nzilbb.labbcat.server.locale.Resources", Locale.UK);
-    title = getClass().getSimpleName();
+    defaultTitle = getClass().getSimpleName();
   } // end of constructor
   
   /** 
    * Initialise the endpoint data.
    */
-  public void init(String title, String version, ConnectionFactory connectionFactory, ResourceBundle resources) {
-    this.title = title;
-    this.version = version;
-    this.connectionFactory = connectionFactory;
-    if (resources != null) {
-      this.resources = resources;
-    }
+  public void init(APIRequestContext context) {
+    this.context = context;
   }
 
   /**
@@ -112,7 +109,7 @@ public class APIRequestHandler {
    */
   protected Connection newConnection()
     throws SQLException { 
-    return connectionFactory.newConnection();
+    return context.getConnectionFactory().newConnection();
   } // end of newDatabaseConnection()   
      
   /**
@@ -150,8 +147,8 @@ public class APIRequestHandler {
     Object result, String message, Object... args) {
     
     JsonObjectBuilder response = Json.createObjectBuilder()
-      .add("title", title)
-      .add("version", version)
+      .add("title", Optional.ofNullable(context.getTitle()).orElse(defaultTitle))
+      .add("version", context.getVersion())
       .add("code", 0) // TODO deprecate?
       .add("errors", Json.createArrayBuilder());      
     if (message == null) {
@@ -212,8 +209,8 @@ public class APIRequestHandler {
    */
   protected JsonObject failureResult(Collection<String> messages) {
     JsonObjectBuilder response = Json.createObjectBuilder()
-      .add("title", title)
-      .add("version", version)
+      .add("title", Optional.ofNullable(context.getTitle()).orElse(defaultTitle))
+      .add("version", context.getVersion())
       .add("code", 1); // TODO deprecate?
     JsonArrayBuilder errors = Json.createArrayBuilder();
     if (messages != null) {
@@ -236,8 +233,8 @@ public class APIRequestHandler {
   protected JsonObject failureResult(String message, Object... args) {
     
     JsonObjectBuilder response = Json.createObjectBuilder()
-      .add("title", title)
-      .add("version", version)
+      .add("title", Optional.ofNullable(context.getTitle()).orElse(defaultTitle))
+      .add("version", context.getVersion())
       .add("code", 1); // TODO deprecate?
     if (message == null) {
       response = response
@@ -278,8 +275,8 @@ public class APIRequestHandler {
     }
     
     JsonObjectBuilder result = Json.createObjectBuilder()
-      .add("title", title)
-      .add("version", version)
+      .add("title", Optional.ofNullable(context.getTitle()).orElse(defaultTitle))
+      .add("version", context.getVersion())
       .add("code", 1) // TODO deprecate?
       .add("errors", Json.createArrayBuilder().add(message))
       .add("exception", exception)
@@ -298,8 +295,8 @@ public class APIRequestHandler {
    */
   protected JsonGenerator startResult(JsonGenerator writer, boolean modelIsArray) {
     writer.writeStartObject();
-    writer.write("title", title);
-    writer.write("version", version);
+    writer.write("title", Optional.ofNullable(context.getTitle()).orElse(defaultTitle));
+    writer.write("version", context.getVersion());
     if (modelIsArray) {
       writer.writeStartArray("model");
     } else {         
@@ -375,9 +372,14 @@ public class APIRequestHandler {
     // get the localized version of the message
     String localizedString = message;
     try {
-      localizedString = resources.getString(message);
+      localizedString = Optional.ofNullable(context.getResourceBundle())
+        .orElse(defaultResourceBundle)
+        .getString(message);
     } catch(Throwable exception) {
-      System.err.println("i18n: missing resource in " + resources.getLocale() + ": " + message);
+      System.err.println("i18n: missing resource in "
+                         + Optional.ofNullable(context.getResourceBundle())
+                         .orElse(defaultResourceBundle)
+                         .getLocale() + ": " + message);
     }
 
     // do we need to substitute in arguments?
@@ -387,5 +389,27 @@ public class APIRequestHandler {
     
     return localizedString;
   } // end of localize()
-  
+
+  /**
+   * Determines whether the request can continue. If the servlet is annotated with 
+   * {@link RequiredRole}, whether the user is in that role.
+   * @param db A connected database connection.
+   * @return true if the request is allowed, false otherwise.
+   * @throws SQLException If a database error occurs.
+   */
+  protected boolean hasAccess(Connection db)
+    throws SQLException {
+    RequiredRole requiredRole = getClass().getAnnotation(RequiredRole.class);
+    if (requiredRole != null) {
+      if (!context.isUserInRole(requiredRole.value())) {
+        return false;
+      } else {
+        return true;
+      }
+    } else { // no particular role required
+      return true;
+    }
+  }
+
+
 } // end of class APIRequestHandler

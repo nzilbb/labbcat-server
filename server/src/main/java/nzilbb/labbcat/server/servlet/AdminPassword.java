@@ -23,13 +23,12 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
-import javax.servlet.http.*;
-import javax.servlet.annotation.WebServlet;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.zip.*;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -77,85 +76,78 @@ import nzilbb.util.IO;
  *  </p>
  * @author Robert Fromont
  */
-@WebServlet("/api/admin/password")
 @RequiredRole("admin")
-public class AdminPassword extends LabbcatServlet {
-   
-   // Attributes:
-   
-   /**
-    * Constructor
-    */
-   public AdminPassword() {
-   } // end of constructor
-
-   // Servlet methods
-   
-   /**
-    * The GET method for the servlet.
-    * <p> This returns information about the current user - their ID and the roles they have.
-    * @param request HTTP request
-    * @param response HTTP response
-    */
-   @Override
-   protected void doPut(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {      
-      try {
-         Connection connection = newConnection();
-         if (!hasAccess(request, response, connection)) return;
-         
-         response.setContentType("application/json");
-         response.setCharacterEncoding("UTF-8");
-         try {
-            // read the incoming object
-           JsonReader reader = Json.createReader( // ensure we read as UTF-8
-             new InputStreamReader(request.getInputStream(), "UTF-8"));
-            JsonObject json = reader.readObject();
-            if (!json.containsKey("user")) {
-               response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-               writeResponse(response, failureResult(request, "No user specified."));
-            } else if (!json.containsKey("password")) {
-               response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-               writeResponse(response, failureResult(request, "No password specified."));
-            } else {
-               String user = json.getString("user");
-               String password = json.getString("password");
-               if (password == null || password.length() == 0) {
-                  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                  writeResponse(response, failureResult(request, "No password specified."));
-               } else {
-                  boolean resetPassword = json.containsKey("resetPassword")
-                     && json.getBoolean("resetPassword");
-                  String passwordDigest = getServletContext().getInitParameter("passwordDigest");
-                  String passwordExpression = passwordDigest == null?"?":passwordDigest+"(?)";
-                  PreparedStatement sql = connection.prepareStatement(
-                     "UPDATE miner_user SET password = " + passwordExpression 
-                     + ", reset_password = ?, expiry = NULL WHERE user_id = ?"); 
-                  sql.setString(1, password);
-                  sql.setInt(2, resetPassword?1:0);
-                  sql.setString(3, user);
-                  int rowCount = sql.executeUpdate();
-                  if (rowCount != 1) { // it didn't work 
-                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                     writeResponse(response, failureResult(request, "User not found: {0}", user));
-                  } else {
-                     writeResponse(response, successResult(request, null, "Password changed."));
-                  }
-               }
-            }
-         } finally {
-            connection.close();
-         }
-      } catch(SQLException exception) {
-         log("AdminPassword PUT: Database operation failed: " + exception);
-         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-         writeResponse(response, failureResult(exception));
-      } catch(Exception exception) {
-         log("AdminPassword PUT: Failed: " + exception);
-         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-         writeResponse(response, failureResult(exception));
+public class AdminPassword extends APIRequestHandler {
+  
+  /**
+   * Constructor
+   */
+  public AdminPassword() {
+  } // end of constructor
+  
+  /**
+   * The handler for the request
+   * <p> This set the user password as specified
+   * @param request HTTP request
+   * @param response HTTP response
+   */
+  public JsonObject put(InputStream requestBody, Consumer<Integer> httpStatus) {
+    try {
+      Connection connection = newConnection();
+      if (!hasAccess(connection)) {
+        httpStatus.accept(SC_FORBIDDEN);
+        return null;
       }
-   }
+      
+      try {
+        // read the incoming object
+        JsonReader reader = Json.createReader( // ensure we read as UTF-8
+          new InputStreamReader(requestBody, "UTF-8"));
+        JsonObject json = reader.readObject();
+        if (!json.containsKey("user")) {
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult("No user specified.");
+        } else if (!json.containsKey("password")) {
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult("No password specified.");
+        } else {
+          String user = json.getString("user");
+          String password = json.getString("password");
+          if (password == null || password.length() == 0) {
+            httpStatus.accept(SC_BAD_REQUEST);
+            return failureResult("No password specified.");
+          } else {
+            boolean resetPassword = json.containsKey("resetPassword")
+              && json.getBoolean("resetPassword");
+            String passwordDigest = context.getInitParameter("passwordDigest");
+            String passwordExpression = passwordDigest == null?"?":passwordDigest+"(?)";
+            PreparedStatement sql = connection.prepareStatement(
+              "UPDATE miner_user SET password = " + passwordExpression 
+              + ", reset_password = ?, expiry = NULL WHERE user_id = ?"); 
+            sql.setString(1, password);
+            sql.setInt(2, resetPassword?1:0);
+            sql.setString(3, user);
+            int rowCount = sql.executeUpdate();
+            if (rowCount != 1) { // it didn't work 
+              httpStatus.accept(SC_NOT_FOUND);
+              return failureResult("User not found: {0}", user);
+            } else {
+              return successResult(null, "Password changed.");
+            }
+          }
+        }
+      } finally {
+        connection.close();
+      }
+    } catch(SQLException exception) {
+      System.err.println("AdminPassword.handleRequest: Database operation failed: " + exception);
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      return failureResult(exception);
+    } catch(Exception exception) {
+      System.err.println("AdminPassword.handleRequest: Failed: " + exception);
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      return failureResult(exception);
+    }
+  }
    
-   private static final long serialVersionUID = -1;
 } // end of class AdminPassword

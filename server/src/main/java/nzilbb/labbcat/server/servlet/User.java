@@ -79,13 +79,14 @@ public class User extends APIRequestHandler {
   } // end of constructor
   
   /**
-   * Generate the to a request.
+   * Generate the response to a request.
    * <p> This returns information about the current user - their ID and the roles they have.
    * @param jsonOut A JSON generator for writing the response to
    * @param user The current user logged in, or null if user authentication is not being used.
    */
-  public void handleRequest(JsonGenerator jsonOut, String user) {      
-    startResult(jsonOut, false);    
+  public void get(JsonGenerator jsonOut) {      
+    startResult(jsonOut, false);
+    String user = context.getUser();
     if (user != null) {
       jsonOut.write("user", user);
     }
