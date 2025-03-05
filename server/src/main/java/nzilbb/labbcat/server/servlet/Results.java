@@ -23,6 +23,9 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,15 +41,14 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
@@ -158,13 +160,9 @@ import org.apache.commons.csv.CSVPrinter;
  * <br> The task, when finished, will output a URL for accessing the matches of the search.
  * @author Robert Fromont
  */
-@WebServlet({"/api/results"})
-public class Results extends LabbcatServlet { // TODO unit test
+public class Results extends APIRequestHandler { // TODO unit test
   // TODO add support for annotation anchoring
 
-  /** LaBB-CAT Title, in case it's required */
-  private String labbcatTitle = null;
-  
   /**
    * Constructor
    */
@@ -175,86 +173,96 @@ public class Results extends LabbcatServlet { // TODO unit test
   
   /**
    * The GET method for the servlet.
-   * <p> This expects a multipart request body with parameters as defined above.
-   * @param request HTTP request
-   * @param response HTTP response
+   * @param parameters Request parameter map.
+   * @param out Response body output stream.
+   * @param contentType Receives the content type for specification in the response headers.
+   * @param fileName Receives the filename for specification in the response headers.
+   * @param httpStatus Receives the response status code, in case or error.
    */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    response.setCharacterEncoding("UTF-8");
-
+  public void get(RequestParameters parameters, UnaryOperator<String> requestHeaders, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> fileName, Consumer<Integer> httpStatus) {
+    System.out.println("Results.get...");
+    
     try {
-      final SqlGraphStoreAdministration store = getStore(request);
+      final SqlGraphStoreAdministration store = getStore();
       final Schema schema = store.getSchema();
       
       // parameters
-      String threadId = request.getParameter("threadId");
-      String[] utterances = request.getParameterValues("utterance");
-      if (threadId == null && utterances == null) {
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        writeResponse(response, failureResult(request, "No task ID specified."));
+      String threadId = parameters.getString("threadId");
+      String[] utterances = parameters.getStrings("utterance");
+      if (threadId == null && utterances.length == 0) {
+        contentTypeConsumer.accept("application/json;charset=UTF-8");
+        httpStatus.accept(SC_BAD_REQUEST);
+        JsonWriter writer = Json.createWriter(out);
+        writer.writeObject(failureResult("No task ID specified."));
+        writer.close();
         return;
       }
       int words_context = 0;
-      if (request.getParameter("words_context") != null) {
+      if (parameters.getString("words_context") != null) {
         try {
-          words_context = Integer.parseInt(request.getParameter("words_context"));
+          words_context = Integer.parseInt(parameters.getString("words_context"));
         } catch(Exception exception) {
-          response.setContentType("application/json");
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-          writeResponse(response, failureResult(
-                          request, "Invalid words context: {0}",
-                          request.getParameter("words_context")));
+          contentTypeConsumer.accept("application/json;charset=UTF-8");
+          httpStatus.accept(SC_BAD_REQUEST);
+          JsonWriter writer = Json.createWriter(out);
+          writer.writeObject(failureResult(
+                               "Invalid words context: {0}",
+                               parameters.getString("words_context")));
+          writer.close();
           return;
         }
       }
       final int wordsContext = words_context;
       Integer pageLength = null;
-      if (request.getParameter("pageLength") != null) {
+      if (parameters.getString("pageLength") != null) {
         try {
-          pageLength = Integer.valueOf(request.getParameter("pageLength"));
+          pageLength = Integer.valueOf(parameters.getString("pageLength"));
         } catch(NumberFormatException x) {
-          response.setContentType("application/json");
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-          writeResponse(response, failureResult(
-                          request, "Invalid pageLength: {0}",
-                          request.getParameter("pageLength")));
+          contentTypeConsumer.accept("application/json;charset=UTF-8");
+          httpStatus.accept(SC_BAD_REQUEST);
+          JsonWriter writer = Json.createWriter(out);
+          writer.writeObject(failureResult(
+                               "Invalid pageLength: {0}",
+                               parameters.getString("pageLength")));
+          writer.close();
           return;
         }
       }
       Integer pageNumber = Integer.valueOf(0);
-      if (request.getParameter("pageNumber") != null) {
+      if (parameters.getString("pageNumber") != null) {
         try {
-          pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+          pageNumber = Integer.valueOf(parameters.getString("pageNumber"));
         } catch(NumberFormatException x) {
-          response.setContentType("application/json");
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-          writeResponse(response, failureResult(
-                          request, "Invalid pageNumber: {0}",
-                          request.getParameter("pageNumber")));
+          contentTypeConsumer.accept("application/json;charset=UTF-8");
+          httpStatus.accept(SC_BAD_REQUEST);
+          JsonWriter writer = Json.createWriter(out);
+          writer.writeObject(failureResult(
+                               "Invalid pageNumber: {0}",
+                               parameters.getString("pageNumber")));
+          writer.close();
           return;
         }
       }
       Integer offsetThreshold = Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC);
-      if (request.getParameter("offsetThreshold") != null) {
+      if (parameters.getString("offsetThreshold") != null) {
         try {
-          offsetThreshold = Integer.valueOf(request.getParameter("offsetThreshold"));
+          offsetThreshold = Integer.valueOf(parameters.getString("offsetThreshold"));
         } catch(NumberFormatException x) {
-          response.setContentType("application/json");
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-          writeResponse(response, failureResult(
-                          request, "Invalid offsetThreshold: {0}",
-                          request.getParameter("offsetThreshold")));
+          contentTypeConsumer.accept("application/json;charset=UTF-8");
+          httpStatus.accept(SC_BAD_REQUEST);
+          JsonWriter writer = Json.createWriter(out);
+          writer.writeObject(failureResult(
+                               "Invalid offsetThreshold: {0}",
+                               parameters.getString("offsetThreshold")));
+          writer.close();
           return;
         }
       }
       final int finalOffsetThreshold = offsetThreshold;
 
-      String[] csv_option = request.getParameterValues("csv_option");
+      String[] csv_option = parameters.getStrings("csv_option");
       final LinkedHashSet<String> options = new LinkedHashSet<String>();
-      if (csv_option != null) for (String o : csv_option) options.add(o);
+      for (String o : csv_option) options.add(o);
       if (options.size() == 0) { // default options
         options.add("labbcat_title");
         options.add("labbcat_version");
@@ -267,9 +275,9 @@ public class Results extends LabbcatServlet { // TODO unit test
         options.add("result_text");
       }
 
-      String[] csv_layer = request.getParameterValues("csv_layer");
+      String[] csv_layer = parameters.getStrings("csv_layer");
       final LinkedHashSet<String> layers = new LinkedHashSet<String>();
-      if (csv_layer != null) for (String l : csv_layer) layers.add(l);
+      for (String l : csv_layer) layers.add(l);
       if (layers.size() == 0) { // default layers
         layers.add(schema.getRoot().getId());
         layers.add(schema.getParticipantLayerId());
@@ -286,7 +294,7 @@ public class Results extends LabbcatServlet { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
           });
       // transcript attributes
       schema.getRoot().getChildren().values().stream()
@@ -299,7 +307,7 @@ public class Results extends LabbcatServlet { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
           });
       // span layers
       schema.getRoot().getChildren().values().stream()
@@ -309,7 +317,7 @@ public class Results extends LabbcatServlet { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
           });
       // phrase layers
       schema.getTurnLayer().getChildren().values().stream()
@@ -319,7 +327,7 @@ public class Results extends LabbcatServlet { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
           });
       // word layers
       if (layers.contains(schema.getWordLayerId())) {
@@ -332,14 +340,14 @@ public class Results extends LabbcatServlet { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
           });
       // segment layers
       if (schema.getLayers().containsKey("segment")) {
         if (layers.contains("segment")) {
           csvLayers.put(
             "segment", Integer.valueOf(
-              Optional.ofNullable(request.getParameter("include_count_segment")).orElse("1")));
+              Optional.ofNullable(parameters.getString("include_count_segment")).orElse("1")));
         }
         schema.getLayer("segment").getChildren().values().stream()
           .map(l -> l.getId())
@@ -347,61 +355,64 @@ public class Results extends LabbcatServlet { // TODO unit test
           .forEach(id -> {
               csvLayers.put(
                 id, Integer.valueOf(
-                  Optional.ofNullable(request.getParameter("include_count_"+id)).orElse("1")));
+                  Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
             });
       }    
       
-      String contentType = request.getParameter("todo");
+      String contentType = parameters.getString("todo");
       if (contentType == null) {
-        contentType = request.getParameter("content-type");
+        contentType = parameters.getString("content-type");
         if (contentType == null) {
-          contentType = request.getHeader("Accept");
+          contentType = requestHeaders.apply("Accept");
         }
       }
-      String language = Optional.ofNullable(request.getHeader("Accept-Language")).orElse("en");
+      String language = Optional.ofNullable(requestHeaders.apply("Accept-Language")).orElse("en");
       if ("csv".equalsIgnoreCase(contentType)
           || "text/csv".equalsIgnoreCase(contentType)) {
-        contentType = "text/csv";
+        contentType = "text/csv;charset=UTF-8";
       } else {
-        contentType = "application/json";
+        contentType = "application/json;charset=UTF-8";
       }
-      response.setContentType(contentType);
-      response.setCharacterEncoding("UTF-8");
+      contentTypeConsumer.accept(contentType);
       // output will be either CSV or JSON - define an appropriate output streamer
-      final CSVPrinter csvOut = contentType.equals("text/csv")?
-        new CSVPrinter(response.getWriter(), CSVFormat.EXCEL.withDelimiter( 
+      final CSVPrinter csvOut = contentType.startsWith("text/csv")?
+        new CSVPrinter(new PrintWriter(new OutputStreamWriter(out, "UTF-8")),
+                       CSVFormat.EXCEL.withDelimiter( 
                          // guess the best delimiter - comma if English speaking user, tab otherwise
                          language.contains("en")?',':'\t')):null;
-      final JsonGenerator jsonOut = !contentType.equals("text/csv")?
-        Json.createGenerator(response.getWriter()):null;
+      final JsonGenerator jsonOut = !contentType.startsWith("text/csv")?
+        Json.createGenerator(new PrintWriter(new OutputStreamWriter(out, "UTF-8"))):null;
       
       Task task = threadId==null?null:Task.findTask(Long.valueOf(threadId));
-      if (threadId != null && task == null && utterances == null) {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        writeResponse(response, failureResult(
-                        request, "Invalid task ID: {0}", "\""+threadId+"\""));
+      if (threadId != null && task == null && utterances.length == 0) {
+        System.out.println("invalid threadId " + threadId);
+        httpStatus.accept(SC_BAD_REQUEST);
+        JsonWriter writer = Json.createWriter(out);
+        writer.writeObject(failureResult("Invalid task ID: {0}", "\""+threadId+"\""));
+        writer.close();
         return;
       } else if (task != null && !(task instanceof SearchTask)) {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        writeResponse(response, failureResult(
-                        request, "Invalid task ID: {0}", task.getClass().getName()));
+        httpStatus.accept(SC_BAD_REQUEST);
+        JsonWriter writer = Json.createWriter(out);
+        writer.writeObject(failureResult("Invalid task ID: {0}", task.getClass().getName()));
+        writer.close();
         return;
       }
       SearchTask search = (SearchTask)task;
       if (search != null) {
         search.keepAlive(); // prevent the task from dying while we're still interested
       }
-      SearchResults searchResults = utterances != null?
+      SearchResults searchResults = utterances.length > 0?
         new ArraySearchResults(utterances) // explicit selection only
         :search.getResults(); // all results from database
 
       try {
         Connection connection = store.getConnection();
-        final SearchResults results = utterances != null?searchResults
+        final SearchResults results = utterances.length > 0?searchResults
           // the original results object presumably has a dead connection
           // we want a new copy of our own
           :new SqlSearchResults((SqlSearchResults)searchResults, connection);
-        if (utterances != null && search != null) { // both threadId and utterance specified
+        if (utterances.length > 0 && search != null) { // both threadId and utterance specified
           // copy name
           ((ArraySearchResults)results).setName(search.getResults().getName());
         }
@@ -452,18 +463,13 @@ public class Results extends LabbcatServlet { // TODO unit test
           }
           final String finalSearchName = searchName;
           
-          if (contentType.equals("text/csv")) {
-            String fileName = IO.SafeFileNameUrl(searchName);
-            if (fileName.length() > 150) fileName = fileName.substring(0, 150);
-            fileName = "results_" + fileName + ".csv";
-            ResponseAttachmentName(request, response, fileName);
+          if (contentType.startsWith("text/csv")) {
+            String name = IO.SafeFileNameUrl(searchName);
+            if (name.length() > 150) name = name.substring(0, 150);
+            name = "results_" + name + ".csv";
+            fileName.accept(name);
           }
-
-          if (options.contains("labbcat_title") && labbcatTitle == null) {
-            // they want the LaBB-CAT Title, so we need to fetch it
-            labbcatTitle = GetSystemAttribute("title", connection);
-          }
-
+          
           outputStart(
             jsonOut, csvOut, searchName, results.size(), multiWordMatches, options, layers, csvLayers, schema);
           try {
@@ -476,119 +482,119 @@ public class Results extends LabbcatServlet { // TODO unit test
             final HashMap<Integer,Graph> agIdToGraph = new HashMap<Integer,Graph>();
             final HashMap<Integer,String> speakerNumberToName = new HashMap<Integer,String>();
             final Set<String> anchorStartLayers = csvLayers.keySet().stream()
-              .filter(layerId -> request.getParameter("share_start_"+layerId) != null)
+              .filter(layerId -> parameters.getString("share_start_"+layerId) != null)
               .collect(Collectors.toSet());
             final Set<String> anchorEndLayers = csvLayers.keySet().stream()
-              .filter(layerId -> request.getParameter("share_end_"+layerId) != null)
+              .filter(layerId -> parameters.getString("share_end_"+layerId) != null)
               .collect(Collectors.toSet());
             for (String layerId : csvLayers.keySet())
-
-            if (contentType.equals("text/csv")) {
-              // process the data rows
-              store.getMatchAnnotations(
-                results, csvLayers, anchorStartLayers, anchorEndLayers, 0,
-                annotations -> {
-                  search.keepAlive(); // prevent the task from dying while we're still interested
-                  try {
-                    // write the initial non-layer fields
-                    String matchId = results.getLastMatchId();
-                    IdMatch result = new IdMatch(matchId);
-                    outputMatchStart(
-                      jsonOut, csvOut, finalSearchName, result, agIdToGraph, speakerNumberToName,
-                      store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
-                    
-                    // write the annotations
-                    Iterator<String> layerIds = csvLayers.keySet().stream()
-                      .map(id -> {
-                          Vector<String> reps = new Vector<String>();
-                          for (int i = 0; i < csvLayers.get(id); i++) reps.add(id);
-                          return reps.stream();
-                        })
-                      .flatMap(i -> i)
-                      .iterator();
-                    Layer lastLayer = schema.getWordLayer();
-                    for (Annotation annotation : annotations) {
-                      Layer layer = schema.getLayer(layerIds.next());
-
-                      // if we've changed layer, finish off the last layer...
-                      if (lastLayer != null && !lastLayer.getId().equals(layer.getId())) {
+              
+              if (contentType.startsWith("text/csv")) {
+                // process the data rows
+                store.getMatchAnnotations(
+                  results, csvLayers, anchorStartLayers, anchorEndLayers, 0,
+                  annotations -> {
+                    search.keepAlive(); // prevent the task from dying while we're still interested
+                    try {
+                      // write the initial non-layer fields
+                      String matchId = results.getLastMatchId();
+                      IdMatch result = new IdMatch(matchId);
+                      outputMatchStart(
+                        jsonOut, csvOut, finalSearchName, result, agIdToGraph, speakerNumberToName,
+                        store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
+                      
+                      // write the annotations
+                      Iterator<String> layerIds = csvLayers.keySet().stream()
+                        .map(id -> {
+                            Vector<String> reps = new Vector<String>();
+                            for (int i = 0; i < csvLayers.get(id); i++) reps.add(id);
+                            return reps.stream();
+                          })
+                        .flatMap(i -> i)
+                        .iterator();
+                      Layer lastLayer = schema.getWordLayer();
+                      for (Annotation annotation : annotations) {
+                        Layer layer = schema.getLayer(layerIds.next());
+                        
+                        // if we've changed layer, finish off the last layer...
+                        if (lastLayer != null && !lastLayer.getId().equals(layer.getId())) {
+                          outputMatchLayerLabels(
+                            csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result, lastLayer);
+                        } // layer changed
+                        
+                        // now output this annotation
+                        if (annotation == null) {
+                          csvOut.print("");
+                          switch (layer.getAlignment()) { // offsets
+                            case Constants.ALIGNMENT_INTERVAL:
+                              csvOut.print(""); // start
+                              csvOut.print(""); // end
+                              break;
+                            case Constants.ALIGNMENT_INSTANT:
+                              csvOut.print(""); // time
+                          }
+                        } else {
+                          assert layer.getId().equals(annotation.getLayerId())
+                            : "layer.getId().equals(annotation.getLayerId()) - "
+                            + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
+                          csvOut.print(annotation.getLabel());
+                          if (layer.getAlignment() != Constants.ALIGNMENT_NONE) { // offsets
+                            String[] anchorIds = {
+                              annotation.getStartId(), annotation.getEndId() };
+                            Anchor[] anchors = store.getAnchors(null, anchorIds);
+                            for (Anchor anchor : anchors) {
+                              if (anchor != null && anchor.getOffset() != null
+                                  && anchor.getConfidence() >= finalOffsetThreshold) {
+                                csvOut.print(anchor.getOffset().toString());
+                              } else { // no anchor offset available, or not confident enough
+                                csvOut.print("");
+                              }
+                              if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
+                              // only one offset
+                                break;
+                              }
+                            } // next anchor
+                          } // offsets
+                        } // annotation present
+                        lastLayer = layer;
+                      } // next annotation
+                      if (lastLayer != null) {
                         outputMatchLayerLabels(
                           csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result, lastLayer);
                       } // layer changed
-
-                      // now output this annotation
-                      if (annotation == null) {
-                        csvOut.print("");
-                        switch (layer.getAlignment()) { // offsets
-                          case Constants.ALIGNMENT_INTERVAL:
-                            csvOut.print(""); // start
-                            csvOut.print(""); // end
-                            break;
-                          case Constants.ALIGNMENT_INSTANT:
-                            csvOut.print(""); // time
-                        }
-                      } else {
-                        assert layer.getId().equals(annotation.getLayerId())
-                          : "layer.getId().equals(annotation.getLayerId()) - "
-                          + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
-                        csvOut.print(annotation.getLabel());
-                        if (layer.getAlignment() != Constants.ALIGNMENT_NONE) { // offsets
-                          String[] anchorIds = {
-                            annotation.getStartId(), annotation.getEndId() };
-                          Anchor[] anchors = store.getAnchors(null, anchorIds);
-                          for (Anchor anchor : anchors) {
-                            if (anchor != null && anchor.getOffset() != null
-                                && anchor.getConfidence() >= finalOffsetThreshold) {
-                              csvOut.print(anchor.getOffset().toString());
-                            } else { // no anchor offset available, or not confident enough
-                              csvOut.print("");
-                            }
-                            if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
-                              // only one offset
-                              break;
-                            }
-                          } // next anchor
-                        } // offsets
-                      } // annotation present
-                      lastLayer = layer;
-                    } // next annotation
-                    if (lastLayer != null) {
-                      outputMatchLayerLabels(
-                        csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result, lastLayer);
-                    } // layer changed
-                  } catch(Exception x) {
-                    log("ERROR Results-consumer: " + x);
-                    System.err.println("ERROR Results-consumer: " + x);
-                    x.printStackTrace(System.err);
-                  }
-                });
-            } else { // JSON output
-              results.forEachRemaining(matchId -> {
-                  search.keepAlive(); // prevent the task from dying while we're still interested
-                  try {
-                    IdMatch result = new IdMatch(matchId);                
-                    outputMatchStart(
-                      jsonOut, csvOut, finalSearchName, result, agIdToGraph, speakerNumberToName,
-                      store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
-                  } catch(Exception x) {
-                    log("ERROR Results-consumer: " + x);
-                    System.err.println("ERROR Results-consumer: " + x);
-                    x.printStackTrace(System.err);
-                  } finally {
-                    outputMatchEnd(jsonOut, csvOut); // end this match
-                  }
-                });
-            } // JSON output
+                    } catch(Exception x) {
+                      System.err.println("ERROR Results-consumer: " + x);
+                      x.printStackTrace(System.err);
+                    }
+                  });
+              } else { // JSON output
+                System.out.println("JSON output");
+                results.forEachRemaining(matchId -> {
+                    System.out.println("matchId " + matchId);
+                    search.keepAlive(); // prevent the task from dying while we're still interested
+                    try {
+                      IdMatch result = new IdMatch(matchId);                
+                      outputMatchStart(
+                        jsonOut, csvOut, finalSearchName, result, agIdToGraph, speakerNumberToName,
+                        store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
+                    } catch(Exception x) {
+                      System.err.println("ERROR Results-consumer: " + x);
+                      x.printStackTrace(System.err);
+                    } finally {
+                      outputMatchEnd(jsonOut, csvOut); // end this match
+                    }
+                  });
+              } // JSON output
           } finally {
             outputMatchesEnd(jsonOut, csvOut); // end all matches
             sqlMatchTranscriptContext.close();
             sqlMatchLayerLabels.close();
           }
-          outputSuccessfulEnd(jsonOut, csvOut, request);
+          outputSuccessfulEnd(jsonOut, csvOut);
         } catch (Exception x) {
-          log(x.toString());
+          System.err.println(x.toString());
           x.printStackTrace(System.err);
-          outputFailedEnd(jsonOut, csvOut, request, x.getMessage());
+          outputFailedEnd(jsonOut, csvOut, x.getMessage());
         } finally {
           results.close();
         }
@@ -597,7 +603,21 @@ public class Results extends LabbcatServlet { // TODO unit test
       }
       
     } catch(Exception ex) {
-      throw new ServletException(ex);
+      try {
+        contentTypeConsumer.accept("application/json;charset=UTF-8");
+      } catch(Exception exception) {}
+      try {
+        httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      } catch(Exception exception) {}
+      try {
+        JsonWriter writer = Json.createWriter(out);
+        writer.writeObject(failureResult(ex));
+        writer.close();
+        out.write(ex.toString().getBytes());
+      } catch(IOException exception) {
+        System.err.println("Results.get: could not report unhandled exception: " + ex);
+        ex.printStackTrace(System.err);
+      }
     }
   }
   
@@ -706,8 +726,8 @@ public class Results extends LabbcatServlet { // TODO unit test
       // set initial structure of model
       jsonOut.write("name", searchName);
       jsonOut.write("matchCount", matchCount);
-      if (options.contains("labbcat_title")) jsonOut.write("labbcatTitle", labbcatTitle);
-      if (options.contains("labbcat_version")) jsonOut.write("labbcatVersion", version);
+      if (options.contains("labbcat_title")) jsonOut.write("labbcatTitle", context.getTitle());
+      if (options.contains("labbcat_version")) jsonOut.write("labbcatVersion", context.getVersion());
       jsonOut.writeStartArray("matches");      
     }
   } // end of startResults()
@@ -736,8 +756,8 @@ public class Results extends LabbcatServlet { // TODO unit test
     if (csvOut != null) {
       // start new record
       csvOut.println();
-      if (options.contains("labbcat_title")) csvOut.print(labbcatTitle);
-      if (options.contains("labbcat_version")) csvOut.print(version);
+      if (options.contains("labbcat_title")) csvOut.print(context.getTitle());
+      if (options.contains("labbcat_version")) csvOut.print(context.getVersion());
       if (options.contains("collection_name")) csvOut.print(searchName);
       if (options.contains("result_number")) {
         csvOut.print(
@@ -1034,15 +1054,14 @@ public class Results extends LabbcatServlet { // TODO unit test
    * <p> Assumes outputMatchesEnd has been called.
    * @param jsonOut Generator for JSON output, or null for CSV output.
    * @param csvOut Printer for CSV output, or null for JSON output.
-   * @param request The HTTP request.
    */
-  void outputSuccessfulEnd(JsonGenerator jsonOut, CSVPrinter csvOut, HttpServletRequest request)
+  void outputSuccessfulEnd(JsonGenerator jsonOut, CSVPrinter csvOut)
     throws IOException {
     if (csvOut != null) {
       csvOut.close();
     } else {
       // finish the JSON envelope
-      endSuccessResult(request, jsonOut, null);
+      endSuccessResult(jsonOut, null);
     }
   } // end of outputSuccessfulEnd()
 
@@ -1051,11 +1070,10 @@ public class Results extends LabbcatServlet { // TODO unit test
    * <p> Errors can occur at any point, so no assumptions can be made about previous output calls.
    * @param jsonOut Generator for JSON output, or null for CSV output.
    * @param csvOut Printer for CSV output, or null for JSON output.
-   * @param request The HTTP request.
    * @param error The error message to return.
    */
   void outputFailedEnd(
-    JsonGenerator jsonOut, CSVPrinter csvOut, HttpServletRequest request, String error)
+    JsonGenerator jsonOut, CSVPrinter csvOut, String error)
     throws IOException {
     if (csvOut != null) {
       // Send column headers
@@ -1065,9 +1083,8 @@ public class Results extends LabbcatServlet { // TODO unit test
       csvOut.close();
     } else {
       // finish the JSON envelope
-      endFailureResult(request, jsonOut, error);
+      endFailureResult(jsonOut, error);
     }
   } // end of outputSuccessfulEnd()
 
-  private static final long serialVersionUID = -1;
 } // end of class Results
