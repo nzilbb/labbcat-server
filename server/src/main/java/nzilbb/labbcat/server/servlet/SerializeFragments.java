@@ -183,6 +183,8 @@ public class SerializeFragments extends APIRequestHandler { // TODO unit test
    * @param httpStatus Receives the response status code, in case or error.
    */
   public void get(RequestParameters parameters, OutputStream out, Consumer<String> contentType, Consumer<String> fileName, Consumer<Integer> httpStatus) {
+    
+    bCancel = false;
       
     // check parameters
     String name = parameters.getString("collection_name");

@@ -73,13 +73,12 @@ import org.xml.sax.*;
  * containing the output files. 
  * @author Robert Fromont
  */
-@WebServlet({"/api/serialize/graphs", "/serialize/graphs"} )
-public class SerializeGraphs extends LabbcatServlet { // TODO unit test
+public class SerializeGraphs extends APIRequestHandler { // TODO unit test
    
   // Attributes:
-
+  
   private boolean bCancel = false;
-   
+  
   /**
    * How far through the speakers.
    */
@@ -124,50 +123,60 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
    * If there is only one, the file in returned as the response to 
    * the request.  If there are more than one, the response is a
    * zipfile containing the output files. 
-   * @param request HTTP request
-   * @param response HTTP response
+   * @param parameters Request parameter map.
+   * @param out Response body stream.
+   * @param contentType Receives the content type for specification in the response headers.
+   * @param fileName Receives the filename for specification in the response headers.
+   * @param httpStatus Receives the response status code, in case or error.
    */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+  public void get(RequestParameters parameters, OutputStream out, Consumer<String> contentType, Consumer<String> fileName, Consumer<Integer> httpStatus) {
       
     bCancel = false;
-    ServletContext context = getServletContext();
       
     // check parameters
-    String name = request.getParameter("name");
+    String name = parameters.getString("name");
     if (name == null || name.trim().length() == 0) name = "transcripts";
     name = IO.SafeFileNameUrl(name.trim());
       
-    String mimeType = request.getParameter("mimeType");
+    String mimeType = parameters.getString("mimeType");
     if (mimeType == null) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No MIME type specified");
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(localize("No MIME type specified").getBytes()); // TODO i18n
+      } catch(IOException exception) {}
       return;
     }
       
     // an array of layer names
-    String[] layersToSerialize = request.getParameterValues("layerId");
-    if (layersToSerialize == null) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No layers specified");
+    String[] layersToSerialize = parameters.getStrings("layerId");
+    if (layersToSerialize.length == 0) {
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(localize("No layers specified").getBytes()); // TODO i18n
+      } catch(IOException exception) {}
       return;
     }
-
+    
     try {
          
-      final SqlGraphStoreAdministration store = getStore(request);
+      final SqlGraphStoreAdministration store = getStore();
       try {
         // arrays of transcripts and delimiters
-        String[] ids = request.getParameterValues("id");
-        if (ids == null) {
+        String[] ids = parameters.getStrings("id");
+        if (ids.length == 0) {
           // have they specified a query?
-          String query = request.getParameter("query");
+          String query = parameters.getString("query");
           ids = store.getMatchingTranscriptIds(query);
           if (ids.length == 0) {
-            response.sendError(400, "No graph IDs specified");
+            contentType.accept("text/plain;charset=UTF-8");
+            httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+            out.write(localize("No IDs were specified").getBytes()); // TODO i18n
             return;
           }
         } // no "id" parameter values
-
+        
         // gather layer IDs in a mutable collection
         LinkedHashSet<String> layers = new LinkedHashSet<String>();
         for (String l : layersToSerialize) layers.add(l);
@@ -175,7 +184,9 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
         // configure serializer
         final GraphSerializer serializer = store.serializerForMimeType(mimeType);
         if (serializer == null) {
-          response.sendError(400, "Invalid MIME type: " + mimeType);
+          contentType.accept("text/plain;charset=UTF-8");
+          httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+          out.write(localize("Invalid MIME type: {0}", mimeType).getBytes()); // TODO i18n
           return;
         }
         Schema schema = store.getSchema();
@@ -190,11 +201,9 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
         // add any layers required by the serializer
         for (String l : serializer.getRequiredLayers()) layers.add(l);
         final String[] layersToLoad = layers.toArray(new String[0]);
-
+        
         // make the serialization a monitorable, cancelable task 
         // create a stream to pump from
-        final HttpServletRequest finalRequest = request;
-        final HttpServletResponse finalResponse = response;
         final String finalName = name;
         PipedInputStream inStream = new PipedInputStream();
         final PipedOutputStream outStream = new PipedOutputStream(inStream);
@@ -218,7 +227,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
                     || (serializer.getCardinality() == GraphSerializer.Cardinality.NToN
                         && finalIds.length == 1)) { // single output stream, return that file
                   
-                  finalResponse.setContentType(mimeType);
+                  contentType.accept(mimeType);
                   serializer.serialize(
                     // a source of graphs to serialize (for NToOne there might be more than one)
                     Arrays.stream(finalIds)
@@ -244,7 +253,7 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
                       if (bCancelling) return;
                       try {
                         setStatus(stream.getName());
-                        ResponseAttachmentName(finalRequest, finalResponse, stream.getName());
+                        fileName.accept(stream.getName());
                         IO.Pump(stream.getStream(), outStream);
                         outStream.flush();
                         outStream.close();
@@ -266,13 +275,13 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
                       setLastException(exception);
                       setStatus("Serialization error: " + exception);
                     });
-                    
+                  
                   
                 } else { // multiple output streams, return a zip file
                   
                   // send headers
-                  finalResponse.setContentType("application/zip");
-                  ResponseAttachmentName(finalRequest, finalResponse, finalName + ".zip");
+                  contentType.accept("application/zip");
+                  fileName.accept(finalName + ".zip");
                   final ZipOutputStream zipOut = new ZipOutputStream(outStream);
                   try {
                     
@@ -358,13 +367,20 @@ public class SerializeGraphs extends LabbcatServlet { // TODO unit test
           };
         task.setStore(store);
         task.start();
-        IO.Pump(inStream, response.getOutputStream());
+        IO.Pump(inStream, out);
         
       } finally {
         cacheStore(store);
       }
     } catch(Exception ex) {
-      throw new ServletException(ex);
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(ex.toString().getBytes());
+      } catch(IOException exception) {
+        System.err.println("Files.get: could not report unhandled exception: " + ex);
+        ex.printStackTrace(System.err);
+      }
     }
   }
 
