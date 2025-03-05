@@ -8,9 +8,10 @@
     import = "org.apache.commons.fileupload.*"
     import = "org.apache.commons.fileupload.disk.*"
     import = "org.apache.commons.fileupload.servlet.*"
+    import = "nzilbb.labbcat.server.servlet.RequestParameters" 
 %><%
 {
-  HashMap<String,Object> parameters = new HashMap<String,Object>();
+  RequestParameters parameters = new RequestParameters();
   try {
     ServletFileUpload fileupload = new ServletFileUpload(new DiskFileItemFactory());
     // this ensures that umlauts, etc. don't get ?ified
@@ -38,6 +39,10 @@
         } else { // it's a file
           File f = File.createTempFile("anycontainer-", "-"+item.getName());
           f.delete();
+          f.deleteOnExit();
+          f.mkdir();
+          // ensure the server file's name is the same as the client file's name
+          f = new File(f, item.getName());
           f.deleteOnExit();
           item.write(f);            
           if (!parameters.containsKey(item.getFieldName())) {

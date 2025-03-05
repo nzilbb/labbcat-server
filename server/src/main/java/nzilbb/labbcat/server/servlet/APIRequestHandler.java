@@ -24,6 +24,7 @@ package nzilbb.labbcat.server.servlet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -386,6 +387,17 @@ public class APIRequestHandler {
     writer.flush();
     return writer;
   } // end of endFailureResult()
+  
+  /**
+   * Write a given JSON response to a given OutputStream.
+   * @param out Output stream to write to.
+   * @param jsonOut JSON object the write.
+   */
+  public void writeResponse(OutputStream out, JsonObject jsonOut) {
+    JsonWriter writer = Json.createWriter(out);
+    writer.writeObject(jsonOut);
+    writer.close();
+  } // end of writeResponse()
   
   /**
    * Escapes quotes in the given string for inclusion in QL or SQL queries.

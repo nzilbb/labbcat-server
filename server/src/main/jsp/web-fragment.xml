@@ -3,6 +3,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-fragment_5_0.xsd"
 	version="5.0" metadata-complete="false">
+  <servlet><servlet-name>file-upload-tomcat9.jsp</servlet-name><jsp-file>/jsp/file-upload-tomcat9.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>file-upload-tomcat9.jsp</servlet-name><url-pattern>/api/file-upload-tomcat9.jsp</url-pattern></servlet-mapping>
+  <servlet><servlet-name>file-upload-tomcat10.jsp</servlet-name><jsp-file>/jsp/file-upload-tomcat10.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>file-upload-tomcat10.jsp</servlet-name><url-pattern>/api/file-upload-tomcat10.jsp</url-pattern></servlet-mapping>
+
   <servlet><servlet-name>user.jsp</servlet-name><jsp-file>/jsp/user.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>user.jsp</servlet-name><url-pattern>/api/user</url-pattern></servlet-mapping>
   
@@ -21,7 +26,10 @@
   <servlet><servlet-name>results.jsp</servlet-name><jsp-file>/jsp/results.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>results.jsp</servlet-name><url-pattern>/api/results</url-pattern></servlet-mapping>
   
-xo  <servlet><servlet-name>admin/password.jsp</servlet-name><jsp-file>/jsp/admin/password.jsp</jsp-file></servlet>
+  <servlet><servlet-name>praat.jsp</servlet-name><jsp-file>/jsp/praat.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>praat.jsp</servlet-name><url-pattern>/api/praat</url-pattern></servlet-mapping>
+
+  <servlet><servlet-name>admin/password.jsp</servlet-name><jsp-file>/jsp/admin/password.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/password.jsp</servlet-name><url-pattern>/api/admin/password</url-pattern></servlet-mapping>
   
   <servlet><servlet-name>admin/systemattributes.jsp</servlet-name><jsp-file>/jsp/admin/systemattributes.jsp</jsp-file></servlet>

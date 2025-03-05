@@ -10,9 +10,10 @@
     import = "org.apache.commons.fileupload2.core.DiskFileItemFactory"
     import = "org.apache.commons.fileupload2.core.FileItem"
     import = "org.apache.commons.fileupload2.core.FileUploadException"
+    import = "nzilbb.labbcat.server.servlet.RequestParameters" 
 %><%
 {
-  HashMap<String,Object> parameters = new HashMap<String,Object>();
+  RequestParameters parameters = new RequestParameters();
   try {
     final DiskFileItemFactory fileItemfactory = DiskFileItemFactory.builder().get();
     final JakartaServletFileUpload fileUpload = new JakartaServletFileUpload(fileItemfactory);
@@ -40,6 +41,10 @@
           File f = File.createTempFile("anycontainer-", "-"+item.getName());
           f.delete();
           f.deleteOnExit();
+          f.mkdir();
+          // ensure the server file's name is the same as the client file's name
+          f = new File(f, item.getName());
+          f.deleteOnExit();
           item.write(f.toPath());            
           if (!parameters.containsKey(item.getFieldName())) {
             parameters.put(item.getFieldName(), f);
@@ -57,16 +62,7 @@
     } // next item
   } catch(FileUploadException exception) {
     // not a multipart request, just load regular parameters
-    Enumeration enNames = request.getParameterNames();
-    while (enNames.hasMoreElements()) {
-      String name = (String)enNames.nextElement();
-      String[] values = request.getParameterValues(name);
-      if (values.length == 1) {
-        parameters.put(name, values[0]);
-      } else {
-        parameters.put(name, values);
-      }
-    } // next element 
+    parameters = parseParameters(request);
   }
   request.setAttribute("multipart-parameters", parameters);
 }

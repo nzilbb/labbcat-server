@@ -33,9 +33,6 @@ import java.util.zip.*;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.Graph;
@@ -52,7 +49,6 @@ import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.db.StoreCache;
 import nzilbb.labbcat.server.task.ProcessWithPraat;
 import nzilbb.util.IO;
-import org.apache.commons.fileupload.FileItem;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -242,11 +238,8 @@ import org.xml.sax.*;
  * to each line. 
  * @author Robert Fromont
  */
-@WebServlet({"/api/praat"} )
-public class Praat extends LabbcatServlet { // TODO unit test
+public class Praat extends APIRequestHandler {
    
-  // Attributes:
-     
   /**
    * Constructor
    */
@@ -257,40 +250,31 @@ public class Praat extends LabbcatServlet { // TODO unit test
   
   /**
    * The POST method for the servlet.
-   * <p> This expects a multipart request body with parameters as defined above.
-   * @param request HTTP request
-   * @param response HTTP response
+   * @param parameters Request parameter map.
+   * @param out Response body output stream.
+   * @param contentType Receives the content type for specification in the response headers.
+   * @param fileName Receives the filename for specification in the response headers.
+   * @param httpStatus Receives the response status code, in case or error.
+   * @return JSON-encoded object representing the response
    */
-  @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
+  public JsonObject post(RequestParameters parameters, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     
     try {
-      // interpret request parameters
-      MultipartRequestParameters parameters = new MultipartRequestParameters(request); 
-      Vector<FileItem> files =  parameters.getFiles("csv");
+      Vector<File> files =  parameters.getFiles("csv");
       if (files.size() == 0) {
-        writeResponse(response, failureResult(request, "No file received."));
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult("No file received.");
       }
-      // save the input file
-      FileItem csv = files.elementAt(0);
-      String fileName = MultipartRequestParameters.SanitizedFileName(csv);
-      // save the file
-      File uploadedCsvFile = File.createTempFile("Praat-", "-"+fileName);
-      uploadedCsvFile.delete();
-      uploadedCsvFile.deleteOnExit();
-      csv.write(uploadedCsvFile);        
+      // get the file
+      File uploadedCsvFile = files.elementAt(0);
           
       ProcessWithPraat task = new ProcessWithPraat();
       task.setStoreCache(new StoreCache() {
           public SqlGraphStore get() {
             try {
-              return getStore(request);
+              return getStore();
             } catch(Exception exception) {
-              System.err.println("Search.StoreCache: " + exception);
+              System.err.println("Praat.StoreCache: " + exception);
               return null;
             }
           }
@@ -299,23 +283,21 @@ public class Praat extends LabbcatServlet { // TODO unit test
           }
         });
       task.setDataFile(uploadedCsvFile);
-      task.setFileName(fileName);
+      task.setFileName(uploadedCsvFile.getName());
           
       if (parameters.getString("transcriptColumn") != null) {
         try {
           task.setTranscriptIdColumn(
             Integer.parseInt(parameters.getString("transcriptColumn")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "Transcript column \"{0}\" is not an integer.",
-              parameters.getString("transcriptColumn")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "Transcript column \"{0}\" is not an integer.",
+            parameters.getString("transcriptColumn"));
         }
       } else {
-        writeResponse(
-          response, failureResult(
-            request, "Transcript column not supplied."));
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult("Transcript column not supplied.");
       }
           
       if (parameters.getString("participantColumn") != null) {
@@ -323,62 +305,55 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setParticipantNameColumn(
             Integer.parseInt(parameters.getString("participantColumn")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "Participant column \"{0}\" is not an integer.",
-              parameters.getString("participantColumn")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+              "Participant column \"{0}\" is not an integer.",
+              parameters.getString("participantColumn"));
         }
       } else {
-        writeResponse(
-          response, failureResult(
-            request, "Participant column not supplied."));
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult("Participant column not supplied.");
       }
           
       if (parameters.getString("startTimeColumn") != null) {
         try {
           task.setMarkColumn(Integer.parseInt(parameters.getString("startTimeColumn")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "Start time column \"{0}\" is not an integer.",
-              parameters.getString("startTimeColumn")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "Start time column \"{0}\" is not an integer.",
+            parameters.getString("startTimeColumn"));
         }
       } else {
-        writeResponse(
-          response, failureResult(
-            request, "Start time column not supplied."));
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult("Start time column not supplied.");
       }
-          
+      
       if (parameters.getString("endTimeColumn") != null) {
         try {
           task.setMarkEndColumn(Integer.parseInt(parameters.getString("endTimeColumn")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "End time column \"{0}\" is not an integer.",
-              parameters.getString("endTimeColumn")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "End time column \"{0}\" is not an integer.",
+            parameters.getString("endTimeColumn"));
         }
       } else {
-        writeResponse(
-          response, failureResult(
-            request, "End time column not supplied."));
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult("End time column not supplied.");
       }
-          
+      
       if (parameters.getString("windowOffset") != null) {
         try {
           task.setWindowOffset(Double.parseDouble(parameters.getString("windowOffset")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "Window offset \"{0}\" is not a number.",
-              parameters.getString("windowOffset")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "Window offset \"{0}\" is not a number.",
+            parameters.getString("windowOffset"));
         }
       }
-          
+      
       if (parameters.getString("passThroughData") != null
           && parameters.getString("passThroughData").equalsIgnoreCase("false")) {
         task.setPassThroughData(false);
@@ -406,11 +381,10 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getFormantOtherPattern().add(Pattern.compile(value));
         } catch(PatternSyntaxException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not a valid regular expression: {2}",
-              "formantOtherPattern", value, exception.getMessage()));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not a valid regular expression: {2}",
+            "formantOtherPattern", value, exception.getMessage());
         }
       } // next value
       if (parameters.getString("formantCeilingDefault") != null) {
@@ -418,12 +392,10 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFormantCeilingDefault(
             Integer.parseInt(parameters.getString("formantCeilingDefault")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request,
-              "{0} \"{1}\" is not an integer.",
-              "formantCeilingDefault", parameters.getString("formantCeilingDefault")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "formantCeilingDefault", parameters.getString("formantCeilingDefault"));
         }
       }
       task.getFormantCeilingOther().clear();
@@ -431,17 +403,15 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getFormantCeilingOther().add(Integer.valueOf(value));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.", "formantCeilingOther", value));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult("{0} \"{1}\" is not an integer.", "formantCeilingOther", value);
         }
       } // next value          
       if (parameters.getString("scriptFormant") != null
           && parameters.getString("scriptFormant").length() > 0) {
         task.setScriptFormant(parameters.getString("scriptFormant"));
       }
-
+      
       task.setUseFastTrack(
         "true".equalsIgnoreCase(parameters.getString("useFastTrack")));
       if (parameters.getString("fastTrackDifferentiationLayerId") != null) {
@@ -453,11 +423,10 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getFastTrackOtherPattern().add(Pattern.compile(value));
         } catch(PatternSyntaxException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not a valid regular expression: {2}",
-              "fastTrackOtherPattern", value, exception.getMessage()));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not a valid regular expression: {2}",
+            "fastTrackOtherPattern", value, exception.getMessage());
         }
       } // next value
       if (parameters.getString("fastTrackLowestAnalysisFrequencyDefault") != null) {
@@ -465,13 +434,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackLowestAnalysisFrequencyDefault(
             Integer.parseInt(parameters.getString("fastTrackLowestAnalysisFrequencyDefault")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request,
-              "{0} \"{1}\" is not an integer.",
-              "fastTrackLowestAnalysisFrequencyDefault",
-              parameters.getString("fastTrackLowestAnalysisFrequencyDefault")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackLowestAnalysisFrequencyDefault",
+            parameters.getString("fastTrackLowestAnalysisFrequencyDefault"));
         }
       }
       task.getFastTrackLowestAnalysisFrequencyOther().clear();
@@ -479,11 +446,10 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getFastTrackLowestAnalysisFrequencyOther().add(Integer.valueOf(value));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackLowestAnalysisFrequencyOther", value));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackLowestAnalysisFrequencyOther", value);
         }
       } // next value
       if (parameters.getString("fastTrackHighestAnalysisFrequencyDefault") != null) {
@@ -491,13 +457,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackHighestAnalysisFrequencyDefault(
             Integer.parseInt(parameters.getString("fastTrackHighestAnalysisFrequencyDefault")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request,
-              "{0} \"{1}\" is not an integer.",
-              "fastTrackHighestAnalysisFrequencyDefault",
-              parameters.getString("fastTrackHighestAnalysisFrequencyDefault")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackHighestAnalysisFrequencyDefault",
+            parameters.getString("fastTrackHighestAnalysisFrequencyDefault"));
         }
       }
       task.getFastTrackHighestAnalysisFrequencyOther().clear();
@@ -505,11 +469,10 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getFastTrackHighestAnalysisFrequencyOther().add(Integer.valueOf(value));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackHighestAnalysisFrequencyOther", value));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackHighestAnalysisFrequencyOther", value);
         }
       } // next value
       if (parameters.getString("fastTrackTimeStep") != null) {
@@ -517,12 +480,10 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackTimeStep(
             Double.parseDouble(parameters.getString("fastTrackTimeStep")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request,
-              "{0} \"{1}\" is not a number.",
-              "fastTrackTimeStep", parameters.getString("fastTrackTimeStep")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not a number.",
+            "fastTrackTimeStep", parameters.getString("fastTrackTimeStep"));
         }
       }
       if (parameters.getString("fastTrackBasisFunctions") != null
@@ -548,12 +509,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackMaximumF1FrequencyValue(
             Integer.parseInt(parameters.getString("fastTrackMaximumF1FrequencyValue")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackMaximumF1FrequencyValue",
-              parameters.getString("fastTrackMaximumF1FrequencyValue")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackMaximumF1FrequencyValue",
+            parameters.getString("fastTrackMaximumF1FrequencyValue"));
         }
       }
       task.setFastTrackEnableF1BandwidthHeuristic(
@@ -563,12 +523,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackMaximumF1BandwidthValue(
             Integer.parseInt(parameters.getString("fastTrackMaximumF1BandwidthValue")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackMaximumF1BandwidthValue",
-              parameters.getString("fastTrackMaximumF1BandwidthValue")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackMaximumF1BandwidthValue",
+            parameters.getString("fastTrackMaximumF1BandwidthValue"));
         }
       }
       task.setFastTrackEnableF2BandwidthHeuristic(
@@ -578,12 +537,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackMaximumF2BandwidthValue(
             Integer.parseInt(parameters.getString("fastTrackMaximumF2BandwidthValue")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackMaximumF2BandwidthValue",
-              parameters.getString("fastTrackMaximumF2BandwidthValue")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackMaximumF2BandwidthValue",
+            parameters.getString("fastTrackMaximumF2BandwidthValue"));
         }
       }
       task.setFastTrackEnableF3BandwidthHeuristic(
@@ -593,12 +551,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackMaximumF3BandwidthValue(
             Integer.parseInt(parameters.getString("fastTrackMaximumF3BandwidthValue")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackMaximumF3BandwidthValue",
-              parameters.getString("fastTrackMaximumF3BandwidthValue")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackMaximumF3BandwidthValue",
+            parameters.getString("fastTrackMaximumF3BandwidthValue"));
         }
       }
       task.setFastTrackEnableF4FrequencyHeuristic(
@@ -608,12 +565,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackMinimumF4FrequencyValue(
             Integer.parseInt(parameters.getString("fastTrackMinimumF4FrequencyValue")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackMinimumF4FrequencyValue",
-              parameters.getString("fastTrackMinimumF4FrequencyValue")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackMinimumF4FrequencyValue",
+            parameters.getString("fastTrackMinimumF4FrequencyValue"));
         }
       }
       task.setFastTrackEnableRhoticHeuristic(
@@ -625,12 +581,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackNumberOfSteps(
             Integer.parseInt(parameters.getString("fastTrackNumberOfSteps")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackNumberOfSteps",
-              parameters.getString("fastTrackNumberOfSteps")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackNumberOfSteps",
+            parameters.getString("fastTrackNumberOfSteps"));
         }
       }
       if (parameters.getString("fastTrackNumberOfCoefficients") != null) {
@@ -638,12 +593,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackNumberOfCoefficients(
             Integer.parseInt(parameters.getString("fastTrackNumberOfCoefficients")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackNumberOfCoefficients",
-              parameters.getString("fastTrackNumberOfCoefficients")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackNumberOfCoefficients",
+            parameters.getString("fastTrackNumberOfCoefficients"));
         }
       }
       if (parameters.getString("fastTrackNumberOfFormants") != null) {
@@ -651,12 +605,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setFastTrackNumberOfFormants(
             Integer.parseInt(parameters.getString("fastTrackNumberOfFormants")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "fastTrackNumberOfFormants",
-              parameters.getString("fastTrackNumberOfFormants")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "fastTrackNumberOfFormants",
+            parameters.getString("fastTrackNumberOfFormants"));
         }
       }
       task.setFastTrackCoefficients(
@@ -678,11 +631,10 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getPitchOtherPattern().add(Pattern.compile(value));
         } catch(PatternSyntaxException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not a valid regular expression: {2}",
-              "pitchOtherPattern", value, exception.getMessage()));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not a valid regular expression: {2}",
+            "pitchOtherPattern", value, exception.getMessage());
         }
       } // next value
       if (parameters.getString("pitchFloorDefault") != null) {
@@ -690,12 +642,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setPitchFloorDefault(
             Integer.parseInt(parameters.getString("pitchFloorDefault")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "pitchFloorDefault",
-              parameters.getString("pitchFloorDefault")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "pitchFloorDefault",
+            parameters.getString("pitchFloorDefault"));
         }
       }
       task.getPitchFloorOther().clear();
@@ -703,12 +654,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getPitchFloorOther().add(Integer.valueOf(value));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "pitchFloorOther",
-              parameters.getString("pitchFloorOther")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "pitchFloorOther",
+            parameters.getString("pitchFloorOther"));
         }
       } // next value
       if (parameters.getString("pitchCeilingDefault") != null) {
@@ -716,12 +666,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setPitchCeilingDefault(
             Integer.parseInt(parameters.getString("pitchCeilingDefault")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "pitchCeilingDefault",
-              parameters.getString("pitchCeilingDefault")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "pitchCeilingDefault",
+            parameters.getString("pitchCeilingDefault"));
         }
       }
       task.getPitchCeilingOther().clear();
@@ -729,12 +678,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getPitchCeilingOther().add(Integer.valueOf(value));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "pitchCeilingOther",
-              parameters.getString("pitchCeilingOther")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "pitchCeilingOther",
+            parameters.getString("pitchCeilingOther"));
         }
       } // next value
       if (parameters.getString("voicingThresholdDefault") != null) {
@@ -742,12 +690,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setVoicingThresholdDefault(
             Double.parseDouble(parameters.getString("voicingThresholdDefault")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not a number.",
-              "voicingThresholdDefault",
-              parameters.getString("voicingThresholdDefault")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not a number.",
+            "voicingThresholdDefault",
+            parameters.getString("voicingThresholdDefault"));
         }
       }
       task.getVoicingThresholdOther().clear();
@@ -755,12 +702,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getVoicingThresholdOther().add(Double.valueOf(value));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not a number.",
-              "voicingThresholdOther",
-              parameters.getString("voicingThresholdOther")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not a number.",
+            "voicingThresholdOther",
+            parameters.getString("voicingThresholdOther"));
         }
       } // next value
       if (parameters.getString("scriptPitch") != null
@@ -779,11 +725,10 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getIntensityOtherPattern().add(Pattern.compile(value));
         } catch(PatternSyntaxException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not a valid regular expression: {2}",
-              "intensityOtherPattern", value, exception.getMessage()));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not a valid regular expression: {2}",
+            "intensityOtherPattern", value, exception.getMessage());
         }
       } // next value
       if (parameters.getString("intensityPitchFloorDefault") != null) {
@@ -791,12 +736,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
           task.setIntensityPitchFloorDefault(
             Integer.parseInt(parameters.getString("intensityPitchFloorDefault")));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "intensityPitchFloorDefault",
-              parameters.getString("intensityPitchFloorDefault")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "intensityPitchFloorDefault",
+            parameters.getString("intensityPitchFloorDefault"));
         }
       }
       task.getIntensityPitchFloorOther().clear();
@@ -804,12 +748,11 @@ public class Praat extends LabbcatServlet { // TODO unit test
         try {
           task.getIntensityPitchFloorOther().add(Integer.valueOf(value));
         } catch(NumberFormatException exception) {
-          writeResponse(
-            response, failureResult(
-              request, "{0} \"{1}\" is not an integer.",
-              "intensityPitchFloorOther",
-              parameters.getString("intensityPitchFloorOther")));
-          return;
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult(
+            "{0} \"{1}\" is not an integer.",
+            "intensityPitchFloorOther",
+            parameters.getString("intensityPitchFloorOther"));
         }
       } // next value
       if (parameters.getString("scriptIntensity") != null
@@ -832,74 +775,58 @@ public class Praat extends LabbcatServlet { // TODO unit test
 
       // ensure number of patterns match values
       if (task.getFormantOtherPattern().size() != task.getFormantCeilingOther().size()) {
-        writeResponse(
-          response, failureResult(
-            request,
-            "{0} and {1} must have the same number of values.",
-            "formantOtherPattern", "formantCeilingOther"));
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult(
+          "{0} and {1} must have the same number of values.",
+          "formantOtherPattern", "formantCeilingOther");
       }
       if (task.getPitchOtherPattern().size() != task.getPitchFloorOther().size()) {
-        writeResponse(
-          response, failureResult(
-            request,
-            "{0} and {1} must have the same number of values.",
-            "pitchOtherPattern", "pitchFloorOther"));
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult(
+          "{0} and {1} must have the same number of values.",
+          "pitchOtherPattern", "pitchFloorOther");
       }
       if (task.getPitchOtherPattern().size() != task.getPitchCeilingOther().size()) {
-        writeResponse(
-          response, failureResult(
-            request,
-            "{0} and {1} must have the same number of values.",
-            "pitchOtherPattern", "pitchCeilingOther"));
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult(
+          "{0} and {1} must have the same number of values.",
+          "pitchOtherPattern", "pitchCeilingOther");
       }
       if (task.getPitchOtherPattern().size() != task.getVoicingThresholdOther().size()) {
-        writeResponse(
-          response, failureResult(
-            request,
-            "{0} and {1} must have the same number of values.",
-            "pitchOtherPattern", "voicingThresholdOther"));
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult(
+          "{0} and {1} must have the same number of values.",
+          "pitchOtherPattern", "voicingThresholdOther");
       }
       if (task.getIntensityOtherPattern().size() != task.getIntensityPitchFloorOther().size()) {
-        writeResponse(
-          response, failureResult(
-            request,
-            "{0} and {1} must have the same number of values.",
-            "intensityOtherPattern", "intensityPitchFloorOther"));
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult(
+          "{0} and {1} must have the same number of values.",
+          "intensityOtherPattern", "intensityPitchFloorOther");
       }
       if (task.getFastTrackOtherPattern().size() != task.getFastTrackLowestAnalysisFrequencyOther().size()) {
-        writeResponse(
-          response, failureResult(
-            request,
-            "{0} and {1} must have the same number of values.",
-            "fastTrackOtherPattern", "fastTrackLowestAnalysisFrequencyOther"));
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult(
+          "{0} and {1} must have the same number of values.",
+          "fastTrackOtherPattern", "fastTrackLowestAnalysisFrequencyOther");
       }
       if (task.getFastTrackOtherPattern().size() != task.getFastTrackHighestAnalysisFrequencyOther().size()) {
-        writeResponse(
-          response, failureResult(
-            request,
-            "{0} and {1} must have the same number of values.",
-            "fastTrackOtherPattern", "fastTrackHighestAnalysisFrequencyOther"));
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult(
+          "{0} and {1} must have the same number of values.",
+          "fastTrackOtherPattern", "fastTrackHighestAnalysisFrequencyOther");
       }
 
       // are they a non-admin user?
       Connection db = newConnection();
       try {
-        if (!IsUserInRole("admin", request, db)) {
+        if (!context.isUserInRole("admin")) {
           if (task.filesAccessed()) {
-            writeResponse(
-              response, failureResult(
-                request,
-                "The Praat script contains operations like readFile, writeFile, or deleteFile"
-                +" that could access arbitrary files on the server."
-                +" As this is a security risk, such scripts can only be executed by 'admin' users."));
-            return;
+            httpStatus.accept(SC_BAD_REQUEST);
+            return failureResult(
+              "The Praat script contains operations like readFile, writeFile, or deleteFile"
+              +" that could access arbitrary files on the server."
+              +" As this is a security risk, such scripts can only be executed by 'admin' users.");
           }
         }
       } finally {
@@ -907,24 +834,27 @@ public class Praat extends LabbcatServlet { // TODO unit test
       }
 
       // start the task
-      task.setName(uploadedCsvFile.getName());
-      if (request.getRemoteUser() != null) {	
-        task.setWho(request.getRemoteUser());
+      task.setName(uploadedCsvFile.getParentFile().getName()); // parent dir is a unque version of he name
+      if (context.getUser() != null) {	
+        task.setWho(context.getUser());
       } else {
-        task.setWho(request.getRemoteHost());
+        task.setWho(context.getUserHost());
       }
       task.start();
           
       // return its ID
       JsonObjectBuilder jsonResult = Json.createObjectBuilder()
         .add("threadId", task.getId());
-      writeResponse(
-        response, successResult(request, jsonResult.build(), null));
-          
-      } catch(Exception ex) {
-        throw new ServletException(ex);
-      }
+      return successResult(jsonResult.build(), null);
+      
+    } catch(Exception ex) {
+      try {
+        httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      } catch(Exception exception) {}
+      System.err.println("Praat.post: unhandled exception: " + ex);
+      ex.printStackTrace(System.err);
+      return failureResult(ex);
+    }
   }
   
-  private static final long serialVersionUID = -1;
 } // end of class Praat

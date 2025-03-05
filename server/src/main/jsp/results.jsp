@@ -1,4 +1,4 @@
-<%@ page info="Transcript search" isErrorPage="true"
+<%@ page info="Search results" isErrorPage="true"
     import = "nzilbb.labbcat.server.servlet.Results" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 

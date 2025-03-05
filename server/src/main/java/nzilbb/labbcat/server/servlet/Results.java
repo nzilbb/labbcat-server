@@ -174,6 +174,7 @@ public class Results extends APIRequestHandler { // TODO unit test
   /**
    * The GET method for the servlet.
    * @param parameters Request parameter map.
+   * @param requestHeaders Access to HTTP request headers.
    * @param out Response body output stream.
    * @param contentType Receives the content type for specification in the response headers.
    * @param fileName Receives the filename for specification in the response headers.
@@ -605,15 +606,7 @@ public class Results extends APIRequestHandler { // TODO unit test
       try {
         httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       } catch(Exception exception) {}
-      try {
-        JsonWriter writer = Json.createWriter(out);
-        writer.writeObject(failureResult(ex));
-        writer.close();
-        out.write(ex.toString().getBytes());
-      } catch(IOException exception) {
-        System.err.println("Results.get: could not report unhandled exception: " + ex);
-        ex.printStackTrace(System.err);
-      }
+      writeResponse(out, failureResult(ex));
     }
   }
   
