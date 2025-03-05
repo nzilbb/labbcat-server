@@ -27,14 +27,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import nzilbb.ag.Schema;
 import nzilbb.labbcat.server.db.AllUtterancesTask;
 import nzilbb.labbcat.server.db.SqlGraphStore;
@@ -81,8 +78,7 @@ import nzilbb.labbcat.server.search.Matrix;
  * <br> The task, when finished, will output a URL for accessing the matches of the search.
  * @author Robert Fromont
  */
-@WebServlet({"/api/utterances"} )
-public class Utterances extends LabbcatServlet { // TODO unit test
+public class Utterances extends APIRequestHandler { // TODO unit test
   
   /**
    * Constructor
@@ -90,54 +86,51 @@ public class Utterances extends LabbcatServlet { // TODO unit test
   public Utterances() {
   } // end of constructor
   
-  // Servlet methods
-  
   /**
    * The POST method for the servlet.
-   * <p> This expects a multipart request body with parameters as defined above.
-   * @param request HTTP request
-   * @param response HTTP response
+   * @param parameters Request parameter map.
+   * @param out Response body output stream.
+   * @param contentType Receives the content type for specification in the response headers.
+   * @param fileName Receives the filename for specification in the response headers.
+   * @param httpStatus Receives the response status code, in case or error.
+   * @param redirectUrl Receives a URL for the request to be redirected to.
+   * @return JSON-encoded object representing the response
    */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
-
+  public JsonObject post(RequestParameters parameters, Consumer<String> fileName, Consumer<Integer> httpStatus, Consumer<String> redirectUrl) {
+    
     // parameters
     AllUtterancesTask task = new AllUtterancesTask();
-    task.setResources(inferResourceBundle(request));
-    task.setParticipantQuery(request.getParameter("participant_expression"));
+    task.setResources(context.getResourceBundle());
+    task.setParticipantQuery(parameters.getString("participant_expression"));
     if (task.getParticipantQuery() == null) {
-      if (request.getParameter("id") != null) {
+      if (parameters.getString("id") != null) {
         task.setParticipantQuery(
           "id IN ("
-          +Arrays.stream(request.getParameterValues("id"))
+          +Arrays.stream(parameters.getStrings("id"))
           .map(id->"'"+esc(id)+"'")
           .collect(Collectors.joining(","))
           +")");
-      } else if (request.getParameter("speaker_number") != null) {
+      } else if (parameters.getString("speaker_number") != null) {
         task.setParticipantQuery(
           "speaker_number IN ("
-          +Arrays.stream(request.getParameterValues("speaker_number"))
+          +Arrays.stream(parameters.getStrings("speaker_number"))
           .collect(Collectors.joining(","))
           +")");
       } else {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        writeResponse(response, failureResult(request, "No participants specified.")); // TODO i18n
-        return;
+        httpStatus.accept(SC_BAD_REQUEST);
+        return failureResult("No participants specified."); // TODO i18n
       }
     }
-    task.setTranscriptQuery(request.getParameter("transcript_expression"));
+    task.setTranscriptQuery(parameters.getString("transcript_expression"));
     try {
-      final SqlGraphStoreAdministration store = getStore(request);
-      if (task.getTranscriptQuery() == null && request.getParameter("transcript_type") != null) {
+      final SqlGraphStoreAdministration store = getStore();
+      if (task.getTranscriptQuery() == null && parameters.getString("transcript_type") != null) {
         // parameter values are numeric transcript_type.type_id values, but we need the text labels
         PreparedStatement sql = store.getConnection().prepareStatement(
           "SELECT transcript_type"
           + " FROM transcript_type"
           + " WHERE type_id IN ("
-          +Arrays.stream(request.getParameterValues("transcript_type"))
+          +Arrays.stream(parameters.getStrings("transcript_type"))
           .collect(Collectors.joining(","))
           + ")");
         StringBuilder transcriptQuery = new StringBuilder();
@@ -155,7 +148,7 @@ public class Utterances extends LabbcatServlet { // TODO unit test
           } // next transcript type
         } catch (SQLException x) { // probably transcript type labels not numeric type_id
           transcriptQuery.append("[");
-          transcriptQuery.append(Arrays.stream(request.getParameterValues("transcript_type"))
+          transcriptQuery.append(Arrays.stream(parameters.getStrings("transcript_type"))
                                  .map(type -> "'"+esc(type)+"'")
                                  .collect(Collectors.joining(",")));
         }
@@ -165,15 +158,15 @@ public class Utterances extends LabbcatServlet { // TODO unit test
           task.setTranscriptQuery(transcriptQuery.toString());
         }
       } // transcript_type parameter
-      if (request.getParameter("only_main_speaker") != null) task.setMainParticipantOnly(true);
-      boolean redirect = request.getParameter("redirect") != null;
+      if (parameters.getString("only_main_speaker") != null) task.setMainParticipantOnly(true);
+      boolean redirect = parameters.getString("redirect") != null;
       
       task.setStoreCache(new StoreCache() {
           public SqlGraphStore get() {
             try {
               return store;
             } catch(Exception exception) {
-              System.err.println("Search.StoreCache: " + exception);
+              System.err.println("Utterances.StoreCache: " + exception);
               return null;
             }
           }
@@ -181,39 +174,43 @@ public class Utterances extends LabbcatServlet { // TODO unit test
             cacheStore((SqlGraphStoreAdministration)store);
           }
         });
-      if (request.getRemoteUser() != null) {	
-        task.setWho(request.getRemoteUser());
+      if (context.getUser() != null) {	
+        task.setWho(context.getUser());
         // admin users have access to everything
-        if (!IsUserInRole("admin", request, task.getStore().getConnection())
+        if (!context.isUserInRole("admin")
             // if they're using using access permissions in general
             && task.getStore().getPermissionsSpecified()) {
           // other users may have restricted access to some things
-          task.setRestrictByUser(request.getRemoteUser());
+          task.setRestrictByUser(context.getUser());
         } // not an admin user
       } else {
-        task.setWho(request.getRemoteHost());
+        task.setWho(context.getUserHost());
       }
       
       String validationError = task.validate();
       if (validationError != null) {
         cacheStore(store);
-        writeResponse(response, failureResult(request, validationError));
+        return failureResult(validationError);
       } else {
         task.start();
-
+        
         if (redirect) {
-          response.sendRedirect("../thread?threadId="+task.getId());
+          redirectUrl.accept("../thread?threadId="+task.getId());
+          return null;
         } else {
           // return its ID
           JsonObjectBuilder jsonResult = Json.createObjectBuilder()
             .add("threadId", ""+task.getId());
-          writeResponse(response, successResult(request, jsonResult.build(), null));
+          return successResult(jsonResult.build(), null);
         }
       } // valid search
     } catch(Exception ex) {
-      throw new ServletException(ex);
+      try {
+        httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      } catch(Exception exception) {}
+      System.err.println("Praat.post: unhandled exception: " + ex);
+      ex.printStackTrace(System.err);
+      return failureResult(ex);
     }
   }
-  
-  private static final long serialVersionUID = -1;
 } // end of class Search

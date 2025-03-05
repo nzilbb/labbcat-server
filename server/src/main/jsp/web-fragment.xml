@@ -37,6 +37,9 @@
   <servlet><servlet-name>praat.jsp</servlet-name><jsp-file>/jsp/praat.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>praat.jsp</servlet-name><url-pattern>/api/praat</url-pattern></servlet-mapping>
 
+  <servlet><servlet-name>utterances.jsp</servlet-name><jsp-file>/jsp/utterances.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>utterances.jsp</servlet-name><url-pattern>/api/utterances</url-pattern></servlet-mapping>
+
   <servlet><servlet-name>admin/password.jsp</servlet-name><jsp-file>/jsp/admin/password.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/password.jsp</servlet-name><url-pattern>/api/admin/password</url-pattern></servlet-mapping>
   
