@@ -25,14 +25,13 @@ package nzilbb.labbcat.server.servlet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.URI;
 import java.util.Vector;
+import java.util.function.Consumer;
 import java.util.zip.*;
-import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphNotFoundException;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
@@ -59,9 +58,8 @@ import nzilbb.util.IO;
  * If there are more than one, the response is a zip file containing the output files. 
  * @author Robert Fromont
  */
-@WebServlet({"/api/files"} )
-public class Files extends LabbcatServlet { // TODO unit test
-   
+public class Files extends APIRequestHandler { // TODO unit test
+  
   /**
    * Constructor
    */
@@ -69,26 +67,25 @@ public class Files extends LabbcatServlet { // TODO unit test
   } // end of constructor
 
   // Servlet methods
-   
+  
   /**
    * The GET method for the servlet.
-   * @param request HTTP request
-   * @param response HTTP response
+   * @param parameters Request parameter map.
+   * @param out Response body stream.
+   * @param contentType Receives the content type for specification in the response headers.
+   * @param fileName Receives the filename for specification in the response headers.
+   * @param httpStatus Receives the response status code, in case or error.
    */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-      
-    ServletContext context = getServletContext();
-      
+  public void get(RequestParameters parameters, OutputStream out, Consumer<String> contentType, Consumer<String> fileName, Consumer<Integer> httpStatus) {
+
     // check parameters
-    String mimeType = request.getParameter("mimeType");
+    String mimeType = parameters.getString("mimeType");
     if (mimeType == null || mimeType.trim().length() == 0) mimeType = "";
     
-    String trackSuffix = request.getParameter("trackSuffix");
+    String trackSuffix = parameters.getString("trackSuffix");
     if (trackSuffix == null || trackSuffix.trim().length() == 0) trackSuffix = "";
-
-    String name = request.getParameter("name");
+    
+    String name = parameters.getString("name");
     if (name == null || name.trim().length() == 0) {
       if (mimeType == null || mimeType.length() == 0) {
         name = "transcripts";
@@ -97,29 +94,37 @@ public class Files extends LabbcatServlet { // TODO unit test
       }
     }
     name = IO.SafeFileNameUrl(name.trim());
-      
+    
     try {
-         
-      SqlGraphStoreAdministration store = getStore(request);
+      
+      SqlGraphStoreAdministration store = getStore();
       // we want local, not remote, file URLs, so unset baseUrl temporarily
       String baseUrl = store.getBaseUrl();
       store.setBaseUrl(null);
       // arrays of transcripts and delimiters
-      String[] id = request.getParameterValues("id");
-      if (id == null) {
+      String[] id = parameters.getStrings("id");
+      if (id.length == 0) {
         // have they specified a query?
-        String query = request.getParameter("query");
+        String query = parameters.getString("query");
+        if (query == null) {
+          contentType.accept("text/plain;charset=UTF-8");
+          httpStatus.accept(SC_BAD_REQUEST);
+          out.write("No graph IDs specified".getBytes());
+          return;
+        }
         id = store.getMatchingTranscriptIds(query);
         if (id.length == 0) {
-          response.sendError(400, "No graph IDs specified");
+          contentType.accept("text/plain;charset=UTF-8");
+          httpStatus.accept(SC_BAD_REQUEST);
+          out.write("No graph IDs identified".getBytes());
           return;
         }
       } // no "id" parameter values
-
+      
       File zipFile = null;
       Vector<File> files = new Vector<File>();
       try {
-
+        
         for (String transcriptId : id) {
           try {
             String file = mimeType.length() > 0?
@@ -130,23 +135,28 @@ public class Files extends LabbcatServlet { // TODO unit test
             } // file was returned
           } catch(GraphNotFoundException notFound) {
           } catch(Exception x) {
-            response.sendError(500, "Could not get file for " + transcriptId + ": " + x);
-              return;
+            contentType.accept("text/plain;charset=UTF-8");
+            httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+            out.write(localize("Could not get file for {0}: {1}", transcriptId, x.toString()).getBytes()); // TODO i18n
+            return;
           }
-        } // gnext ID
+        } // next ID
         
         if (files.size() == 0) {
-          response.sendError(HttpServletResponse.SC_NOT_FOUND, "No files were generated");
-        }
-        else if (files.size() == 1) { // one file only
+          contentType.accept("text/plain;charset=UTF-8");
+          httpStatus.accept(SC_NOT_FOUND);
+          out.write(localize("No files were generated").getBytes());
+          return;
+        } else if (files.size() == 1) { // one file only
           // don't zip a single file, just return the file
-          response.setContentType(mimeType);
+          // TODO if mimeType is blank try to guess it from the existension
+          contentType.accept(mimeType);
           File file = files.firstElement();
-          ResponseAttachmentName(request, response, file.getName());               
-          IO.Pump(new FileInputStream(file), response.getOutputStream());
+          fileName.accept(file.getName());               
+          IO.Pump(new FileInputStream(file), out);
         } else { // multiple files
-          response.setContentType("application/zip");
-          ResponseAttachmentName(request, response, IO.SafeFileNameUrl(name) + ".zip");
+          contentType.accept("application/zip");
+          fileName.accept(IO.SafeFileNameUrl(name) + ".zip");
           
           // create a stream to pump from
           PipedInputStream inStream = new PipedInputStream();
@@ -181,9 +191,9 @@ public class Files extends LabbcatServlet { // TODO unit test
             }).start();
           
           // send headers immediately, so that the browser shows the 'save' prompt
-          response.getOutputStream().flush();
+          out.flush();
           
-          IO.Pump(inStream, response.getOutputStream());
+          IO.Pump(inStream, out);
         } // multiple files
       } finally {
         // restore the baseUrl setting
@@ -192,9 +202,14 @@ public class Files extends LabbcatServlet { // TODO unit test
         cacheStore(store);
       }
     } catch(Exception ex) {
-      throw new ServletException(ex);
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(ex.toString().getBytes());
+      } catch(IOException exception) {
+        System.err.println("Files.get: could not report unhandled exception: " + exception);
+        exception.printStackTrace(System.err);
+      }
     }
   }
-  
-  private static final long serialVersionUID = -1;
 } // end of class Files
