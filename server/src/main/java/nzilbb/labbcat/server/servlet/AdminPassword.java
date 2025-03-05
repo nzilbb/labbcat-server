@@ -88,8 +88,9 @@ public class AdminPassword extends APIRequestHandler {
   /**
    * The handler for the request
    * <p> This set the user password as specified
-   * @param request HTTP request
-   * @param response HTTP response
+   * @param requestBody Stream supplying the body of the request.
+   * @param httpStatus Receives the response status code, in case or error.
+   * @return A JSON object as the request response.
    */
   public JsonObject put(InputStream requestBody, Consumer<Integer> httpStatus) {
     try {

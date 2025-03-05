@@ -63,8 +63,10 @@ public class Attributes extends APIRequestHandler { // TODO unit test
   
   /**
    * The GET method for the servlet.
-   * @param request HTTP request
-   * @param response HTTP response
+   * @param parameters Request parameter map.
+   * @param out Response body stream.
+   * @param fileName Receives the filename for specification in the response headers.
+   * @param httpStatus Receives the response status code, in case or error.
    */
   public void get(RequestParameters parameters, OutputStream out, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     

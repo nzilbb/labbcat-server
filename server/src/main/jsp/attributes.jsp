@@ -1,4 +1,4 @@
-<%@ page info="User information" isErrorPage="true"
+<%@ page info="Transcript attributes" isErrorPage="true"
     contentType = "text/csv;charset=UTF-8"
     import = "nzilbb.labbcat.server.servlet.Attributes" 
     import = "javax.json.Json" 

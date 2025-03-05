@@ -56,6 +56,12 @@ public interface APIRequestContext {
   public String getUser();
   
   /**
+   * The IP/host name of the user's connection.
+   * @return The IP/host name of the user's connection, or null if not available.
+   */
+  public String getUserHost();
+  
+  /**
    * Determines whether the logged-in user is in the given role.
    * @param role The desired role.
    * @return true if the user is in the given role, false otherwise.

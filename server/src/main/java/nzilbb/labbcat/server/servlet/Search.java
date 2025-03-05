@@ -24,14 +24,11 @@ package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import nzilbb.ag.Schema;
 import nzilbb.labbcat.server.db.OneQuerySearch;
 import nzilbb.labbcat.server.db.SqlGraphStore;
@@ -99,8 +96,7 @@ import nzilbb.labbcat.server.search.Matrix;
  * <br> The task, when finished, will output a URL for accessing the matches of the search.
  * @author Robert Fromont
  */
-@WebServlet({"/api/search"} )
-public class Search extends LabbcatServlet {
+public class Search extends APIRequestHandler {
   
   /**
    * Constructor
@@ -111,59 +107,53 @@ public class Search extends LabbcatServlet {
   // Servlet methods
   
   /**
-   * The POST method for the servlet.
-   * <p> This expects a multipart request body with parameters as defined above.
-   * @param request HTTP request
-   * @param response HTTP response
+   * The GET method for the servlet.
+   * @param parameters Request parameter map.
+   * @param httpStatus Receives the response status code, in case or error.
+   * @return A JSON object as the request response.
    */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
-
+  public JsonObject get(RequestParameters parameters, Consumer<Integer> httpStatus) {
     // parameters
     Matrix matrix = new Matrix();
-    String searchJson = request.getParameter("searchJson");
-    String search = request.getParameter("search");
+    String searchJson = parameters.getString("searchJson");
+    String search = parameters.getString("search");
     if (searchJson != null) {
       matrix.fromJsonString(searchJson);
     } else if (search != null) {
       matrix.fromLegacyString(search);
     } else {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      writeResponse(response, failureResult(request, "No search matrix specified."));
-      return;
+      httpStatus.accept(SC_BAD_REQUEST);
+      return failureResult("No search matrix specified.");
     }
-    if (request.getParameter("participantQuery") != null) {
-      matrix.setParticipantQuery(request.getParameter("participantQuery"));
-    } else if (request.getParameter("participant_expression") != null) {
-      matrix.setParticipantQuery(request.getParameter("participant_expression"));
-    } else if (request.getParameter("participant_id") != null) {
+    if (parameters.getString("participantQuery") != null) {
+      matrix.setParticipantQuery(parameters.getString("participantQuery"));
+    } else if (parameters.getString("participant_expression") != null) {
+      matrix.setParticipantQuery(parameters.getString("participant_expression"));
+    } else if (parameters.getString("participant_id") != null) {
       matrix.setParticipantQuery(
         "id IN ("
-        +Arrays.stream(request.getParameterValues("participant_id"))
+        +Arrays.stream(parameters.getStrings("participant_id"))
         .map(id->"'"+id+"'")
         .collect(Collectors.joining(","))
         +")");
     }
-    if (request.getParameter("transcriptQuery") != null) {
-      matrix.setTranscriptQuery(request.getParameter("transcriptQuery"));
-    } else if (request.getParameter("transcript_expression") != null) {
-      matrix.setTranscriptQuery(request.getParameter("transcript_expression"));
+    if (parameters.getString("transcriptQuery") != null) {
+      matrix.setTranscriptQuery(parameters.getString("transcriptQuery"));
+    } else if (parameters.getString("transcript_expression") != null) {
+      matrix.setTranscriptQuery(parameters.getString("transcript_expression"));
     }
     OneQuerySearch task = new OneQuerySearch();
     task.setMatrix(matrix);
-    if (request.getParameter("mainParticipantOnly") != null
-        || request.getParameter("only_main_speaker") != null) {
+    if (parameters.getString("mainParticipantOnly") != null
+        || parameters.getString("only_main_speaker") != null) {
       task.setMainParticipantOnly(true);
     }
-    if (request.getParameter("suppressResults") != null
-        || request.getParameter("suppress_results") != null) {
+    if (parameters.getString("suppressResults") != null
+        || parameters.getString("suppress_results") != null) {
       task.setSuppressResults(true);
     }
-    String offsetThreshold = request.getParameter("offsetThreshold");
-    if (offsetThreshold == null && request.getParameter("only_aligned") != null) {
+    String offsetThreshold = parameters.getString("offsetThreshold");
+    if (offsetThreshold == null && parameters.getString("only_aligned") != null) {
       offsetThreshold = "50";
     }
     if ("0".equals(offsetThreshold)) offsetThreshold = null;
@@ -171,54 +161,49 @@ public class Search extends LabbcatServlet {
       try {
         task.setAnchorConfidenceThreshold(Byte.valueOf(offsetThreshold));
       } catch(NumberFormatException exception) {
-        writeResponse(response, failureResult(
-                        request, "Invalid offset threshold \"{0}\": {1}",
-                        offsetThreshold, exception.getMessage()));
-        return;
+        return failureResult("Invalid offset threshold \"{0}\": {1}",
+                             offsetThreshold, exception.getMessage());
       }
     }
-    String matchesPerTranscript = request.getParameter("matchesPerTranscript");
+    String matchesPerTranscript = parameters.getString("matchesPerTranscript");
     if (matchesPerTranscript == null) {
-      matchesPerTranscript = request.getParameter("matches_per_transcript");
+      matchesPerTranscript = parameters.getString("matches_per_transcript");
     }
     if (matchesPerTranscript != null) {
       try {
         task.setMatchesPerTranscript(Integer.valueOf(matchesPerTranscript));
       } catch(NumberFormatException exception) {
-        writeResponse(response, failureResult(
-                        request, "Invalid matches per transcript \"{0}\": {1}",
-                        matchesPerTranscript,
-                        exception.getMessage()));
-        return;
+        return failureResult(
+          "Invalid matches per transcript \"{0}\": {1}",
+          matchesPerTranscript,
+          exception.getMessage());
       }
     }
-    String overlapThreshold = request.getParameter("overlapThreshold");
-    if (overlapThreshold == null) overlapThreshold = request.getParameter("overlap_threshold");
+    String overlapThreshold = parameters.getString("overlapThreshold");
+    if (overlapThreshold == null) overlapThreshold = parameters.getString("overlap_threshold");
     if (overlapThreshold != null) {
       try {
         task.setOverlapThreshold(Integer.valueOf(overlapThreshold));
       } catch(NumberFormatException exception) {
-        writeResponse(response, failureResult(
-                        request, "Invalid overlap threshold \"{0}\": {1}",
-                        overlapThreshold, exception.getMessage()));
-        return;
+        return failureResult(
+          "Invalid overlap threshold \"{0}\": {1}",
+          overlapThreshold, exception.getMessage());
       }
     }
-    String maxMatches = request.getParameter("maxMatches");
-    if (maxMatches == null) maxMatches = request.getParameter("num_transcripts");
+    String maxMatches = parameters.getString("maxMatches");
+    if (maxMatches == null) maxMatches = parameters.getString("num_transcripts");
     if (maxMatches != null) {
       try {
         task.setMaxMatches(Integer.valueOf(maxMatches));
       } catch(NumberFormatException exception) {
-        writeResponse(response, failureResult(
-                        request, "Invalid maximum number of matches \"{0}\": {1}",
-                        maxMatches, exception.getMessage()));
-        return;
+        return failureResult(
+          "Invalid maximum number of matches \"{0}\": {1}",
+          maxMatches, exception.getMessage());
       }
     }
     
     try {
-      final SqlGraphStoreAdministration store = getStore(request);
+      final SqlGraphStoreAdministration store = getStore();
       task.setStoreCache(new StoreCache() {
           public SqlGraphStore get() {
             return store;
@@ -227,35 +212,33 @@ public class Search extends LabbcatServlet {
             cacheStore((SqlGraphStoreAdministration)store);
           }
         });
-      if (request.getRemoteUser() != null) {	
-        task.setWho(request.getRemoteUser());
+      if (context.getUser() != null) {	
+        task.setWho(context.getUser());
         // admin users have access to everything
-        if (!IsUserInRole("admin", request, task.getStore().getConnection())
+        if (!context.isUserInRole("admin")
             // if they're using using access permissions in general
             && task.getStore().getPermissionsSpecified()) {
           // other users may have restricted access to some things
-          task.setRestrictByUser(request.getRemoteUser());
+          task.setRestrictByUser(context.getUser());
         } // not an admin user
       } else {
-        task.setWho(request.getRemoteHost());
+        task.setWho(context.getUserHost());
       }
       
       String validationError = task.validate();
       if (validationError != null) {
-        writeResponse(response, failureResult(request, validationError));
+        return failureResult(validationError);
       } else {
         task.start();
         
         // return its ID
         JsonObjectBuilder jsonResult = Json.createObjectBuilder()
           .add("threadId", ""+task.getId());
-        writeResponse(
-          response, successResult(request, jsonResult.build(), null));
+        return successResult(jsonResult.build(), null);
       } // valid search
     } catch(Exception ex) {
-      throw new ServletException(ex);
+      return failureResult(ex);
     }
   }
   
-  private static final long serialVersionUID = -1;
 } // end of class Search

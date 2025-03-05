@@ -81,8 +81,7 @@ public class User extends APIRequestHandler {
   /**
    * Generate the response to a request.
    * <p> This returns information about the current user - their ID and the roles they have.
-   * @param jsonOut A JSON generator for writing the response to
-   * @param user The current user logged in, or null if user authentication is not being used.
+   * @param jsonOut A JSON generator for writing the response to.
    */
   public void get(JsonGenerator jsonOut) {      
     startResult(jsonOut, false);

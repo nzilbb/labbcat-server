@@ -1997,9 +1997,11 @@ public class OneQuerySearch extends SearchTask {
     }
 
     sqlPatternMatch = connection.prepareStatement(
-      "DROP TABLE _result_copy");
+      "DROP TEMPORARY TABLE _result_copy");
     try {
       sqlPatternMatch.executeUpdate();
+    } catch (SQLException x) {
+      // maybe we're cancelling before it was created?
     } finally {
       sqlPatternMatch.close();
     }
@@ -2049,7 +2051,7 @@ public class OneQuerySearch extends SearchTask {
 
     // delete the unsorted results
     sqlPatternMatch = connection.prepareStatement(
-      "DROP TABLE _result");
+      "DROP TEMPORARY TABLE _result");
     try {
       sqlPatternMatch.executeUpdate();
     } catch (Exception x) {
