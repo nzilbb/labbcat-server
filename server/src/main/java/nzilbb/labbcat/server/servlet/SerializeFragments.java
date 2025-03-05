@@ -32,9 +32,6 @@ import java.util.zip.*;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.servlet.*;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphStoreAdministration;
 import nzilbb.ag.Schema;
@@ -116,386 +113,410 @@ import nzilbb.util.MonitorableSeries;
  * long series of short requests, and then the data tranferred when finally ready.</p>
  * @author Robert Fromont
  */
-@WebServlet({"/api/serialize/fragment", "/serialize/fragment"} )
-public class SerializeFragments extends LabbcatServlet { // TODO unit test
+public class SerializeFragments extends APIRequestHandler { // TODO unit test
    
-   // Attributes:
-   private boolean bCancel = false;
-   private MonitorableSeries<Graph> utterances;
-   private GraphSerializer serializer;
-   
-   /**
-    * How far through the speakers.
-    */
-   private int iPercentComplete = 0;
-   /**
-    * PercentComplete accessor 
-    * @return How far through the speakers.
-    */
+  // Attributes:
+  private boolean bCancel = false;
+  private MonitorableSeries<Graph> utterances;
+  private GraphSerializer serializer;
+  
+  /**
+   * How far through the speakers.
+   */
+  private int iPercentComplete = 0;
+  /**
+   * PercentComplete accessor 
+   * @return How far through the speakers.
+   */
    public int getPercentComplete() {
-      if (serializer != null && utterances != null) {
-         iPercentComplete =
-            Optional.ofNullable(utterances.getPercentComplete()).orElse(0)/2
-            + Optional.ofNullable(serializer.getPercentComplete()).orElse(0)/2;
-      }
-      return iPercentComplete;
+     if (serializer != null && utterances != null) {
+       iPercentComplete =
+         Optional.ofNullable(utterances.getPercentComplete()).orElse(0)/2
+         + Optional.ofNullable(serializer.getPercentComplete()).orElse(0)/2;
+     }
+     return iPercentComplete;
    }
-   /**
-    * PercentComplete mutator
-    * @param iNewPercentComplete How far through the speakers.
-    */
-   public void setPercentComplete(int iNewPercentComplete) { iPercentComplete = iNewPercentComplete; }
-   
-   /**
-    * Constructor
-    */
-   public SerializeFragments() {
-   } // end of constructor
-   
-   // Servlet methods
-   
-   /**
-    * The GET method for the servlet - this expects an array of 
-    * graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
-    * a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
-    * <p><b>Input HTTP parameters</b>:
-    * <ul>
-    *  <li><i>mimeType</i> - content-type of the format to serialize to. </li>
-    *  <li><i>layerId</i> - a list of layer IDs to include in the serialization. </li>
-    *  <li><i>id</i> - one or more graph IDs. </li>
-    *  <li><i>start</i> - one or more start times (in seconds).</li>
-    *  <li><i>end</i> - one or more end times (in seconds).</li>
-    *  <li><i>filter</i> - (optional) one or more annotation IDs to filter by. e.g. a turn
-    * annotation ID, which would ensure that only words within the specified turn are
-    * included, not words from other turns.</li>
-    *  <li><i>name</i> or <i>collection_name</i> - (optional) name of the collection.</li>
-    *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
-    *  <li><i>tag</i> - (optional) add a tag identifying the target annotation.</li>
-    * </ul>
-    * <br><b>Output</b>: A each of the transcript fragments 
-    * specified by the input parameters converted to the given 
-    * format.  
-    * This may be a single file or multiple files, depending on
-    * the converter behaviour and how many fragments are specified.
-    * If there is only one, the file in returned as the response to 
-    * the request.  If there are more than one, the response is a
-    * zipfile containing the output files. 
-    * @param request HTTP request
-    * @param response HTTP response
-    */
-   @Override
-   public void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+  /**
+   * PercentComplete mutator
+   * @param iNewPercentComplete How far through the speakers.
+   */
+  public void setPercentComplete(int iNewPercentComplete) { iPercentComplete = iNewPercentComplete; }
+  
+  /**
+   * Constructor
+   */
+  public SerializeFragments() {
+  } // end of constructor
+  
+  // Servlet methods
+  
+  /**
+   * The GET method for the servlet - this expects an array of 
+   * graph <i>id</i>s, <i>start</i> times and <i>end</i> times, 
+   * a list of <i>layerId</i>s in include, and a <i>mimetype</i>.
+   * <p><b>Input HTTP parameters</b>:
+   * <ul>
+   *  <li><i>mimeType</i> - content-type of the format to serialize to. </li>
+   *  <li><i>layerId</i> - a list of layer IDs to include in the serialization. </li>
+   *  <li><i>id</i> - one or more graph IDs. </li>
+   *  <li><i>start</i> - one or more start times (in seconds).</li>
+   *  <li><i>end</i> - one or more end times (in seconds).</li>
+   *  <li><i>filter</i> - (optional) one or more annotation IDs to filter by. e.g. a turn
+   * annotation ID, which would ensure that only words within the specified turn are
+   * included, not words from other turns.</li>
+   *  <li><i>name</i> or <i>collection_name</i> - (optional) name of the collection.</li>
+   *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
+   *  <li><i>tag</i> - (optional) add a tag identifying the target annotation.</li>
+   * </ul>
+   * <br><b>Output</b>: A each of the transcript fragments 
+   * specified by the input parameters converted to the given 
+   * format.  
+   * This may be a single file or multiple files, depending on
+   * the converter behaviour and how many fragments are specified.
+   * If there is only one, the file in returned as the response to 
+   * the request.  If there are more than one, the response is a
+   * zipfile containing the output files. 
+   * @param parameters Request parameter map.
+   * @param out Response body stream.
+   * @param contentType Receives the content type for specification in the response headers.
+   * @param fileName Receives the filename for specification in the response headers.
+   * @param httpStatus Receives the response status code, in case or error.
+   */
+  public void get(RequestParameters parameters, OutputStream out, Consumer<String> contentType, Consumer<String> fileName, Consumer<Integer> httpStatus) {
       
-      ServletContext context = getServletContext();
-      
-      // check parameters
-      String name = request.getParameter("collection_name");
-      if (name == null || name.trim().length() == 0) name = request.getParameter("name");
-      if (name == null || name.trim().length() == 0) name = "fragments";
-      name = "fragments_"+IO.SafeFileNameUrl(name.trim());
-      
-      String mimeType = request.getParameter("mimeType");
-      if (mimeType == null) mimeType = request.getParameter("content-type");
-      if (mimeType == null) {
-	 response.sendError(500, "no MIME type specified");
-	 return;
-      }
-      
-      // an array of layer names
-      String[] layerId = request.getParameterValues("layerId");
-      if (layerId == null) {
-	 response.sendError(500, "no layers specified");
-	 return;
-      }
-
-      long searchId = -1;
-      String threadId = request.getParameter("threadId");
-      if (threadId != null) {
-        Task task = Task.findTask(Long.valueOf(threadId));
-        if (task != null && task instanceof SearchTask) {
-          SearchTask search = (SearchTask)task;
-          if (search.getResults() != null && search.getResults() instanceof SqlSearchResults) {
-            searchId = ((SqlSearchResults)search.getResults()).getId();
-          }
-        }
-      }
-      String[] utterance = request.getParameterValues("utterance");
-
-      // arrays of transcripts and delimiters
-      String[] id = request.getParameterValues("id");
-      if (id == null && utterance == null && threadId == null) {
-	 response.sendError(500, "no graph IDs specified");
-	 return;
-      }
-      String[] start = request.getParameterValues("start");
-      if (start == null && utterance == null && threadId == null) {
-	 response.sendError(500, "no start offsets specified");
-	 return;
-      }
-      String[] end = request.getParameterValues("end");
-      if (end == null && utterance == null && threadId == null) {
-	 response.sendError(500, "no end offsets specified");
-	 return;
-      }
-      String[] filter = request.getParameterValues("filter");
-      if (utterance == null && threadId == null &&
-          (id.length != start.length || id.length != end.length
-           || (filter != null && id.length != filter.length))) {
-        response.sendError(500, "mismatched number of id, start, end, and filter parameters");
-        return;
-      }
-
-      boolean prefixNames = request.getParameter("prefix") != null;
-      boolean tagTarget = request.getParameter("tag") != null;
-      NumberFormat resultNumberFormatter = NumberFormat.getInstance();
-      resultNumberFormatter.setGroupingUsed(false);
-      if (id != null) {
-        resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
-      } // TODO minimum integer digits for utterance/threadId cases
-      
+    // check parameters
+    String name = parameters.getString("collection_name");
+    if (name == null || name.trim().length() == 0) name = parameters.getString("name");
+    if (name == null || name.trim().length() == 0) name = "fragments";
+    name = "fragments_"+IO.SafeFileNameUrl(name.trim());
+    
+    String mimeType = parameters.getString("mimeType");
+    if (mimeType == null) mimeType = parameters.getString("content-type");
+    if (mimeType == null) {
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       try {
-        if ("true".equalsIgnoreCase(request.getParameter("async"))) {
-          // start a task and return its ID
-          
-          // layers
-          HashSet<String> layers = new HashSet<String>();
-          for (String l : layerId) layers.add(l);
-          
-          // utterances
-          Vector<String> vUtterances = new Vector<String>();
-          if (utterance != null) {
-            for (String matchId : utterance) vUtterances.add(matchId);
-          } else if (id != null) {
-            if (filter == null) { // not filtering by turn etc.
-              for (int f = 0; f < id.length; f++) {
-                vUtterances.add(
-                  id[f]+";"+start[f]+"-"+end[f]
-                  +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
-              }
-            } else { // filtering by turn etc.
-              for (int f = 0; f < id.length; f++) {
-                vUtterances.add(
-                  id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
-                  +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
-              }
-            }
-          } // id/start/end specified
-          
-          SerializeFragmentsTask task = new SerializeFragmentsTask(
-            name, searchId, layers,
-            mimeType, getStore(request))
-            .setIncludeRequiredLayers(true)
-            .setPrefixNames(prefixNames)
-            .setTagTarget(tagTarget);
-          if (vUtterances.size() > 0) task.setUtterances(vUtterances);
-          if (request.getRemoteUser() != null) {	
-            task.setWho(request.getRemoteUser());
-          } else {
-            task.setWho(request.getRemoteHost());
-          }
-          task.start();
-          // return its ID
-          JsonObjectBuilder jsonResult = Json.createObjectBuilder()
-            .add("threadId", task.getId());
-          writeResponse(
-            response, successResult(request, jsonResult.build(), null));
-          return;
-        } // async
-        
-        File zipFile = null;
-        SqlGraphStoreAdministration store = getStore(request);
-        try {
-            
-          LinkedHashSet<String> layersToLoad = new LinkedHashSet<String>();
-          for (String l : layerId) layersToLoad.add(l);
-            
-          Vector<String> vUtterances = new Vector<String>();
-          if (utterance != null) {
-            for (String matchId : utterance) vUtterances.add(matchId);
-          } else if (id != null) {
-            if (filter == null) { // not filtering by turn etc.
-              for (int f = 0; f < id.length; f++) {
-                vUtterances.add(
-                  id[f]+";"+start[f]+"-"+end[f]
-                  +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
-              }
-            } else { // filtering by turn etc.
-              for (int f = 0; f < id.length; f++) {
-                vUtterances.add(
-                  id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
-                  +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
-              }
-            }
-          }
-            
-          GraphSerializer serializer = store.serializerForMimeType(mimeType);
-          if (serializer == null) {
-            throw new Exception("Invalid MIME type: " + mimeType);
-          }
-          Schema schema = store.getSchema();
-          // configure serializer
-          ParameterSet configuration = new ParameterSet();
-          // default values
-          serializer.configure(configuration, schema);
-          // load saved ones
-          ConfigurationHelper.LoadConfiguration(
-            serializer.getDescriptor(), configuration, store.getSerializersDirectory(), schema);
-          serializer.configure(configuration, schema);
-          for (String l : serializer.getRequiredLayers()) layersToLoad.add(l);
-          MonitorableSeries<Graph> fragmentSource = vUtterances.size() > 0?
-            new FragmentSeries(vUtterances, store, layersToLoad.toArray(new String[0]))
-            .setPrefixNames(prefixNames)
-            .setTagTarget(tagTarget)
-            :new ResultSeries(searchId, store, layersToLoad.toArray(new String[0]))
-            .setPrefixNames(prefixNames)
-            .setTagTarget(tagTarget);
-          // if we're not prefixing names, and we're tagging targets
-          if (!prefixNames && tagTarget) {
-            // then we need to consolidate graphs - i.e. catch consecutive fragments that
-            // are the same ID, and copy the target tags into the winning version of the graph
-            fragmentSource = new ConsolidatedGraphSeries(fragmentSource)
-              .copyLayer("target");
-          }
-          if (tagTarget) {
-            // make sure serializer outputs target layer too
-            Vector<String> layersIncludingTarget = new Vector<String>();
-            for (String l : layerId) layersIncludingTarget.add(l);
-            layersIncludingTarget.add("target");
-            layerId = layersIncludingTarget.toArray(new String[0]);
-          }
-          final Vector<NamedStream> files = new Vector<NamedStream>();
-          serializeFragments(
-            name, fragmentSource,
-            serializer,
-            new Consumer<NamedStream>() {
-              public void accept(NamedStream stream) {
-                files.add(stream);
-              }},
-            new Consumer<SerializationException>() {
-              public void accept(SerializationException exception) {
-                System.err.println("SerializeFragments: " + exception);
-              }},
-            layerId, mimeType, store);
-            
-          // did we actually find any files?
-          if (files.size() == 0) {
-            response.sendError(404, "no files were generated");
-          } else if (files.size() == 1) { // one file only
-            // don't zip a single file, just return the file
-            response.setContentType(mimeType);
-            NamedStream stream = files.firstElement();
-            ResponseAttachmentName(request, response, stream.getName());               
-            IO.Pump(stream.getStream(), response.getOutputStream());
-          } else { /// multiple files
-            response.setContentType("application/zip");
-            ResponseAttachmentName(request, response, name + ".zip");
-               
-            // create a stream to pump from
-            PipedInputStream inStream = new PipedInputStream();
-            final PipedOutputStream outStream = new PipedOutputStream(inStream);
-               
-            // start a new thread to extract the data and stream it back
-            new Thread(new Runnable() {
-                public void run() {
-                  try {
-                    ZipOutputStream zipOut = new ZipOutputStream(outStream);
-                           
-                    // for each file
-                    for (NamedStream stream : files) {
-                      try {
-                        // create the zip entry
-                        zipOut.putNextEntry(
-                          new ZipEntry(IO.SafeFileNameUrl(stream.getName())));
-                                 
-                        IO.Pump(stream.getStream(), zipOut, false);
-                      }
-                      catch (ZipException zx) {
-                      } finally {
-                        stream.getStream().close();
-                      }
-                    } // next file
-                    try {
-                      zipOut.close();
-                    } catch(Exception exception) {
-                      System.err.println("ConvertFragment: Cannot close ZIP file: " + exception);
-                    }
-                  } catch(Exception exception) {
-                    System.err.println("ConvertFragment: open zip stream: " + exception);
-                  }
-                }
-              }).start();
-               
-            // send headers immediately, so that the browser shows the 'save' prompt
-            response.getOutputStream().flush();
-               
-            IO.Pump(inStream, response.getOutputStream());
-          } // multiple files
-        } finally {
-          cacheStore(store);
+        out.write(localize("No MIME type specified").getBytes()); // TODO i18n
+      } catch(IOException exception) {}
+      return;
+    }
+    
+    // an array of layer names
+    String[] layerId = parameters.getStrings("layerId");
+    if (layerId.length == 0) {
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(localize("No layers specified").getBytes()); // TODO i18n
+      } catch(IOException exception) {}
+      return;
+    }
+    
+    long searchId = -1;
+    String threadId = parameters.getString("threadId");
+    if (threadId != null) {
+      Task task = Task.findTask(Long.valueOf(threadId));
+      if (task != null && task instanceof SearchTask) {
+        SearchTask search = (SearchTask)task;
+        if (search.getResults() != null && search.getResults() instanceof SqlSearchResults) {
+          searchId = ((SqlSearchResults)search.getResults()).getId();
         }
-      } catch(Exception ex) {
-         throw new ServletException(ex);
       }
-   }
-   
-   /**
-    * The post method for this servlet - simply calls doGet.
-    * @param req HTTP request
-    * @param res HTTP response
-    */
-   protected void doPost(HttpServletRequest req, HttpServletResponse res)
-      throws ServletException, java.io.IOException {
-      doGet(req,res);
-   }
-
-   /**
-    * Cancels the currently running exportTextGrids() method.
-    */
-   public void cancel() {
-      bCancel = true;
-      if (utterances != null) utterances.cancel();
-      if (serializer != null) serializer.cancel();
-   } // end of cancel()
-   
-   /**
-    * Serializes the given series of utterances using the given serializer.
-    * @param name The name of the collection.
-    * @param utterances Utterances to serialize.
-    * @param serializer The serialization module.
-    * @param streamConsumer Consumer for receiving the serialized streams.
-    * @param errorConsumer Consumer for handling serialization errors.
-    * @param layerIds A list of layer names.
-    * @param mimeType
-    * @param store Graph store.
-    * @throws Exception
-    */
-   public void serializeFragments(
-      String name, MonitorableSeries<Graph> utterances, GraphSerializer serializer,
-      Consumer<NamedStream> streamConsumer, Consumer<SerializationException> errorConsumer,
-      String[] layerIds, String mimeType, GraphStoreAdministration store)
-      throws Exception {
+    }
+    String[] utterance = parameters.getStrings("utterance");
+    
+    // arrays of transcripts and delimiters
+    String[] id = parameters.getStrings("id");
+    if (id.length == 0 && utterance.length == 0 && threadId == null) {
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(localize("No IDs specified").getBytes()); // TODO i18n       
+      } catch(IOException exception) {}
+      return;
+    }
+    String[] start = parameters.getStrings("start");
+    if (start.length == 0 && utterance.length == 0 && threadId == null) {
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(localize("No start offsets specified").getBytes()); // TODO i18n
+      } catch(IOException exception) {}
+      return;
+    }
+    String[] end = parameters.getStrings("end");
+    if (end.length == 0 && utterance.length == 0 && threadId == null) {
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(localize("No end offsets specified").getBytes()); // TODO i18n
+      } catch(IOException exception) {}
+      return;
+    }
+    String[] filter = parameters.getStrings("filter");
+    if (utterance == null && threadId == null &&
+        (id.length != start.length || id.length != end.length
+         || (filter.length != 0 && id.length != filter.length))) {
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(localize("Mismatched number of id, start, end, and filter parameters").getBytes()); // TODO i18n
+      } catch(IOException exception) {}
+      return;
+    }
+    
+    boolean prefixNames = parameters.getString("prefix") != null;
+    boolean tagTarget = parameters.getString("tag") != null;
+    NumberFormat resultNumberFormatter = NumberFormat.getInstance();
+    resultNumberFormatter.setGroupingUsed(false);
+    if (id != null) {
+      resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
+    } // TODO minimum integer digits for utterance/threadId cases
+    
+    try {
+      if ("true".equalsIgnoreCase(parameters.getString("async"))) {
+        // start a task and return its ID
+        
+        // layers
+        HashSet<String> layers = new HashSet<String>();
+        for (String l : layerId) layers.add(l);
+        
+        // utterances
+        Vector<String> vUtterances = new Vector<String>();
+        if (utterance != null) {
+          for (String matchId : utterance) vUtterances.add(matchId);
+        } else if (id != null) {
+          if (filter == null) { // not filtering by turn etc.
+            for (int f = 0; f < id.length; f++) {
+              vUtterances.add(
+                id[f]+";"+start[f]+"-"+end[f]
+                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+            }
+          } else { // filtering by turn etc.
+            for (int f = 0; f < id.length; f++) {
+              vUtterances.add(
+                id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+            }
+          }
+        } // id/start/end specified
+        
+        SerializeFragmentsTask task = new SerializeFragmentsTask(
+          name, searchId, layers,
+          mimeType, getStore())
+          .setIncludeRequiredLayers(true)
+          .setPrefixNames(prefixNames)
+          .setTagTarget(tagTarget);
+        if (vUtterances.size() > 0) task.setUtterances(vUtterances);
+        if (context.getUser() != null) {	
+          task.setWho(context.getUser());
+        } else {
+          task.setWho(context.getUserHost());
+        }
+        task.start();
+        // return its ID
+        JsonObjectBuilder jsonResult = Json.createObjectBuilder()
+          .add("threadId", task.getId());
+        contentType.accept("application/json;charset=UTF-8");
+        writeResponse(
+          out, successResult(jsonResult.build(), null));
+        return;
+      } // async
       
-      bCancel = false;
-      this.utterances = utterances;
-      this.serializer = serializer;
-      
-      if (utterances.getExactSizeIfKnown() <= 0) throw new Exception("No utterances specified");
-      
-      File fTempDir = new File(System.getProperty("java.io.tmpdir"));
-	 
-      // serialize the fragments
-      final Vector<NamedStream> files = new Vector<NamedStream>();
-      serializer.serialize(
-         utterances, layerIds,
-         streamConsumer,
-         new Consumer<String>() {
-            public void accept(String warning) {
-               System.out.println("WARNING: " + warning);
+      File zipFile = null;
+      SqlGraphStoreAdministration store = getStore();
+      try {
+        
+        LinkedHashSet<String> layersToLoad = new LinkedHashSet<String>();
+        for (String l : layerId) layersToLoad.add(l);
+        
+        Vector<String> vUtterances = new Vector<String>();
+        if (utterance != null) {
+          for (String matchId : utterance) vUtterances.add(matchId);
+        } else if (id != null) {
+          if (filter == null) { // not filtering by turn etc.
+            for (int f = 0; f < id.length; f++) {
+              vUtterances.add(
+                id[f]+";"+start[f]+"-"+end[f]
+                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+            }
+          } else { // filtering by turn etc.
+            for (int f = 0; f < id.length; f++) {
+              vUtterances.add(
+                id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
+            }
+          }
+        }
+        
+        GraphSerializer serializer = store.serializerForMimeType(mimeType);
+        if (serializer == null) {
+         contentType.accept("text/plain;charset=UTF-8");
+         httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+         out.write(localize("Invalid MIME type: {0}", mimeType).getBytes()); // TODO i18n
+         return;
+        }
+        Schema schema = store.getSchema();
+        // configure serializer
+        ParameterSet configuration = new ParameterSet();
+        // default values
+        serializer.configure(configuration, schema);
+        // load saved ones
+        ConfigurationHelper.LoadConfiguration(
+          serializer.getDescriptor(), configuration, store.getSerializersDirectory(), schema);
+        serializer.configure(configuration, schema);
+        for (String l : serializer.getRequiredLayers()) layersToLoad.add(l);
+        MonitorableSeries<Graph> fragmentSource = vUtterances.size() > 0?
+          new FragmentSeries(vUtterances, store, layersToLoad.toArray(new String[0]))
+          .setPrefixNames(prefixNames)
+          .setTagTarget(tagTarget)
+          :new ResultSeries(searchId, store, layersToLoad.toArray(new String[0]))
+          .setPrefixNames(prefixNames)
+          .setTagTarget(tagTarget);
+        // if we're not prefixing names, and we're tagging targets
+        if (!prefixNames && tagTarget) {
+          // then we need to consolidate graphs - i.e. catch consecutive fragments that
+          // are the same ID, and copy the target tags into the winning version of the graph
+          fragmentSource = new ConsolidatedGraphSeries(fragmentSource)
+            .copyLayer("target");
+        }
+        if (tagTarget) {
+          // make sure serializer outputs target layer too
+          Vector<String> layersIncludingTarget = new Vector<String>();
+          for (String l : layerId) layersIncludingTarget.add(l);
+          layersIncludingTarget.add("target");
+          layerId = layersIncludingTarget.toArray(new String[0]);
+        }
+        final Vector<NamedStream> files = new Vector<NamedStream>();
+        serializeFragments(
+          name, fragmentSource,
+          serializer,
+          new Consumer<NamedStream>() {
+            public void accept(NamedStream stream) {
+              files.add(stream);
             }},
-         errorConsumer);
-      iPercentComplete = 100;
-   } // end of convertFragments()
+          new Consumer<SerializationException>() {
+            public void accept(SerializationException exception) {
+              System.err.println("SerializeFragments: " + exception);
+            }},
+          layerId, mimeType, store);
+        
+        // did we actually find any files?
+        if (files.size() == 0) {
+          contentType.accept("text/plain;charset=UTF-8");
+          httpStatus.accept(SC_NOT_FOUND);
+          out.write(localize("No files wer generated.").getBytes()); // TODO i18n
+        } else if (files.size() == 1) { // one file only
+            // don't zip a single file, just return the file
+          contentType.accept(mimeType);
+          NamedStream stream = files.firstElement();
+          fileName.accept(stream.getName());               
+          IO.Pump(stream.getStream(), out);
+        } else { /// multiple files
+          contentType.accept("application/zip");
+          fileName.accept(name + ".zip");
+          
+          // create a stream to pump from
+          PipedInputStream inStream = new PipedInputStream();
+          final PipedOutputStream outStream = new PipedOutputStream(inStream);
+          
+          // start a new thread to extract the data and stream it back
+          new Thread(new Runnable() {
+              public void run() {
+                try {
+                  ZipOutputStream zipOut = new ZipOutputStream(outStream);
+                  
+                  // for each file
+                  for (NamedStream stream : files) {
+                    try {
+                      // create the zip entry
+                      zipOut.putNextEntry(
+                        new ZipEntry(IO.SafeFileNameUrl(stream.getName())));
+                      
+                      IO.Pump(stream.getStream(), zipOut, false);
+                    }
+                    catch (ZipException zx) {
+                    } finally {
+                      stream.getStream().close();
+                    }
+                  } // next file
+                  try {
+                    zipOut.close();
+                  } catch(Exception exception) {
+                    System.err.println("ConvertFragment: Cannot close ZIP file: " + exception);
+                  }
+                } catch(Exception exception) {
+                  System.err.println("ConvertFragment: open zip stream: " + exception);
+                }
+              }
+            }).start();
+          
+          // send headers immediately, so that the browser shows the 'save' prompt
+          out.flush();
+          
+          IO.Pump(inStream, out);
+        } // multiple files
+      } finally {
+        cacheStore(store);
+      }
+    } catch(Exception ex) {
+      contentType.accept("text/plain;charset=UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(ex.toString().getBytes());
+      } catch(IOException exception) {
+        System.err.println("Files.get: could not report unhandled exception: " + ex);
+        ex.printStackTrace(System.err);
+      }
+    }
+  }
+  
+  /**
+   * Cancels the currently running exportTextGrids() method.
+   */
+  public void cancel() {
+    bCancel = true;
+    if (utterances != null) utterances.cancel();
+    if (serializer != null) serializer.cancel();
+  } // end of cancel()
+  
+  /**
+   * Serializes the given series of utterances using the given serializer.
+   * @param name The name of the collection.
+   * @param utterances Utterances to serialize.
+   * @param serializer The serialization module.
+   * @param streamConsumer Consumer for receiving the serialized streams.
+   * @param errorConsumer Consumer for handling serialization errors.
+   * @param layerIds A list of layer names.
+   * @param mimeType
+   * @param store Graph store.
+   * @throws Exception
+   */
+  public void serializeFragments(
+    String name, MonitorableSeries<Graph> utterances, GraphSerializer serializer,
+    Consumer<NamedStream> streamConsumer, Consumer<SerializationException> errorConsumer,
+    String[] layerIds, String mimeType, GraphStoreAdministration store)
+    throws Exception {
+      
+    bCancel = false;
+    this.utterances = utterances;
+    this.serializer = serializer;
+      
+    if (utterances.getExactSizeIfKnown() <= 0) throw new Exception("No utterances specified");
+      
+    File fTempDir = new File(System.getProperty("java.io.tmpdir"));
+	 
+    // serialize the fragments
+    final Vector<NamedStream> files = new Vector<NamedStream>();
+    serializer.serialize(
+      utterances, layerIds,
+      streamConsumer,
+      new Consumer<String>() {
+        public void accept(String warning) {
+          System.out.println("WARNING: " + warning);
+        }},
+      errorConsumer);
+    iPercentComplete = 100;
+  } // end of serializeFragments()
    
-   private static final long serialVersionUID = -1;
 } // end of class SerializeFragments
