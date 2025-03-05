@@ -5,9 +5,7 @@
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="base.jsp" %><%{
-    if (!"GET".equals(request.getMethod()) && !"POST".equals(request.getMethod())) { // GET/POST only
-      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    } else {
+    if ("GET".equals(request.getMethod()) || "POST".equals(request.getMethod())) { // GET/POST only
       Utterances handler = new Utterances();
       initializeHandler(handler, request);
       JsonObject json = handler.post(
@@ -29,5 +27,9 @@
         writer.writeObject(json);   
         writer.close();
       }
+    } else if ("OPTIONS".equals(request.getMethod())) {
+      response.addHeader("Allow", "OPTIONS, GET, POST");
+    } else {
+      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 }%>

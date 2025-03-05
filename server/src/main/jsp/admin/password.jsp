@@ -5,9 +5,7 @@
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="../base.jsp" %><%{
-    if (!"PUT".equals(request.getMethod())) { // PUT only
-      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    } else {
+    if ("PUT".equals(request.getMethod())) { // PUT only
       AdminPassword handler = new AdminPassword();
       initializeHandler(handler, request);
       JsonObject json = handler.put(
@@ -17,5 +15,9 @@
         writer.writeObject(json);   
         writer.close();
       }
+    } else if ("OPTIONS".equals(request.getMethod())) {
+      response.addHeader("Allow", "OPTIONS, PUT");
+    } else {
+      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 }%>

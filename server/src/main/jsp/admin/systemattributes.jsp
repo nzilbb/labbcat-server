@@ -5,22 +5,22 @@
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="../base.jsp" %><%{
-    if (!"PUT".equals(request.getMethod()) && !"GET".equals(request.getMethod())) { // PUT/GET
-      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    } else {
-      AdminSystemAttributes handler = new AdminSystemAttributes();
-      initializeHandler(handler, request);
-      if ("PUT".equals(request.getMethod())) {
-        JsonObject json = handler.put(
-          request.getInputStream(), (status)->response.setStatus(status));
-        if (json != null) {
-          JsonWriter writer = Json.createWriter(response.getWriter());
-          writer.writeObject(json);   
-          writer.close();
-        }
-      } else { // GET
-        handler.get(
-          Json.createGenerator(out), (status)->response.setStatus(status));
+    AdminSystemAttributes handler = new AdminSystemAttributes();
+    initializeHandler(handler, request);
+    if ("PUT".equals(request.getMethod())) {
+      JsonObject json = handler.put(
+        request.getInputStream(), (status)->response.setStatus(status));
+      if (json != null) {
+        JsonWriter writer = Json.createWriter(response.getWriter());
+        writer.writeObject(json);   
+        writer.close();
       }
+    } else if ("GET".equals(request.getMethod())) { // GET
+      handler.get(
+        Json.createGenerator(out), (status)->response.setStatus(status));
+    } else if ("OPTIONS".equals(request.getMethod())) {
+      response.addHeader("Allow", "OPTIONS, GET, PUT");
+    } else {
+      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 }%>

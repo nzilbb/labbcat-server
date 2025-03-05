@@ -6,9 +6,7 @@
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="base.jsp" %><%{
-    if (!"POST".equals(request.getMethod())) { // POST only
-      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    } else {
+    if ("POST".equals(request.getMethod())) { // POST only
       // load multipart request parameters - the implementation depends on the servlet container:
       // Server info something like "Apache Tomcat/9.0.58 (Ubuntu)" or "Apache Tomcat/10.1.36"
       boolean tomcat9 = application.getServerInfo().matches(".*Tomcat/9.*");
@@ -33,5 +31,9 @@
         writer.writeObject(json);   
         writer.close();
       }
+    } else if ("OPTIONS".equals(request.getMethod())) {
+      response.addHeader("Allow", "OPTIONS, POST");
+    } else {
+      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 }%>

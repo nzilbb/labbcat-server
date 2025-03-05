@@ -34,6 +34,8 @@
         response.getOutputStream(),
         (contentType)->response.setContentType(contentType),
         (status)->response.setStatus(status));
+    } else if ("OPTIONS".equals(request.getMethod())) {
+      response.addHeader("Allow", "OPTIONS, GET, POST, PUT, DELETE");
     } else {
       response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }

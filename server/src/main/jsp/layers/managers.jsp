@@ -15,6 +15,8 @@
             request, response, fileName);
         },
         (status)->response.setStatus(status));
+    } else if ("OPTIONS".equals(request.getMethod())) {
+      response.addHeader("Allow", "OPTIONS, GET");
     } else {
       response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
