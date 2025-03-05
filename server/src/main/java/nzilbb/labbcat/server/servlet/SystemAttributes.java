@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet(urlPatterns = "/api/systemattributes/*", loadOnStartup = 20)
 public class SystemAttributes extends TableServletBase {   
    
    public SystemAttributes() {
@@ -71,5 +70,4 @@ public class SystemAttributes extends TableServletBase {
          +" AND name NOT LIKE '%email%'"; // no email addresses
    }
    
-   private static final long serialVersionUID = 1;
 } // end of class SystemAttributes

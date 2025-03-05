@@ -123,224 +123,220 @@ import javax.servlet.http.HttpServletRequest;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet(urlPatterns = "/api/admin/users/*", loadOnStartup = 20)
 @RequiredRole("admin")
 public class AdminUsers extends TableServletBase {   
-   
-   public AdminUsers() {
-      super("miner_user", // table
-            new Vector<String>() {{ // primary keys
-               add("user_id");
-            }},
-            new Vector<String>() {{ // columns
-               add("email");
-               add("reset_password");
-            }},
-            "user_id"); // order
-      
-      setAliases(new HashMap<String,String>() {{
-         put("user_id", "user");
-         put("reset_password", "resetPassword");
-      }});
-      
-      deleteChecks = new Vector<DeleteCheck>() {{
-            add(new DeleteCheck(
-                   "SELECT CASE WHEN COUNT(*) > 0 THEN 0 ELSE 1 END FROM role"
-                   +" WHERE role_id = 'admin' AND user_id <> ?",
-                   "user_id",
-                   "Last admin user cannot be deleted.")); // TODO prevent last admin user from being removed from the admin role
-         }};
-      beforeDelete = new Vector<DeleteCheck>() {{
-            add(new DeleteCheck("DELETE FROM role WHERE user_id = ?", "user_id", null));
-         }};
-      
-      create = true;
-      read = true;
-      update = true;
-      delete = true;
-      
-      emptyKeyAllowed = false;
-   }
-
-   /**
-    * Validates a record before UPDATEing it.
-    * @param request The request.
-    * @param record The incoming record to validate, to which attributes can be added.
-    * @param connection A connection to th database.
-    * @return A JSON representation of the valid record, which may or may not be the same
-    * object as <var>record</var>.
-    * @throws ValidationException If the record is invalid.
-    */
-   @Override
-   protected JsonObject validateBeforeUpdate(
-      HttpServletRequest request, JsonObject record,
-      Connection connection) throws ValidationException {
-      
-      Vector<String> errors = null;
-      try {
-         // user ID
-         if (!record.containsKey("user") || record.isNull("user")) {
-            errors = new Vector<String>() {{
-                  add(localize(request, "No user ID was provided.")); }};
-         } else {
-            // trim name
-            if (!record.getString("user").equals(record.getString("user").trim())) {
-               record = createMutableCopy(record, "user")
-                  .add("user", record.getString("user").trim())
-                  .build();
-            }
-            if (record.getString("user").length() == 0) {
-               errors = new Vector<String>() {{
-                     add(localize(request, "User ID cannot be blank.")); }};
-            }
-         }
-         // email
-         if (record.containsKey("email") && !record.isNull("email")
-             && record.getString("email").trim().length() > 0) {
-            // there is an email address
-            if (record.getString("email").indexOf("@") <= 0) {
-               final String email = record.getString("email");
-               errors = new Vector<String>() {{
-                     add(localize(
-                            request, "Invalid email address: {0}", email)); }};
-            }
-         }
-         // resetPassword default value
-         if (!record.containsKey("resetPassword") || record.isNull("resetPassword")) {
-            record = createMutableCopy(record, "resetPassword")
-               .add("resetPassword", 0)
-               .build();
-         }
-
-      } catch (JsonException x) {
-         if (errors == null) errors = new Vector<String>();
-         errors.add(x.toString());
-         // not expecting this, so log it:
-         System.err.println("AdminCorpora.validateBeforeUpdate: ERROR " + x);
+  
+  public AdminUsers() {
+    super("miner_user", // table
+          new Vector<String>() {{ // primary keys
+            add("user_id");
+          }},
+          new Vector<String>() {{ // columns
+            add("email");
+            add("reset_password");
+          }},
+          "user_id"); // order
+    
+    setAliases(new HashMap<String,String>() {{
+      put("user_id", "user");
+      put("reset_password", "resetPassword");
+    }});
+    
+    deleteChecks = new Vector<DeleteCheck>() {{
+        add(new DeleteCheck(
+              "SELECT CASE WHEN COUNT(*) > 0 THEN 0 ELSE 1 END FROM role"
+              +" WHERE role_id = 'admin' AND user_id <> ?",
+              "user_id",
+              "Last admin user cannot be deleted.")); // TODO prevent last admin user from being removed from the admin role
+      }};
+    beforeDelete = new Vector<DeleteCheck>() {{
+        add(new DeleteCheck("DELETE FROM role WHERE user_id = ?", "user_id", null));
+      }};
+    
+    create = true;
+    read = true;
+    update = true;
+    delete = true;
+    
+    emptyKeyAllowed = false;
+  }
+  
+  /**
+   * Validates a record before UPDATEing it.
+   * @param request The request.
+   * @param record The incoming record to validate, to which attributes can be added.
+   * @param connection A connection to th database.
+   * @return A JSON representation of the valid record, which may or may not be the same
+   * object as <var>record</var>.
+   * @throws ValidationException If the record is invalid.
+   */
+  @Override
+  protected JsonObject validateBeforeUpdate(
+    JsonObject record, Connection connection) throws ValidationException {
+    
+    Vector<String> errors = null;
+    try {
+      // user ID
+      if (!record.containsKey("user") || record.isNull("user")) {
+        errors = new Vector<String>() {{
+            add(localize("No user ID was provided.")); }};
+      } else {
+        // trim name
+        if (!record.getString("user").equals(record.getString("user").trim())) {
+          record = createMutableCopy(record, "user")
+            .add("user", record.getString("user").trim())
+            .build();
+        }
+        if (record.getString("user").length() == 0) {
+          errors = new Vector<String>() {{
+              add(localize("User ID cannot be blank.")); }};
+        }
       }
-      if (errors != null) throw new ValidationException(errors);
-      return record;
-   } // end of validateBeforeCreate()
-   
-   /**
-    * Add roles to the returned object.
-    * @param rs The record.
-    * @param jsonOut The object to return in the response, after main columns have been
-    * written, and before <var> _canDelete </var> and the object end has been written.
-    * @param connection Database connection
-    * @throws SQLException If there's an error operating with the database.
-    */
-   protected void editOutputRecord(ResultSet rs, JsonGenerator jsonOut, Connection connection)
-      throws SQLException {
+      // email
+      if (record.containsKey("email") && !record.isNull("email")
+          && record.getString("email").trim().length() > 0) {
+        // there is an email address
+        if (record.getString("email").indexOf("@") <= 0) {
+          final String email = record.getString("email");
+          errors = new Vector<String>() {{
+              add(localize(
+                    "Invalid email address: {0}", email)); }};
+        }
+      }
+      // resetPassword default value
+      if (!record.containsKey("resetPassword") || record.isNull("resetPassword")) {
+        record = createMutableCopy(record, "resetPassword")
+          .add("resetPassword", 0)
+          .build();
+      }
+      
+    } catch (JsonException x) {
+      if (errors == null) errors = new Vector<String>();
+      errors.add(x.toString());
+      // not expecting this, so log it:
+      System.err.println("AdminCorpora.validateBeforeUpdate: ERROR " + x);
+    }
+    if (errors != null) throw new ValidationException(errors);
+    return record;
+  } // end of validateBeforeCreate()
+  
+  /**
+   * Add roles to the returned object.
+   * @param rs The record.
+   * @param jsonOut The object to return in the response, after main columns have been
+   * written, and before <var> _canDelete </var> and the object end has been written.
+   * @param connection Database connection
+   * @throws SQLException If there's an error operating with the database.
+   */
+  protected void editOutputRecord(ResultSet rs, JsonGenerator jsonOut, Connection connection)
+    throws SQLException {
+    try {
+      PreparedStatement sql = connection.prepareStatement(
+        "SELECT role_id FROM role WHERE user_id = ? ORDER BY role_id");
+      sql.setString(1, rs.getString("user_id"));
+      ResultSet rsRole = sql.executeQuery();
+      jsonOut.writeStartArray("roles");
       try {
-         PreparedStatement sql = connection.prepareStatement(
-            "SELECT role_id FROM role WHERE user_id = ? ORDER BY role_id");
-         sql.setString(1, rs.getString("user_id"));
-         ResultSet rsRole = sql.executeQuery();
-         jsonOut.writeStartArray("roles");
-         try {
-            while (rsRole.next()) {
-               jsonOut.write(rsRole.getString("role_id"));
-            } // next role
-         } finally {
-            rsRole.close();
-            sql.close();
-            jsonOut.writeEnd(); // end roles array
-         }
+        while (rsRole.next()) {
+          jsonOut.write(rsRole.getString("role_id"));
+        } // next role
+      } finally {
+        rsRole.close();
+        sql.close();
+        jsonOut.writeEnd(); // end roles array
+      }
+    } catch (SQLException x) {
+      System.err.println("editOutputRecord: " + x);
+    }
+  } // end of editOutputRecord()
+  
+  /**
+   * Ensures that the roles match the incoming object, and that a random initial password
+   * is set.
+   * @param jsonIn The JSON representation of the object received with the request.
+   * @param jsonOut The object to return in the response, after main columns have been
+   * written, and before <var> _canDelete </var> and the object end has been written.
+   * @param connection Database connection
+   */
+  protected void editNewRecord(
+    JsonObject jsonIn, JsonObjectBuilder jsonOut, Connection connection) {
+    try {
+      // ensure password is not blank, nor predictable
+      PreparedStatement sql = connection.prepareStatement(
+        "UPDATE miner_user SET password = MD5(RAND()) WHERE user_id = ?");
+      sql.setString(1, jsonIn.getString("user"));
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      System.err.println("editNewRecord: " + x);
+    }
+    editUpdatedRecord(jsonIn, jsonOut, connection);
+  } // end of editNewRecord()
+  
+  /**
+   * Ensures that the roles match the incoming object.
+   * @param jsonIn The JSON representation of the object received with the request.
+   * @param jsonOut The object to return in the response, after main columns have been
+   * written, and before <var> _canDelete </var> and the object end has been written.
+   * @param connection Database connection
+   */
+  protected void editUpdatedRecord(
+    JsonObject jsonIn, JsonObjectBuilder jsonOut, Connection connection) {
+    // only if the incoming object specifies roles...
+    if (jsonIn.containsKey("roles")) {
+      try {
+        
+        // get old roles
+        PreparedStatement sql = connection.prepareStatement(
+          "SELECT role_id FROM role WHERE user_id = ? ORDER BY role_id");
+        sql.setString(1, jsonIn.getString("user"));
+        ResultSet rs = sql.executeQuery();
+        HashSet<String> oldRoles = new HashSet<String>();
+        while (rs.next()) {
+          oldRoles.add(rs.getString("role_id"));
+        } // next role
+        rs.close();
+        sql.close();
+        
+        // get new roles
+        HashSet<String> newRoles = new HashSet<String>();
+        JsonArray newRolesArray = jsonIn.getJsonArray("roles");
+        for (int r = 0; r < newRolesArray.size(); r++) {
+          newRoles.add(newRolesArray.getString(r));
+        } // next element
+        
+        // add new ones
+        HashSet<String> rolesToAdd = new HashSet<String>(newRoles);
+        rolesToAdd.removeAll(oldRoles);
+        if (rolesToAdd.size() > 0) {
+          sql = connection.prepareStatement(
+            "INSERT INTO role (user_id, role_id) VALUES (?,?)");
+          sql.setString(1, jsonIn.getString("user"));
+          for (String role : rolesToAdd) {
+            sql.setString(2, role);
+            sql.executeUpdate();
+          } // next role
+          sql.close();
+        }
+        
+        // remove missing ones
+        HashSet<String> rolesToRemove = new HashSet<String>(oldRoles);
+        rolesToRemove.removeAll(newRoles);
+        if (rolesToRemove.size() > 0) {
+          sql = connection.prepareStatement(
+            "DELETE FROM role WHERE user_id = ? AND role_id = ?");
+          sql.setString(1, jsonIn.getString("user"));
+          for (String role : rolesToRemove) {
+            sql.setString(2, role);
+            sql.executeUpdate();
+          } // next role
+          sql.close();
+        }
+        
       } catch (SQLException x) {
-         log("editOutputRecord: " + x);
+        System.err.println("editOutputRecord: " + x);
+      } catch (ClassCastException x) {
+        System.err.println("editOutputRecord: " + x);
       }
-   } // end of editOutputRecord()
-
-   /**
-    * Ensures that the roles match the incoming object, and that a random initial password
-    * is set.
-    * @param jsonIn The JSON representation of the object received with the request.
-    * @param jsonOut The object to return in the response, after main columns have been
-    * written, and before <var> _canDelete </var> and the object end has been written.
-    * @param connection Database connection
-    */
-   protected void editNewRecord(
-      JsonObject jsonIn, JsonObjectBuilder jsonOut, Connection connection) {
-      try {
-         // ensure password is not blank, nor predictable
-         PreparedStatement sql = connection.prepareStatement(
-            "UPDATE miner_user SET password = MD5(RAND()) WHERE user_id = ?");
-         sql.setString(1, jsonIn.getString("user"));
-         sql.executeUpdate();
-      } catch (SQLException x) {
-         log("editNewRecord: " + x);
-      }
-      editUpdatedRecord(jsonIn, jsonOut, connection);
-   } // end of editNewRecord()
-   
-   /**
-    * Ensures that the roles match the incoming object.
-    * @param jsonIn The JSON representation of the object received with the request.
-    * @param jsonOut The object to return in the response, after main columns have been
-    * written, and before <var> _canDelete </var> and the object end has been written.
-    * @param connection Database connection
-    */
-   protected void editUpdatedRecord(
-      JsonObject jsonIn, JsonObjectBuilder jsonOut, Connection connection) {
-      // only if the incoming object specifies roles...
-      if (jsonIn.containsKey("roles")) {
-         try {
-            
-            // get old roles
-            PreparedStatement sql = connection.prepareStatement(
-               "SELECT role_id FROM role WHERE user_id = ? ORDER BY role_id");
-            sql.setString(1, jsonIn.getString("user"));
-            ResultSet rs = sql.executeQuery();
-            HashSet<String> oldRoles = new HashSet<String>();
-            while (rs.next()) {
-               oldRoles.add(rs.getString("role_id"));
-            } // next role
-            rs.close();
-            sql.close();
-            
-            // get new roles
-            HashSet<String> newRoles = new HashSet<String>();
-            JsonArray newRolesArray = jsonIn.getJsonArray("roles");
-            for (int r = 0; r < newRolesArray.size(); r++) {
-               newRoles.add(newRolesArray.getString(r));
-            } // next element
-
-            // add new ones
-            HashSet<String> rolesToAdd = new HashSet<String>(newRoles);
-            rolesToAdd.removeAll(oldRoles);
-            if (rolesToAdd.size() > 0) {
-               sql = connection.prepareStatement(
-                  "INSERT INTO role (user_id, role_id) VALUES (?,?)");
-               sql.setString(1, jsonIn.getString("user"));
-               for (String role : rolesToAdd) {
-                  sql.setString(2, role);
-                  sql.executeUpdate();
-               } // next role
-               sql.close();
-            }
-            
-            // remove missing ones
-            HashSet<String> rolesToRemove = new HashSet<String>(oldRoles);
-            rolesToRemove.removeAll(newRoles);
-            if (rolesToRemove.size() > 0) {
-               sql = connection.prepareStatement(
-                  "DELETE FROM role WHERE user_id = ? AND role_id = ?");
-               sql.setString(1, jsonIn.getString("user"));
-               for (String role : rolesToRemove) {
-                  sql.setString(2, role);
-                  sql.executeUpdate();
-               } // next role
-               sql.close();
-            }
-
-         } catch (SQLException x) {
-            log("editOutputRecord: " + x);
-         } catch (ClassCastException x) {
-            log("editOutputRecord: " + x);
-         }
-      } // "roles" is specified
-   } // end of editUpdatedRecord()
-
-   private static final long serialVersionUID = 1;
+    } // "roles" is specified
+  } // end of editUpdatedRecord()
 } // end of class AdminUsers

@@ -70,8 +70,7 @@ import javax.servlet.http.HttpServletRequest;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet(urlPatterns = "/api/categories/*", loadOnStartup = 20)
-public class Categories extends TableServletBase {
+public class Categories extends TableServletBase { // TODO automated tests
   public Categories() {
     super("attribute_category", // table
           new Vector<String>() {{ // primary keys
@@ -89,5 +88,4 @@ public class Categories extends TableServletBase {
     update = false;
     delete = false;      
   }
-  private static final long serialVersionUID = 1;
 } // end of class Categories

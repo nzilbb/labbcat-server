@@ -1,4 +1,4 @@
-<%@ page info="Process with Praat" isErrorPage="true"
+<%@ page info="All Utterances" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
     import = "nzilbb.labbcat.server.servlet.Utterances" 
     import = "javax.json.Json" 

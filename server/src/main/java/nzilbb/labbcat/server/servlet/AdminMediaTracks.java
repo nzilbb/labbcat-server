@@ -116,7 +116,6 @@ import javax.servlet.http.HttpServletRequest;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet(urlPatterns = "/api/admin/mediatracks/*", loadOnStartup = 20)
 @RequiredRole("admin")
 public class AdminMediaTracks extends TableServletBase {   
    
@@ -150,7 +149,7 @@ public class AdminMediaTracks extends TableServletBase {
     */
    @Override
    protected JsonObject validateBeforeUpdate(
-      HttpServletRequest request, JsonObject record,
+      JsonObject record,
       Connection connection) throws ValidationException {
       
       if (!record.containsKey("display_order") || record.isNull("display_order")
@@ -170,7 +169,7 @@ public class AdminMediaTracks extends TableServletBase {
                sql.close();
             }            
          } catch(SQLException exception) {
-            log("ERROR getting default value for display_order: " + exception);
+            System.err.println("ERROR getting default value for display_order: " + exception);
             record = createMutableCopy(record, "display_order")
                .add("display_order", 0)
                .build();

@@ -114,100 +114,98 @@ import javax.servlet.http.HttpServletRequest;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet(urlPatterns = "/api/admin/categories/*", loadOnStartup = 20)
 @RequiredRole("admin")
 public class AdminCategories extends TableServletBase {   
-
-   public AdminCategories() {
-      super("attribute_category", // table
-            new Vector<String>() {{ // primary keys
-               add("class_id");
-               add("category");
-            }},
-            new Vector<String>() {{ // columns
-               add("description");
-               add("display_order");
-            }},
-            "class_id, display_order, category"); // order
-      
-      create = true;
-      read = true;
-      update = true;
-      delete = true;
-      
-      deleteChecks = new Vector<DeleteCheck>() {{
-          add(new DeleteCheck(
-                "SELECT COUNT(*), MIN(attribute) FROM attribute_definition"
-                +" WHERE class_id = ? AND category = ?",
-                new Vector<String>(){{add("class_id");add("category");}},
-                "{0,choice,1#There is still a layer using this category: {1}"
-                +"|1<There are still {0} layers using this category, including {1}}"));
-          add(new DeleteCheck(
-                "SELECT COUNT(*), MIN(short_description) FROM layer"
-                +" WHERE 'layer' = ? AND category = ?",
-                new Vector<String>(){{add("class_id");add("category");}},
-                "{0,choice,1#There is still a layer using this category: {1}"
-                +"|1<There are still {0} layers using this category, including {1}}"));
-        }};
-   }
   
-   /**
-    * Validates a record before UPDATEing it.
-    * @param request The request.
-    * @param record The incoming record to validate, to which attributes can be added.
-    * @param connection A connection to the database.
-    * @return A JSON representation of the valid record, which may or may not be the same
-    * object as <var>record</var>.
-    * @throws ValidationException If the record is invalid.
-    */
-   @Override
-   protected JsonObject validateBeforeUpdate(
-     HttpServletRequest request, JsonObject record,
-     Connection connection) throws ValidationException {
-     
-     Vector<String> errors = new Vector<String>();
-     try {
-       if (!record.containsKey("class_id") || record.isNull("class_id")) {
-         errors.add(localize(request, "No scope was provided."));
-       } else {
-         // trim class_id
-         if (!record.getString("class_id").equals(record.getString("class_id").trim())) {
-           record = createMutableCopy(record, "class_id")
-             .add("class_id", record.getString("class_id").trim())
-             .build();
-         }
-         if (record.getString("class_id").length() == 0) {
-           errors.add(localize(request, "Scope cannot be blank."));
-         }
-         // validate class_id
-         if (!record.getString("class_id").equals("transcript")
-             && !record.getString("class_id").equals("speaker")
-             && !record.getString("class_id").equals("layer")) {
-           errors.add(localize(request, "Scope invalid: {0}", record.getString("class_id")));
-         }
-       }
-
-       if (!record.containsKey("category") || record.isNull("category")) {
-         errors.add(localize(request, "No category name was provided."));
-       } else {
-         // trim name
-         if (!record.getString("category").equals(record.getString("category").trim())) {
-           record = createMutableCopy(record, "category")
-             .add("category", record.getString("category").trim())
-             .build();
-         }
-         if (record.getString("category").length() == 0) {
-           errors.add(localize(request, "Category name cannot be blank."));
-         }
-       }
-     } catch (JsonException x) {
-       errors.add(x.toString());
-       // not expecting this, so log it:
-       System.err.println("AdminCategories.validateBeforeUpdate: ERROR " + x);
-     }
-     if (errors.size() > 0) throw new ValidationException(errors);
-     return record;
-   } // end of validateBeforeUpdate()
+  public AdminCategories() {
+    super("attribute_category", // table
+          new Vector<String>() {{ // primary keys
+            add("class_id");
+            add("category");
+          }},
+          new Vector<String>() {{ // columns
+            add("description");
+            add("display_order");
+          }},
+          "class_id, display_order, category"); // order
+    
+    create = true;
+    read = true;
+    update = true;
+    delete = true;
+    
+    deleteChecks = new Vector<DeleteCheck>() {{
+        add(new DeleteCheck(
+              "SELECT COUNT(*), MIN(attribute) FROM attribute_definition"
+              +" WHERE class_id = ? AND category = ?",
+              new Vector<String>(){{add("class_id");add("category");}},
+              "{0,choice,1#There is still a layer using this category: {1}"
+              +"|1<There are still {0} layers using this category, including {1}}"));
+        add(new DeleteCheck(
+              "SELECT COUNT(*), MIN(short_description) FROM layer"
+              +" WHERE 'layer' = ? AND category = ?",
+              new Vector<String>(){{add("class_id");add("category");}},
+              "{0,choice,1#There is still a layer using this category: {1}"
+              +"|1<There are still {0} layers using this category, including {1}}"));
+      }};
+  }
   
-  private static final long serialVersionUID = 1;
+  /**
+   * Validates a record before UPDATEing it.
+   * @param request The request.
+   * @param record The incoming record to validate, to which attributes can be added.
+   * @param connection A connection to the database.
+   * @return A JSON representation of the valid record, which may or may not be the same
+   * object as <var>record</var>.
+   * @throws ValidationException If the record is invalid.
+   */
+  @Override
+  protected JsonObject validateBeforeUpdate(
+    JsonObject record,
+    Connection connection) throws ValidationException {
+    
+    Vector<String> errors = new Vector<String>();
+    try {
+      if (!record.containsKey("class_id") || record.isNull("class_id")) {
+        errors.add(localize("No scope was provided."));
+      } else {
+        // trim class_id
+        if (!record.getString("class_id").equals(record.getString("class_id").trim())) {
+          record = createMutableCopy(record, "class_id")
+            .add("class_id", record.getString("class_id").trim())
+            .build();
+        }
+        if (record.getString("class_id").length() == 0) {
+          errors.add(localize("Scope cannot be blank."));
+        }
+        // validate class_id
+        if (!record.getString("class_id").equals("transcript")
+            && !record.getString("class_id").equals("speaker")
+            && !record.getString("class_id").equals("layer")) {
+          errors.add(localize("Scope invalid: {0}", record.getString("class_id")));
+        }
+      }
+
+      if (!record.containsKey("category") || record.isNull("category")) {
+        errors.add(localize("No category name was provided."));
+      } else {
+        // trim name
+        if (!record.getString("category").equals(record.getString("category").trim())) {
+          record = createMutableCopy(record, "category")
+            .add("category", record.getString("category").trim())
+            .build();
+        }
+        if (record.getString("category").length() == 0) {
+          errors.add(localize("Category name cannot be blank."));
+        }
+      }
+    } catch (JsonException x) {
+      errors.add(x.toString());
+      // not expecting this, so log it:
+      System.err.println("AdminCategories.validateBeforeUpdate: ERROR " + x);
+    }
+    if (errors.size() > 0) throw new ValidationException(errors);
+    return record;
+  } // end of validateBeforeUpdate()
+  
 } // end of class AdminCategories

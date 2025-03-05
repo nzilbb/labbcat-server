@@ -46,4 +46,31 @@
   <servlet><servlet-name>admin/systemattributes.jsp</servlet-name><jsp-file>/jsp/admin/systemattributes.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/systemattributes.jsp</servlet-name><url-pattern>/api/admin/systemattributes</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>systemattributes.jsp</servlet-name><jsp-file>/jsp/systemattributes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>systemattributes.jsp</servlet-name><url-pattern>/api/systemattributes/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>categories.jsp</servlet-name><jsp-file>/jsp/categories.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>categories.jsp</servlet-name><url-pattern>/api/categories/*</url-pattern></servlet-mapping>
+
+  <servlet><servlet-name>layers/managers.jsp</servlet-name><jsp-file>/jsp/layers/managers.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>layers/managers.jsp</servlet-name><url-pattern>/api/layers/managers/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/categories.jsp</servlet-name><jsp-file>/jsp/admin/categories.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/categories.jsp</servlet-name><url-pattern>/api/admin/categories/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/corpora.jsp</servlet-name><jsp-file>/jsp/admin/corpora.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/corpora.jsp</servlet-name><url-pattern>/api/admin/corpora/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/mediatracks.jsp</servlet-name><jsp-file>/jsp/admin/mediatracks.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/mediatracks.jsp</servlet-name><url-pattern>/api/admin/mediatracks/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/roles/permissions.jsp</servlet-name><jsp-file>/jsp/admin/roles/permissions.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/roles/permissions.jsp</servlet-name><url-pattern>/api/admin/roles/permissions/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/roles.jsp</servlet-name><jsp-file>/jsp/admin/roles.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/roles.jsp</servlet-name><url-pattern>/api/admin/roles/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/users.jsp</servlet-name><jsp-file>/jsp/admin/users.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/users.jsp</servlet-name><url-pattern>/api/admin/users/*</url-pattern></servlet-mapping>
+  
 </web-fragment>

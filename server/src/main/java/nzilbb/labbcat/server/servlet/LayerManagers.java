@@ -63,22 +63,19 @@ import javax.servlet.http.HttpServletRequest;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet(urlPatterns = "/api/layers/managers/*", loadOnStartup = 20)
 public class LayerManagers extends TableServletBase {   
-   // TODO deprecate this servlet when new automation API is implemented
-   public LayerManagers() {
-      super("layer_manager", // table
-            new Vector<String>() {{ // primary keys
-               add("layer_manager_id");
-            }},
-            new Vector<String>() {{ // columns
-               add("version");
-               add("name");
-               add("description");
-               add("layer_type");
-            }},
-            "layer_manager_id"); // order
-   }
-   
-   private static final long serialVersionUID = 1;
+  // TODO deprecate this servlet when new automation API is implemented
+  public LayerManagers() {
+    super("layer_manager", // table
+          new Vector<String>() {{ // primary keys
+            add("layer_manager_id");
+          }},
+          new Vector<String>() {{ // columns
+            add("version");
+            add("name");
+            add("description");
+            add("layer_type");
+          }},
+          "layer_manager_id"); // order
+  }  
 } // end of class LayerManagers

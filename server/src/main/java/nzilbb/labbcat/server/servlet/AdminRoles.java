@@ -111,75 +111,71 @@ import javax.servlet.http.HttpServletRequest;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet(urlPatterns = "/api/admin/roles/*", loadOnStartup = 20)
 @RequiredRole("admin")
 public class AdminRoles extends TableServletBase {   
-
-   public AdminRoles() {
-      super("role_definition", // table
-            new Vector<String>() {{ // primary/URL keys
-               add("role_id");
-            }},
-            new Vector<String>() {{ // columns
-               add("description");
-            }},
-            "role_id"); // order
-      
-      create = true;
-      read = true;
-      update = true;
-      delete = true;
-      
-      deleteChecks = new Vector<DeleteCheck>() {{
-            add(new DeleteCheck(
-                   "SELECT COUNT(*) FROM role_definition"
-                   +" WHERE role_id = ? AND role_id IN ('view','edit','admin')",
-                   "role_id",
-                   "System roles cannot be deleted."));
-         }};
-      beforeDelete = new Vector<DeleteCheck>() {{
-            add(new DeleteCheck("DELETE FROM role_permission WHERE role_id = ?", "role_id", null));
-         }};
-   }
-
-   /**
-    * Validates a record before UPDATEing it.
-    * @param request The request.
-    * @param record The incoming record to validate, to which attributes can be added.
-    * @param connection A connection to the database.
-    * @return A JSON representation of the valid record, which may or may not be the same
-    * object as <var>record</var>.
-    * @throws ValidationException If the record is invalid.
-    */
-   @Override
-   protected JsonObject validateBeforeUpdate(
-      HttpServletRequest request, JsonObject record,
-      Connection connection) throws ValidationException {
-      
-      Vector<String> errors = null;
-      try {
-         if (!record.containsKey("role_id") || record.isNull("role_id")) {
-            errors = new Vector<String>() {{ add(localize(request, "No role ID was provided.")); }};
-         } else {
-            // trim name
-            if (!record.getString("role_id").equals(record.getString("role_id").trim())) {
-               record = createMutableCopy(record, "role_id")
-                  .add("role_id", record.getString("role_id").trim())
-                  .build();
-            }
-            if (record.getString("role_id").length() == 0) {
-               errors = new Vector<String>() {{ add(localize(request, "Role ID cannot be blank.")); }};
-            }
-         }
-      } catch (JsonException x) {
-         if (errors == null) errors = new Vector<String>();
-         errors.add(x.toString());
-         // not expecting this, so log it:
-         System.err.println("AdminRoles.validateBeforeUpdate: ERROR " + x);
+  
+  public AdminRoles() {
+    super("role_definition", // table
+          new Vector<String>() {{ // primary/URL keys
+            add("role_id");
+          }},
+          new Vector<String>() {{ // columns
+            add("description");
+          }},
+          "role_id"); // order
+    
+    create = true;
+    read = true;
+    update = true;
+    delete = true;
+    
+    deleteChecks = new Vector<DeleteCheck>() {{
+        add(new DeleteCheck(
+              "SELECT COUNT(*) FROM role_definition"
+              +" WHERE role_id = ? AND role_id IN ('view','edit','admin')",
+              "role_id",
+              "System roles cannot be deleted."));
+      }};
+    beforeDelete = new Vector<DeleteCheck>() {{
+        add(new DeleteCheck("DELETE FROM role_permission WHERE role_id = ?", "role_id", null));
+      }};
+  }
+  
+  /**
+   * Validates a record before UPDATEing it.
+   * @param request The request.
+   * @param record The incoming record to validate, to which attributes can be added.
+   * @param connection A connection to the database.
+   * @return A JSON representation of the valid record, which may or may not be the same
+   * object as <var>record</var>.
+   * @throws ValidationException If the record is invalid.
+   */
+  @Override
+  protected JsonObject validateBeforeUpdate(
+    JsonObject record, Connection connection) throws ValidationException {
+    
+    Vector<String> errors = null;
+    try {
+      if (!record.containsKey("role_id") || record.isNull("role_id")) {
+        errors = new Vector<String>() {{ add(localize("No role ID was provided.")); }};
+      } else {
+        // trim name
+        if (!record.getString("role_id").equals(record.getString("role_id").trim())) {
+          record = createMutableCopy(record, "role_id")
+            .add("role_id", record.getString("role_id").trim())
+            .build();
+        }
+        if (record.getString("role_id").length() == 0) {
+          errors = new Vector<String>() {{ add(localize("Role ID cannot be blank.")); }};
+        }
       }
-      if (errors != null) throw new ValidationException(errors);
-      return record;
-   } // end of validateBeforeUpdate()
-   
-   private static final long serialVersionUID = 1;
+    } catch (JsonException x) {
+      if (errors == null) errors = new Vector<String>();
+      errors.add(x.toString());
+      // not expecting this, so log it:
+      System.err.println("AdminRoles.validateBeforeUpdate: ERROR " + x);
+    }
+    if (errors != null) throw new ValidationException(errors);
+    return record;
+  } // end of validateBeforeUpdate()
 } // end of class AdminRoles

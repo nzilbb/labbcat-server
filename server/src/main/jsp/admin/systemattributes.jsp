@@ -1,4 +1,4 @@
-<%@ page info="Set user password" isErrorPage="true"
+<%@ page info="System Attributes" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
     import = "nzilbb.labbcat.server.servlet.AdminSystemAttributes" 
     import = "javax.json.Json" 
