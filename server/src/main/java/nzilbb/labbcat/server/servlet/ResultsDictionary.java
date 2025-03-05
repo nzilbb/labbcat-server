@@ -23,6 +23,8 @@
 package nzilbb.labbcat.server.servlet;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.sql.Connection;
@@ -36,14 +38,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Vector;
+import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.stream.JsonGenerator;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
@@ -90,8 +89,7 @@ import nzilbb.util.IO;
  *</pre>
  * @author Robert Fromont
  */
-@WebServlet({"/api/results/dictionary"})
-public class ResultsDictionary extends LabbcatServlet { // TODO unit test
+public class ResultsDictionary extends APIRequestHandler { // TODO unit test
   
   /**
    * Constructor
@@ -103,56 +101,52 @@ public class ResultsDictionary extends LabbcatServlet { // TODO unit test
   
   /**
    * The GET method for the servlet.
-   * <p> This expects a multipart request body with parameters as defined above.
-   * @param request HTTP request
-   * @param response HTTP response
+   * @param parameters Request parameter map.
+   * @param out Response body output stream.
+   * @param fileName Receives the filename for specification in the response headers.
+   * @param httpStatus Receives the response status code, in case or error.
    */
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    response.setCharacterEncoding("UTF-8");
-    response.setContentType("text/plain");
-    PrintWriter writer = response.getWriter();
-
+  public void get(RequestParameters parameters, OutputStream out, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     try {
-      SqlGraphStoreAdministration store = getStore(request);
+      PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "UTF-8"));
+      SqlGraphStoreAdministration store = getStore();
       Schema schema = store.getSchema();
       Connection connection = store.getConnection();
       
       try {
         // parameters
-        String threadId = request.getParameter("threadId");
+        String threadId = parameters.getString("threadId");
         if (threadId == null) {
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-          writer.println("No task ID specified.");
+          httpStatus.accept(SC_BAD_REQUEST);
+          writer.println("No task ID specified."); // TODO i18n
           return;
         }
         Task task = Task.findTask(Long.valueOf(threadId));
         if (task == null) {
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-          writer.println(localize(request, "Invalid task ID: {0}", "\""+threadId+"\""));
+          httpStatus.accept(SC_NOT_FOUND);
+          writer.println(localize("Invalid task ID: {0}", "\""+threadId+"\""));
           return;
         } else if (!(task instanceof SearchTask)) {
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-          writer.println(localize(request, "Invalid task ID: {0}", task.getClass().getName()));
+          httpStatus.accept(SC_BAD_REQUEST);
+          writer.println(localize("Invalid task ID: {0}", task.getClass().getName()));
           return;
         }
         SearchTask search = (SearchTask)task;
         if (!(search.getResults() instanceof SqlSearchResults)) {
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+          httpStatus.accept(SC_BAD_REQUEST);
           writer.println(
-            localize(request, "Invalid task ID: {0}", search.getResults().getClass().getName()));
+            localize("Invalid task ID: {0}", search.getResults().getClass().getName()));
           return;
         }
-        String definitionLayerId = request.getParameter("definitionLayerId");
+        String definitionLayerId = parameters.getString("definitionLayerId");
         if (definitionLayerId == null) definitionLayerId = "orthography";
         Layer definitionLayer = schema.getLayer(definitionLayerId);
         if (definitionLayerId == null) schema.getWordLayer();
-
+        
         // get search results
         search.keepAlive(); // prevent the task from dying while we're still interested
         SqlSearchResults results = (SqlSearchResults)search.getResults();
-
+        
         String searchName = results.getName();
         if (searchName == null || searchName.trim().length() == 0
             && search.getMatrix() != null) {
@@ -162,10 +156,11 @@ public class ResultsDictionary extends LabbcatServlet { // TODO unit test
             && search.getDescription() != null) {
           searchName = search.getDescription();
         }
-        String fileName = IO.SafeFileNameUrl(searchName);
-        if (fileName.length() > 150) fileName = fileName.substring(0, 150);
-        fileName = "dictionary_" + fileName + ".txt";
-        ResponseAttachmentName(request, response, fileName);
+        String name = IO.SafeFileNameUrl(searchName);
+        if (name.length() > 150) name = name.substring(0, 150);
+        name = "dictionary_" + name + ".txt";
+        fileName.accept(name);
+        writer.flush();
 
         // create SQL
         PreparedStatement sql = connection.prepareStatement(
@@ -216,15 +211,19 @@ public class ResultsDictionary extends LabbcatServlet { // TODO unit test
           rs.close();
           sql.close();
         }
-        
       } finally {
+        writer.flush();
         cacheStore(store);
       }
       
     } catch(Exception ex) {
-      throw new ServletException(ex);
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(ex.toString().getBytes());
+      } catch(IOException exception) {
+        System.err.println("Files.get: could not report unhandled exception: " + exception);
+        exception.printStackTrace(System.err);
+      }
     }
   }
-  
-  private static final long serialVersionUID = -1;
 } // end of class ResultsDictionary

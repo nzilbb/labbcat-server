@@ -1,18 +1,18 @@
-<%@ page info="Transcript files" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.Files" 
+<%@ page info="Transcript search" isErrorPage="true"
+    contentType = "text/plain;charset=UTF-8"
+    import = "nzilbb.labbcat.server.servlet.ResultsDictionary" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
-%><%@ include file="base.jsp" %><%{
+%><%@ include file="../base.jsp" %><%{
     if (!"GET".equals(request.getMethod()) && !"POST".equals(request.getMethod())) { // GET/POST only
       response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     } else {
-      Files handler = new Files();
+      ResultsDictionary handler = new ResultsDictionary();
       initializeHandler(handler, request);
       handler.get(
         parseParameters(request),
         response.getOutputStream(),
-        (contentType)->response.setContentType(contentType),
         (fileName)->{
           ResponseAttachmentName(
             request, response, fileName);

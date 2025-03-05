@@ -15,6 +15,9 @@
   <servlet><servlet-name>files.jsp</servlet-name><jsp-file>/jsp/files.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>files.jsp</servlet-name><url-pattern>/api/files</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>results/dictionary.jsp</servlet-name><jsp-file>/jsp/results/dictionary.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>results/dictionary.jsp</servlet-name><url-pattern>/api/results/dictionary</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>admin/password.jsp</servlet-name><jsp-file>/jsp/admin/password.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/password.jsp</servlet-name><url-pattern>/api/admin/password</url-pattern></servlet-mapping>
   
