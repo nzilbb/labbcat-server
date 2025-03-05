@@ -180,7 +180,6 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param httpStatus Receives the response status code, in case or error.
    */
   public void get(RequestParameters parameters, UnaryOperator<String> requestHeaders, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> fileName, Consumer<Integer> httpStatus) {
-    System.out.println("Results.get...");
     
     try {
       final SqlGraphStoreAdministration store = getStore();
@@ -385,7 +384,6 @@ public class Results extends APIRequestHandler { // TODO unit test
       
       Task task = threadId==null?null:Task.findTask(Long.valueOf(threadId));
       if (threadId != null && task == null && utterances.length == 0) {
-        System.out.println("invalid threadId " + threadId);
         httpStatus.accept(SC_BAD_REQUEST);
         JsonWriter writer = Json.createWriter(out);
         writer.writeObject(failureResult("Invalid task ID: {0}", "\""+threadId+"\""));
@@ -568,9 +566,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                     }
                   });
               } else { // JSON output
-                System.out.println("JSON output");
                 results.forEachRemaining(matchId -> {
-                    System.out.println("matchId " + matchId);
                     search.keepAlive(); // prevent the task from dying while we're still interested
                     try {
                       IdMatch result = new IdMatch(matchId);                
