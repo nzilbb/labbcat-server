@@ -5,7 +5,7 @@
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="base.jsp" %><%{
-    if (!"GET".equals(request.getMethod())) { // GET only
+    if (!"GET".equals(request.getMethod()) && !"POST".equals(request.getMethod())) { // GET/POST only
       response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     } else {
       Search handler = new Search();
