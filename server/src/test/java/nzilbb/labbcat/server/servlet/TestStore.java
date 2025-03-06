@@ -169,6 +169,7 @@ public class TestStore
     Annotation language = graph.first("transcript_language");
     String originalLanguage = language != null?language.getLabel():null;
     graph.createTag(graph, "transcript_language", "test-value");
+    //l.setVerbose(true);
     l.saveTranscript(graph);
 
     // check the new value was saved

@@ -24,6 +24,7 @@ package nzilbb.labbcat.server.api;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -870,20 +871,22 @@ public class Store extends APIRequestHandler {
    * @param pathInfo The URL path.
    * @param queryString The URL's query string.
    * @param parameters Request parameter map.
+   * @param requestBody For access to the request body.
    * @param httpStatus Receives the response status code, in case or error.
    * @param redirectUrl Receives a URL for the request to be redirected to.
    * @return JSON-encoded object representing the response
    */
   public JsonObject get(
     String url, String method, String pathInfo,
-    String queryString, RequestParameters parameters,
+    String queryString, RequestParameters parameters, InputStream requestBody,
     Consumer<Integer> httpStatus, Consumer<String> redirectUrl) {
     
     try {
       SqlGraphStoreAdministration store = getStore();
       try {
         JsonObject json = invokeFunction(
-          url, method, pathInfo, queryString, parameters, httpStatus, redirectUrl, store);
+          url, method, pathInfo, queryString, parameters, requestBody,
+          httpStatus, redirectUrl, store);
         if (json == null) {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("Invalid path: {0}", pathInfo);
@@ -919,11 +922,12 @@ public class Store extends APIRequestHandler {
    * @param pathInfo The URL path.
    * @param queryString The URL's query string.
    * @param parameters Request parameter map.
+   * @param requestBody For access to the request body.
    * @param httpStatus Receives the response status code, in case or error.
    * @param redirectUrl Receives a URL for the request to be redirected to.
    * @return JSON-encoded object representing the response
    */
-  protected JsonObject invokeFunction(String url, String method, String pathInfo, String queryString, RequestParameters parameters, Consumer<Integer> httpStatus, Consumer<String> redirectUrl, SqlGraphStoreAdministration store)
+  protected JsonObject invokeFunction(String url, String method, String pathInfo, String queryString, RequestParameters parameters, InputStream requestBody, Consumer<Integer> httpStatus, Consumer<String> redirectUrl, SqlGraphStoreAdministration store)
     throws IOException, StoreException, PermissionException, GraphNotFoundException {
     if (pathInfo == null || pathInfo.equals("/")) { // no path component
       // redirect /store?call=getXXX to /store/getXXX
@@ -1382,8 +1386,7 @@ public class Store extends APIRequestHandler {
 
   /**
    * Implementation of {@link nzilbb.ag.IGraphStore#countAnnotations(String,String,Integer)}
-   * @param request The HTTP request.
-   * @param response The HTTP response.
+   * @param parameters Request parameter map.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */

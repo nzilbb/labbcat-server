@@ -1,4 +1,4 @@
-<%@ page info="Process with Praat" isErrorPage="true"
+<%@ page info="Annotation Graph Store" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
     import = "nzilbb.labbcat.server.api.Store" 
     import = "javax.json.Json" 
@@ -10,7 +10,7 @@
       initializeHandler(handler, request);
       JsonObject json = handler.get(
         request.getRequestURI(), request.getMethod(), request.getPathInfo(),
-        request.getQueryString(), parseParameters(request),
+        request.getQueryString(), parseParameters(request), request.getInputStream(),
         (status)->response.setStatus(status),
         (redirectUrl)->{
           try {
