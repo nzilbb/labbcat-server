@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -47,7 +47,7 @@ import nzilbb.labbcat.http.HttpRequestGet;
  * These tests assume that there is a working LaBB-CAT instance with the latest version of
  * nzilbb.labbcat.server.jar installed.  
  */
-public class TestAdminCategories {
+public class TestCategories {
   static String labbcatUrl = "http://localhost:8080/labbcat/";
   static String username = "labbcat";
   static String password = "labbcat";
@@ -262,6 +262,6 @@ public class TestAdminCategories {
   }
 
   public static void main(String args[]) {
-    org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestAdminCategories");
+    org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.api.admin.TestCategories");
   }
 }

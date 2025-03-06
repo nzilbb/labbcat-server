@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin.roles;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -47,7 +47,7 @@ import nzilbb.labbcat.http.HttpRequestGet;
  * These tests assume that there is a working LaBB-CAT instance with the latest version of
  * nzilbb.labbcat.server.jar installed.  
  */
-public class TestAdminRolePermissions
+public class TestPermissions
 {
    static String labbcatUrl = "http://localhost:8080/labbcat/";
    static String username = "labbcat";
@@ -203,9 +203,9 @@ public class TestAdminRolePermissions
       }
    }
    
-   @Test public void newRolePermissionUpdateRolePermissionAndDeleteRolePermission()
+   @Test public void newPermissionUpdatePermissionAndDeletePermission()
       throws Exception {
-      RolePermission originalRolePermission = new RolePermission()
+      RolePermission originalPermission = new RolePermission()
          .setRoleId("admin")
          .setEntity("t")
          .setLayerId("corpus")
@@ -213,80 +213,80 @@ public class TestAdminRolePermissions
       
       // ensure the record doesn't exist to start with
       try {
-         l.deleteRolePermission(originalRolePermission);
+         l.deleteRolePermission(originalPermission);
       } catch(Exception exception) {}
       
       try
       {
-         RolePermission newRolePermission = l.createRolePermission(originalRolePermission);
-         assertNotNull("RolePermission returned", newRolePermission);
+         RolePermission newPermission = l.createRolePermission(originalPermission);
+         assertNotNull("Permission returned", newPermission);
          assertEquals("roleId correct",
-                      originalRolePermission.getRoleId(), newRolePermission.getRoleId());
+                      originalPermission.getRoleId(), newPermission.getRoleId());
          assertEquals("entity correct",
-                      originalRolePermission.getEntity(), newRolePermission.getEntity());
+                      originalPermission.getEntity(), newPermission.getEntity());
          assertEquals("layerId correct",
-                      originalRolePermission.getLayerId(), newRolePermission.getLayerId());
+                      originalPermission.getLayerId(), newPermission.getLayerId());
          assertEquals("valudPattern correct",
-                      originalRolePermission.getValuePattern(), newRolePermission.getValuePattern());
+                      originalPermission.getValuePattern(), newPermission.getValuePattern());
          
          try {
-            l.createRolePermission(originalRolePermission);
+            l.createRolePermission(originalPermission);
             fail("Can't create a rolePermission with existing name");
          }
          catch(Exception exception) {}
          
          RolePermission[] rolePermissions
-            = l.readRolePermissions(originalRolePermission.getRoleId());
+            = l.readRolePermissions(originalPermission.getRoleId());
          // ensure the rolePermission exists
          assertTrue("There's at least one rolePermission", rolePermissions.length >= 1);
          boolean found = false;
          for (RolePermission c : rolePermissions) {
             assertEquals("Only correct role listed",
-                         originalRolePermission.getRoleId(), c.getRoleId());
-            if (c.getRoleId().equals(originalRolePermission.getRoleId())
-                && c.getEntity().equals(originalRolePermission.getEntity())) {
+                         originalPermission.getRoleId(), c.getRoleId());
+            if (c.getRoleId().equals(originalPermission.getRoleId())
+                && c.getEntity().equals(originalPermission.getEntity())) {
                found = true;
             }
          }
-         assertTrue("RolePermission was added", found);
+         assertTrue("Permission was added", found);
 
          // update it
-         RolePermission updatedRolePermission = new RolePermission()
+         RolePermission updatedPermission = new RolePermission()
             .setRoleId("admin")
             .setEntity("t")
             .setLayerId("transcript_language")
             .setValuePattern("en.*");
          
-         RolePermission changedRolePermission = l.updateRolePermission(updatedRolePermission);
-         assertNotNull("RolePermission returned", changedRolePermission);
+         RolePermission changedPermission = l.updateRolePermission(updatedPermission);
+         assertNotNull("Permission returned", changedPermission);
          assertEquals("roleId unchanged",
-                      originalRolePermission.getRoleId(), changedRolePermission.getRoleId());
+                      originalPermission.getRoleId(), changedPermission.getRoleId());
          assertEquals("entity unchanged",
-                      originalRolePermission.getEntity(), changedRolePermission.getEntity());
+                      originalPermission.getEntity(), changedPermission.getEntity());
          assertEquals("layerId updated",
-                      updatedRolePermission.getLayerId(), changedRolePermission.getLayerId());
+                      updatedPermission.getLayerId(), changedPermission.getLayerId());
          assertEquals("valudPattern updated",
-                      updatedRolePermission.getValuePattern(), changedRolePermission.getValuePattern());
+                      updatedPermission.getValuePattern(), changedPermission.getValuePattern());
          // delete it
          l.deleteRolePermission(
-            originalRolePermission.getRoleId(), originalRolePermission.getEntity());
+            originalPermission.getRoleId(), originalPermission.getEntity());
          
          RolePermission[] rolePermissionsAfter = l.readRolePermissions(
-            originalRolePermission.getRoleId());
+            originalPermission.getRoleId());
          // ensure the rolePermission no longer exists
          boolean foundAfter = false;
          for (RolePermission c : rolePermissionsAfter) {
-            if (c.getRoleId().equals(originalRolePermission.getRoleId())
-                && c.getEntity().equals(originalRolePermission.getEntity())) {
+            if (c.getRoleId().equals(originalPermission.getRoleId())
+                && c.getEntity().equals(originalPermission.getEntity())) {
                foundAfter = true;
                break;
             }
          }
-         assertFalse("RolePermission is gone", foundAfter);
+         assertFalse("Permission is gone", foundAfter);
 
          try {
             // can't delete it again
-            l.deleteRolePermission(originalRolePermission);
+            l.deleteRolePermission(originalPermission);
             fail("Can't delete rolePermission that doesn't exist");
          } catch(Exception exception) {
          }
@@ -294,26 +294,26 @@ public class TestAdminRolePermissions
       } finally {
          // ensure it's not there
          try {
-            l.deleteRolePermission(originalRolePermission);
+            l.deleteRolePermission(originalPermission);
          } catch(Exception exception) {}         
       }
    }
    
    @Test public void readonlyAccessEnforced() throws IOException, StoreException, PermissionException {
       // create a rolePermission to work with
-      RolePermission testRolePermission = new RolePermission()
+      RolePermission testPermission = new RolePermission()
          .setRoleId("admin")
          .setEntity("t")
          .setLayerId("corpus")
          .setValuePattern("unit-test.*");
       
       try {
-         l.createRolePermission(testRolePermission);
+         l.createRolePermission(testPermission);
 
          // now try operations with read-only ID, all should fail because of lack of authorization
 
          try {
-            ro.createRolePermission(testRolePermission);
+            ro.createRolePermission(testPermission);
             fail("Can't create a rolePermission as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
@@ -323,7 +323,7 @@ public class TestAdminRolePermissions
          }
          
          try {
-            ro.readRolePermissions(testRolePermission.getRoleId());
+            ro.readRolePermissions(testPermission.getRoleId());
             fail("Can't read rolePermissions as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
@@ -333,7 +333,7 @@ public class TestAdminRolePermissions
          }
          
          try {
-            ro.updateRolePermission(testRolePermission);
+            ro.updateRolePermission(testPermission);
             fail("Can't update a rolePermission as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
@@ -343,7 +343,7 @@ public class TestAdminRolePermissions
          }
          
          try {
-            ro.deleteRolePermission(testRolePermission);
+            ro.deleteRolePermission(testPermission);
             fail("Can't delete rolePermission as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
@@ -354,12 +354,12 @@ public class TestAdminRolePermissions
       
       } finally {         
          try { // ensure test rolePermission is deleted
-            l.deleteRolePermission(testRolePermission);
+            l.deleteRolePermission(testPermission);
          } catch(Exception exception) {}         
       }
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestAdminRolePermissions");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.api.admin.roles.TestPermissions");
    }
 }

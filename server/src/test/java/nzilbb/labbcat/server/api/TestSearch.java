@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -173,6 +173,6 @@ public class TestSearch {
   }
 
   public static void main(String args[]) {
-    org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestSearch");
+    org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.api.TestSearch");
   }
 }

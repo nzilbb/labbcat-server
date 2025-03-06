@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -40,14 +40,14 @@ import nzilbb.ag.PermissionException;
 import nzilbb.ag.StoreException;
 import nzilbb.labbcat.LabbcatAdmin;
 import nzilbb.labbcat.ResponseException;
-import nzilbb.labbcat.model.MediaTrack;
+import nzilbb.labbcat.model.Role;
 import nzilbb.labbcat.http.HttpRequestGet;
 
 /**
  * These tests assume that there is a working LaBB-CAT instance with the latest version of
  * nzilbb.labbcat.server.jar installed.  
  */
-public class TestAdminMediaTracks
+public class TestRoles
 {
    static String labbcatUrl = "http://localhost:8080/labbcat/";
    static String username = "labbcat";
@@ -69,129 +69,127 @@ public class TestAdminMediaTracks
       }
    }
    
-
-   @Test public void newMediaTrackUpdateMediaTrackAndDeleteMediaTrack() throws Exception {
-      MediaTrack originalMediaTrack = new MediaTrack()
-         .setSuffix("unit-test")
-         .setDescription("Temporary mediaTrack for unit testing")
-         .setDisplayOrder(99);
+   @Test public void validation() throws Exception {
+      try {
+         l.createRole(new Role());
+         fail("Can't create a role with null name");
+      }
+      catch(ResponseException x) {
+         // check it's for the right reason
+         assertEquals("Create failed for lack of name: "
+                      + x.getResponse().getHttpStatus() + " " + x.getResponse().getRaw(),
+                      400, x.getResponse().getHttpStatus());
+      }
       
       try {
-         MediaTrack newMediaTrack = l.createMediaTrack(originalMediaTrack);
-         assertNotNull("MediaTrack returned", newMediaTrack);
+         l.createRole(new Role().setRoleId(""));
+         fail("Can't create a role with blank name");
+      }
+      catch(ResponseException x) {
+         // check it's for the right reason
+         assertEquals("Create failed for blank name: "
+                      + x.getResponse().getHttpStatus() + " " + x.getResponse().getRaw(),
+                      400, x.getResponse().getHttpStatus());
+      }
+
+      try {
+         l.createRole(new Role().setRoleId("\t "));
+         fail("Can't create a role with all-whitespace name");
+      }
+      catch(ResponseException x) {
+         // check it's for the right reason
+         assertEquals("Create failed for all-whitespace name: "
+                      + x.getResponse().getHttpStatus() + " " + x.getResponse().getRaw(),
+                      400, x.getResponse().getHttpStatus());
+      }
+   }
+   
+   @Test public void newRoleUpdateRoleAndDeleteRole() throws Exception {
+      Role originalRole = new Role()
+         .setRoleId("unit-test")
+         .setDescription("Temporary role for unit testing");
+      
+      try {
+         Role newRole = l.createRole(originalRole);
+         assertNotNull("Role returned", newRole);
          assertEquals("Name correct",
-                      originalMediaTrack.getSuffix(), newMediaTrack.getSuffix());
+                      originalRole.getRoleId(), newRole.getRoleId());
          assertEquals("Description correct",
-                      originalMediaTrack.getDescription(), newMediaTrack.getDescription());
-         assertEquals("Display order correct",
-                      originalMediaTrack.getDisplayOrder(), newMediaTrack.getDisplayOrder());
+                      originalRole.getDescription(), newRole.getDescription());
          
          try {
-            l.createMediaTrack(originalMediaTrack);
-            fail("Can't create a mediaTrack with existing name");
+            l.createRole(originalRole);
+            fail("Can't create a role with existing name");
          }
          catch(Exception exception) {}
          
-         MediaTrack[] mediaTracks = l.readMediaTracks();
-         // ensure the mediaTrack exists
-         assertTrue("There's at least one mediaTrack", mediaTracks.length >= 1);
+         Role[] roles = l.readRoles();
+         // ensure the role exists
+         assertTrue("There's at least one role", roles.length >= 1);
          boolean found = false;
-         for (MediaTrack c : mediaTracks) {
-            if (c.getSuffix().equals(originalMediaTrack.getSuffix())) {
+         for (Role c : roles) {
+            if (c.getRoleId().equals(originalRole.getRoleId())) {
                found = true;
                break;
             }
          }
-         assertTrue("MediaTrack was added", found);
+         assertTrue("Role was added", found);
 
          // update it
-         MediaTrack updatedMediaTrack = new MediaTrack()
-            .setSuffix("unit-test")
-            .setDescription("Changed description")
-            .setDisplayOrder(100);
+         Role updatedRole = new Role()
+            .setRoleId("unit-test")
+            .setDescription("Changed description");
          
-         MediaTrack changedMediaTrack = l.updateMediaTrack(updatedMediaTrack);
-         assertNotNull("MediaTrack returned", changedMediaTrack);
+         Role changedRole = l.updateRole(updatedRole);
+         assertNotNull("Role returned", changedRole);
          assertEquals("Updated Name correct",
-                      updatedMediaTrack.getSuffix(), changedMediaTrack.getSuffix());
+                      updatedRole.getRoleId(), changedRole.getRoleId());
          assertEquals("Updated Description correct",
-                      updatedMediaTrack.getDescription(), changedMediaTrack.getDescription());
-         assertEquals("Updated Display order correct",
-                      updatedMediaTrack.getDisplayOrder(), changedMediaTrack.getDisplayOrder());
+                      updatedRole.getDescription(), changedRole.getDescription());
 
          // delete it
-         l.deleteMediaTrack(originalMediaTrack.getSuffix());
+         l.deleteRole(originalRole.getRoleId());
 
-         MediaTrack[] mediaTracksAfter = l.readMediaTracks();
-         // ensure the mediaTrack no longer exists
+         Role[] rolesAfter = l.readRoles();
+         // ensure the role no longer exists
          boolean foundAfter = false;
-         for (MediaTrack c : mediaTracksAfter) {
-            if (c.getSuffix().equals(originalMediaTrack.getSuffix())) {
+         for (Role c : rolesAfter) {
+            if (c.getRoleId().equals(originalRole.getRoleId())) {
                foundAfter = true;
                break;
             }
          }
-         assertFalse("MediaTrack is gone", foundAfter);
+         assertFalse("Role is gone", foundAfter);
 
          try {
             // can't delete it again
-            l.deleteMediaTrack(originalMediaTrack);
-            fail("Can't delete mediaTrack that doesn't exist");
+            l.deleteRole(originalRole);
+            fail("Can't delete role that doesn't exist");
          } catch(Exception exception) {
          }
-
+         
       } finally {
          // ensure it's not there
          try {
-            l.deleteMediaTrack(originalMediaTrack);
+            l.deleteRole(originalRole);
          } catch(Exception exception) {}         
      }
    }
    
-   @Test public void canAddDeleteMediaTrackWithNoSuffix() throws Exception {
-
-      // if the test system has one already, ensure we restore it afterwards
-      MediaTrack existingTrack = null;
-      MediaTrack[] mediaTracks = l.readMediaTracks();
-      for (MediaTrack c : mediaTracks) {
-         if (c.getSuffix().length() == 0) {
-            existingTrack = c;
-            break;
-         }
-      }
-      
-      try {
-
-         if (existingTrack != null) l.deleteMediaTrack(existingTrack);
-
-         MediaTrack testTrack = new MediaTrack()
-            .setSuffix("")
-            .setDescription("Media")
-            .setDisplayOrder(0);
-         l.createMediaTrack(testTrack);
-         l.deleteMediaTrack(testTrack);
-
-      } finally {
-         // put the original track back
-         if (existingTrack != null) l.createMediaTrack(existingTrack);
-     }
-   }
-   
    @Test public void readonlyAccessEnforced() throws IOException, StoreException, PermissionException {
-      // create a mediaTrack to work with
-      MediaTrack testMediaTrack = new MediaTrack()
-         .setSuffix("unit-test")
-         .setDescription("Temporary mediaTrack for unit testing")
-         .setDisplayOrder(99);
+      // create a role to work with
+      Role testRole = new Role()
+         .setRoleId("unit-test")
+         .setDescription("Temporary role for unit testing");
       
       try {
-         l.createMediaTrack(testMediaTrack);
+         l.createRole(testRole);
 
          // now try operations with read-only ID, all should fail because of lack of authorization
 
          try {
-            ro.createMediaTrack(testMediaTrack);
-            fail("Can't create a mediaTrack as non-admin user");
+            ro.createRole(testRole);
+            fail("Can't create a role as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
             assertEquals("Create failed for lack of auth: "
@@ -200,8 +198,8 @@ public class TestAdminMediaTracks
          }
 
          try {
-            ro.readMediaTracks();
-            fail("Can't read mediaTracks as non-admin user");
+            ro.readRoles();
+            fail("Can't read roles as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
             assertEquals("Read failed for lack of auth: "
@@ -210,8 +208,8 @@ public class TestAdminMediaTracks
          }
          
          try {
-            ro.updateMediaTrack(testMediaTrack);
-            fail("Can't update a mediaTrack as non-admin user");
+            ro.updateRole(testRole);
+            fail("Can't update a role as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
             assertEquals("Update failed for lack of auth: "
@@ -220,8 +218,8 @@ public class TestAdminMediaTracks
          }
          
          try {
-            ro.deleteMediaTrack(testMediaTrack);
-            fail("Can't delete mediaTrack as non-admin user");
+            ro.deleteRole(testRole.getRoleId());
+            fail("Can't delete role as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
             assertEquals("Create failed for lack of auth: "
@@ -230,13 +228,13 @@ public class TestAdminMediaTracks
          }
       
       } finally {         
-         try { // ensure test mediaTrack is deleted
-            l.deleteMediaTrack(testMediaTrack);
+         try { // ensure test role is deleted
+            l.deleteRole(testRole);
          } catch(Exception exception) {}         
       }
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestAdminMediaTracks");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.api.admin.TestRoles");
    }
 }

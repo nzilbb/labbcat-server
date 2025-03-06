@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -48,7 +48,7 @@ import nzilbb.labbcat.model.Match;
  * These tests assume that there is a working LaBB-CAT instance with the latest version of
  * nzilbb.labbcat.server.jar installed.  
  */
-public class TestStoreQuery
+public class TestStore
 {
    static String labbcatUrl = "http://localhost:8080/labbcat/";
    static String username = "labbcat";
@@ -340,6 +340,6 @@ public class TestStoreQuery
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.TestStoreQuery");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.api.TestStore");
    }
 }

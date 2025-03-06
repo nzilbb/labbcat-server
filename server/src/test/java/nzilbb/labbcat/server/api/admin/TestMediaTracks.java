@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -40,14 +40,14 @@ import nzilbb.ag.PermissionException;
 import nzilbb.ag.StoreException;
 import nzilbb.labbcat.LabbcatAdmin;
 import nzilbb.labbcat.ResponseException;
-import nzilbb.labbcat.model.Corpus;
+import nzilbb.labbcat.model.MediaTrack;
 import nzilbb.labbcat.http.HttpRequestGet;
 
 /**
  * These tests assume that there is a working LaBB-CAT instance with the latest version of
  * nzilbb.labbcat.server.jar installed.  
  */
-public class TestAdminCorpora
+public class TestMediaTracks
 {
    static String labbcatUrl = "http://localhost:8080/labbcat/";
    static String username = "labbcat";
@@ -58,7 +58,7 @@ public class TestAdminCorpora
    static LabbcatAdmin ro;
 
    @BeforeClass public static void setBaseUrl() throws MalformedURLException {
-
+      
       try {
          l = new LabbcatAdmin(labbcatUrl, username, password);
          l.setBatchMode(true);
@@ -69,135 +69,129 @@ public class TestAdminCorpora
       }
    }
    
-   @Test public void validation() throws Exception {
-      try {
-         l.createCorpus(new Corpus());
-         fail("Can't create a corpus with null name");
-      }
-      catch(ResponseException x) {
-         // check it's for the right reason
-         assertEquals("Create failed for lack of name: "
-                      + x.getResponse().getHttpStatus() + " " + x.getResponse().getRaw(),
-                      400, x.getResponse().getHttpStatus());
-      }
+
+   @Test public void newMediaTrackUpdateMediaTrackAndDeleteMediaTrack() throws Exception {
+      MediaTrack originalMediaTrack = new MediaTrack()
+         .setSuffix("unit-test")
+         .setDescription("Temporary mediaTrack for unit testing")
+         .setDisplayOrder(99);
       
       try {
-         l.createCorpus(new Corpus().setName(""));
-         fail("Can't create a corpus with blank name");
-      }
-      catch(ResponseException x) {
-         // check it's for the right reason
-         assertEquals("Create failed for blank name: "
-                      + x.getResponse().getHttpStatus() + " " + x.getResponse().getRaw(),
-                      400, x.getResponse().getHttpStatus());
-      }
-
-      try {
-         l.createCorpus(new Corpus().setName("\t "));
-         fail("Can't create a corpus with all-whitespace name");
-      }
-      catch(ResponseException x) {
-         // check it's for the right reason
-         assertEquals("Create failed for all-whitespace name: "
-                      + x.getResponse().getHttpStatus() + " " + x.getResponse().getRaw(),
-                      400, x.getResponse().getHttpStatus());
-      }
- }
-   
-   @Test public void newCorpusUpdateCorpusAndDeleteCorpus() throws Exception {
-      Corpus originalCorpus = new Corpus()
-         .setName("unit-test")
-         .setLanguage("en")
-         .setDescription("Temporary corpus for unit testing");
-      try {
-         Corpus newCorpus = l.createCorpus(originalCorpus);
-         assertNotNull("Corpus returned", newCorpus);
+         MediaTrack newMediaTrack = l.createMediaTrack(originalMediaTrack);
+         assertNotNull("MediaTrack returned", newMediaTrack);
          assertEquals("Name correct",
-                      originalCorpus.getName(), newCorpus.getName());
-         assertEquals("Language correct",
-                      originalCorpus.getLanguage(), newCorpus.getLanguage());
+                      originalMediaTrack.getSuffix(), newMediaTrack.getSuffix());
          assertEquals("Description correct",
-                      originalCorpus.getDescription(), newCorpus.getDescription());
-
+                      originalMediaTrack.getDescription(), newMediaTrack.getDescription());
+         assertEquals("Display order correct",
+                      originalMediaTrack.getDisplayOrder(), newMediaTrack.getDisplayOrder());
+         
          try {
-            l.createCorpus(originalCorpus);
-            fail("Can't create a corpus with existing name");
+            l.createMediaTrack(originalMediaTrack);
+            fail("Can't create a mediaTrack with existing name");
          }
-         catch(ResponseException exception) {
-            // check it's for the right reason
-         }
-
-         Corpus[] corpora = l.readCorpora();
-         // ensure the corpus exists
-         assertTrue("There's at least one corpus", corpora.length >= 1);
+         catch(Exception exception) {}
+         
+         MediaTrack[] mediaTracks = l.readMediaTracks();
+         // ensure the mediaTrack exists
+         assertTrue("There's at least one mediaTrack", mediaTracks.length >= 1);
          boolean found = false;
-         for (Corpus c : corpora) {
-            if (c.getName().equals(originalCorpus.getName())) {
+         for (MediaTrack c : mediaTracks) {
+            if (c.getSuffix().equals(originalMediaTrack.getSuffix())) {
                found = true;
                break;
             }
          }
-         assertTrue("Corpus was added", found);
+         assertTrue("MediaTrack was added", found);
 
          // update it
-         Corpus updatedCorpus = new Corpus()
-            .setName("unit-test")
-            .setLanguage("es")
-            .setDescription("Temporary Spanish corpus for unit testing");
-
-         Corpus changedCorpus = l.updateCorpus(updatedCorpus);
-         assertNotNull("Corpus returned", changedCorpus);
+         MediaTrack updatedMediaTrack = new MediaTrack()
+            .setSuffix("unit-test")
+            .setDescription("Changed description")
+            .setDisplayOrder(100);
+         
+         MediaTrack changedMediaTrack = l.updateMediaTrack(updatedMediaTrack);
+         assertNotNull("MediaTrack returned", changedMediaTrack);
          assertEquals("Updated Name correct",
-                      updatedCorpus.getName(), changedCorpus.getName());
-         assertEquals("Updated Language correct",
-                      updatedCorpus.getLanguage(), changedCorpus.getLanguage());
+                      updatedMediaTrack.getSuffix(), changedMediaTrack.getSuffix());
          assertEquals("Updated Description correct",
-                      updatedCorpus.getDescription(), changedCorpus.getDescription());
+                      updatedMediaTrack.getDescription(), changedMediaTrack.getDescription());
+         assertEquals("Updated Display order correct",
+                      updatedMediaTrack.getDisplayOrder(), changedMediaTrack.getDisplayOrder());
 
          // delete it
-         l.deleteCorpus(originalCorpus.getName());
+         l.deleteMediaTrack(originalMediaTrack.getSuffix());
 
-         Corpus[] corporaAfter = l.readCorpora();
-         // ensure the corpus no longer exists
+         MediaTrack[] mediaTracksAfter = l.readMediaTracks();
+         // ensure the mediaTrack no longer exists
          boolean foundAfter = false;
-         for (Corpus c : corporaAfter) {
-            if (c.getName().equals(originalCorpus.getName())) {
+         for (MediaTrack c : mediaTracksAfter) {
+            if (c.getSuffix().equals(originalMediaTrack.getSuffix())) {
                foundAfter = true;
                break;
             }
          }
-         assertFalse("Corpus is gone", foundAfter);
+         assertFalse("MediaTrack is gone", foundAfter);
 
          try {
             // can't delete it again
-            l.deleteCorpus(originalCorpus);
-            fail("Can't delete corpus that doesn't exist");
+            l.deleteMediaTrack(originalMediaTrack);
+            fail("Can't delete mediaTrack that doesn't exist");
          } catch(Exception exception) {
          }
 
       } finally {
          // ensure it's not there
          try {
-            l.deleteCorpus(originalCorpus);
+            l.deleteMediaTrack(originalMediaTrack);
          } catch(Exception exception) {}         
      }
    }
    
-   @Test public void readonlyAccessEnforced() throws IOException, StoreException, PermissionException {
-      // create a corpus to work with
-      Corpus testCorpus = new Corpus()
-         .setName("unit-test")
-         .setLanguage("en")
-         .setDescription("Temporary corpus for unit testing");
+   @Test public void canAddDeleteMediaTrackWithNoSuffix() throws Exception {
+
+      // if the test system has one already, ensure we restore it afterwards
+      MediaTrack existingTrack = null;
+      MediaTrack[] mediaTracks = l.readMediaTracks();
+      for (MediaTrack c : mediaTracks) {
+         if (c.getSuffix().length() == 0) {
+            existingTrack = c;
+            break;
+         }
+      }
       
       try {
-         l.createCorpus(testCorpus);
+
+         if (existingTrack != null) l.deleteMediaTrack(existingTrack);
+
+         MediaTrack testTrack = new MediaTrack()
+            .setSuffix("")
+            .setDescription("Media")
+            .setDisplayOrder(0);
+         l.createMediaTrack(testTrack);
+         l.deleteMediaTrack(testTrack);
+
+      } finally {
+         // put the original track back
+         if (existingTrack != null) l.createMediaTrack(existingTrack);
+     }
+   }
+   
+   @Test public void readonlyAccessEnforced() throws IOException, StoreException, PermissionException {
+      // create a mediaTrack to work with
+      MediaTrack testMediaTrack = new MediaTrack()
+         .setSuffix("unit-test")
+         .setDescription("Temporary mediaTrack for unit testing")
+         .setDisplayOrder(99);
+      
+      try {
+         l.createMediaTrack(testMediaTrack);
 
          // now try operations with read-only ID, all should fail because of lack of authorization
 
          try {
-            ro.createCorpus(testCorpus);
-            fail("Can't create a corpus as non-admin user");
+            ro.createMediaTrack(testMediaTrack);
+            fail("Can't create a mediaTrack as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
             assertEquals("Create failed for lack of auth: "
@@ -206,8 +200,8 @@ public class TestAdminCorpora
          }
 
          try {
-            ro.readCorpora();
-            fail("Can't read corpora as non-admin user");
+            ro.readMediaTracks();
+            fail("Can't read mediaTracks as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
             assertEquals("Read failed for lack of auth: "
@@ -216,8 +210,8 @@ public class TestAdminCorpora
          }
          
          try {
-            ro.updateCorpus(testCorpus);
-            fail("Can't update a corpus as non-admin user");
+            ro.updateMediaTrack(testMediaTrack);
+            fail("Can't update a mediaTrack as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
             assertEquals("Update failed for lack of auth: "
@@ -226,8 +220,8 @@ public class TestAdminCorpora
          }
          
          try {
-            ro.deleteCorpus(testCorpus.getName());
-            fail("Can't delete corpus as non-admin user");
+            ro.deleteMediaTrack(testMediaTrack);
+            fail("Can't delete mediaTrack as non-admin user");
          } catch(ResponseException x) {
             // check it's for the right reason
             assertEquals("Create failed for lack of auth: "
@@ -236,13 +230,13 @@ public class TestAdminCorpora
          }
       
       } finally {         
-         try { // ensure test corpus is deleted
-            l.deleteCorpus(testCorpus);
+         try { // ensure test mediaTrack is deleted
+            l.deleteMediaTrack(testMediaTrack);
          } catch(Exception exception) {}         
       }
    }
 
    public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.servlet.test.TestAdminCorpora");
+      org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.api.admin.TestMediaTracks");
    }
 }
