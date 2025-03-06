@@ -1,6 +1,6 @@
 <%@ page info="Transcript search" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
-    import = "nzilbb.labbcat.server.servlet.Search" 
+    import = "nzilbb.labbcat.server.api.Search" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 

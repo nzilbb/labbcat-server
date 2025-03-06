@@ -1,7 +1,7 @@
 <%@ page info="Corpora" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.AdminCorpora" 
+    import = "nzilbb.labbcat.server.api.admin.Corpora" 
 %><%@ include file="../base.jsp" %><%{
-    AdminCorpora handler = new AdminCorpora();
+    Corpora handler = new Corpora();
     initializeHandler(handler, request);
     if ("GET".equals(request.getMethod())) {
       handler.get(

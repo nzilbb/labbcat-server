@@ -1,7 +1,7 @@
 <%@ page info="Attribute categories" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.AdminCategories" 
+    import = "nzilbb.labbcat.server.api.admin.Categories" 
 %><%@ include file="../base.jsp" %><%{
-    AdminCategories handler = new AdminCategories();
+    Categories handler = new Categories();
     initializeHandler(handler, request);
     if ("GET".equals(request.getMethod())) {
       handler.get(

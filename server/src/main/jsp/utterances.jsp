@@ -1,6 +1,6 @@
 <%@ page info="All Utterances" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
-    import = "nzilbb.labbcat.server.servlet.Utterances" 
+    import = "nzilbb.labbcat.server.api.Utterances" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 

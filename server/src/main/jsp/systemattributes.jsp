@@ -1,5 +1,5 @@
 <%@ page info="System Attributes" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.SystemAttributes" 
+    import = "nzilbb.labbcat.server.api.SystemAttributes" 
 %><%@ include file="base.jsp" %><%{
     SystemAttributes handler = new SystemAttributes();
     initializeHandler(handler, request);

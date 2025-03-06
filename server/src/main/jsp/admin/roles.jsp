@@ -1,7 +1,7 @@
 <%@ page info="User roles" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.AdminRoles" 
+    import = "nzilbb.labbcat.server.api.admin.Roles" 
 %><%@ include file="../base.jsp" %><%{
-    AdminRoles handler = new AdminRoles();
+    Roles handler = new Roles();
     initializeHandler(handler, request);
     if ("GET".equals(request.getMethod())) {
       handler.get(

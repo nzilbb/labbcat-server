@@ -10,7 +10,7 @@
     import = "org.apache.commons.fileupload2.core.DiskFileItemFactory"
     import = "org.apache.commons.fileupload2.core.FileItem"
     import = "org.apache.commons.fileupload2.core.FileUploadException"
-    import = "nzilbb.labbcat.server.servlet.RequestParameters" 
+    import = "nzilbb.labbcat.server.api.RequestParameters" 
 %><%
 {
   RequestParameters parameters = new RequestParameters();

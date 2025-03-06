@@ -19,7 +19,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin.roles;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,6 +34,8 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
+import nzilbb.labbcat.server.api.TableServletBase;
+import nzilbb.labbcat.server.api.RequiredRole;
 
 /**
  * <tt>/api/admin/roles/permissions[/<var>role_id</var>[/<var>entity</var>]]</tt> 
@@ -127,9 +129,9 @@ import javax.servlet.http.HttpServletRequest;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @RequiredRole("admin")
-public class AdminRolePermissions extends TableServletBase {   
+public class Permissions extends TableServletBase {   
   
-  public AdminRolePermissions() {
+  public Permissions() {
     super("role_permission", // table
           new Vector<String>() {{ // primary/URL keys
             add("role_id");
@@ -199,7 +201,7 @@ public class AdminRolePermissions extends TableServletBase {
       if (errors == null) errors = new Vector<String>();
       errors.add(x.toString());
       // not expecting this, so log it:
-      System.err.println("AdminRolePermissions.validateBeforeUpdate: ERROR " + x);
+      System.err.println("Permissions.validateBeforeUpdate: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
     return record;
@@ -262,9 +264,9 @@ public class AdminRolePermissions extends TableServletBase {
       if (errors == null) errors = new Vector<String>();
       errors.add(x.toString());
       // not expecting this, so log it:
-      System.err.println("AdminRolePermissions.validateBeforeInsert: ERROR " + x);
+      System.err.println("Permissions.validateBeforeInsert: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
     return record;
   } // end of validateBeforeCreate()
-} // end of class AdminRolePermissions
+} // end of class Permissions

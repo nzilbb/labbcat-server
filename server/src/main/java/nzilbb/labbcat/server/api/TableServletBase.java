@@ -19,7 +19,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,7 +131,7 @@ public class TableServletBase extends APIRequestHandler {
    *                 "{0} {0,choice,1#transcript|1&lt;transcripts} use this corpus, e.g. {1}")
    * </code>
    */
-  class DeleteCheck {
+  public class DeleteCheck {
     String query;
     List<String> fields;
     String reason;

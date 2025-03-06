@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.results;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -62,6 +62,8 @@ import nzilbb.labbcat.server.search.SearchResults;
 import nzilbb.labbcat.server.search.SearchTask;
 import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
+import nzilbb.labbcat.server.api.APIRequestHandler;
+import nzilbb.labbcat.server.api.RequestParameters;
 
 /**
  * <tt>/api/results/dictionary</tt>
@@ -89,12 +91,12 @@ import nzilbb.util.IO;
  *</pre>
  * @author Robert Fromont
  */
-public class ResultsDictionary extends APIRequestHandler { // TODO unit test
+public class Dictionary extends APIRequestHandler { // TODO unit test
   
   /**
    * Constructor
    */
-  public ResultsDictionary() {
+  public Dictionary() {
   } // end of constructor
   
   // Servlet methods
@@ -226,4 +228,4 @@ public class ResultsDictionary extends APIRequestHandler { // TODO unit test
       }
     }
   }
-} // end of class ResultsDictionary
+} // end of class Dictionary

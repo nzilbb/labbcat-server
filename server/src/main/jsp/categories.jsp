@@ -1,5 +1,5 @@
 <%@ page info="Attribute Categories" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.Categories" 
+    import = "nzilbb.labbcat.server.api.Categories" 
 %><%@ include file="base.jsp" %><%{
     Categories handler = new Categories();
     initializeHandler(handler, request);

@@ -1,3 +1,4 @@
+
 //
 // Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
@@ -19,7 +20,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,8 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.stream.JsonGenerator;
+import nzilbb.labbcat.server.api.APIRequestHandler;
+import nzilbb.labbcat.server.api.RequiredRole;
 
 /**
  * <tt>/api/admin/systemattributes</tt> : Administration of <em> system attribute </em> records.
@@ -86,12 +89,12 @@ import javax.json.stream.JsonGenerator;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @RequiredRole("admin")
-public class AdminSystemAttributes extends APIRequestHandler {
+public class SystemAttributes extends APIRequestHandler {
   
   /**
    * Default constructor.
    */
-  public AdminSystemAttributes() {
+  public SystemAttributes() {
   } // end of constructor
   
   /**
@@ -176,7 +179,7 @@ public class AdminSystemAttributes extends APIRequestHandler {
             endSuccessResult(jsonOut, null);
           } catch(SQLException exception) {
             httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-            System.err.println("AdminSystemAttributes GET: ERROR: " + exception);
+            System.err.println("SystemAttributes GET: ERROR: " + exception);
             endFailureResult(jsonOut, exception);
           }
         }
@@ -184,7 +187,7 @@ public class AdminSystemAttributes extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      System.err.println("AdminSystemAttributes GET: Couldn't connect to database: " + exception);
+      System.err.println("SystemAttributes GET: Couldn't connect to database: " + exception);
       endFailureResult(jsonOut, exception);
     }      
   }
@@ -260,7 +263,7 @@ public class AdminSystemAttributes extends APIRequestHandler {
         connection.close();
       }
     } catch(Exception exception) {
-      System.err.println("AdminSystemAttributes.put: Couldn't connect to database: " + exception);
+      System.err.println("SystemAttributes.put: Couldn't connect to database: " + exception);
       return failureResult(exception);
     }      
   }

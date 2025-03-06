@@ -1,7 +1,7 @@
 <%@ page info="Layer Managers" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.LayerManagers" 
+    import = "nzilbb.labbcat.server.api.layers.Managers" 
 %><%@ include file="../base.jsp" %><%{
-    LayerManagers handler = new LayerManagers();
+    Managers handler = new Managers();
     initializeHandler(handler, request);
     if ("GET".equals(request.getMethod())) {
       handler.get(

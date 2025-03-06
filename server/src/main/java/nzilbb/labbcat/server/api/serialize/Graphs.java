@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.serialize;
 
 import java.io.*;
 import java.net.*;
@@ -45,6 +45,8 @@ import nzilbb.ag.serialize.util.ConfigurationHelper;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.ParameterSet;
+import nzilbb.labbcat.server.api.APIRequestHandler;
+import nzilbb.labbcat.server.api.RequestParameters;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
@@ -73,7 +75,7 @@ import org.xml.sax.*;
  * containing the output files. 
  * @author Robert Fromont
  */
-public class SerializeGraphs extends APIRequestHandler { // TODO unit test
+public class Graphs extends APIRequestHandler { // TODO unit test
    
   // Attributes:
   
@@ -92,12 +94,12 @@ public class SerializeGraphs extends APIRequestHandler { // TODO unit test
    * PercentComplete mutator
    * @param iNewPercentComplete How far through the speakers.
    */
-  public SerializeGraphs setPercentComplete(int iNewPercentComplete) { iPercentComplete = iNewPercentComplete; return this; }
+  public Graphs setPercentComplete(int iNewPercentComplete) { iPercentComplete = iNewPercentComplete; return this; }
    
   /**
    * Constructor
    */
-  public SerializeGraphs() {
+  public Graphs() {
   } // end of constructor
 
   // Servlet methods
@@ -238,7 +240,7 @@ public class SerializeGraphs extends APIRequestHandler { // TODO unit test
                           return store.getTranscript(id, layersToLoad);
                         } catch (Exception x) {
                           setLastException(x);
-                          setStatus("SerializeGraphs: getTranscript("+id+"): " + x);
+                          setStatus("Graphs: getTranscript("+id+"): " + x);
                           return null;
                         } finally {
                           gotGraphCount += 1;
@@ -265,7 +267,7 @@ public class SerializeGraphs extends APIRequestHandler { // TODO unit test
                           stream.getStream().close();
                         } catch(Exception exception) {
                           setStatus(
-                            "SerializeGraphs: Cannot close single graph stream: " + exception);
+                            "Graphs: Cannot close single graph stream: " + exception);
                         }
                       }
                       iPercentComplete = 100;
@@ -296,7 +298,7 @@ public class SerializeGraphs extends APIRequestHandler { // TODO unit test
                             return store.getTranscript(id, layersToLoad);
                           } catch (Exception x) {
                             setLastException(x);
-                            setStatus("SerializeGraphs: getTranscript("+id+"): " + x);
+                            setStatus("Graphs: getTranscript("+id+"): " + x);
                             return null;
                           } finally {
                             gotGraphCount += 1;
@@ -318,15 +320,15 @@ public class SerializeGraphs extends APIRequestHandler { // TODO unit test
                           IO.Pump(stream.getStream(), zipOut, false);
                         } catch (ZipException zx) {
                           setLastException(zx);
-                          setStatus("SerializeGraphs: can't zip stream "+stream.getName()+": " + zx);
+                          setStatus("Graphs: can't zip stream "+stream.getName()+": " + zx);
                         } catch (IOException iox) {
                           setLastException(iox);
-                          setStatus("SerializeGraphs: can't process stream "+stream.getName()+": " + iox);
+                          setStatus("Graphs: can't process stream "+stream.getName()+": " + iox);
                         } finally {
                           try {
                             stream.getStream().close();
                           } catch(Exception exception) {
-                            setStatus("SerializeGraphs: Cannot close graph stream: " + exception);
+                            setStatus("Graphs: Cannot close graph stream: " + exception);
                           }
                         }
                       },
@@ -340,7 +342,7 @@ public class SerializeGraphs extends APIRequestHandler { // TODO unit test
                     try {
                       zipOut.close();
                     } catch(Exception exception) {
-                      setStatus("SerializeGraphs: Cannot close ZIP file: " + exception);
+                      setStatus("Graphs: Cannot close ZIP file: " + exception);
                     }
                   }
                 } // multiple output streams, return a zip file
@@ -443,7 +445,7 @@ public class SerializeGraphs extends APIRequestHandler { // TODO unit test
       try {
         graphs.add(store.getTranscript(id, layerIds));
       } catch(Exception exception) {
-        System.err.println("SerializeGraphs error processing: " + id + " - " + exception);
+        System.err.println("Graphs error processing: " + id + " - " + exception);
       }	    
     } // next graph
     iPercentComplete = 50;
@@ -466,4 +468,4 @@ public class SerializeGraphs extends APIRequestHandler { // TODO unit test
   } // end of serializeGraphs()
    
   private static final long serialVersionUID = -1;
-} // end of class SerializeGraphs
+} // end of class Graphs

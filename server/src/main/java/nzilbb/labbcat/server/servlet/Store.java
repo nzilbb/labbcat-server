@@ -691,7 +691,7 @@ public class Store extends StoreQuery {
       String trackSuffix = parameters.getString("trackSuffix");
       Vector<FileItem> files =  parameters.getFiles("media");
       FileItem media = files.size() == 0? null : files.firstElement();
-      if (media == null) errors.add("No media received."); // TODO i18n
+      if (media == null) errors.add("No media received.");
       if (errors.size() > 0) return failureResult(errors);
 
       String fileName = MultipartRequestParameters.SanitizedFileName(media);
@@ -706,7 +706,7 @@ public class Store extends StoreQuery {
       temporaryMediaFile.delete();
 
       return successResult(
-        request, mediaFile, "Added {0} to {1}", fileName, id); // TODO i18n
+        request, mediaFile, "Added {0} to {1}", fileName, id);
 
     } catch(Exception ex) {
       throw new ServletException(ex);
@@ -732,7 +732,7 @@ public class Store extends StoreQuery {
       if (id == null) errors.add(localize(request, "No ID specified."));
       Vector<FileItem> files =  parameters.getFiles("document");
       FileItem media = files.size() == 0? null : files.firstElement();
-      if (media == null) errors.add("No media received."); // TODO i18n
+      if (media == null) errors.add("No media received.");
       if (errors.size() > 0) return failureResult(errors);
       
       String fileName = MultipartRequestParameters.SanitizedFileName(media);
@@ -751,7 +751,7 @@ public class Store extends StoreQuery {
       temporaryMediaDir.delete();
       
       return successResult(
-        request, mediaFile, "Added {0} to {1}", fileName, id); // TODO i18n
+        request, mediaFile, "Added {0} to {1}", fileName, id);
       
     } catch(Exception ex) {
       throw new ServletException(ex);
@@ -772,10 +772,10 @@ public class Store extends StoreQuery {
     String id = request.getParameter("id");
     if (id == null) errors.add(localize(request, "No ID specified."));
     String fileName = request.getParameter("fileName");
-    if (fileName == null) errors.add(localize(request, "No file name specified.")); // TODO i18n
+    if (fileName == null) errors.add(localize(request, "No file name specified."));
     if (errors.size() > 0) return failureResult(errors);
     store.deleteMedia(id, fileName);
-    return successResult(request, null, "Media deleted from {0}: {1}", id, fileName); // TODO i18n
+    return successResult(request, null, "Media deleted from {0}: {1}", id, fileName);
   }
 
   // TODO saveSource

@@ -1,6 +1,6 @@
 <%@ page info="User information" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
-    import = "nzilbb.labbcat.server.servlet.User" 
+    import = "nzilbb.labbcat.server.api.User" 
     import = "javax.json.Json" 
 %><%@ include file="base.jsp" %><%{
     if ("GET".equals(request.getMethod())) { // GET only

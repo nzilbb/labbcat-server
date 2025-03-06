@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -19,7 +19,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 
 import java.sql.Connection;
 import java.util.List;
@@ -29,17 +29,19 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
+import nzilbb.labbcat.server.api.TableServletBase;
+import nzilbb.labbcat.server.api.RequiredRole;
 
 /**
- * <tt>/api/admin/corpora</tt> 
- * : Administration of <em> corpus </em> records.
- *  <p> Allows administration (Create/Read/Update/Delete) of corpus records via
+ * <tt>/api/admin/categories/<var>class_id</var>[/<var>category</var>]</tt> 
+ * : Administration of <em> category </em> records.
+ *  <p> Allows administration (Create/Read/Update/Delete) of layer/attribute category records via
  *  JSON-encoded objects with the following attributes:
  *   <dl>
- *    <dt> corpus_id </dt><dd> The database key for the record. </dd>
- *    <dt> corpus_name </dt><dd> The name of the corpus. </dd>
- *    <dt> corpus_language </dt><dd> The ISO 639-1 code for the default language. </dd>
- *    <dt> corpus_description </dt><dd> The description of the corpus. </dd>
+ *    <dt> class_id </dt><dd> The scope of the category - either "transcript" or "speaker". </dd>
+ *    <dt> category </dt><dd> The name of the category. </dd>
+ *    <dt> description </dt><dd> The description of t/he category. </dd>
+ *    <dt> display_order </dt><dd> The order in which the category appears amongst others. </dd>
  *    <dt> _cantDelete </dt><dd> This is not a database field, but rather is present in
  *         records returned from the server that can not currently be deleted; 
  *         a string representing the reason the record can't be deleted. </dd>
@@ -49,9 +51,9 @@ import javax.servlet.http.HttpServletRequest;
  *    <dt> POST </dt><dd> Create a new record.
  *     <ul>
  *      <li><em> Request Body </em> - a JSON-encoded object representing the new record
- *       (excluding <var>corpus_id</var>). </li>
+ *       (excluding <var>category_id</var>). </li>
  *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
- *       object representing the new record (including <var>corpus_id</var>). </li>
+ *       object representing the new record (including <var>category_id</var>). </li>
  *      <li><em> Response Status </em>
  *        <ul>
  *         <li><em> 200 </em> : The record was successfully created. </li>
@@ -81,7 +83,7 @@ import javax.servlet.http.HttpServletRequest;
  *      </li>
  *     </ul></dd> 
  *    
- *    <dt> PUT </dt><dd> Update an existing record, specified by the <var> corpus_name </var> given in the
+ *    <dt> PUT </dt><dd> Update an existing record, specified by the <var> category </var> given in the
  *    request body.
  *     <ul>
  *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
@@ -97,14 +99,14 @@ import javax.servlet.http.HttpServletRequest;
  *    
  *    <dt> DELETE </dt><dd> Delete an existing record.
  *     <ul>
- *      <li><em> Request Path </em> - /api/admin/corpora/<var>corpus_name</var> where 
- *          <var> corpus_name </var> is the name of the corpus to delete.</li>
+ *      <li><em> Request Path </em> - /api/admin/categories/<var>class_id</var>/<var>category</var> where 
+ *          <var> category </var> is the database ID of the record to delete.</li>
  *      <li><em> Response Body </em> - the standard JSON envelope, including a message if
  *          the request succeeds or an error explaining the reason for failure. </li>
  *      <li><em> Response Status </em>
  *        <ul>
  *         <li><em> 200 </em> : The record was successfully deleted. </li>
- *         <li><em> 400 </em> : No <var> corpus_id </var> was specified in the URL path,
+ *         <li><em> 400 </em> : No <var> category </var> was specified in the URL path,
  *             or the record exists but could not be deleted. </li> 
  *         <li><em> 404 </em> : The record was not found. </li>
  *        </ul>
@@ -115,83 +117,97 @@ import javax.servlet.http.HttpServletRequest;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @RequiredRole("admin")
-public class AdminCorpora extends TableServletBase {   
+public class Categories extends TableServletBase {   
   
-  public AdminCorpora() {
-    super("corpus", // table
+  public Categories() {
+    super("attribute_category", // table
           new Vector<String>() {{ // primary keys
-            add("corpus_id");
-          }},
-          new Vector<String>() {{ // URL keys
-            add("corpus_name");
+            add("class_id");
+            add("category");
           }},
           new Vector<String>() {{ // columns
-            add("corpus_language");
-            add("corpus_description");
+            add("description");
+            add("display_order");
           }},
-          "corpus_name"); // order
+          "class_id, display_order, category"); // order
     
     create = true;
     read = true;
     update = true;
     delete = true;
     
-    autoKey = "corpus_id";
-    autoKeyQuery = "SELECT COALESCE(max(corpus_id) + 1, 1) FROM corpus";      
-    
     deleteChecks = new Vector<DeleteCheck>() {{
         add(new DeleteCheck(
-              "SELECT COUNT(*), MIN(transcript_id) FROM transcript WHERE corpus_name = ?",
-              "corpus_name",
-              "{0,choice,1#There is still a transcript using this corpus: {1}"
-              +"|1<There are still {0} transcripts using this corpus, including {1}}"));
+              "SELECT COUNT(*), MIN(attribute) FROM attribute_definition"
+              +" WHERE class_id = ? AND category = ?",
+              new Vector<String>(){{add("class_id");add("category");}},
+              "{0,choice,1#There is still a layer using this category: {1}"
+              +"|1<There are still {0} layers using this category, including {1}}"));
         add(new DeleteCheck(
-              "SELECT COUNT(*), MIN(speaker.name) FROM speaker_corpus"
-              +" INNER JOIN speaker ON speaker_corpus.speaker_number = speaker.speaker_number"
-              +" WHERE speaker_corpus.corpus_id = ?",
-              "corpus_id",
-              "{0,choice,1#There is still a participant using this corpus: {1}"
-              +"|1<There are still {0} participants using this corpus, including {1}}"));
+              "SELECT COUNT(*), MIN(short_description) FROM layer"
+              +" WHERE 'layer' = ? AND category = ?",
+              new Vector<String>(){{add("class_id");add("category");}},
+              "{0,choice,1#There is still a layer using this category: {1}"
+              +"|1<There are still {0} layers using this category, including {1}}"));
       }};
   }
   
   /**
-   * Validates a record before INSERTing it.
+   * Validates a record before UPDATEing it.
    * @param request The request.
    * @param record The incoming record to validate, to which attributes can be added.
-   * @param connection A connection to th database.
+   * @param connection A connection to the database.
    * @return A JSON representation of the valid record, which may or may not be the same
    * object as <var>record</var>.
    * @throws ValidationException If the record is invalid.
    */
-  protected JsonObject validateBeforeCreate(
-    JsonObject record, Connection connection) throws ValidationException {
+  @Override
+  protected JsonObject validateBeforeUpdate(
+    JsonObject record,
+    Connection connection) throws ValidationException {
     
-    Vector<String> errors = null;
+    Vector<String> errors = new Vector<String>();
     try {
-      if (!record.containsKey("corpus_name") || record.isNull("corpus_name")) {
-        errors = new Vector<String>() {{
-            add(localize("No corpus name was provided.")); }};
+      if (!record.containsKey("class_id") || record.isNull("class_id")) {
+        errors.add(localize("No scope was provided."));
       } else {
-        // trim name
-        if (!record.getString("corpus_name").equals(record.getString("corpus_name").trim())) {
-          record = createMutableCopy(record, "corpus_name")
-            .add("corpus_name", record.getString("corpus_name").trim())
+        // trim class_id
+        if (!record.getString("class_id").equals(record.getString("class_id").trim())) {
+          record = createMutableCopy(record, "class_id")
+            .add("class_id", record.getString("class_id").trim())
             .build();
         }
-        if (record.getString("corpus_name").length() == 0) {
-          errors = new Vector<String>() {{
-              add(localize("Corpus name cannot be blank.")); }};
+        if (record.getString("class_id").length() == 0) {
+          errors.add(localize("Scope cannot be blank."));
+        }
+        // validate class_id
+        if (!record.getString("class_id").equals("transcript")
+            && !record.getString("class_id").equals("speaker")
+            && !record.getString("class_id").equals("layer")) {
+          errors.add(localize("Scope invalid: {0}", record.getString("class_id")));
+        }
+      }
+
+      if (!record.containsKey("category") || record.isNull("category")) {
+        errors.add(localize("No category name was provided."));
+      } else {
+        // trim name
+        if (!record.getString("category").equals(record.getString("category").trim())) {
+          record = createMutableCopy(record, "category")
+            .add("category", record.getString("category").trim())
+            .build();
+        }
+        if (record.getString("category").length() == 0) {
+          errors.add(localize("Category name cannot be blank."));
         }
       }
     } catch (JsonException x) {
-      if (errors == null) errors = new Vector<String>();
       errors.add(x.toString());
       // not expecting this, so log it:
-      System.err.println("AdminCorpora.validateBeforeUpdate: ERROR " + x);
+      System.err.println("Categories.validateBeforeUpdate: ERROR " + x);
     }
-    if (errors != null) throw new ValidationException(errors);
-      return record;
+    if (errors.size() > 0) throw new ValidationException(errors);
+    return record;
   } // end of validateBeforeUpdate()
   
-} // end of class AdminCorpora
+} // end of class Categories

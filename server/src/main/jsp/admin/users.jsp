@@ -1,7 +1,7 @@
 <%@ page info="Users" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.AdminUsers" 
+    import = "nzilbb.labbcat.server.api.admin.Users" 
 %><%@ include file="../base.jsp" %><%{
-    AdminUsers handler = new AdminUsers();
+    Users handler = new Users();
     initializeHandler(handler, request);
     if ("GET".equals(request.getMethod())) {
       handler.get(

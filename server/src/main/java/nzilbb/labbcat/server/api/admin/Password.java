@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +48,8 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.util.IO;
+import nzilbb.labbcat.server.api.APIRequestHandler;
+import nzilbb.labbcat.server.api.RequiredRole;
 
 /**
  * <tt>/api/admin/password</tt> : sets user's password.
@@ -77,12 +79,12 @@ import nzilbb.util.IO;
  * @author Robert Fromont
  */
 @RequiredRole("admin")
-public class AdminPassword extends APIRequestHandler {
+public class Password extends APIRequestHandler {
   
   /**
    * Constructor
    */
-  public AdminPassword() {
+  public Password() {
   } // end of constructor
   
   /**
@@ -141,14 +143,14 @@ public class AdminPassword extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      System.err.println("AdminPassword.handleRequest: Database operation failed: " + exception);
+      System.err.println("Password.handleRequest: Database operation failed: " + exception);
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       return failureResult(exception);
     } catch(Exception exception) {
-      System.err.println("AdminPassword.handleRequest: Failed: " + exception);
+      System.err.println("Password.handleRequest: Failed: " + exception);
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       return failureResult(exception);
     }
   }
    
-} // end of class AdminPassword
+} // end of class Password

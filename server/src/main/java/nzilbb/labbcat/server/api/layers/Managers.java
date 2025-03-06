@@ -19,13 +19,14 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.layers;
 
 import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
+import nzilbb.labbcat.server.api.TableServletBase;
 
 /**
  * <tt>/api/layers/managers/</tt>
@@ -63,9 +64,9 @@ import javax.servlet.http.HttpServletRequest;
  *  </p>
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class LayerManagers extends TableServletBase {   
+public class Managers extends TableServletBase {   
   // TODO deprecate this servlet when new automation API is implemented
-  public LayerManagers() {
+  public Managers() {
     super("layer_manager", // table
           new Vector<String>() {{ // primary keys
             add("layer_manager_id");
@@ -78,4 +79,4 @@ public class LayerManagers extends TableServletBase {
           }},
           "layer_manager_id"); // order
   }  
-} // end of class LayerManagers
+} // end of class Managers

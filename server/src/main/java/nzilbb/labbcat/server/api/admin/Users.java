@@ -19,7 +19,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,6 +36,8 @@ import javax.json.JsonObjectBuilder;
 import javax.json.stream.JsonGenerator;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
+import nzilbb.labbcat.server.api.TableServletBase;
+import nzilbb.labbcat.server.api.RequiredRole;
 
 /**
  * <tt>/api/admin/users[/<var>user</var>]</tt> 
@@ -124,9 +126,9 @@ import javax.servlet.http.HttpServletRequest;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @RequiredRole("admin")
-public class AdminUsers extends TableServletBase {   
+public class Users extends TableServletBase {   
   
-  public AdminUsers() {
+  public Users() {
     super("miner_user", // table
           new Vector<String>() {{ // primary keys
             add("user_id");
@@ -339,4 +341,4 @@ public class AdminUsers extends TableServletBase {
       }
     } // "roles" is specified
   } // end of editUpdatedRecord()
-} // end of class AdminUsers
+} // end of class Users

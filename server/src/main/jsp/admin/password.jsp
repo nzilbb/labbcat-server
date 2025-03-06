@@ -1,12 +1,12 @@
 <%@ page info="Set user password" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
-    import = "nzilbb.labbcat.server.servlet.AdminPassword" 
+    import = "nzilbb.labbcat.server.api.admin.Password" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="../base.jsp" %><%{
     if ("PUT".equals(request.getMethod())) { // PUT only
-      AdminPassword handler = new AdminPassword();
+      Password handler = new Password();
       initializeHandler(handler, request);
       JsonObject json = handler.put(
         request.getInputStream(), (status)->response.setStatus(status));

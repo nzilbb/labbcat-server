@@ -1,11 +1,11 @@
 <%@ page info="Serialize transcripts" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.SerializeGraphs" 
+    import = "nzilbb.labbcat.server.api.serialize.Graphs" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="../base.jsp" %><%{
     if ("GET".equals(request.getMethod()) || "POST".equals(request.getMethod())) { // GET/POST only
-      SerializeGraphs handler = new SerializeGraphs();
+      Graphs handler = new Graphs();
       initializeHandler(handler, request);
       handler.get(
         parseParameters(request),

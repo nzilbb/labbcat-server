@@ -19,12 +19,9 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Vector;
 import javax.json.JsonException;
@@ -32,16 +29,19 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
+import nzilbb.labbcat.server.api.TableServletBase;
+import nzilbb.labbcat.server.api.RequiredRole;
 
 /**
- * <tt>/api/admin/mediatracks[/<var>suffix</var>]</tt> 
- * : Administration of <em> media track </em> records.
- *  <p> Allows administration (Create/Read/Update/Delete) of media track records via
+ * <tt>/api/admin/corpora</tt> 
+ * : Administration of <em> corpus </em> records.
+ *  <p> Allows administration (Create/Read/Update/Delete) of corpus records via
  *  JSON-encoded objects with the following attributes:
  *   <dl>
- *    <dt> suffix </dt><dd> The suffix associated with the media track. </dd>
- *    <dt> description </dt><dd> The description of the track. </dd>
- *    <dt> display_order </dt><dd> The position of the track amongst other tracks. </dd>
+ *    <dt> corpus_id </dt><dd> The database key for the record. </dd>
+ *    <dt> corpus_name </dt><dd> The name of the corpus. </dd>
+ *    <dt> corpus_language </dt><dd> The ISO 639-1 code for the default language. </dd>
+ *    <dt> corpus_description </dt><dd> The description of the corpus. </dd>
  *    <dt> _cantDelete </dt><dd> This is not a database field, but rather is present in
  *         records returned from the server that can not currently be deleted; 
  *         a string representing the reason the record can't be deleted. </dd>
@@ -51,9 +51,9 @@ import javax.servlet.http.HttpServletRequest;
  *    <dt> POST </dt><dd> Create a new record.
  *     <ul>
  *      <li><em> Request Body </em> - a JSON-encoded object representing the new record
- *       (excluding <var>mediaTrack_id</var>). </li>
+ *       (excluding <var>corpus_id</var>). </li>
  *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
- *       object representing the new record (including <var>mediaTrack_id</var>). </li>
+ *       object representing the new record (including <var>corpus_id</var>). </li>
  *      <li><em> Response Status </em>
  *        <ul>
  *         <li><em> 200 </em> : The record was successfully created. </li>
@@ -83,7 +83,7 @@ import javax.servlet.http.HttpServletRequest;
  *      </li>
  *     </ul></dd> 
  *    
- *    <dt> PUT </dt><dd> Update an existing record, specified by the <var> mediaTrack </var> given in the
+ *    <dt> PUT </dt><dd> Update an existing record, specified by the <var> corpus_name </var> given in the
  *    request body.
  *     <ul>
  *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
@@ -99,14 +99,14 @@ import javax.servlet.http.HttpServletRequest;
  *    
  *    <dt> DELETE </dt><dd> Delete an existing record.
  *     <ul>
- *      <li><em> Request Path </em> - /api/admin/mediatracks/<var>suffix</var> where 
- *          <var> suffix </var> is the suffix of the media track to delete.</li>
+ *      <li><em> Request Path </em> - /api/admin/corpora/<var>corpus_name</var> where 
+ *          <var> corpus_name </var> is the name of the corpus to delete.</li>
  *      <li><em> Response Body </em> - the standard JSON envelope, including a message if
  *          the request succeeds or an error explaining the reason for failure. </li>
  *      <li><em> Response Status </em>
  *        <ul>
  *         <li><em> 200 </em> : The record was successfully deleted. </li>
- *         <li><em> 400 </em> : No <var> mediaTrack </var> was specified in the URL path,
+ *         <li><em> 400 </em> : No <var> corpus_id </var> was specified in the URL path,
  *             or the record exists but could not be deleted. </li> 
  *         <li><em> 404 </em> : The record was not found. </li>
  *        </ul>
@@ -117,66 +117,83 @@ import javax.servlet.http.HttpServletRequest;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @RequiredRole("admin")
-public class AdminMediaTracks extends TableServletBase {   
-   
-   public AdminMediaTracks() {
-      super("media_track", // table
-            new Vector<String>() {{ // primary keys
-               add("suffix");
-            }},
-            new Vector<String>() {{ // columns
-               add("description");
-               add("display_order");
-            }},
-            "display_order"); // order
-      
-      create = true;
-      read = true;
-      update = true;
-      delete = true;
-      
-      emptyKeyAllowed = true;
-   }
-
-   /**
-    * Validates a record before UPDATEing it.
-    * @param request The request.
-    * @param record The incoming record to validate, to which attributes can be added.
-    * @param connection A connection to the database.
-    * @return A JSON representation of the valid record, which may or may not be the same
-    * object as <var>record</var>.
-    * @throws ValidationException If the record is invalid.
-    */
-   @Override
-   protected JsonObject validateBeforeUpdate(
-      JsonObject record,
-      Connection connection) throws ValidationException {
-      
-      if (!record.containsKey("display_order") || record.isNull("display_order")
-          || record.get("display_order").toString().equals("")) {
-         try {
-            // default is one more that the MAX
-            PreparedStatement sql = connection.prepareStatement(
-               "SELECT COALESCE(MAX(display_order) + 1, 1) FROM media_track");
-            ResultSet rs = sql.executeQuery();
-            try {
-               rs.next();
-               record = createMutableCopy(record, "display_order")
-                  .add("display_order", rs.getInt(1))
-                  .build();
-            } finally {
-               rs.close();
-               sql.close();
-            }            
-         } catch(SQLException exception) {
-            System.err.println("ERROR getting default value for display_order: " + exception);
-            record = createMutableCopy(record, "display_order")
-               .add("display_order", 0)
-               .build();
-         }
-      } 
+public class Corpora extends TableServletBase {   
+  
+  public Corpora() {
+    super("corpus", // table
+          new Vector<String>() {{ // primary keys
+            add("corpus_id");
+          }},
+          new Vector<String>() {{ // URL keys
+            add("corpus_name");
+          }},
+          new Vector<String>() {{ // columns
+            add("corpus_language");
+            add("corpus_description");
+          }},
+          "corpus_name"); // order
+    
+    create = true;
+    read = true;
+    update = true;
+    delete = true;
+    
+    autoKey = "corpus_id";
+    autoKeyQuery = "SELECT COALESCE(max(corpus_id) + 1, 1) FROM corpus";      
+    
+    deleteChecks = new Vector<DeleteCheck>() {{
+        add(new DeleteCheck(
+              "SELECT COUNT(*), MIN(transcript_id) FROM transcript WHERE corpus_name = ?",
+              "corpus_name",
+              "{0,choice,1#There is still a transcript using this corpus: {1}"
+              +"|1<There are still {0} transcripts using this corpus, including {1}}"));
+        add(new DeleteCheck(
+              "SELECT COUNT(*), MIN(speaker.name) FROM speaker_corpus"
+              +" INNER JOIN speaker ON speaker_corpus.speaker_number = speaker.speaker_number"
+              +" WHERE speaker_corpus.corpus_id = ?",
+              "corpus_id",
+              "{0,choice,1#There is still a participant using this corpus: {1}"
+              +"|1<There are still {0} participants using this corpus, including {1}}"));
+      }};
+  }
+  
+  /**
+   * Validates a record before INSERTing it.
+   * @param request The request.
+   * @param record The incoming record to validate, to which attributes can be added.
+   * @param connection A connection to th database.
+   * @return A JSON representation of the valid record, which may or may not be the same
+   * object as <var>record</var>.
+   * @throws ValidationException If the record is invalid.
+   */
+  protected JsonObject validateBeforeCreate(
+    JsonObject record, Connection connection) throws ValidationException {
+    
+    Vector<String> errors = null;
+    try {
+      if (!record.containsKey("corpus_name") || record.isNull("corpus_name")) {
+        errors = new Vector<String>() {{
+            add(localize("No corpus name was provided.")); }};
+      } else {
+        // trim name
+        if (!record.getString("corpus_name").equals(record.getString("corpus_name").trim())) {
+          record = createMutableCopy(record, "corpus_name")
+            .add("corpus_name", record.getString("corpus_name").trim())
+            .build();
+        }
+        if (record.getString("corpus_name").length() == 0) {
+          errors = new Vector<String>() {{
+              add(localize("Corpus name cannot be blank.")); }};
+        }
+      }
+    } catch (JsonException x) {
+      if (errors == null) errors = new Vector<String>();
+      errors.add(x.toString());
+      // not expecting this, so log it:
+      System.err.println("Corpora.validateBeforeUpdate: ERROR " + x);
+    }
+    if (errors != null) throw new ValidationException(errors);
       return record;
-   } // end of validateBeforeUpdate()
-   
-   private static final long serialVersionUID = 1;
-} // end of class AdminMediaTracks
+  } // end of validateBeforeUpdate()
+  
+} // end of class Corpora

@@ -1,6 +1,6 @@
 <%@ page info="Transcript attributes" isErrorPage="true"
     contentType = "text/csv;charset=UTF-8"
-    import = "nzilbb.labbcat.server.servlet.Attributes" 
+    import = "nzilbb.labbcat.server.api.Attributes" 
     import = "javax.json.Json" 
 %><%@ include file="base.jsp" %><%{
     if ("GET".equals(request.getMethod())) { // GET only

@@ -1,5 +1,5 @@
 <%@ page info="Transcript files" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.Files" 
+    import = "nzilbb.labbcat.server.api.Files" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 

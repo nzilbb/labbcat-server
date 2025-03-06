@@ -1,11 +1,11 @@
 <%@ page info="Serialize transcript fragments" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.SerializeFragments" 
+    import = "nzilbb.labbcat.server.api.serialize.Fragments" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="../base.jsp" %><%{
     if ("GET".equals(request.getMethod()) ||"POST".equals(request.getMethod())) { // GET/POST only
-      SerializeFragments handler = new SerializeFragments();
+      Fragments handler = new Fragments();
       initializeHandler(handler, request);
       handler.get(
         parseParameters(request),

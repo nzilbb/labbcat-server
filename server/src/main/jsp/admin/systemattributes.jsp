@@ -1,11 +1,11 @@
 <%@ page info="System Attributes" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
-    import = "nzilbb.labbcat.server.servlet.AdminSystemAttributes" 
+    import = "nzilbb.labbcat.server.api.admin.SystemAttributes" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="../base.jsp" %><%{
-    AdminSystemAttributes handler = new AdminSystemAttributes();
+    SystemAttributes handler = new SystemAttributes();
     initializeHandler(handler, request);
     if ("PUT".equals(request.getMethod())) {
       JsonObject json = handler.put(

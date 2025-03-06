@@ -1,7 +1,7 @@
 <%@ page info="Media Tracks" isErrorPage="true"
-    import = "nzilbb.labbcat.server.servlet.AdminMediaTracks" 
+    import = "nzilbb.labbcat.server.api.admin.MediaTracks" 
 %><%@ include file="../base.jsp" %><%{
-    AdminMediaTracks handler = new AdminMediaTracks();
+    MediaTracks handler = new MediaTracks();
     initializeHandler(handler, request);
     if ("GET".equals(request.getMethod())) {
       handler.get(

@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.serialize;
 
 import java.io.*;
 import java.net.*;
@@ -51,9 +51,11 @@ import nzilbb.labbcat.server.task.SerializeFragmentsTask;
 import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableSeries;
+import nzilbb.labbcat.server.api.APIRequestHandler;
+import nzilbb.labbcat.server.api.RequestParameters;
 
 /**
- * <tt>/api/serialize/fragment</tt>
+ * <tt>/api/serialize/fragments</tt>
  * : Converts transcript fragments to specific formats.
  *  <p> Converts parts of transcripts to annotation file formats. 
  *  <p> The request method can be <b> GET </b> or <b> POST </b>
@@ -91,7 +93,7 @@ import nzilbb.util.MonitorableSeries;
  * structure for which the "model" is an object with a "threadId" attribute, which is the
  * ID of the server task to monitor for results. e.g.
  * <pre>{
- *    "title":"SerializeFragments",
+ *    "title":"Fragments",
  *    "version" : "20220303.1143",
  *    "code" : 0,
  *    "errors" : [],
@@ -113,7 +115,7 @@ import nzilbb.util.MonitorableSeries;
  * long series of short requests, and then the data tranferred when finally ready.</p>
  * @author Robert Fromont
  */
-public class SerializeFragments extends APIRequestHandler { // TODO unit test
+public class Fragments extends APIRequestHandler { // TODO unit test
    
   // Attributes:
   private boolean bCancel = false;
@@ -145,7 +147,7 @@ public class SerializeFragments extends APIRequestHandler { // TODO unit test
   /**
    * Constructor
    */
-  public SerializeFragments() {
+  public Fragments() {
   } // end of constructor
   
   // Servlet methods
@@ -399,7 +401,7 @@ public class SerializeFragments extends APIRequestHandler { // TODO unit test
             }},
           new Consumer<SerializationException>() {
             public void accept(SerializationException exception) {
-              System.err.println("SerializeFragments: " + exception);
+              System.err.println("Fragments: " + exception);
             }},
           layerId, mimeType, store);
         
@@ -521,4 +523,4 @@ public class SerializeFragments extends APIRequestHandler { // TODO unit test
     iPercentComplete = 100;
   } // end of serializeFragments()
    
-} // end of class SerializeFragments
+} // end of class Fragments

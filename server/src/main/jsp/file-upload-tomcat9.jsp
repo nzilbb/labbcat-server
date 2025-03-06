@@ -8,7 +8,7 @@
     import = "org.apache.commons.fileupload.*"
     import = "org.apache.commons.fileupload.disk.*"
     import = "org.apache.commons.fileupload.servlet.*"
-    import = "nzilbb.labbcat.server.servlet.RequestParameters" 
+    import = "nzilbb.labbcat.server.api.RequestParameters" 
 %><%
 {
   RequestParameters parameters = new RequestParameters();
