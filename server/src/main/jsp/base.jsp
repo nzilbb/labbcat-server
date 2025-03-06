@@ -130,6 +130,14 @@
         }
   
         /**
+         * Get the base parth for the servlet.
+         * @return Get the base parth for the servlet, or null if it can't be determined.
+         */
+        public String getServletPath() {
+          return request.getServletPath();
+        }
+        
+        /**
          * The ID of the logged-in user.
          * @return The ID of the logged-in user, on null if no user is logged in.
          */

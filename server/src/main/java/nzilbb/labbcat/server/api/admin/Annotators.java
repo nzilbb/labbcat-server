@@ -19,12 +19,14 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet.annotator;
+package nzilbb.labbcat.server.api.admin;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,25 +36,22 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Vector;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.automation.*;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
+import nzilbb.labbcat.server.api.APIRequestHandler;
+import nzilbb.labbcat.server.api.RequestParameters;
+import nzilbb.labbcat.server.api.RequiredRole;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
-import nzilbb.labbcat.server.servlet.*;
 import nzilbb.util.IO;
-import org.apache.commons.fileupload.*;
-import org.apache.commons.fileupload.disk.*;
-import org.apache.commons.fileupload.servlet.*;
 
 /**
  * Servlet that manages installation/upgrade/uninstallation of annotators.
@@ -113,9 +112,8 @@ import org.apache.commons.fileupload.servlet.*;
  *   </dl>
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet({"/admin/annotator", "/api/admin/annotator"})
 @RequiredRole("admin")
-public class AdminAnnotators extends LabbcatServlet {
+public class Annotators extends APIRequestHandler {
 
   private File tempDir;
 
@@ -130,208 +128,158 @@ public class AdminAnnotators extends LabbcatServlet {
   /**
    * Default constructor.
    */
-  public AdminAnnotators() {
+  public Annotators(File tempDir) {
+    this.tempDir = tempDir;
   } // end of constructor
-   
-  /** 
-   * Initialise the servlet
-   */
-  public void init() {
-    super.init();
-    try {
-      tempDir = Files.createTempDirectory(getClass().getSimpleName()).toFile();
-    } catch (IOException x) {
-      System.err.println("AdminAnnotators.init: " + x);
-    }
-  }
    
   /**
    * POST handler - receive an uploaded file or an installation confirmation.
+   * @param parameters Request parameter map.
+   * @param httpStatus Receives the response status code, in case or error.
+   * @param annotatorDir The directory in which annotator jars and their files are stored.
+   * @return JSON-encoded object representing the response
    */
-  @Override
   @SuppressWarnings("rawtypes")
-  protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-
-    response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
+  public JsonObject post(RequestParameters parameters, Consumer<Integer> httpStatus, File annotatorDir) {
 
     try {
-      SqlGraphStoreAdministration store = getStore(request);
+      SqlGraphStoreAdministration store = getStore();
       try {
             
-        if (!hasAccess(request, response, store.getConnection())) {
-          return;
-        } 
-        if (ServletFileUpload.isMultipartContent(request)) { // file being uploaded
+        if (!hasAccess(store.getConnection())) {
+          return null;
+        }
+        Optional anyFileValue = parameters.keySet().stream()
+          .map(key->parameters.get(key))
+          .filter(value->value instanceof File)
+          .findAny();
+        if (anyFileValue.isPresent()) { // file being uploaded
                
           try {
             // take the first file we find
-            ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-            List items = upload.parseRequest(request);
-            Iterator it = items.iterator();
-            FileItem fileItem = null;
-            while (it.hasNext()) {
-              FileItem item = (FileItem) it.next();
-              if (!item.isFormField()) {
-                fileItem = item;
-                break;
-              }            
-            } // next part
-            if (fileItem == null) {
-              writeResponse(response, failureResult(request, "No file received."));
-            } else {
-              String fileName = fileItem.getName();
-              // some browsers provide a full path, which must be truncated
-              int lastSlash = fileName.lastIndexOf('/');
-              if (lastSlash < 0) lastSlash = fileName.lastIndexOf('\\');
-              if (lastSlash >= 0) {
-                fileName = fileName.substring(lastSlash + 1);
+            File formFile = (File)anyFileValue.get();
+            File uploadedJarFile = new File(tempDir, formFile.getName());
+            uploadedJarFile.deleteOnExit();
+            if (!formFile.renameTo(uploadedJarFile)) {
+              IO.Copy(formFile, uploadedJarFile);
+              formFile.delete();
+            }
+            
+            // find the annotator
+            try {
+              AnnotatorDescriptor descriptor = new AnnotatorDescriptor(uploadedJarFile);
+              Annotator annotator = descriptor.getInstance();
+              
+              // return information
+              JsonObjectBuilder jsonResult = Json.createObjectBuilder()
+                .add("jar", uploadedJarFile.getName())
+                .add("annotatorId", annotator.getAnnotatorId())
+                .add("version", annotator.getVersion());
+              
+              Annotator installed = store.getAnnotator(annotator.getAnnotatorId());
+              if (installed != null) {
+                jsonResult.add("installedVersion", installed.getVersion());
               }
-              // save the file
-              File uploadedJarFile = new File(tempDir, fileName);
-              uploadedJarFile.deleteOnExit();
-              fileItem.write(uploadedJarFile);
-                     
-              // find the annotator
-              try {
-                AnnotatorDescriptor descriptor = new AnnotatorDescriptor(uploadedJarFile);
-                Annotator annotator = descriptor.getInstance();
-
-                // return information
-                JsonObjectBuilder jsonResult = Json.createObjectBuilder()
-                  .add("jar", uploadedJarFile.getName())
-                  .add("annotatorId", annotator.getAnnotatorId())
-                  .add("version", annotator.getVersion());
-
-                Annotator installed = store.getAnnotator(annotator.getAnnotatorId());
-                if (installed != null) {
-                  jsonResult.add("installedVersion", installed.getVersion());
-                }
-                        
-                jsonResult
-                  .add("hasConfigWebapp", descriptor.hasConfigWebapp())
-                  .add("hasTaskWebapp", descriptor.hasTaskWebapp())
-                  .add("hasExtWebapp", descriptor.hasExtWebapp())
-                  .add("info", descriptor.getInfo());
-                writeResponse(
-                  response, successResult(request, jsonResult.build(), "Annotator received."));
-              } catch (ClassNotFoundException noAnnotator) {
-                writeResponse(response, failureResult(
-                                request, "No annotator found in {0}", fileName));
-              }
+              
+              jsonResult
+                .add("hasConfigWebapp", descriptor.hasConfigWebapp())
+                .add("hasTaskWebapp", descriptor.hasTaskWebapp())
+                .add("hasExtWebapp", descriptor.hasExtWebapp())
+                .add("info", descriptor.getInfo());
+              return successResult(jsonResult.build(), "Annotator received.");
+            } catch (ClassNotFoundException noAnnotator) {
+              return failureResult("No annotator found in {0}", uploadedJarFile.getName());
             }
           } catch(Exception exception) {
-            writeResponse(response, failureResult(exception));
-            return;
+            return failureResult(exception);
           }
         } else { // another action: install/cancel/uninstall
-               
-          String action = request.getParameter("action");
+          
+          String action = parameters.getString("action");
           if (action == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            writeResponse(response, failureResult(
-                            request, "Missing parameter: {0}", "action"));
-            return;
+            httpStatus.accept(SC_BAD_REQUEST);
+            return failureResult("Missing parameter: {0}", "action");
           }
-               
+          
           if (action.equals("uninstall")) { // uninstall
-            String annotatorId = request.getParameter("annotatorId");
+            String annotatorId = parameters.getString("annotatorId");
             if (annotatorId == null) {
-              response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-              writeResponse(response, failureResult(
-                              request, "Missing parameter: {0}", "annotatorId"));
+              httpStatus.accept(SC_BAD_REQUEST);
+              return failureResult("Missing parameter: {0}", "annotatorId");
             }
-
+            
             // execute uninstall()
             AnnotatorDescriptor descriptor = store.getAnnotatorDescriptor(annotatorId);
             if (descriptor == null) {
-              response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-              writeResponse(response, failureResult(
-                              request, "Invalid ID: {0}", annotatorId));
-              return;
+              httpStatus.accept(SC_NOT_FOUND);
+              return failureResult("Invalid ID: {0}", annotatorId);
             }
             descriptor.getInstance().uninstall();
-
+            
             // delete jar file
             try {
-              deleteAllJars(annotatorId);
-              writeResponse(
-                response, successResult(
-                  request, null, "Annotator uninstalled."));
+              deleteAllJars(annotatorId, annotatorDir);
+              return successResult(null, "Annotator uninstalled.");
             } catch(CouldNotDeleteFileException x) {
-              writeResponse(
-                response, failureResult(
-                  request, "Could not uninstall annotator {0}",
-                  x.file.getName()));
-              return;
+              return failureResult("Could not uninstall annotator {0}", x.file.getName());
             }
-                  
+            
           } else { // install/cancel
-            String fileName = request.getParameter("jar");
+            String fileName = parameters.getString("jar");
             File uploadedJarFile = new File(tempDir, fileName);
             if (!uploadedJarFile.exists()) {
-              writeResponse(response, failureResult(
-                              request, "File not found: {0}", fileName));
+              return failureResult("File not found: {0}", fileName);
             } else { // uploadedJarFile exists
-                     
-              if (action.equals("install")) { // install
-                // find the annotator
-                try {
-                  AnnotatorDescriptor descriptor = new AnnotatorDescriptor(uploadedJarFile);
-                  Annotator annotator = descriptor.getInstance();
-                           
-                  File installedFile = new File(
-                    getAnnotatorDir(), annotator.getAnnotatorId()
-                    + "-" + annotator.getVersion() + ".jar");
-                           
-                  // delete all other versions of the annotator
+              try {
+                if (action.equals("install")) { // install
+                  // find the annotator
                   try {
-                    deleteAllJars(annotator.getAnnotatorId());
+                    AnnotatorDescriptor descriptor = new AnnotatorDescriptor(uploadedJarFile);
+                    Annotator annotator = descriptor.getInstance();
+                  
+                    File installedFile = new File(
+                      annotatorDir, annotator.getAnnotatorId()
+                      + "-" + annotator.getVersion() + ".jar");
+                  
+                    // delete all other versions of the annotator
+                    try {
+                      deleteAllJars(annotator.getAnnotatorId(), annotatorDir);
+                    }
+                    catch(CouldNotDeleteFileException x) {
+                      return failureResult(
+                        "Could not delete previous version: {0}", x.file.getName());
+                    }
+                  
+                    IO.Copy(uploadedJarFile, installedFile);
+                  
+                    // return information
+                    JsonObjectBuilder jsonResult = Json.createObjectBuilder()
+                      .add("jar", installedFile.getName())
+                      .add("annotatorId", annotator.getAnnotatorId());
+                    // if there's a configuration webapp...
+                    if (descriptor.hasConfigWebapp()) {
+                      // the next step is to configure the annotator
+                      jsonResult.add(
+                        "url", context.getBaseUrl() + context.getServletPath()
+                        + "/config/" + annotator.getAnnotatorId() + "/");
+                    } else {
+                      // no configuration is required, so set the configuration directly
+                      jsonResult.add(
+                        "url", context.getBaseUrl() + context.getServletPath()
+                        + "/config/" + annotator.getAnnotatorId() + "/setConfig");
+                    }
+                  
+                    return successResult(jsonResult.build(), "Annotator installed.");
+                  } catch (ClassNotFoundException noAnnotator) {
+                    return failureResult("No annotator found in {0}", fileName);
                   }
-                  catch(CouldNotDeleteFileException x) {
-                    writeResponse(
-                      response, failureResult(
-                        request, "Could not delete previous version: {0}",
-                        x.file.getName()));
-                    return;
-                  }
-
-                  IO.Copy(uploadedJarFile, installedFile);
-                           
-                  // return information
-                  JsonObjectBuilder jsonResult = Json.createObjectBuilder()
-                    .add("jar", installedFile.getName())
-                    .add("annotatorId", annotator.getAnnotatorId());
-                  // if there's a configuration webapp...
-                  if (descriptor.hasConfigWebapp()) {
-                    // the next step is to configure the annotator
-                    jsonResult.add(
-                      "url", baseUrl(request) + request.getServletPath()
-                      + "/config/" + annotator.getAnnotatorId() + "/");
-                  } else {
-                    // no configuration is required, so set the configuration directly
-                    jsonResult.add(
-                      "url", baseUrl(request) + request.getServletPath()
-                      + "/config/" + annotator.getAnnotatorId() + "/setConfig");
-                  }                        
-                           
-                  writeResponse(
-                    response, successResult(
-                      request, jsonResult.build(), "Annotator installed."));
-                } catch (ClassNotFoundException noAnnotator) {
-                  writeResponse(response, failureResult(
-                                  request, "No annotator found in {0}", fileName));
-                           
+                } else { // cancel
+                  return successResult(null, "Installation cancelled.");
                 }
-              } else { // cancel
-                writeResponse(
-                  response, successResult(request, null, "Installation cancelled."));
-              }
-
-              // delete uploaded file whether installing or cancelling
-              uploadedJarFile.delete();
-                     
+              } finally {              
+                // delete uploaded file whether installing or cancelling
+                uploadedJarFile.delete();
+              }              
             } // uploadedJarFile exists
           } // install/cancel
         } // not uploading a file, so another action: install/cancel/uninstall
@@ -339,12 +287,14 @@ public class AdminAnnotators extends LabbcatServlet {
         cacheStore(store);
       }
     } catch (PermissionException x) {
-      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-      writeResponse(response, failureResult(x));
+      httpStatus.accept(SC_FORBIDDEN);
+      return failureResult(x);
     } catch (SQLException x) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      writeResponse(response, failureResult(
-                      request, "Cannot connect to database: {0}", x.getMessage()));
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      return failureResult("Cannot connect to database: {0}", x.getMessage());
+    } catch (IOException x) {
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      return failureResult("Communcation error: {0}", x.getMessage());
     }
   }
    
@@ -354,9 +304,9 @@ public class AdminAnnotators extends LabbcatServlet {
    * @return The number of files deleted.
    * @throws Exception
    */
-  private int deleteAllJars(String annotatorId) throws CouldNotDeleteFileException {
+  private int deleteAllJars(String annotatorId, File annotatorDir) throws CouldNotDeleteFileException {
     int fileCount = 0;
-    for (File jar : getAnnotatorDir().listFiles(new FileFilter() {
+    for (File jar : annotatorDir.listFiles(new FileFilter() {
         public boolean accept(File f) {
           return !f.isDirectory()
             && f.getName().startsWith(annotatorId + "-")
@@ -373,29 +323,27 @@ public class AdminAnnotators extends LabbcatServlet {
   /**
    * GET handler: lists currently installed annotators.
    */
-  @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+  public void get(Consumer<String> contentTypeConsumer, OutputStream out)
+    throws IOException {
     try { // check access
       Connection connection = newConnection();
       try {
-        if (!hasAccess(request, response, connection)) {
+        if (!hasAccess(connection)) {
           return;
         }
       } finally {
         connection.close();
       }
     } catch(SQLException exception) {
-      log("AdminAnnotators: Couldn't connect to database: " + exception);
-      writeResponse(response, failureResult(exception));
+      System.err.println("Annotators: Couldn't connect to database: " + exception);
+      writeResponse(out, failureResult(exception));
       return;
     }
 
     // send upload form
-    response.setContentType("text/html");
-    response.setCharacterEncoding("UTF-8");
+    contentTypeConsumer.accept("text/html;UTF-8");
       
-    PrintWriter writer = response.getWriter();
+    PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "UTF-8"));
     writer.println("<!DOCTYPE html>");
     writer.println("<html>");
     writer.println(" <head>");
@@ -443,6 +391,4 @@ public class AdminAnnotators extends LabbcatServlet {
     writer.flush();
 
   }
-
-  private static final long serialVersionUID = 1;
-} // end of class AdminAnnotators
+} // end of class Annotators

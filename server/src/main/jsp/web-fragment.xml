@@ -96,5 +96,9 @@
   <servlet><servlet-name>admin/annotator/task.jsp</servlet-name><jsp-file>/jsp/admin/annotator/task.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/annotator/task.jsp</servlet-name><url-pattern>/api/admin/annotator/task/*</url-pattern></servlet-mapping>
   <servlet-mapping><servlet-name>admin/annotator/task.jsp</servlet-name><url-pattern>/admin/annotator/task/*</url-pattern></servlet-mapping>
+
+  <servlet><servlet-name>admin/annotator.jsp</servlet-name><jsp-file>/jsp/admin/annotator.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/annotator.jsp</servlet-name><url-pattern>/api/admin/annotator/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>admin/annotator.jsp</servlet-name><url-pattern>/admin/annotator/*</url-pattern></servlet-mapping>
   
 </web-fragment>
