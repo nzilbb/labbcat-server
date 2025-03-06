@@ -19,7 +19,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +32,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Vector;
+import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
@@ -59,7 +60,7 @@ import org.xml.sax.*;
 
 /**
  * Endpoints starting <tt>/api/store/&hellip;</tt> provide an HTTP-based API for access to
- * <a href="https://nzilbb.github.io/ag/apidocs/nzilbb/ag/GraphStoreQuery.html">GraphStoreQuery</a> 
+ * <a href="https://nzilbb.github.io/ag/apidocs/nzilbb/ag/GraphStore.html">GraphStore</a> 
  * functions.
  * <p> These endpoints all work for <b>GET</b> HTTP requests and return a JSON response with the same standard envelope structure:
  * <dl>
@@ -852,639 +853,644 @@ import org.xml.sax.*;
 
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class StoreQuery extends LabbcatServlet {
-   
-  // Attributes:
-
-  // Methods:
+public class Store extends APIRequestHandler {
    
   /**
    * Default constructor.
    */
-  public StoreQuery() {
+  public Store() {
   } // end of constructor
-
+  
   /**
-   * GET handler
+   * GET handler lists all rows. 
+   * <p> The return is JSON encoded, unless the "Accept" request header, or the "Accept"
+   * request parameter, is "text/csv", in which case CSV is returned.
+   * @param url The URI of the request. 
+   * @param method The HTTP request method, e.g. "GET".
+   * @param pathInfo The URL path.
+   * @param queryString The URL's query string.
+   * @param parameters Request parameter map.
+   * @param httpStatus Receives the response status code, in case or error.
+   * @param redirectUrl Receives a URL for the request to be redirected to.
+   * @return JSON-encoded object representing the response
    */
-  @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-      
-    JsonObject json = null;
+  public JsonObject get(
+    String url, String method, String pathInfo,
+    String queryString, RequestParameters parameters,
+    Consumer<Integer> httpStatus, Consumer<String> redirectUrl) {
+    
     try {
-      SqlGraphStoreAdministration store = getStore(request);
+      SqlGraphStoreAdministration store = getStore();
       try {
-        if (title == null) {
-          title = store.getSystemAttribute("title");
-        }
-        json = invokeFunction(request, response, store);
+        JsonObject json = invokeFunction(
+          url, method, pathInfo, queryString, parameters, httpStatus, redirectUrl, store);
         if (json == null) {
-          response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-          json = failureResult(request, "Invalid path: {0}", request.getPathInfo());
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult("Invalid path: {0}", pathInfo);
+        } else {
+          return json;
         }
       } finally {
         cacheStore(store);
       }
     } catch (GraphNotFoundException x) {         
-      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-      json = failureResult(x);
+      httpStatus.accept(SC_NOT_FOUND);
+      return failureResult(x);
     } catch (PermissionException x) {
-      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-      json = failureResult(x);
+      httpStatus.accept(SC_FORBIDDEN);
+      return failureResult(x);
     } catch (StoreException x) {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      json = failureResult(x);
+      httpStatus.accept(SC_BAD_REQUEST);
+      return failureResult(x);
     } catch (SQLException x) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      json = failureResult(request, "Cannot connect to database: {0}", x.getMessage());
-    }
-    if (json != null) {
-      response.setContentType("application/json");
-      response.setCharacterEncoding("UTF-8");
-      JsonWriter writer = Json.createWriter(response.getWriter());
-      writer.writeObject(json);
-      writer.close();
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      return failureResult("Cannot connect to database: {0}", x.getMessage());
+    } catch (IOException x) {
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      return failureResult("Communications error: {0}", x.getMessage());
     }
   }
 
   /**
    * Interprets the URL path, and executes the corresponding function on the store. This
    * method should be overridden by subclasses to interpret their own functions.
-   * @param request The request.
-   * @param response The response.
-   * @param store The connected graph store.
-   * @return The response to send to the caller, or null if the request could not be interpreted.
+   * @param url The URI of the request. 
+   * @param method The HTTP request method, e.g. "GET".
+   * @param pathInfo The URL path.
+   * @param queryString The URL's query string.
+   * @param parameters Request parameter map.
+   * @param httpStatus Receives the response status code, in case or error.
+   * @param redirectUrl Receives a URL for the request to be redirected to.
+   * @return JSON-encoded object representing the response
    */
-  protected JsonObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
-    JsonObject json = null;
-    if (request.getPathInfo() == null || request.getPathInfo().equals("/")) {
-      // no path component
-      json = successResult(
-        // send the version in the model for backwards compatibility with labbcat-R <= 0.4-2
-        request, Json.createObjectBuilder().add("version", version).build(), null);
+  protected JsonObject invokeFunction(String url, String method, String pathInfo, String queryString, RequestParameters parameters, Consumer<Integer> httpStatus, Consumer<String> redirectUrl, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
+    if (pathInfo == null || pathInfo.equals("/")) { // no path component
       // redirect /store?call=getXXX to /store/getXXX
-      if (request.getMethod().equals("GET")
-          && request.getParameter("call") != null
-          && request.getParameter("call").length() > 0) {
-        response.sendRedirect(
-          request.getRequestURI()
-          + "/" + request.getParameter("call")
-          + "?" + request.getQueryString());
+      if ("GET".equals(method)
+          && parameters.getString("call") != null
+          && parameters.getString("call").length() > 0) {
+        redirectUrl.accept(
+          url
+          + "/" + parameters.getString("call")
+          + "?" + queryString);
+        return null;
+      } else {
+        return successResult(
+          // send the version in the model for backwards compatibility with labbcat-R <= 0.4-2
+          Json.createObjectBuilder().add("version", context.getVersion()).build(), null);
       }
     } else {
-      String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
+      pathInfo = pathInfo.toLowerCase(); // case-insensitive
       if (pathInfo.endsWith("getid")) {
-        json = getId(request, response, store);
+        return getId(parameters, store);
       } else if (pathInfo.endsWith("getschema")) {
-        json = getSchema(request, response, store);
+        return getSchema(parameters, store);
       } else if (pathInfo.endsWith("getlayerids")) {
-        json = getLayerIds(request, response, store);
+        return getLayerIds(parameters, store);
       } else if (pathInfo.endsWith("getlayers")) {
-        json = getLayers(request, response, store);
+        return getLayers(parameters, store);
       } else if (pathInfo.endsWith("getlayer")) {
-        json = getLayer(request, response, store);
+        return getLayer(parameters, store);
       } else if (pathInfo.endsWith("getcorpusids")) {
-        json = getCorpusIds(request, response, store);
+        return getCorpusIds(parameters, store);
       } else if (pathInfo.endsWith("getparticipantids")) {
-        json = getParticipantIds(request, response, store);
+        return getParticipantIds(parameters, store);
       } else if (pathInfo.endsWith("getparticipant")) {
-        json = getParticipant(request, response, store);
+        return getParticipant(parameters, store);
       } else if (pathInfo.endsWith("countmatchingparticipantids")) {
-        json = countMatchingParticipantIds(request, response, store);
+        return countMatchingParticipantIds(parameters, store);
       } else if (pathInfo.endsWith("getmatchingparticipantids")) {
-        json = getMatchingParticipantIds(request, response, store);
+        return getMatchingParticipantIds(parameters, store);
       } else if (pathInfo.endsWith("gettranscriptids")
                  // support deprecated name
                  || pathInfo.endsWith("getgraphids")) {
-        json = getTranscriptIds(request, response, store);
+        return getTranscriptIds(parameters, store);
       } else if (pathInfo.endsWith("gettranscriptidsincorpus")
                  // support deprecated name
                  || pathInfo.endsWith("getgraphidsincorpus")) {
-        json = getTranscriptIdsInCorpus(request, response, store);
+        return getTranscriptIdsInCorpus(parameters, store);
       } else if (pathInfo.endsWith("gettranscriptidswithparticipant")
                  // support deprecated name
                  || pathInfo.endsWith("getgraphidswithparticipant")) {
-        json = getTranscriptIdsWithParticipant(request, response, store);
+        return getTranscriptIdsWithParticipant(parameters, store);
       } else if (pathInfo.endsWith("countmatchingtranscriptids")
                  // support deprecated name
                  || pathInfo.endsWith("countmatchinggraphids")) {
-        json = countMatchingTranscriptIds(request, response, store);
+        return countMatchingTranscriptIds(parameters, store);
       } else if (pathInfo.endsWith("getmatchingtranscriptids")
                  // support deprecated name
                  || pathInfo.endsWith("getmatchinggraphids")) {
-        json = getMatchingTranscriptIds(request, response, store);
+        return getMatchingTranscriptIds(parameters, store);
       } else if (pathInfo.endsWith("countmatchingannotations")) {
-        json = countMatchingAnnotations(request, response, store);
+        return countMatchingAnnotations(parameters, store);
       } else if (pathInfo.endsWith("getmatchingannotations")) {
-        json = getMatchingAnnotations(request, response, store);
+        return getMatchingAnnotations(parameters, store);
       } else if (pathInfo.endsWith("aggregatematchingannotations")) {
-        json = aggregateMatchingAnnotations(request, response, store);
+        return aggregateMatchingAnnotations(parameters, store);
       } else if (pathInfo.endsWith("countannotations")) {
-        json = countAnnotations(request, response, store);
+        return countAnnotations(parameters, store);
       } else if (pathInfo.endsWith("getannotations")) {
-        json = getAnnotations(request, response, store);
+        return getAnnotations(parameters, store);
       } else if (pathInfo.endsWith("getanchors")) {
-        json = getAnchors(request, response, store);
+        return getAnchors(parameters, store);
       } else if (pathInfo.endsWith("getmediatracks")) {
-        json = getMediaTracks(request, response, store);
+        return getMediaTracks(parameters, store);
       } else if (pathInfo.endsWith("getavailablemedia")) {
-        json = getAvailableMedia(request, response, store);
+        return getAvailableMedia(parameters, store);
       } else if (pathInfo.endsWith("gettranscript")
                  // support deprecated name
                  || pathInfo.endsWith("getgraph")) {
-        json = getTranscript(request, response, store);
+        return getTranscript(parameters, store);
       } else if (pathInfo.endsWith("getfragment")) {
-        json = getFragment(request, response, store);
+        return getFragment(parameters, store);
       } else if (pathInfo.endsWith("getmedia")) {
-        json = getMedia(request, response, store);
+        return getMedia(parameters, store);
       } else if (pathInfo.endsWith("getepisodedocuments")) {
-        json = getEpisodeDocuments(request, response, store);
+        return getEpisodeDocuments(parameters, store);
       } else if (pathInfo.endsWith("getserializerdescriptors")) {
-        json = getSerializerDescriptors(request, response, store);
+        return getSerializerDescriptors(parameters, store);
       } else if (pathInfo.endsWith("getdeserializerdescriptors")) {
-        json = getDeserializerDescriptors(request, response, store);
+        return getDeserializerDescriptors(parameters, store);
       } else if (pathInfo.endsWith("getannotatordescriptors")) {
-        json = getAnnotatorDescriptors(request, response, store);
+        return getAnnotatorDescriptors(parameters, store);
       } else if (pathInfo.endsWith("getannotatordescriptor")) {
-        json = getAnnotatorDescriptor(request, response, store);
+        return getAnnotatorDescriptor(parameters, store);
       } else if (pathInfo.endsWith("getannotatortasks")) {
-         json = getAnnotatorTasks(request, response, store);
+         return getAnnotatorTasks(parameters, store);
       } else if (pathInfo.endsWith("getannotatortaskparameters")) {
-         json = getAnnotatorTaskParameters(request, response, store);
+         return getAnnotatorTaskParameters(parameters, store);
       } else if (pathInfo.endsWith("gettranscriberdescriptors")) {
-        json = getTranscriberDescriptors(request, response, store);
+        return getTranscriberDescriptors(parameters, store);
       }
     }
-    return json;
+    return null;
   } // end of invokeFunction()
    
-  // IGraphStoreQuery method handlers
+  // IGraphStore method handlers
 
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getId()}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getId()}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getId(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
-    return successResult(request, store.getId(), null);
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
+    return successResult(store.getId(), null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayerIds()}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getLayerIds()}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getLayerIds(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    return successResult(request, store.getLayerIds(), null);
+    return successResult(store.getLayerIds(), null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayers()}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getLayers()}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getLayers(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
     Layer[] layers = store.getLayers();
     // unset children so that JSON serialization doesn't double-up layers
     for (Layer layer : layers) layer.setChildren(null);
-    return successResult(request, layers, null);
+    return successResult(layers, null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getSchema()}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getSchema()}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getSchema(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    return successResult(request, store.getSchema(), null);
+    return successResult(store.getSchema(), null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getLayer(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getLayer(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getLayer(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    String id = request.getParameter("id");
-    if (id == null) return failureResult(request, "No ID specified.");
-    return successResult(request, store.getLayer(id), null);
+    String id = parameters.getString("id");
+    if (id == null) return failureResult("No ID specified.");
+    return successResult(store.getLayer(id), null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getCorpusIds()}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getCorpusIds()}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getCorpusIds(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
     String[] ids = store.getCorpusIds();
-    return successResult(request, ids, ids.length == 0?"There are no corpora.":null);
+    return successResult(ids, ids.length == 0?"There are no corpora.":null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getParticipantIds()}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getParticipantIds()}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getParticipantIds(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
     String[] ids = store.getParticipantIds();
-    return successResult(request, ids, ids.length == 0?"There are no participants.":null);
+    return successResult(ids, ids.length == 0?"There are no participants.":null);
   }
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getParticipant(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getParticipant(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getParticipant(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    String id = request.getParameter("id");
-    if (id == null) return failureResult(request, "No ID specified.");
-    String[] layerIds = request.getParameterValues("layerIds");
+    String id = parameters.getString("id");
+    if (id == null) return failureResult("No ID specified.");
+    String[] layerIds = parameters.getStrings("layerIds");
     // The httr R package can't handle multiple parameters with the same name,
     // so we may have received a single newline-delimited string
-    if (layerIds != null && layerIds.length == 1) {
+    if (layerIds.length == 1) {
       layerIds = layerIds[0].split("\n");
     }
     Annotation participant = store.getParticipant(id, layerIds);
-    return successResult(request, participant, null);
+    return successResult(participant, null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingParticipantIds(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#countMatchingParticipantIds(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject countMatchingParticipantIds(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    String expression = request.getParameter("expression");
-    if (expression == null) return failureResult(request, "No expression specified.");
-    return successResult(request, store.countMatchingParticipantIds(expression), null);
+    String expression = parameters.getString("expression");
+    if (expression == null) return failureResult("No expression specified.");
+    return successResult(store.countMatchingParticipantIds(expression), null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingParticipantIds(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getMatchingParticipantIds(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getMatchingParticipantIds(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
     Vector<String> errors = new Vector<String>();
-    String expression = request.getParameter("expression");
+    String expression = parameters.getString("expression");
     if (expression == null) errors.add("No expression specified.");
     Integer pageLength = null;
-    if (request.getParameter("pageLength") != null) {
+    if (parameters.getString("pageLength") != null) {
       try {
-        pageLength = Integer.valueOf(request.getParameter("pageLength"));
+        pageLength = Integer.valueOf(parameters.getString("pageLength"));
       } catch(NumberFormatException x) {
         errors.add("Invalid page length: " + x.getMessage());
       }
     }
     Integer pageNumber = null;
-    if (request.getParameter("pageNumber") != null) {
+    if (parameters.getString("pageNumber") != null) {
       try {
-        pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+        pageNumber = Integer.valueOf(parameters.getString("pageNumber"));
       } catch(NumberFormatException x) {
         errors.add("Invalid page number: " + x.getMessage());
       }
     }
     if (errors.size() > 0) return failureResult(errors);
     String[] ids = store.getMatchingParticipantIds(expression, pageLength, pageNumber);
-    return successResult(request, ids, ids.length == 0?"There are no matching IDs.":null);
+    return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
   }         
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getTranscriptIds()}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getTranscriptIds()}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getTranscriptIds(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    return successResult(request, store.getTranscriptIds(), null);
+    return successResult(store.getTranscriptIds(), null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getTranscriptIdsInCorpus(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getTranscriptIdsInCorpus(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getTranscriptIdsInCorpus(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    String id = request.getParameter("id");
-    if (id == null) return failureResult(request, "No ID specified.");
+    String id = parameters.getString("id");
+    if (id == null) return failureResult("No ID specified.");
     String[] ids = store.getTranscriptIdsInCorpus(id);
-    return successResult(request, ids, ids.length == 0?"There are no matching IDs.":null);
+    return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getTranscriptIdsWithParticipant(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getTranscriptIdsWithParticipant(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getTranscriptIdsWithParticipant(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    String id = request.getParameter("id");
-    if (id == null) return failureResult(request, "No ID specified.");
+    String id = parameters.getString("id");
+    if (id == null) return failureResult("No ID specified.");
     String[] ids = store.getTranscriptIdsWithParticipant(id);
-    return successResult(request, ids, ids.length == 0?"There are no matching IDs.":null);
+    return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingTranscriptIds(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#countMatchingTranscriptIds(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject countMatchingTranscriptIds(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    String expression = request.getParameter("expression");
-    if (expression == null) return failureResult(request, "No expression specified.");
-    return successResult(request, store.countMatchingTranscriptIds(expression), null);
+    String expression = parameters.getString("expression");
+    if (expression == null) return failureResult("No expression specified.");
+    return successResult(store.countMatchingTranscriptIds(expression), null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMatchingTranscriptIds(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getMatchingTranscriptIds(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getMatchingTranscriptIds(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
 
     Vector<String> errors = new Vector<String>();
-    String expression = request.getParameter("expression");
-    if (expression == null) errors.add(localize(request, "No expression specified."));
+    String expression = parameters.getString("expression");
+    if (expression == null) errors.add(localize("No expression specified."));
     Integer pageLength = null;
-    if (request.getParameter("pageLength") != null) {
+    if (parameters.getString("pageLength") != null) {
       try {
-        pageLength = Integer.valueOf(request.getParameter("pageLength"));
+        pageLength = Integer.valueOf(parameters.getString("pageLength"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid page length: " + x.getMessage()));
+        errors.add(localize("Invalid page length: " + x.getMessage()));
       }
     }
     Integer pageNumber = null;
-    if (request.getParameter("pageNumber") != null) {
+    if (parameters.getString("pageNumber") != null) {
       try {
-        pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+        pageNumber = Integer.valueOf(parameters.getString("pageNumber"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid page number: " + x.getMessage()));
+        errors.add(localize("Invalid page number: " + x.getMessage()));
       }
     }
     if (errors.size() > 0) return failureResult(errors);
     String[] ids = store.getMatchingTranscriptIds(expression, pageLength, pageNumber);
-    return successResult(request, ids, ids.length == 0?"There are no matching IDs.":null);
+    return successResult(ids, ids.length == 0?"There are no matching IDs.":null);
   }         
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countMatchingAnnotations(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#countMatchingAnnotations(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject countMatchingAnnotations(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    String expression = request.getParameter("expression");
-    if (expression == null) return failureResult(request, "No expression specified.");
-    return successResult(request, store.countMatchingAnnotations(expression), null);
+    String expression = parameters.getString("expression");
+    if (expression == null) return failureResult("No expression specified.");
+    return successResult(store.countMatchingAnnotations(expression), null);
   }      
    
   /**
    * Implementation of
-   * {@link nzilbb.ag.IGraphStoreQuery#getMatchingAnnotations(String,Integer,Integer)}
+   * {@link nzilbb.ag.IGraphStore#getMatchingAnnotations(String,Integer,Integer)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getMatchingAnnotations(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
     Vector<String> errors = new Vector<String>();
-    String expression = request.getParameter("expression");
-    if (expression == null) errors.add(localize(request, "No expression specified."));
+    String expression = parameters.getString("expression");
+    if (expression == null) errors.add(localize("No expression specified."));
     Integer pageLength = null;
-    if (request.getParameter("pageLength") != null) {
+    if (parameters.getString("pageLength") != null) {
       try {
-        pageLength = Integer.valueOf(request.getParameter("pageLength"));
+        pageLength = Integer.valueOf(parameters.getString("pageLength"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid page length: {0}", x.getMessage()));
+        errors.add(localize("Invalid page length: {0}", x.getMessage()));
       }
     }
     Integer pageNumber = null;
-    if (request.getParameter("pageNumber") != null) {
+    if (parameters.getString("pageNumber") != null) {
       try {
-        pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+        pageNumber = Integer.valueOf(parameters.getString("pageNumber"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid page number: {0}", x.getMessage()));
+        errors.add(localize("Invalid page number: {0}", x.getMessage()));
       }
     }
     if (errors.size() > 0) return failureResult(errors);
     Annotation[] annotations = store.getMatchingAnnotations(expression, pageLength, pageNumber);
-    return successResult(request, annotations, annotations.length == 0?"There are no annotations.":null);
+    return successResult(annotations, annotations.length == 0?"There are no annotations.":null);
   }         
 
   /**
    * Implementation of
-   * {@link nzilbb.ag.GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
+   * {@link nzilbb.ag.GraphStore#aggregateMatchingAnnotations(String,String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject aggregateMatchingAnnotations(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
     Vector<String> errors = new Vector<String>();
-    String operation = request.getParameter("operation");
-    if (operation == null) errors.add(localize(request, "No operation specified."));
-    String expression = request.getParameter("expression");
-    if (expression == null) errors.add(localize(request, "No expression specified."));
+    String operation = parameters.getString("operation");
+    if (operation == null) errors.add(localize("No operation specified."));
+    String expression = parameters.getString("expression");
+    if (expression == null) errors.add(localize("No expression specified."));
     if (errors.size() > 0) return failureResult(errors);
     String[] values = store.aggregateMatchingAnnotations(operation, expression);
-    return successResult(request, values, values.length == 0?"There are no annotations.":null);
+    return successResult(values, values.length == 0?"There are no annotations.":null);
   }         
 
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#countAnnotations(String,String,Integer)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#countAnnotations(String,String,Integer)}
    * @param request The HTTP request.
    * @param response The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject countAnnotations(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
       
     Vector<String> errors = new Vector<String>();
-    String id = request.getParameter("id");
-    if (id == null) errors.add(localize(request, "No ID specified."));
-    String layerId = request.getParameter("layerId");
-    if (layerId == null) errors.add(localize(request, "No layer ID specified."));
+    String id = parameters.getString("id");
+    if (id == null) errors.add(localize("No ID specified."));
+    String layerId = parameters.getString("layerId");
+    if (layerId == null) errors.add(localize("No layer ID specified."));
     Integer maxOrdinal = null;
-    if (request.getParameter("maxOrdinal") != null) {
+    if (parameters.getString("maxOrdinal") != null) {
       try {
-        maxOrdinal = Integer.valueOf(request.getParameter("maxOrdinal"));
+        maxOrdinal = Integer.valueOf(parameters.getString("maxOrdinal"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid maximum ordinal: {0}", x.getMessage()));
+        errors.add(localize("Invalid maximum ordinal: {0}", x.getMessage()));
       }
     }
     if (errors.size() > 0) return failureResult(errors);
-    return successResult(request, store.countAnnotations(id, layerId, maxOrdinal), null);
+    return successResult(store.countAnnotations(id, layerId, maxOrdinal), null);
   }
    
   /**
    * Implementation of
-   * {@link nzilbb.ag.IGraphStoreQuery#getAnnotations(String,String,Integer,Integer,Integer)}
+   * {@link nzilbb.ag.IGraphStore#getAnnotations(String,String,Integer,Integer,Integer)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getAnnotations(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
       
     Vector<String> errors = new Vector<String>();
-    String id = request.getParameter("id");
+    String id = parameters.getString("id");
     if (id == null) errors.add("No ID specified.");
-    String layerId = request.getParameter("layerId");
-    if (layerId == null) errors.add(localize(request, "No layer ID specified."));
+    String layerId = parameters.getString("layerId");
+    if (layerId == null) errors.add(localize("No layer ID specified."));
     Integer pageLength = null;
-    if (request.getParameter("pageLength") != null) {
+    if (parameters.getString("pageLength") != null) {
       try {
-        pageLength = Integer.valueOf(request.getParameter("pageLength"));
+        pageLength = Integer.valueOf(parameters.getString("pageLength"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid page length: {0}", x.getMessage()));
+        errors.add(localize("Invalid page length: {0}", x.getMessage()));
       }
     }
     Integer pageNumber = null;
-    if (request.getParameter("pageNumber") != null) {
+    if (parameters.getString("pageNumber") != null) {
       try {
-        pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
+        pageNumber = Integer.valueOf(parameters.getString("pageNumber"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid page number: {0}", x.getMessage()));
+        errors.add(localize("Invalid page number: {0}", x.getMessage()));
       }
     }
     Integer maxOrdinal = null;
-    if (request.getParameter("maxOrdinal") != null) {
+    if (parameters.getString("maxOrdinal") != null) {
       try {
-        maxOrdinal = Integer.valueOf(request.getParameter("maxOrdinal"));
+        maxOrdinal = Integer.valueOf(parameters.getString("maxOrdinal"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid maximum ordinal: {0}", x.getMessage()));
+        errors.add(localize("Invalid maximum ordinal: {0}", x.getMessage()));
       }
     }
     if (errors.size() > 0) return failureResult(errors);
     Annotation[] annotations = store.getAnnotations(id, layerId, maxOrdinal, pageLength, pageNumber);
-    return successResult(request, annotations, annotations.length == 0?"There are no annotations.":null);
+    return successResult(annotations, annotations.length == 0?"There are no annotations.":null);
   }
 
   // TODO getMatchAnnotations
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAnchors(String,String[])}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getAnchors(String,String[])}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getAnchors(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
       
     Vector<String> errors = new Vector<String>();
-    String id = request.getParameter("id");
-    if (id == null) errors.add(localize(request, "No ID specified."));
-    String[] anchorIds = request.getParameterValues("anchorIds");
-    if (anchorIds == null) errors.add(localize(request, "No anchor IDs specified."));
+    String id = parameters.getString("id");
+    if (id == null) errors.add(localize("No ID specified."));
+    String[] anchorIds = parameters.getStrings("anchorIds");
+    if (anchorIds.length == 0) errors.add(localize("No anchor IDs specified."));
     if (errors.size() > 0) return failureResult(errors);
-    return successResult(request, store.getAnchors(id, anchorIds), null);
+    return successResult(store.getAnchors(id, anchorIds), null);
   }
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getTranscript(String,String[])}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getTranscript(String,String[])}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getTranscript(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
       
     Vector<String> errors = new Vector<String>();
-    String id = request.getParameter("id");
-    if (id == null) errors.add(localize(request, "No ID specified."));
-    String[] layerIds = request.getParameterValues("layerIds");
-    if (layerIds == null) layerIds = new String[0];
+    String id = parameters.getString("id");
+    if (id == null) errors.add(localize("No ID specified."));
+    String[] layerIds = parameters.getStrings("layerIds");
     if (errors.size() > 0) return failureResult(errors);
 
     Graph transcript = store.getTranscript(id, layerIds);
@@ -1501,50 +1507,49 @@ public class StoreQuery extends LabbcatServlet {
       JsonReader reader = Json.createReader(
         new InputStreamReader(streams.elementAt(0).getStream(), "UTF-8"));
       JsonObject json = reader.readObject();    
-      return successResult(request, json, null);
+      return successResult(json, null);
     } catch(SerializerNotConfiguredException exception) { // shouldn't happen
       throw new StoreException(exception);
     }
   }
 
   /**
-   * Implementation of {@link nzilbb.ag.GraphStoreQuery#getFragment(String,String,String[])}
-   * and {@link nzilbb.ag.GraphStoreQuery#getFragment(String,double,double,String[])}
+   * Implementation of {@link nzilbb.ag.GraphStore#getFragment(String,String,String[])}
+   * and {@link nzilbb.ag.GraphStore#getFragment(String,double,double,String[])}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getFragment(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     
     Vector<String> errors = new Vector<String>();
-    String id = request.getParameter("id");
-    if (id == null) errors.add(localize(request, "No ID specified."));
-    String[] layerIds = request.getParameterValues("layerIds");
-    if (layerIds == null) layerIds = new String[0];
-    String annotationId = request.getParameter("annotationId");
-    String startParameter = request.getParameter("start");
+    String id = parameters.getString("id");
+    if (id == null) errors.add(localize("No ID specified."));
+    String[] layerIds = parameters.getStrings("layerIds");
+    String annotationId = parameters.getString("annotationId");
+    String startParameter = parameters.getString("start");
     Double start = null;
     if (startParameter != null) {
       try {
         start = Double.valueOf(startParameter);
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid start offset: {0}", x.getMessage()));
+        errors.add(localize("Invalid start offset: {0}", x.getMessage()));
       }
     }
-    String endParameter = request.getParameter("end");
+    String endParameter = parameters.getString("end");
     Double end = null;
     if (endParameter != null) {
       try {
         end = Double.valueOf(endParameter);
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid end offset: {0}", x.getMessage()));
+        errors.add(localize("Invalid end offset: {0}", x.getMessage()));
       }
     }
     if (annotationId == null && (start == null || end == null)) {
-      errors.add(localize(request, "Annotation ID not specified.")); // TODO i18n
+      errors.add(localize("Annotation ID not specified.")); // TODO i18n
     }
     
     if (errors.size() > 0) return failureResult(errors);
@@ -1564,7 +1569,7 @@ public class StoreQuery extends LabbcatServlet {
       JsonReader reader = Json.createReader(
         new InputStreamReader(streams.elementAt(0).getStream(), "UTF-8"));
       JsonObject json = reader.readObject();    
-      return successResult(request, json, null);
+      return successResult(json, null);
     } catch(SerializerNotConfiguredException exception) { // shouldn't happen
       throw new StoreException(exception);
     }
@@ -1573,107 +1578,107 @@ public class StoreQuery extends LabbcatServlet {
   // TODO getFragmentSeries
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getMediaTracks()}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getMediaTracks()}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getMediaTracks(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException {
       
-    return successResult(request, store.getMediaTracks(), null);
+    return successResult(store.getMediaTracks(), null);
   }      
    
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAvailableMedia(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getAvailableMedia(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getAvailableMedia(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
       
-    String id = request.getParameter("id");
-    if (id == null) return failureResult(request, "No ID specified.");
+    String id = parameters.getString("id");
+    if (id == null) return failureResult("No ID specified.");
 
     MediaFile[] media = store.getAvailableMedia(id);
       
     // strip out local file paths
     for (MediaFile file : media) file.setFile(null);
       
-    return successResult(request, media, media.length == 0?"There is no media.":null);
+    return successResult(media, media.length == 0?"There is no media.":null);
   }
 
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getAvailableMedia(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getAvailableMedia(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getMedia(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
       
     Vector<String> errors = new Vector<String>();
-    String id = request.getParameter("id");
-    if (id == null) errors.add(localize(request, "No ID specified."));
-    String trackSuffix = request.getParameter("trackSuffix"); // optional
-    String mimeType = request.getParameter("mimeType");
-    if (mimeType == null) errors.add(localize(request, "No Content Type specified."));
+    String id = parameters.getString("id");
+    if (id == null) errors.add(localize("No ID specified."));
+    String trackSuffix = parameters.getString("trackSuffix"); // optional
+    String mimeType = parameters.getString("mimeType");
+    if (mimeType == null) errors.add(localize("No Content Type specified."));
     Double startOffset = null;
-    if (request.getParameter("startOffset") != null) {
+    if (parameters.getString("startOffset") != null) {
       try {
-        startOffset = Double.valueOf(request.getParameter("startOffset"));
+        startOffset = Double.valueOf(parameters.getString("startOffset"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid start offset: {0}", x.getMessage()));
+        errors.add(localize("Invalid start offset: {0}", x.getMessage()));
       }
     }
     Double endOffset = null;
-    if (request.getParameter("endOffset") != null) {
+    if (parameters.getString("endOffset") != null) {
       try {
-        endOffset = Double.valueOf(request.getParameter("endOffset"));
+        endOffset = Double.valueOf(parameters.getString("endOffset"));
       } catch(NumberFormatException x) {
-        errors.add(localize(request, "Invalid end offset: {0}", x.getMessage()));
+        errors.add(localize("Invalid end offset: {0}", x.getMessage()));
       }
     }
     if (startOffset == null && endOffset == null) {
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(request, store.getMedia(id, trackSuffix, mimeType), null);
+      return successResult(store.getMedia(id, trackSuffix, mimeType), null);
     } else {
-      if (startOffset == null) errors.add(localize(request, "Start offset not specified."));
-      if (endOffset == null) errors.add(localize(request, "End offset not specified."));
+      if (startOffset == null) errors.add(localize("Start offset not specified."));
+      if (endOffset == null) errors.add(localize("End offset not specified."));
       if (endOffset <= startOffset)
-        errors.add(localize(request, "Start offset ({0,number,#.###}) must be before end offset ({1,number,#.###})", startOffset, endOffset));
+        errors.add(localize("Start offset ({0,number,#.###}) must be before end offset ({1,number,#.###})", startOffset, endOffset));
       if (errors.size() > 0) return failureResult(errors);
-      return successResult(request, store.getMedia(id, trackSuffix, mimeType, startOffset, endOffset), null);
+      return successResult(store.getMedia(id, trackSuffix, mimeType, startOffset, endOffset), null);
     }
   }
 
   /**
-   * Implementation of {@link nzilbb.ag.IGraphStoreQuery#getEpisodeDocuments(String)}
+   * Implementation of {@link nzilbb.ag.IGraphStore#getEpisodeDocuments(String)}
    * @param request The HTTP request.
    * @param request The HTTP response.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getEpisodeDocuments(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
       
-    String id = request.getParameter("id");
-    if (id == null) return failureResult(request, "No ID specified.");
+    String id = parameters.getString("id");
+    if (id == null) return failureResult("No ID specified.");
 
     MediaFile[] media = store.getEpisodeDocuments(id);
       
     // strip out local file paths
     for (MediaFile file : media) file.setFile(null);
       
-    return successResult(request, media, media.length == 0?"There are no documents.":null);
+    return successResult(media, media.length == 0?"There are no documents.":null);
   }
 
   /**
@@ -1686,11 +1691,11 @@ public class StoreQuery extends LabbcatServlet {
    * @throws PermissionException If the operation is not permitted.
    */
   protected JsonObject getSerializerDescriptors(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     SerializationDescriptor[] descriptors = store.getSerializerDescriptors();
     return successResult(
-      request, descriptors, descriptors.length == 0?"There are no serializers.":null);
+      descriptors, descriptors.length == 0?"There are no serializers.":null);
   }
    
   /**
@@ -1702,11 +1707,11 @@ public class StoreQuery extends LabbcatServlet {
    * @throws PermissionException If listing the deserializers is not permitted.
    */
   protected JsonObject getDeserializerDescriptors(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     SerializationDescriptor[] descriptors = store.getDeserializerDescriptors();
     return successResult(
-      request, descriptors, descriptors.length == 0?"There are no deserializers.":null);
+      descriptors, descriptors.length == 0?"There are no deserializers.":null);
   }
 
   /**
@@ -1717,11 +1722,11 @@ public class StoreQuery extends LabbcatServlet {
    * @throws PermissionException If listing the deserializers is not permitted.
    */
   protected JsonObject getAnnotatorDescriptors(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     AnnotatorDescriptor[] descriptors = store.getAnnotatorDescriptors();
     return successResult(
-      request, descriptors, descriptors.length == 0?"There are no annotators.":null);
+      descriptors, descriptors.length == 0?"There are no annotators.":null);
   }
   
   /**
@@ -1732,14 +1737,14 @@ public class StoreQuery extends LabbcatServlet {
    * @throws PermissionException If listing the deserializers is not permitted.
    */
   protected JsonObject getAnnotatorDescriptor(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
-    String annotatorId = request.getParameter("annotatorId");
-    if (annotatorId == null) return failureResult(request, "No ID specified.");
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
+    String annotatorId = parameters.getString("annotatorId");
+    if (annotatorId == null) return failureResult("No ID specified.");
     AnnotatorDescriptor descriptor = store.getAnnotatorDescriptor(annotatorId);
-    if (descriptor == null) return failureResult(request, "Invalid ID: " + annotatorId);
+    if (descriptor == null) return failureResult("Invalid ID: " + annotatorId);
     return successResult(
-      request, descriptor, null);
+      descriptor, null);
   }
 
   /**
@@ -1753,16 +1758,16 @@ public class StoreQuery extends LabbcatServlet {
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getAnnotatorTasks(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
     // get/validate the parameters
-    String annotatorId = request.getParameter("annotatorId");
-    if (annotatorId == null) errors.add(localize(request, "No Annotator ID specified."));
+    String annotatorId = parameters.getString("annotatorId");
+    if (annotatorId == null) errors.add(localize("No Annotator ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     
     return successResult(
-      request, store.getAnnotatorTasks(annotatorId), null);
+      store.getAnnotatorTasks(annotatorId), null);
   }      
   
   /**
@@ -1776,16 +1781,16 @@ public class StoreQuery extends LabbcatServlet {
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject getAnnotatorTaskParameters(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
     // get/validate the parameters
-    String taskId = request.getParameter("taskId");
-    if (taskId == null) errors.add(localize(request, "No ID specified."));
+    String taskId = parameters.getString("taskId");
+    if (taskId == null) errors.add(localize("No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     
     return successResult(
-      request, store.getAnnotatorTaskParameters(taskId), null);
+      store.getAnnotatorTaskParameters(taskId), null);
   }
   
   /**
@@ -1797,12 +1802,12 @@ public class StoreQuery extends LabbcatServlet {
    * @throws PermissionException If listing the deserializers is not permitted.
    */
   protected JsonObject getTranscriberDescriptors(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     AnnotatorDescriptor[] descriptors = store.getTranscriberDescriptors();
     return successResult(
-      request, descriptors, descriptors.length == 0?"There are no transcribers.":null);
+      descriptors, descriptors.length == 0?"There are no transcribers.":null);
   }
 
   private static final long serialVersionUID = 1;
-} // end of class StoreQuery
+} // end of class Store

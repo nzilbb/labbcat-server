@@ -52,6 +52,9 @@
   
   <servlet><servlet-name>categories.jsp</servlet-name><jsp-file>/jsp/categories.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>categories.jsp</servlet-name><url-pattern>/api/categories/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>store.jsp</servlet-name><jsp-file>/jsp/store.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>store.jsp</servlet-name><url-pattern>/api/store/*</url-pattern></servlet-mapping>
 
   <servlet><servlet-name>layers/managers.jsp</servlet-name><jsp-file>/jsp/layers/managers.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>layers/managers.jsp</servlet-name><url-pattern>/api/layers/managers/*</url-pattern></servlet-mapping>
