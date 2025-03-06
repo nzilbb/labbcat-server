@@ -63,6 +63,10 @@
   <servlet-mapping><servlet-name>edit/store.jsp</servlet-name><url-pattern>/api/edit/store/*</url-pattern></servlet-mapping>
   <servlet-mapping><servlet-name>edit/store.jsp</servlet-name><url-pattern>/edit/store/*</url-pattern></servlet-mapping>
 
+  <servlet><servlet-name>admin/store.jsp</servlet-name><jsp-file>/jsp/admin/store.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/store.jsp</servlet-name><url-pattern>/api/admin/store/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>admin/store.jsp</servlet-name><url-pattern>/admin/store/*</url-pattern></servlet-mapping>
+
   <servlet><servlet-name>admin/categories.jsp</servlet-name><jsp-file>/jsp/admin/categories.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/categories.jsp</servlet-name><url-pattern>/api/admin/categories/*</url-pattern></servlet-mapping>
   

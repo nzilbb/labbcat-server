@@ -54,7 +54,6 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.api.RequestParameters;
 import nzilbb.labbcat.server.db.*;
-import org.apache.commons.fileupload.FileItem;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -324,7 +323,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
   /**
    * Interprets the URL path, and executes the corresponding function on the store. This
    * method is an override of 
-   * {@link nzilbb.labbcat.server.api.Store#invokeFunction(String,String,String,String,RequestParameters,Consumer,Consumer,SqlGraphStoreAdministration)}.
+   * {@link nzilbb.labbcat.server.api.Store#invokeFunction(String,String,String,String,RequestParameters,InputStream,Consumer,Consumer,SqlGraphStoreAdministration)}.
    * <p> This implementation only allows POST HTTP requests.
    * @param url The URI of the request. 
    * @param method The HTTP request method, e.g. "GET".

@@ -693,7 +693,7 @@ public class TestStoreAdministration
     try {
 
       // create the layer
-      //l.setVerbose(true);
+      // l.setVerbose(true);
       Layer newLayer = l.newLayer(testLayer);
       assertNotNull("new layer returned", newLayer);
       assertEquals("created ID",

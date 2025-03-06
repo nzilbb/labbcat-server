@@ -322,6 +322,7 @@ public class SqlGraphStoreAdministration
     requireAdmin();
     try {
       Layer oldVersion = getLayer(layer.getId());
+      if (oldVersion == null) throw new StoreException("Invalid layer ID: " + layer.getId());
       if (layer.getId().equals("transcript_type")) {
         // can only update validLabels
 
@@ -1323,6 +1324,7 @@ public class SqlGraphStoreAdministration
         throw new StoreException("Cannot delete system layer: " + id);
       }
       Layer layer = getLayer(id);
+      if (layer == null) throw new StoreException("Invalid layer ID: " + id);
       if (!layer.containsKey("layer_id") 
           && (!layer.containsKey("class_id") || !layer.containsKey("attribute"))) {
         throw new StoreException("Deleting layer " + id + " not yet implemented");

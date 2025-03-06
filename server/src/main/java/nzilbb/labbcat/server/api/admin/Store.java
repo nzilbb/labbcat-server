@@ -19,11 +19,12 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet;
+package nzilbb.labbcat.server.api.admin;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,24 +33,21 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Vector;
+import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
+import nzilbb.labbcat.server.api.RequestParameters;
 import nzilbb.labbcat.server.db.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
 /**
  * Endpoints starting <tt>/api/admin/store/&hellip;</tt> provide an HTTP-based API for access to
- * <a href="https://nzilbb.github.io/ag/apidocs/nzilbb/ag/GraphStoreAdministration.html">GraphStoreAdministration</a>
+ * <a href="https://nzilbb.github.io/ag/apidocs/nzilbb/ag/GraphStore.html">GraphStore</a>
  * functions. This includes all requests supported by {@link StoreQuery} and {@link Store}.
  * <p> The endpoints documented here only work for <b>POST</b> or <b>PUT</b> HTTP requests and return a JSON response with the same standard envelope structure:
  * <dl>
@@ -65,7 +63,7 @@ import org.xml.sax.*;
  * <tt>http://localhost:8080/labbcat/api/admin/store/newLayer</tt>
  *  might be:
  * <pre>{
- *    "title":"StoreAdministration",
+ *    "title":"Store",
  *    "version":"20230403.1833",
  *    "code":0,
  *    "errors":[],
@@ -342,77 +340,64 @@ import org.xml.sax.*;
 
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet({"/admin/store/*", "/api/admin/store/*"})
-public class StoreAdministration extends Store {
-  // Attributes:
-
-  // Methods:
-   
+public class Store extends nzilbb.labbcat.server.api.edit.Store {
   /**
    * Default constructor.
    */
-  public StoreAdministration() {
+  public Store() {
   } // end of constructor
-
-  /** 
-   * Initialise the servlet
-   */
-  public void init() {
-    super.init();
-  }
 
   // StoreQuery overrides
 
   /**
    * Interprets the URL path, and executes the corresponding function on the store. This
    * method is an override of 
-   * {@link StoreQuery#invokeFunction(HttpServletRequest,HttpServletResponse,SqlGraphStoreAdministration)}.
+   * {@link nzilbb.labbcat.server.api.edit.Store#invokeFunction(String,String,String,String,RequestParameters,InputStream,Consumer,Consumer,SqlGraphStoreAdministration)}.
    * <p> This implementation only allows POST or PUT HTTP requests.
-   * @param request The request.
-   * @param response The response.
-   * @param store The connected graph store.
-   * @return The response to send to the caller, or null if the request could not be interpreted.
+   * @param url The URI of the request. 
+   * @param method The HTTP request method, e.g. "GET".
+   * @param pathInfo The URL path.
+   * @param queryString The URL's query string.
+   * @param parameters Request parameter map.
+   * @param requestBody For access to the request body.
+   * @param httpStatus Receives the response status code, in case or error.
+   * @param redirectUrl Receives a URL for the request to be redirected to.
+   * @return JSON-encoded object representing the response
    */
   @Override
-  protected JsonObject invokeFunction(HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
-    try {
-      if (!IsUserInRole("admin", request, store.getConnection())) {
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        return failureResult(request, "User has no admin permission.");         
-      }
-    } catch(SQLException x) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return failureResult(x);
+  protected JsonObject invokeFunction(String url, String method, String pathInfo, String queryString, RequestParameters parameters, InputStream requestBody, Consumer<Integer> httpStatus, Consumer<String> redirectUrl, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
+    if (!context.isUserInRole("admin")) {
+      httpStatus.accept(SC_FORBIDDEN);
+      return failureResult("User has no admin permission.");         
     }
-    JsonObject json = null;
-    String pathInfo = request.getPathInfo().toLowerCase(); // case-insensitive
+    pathInfo = pathInfo.toLowerCase(); // case-insensitive
     // only allow POST requests
-    if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
+    System.out.println("invokeFunction " + pathInfo + " " + method);
+    if ("POST".equals(method) || "PUT".equals(method)) {
       if (pathInfo.endsWith("newlayer")) {
-        json = newLayer(request, response, store);
+        return newLayer(requestBody, store);
       } else if (pathInfo.endsWith("savelayer")) {
-        json = saveLayer(request, response, store);
+        return saveLayer(requestBody, store);
       } else if (pathInfo.endsWith("deletelayer")) {
-        json = deleteLayer(request, response, store);
+        return deleteLayer(parameters, store);
       } else if (pathInfo.endsWith("newannotatortask")) {
-        json = newAnnotatorTask(request, response, store);
+        return newAnnotatorTask(parameters, store);
       } else if (pathInfo.endsWith("saveannotatortaskdescription")) {
-        json = saveAnnotatorTaskDescription(request, response, store);
+        return saveAnnotatorTaskDescription(parameters, store);
       } else if (pathInfo.endsWith("saveannotatortaskparameters")) {
-        json = saveAnnotatorTaskParameters(request, response, store);
+        return saveAnnotatorTaskParameters(parameters, store);
       } else if (pathInfo.endsWith("deleteannotatortask")) {
-        json = deleteAnnotatorTask(request, response, store);
+        return deleteAnnotatorTask(parameters, store);
       }
     } // only if it's a POST request
       
-    if (json == null) { // either not POST or not a recognized function
-      json = super.invokeFunction(request, response, store);
-    }
-    return json;
+    // either not POST or not a recognized function
+    return super.invokeFunction(
+      url, method, pathInfo, queryString, parameters, requestBody, httpStatus, redirectUrl, store);
   } // end of invokeFunction()
 
-  // IGraphStoreAdministration method handlers
+  // IGraphStore method handlers
    
   // TODO registerDeserializer
   // TODO deregisterDeserializer
@@ -426,67 +411,64 @@ public class StoreAdministration extends Store {
   // TODO serializerForFilesSuffix
 
   /**
-   * Implementation of {@link nzilbb.ag.GraphStoreAdministration#newLayer(Layer)}
-   * @param request The HTTP request, the body of which must be a JSON-encoded {@link Layer}.
-   * @param request The HTTP response.
+   * Implementation of {@link nzilbb.ag.GraphStore#newLayer(Layer)}
+   * @param parameters Request parameter map.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject newLayer(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    InputStream requestBody, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
     // read the incoming object
     JsonReader reader = Json.createReader( // ensure we read as UTF-8
-      new InputStreamReader(request.getInputStream(), "UTF-8"));
+      new InputStreamReader(requestBody, "UTF-8"));
     // incoming object:
     JsonObject json = reader.readObject();
     Layer layer = new Layer(json);
-    if (layer.getId() == null) errors.add(localize(request, "No ID specified."));
+    if (layer.getId() == null) errors.add(localize("No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     return successResult(
-      request, store.newLayer(layer), "Layer added: {0}", layer.getId());
+      store.newLayer(layer), "Layer added: {0}", layer.getId());
   }
    
   /**
-   * Implementation of {@link nzilbb.ag.GraphStoreAdministration#saveLayer(Layer)}
-   * @param request The HTTP request, the body of which must be a JSON-encoded {@link Layer}.
-   * @param request The HTTP response.
+   * Implementation of {@link nzilbb.ag.GraphStore#saveLayer(Layer)}
+   * @param parameters Request parameter map.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject saveLayer(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    InputStream requestBody, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
     // read the incoming object
     JsonReader reader = Json.createReader( // ensure we read as UTF-8
-      new InputStreamReader(request.getInputStream(), "UTF-8"));
+      new InputStreamReader(requestBody, "UTF-8"));
     // incoming object:
     JsonObject json = reader.readObject();
     Layer layer = new Layer(json);    
-    if (layer.getId() == null) errors.add(localize(request, "No ID specified."));
+    if (layer.getId() == null) errors.add(localize("No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     return successResult(
-      request, store.saveLayer(layer), "Layer saved: {0}", layer.getId());
+      store.saveLayer(layer), "Layer saved: {0}", layer.getId());
   }
    
   /**
-   * Implementation of {@link nzilbb.ag.GraphStoreAdministration#deleteLayer(Layer)}
-   * @param request The HTTP request, the body of which must be a JSON-encoded {@link Layer}.
-   * @param request The HTTP response.
+   * Implementation of {@link nzilbb.ag.GraphStore#deleteLayer(Layer)}
+   * @param parameters Request parameter map.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject deleteLayer(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
-    String id = request.getParameter("id");
-    if (id == null) errors.add(localize(request, "No ID specified."));
+    String id = parameters.getString("id");
+    if (id == null) errors.add(localize("No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     store.deleteLayer(id);
-    return successResult(request, null, "Layer deleted: {0}", id);
+    return successResult(null, "Layer deleted: {0}", id);
   }
    
   /**
@@ -502,28 +484,26 @@ public class StoreAdministration extends Store {
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject newAnnotatorTask(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
     // get/validate the parameters
-    String annotatorId = request.getParameter("annotatorId");
-    if (annotatorId == null) errors.add(localize(request, "No Annotator ID specified."));
-    String taskId = request.getParameter("taskId");
-    if (taskId == null) errors.add(localize(request, "No ID specified."));
-    String description = request.getParameter("description");
+    String annotatorId = parameters.getString("annotatorId");
+    if (annotatorId == null) errors.add(localize("No Annotator ID specified."));
+    String taskId = parameters.getString("taskId");
+    if (taskId == null) errors.add(localize("No ID specified."));
+    String description = parameters.getString("description");
     if (description == null) description = "";
     if (errors.size() > 0) return failureResult(errors);
       
     try {
       store.newAnnotatorTask(annotatorId, taskId, description);
-      return successResult(
-        request, null, localize(request, "Record created."));
+      return successResult(null, localize("Record created."));
     } catch(ExistingIdException exception) {
-      errors.add(localize(
-                   request, "A task with that ID already exists: {0}", exception.getId()));
+      errors.add(localize("A task with that ID already exists: {0}", exception.getId()));
       return failureResult(errors);
     } catch(InvalidIdException exception) {
-      errors.add(localize(request, "That annotator isn't installed: {0}", exception.getId()));
+      errors.add(localize("That annotator isn't installed: {0}", exception.getId()));
       return failureResult(errors);
     }
   }      
@@ -540,19 +520,19 @@ public class StoreAdministration extends Store {
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject saveAnnotatorTaskDescription(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
     // get/validate the parameters
-    String taskId = request.getParameter("taskId");
-    if (taskId == null) errors.add(localize(request, "No ID specified."));
-    String description = request.getParameter("description");
+    String taskId = parameters.getString("taskId");
+    if (taskId == null) errors.add(localize("No ID specified."));
+    String description = parameters.getString("description");
     if (description == null) description = "";
     if (errors.size() > 0) return failureResult(errors);
 
     store.saveAnnotatorTaskDescription(taskId, description);
     return successResult(
-      request, null, localize(request, "Record updated."));
+      null, localize("Record updated."));
   }      
 
   /**
@@ -567,19 +547,19 @@ public class StoreAdministration extends Store {
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject saveAnnotatorTaskParameters(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
     // get/validate the parameters
-    String taskId = request.getParameter("taskId");
-    if (taskId == null) errors.add(localize(request, "No ID specified."));
-    String parameters = request.getParameter("parameters");
-    if (parameters == null) parameters = "";
+    String taskId = parameters.getString("taskId");
+    if (taskId == null) errors.add(localize("No ID specified."));
+    String params = parameters.getString("parameters");
+    if (params == null) params = "";
     if (errors.size() > 0) return failureResult(errors);
 
-    store.saveAnnotatorTaskParameters(taskId, parameters);
+    store.saveAnnotatorTaskParameters(taskId, params);
     return successResult(
-      request, null, localize(request, "Record updated."));
+      null, localize("Record updated."));
   }      
 
   /**
@@ -593,18 +573,18 @@ public class StoreAdministration extends Store {
    * @return A JSON response for returning to the caller.
    */
   protected JsonObject deleteAnnotatorTask(
-    HttpServletRequest request, HttpServletResponse response, SqlGraphStoreAdministration store)
-    throws ServletException, IOException, StoreException, PermissionException, GraphNotFoundException {
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
     Vector<String> errors = new Vector<String>();
     // get/validate the parameters
-    String taskId = request.getParameter("taskId");
-    if (taskId == null) errors.add(localize(request, "No ID specified."));
+    String taskId = parameters.getString("taskId");
+    if (taskId == null) errors.add(localize("No ID specified."));
     if (errors.size() > 0) return failureResult(errors);
 
     store.deleteAnnotatorTask(taskId);
     return successResult(
-      request, null, localize(request, "Record deleted."));
+      null, localize("Record deleted."));
   }
 
   private static final long serialVersionUID = 1;
-} // end of class StoreAdministration
+} // end of class Store
