@@ -22,4 +22,4 @@
 /**
  * <p>Servlets related to annotator management.
  */
-package nzilbb.labbcat.server.servlet.annotator;
+package nzilbb.labbcat.server.api.edit.annotator;
