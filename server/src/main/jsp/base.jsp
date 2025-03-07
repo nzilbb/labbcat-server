@@ -387,6 +387,14 @@
    * Returns the root of the persistent file system.
    * @return The "files" directory.
    */
+  public File getRootDir() {
+    return new File(getServletContext().getRealPath("/"));
+  } // end of getFilesDir()
+  
+  /**
+   * Returns the root of the persistent file system.
+   * @return The "files" directory.
+   */
   public File getFilesDir() {
     return new File(getServletContext().getRealPath("/files"));
   } // end of getFilesDir()
