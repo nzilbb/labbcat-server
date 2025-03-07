@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -19,7 +19,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.servlet.doc;
+package nzilbb.labbcat.server.api;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,21 +27,24 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.*;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -54,9 +57,6 @@ import javax.xml.xpath.XPathFactory;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.servlet.LabbcatServlet;
 import nzilbb.util.IO;
-import org.apache.commons.fileupload.*;
-import org.apache.commons.fileupload.disk.*;
-import org.apache.commons.fileupload.servlet.*;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -82,8 +82,7 @@ import org.w3c.dom.NodeList;
  * URL to it is returned as part of the JSON-encoded response to the POST request.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@WebServlet({"/doc/*"})
-public class Doc extends LabbcatServlet {
+public class Doc extends APIRequestHandler {
 
   DocumentBuilderFactory documentBuilderFactory;
   TransformerFactory transformerFactory;
@@ -101,124 +100,153 @@ public class Doc extends LabbcatServlet {
    * JSON-encoded representation of the existing file/directory structure for this
    * document, including peers, ancestors, and ancestor peers. This allows the wysiwiki
    * page to present a navigation tree to the user.
+   * @param referer The request referrer.
+   * @param pathInfo The URL path.
+   * @param realPath Function for translating an absolute URL path into a File.
+   * @param out Response body output stream.
+   * @param contentType Receives the content type for specification in the
+   * response headers. 
+   * @param contentEncoding Receives content character encoding for specification in the
+   * response headers. 
+   * @param httpStatus Receives the response status code, in case or error.
+   * @param redirectUrl Receives a URL for the request to be redirected to.
    */
-  @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    response.setCharacterEncoding("UTF-8");
-    if (request.getPathInfo() == null) { // root directory with no slash
+  public void get(
+    String referer,
+    String pathInfo, Function<String,File> realPath,
+    OutputStream out, Consumer<Long> expiresHeader,
+    Consumer<String> contentType, Consumer<String> contentEncoding,
+    Consumer<Integer> httpStatus, Consumer<String> redirectUrl) {
+    contentEncoding.accept("UTF-8");
+    if (pathInfo == null) { // root directory with no slash
       // redirect to the slash-ending version
-      response.sendRedirect(baseUrl(request) + "/doc/");
+      redirectUrl.accept(context.getBaseUrl() + "/doc/");
       return;
     }
-    if (request.getPathInfo() != null && request.getPathInfo().endsWith("/")
-        && !request.getPathInfo().equals("/")) { // non-root request ends with a slash
+    if (pathInfo != null && pathInfo.endsWith("/")
+        && !pathInfo.equals("/")) { // non-root request ends with a slash
       // redirect to the non-slash-ending version so we can get the document if any
-      response.sendRedirect(
-        baseUrl(request) + "/doc"
-        +request.getPathInfo().substring(0, request.getPathInfo().length()-1));
+      redirectUrl.accept(
+        context.getBaseUrl() + "/doc" +pathInfo.substring(0, pathInfo.length()-1));
       return;
     }
-    response.setContentType("text/html");
-    if (!"/index".equals(request.getPathInfo())) {
-      File html = file(request);
-      if (!html.exists()) { // not an HTML document or directory
-        File asset = new File(getServletContext().getRealPath("/doc"+request.getPathInfo()));
-        if (asset.exists() && !asset.isDirectory()) {
-          // serve the content directly
-          response.setContentType(
-            URLConnection.guessContentTypeFromName(request.getPathInfo()));
-          response.setDateHeader( // expires in a week
-            "Expires", new java.util.Date().getTime() + (1000*60*60*24*7));
-          IO.Pump(new FileInputStream(asset), response.getOutputStream());
-          return;
-        } else {
-          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-          // return 404, but also a template for creating a new document
-          html = new File(getServletContext().getRealPath("/doc/template.html"));
+    contentType.accept("text/html");
+    try {
+      if (!"/index".equals(pathInfo)) {
+        File html = file(pathInfo, realPath);
+        if (!html.exists()) { // not an HTML document or directory
+          File asset = realPath.apply("/doc"+pathInfo);
+          if (asset.exists() && !asset.isDirectory()) {
+            // serve the content directly
+            contentType.accept(
+              URLConnection.guessContentTypeFromName(pathInfo));
+            expiresHeader.accept( // expires in a week
+              new java.util.Date().getTime() + (1000*60*60*24*7));
+            IO.Pump(new FileInputStream(asset), out);
+            out.flush();
+            return;
+          } else {
+            httpStatus.accept(SC_NOT_FOUND);
+            // return 404, but also a template for creating a new document
+            html = realPath.apply("/doc/template.html");
+          }
         }
-      }
-      if (html.getName().equals("template.html")) { // template
-        // stream out the contents, substituting "${base}" for a path to the root directory
-        String context = request.getPathInfo();
-        if ("/template.html".equals(request.getPathInfo())
-            && request.getHeader("Referer") != null) {
-          context = request.getHeader("Referer")
-            .substring(baseUrl(request).length() + 4); // remove the full URL prefix
+        if (html.getName().equals("template.html")) { // template
+          // stream out the contents, substituting "${base}" for a path to the root directory
+          String context = pathInfo;
+          if ("/template.html".equals(pathInfo) && referer != null) {
+            context = referer.substring(this.context.getBaseUrl().length() + 4); // remove the full URL prefix
+          }
+          String[] parts = context.split("/");
+          // stream out, line by line, substituting "${base}" for a path to the root directory
+          String base = ".";
+          if (parts.length > 2) {
+            base = "..";
+            for (int i = 0; i < parts.length - 3; i++) {
+              base += "/..";
+            } // next ancestor
+          } // base is not the root directory
+          BufferedReader reader = new BufferedReader(new FileReader(html));
+          PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, "UTF-8"));
+          String line = reader.readLine();
+          while (line != null) {
+            writer.println(line.replace("${base}", base));
+            line = reader.readLine();
+          }
+          writer.flush();
+        } else { // existing document
+          IO.Pump(new FileInputStream(html), out);
+          out.flush();
         }
-        String[] parts = context.split("/");
-        // stream out, line by line, substituting "${base}" for a path to the root directory
-        String base = ".";
-        if (parts.length > 2) {
-          base = "..";
-          for (int i = 0; i < parts.length - 3; i++) {
-            base += "/..";
-          } // next ancestor
-        } // base is not the root directory
-        BufferedReader reader = new BufferedReader(new FileReader(html));
-        PrintWriter writer = response.getWriter();
-        String line = reader.readLine();
-        while (line != null) {
-          writer.println(line.replace("${base}", base));
-          line = reader.readLine();
-        }
-      } else { // existing document
-        IO.Pump(new FileInputStream(html), response.getOutputStream());
-      }
-    } else { // request for index      
-      try {
-        File root = new File(getServletContext().getRealPath("/doc"));
-        Document index = compileIndex(root, request);
+      } else { // request for index      
+        File root = realPath.apply("/doc");
+        Document index = compileIndex(root);
         DOMSource source = new DOMSource(index);
-        StreamResult result =  new StreamResult(response.getWriter());
+        StreamResult result =  new StreamResult(new OutputStreamWriter(out, "UTF-8"));
         Transformer xmlTransformer = transformerFactory.newTransformer();
         xmlTransformer.transform(source, result);
-      } catch (Exception x) {
-        response.setContentType("application/json");
-        x.printStackTrace(System.err);
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        JsonWriter writer = Json.createWriter(response.getWriter());
-        writer.writeObject(failureResult(request, x.getMessage()));
+      } // request for index
+    } catch (Exception x) {
+      contentType.accept("application/json");
+      x.printStackTrace(System.err);
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
+        writer.writeObject(failureResult(x.getMessage()));
         writer.close();      
-      }
-    } // request for index
+      } catch(Exception exception) {}
+    }
   }
   
   /**
    * PUT handler: Adds or updates an HTML document, or if the "move" parameter is specified,
    * the document's entry is moved in the index (in which case the HTML document itself is
    * not updated).
+   * @param pathInfo The URL path.
+   * @param realPath Function for translating an absolute URL path into a File.
+   * @param requestBody Stream supplying the body of the request.
+   * @param out Stream for writing the response.
+   * @param contentType Consumer for receiving the output content type..
+   * @param contentEncoding Receives content character encoding for specification in the
+   * response headers. 
+   * @param httpStatus Receives the response status code, in case or error.
+   * @return A JSON object as the request response.
    */
-  @Override
-  protected void doPut(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
+  public void put(
+    String pathInfo, Function<String,File> realPath,
+    RequestParameters parameters,
+    InputStream requestBody,
+    OutputStream out,
+    Consumer<String> contentType, Consumer<String> contentEncoding,
+    Consumer<Integer> httpStatus) {
+    contentType.accept("application/json");
+    contentEncoding.accept("UTF-8");
     try {
-      if ("/template".equals(request.getPathInfo()) // not allowed to edit template
-          || "/template.html".equals(request.getPathInfo())
-          || !canEdit(request)) { // only admin users allowed to edit anything
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      if ("/template".equals(pathInfo) // not allowed to edit template
+          || "/template.html".equals(pathInfo)
+          || !canEdit()) { // only admin users allowed to edit anything
+        httpStatus.accept(SC_FORBIDDEN);
         return;
       }
-      File html = file(request);
+      File html = file(pathInfo, realPath);
       String id = IO.WithoutExtension(html);
       if (id.length() == 0) id = "→";
       
       // get the file's item in the index
-      File root = new File(getServletContext().getRealPath("/doc"));
+      File root = realPath.apply("/doc");
       Document index = loadIndexXhtml(root, html.getParentFile());
       XPath xpath = XPathFactory.newInstance().newXPath();
       Element item = (Element)xpath.evaluate("//*[@id='"+id+"']", index, XPathConstants.NODE);
       
-      String move = request.getParameter("move");
+      String move = parameters.getString("move");
       if (move == null) { // PUT full content
-                
+        
         // back up the old version
         backup(html);
         
         // write the new version
-        IO.Pump(request.getInputStream(), new FileOutputStream(html));
+        IO.Pump(requestBody, new FileOutputStream(html));
+        out.flush();
         
         // ensure it's indexed with the correct title
         if (item == null) { // not indexed yet
@@ -235,8 +263,8 @@ public class Doc extends LabbcatServlet {
         }
         
         // send JSON response
-        JsonWriter writer = Json.createWriter(response.getWriter());
-        writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
+        JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
+        writer.writeObject(successResult(null, "OK"));
         writer.close();
       } else { // move request - only edit the position in the index
         if (item != null) { // file is in the index
@@ -258,53 +286,63 @@ public class Doc extends LabbcatServlet {
             saveIndexXhtml(index, html.getParentFile());
           }
           // send JSON response
-          JsonWriter writer = Json.createWriter(response.getWriter());
-          writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
+          JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
+          writer.writeObject(successResult(null, "OK"));
           writer.close();
         } else { // not in index
-          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-          JsonWriter writer = Json.createWriter(response.getWriter());
-          writer.writeObject(failureResult(request, "Record not found: {0}", id));
+          httpStatus.accept(SC_NOT_FOUND);
+          JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
+          writer.writeObject(failureResult("Record not found: {0}", id));
           writer.close();
         } // not in index
       } // move request
       
     } catch (Exception x) {
       x.printStackTrace(System.err);
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      JsonWriter writer = Json.createWriter(response.getWriter());
-      writer.writeObject(failureResult(request, x.getMessage()));
-      writer.close();      
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
+        writer.writeObject(failureResult(x.getMessage()));
+        writer.close();
+      } catch(Exception exception) {}
     }
   }
   
   /**
    * DELETE handler: Delete the given HTML document.
+   * @param pathInfo The URL path.
+   * @param realPath Function for translating an absolute URL path into a File.
+   * @param requestHeaders Access to HTTP request headers.
+   * @param out Response body output stream.
+   * @param contentType Receives the content type for specification in the response headers.
+   * @param contentEncoding Receives content character encoding for specification in the
+   * @param httpStatus Receives the response status code, in case or error.
    */
-  @Override
-  protected void doDelete(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+  public void delete(
+    String pathInfo, Function<String,File> realPath,
+    OutputStream out,
+    Consumer<String> contentType, Consumer<String> contentEncoding,
+    Consumer<Integer> httpStatus) {
     try {
-      if ("/template".equals(request.getPathInfo()) // not allowed to edit template
-          || "/template.html".equals(request.getPathInfo())
-          || !canEdit(request)) { // only admin users allowed to edit anything
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      if ("/template".equals(pathInfo) // not allowed to edit template
+          || "/template.html".equals(pathInfo)
+          || !canEdit()) { // only admin users allowed to edit anything
+        httpStatus.accept(SC_FORBIDDEN);
         return;
       }
-      File html = file(request);
+      File html = file(pathInfo, realPath);
       if (!html.exists()) { // file's directory doesn't exist
-        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        httpStatus.accept(SC_NOT_FOUND);
       } else {
-        log("Deleting " + html.getPath());
         // back up the old version
         backup(html);
         // delete the file
         html.delete();
-
+        
         // remove from index
         String id = IO.WithoutExtension(html);
         if (id.length() > 0) { // but only if it's not the root document
-          File root = new File(getServletContext().getRealPath("/doc"));
+          File root = realPath.apply("/doc");
           Document index = loadIndexXhtml(root, html.getParentFile());
           XPath xpath = XPathFactory.newInstance().newXPath();
           Element item = (Element)xpath.evaluate("//*[@id='"+id+"']", index, XPathConstants.NODE);
@@ -324,115 +362,126 @@ public class Doc extends LabbcatServlet {
             }
           } // it's in the index
         } // it's not the root document
-
+        
         // send JSON response
-        JsonWriter writer = Json.createWriter(response.getWriter());
-        writer.writeObject(successResult(request, null, "OK")); // TODO i18n?
+        JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
+        writer.writeObject(successResult(null, "OK"));
         writer.close();
         
       } // file exists
     } catch (Exception x) {
       x.printStackTrace(System.err);
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      response.getOutputStream().write(x.getMessage().getBytes());
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(x.getMessage().getBytes());
+      } catch(Exception exception) {}
     }
   }
   
   /**
    * POST handler: for saving images and other assets.
+   * @param pathInfo The URL path.
+   * @param realPath Function for translating an absolute URL path into a File.
+   * @param parameters Request parameter map.
+   * @param out Stream for writing the response.
+   * @param contentType Consumer for receiving the output content type..
+   * @param contentEncoding Receives content character encoding for specification in the
+   * response headers. 
+   * @param httpStatus Receives the response status code, in case or error.
+   * @return A JSON object as the request response.
    */
-  @Override
   @SuppressWarnings("rawtypes")
-  protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
+  public void post(
+    String pathInfo, Function<String,File> realPath,
+    RequestParameters parameters,
+    OutputStream out,
+    Consumer<String> contentType, Consumer<String> contentEncoding,
+    Consumer<Integer> httpStatus) {
+    contentType.accept("application/json");
+    contentEncoding.accept("UTF-8");
 
     try {
-      if (!canEdit(request)) { // only admin users allowed to upload anything
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      if (!canEdit()) { // only admin users allowed to upload anything
+        httpStatus.accept(SC_FORBIDDEN);
         return;
       }
-      if (ServletFileUpload.isMultipartContent(request)) { // file being uploaded
-
-        // take the first file we find
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-        List items = upload.parseRequest(request);
-        Iterator it = items.iterator();
-        FileItem fileItem = null;
-        while (it.hasNext()) {
-          FileItem item = (FileItem) it.next();
-          if (!item.isFormField()) {
-            fileItem = item;
-            break;
-          }            
-        } // next part
-        if (fileItem == null) {
-          writeResponse(response, failureResult(request, "No file received."));
-        } else { // file found
-          
-          File file = new File(getServletContext().getRealPath("/doc"+request.getPathInfo()));
-          if (!file.getParentFile().exists()) {
-            Files.createDirectories(file.getParentFile().toPath());
-          }
-          if (file.exists()) {
-            // get a non-existent file name
-            File dir = file.getParentFile();
-            String name = IO.WithoutExtension(file);
-            String ext = IO.Extension(file);
-            int i = 0;
-            do {
-              file = new File(dir, name + "-" + (++i) + "." + ext);
-            } while(file.exists());
-          }
-          fileItem.write(file);
-
-          JsonWriter writer = Json.createWriter(response.getWriter());
-          JsonObjectBuilder model = Json.createObjectBuilder();
-          model.add("url", "."+request.getPathInfo().replaceAll("[^/]+$", file.getName()));
-          writer.writeObject(successResult(request, model.build(), null));
-          writer.close();
-          
-        } // file found
-      } // file being uploaded
+      // take the first file we find
+      Optional anyFileValue = parameters.keySet().stream()
+        .map(key->parameters.get(key))
+        .filter(value->value instanceof File)
+        .findAny();
+      if (!anyFileValue.isPresent()) { // file not being uploaded
+        contentType.accept("application/json");
+        contentEncoding.accept("UTF-8");
+        writeResponse(out, failureResult("No file received."));
+      } else { // file found
+        File formFile = (File)anyFileValue.get();
+        File file = realPath.apply("/doc"+pathInfo);
+        if (!file.getParentFile().exists()) {
+          Files.createDirectories(file.getParentFile().toPath());
+        }
+        if (file.exists()) {
+          // get a non-existent file name
+          File dir = file.getParentFile();
+          String name = IO.WithoutExtension(file);
+          String ext = IO.Extension(file);
+          int i = 0;
+          do {
+            file = new File(dir, name + "-" + (++i) + "." + ext);
+          } while(file.exists());
+        }
+        if (!formFile.renameTo(file)) {
+          IO.Copy(formFile, file);
+          formFile.delete();
+        }
+        
+        JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
+        JsonObjectBuilder model = Json.createObjectBuilder();
+        model.add("url", "."+pathInfo.replaceAll("[^/]+$", file.getName()));
+        writer.writeObject(successResult(model.build(), null));
+        writer.close();
+        
+      } // file found
     } catch (Exception x) {
       x.printStackTrace(System.err);
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      response.getOutputStream().write(x.getMessage().getBytes());
+      contentType.accept("text/plain");
+      contentEncoding.accept("UTF-8");
+      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      try {
+        out.write(x.getMessage().getBytes());
+      } catch(Exception exception) {}
     }
   }
   
-  @Override
   /**
    * OPTIONS handler: specifies what HTML methods are allowed, depending on the user access.
    */
-  protected void doOptions(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+  public String options() {
     String allow = "OPTIONS, GET";
-    if (canEdit(request)) {
+    if (canEdit()) {
       allow += ", PUT, POST, DELETE";
     }
-    response.addHeader("Allow", allow);
+    return allow;
   }
 
   /**
    * Translates the request path into a file.
-   * @param request
+   * @param realPath Function for translating an absolute URL path into a File.
    * @return The real path of the request.
    */
-  protected File file(HttpServletRequest request) {
-    String path = request.getPathInfo();
+  protected File file(String pathInfo, Function<String,File> realPath) {
+    String path = pathInfo;
     if (!path.endsWith(".html")) path += ".html";
-    return new File(getServletContext().getRealPath("/doc"+path));
+    return realPath.apply("/doc"+path);
   } // end of file()
   
   /**
    * Translates the request path into a local path and determines if it's an existing directory.
-   * @param request
+   * @param realPath Function for translating an absolute URL path into a File.
    * @return An existing directory if the request corresponds to one, or null otherwise.
    */
-  protected File directory(HttpServletRequest request) {
-    File dir = new File(getServletContext().getRealPath("/doc"+request.getPathInfo()));
+  protected File directory(String pathInfo, Function<String,File> realPath) {
+    File dir = realPath.apply("/doc"+pathInfo);
     if (dir.exists() && dir.isDirectory()) {
       return dir;
     } else {
@@ -448,12 +497,12 @@ public class Doc extends LabbcatServlet {
    * document is encosed in an HTML &lt;a&gt; tag, with directory links enclosed in 
    * &lt;details&gt;&lt;summary&gt; tags, and each file link enclosed in a &lt;div&gt;.
    */
-  protected Document compileIndex(File root, HttpServletRequest request) throws Exception {
+  protected Document compileIndex(File root) throws Exception {
     XPath xpath = XPathFactory.newInstance().newXPath();
     // recursively construct the index document
     Document index = compileIndex(root, root, xpath);
     // update URLs
-    String baseUrl = baseUrl(request) + "/doc/";
+    String baseUrl = context.getBaseUrl() + "/doc/";
     NodeList ids = (NodeList)xpath.evaluate("//@id", index, XPathConstants.NODESET);
     for (int i = 0; i < ids.getLength(); i++) {
       Attr id = (Attr)ids.item(i);
@@ -467,7 +516,7 @@ public class Doc extends LabbcatServlet {
           href.setNodeValue(baseUrl + id.getNodeValue().replace("→", "/"));
         }
       } catch(Exception x) {
-        log("Couldn't set URL for node with id " + id.getNodeValue() + ": "+x);
+        context.servletLog("Couldn't set URL for node with id " + id.getNodeValue() + ": "+x);
       }
     } // next ID
     return index;
@@ -705,7 +754,7 @@ public class Doc extends LabbcatServlet {
           return title;
         }
       } catch(Exception exception) {
-        //log("Doc.title("+html.getPath()+"): " + exception.toString());
+        //context.servletLog("Doc.title("+html.getPath()+"): " + exception.toString());
       }
     } // file exists and is .html
     return IO.WithoutExtension(html);
@@ -727,7 +776,7 @@ public class Doc extends LabbcatServlet {
         try {
           IO.Copy(html, backup);
         } catch(Exception exception) {
-          log("Doc.backup("+html.getPath()+"): " + exception.toString());
+          context.servletLog("Doc.backup("+html.getPath()+"): " + exception.toString());
         }
       }
       return true;
@@ -740,20 +789,7 @@ public class Doc extends LabbcatServlet {
    * @param request
    * @return true if the current user is allowed to PUT documents, false otherwise.
    */
-  protected boolean canEdit(HttpServletRequest request) {
-    try {
-      SqlGraphStoreAdministration store = getStore(request);
-      try {
-        return IsUserInRole("admin", request, store.getConnection());
-      } finally {
-        cacheStore(store);
-      }
-    } catch (Exception x) {
-      x.printStackTrace(System.err);
-      return false;
-    }
+  protected boolean canEdit() {
+    return context.isUserInRole("admin");
   } // end of canEdit()
-  
-  private static final long serialVersionUID = 1;
-
 }

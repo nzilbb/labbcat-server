@@ -274,6 +274,15 @@
          * @return An object that can provide database connections.
          */
         public ConnectionFactory getConnectionFactory() { return connectionFactory; }
+
+        /**
+         * Log a message.
+         * @param message
+         */
+        public void servletLog(String message) {
+          log(message);
+        }
+        
       });
     return handler;
   }

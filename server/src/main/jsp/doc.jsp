@@ -1,28 +1,38 @@
 <%@ page info="Corpus access agreement" isErrorPage="true"
-    import = "nzilbb.labbcat.server.api.Agreement" 
+    import = "nzilbb.labbcat.server.api.Doc" 
 %><%@ include file="base.jsp" %><%{
-    Agreement handler = new Agreement();
+    Doc handler = new Doc();
     initializeHandler(handler, request);
     if ("GET".equals(request.getMethod())) {
-      handler.get(        
+      handler.get(
+        request.getHeader("Referer"),
         request.getPathInfo(),
         (path)->new File(getServletContext().getRealPath(path)),
         response.getOutputStream(),
         (expires)->response.setDateHeader("Expires", expires),
         (contentType)->response.setContentType(contentType),
         (encoding)->response.setCharacterEncoding(encoding),
-        (status)->response.setStatus(status));
+        (status)->response.setStatus(status),
+        (redirectUrl)->{
+          try {
+            response.sendRedirect(redirectUrl);
+          } catch(IOException ex) {
+            log("Could not redirect to " + redirectUrl + " : " + ex);
+          }
+        });
     } else if ("POST".equals(request.getMethod())) {
       // load multipart request parameters - the implementation depends on the servlet container:
       // Server info something like "Apache Tomcat/9.0.58 (Ubuntu)" or "Apache Tomcat/10.1.36"
       boolean tomcat9 = application.getServerInfo().matches(".*Tomcat/9.*");
       if (tomcat9) {
+      log("tomcat9");
         %><jsp:include page="/api/file-upload-tomcat9.jsp" /><%
       } else {
         %><jsp:include page="/api/file-upload-tomcat10.jsp" /><%
       } 
       RequestParameters parameters = (RequestParameters)
         request.getAttribute("multipart-parameters");
+      log("parameters: " + parameters);
       handler.post(
         request.getPathInfo(),
         (path)->new File(getServletContext().getRealPath(path)),
@@ -35,6 +45,7 @@
       handler.put(
         request.getPathInfo(),
         (path)->new File(getServletContext().getRealPath(path)),
+        parseParameters(request),
         request.getInputStream(),
         response.getOutputStream(),
         (contentType)->response.setContentType(contentType),

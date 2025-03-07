@@ -22,15 +22,15 @@
 package nzilbb.labbcat.server.api;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -45,23 +45,9 @@ import java.util.regex.*;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.servlet.LabbcatServlet;
 import nzilbb.util.IO;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Provides CRUD operations for the agreement.html file, which is the license agreement
@@ -170,7 +156,7 @@ public class Agreement extends APIRequestHandler {
       
       // send JSON response
       JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
-      writer.writeObject(successResult(null, "License agreement updated.")); // TODO i18n?
+      writer.writeObject(successResult(null, "License agreement updated."));
       writer.close();
       
     } catch (Exception x) {
@@ -223,7 +209,7 @@ public class Agreement extends APIRequestHandler {
         contentType.accept("application/json");
         contentEncoding.accept("UTF-8");
         JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
-        writer.writeObject(successResult(null, "License agreement deleted.")); // TODO i18n?
+        writer.writeObject(successResult(null, "License agreement deleted."));
         writer.close();
         
       } // file exists
@@ -316,7 +302,7 @@ public class Agreement extends APIRequestHandler {
   /**
    * OPTIONS handler: specifies what HTML methods are allowed, depending on the user access.
    */
-  protected String options() {
+  public String options() {
     String allow = "OPTIONS, GET";
     if (canEdit()) {
       allow += ", PUT, POST, DELETE";

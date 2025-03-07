@@ -100,4 +100,10 @@ public interface APIRequestContext {
    */
   public ConnectionFactory getConnectionFactory();
   
+  /**
+   * Log a message.
+   * @param message
+   */
+  public void servletLog(String message);
+  
 } // end of APIRequestContext
