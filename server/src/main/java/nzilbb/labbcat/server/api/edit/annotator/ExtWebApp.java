@@ -97,7 +97,7 @@ public class ExtWebApp extends APIRequestHandler {
     UnaryOperator<String> requestHeaders, InputStream requestBody,
     OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> contentEncoding,
     Consumer<Integer> httpStatus) {
-    System.out.println(pathInfo);
+    context.servletLog(pathInfo);
     try {
       SqlGraphStoreAdministration store = getStore();
       try {
@@ -113,14 +113,14 @@ public class ExtWebApp extends APIRequestHandler {
         Matcher path = Pattern.compile("/([^/]+)(/.*)$").matcher(pathInfo);
         if (!path.matches()) {
           httpStatus.accept(SC_NOT_FOUND);
-          System.out.println("No match");
+          context.servletLog("No match");
           return;
         }            
         String annotatorId = path.group(1);
         String resource = path.group(2);
         String query = queryString;
         if (resource.equals("/")) resource = "/index.html";
-        System.out.println("annotatorId " + annotatorId + " resource " + resource + " URI " + requestURI);
+        context.servletLog("annotatorId " + annotatorId + " resource " + resource + " URI " + requestURI);
 
         // get annotator descriptor - the same instance as last time if possible
         AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
@@ -132,7 +132,7 @@ public class ExtWebApp extends APIRequestHandler {
           // use the new one
           descriptor = newDescriptor;
           activeAnnotators.put(annotatorId, descriptor);
-          System.out.println("new descriptor " + descriptor);
+          context.servletLog("new descriptor " + descriptor);
         }
         if (descriptor == null) {
           httpStatus.accept(SC_NOT_FOUND);
@@ -141,7 +141,7 @@ public class ExtWebApp extends APIRequestHandler {
 
         // validate the webapp path
         if (!descriptor.hasExtWebapp()) {
-          System.out.println("no ext webapp " + annotatorId + " " + resource);
+          context.servletLog("no ext webapp " + annotatorId + " " + resource);
           httpStatus.accept(SC_NOT_FOUND);
           return;
         }
@@ -176,9 +176,9 @@ public class ExtWebApp extends APIRequestHandler {
             // requests with a dot are taken to be resources for the webapp,
             // e.g. index.html
             try {
-              //System.out.println("about to get ext" + resource);
+              //context.servletLog("about to get ext" + resource);
               stream = descriptor.getResource("ext"+resource);
-              //System.out.println("got ext" +resource);
+              //context.servletLog("got ext" +resource);
               if (resource.indexOf(".html") > 0) {
                 contentTypeConsumer.accept("text/html;charset=UTF-8");
               } else if (resource.indexOf(".js") > 0) {
@@ -187,7 +187,7 @@ public class ExtWebApp extends APIRequestHandler {
                 contentTypeConsumer.accept("text/css;charset=UTF-8");
               }
             } catch(Throwable exception) {
-              System.out.println(pathInfo + " - Could not getResource: "+exception);
+              context.servletLog(pathInfo + " - Could not getResource: "+exception);
             }
           } else {
             // everything else is routed to the annotator...
@@ -201,18 +201,18 @@ public class ExtWebApp extends APIRequestHandler {
                 method, uri, requestHeaders.apply("Content-Type"), requestBody);
               echoContentType(requestHeaders, contentTypeConsumer, contentEncoding);
             } catch(RequestException exception) {
-              System.out.println(pathInfo + " - RequestException: " + exception);
+              context.servletLog(pathInfo + " - RequestException: " + exception);
               status = exception.getHttpStatus();
               stream = new ByteArrayInputStream(exception.getMessage().getBytes());
             } catch(URISyntaxException exception) {
-              System.out.println(pathInfo + " - URISyntaxException: " + exception);
+              context.servletLog(pathInfo + " - URISyntaxException: " + exception);
               httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
               return;
             }
           }
         }
         if (stream == null)  {
-          System.out.println("no stream for ext" +resource);
+          context.servletLog("no stream for ext" +resource);
           httpStatus.accept(SC_NOT_FOUND);
           return;
         }

@@ -335,7 +335,7 @@ public class Annotators extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      System.err.println("Annotators: Couldn't connect to database: " + exception);
+      context.servletLog("Annotators: Couldn't connect to database: " + exception);
       writeResponse(out, failureResult(exception));
       return;
     }

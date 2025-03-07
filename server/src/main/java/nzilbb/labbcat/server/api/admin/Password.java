@@ -143,11 +143,11 @@ public class Password extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      System.err.println("Password.handleRequest: Database operation failed: " + exception);
+      context.servletLog("Password.handleRequest: Database operation failed: " + exception);
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       return failureResult(exception);
     } catch(Exception exception) {
-      System.err.println("Password.handleRequest: Failed: " + exception);
+      context.servletLog("Password.handleRequest: Failed: " + exception);
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       return failureResult(exception);
     }

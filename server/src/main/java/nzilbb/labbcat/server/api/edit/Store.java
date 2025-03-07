@@ -392,7 +392,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
     InputStream requestBody, SqlGraphStoreAdministration store)
     throws IOException, StoreException, PermissionException,
     GraphNotFoundException {
-    System.out.println("saveTranscript...");
+    context.servletLog("saveTranscript...");
     
     // parse body as JSON to construct incoming graph
     // serialize with JSON serialization
@@ -406,7 +406,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
             new NamedStream().setStream(requestBody).setMimeType("application/json")),
           schema));
       Graph editedGraph = s.deserialize()[0];
-      System.out.println("saveTranscript " + editedGraph.getId());
+      context.servletLog("saveTranscript " + editedGraph.getId());
     
       // list layers, check they're all transcript attribute layers
       Vector<String> layerIds = new Vector<String>();
@@ -429,9 +429,9 @@ public class Store extends nzilbb.labbcat.server.api.Store {
       
       // merge attribute changes
       Merger merger = new Merger(editedGraph);
-      System.out.println("saveTranscript about to merge...");
+      context.servletLog("saveTranscript about to merge...");
       merger.transform(ag);
-      System.out.println("saveTranscript merged.");
+      context.servletLog("saveTranscript merged.");
 
       // save changes to graph store
       boolean thereWereChanges = store.saveTranscript(ag);
@@ -442,19 +442,19 @@ public class Store extends nzilbb.labbcat.server.api.Store {
       }
       
     } catch(TransformationException exception) {
-      System.out.println("saveTranscript: " + exception);
+      context.servletLog("saveTranscript: " + exception);
       throw new StoreException(exception);
     } catch(SerializerNotConfiguredException exception) { // shouldn't happen
-      System.out.println("saveTranscript: " + exception);
+      context.servletLog("saveTranscript: " + exception);
       throw new StoreException(exception);
     } catch(SerializationParametersMissingException exception) { // shouldn't happen
-      System.out.println("saveTranscript: " + exception);
+      context.servletLog("saveTranscript: " + exception);
       throw new StoreException(exception);
     } catch(SerializationException exception) { // shouldn't happen
-      System.out.println("saveTranscript: " + exception);
+      context.servletLog("saveTranscript: " + exception);
       throw new StoreException(exception);
     } catch(Throwable t) {
-      System.out.println("saveTranscript: " + t);
+      context.servletLog("saveTranscript: " + t);
       t.printStackTrace(System.out);
       throw new StoreException(t);
     }

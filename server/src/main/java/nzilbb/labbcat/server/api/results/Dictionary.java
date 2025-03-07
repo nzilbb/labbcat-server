@@ -223,7 +223,7 @@ public class Dictionary extends APIRequestHandler { // TODO unit test
       try {
         out.write(ex.toString().getBytes());
       } catch(IOException exception) {
-        System.err.println("Files.get: could not report unhandled exception: " + exception);
+        context.servletLog("Files.get: could not report unhandled exception: " + exception);
         exception.printStackTrace(System.err);
       }
     }

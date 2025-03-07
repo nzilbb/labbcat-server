@@ -1505,7 +1505,7 @@ public class Store extends APIRequestHandler {
     try {
       s.serialize(Utility.OneGraphSpliterator(transcript), null,
                   (stream) -> streams.add(stream),
-                  (warning) -> System.out.println(warning),
+                  (warning) -> context.servletLog(warning),
                   (exception) -> exceptions.add(exception));
       JsonReader reader = Json.createReader(
         new InputStreamReader(streams.elementAt(0).getStream(), "UTF-8"));
@@ -1567,7 +1567,7 @@ public class Store extends APIRequestHandler {
     try {
       s.serialize(Utility.OneGraphSpliterator(fragment), null,
                   (stream) -> streams.add(stream),
-                  (warning) -> System.out.println(warning),
+                  (warning) -> context.servletLog(warning),
                   (exception) -> exceptions.add(exception));
       JsonReader reader = Json.createReader(
         new InputStreamReader(streams.elementAt(0).getStream(), "UTF-8"));

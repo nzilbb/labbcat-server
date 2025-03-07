@@ -380,7 +380,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
       try {
         out.write(ex.toString().getBytes());
       } catch(IOException exception) {
-        System.err.println("Files.get: could not report unhandled exception: " + ex);
+        context.servletLog("Files.get: could not report unhandled exception: " + ex);
         ex.printStackTrace(System.err);
       }
     }
@@ -445,7 +445,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
       try {
         graphs.add(store.getTranscript(id, layerIds));
       } catch(Exception exception) {
-        System.err.println("Graphs error processing: " + id + " - " + exception);
+        context.servletLog("Graphs error processing: " + id + " - " + exception);
       }	    
     } // next graph
     iPercentComplete = 50;
@@ -460,8 +460,8 @@ public class Graphs extends APIRequestHandler { // TODO unit test
           files.add(stream);
           iPercentComplete = 50 + Optional.of(serializer.getPercentComplete()).orElse(0)/2;
         },
-        warning -> System.out.println("WARNING: " + warning),
-        exception -> System.err.println("SerializeFragment error: " + exception));
+        warning -> context.servletLog("WARNING: " + warning),
+        exception -> context.servletLog("SerializeFragment error: " + exception));
       iPercentComplete = 100;
     }
     return files;

@@ -148,16 +148,16 @@ public class Attributes extends APIRequestHandler { // TODO unit test
             } // next layer
             csvOut.println();
           } catch(Exception x) {
-            System.err.println("Attributes: Cannot get transcript " + transcriptId + ": " + x);
+            context.servletLog("Attributes: Cannot get transcript " + transcriptId + ": " + x);
           }
         } // next graph ID
         try {
           csvOut.close();
         } catch(Exception exception) {
-          System.err.println("Attributes: Cannot close CSV file: " + exception);
+          context.servletLog("Attributes: Cannot close CSV file: " + exception);
         }
       } catch(Exception exception) {
-        System.err.println("Attributes: open csv stream: " + exception);
+        context.servletLog("Attributes: open csv stream: " + exception);
       } finally {
         cacheStore(store);
       }

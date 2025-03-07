@@ -562,7 +562,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                           csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result, lastLayer);
                       } // layer changed
                     } catch(Exception x) {
-                      System.err.println("ERROR Results-consumer: " + x);
+                      context.servletLog("ERROR Results-consumer: " + x);
                       x.printStackTrace(System.err);
                     }
                   });
@@ -575,7 +575,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                         jsonOut, csvOut, finalSearchName, result, agIdToGraph, speakerNumberToName,
                         store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
                     } catch(Exception x) {
-                      System.err.println("ERROR Results-consumer: " + x);
+                      context.servletLog("ERROR Results-consumer: " + x);
                       x.printStackTrace(System.err);
                     } finally {
                       outputMatchEnd(jsonOut, csvOut); // end this match
@@ -589,7 +589,7 @@ public class Results extends APIRequestHandler { // TODO unit test
           }
           outputSuccessfulEnd(jsonOut, csvOut);
         } catch (Exception x) {
-          System.err.println(x.toString());
+          context.servletLog(x.toString());
           x.printStackTrace(System.err);
           outputFailedEnd(jsonOut, csvOut, x.getMessage());
         } finally {

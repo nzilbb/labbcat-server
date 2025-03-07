@@ -182,10 +182,10 @@ public class Files extends APIRequestHandler { // TODO unit test
                   try {
                     zipOut.close();
                   } catch(Exception exception) {
-                    System.err.println("Files: Cannot close ZIP file: " + exception);
+                    context.servletLog("Files: Cannot close ZIP file: " + exception);
                   }
                 } catch(Exception exception) {
-                  System.err.println("Files: open zip stream: " + exception);
+                  context.servletLog("Files: open zip stream: " + exception);
                 }
               }
             }).start();
@@ -207,7 +207,7 @@ public class Files extends APIRequestHandler { // TODO unit test
       try {
         out.write(ex.toString().getBytes());
       } catch(IOException exception) {
-        System.err.println("Files.get: could not report unhandled exception: " + exception);
+        context.servletLog("Files.get: could not report unhandled exception: " + exception);
         exception.printStackTrace(System.err);
       }
     }

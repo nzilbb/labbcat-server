@@ -96,7 +96,7 @@ public class TaskWebApp extends APIRequestHandler {
     UnaryOperator<String> requestHeaders, InputStream requestBody,
     OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> contentEncoding,
     Consumer<Integer> httpStatus) {
-    System.out.println(pathInfo);
+    context.servletLog(pathInfo);
     try {
       SqlGraphStoreAdministration store = getStore();
       try {
@@ -112,7 +112,7 @@ public class TaskWebApp extends APIRequestHandler {
         Matcher path = Pattern.compile("/([^/]+)(/.*)$").matcher(pathInfo);
         if (!path.matches()) {
           httpStatus.accept(SC_NOT_FOUND);
-          System.out.println("No match");
+          context.servletLog("No match");
           return;
         }            
         String annotatorId = path.group(1);
@@ -126,11 +126,11 @@ public class TaskWebApp extends APIRequestHandler {
         }
         if (taskId == null || taskId.length() == 0) {
           httpStatus.accept(SC_BAD_REQUEST);
-          System.out.println("No task specified by query string or referrer");
+          context.servletLog("No task specified by query string or referrer");
           return;
         }
         if (resource.equals("/")) resource = "/index.html";
-        System.out.println("annotatorId " + annotatorId + " resource " + resource);
+        context.servletLog("annotatorId " + annotatorId + " resource " + resource);
 
         // get annotator descriptor - the same instance as last time if possible
         if (!activeAnnotators.containsKey(annotatorId)) {
@@ -151,8 +151,8 @@ public class TaskWebApp extends APIRequestHandler {
           } catch(Exception exception) {}
           // persist the descriptor between requests
           activeAnnotators.get(annotatorId).put(taskId, descriptor);
-          System.out.println("new descriptor " + descriptor);
-          descriptor.getInstance().getStatusObservers().add(s->System.out.println(s));
+          context.servletLog("new descriptor " + descriptor);
+          descriptor.getInstance().getStatusObservers().add(s->context.servletLog(s));
 
         }
         if (descriptor == null) {
@@ -165,7 +165,7 @@ public class TaskWebApp extends APIRequestHandler {
             && !resource.equals("/getStatus")          // except /getStatus OK
             && !resource.equals("/getPercentComplete") // except /getPercentComplete OK
             && !resource.equals("/setTask")) {       // except /setTask OK
-          System.out.println("no task webapp " + annotatorId + " " + resource);
+          context.servletLog("no task webapp " + annotatorId + " " + resource);
           httpStatus.accept(SC_NOT_FOUND);
           return;
         }
@@ -195,7 +195,7 @@ public class TaskWebApp extends APIRequestHandler {
           }
           
         } else if (resource.equals("/setTaskParameters")) {
-          System.out.println("setTaskParameters: " + taskId);
+          context.servletLog("setTaskParameters: " + taskId);
 
           // check the parameters don't generate an error
           String parameters = IO.InputStreamToString(requestBody);
@@ -224,7 +224,7 @@ public class TaskWebApp extends APIRequestHandler {
                 if (existingOutput == null) { // output doesn't exist yet
                   // create new layer
                   store.newLayer(newOutput);
-                  System.out.println("Output layer " + newOutput + " created");
+                  context.servletLog("Output layer " + newOutput + " created");
                 } else { // existing layer
                   
                   if (!newOutput.getType().equals(existingOutput.getType())
@@ -236,7 +236,7 @@ public class TaskWebApp extends APIRequestHandler {
                       || !newOutput.getValidLabels().keySet().equals(
                         existingOutput.getValidLabels().keySet())) {
                     store.saveLayer(newOutput);
-                    System.out.println("Output layer " + newOutput + " updated");
+                    context.servletLog("Output layer " + newOutput + " updated");
                   } // output layer definition has changed
                 } // output layer exists in store
               } // output layer exists for annotator
@@ -265,11 +265,11 @@ public class TaskWebApp extends APIRequestHandler {
             // requests with a dot are taken to be resources for the webapp,
             // e.g. index.html
             try {
-              //System.out.println("about to get task" +resource);
+              //context.servletLog("about to get task" +resource);
               stream = descriptor.getResource("task"+resource);
-              //System.out.println("got task" +resource);
+              //context.servletLog("got task" +resource);
             } catch(Throwable exception) {
-              System.out.println(pathInfo + " - Could not getResource: "+exception);
+              context.servletLog(pathInfo + " - Could not getResource: "+exception);
             }
           } else {
             // everything else is routed to the annotator...
@@ -283,20 +283,20 @@ public class TaskWebApp extends APIRequestHandler {
                 method, uri, requestHeaders.apply("Content-Type"), requestBody);
               echoContentType(requestHeaders, contentTypeConsumer, contentEncoding);
             } catch(RequestException exception) {
-              System.out.println(pathInfo + " - RequestException: " + exception);
+              context.servletLog(pathInfo + " - RequestException: " + exception);
               status = exception.getHttpStatus();
               if (exception.getMessage() != null) {
                 stream = new ByteArrayInputStream(exception.getMessage().getBytes());
               }
             } catch(URISyntaxException exception) {
-              System.out.println(pathInfo + " - URISyntaxException: " + exception);
+              context.servletLog(pathInfo + " - URISyntaxException: " + exception);
               httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
               return;
             }
           }
         }
         if (stream == null)  {
-          System.out.println("no stream for task" +resource);
+          context.servletLog("no stream for task" +resource);
           httpStatus.accept(SC_NOT_FOUND);
           return;
         }

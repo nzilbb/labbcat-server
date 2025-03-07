@@ -115,7 +115,7 @@ public class Agreement extends APIRequestHandler {
         writer.writeObject(failureResult(x.getMessage()));
         writer.close();
       } catch (Exception ex) {
-        System.err.println("Agreement.get: " + x);
+        context.servletLog("Agreement.get: " + x);
         x.printStackTrace(System.err);
       }
     }
@@ -167,7 +167,7 @@ public class Agreement extends APIRequestHandler {
         writer.writeObject(failureResult(x.getMessage()));
         writer.close();
       } catch (Exception ex) {
-        System.err.println("Agreement.get: " + x);
+        context.servletLog("Agreement.get: " + x);
         x.printStackTrace(System.err);
       }
     }
@@ -197,7 +197,7 @@ public class Agreement extends APIRequestHandler {
       if (!html.exists()) { // file's directory doesn't exist
         httpStatus.accept(SC_NOT_FOUND);
       } else {
-        System.out.println("Deleting " + html.getPath());
+        context.servletLog("Deleting " + html.getPath());
         
         // back up the old version
         backup(html);
@@ -326,7 +326,7 @@ public class Agreement extends APIRequestHandler {
         try {
           IO.Copy(html, backup);
         } catch(Exception exception) {
-          System.err.println("Agreement.backup("+html.getPath()+"): " + exception.toString());
+          context.servletLog("Agreement.backup("+html.getPath()+"): " + exception.toString());
         }
       }
       return true;

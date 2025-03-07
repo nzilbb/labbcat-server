@@ -179,7 +179,7 @@ public class SystemAttributes extends APIRequestHandler {
             endSuccessResult(jsonOut, null);
           } catch(SQLException exception) {
             httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-            System.err.println("SystemAttributes GET: ERROR: " + exception);
+            context.servletLog("SystemAttributes GET: ERROR: " + exception);
             endFailureResult(jsonOut, exception);
           }
         }
@@ -187,7 +187,7 @@ public class SystemAttributes extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      System.err.println("SystemAttributes GET: Couldn't connect to database: " + exception);
+      context.servletLog("SystemAttributes GET: Couldn't connect to database: " + exception);
       endFailureResult(jsonOut, exception);
     }      
   }
@@ -263,7 +263,7 @@ public class SystemAttributes extends APIRequestHandler {
         connection.close();
       }
     } catch(Exception exception) {
-      System.err.println("SystemAttributes.put: Couldn't connect to database: " + exception);
+      context.servletLog("SystemAttributes.put: Couldn't connect to database: " + exception);
       return failureResult(exception);
     }      
   }

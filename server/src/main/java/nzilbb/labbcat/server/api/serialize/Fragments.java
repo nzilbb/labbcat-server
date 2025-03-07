@@ -401,7 +401,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
             }},
           new Consumer<SerializationException>() {
             public void accept(SerializationException exception) {
-              System.err.println("Fragments: " + exception);
+              context.servletLog("Fragments: " + exception);
             }},
           layerId, mimeType, store);
         
@@ -447,10 +447,10 @@ public class Fragments extends APIRequestHandler { // TODO unit test
                   try {
                     zipOut.close();
                   } catch(Exception exception) {
-                    System.err.println("ConvertFragment: Cannot close ZIP file: " + exception);
+                    context.servletLog("ConvertFragment: Cannot close ZIP file: " + exception);
                   }
                 } catch(Exception exception) {
-                  System.err.println("ConvertFragment: open zip stream: " + exception);
+                  context.servletLog("ConvertFragment: open zip stream: " + exception);
                 }
               }
             }).start();
@@ -469,7 +469,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       try {
         out.write(ex.toString().getBytes());
       } catch(IOException exception) {
-        System.err.println("Files.get: could not report unhandled exception: " + ex);
+        context.servletLog("Files.get: could not report unhandled exception: " + ex);
         ex.printStackTrace(System.err);
       }
     }
@@ -517,7 +517,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       streamConsumer,
       new Consumer<String>() {
         public void accept(String warning) {
-          System.out.println("WARNING: " + warning);
+          context.servletLog("WARNING: " + warning);
         }},
       errorConsumer);
     iPercentComplete = 100;

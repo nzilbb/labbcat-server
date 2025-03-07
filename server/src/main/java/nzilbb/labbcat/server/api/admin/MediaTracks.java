@@ -171,7 +171,7 @@ public class MediaTracks extends TableServletBase {
                sql.close();
             }            
          } catch(SQLException exception) {
-            System.err.println("ERROR getting default value for display_order: " + exception);
+            context.servletLog("ERROR getting default value for display_order: " + exception);
             record = createMutableCopy(record, "display_order")
                .add("display_order", 0)
                .build();

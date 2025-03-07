@@ -342,11 +342,11 @@ public class TableServletBase extends APIRequestHandler {
                 int offset = page * pageLength;
                 query.append(" LIMIT " + offset + ", " + pageLength);
               } catch (Exception x) {
-                System.err.println("ERROR cannot paginate: " + x);
+                context.servletLog("ERROR cannot paginate: " + x);
               }
             } // page
             
-            System.out.println("GET " + pathInfo + " : " + query.toString()); // TODO remove
+            context.servletLog("GET " + pathInfo + " : " + query.toString()); // TODO remove
             PreparedStatement sql = connection.prepareStatement(query.toString());
             if (keyValues != null) {
               int c = 1;
@@ -399,7 +399,7 @@ public class TableServletBase extends APIRequestHandler {
             } catch (Exception x) {
               contentTypeConsumer.accept("application/json");
               httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-              System.err.println("TableServletBase GET: ERROR: " + x);
+              context.servletLog("TableServletBase GET: ERROR: " + x);
               writeResponse(out, failureResult(x));
             } finally {
                 rs.close();
@@ -408,7 +408,7 @@ public class TableServletBase extends APIRequestHandler {
           } catch(SQLException exception) {
             contentTypeConsumer.accept("application/json");
             httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-            System.err.println("TableServletBase GET: ERROR: " + exception);
+            context.servletLog("TableServletBase GET: ERROR: " + exception);
             writeResponse(out, failureResult(exception));
           }
         }
@@ -416,7 +416,7 @@ public class TableServletBase extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      System.err.println("TableServletBase GET: Couldn't connect to database: " + exception);
+      context.servletLog("TableServletBase GET: Couldn't connect to database: " + exception);
       contentTypeConsumer.accept("application/json;charset=UTF-8");
       writeResponse(out, failureResult(exception));
     }      
@@ -648,7 +648,7 @@ public class TableServletBase extends APIRequestHandler {
             try {
             
               // insert the row
-              System.out.println("POST " + query.toString()); // TODO remove
+              context.servletLog("POST " + query.toString()); // TODO remove
               PreparedStatement sql = connection.prepareStatement(query.toString());
               int c = 1;
               for (String column : dbKeys) {
@@ -751,11 +751,11 @@ public class TableServletBase extends APIRequestHandler {
               writeResponse(out, failureResult("Record already exists: {0}", key.substring(1)));
             } catch(SQLException exception) {
               httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-              System.err.println("TableServletBase POST: ERROR: " + exception);
+              context.servletLog("TableServletBase POST: ERROR: " + exception);
               writeResponse(out, failureResult(exception));
             }
           } catch(java.io.UnsupportedEncodingException x) {
-            System.err.println("TableServletBase POST: Encoding error: " + x);
+            context.servletLog("TableServletBase POST: Encoding error: " + x);
             contentTypeConsumer.accept("application/json;charset=UTF-8");
             writeResponse(out, failureResult(x));
           }
@@ -767,7 +767,7 @@ public class TableServletBase extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      System.err.println("TableServletBase POST: Couldn't connect to database: " + exception);
+      context.servletLog("TableServletBase POST: Couldn't connect to database: " + exception);
       contentTypeConsumer.accept("application/json;charset=UTF-8");
       writeResponse(out, failureResult(exception));
     }      
@@ -822,7 +822,7 @@ public class TableServletBase extends APIRequestHandler {
              query.append(where);
              
              try {
-               System.out.println("PUT " + query.toString()); // TODO remove
+               context.servletLog("PUT " + query.toString()); // TODO remove
                PreparedStatement sql = connection.prepareStatement(query.toString());
                
                try {
@@ -877,7 +877,7 @@ public class TableServletBase extends APIRequestHandler {
                      } // next key
                      dbKeyQuery.append(" WHERE ");
                      dbKeyQuery.append(dbKeyWhere);
-                     System.err.println("PUT key query: " + dbKeyQuery);
+                     context.servletLog("PUT key query: " + dbKeyQuery);
                      PreparedStatement sqlKeys = connection.prepareStatement(dbKeyQuery.toString());
                      int k = 1;
                      for (String column : urlKeys) {
@@ -902,7 +902,7 @@ public class TableServletBase extends APIRequestHandler {
                    writeResponse(out, successResult(jsonResult.build(), "Record updated."));
                  }
                } catch(java.io.UnsupportedEncodingException x) {
-                 System.err.println("TableServletBase POST: Encoding error: " + x);
+                 context.servletLog("TableServletBase POST: Encoding error: " + x);
                  contentTypeConsumer.accept("application/json;charset=UTF-8");
                  writeResponse(out, failureResult(x));
                } finally {
@@ -913,7 +913,7 @@ public class TableServletBase extends APIRequestHandler {
                httpStatus.accept(SC_BAD_REQUEST);
                writeResponse(out, failureResult(exception.errors));
              } catch(SQLException exception) {
-               System.err.println("TableServletBase POST: ERROR: " + exception);
+               context.servletLog("TableServletBase POST: ERROR: " + exception);
                httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
                writeResponse(out, failureResult(exception));
              }
@@ -922,7 +922,7 @@ public class TableServletBase extends APIRequestHandler {
            connection.close();
          }
     } catch(SQLException exception) {
-      System.err.println("TableServletBase PUT: Couldn't connect to database: " + exception);
+      context.servletLog("TableServletBase PUT: Couldn't connect to database: " + exception);
       contentTypeConsumer.accept("application/json;charset=UTF-8");
       writeResponse(out, failureResult(exception));
     }
@@ -1076,7 +1076,7 @@ public class TableServletBase extends APIRequestHandler {
                   try {
                     sqlUpdate.executeUpdate();
                   } catch (SQLException sqlX) {
-                    System.err.println("beforeDelete failed - " + update.query + " : " + sqlX);
+                    context.servletLog("beforeDelete failed - " + update.query + " : " + sqlX);
                   } finally {
                     sqlUpdate.close();
                   }
@@ -1084,7 +1084,7 @@ public class TableServletBase extends APIRequestHandler {
               } // deleteChecks
             } // need to check or update before deleting
             
-            System.out.println("DELETE " + pathInfo + " : " + query.toString()); // TODO remove
+            context.servletLog("DELETE " + pathInfo + " : " + query.toString()); // TODO remove
             PreparedStatement sql = connection.prepareStatement(query.toString());
             try {
               int c = 1;
@@ -1112,7 +1112,7 @@ public class TableServletBase extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      System.err.println("TableServletBase DELETE: Couldn't connect to database: " + exception);
+      context.servletLog("TableServletBase DELETE: Couldn't connect to database: " + exception);
       contentTypeConsumer.accept("application/json;charset=UTF-8");
       writeResponse(out, failureResult(exception));
     }      

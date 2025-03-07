@@ -166,7 +166,7 @@ public class Utterances extends APIRequestHandler { // TODO unit test
             try {
               return store;
             } catch(Exception exception) {
-              System.err.println("Utterances.StoreCache: " + exception);
+              context.servletLog("Utterances.StoreCache: " + exception);
               return null;
             }
           }
@@ -208,7 +208,7 @@ public class Utterances extends APIRequestHandler { // TODO unit test
       try {
         httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       } catch(Exception exception) {}
-      System.err.println("Praat.post: unhandled exception: " + ex);
+      context.servletLog("Praat.post: unhandled exception: " + ex);
       ex.printStackTrace(System.err);
       return failureResult(ex);
     }

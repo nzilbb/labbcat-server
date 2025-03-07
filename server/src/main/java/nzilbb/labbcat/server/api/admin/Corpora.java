@@ -190,7 +190,7 @@ public class Corpora extends TableServletBase {
       if (errors == null) errors = new Vector<String>();
       errors.add(x.toString());
       // not expecting this, so log it:
-      System.err.println("Corpora.validateBeforeUpdate: ERROR " + x);
+      context.servletLog("Corpora.validateBeforeUpdate: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
       return record;

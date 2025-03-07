@@ -201,7 +201,7 @@ public class Permissions extends TableServletBase {
       if (errors == null) errors = new Vector<String>();
       errors.add(x.toString());
       // not expecting this, so log it:
-      System.err.println("Permissions.validateBeforeUpdate: ERROR " + x);
+      context.servletLog("Permissions.validateBeforeUpdate: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
     return record;
@@ -264,7 +264,7 @@ public class Permissions extends TableServletBase {
       if (errors == null) errors = new Vector<String>();
       errors.add(x.toString());
       // not expecting this, so log it:
-      System.err.println("Permissions.validateBeforeInsert: ERROR " + x);
+      context.servletLog("Permissions.validateBeforeInsert: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
     return record;

@@ -100,7 +100,7 @@ public class ConfigWebApp extends APIRequestHandler {
     UnaryOperator<String> requestHeaders, InputStream requestBody,
     OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> contentEncoding,
     Consumer<Integer> httpStatus) {
-    System.out.println(pathInfo);
+    context.servletLog(pathInfo);
     try {
       SqlGraphStoreAdministration store = getStore();
       try {
@@ -116,18 +116,18 @@ public class ConfigWebApp extends APIRequestHandler {
         Matcher path = Pattern.compile("/([^/]+)(/.*)$").matcher(pathInfo);
         if (!path.matches()) {
           httpStatus.accept(SC_NOT_FOUND);
-          System.out.println("No match");
+          context.servletLog("No match");
           return;
         }            
         String annotatorId = path.group(1);
         String resource = path.group(2);
         if (resource.equals("/")) resource = "/index.html";
-        System.out.println("annotatorId " + annotatorId + " resource " + resource);
+        context.servletLog("annotatorId " + annotatorId + " resource " + resource);
         
         // get annotator descriptor - the same instance as last time if possible
         AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
         AnnotatorDescriptor descriptor = activeAnnotators.get(annotatorId);
-        System.out.println("descriptor " + (descriptor==null?"null":descriptor.getVersion()));
+        context.servletLog("descriptor " + (descriptor==null?"null":descriptor.getVersion()));
         if (descriptor == null // haven't got one of these yet
             || descriptor.getVersion() == null // this version has been uninstalled
             || (newDescriptor != null // or a new one has been installed
@@ -135,9 +135,9 @@ public class ConfigWebApp extends APIRequestHandler {
           // use the new one
           descriptor = newDescriptor;
           activeAnnotators.put(annotatorId, descriptor);
-          System.out.println("new descriptor " + descriptor);
+          context.servletLog("new descriptor " + descriptor);
           descriptor.getInstance().getStatusObservers().add(
-            status -> System.out.println(annotatorId + ": " + status));
+            status -> context.servletLog(annotatorId + ": " + status));
         }
         if (descriptor == null) {
           httpStatus.accept(SC_NOT_FOUND);
@@ -149,7 +149,7 @@ public class ConfigWebApp extends APIRequestHandler {
             && !resource.equals("/getStatus")          // except /getStatus OK
             && !resource.equals("/getPercentComplete") // except /getPercentComplete OK
             && !resource.equals("/setConfig")) {       // except /setConfig OK
-          System.out.println("no config webapp " + annotatorId + " " + resource);
+          context.servletLog("no config webapp " + annotatorId + " " + resource);
           httpStatus.accept(SC_NOT_FOUND);
           return;
         }
@@ -212,7 +212,7 @@ public class ConfigWebApp extends APIRequestHandler {
                 try {
                   annotator.setConfig(config);
                 } catch(InvalidConfigurationException exception) {
-                  System.out.println(pathInfo + " - invalid config: " + exception
+                  context.servletLog(pathInfo + " - invalid config: " + exception
                       + " : " + config);
                 }
               }
@@ -230,11 +230,11 @@ public class ConfigWebApp extends APIRequestHandler {
             // requests with a dot are taken to be resources for the webapp,
             // e.g. index.html
             try {
-              //System.out.println("about to get " + resource);
+              //context.servletLog("about to get " + resource);
               stream = descriptor.getResource("config"+resource);
-              //System.out.println("got " +resource);
+              //context.servletLog("got " +resource);
             } catch(Throwable exception) {
-              System.out.println(pathInfo + " - Could not getResource: "+exception);
+              context.servletLog(pathInfo + " - Could not getResource: "+exception);
             }
           } else {
             // everything else is routed to the annotator...
@@ -248,7 +248,7 @@ public class ConfigWebApp extends APIRequestHandler {
                 method, uri, requestHeaders.apply("Content-Type"), requestBody);
               echoContentType(requestHeaders, contentTypeConsumer, contentEncoding);
             } catch(RequestException exception) {
-              System.out.println(pathInfo + " - RequestException: " + exception);
+              context.servletLog(pathInfo + " - RequestException: " + exception);
               status = exception.getHttpStatus();
               if (exception.getMessage() != null) {
                 stream = new ByteArrayInputStream(exception.getMessage().getBytes());
@@ -256,14 +256,14 @@ public class ConfigWebApp extends APIRequestHandler {
                 stream = new ByteArrayInputStream(exception.getClass().getName().getBytes());
               }
             } catch(URISyntaxException exception) {
-              System.out.println(pathInfo + " - URISyntaxException: " + exception);
+              context.servletLog(pathInfo + " - URISyntaxException: " + exception);
               httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
               return;
             }
           }
         }
         if (stream == null)  {
-          System.out.println("no stream for config" +resource);
+          context.servletLog("no stream for config" +resource);
           httpStatus.accept(SC_NOT_FOUND);
           return;
         }

@@ -216,7 +216,7 @@ public class Users extends TableServletBase {
       if (errors == null) errors = new Vector<String>();
       errors.add(x.toString());
       // not expecting this, so log it:
-      System.err.println("AdminCorpora.validateBeforeUpdate: ERROR " + x);
+      context.servletLog("AdminCorpora.validateBeforeUpdate: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
     return record;
@@ -248,7 +248,7 @@ public class Users extends TableServletBase {
         jsonOut.writeEnd(); // end roles array
       }
     } catch (SQLException x) {
-      System.err.println("editOutputRecord: " + x);
+      context.servletLog("editOutputRecord: " + x);
     }
   } // end of editOutputRecord()
   
@@ -269,7 +269,7 @@ public class Users extends TableServletBase {
       sql.setString(1, jsonIn.getString("user"));
       sql.executeUpdate();
     } catch (SQLException x) {
-      System.err.println("editNewRecord: " + x);
+      context.servletLog("editNewRecord: " + x);
     }
     editUpdatedRecord(jsonIn, jsonOut, connection);
   } // end of editNewRecord()
@@ -335,9 +335,9 @@ public class Users extends TableServletBase {
         }
         
       } catch (SQLException x) {
-        System.err.println("editOutputRecord: " + x);
+        context.servletLog("editOutputRecord: " + x);
       } catch (ClassCastException x) {
-        System.err.println("editOutputRecord: " + x);
+        context.servletLog("editOutputRecord: " + x);
       }
     } // "roles" is specified
   } // end of editUpdatedRecord()

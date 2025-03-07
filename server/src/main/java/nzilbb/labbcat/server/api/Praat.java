@@ -273,7 +273,7 @@ public class Praat extends APIRequestHandler {
             try {
               return getStore();
             } catch(Exception exception) {
-              System.err.println("Praat.StoreCache: " + exception);
+              context.servletLog("Praat.StoreCache: " + exception);
               return null;
             }
           }
@@ -850,7 +850,7 @@ public class Praat extends APIRequestHandler {
       try {
         httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       } catch(Exception exception) {}
-      System.err.println("Praat.post: unhandled exception: " + ex);
+      context.servletLog("Praat.post: unhandled exception: " + ex);
       ex.printStackTrace(System.err);
       return failureResult(ex);
     }

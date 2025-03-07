@@ -204,7 +204,7 @@ public class Categories extends TableServletBase {
     } catch (JsonException x) {
       errors.add(x.toString());
       // not expecting this, so log it:
-      System.err.println("Categories.validateBeforeUpdate: ERROR " + x);
+      context.servletLog("Categories.validateBeforeUpdate: ERROR " + x);
     }
     if (errors.size() > 0) throw new ValidationException(errors);
     return record;

@@ -373,7 +373,7 @@ public class Store extends nzilbb.labbcat.server.api.edit.Store {
     }
     pathInfo = pathInfo.toLowerCase(); // case-insensitive
     // only allow POST requests
-    System.out.println("invokeFunction " + pathInfo + " " + method);
+    context.servletLog("invokeFunction " + pathInfo + " " + method);
     if ("POST".equals(method) || "PUT".equals(method)) {
       if (pathInfo.endsWith("newlayer")) {
         return newLayer(requestBody, store);
