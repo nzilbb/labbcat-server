@@ -131,7 +131,6 @@ public class Agreement extends APIRequestHandler {
    * @param contentEncoding Receives content character encoding for specification in the
    * response headers. 
    * @param httpStatus Receives the response status code, in case or error.
-   * @return A JSON object as the request response.
    */
   public void put(
     String pathInfo, Function<String,File> realPath,
@@ -177,7 +176,6 @@ public class Agreement extends APIRequestHandler {
    * DELETE handler: Delete the HTML document.
    * @param pathInfo The URL path.
    * @param realPath Function for translating an absolute URL path into a File.
-   * @param requestHeaders Access to HTTP request headers.
    * @param out Response body output stream.
    * @param contentType Receives the content type for specification in the response headers.
    * @param contentEncoding Receives content character encoding for specification in the
@@ -234,7 +232,6 @@ public class Agreement extends APIRequestHandler {
    * @param contentEncoding Receives content character encoding for specification in the
    * response headers. 
    * @param httpStatus Receives the response status code, in case or error.
-   * @return A JSON object as the request response.
    */
   @SuppressWarnings("rawtypes")
   public void post(

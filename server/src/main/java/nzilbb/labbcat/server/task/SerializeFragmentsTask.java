@@ -43,7 +43,7 @@ import nzilbb.labbcat.server.db.ConsolidatedGraphSeries;
 import nzilbb.labbcat.server.db.FragmentSeries;
 import nzilbb.labbcat.server.db.ResultSeries;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
-import nzilbb.labbcat.server.servlet.SerializeFragments;
+import nzilbb.labbcat.server.api.serialize.Fragments;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableSeries;
 
@@ -53,7 +53,7 @@ import nzilbb.util.MonitorableSeries;
  */
 public class SerializeFragmentsTask extends Task {
 
-  private SerializeFragments exporter = new SerializeFragments();
+  private Fragments exporter = new Fragments();
   private MonitorableSeries<Graph> fragments = null;
    
   /**

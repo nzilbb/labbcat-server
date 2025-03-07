@@ -89,8 +89,6 @@ public class Utterances extends APIRequestHandler { // TODO unit test
   /**
    * The POST method for the servlet.
    * @param parameters Request parameter map.
-   * @param out Response body output stream.
-   * @param contentType Receives the content type for specification in the response headers.
    * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
    * @param redirectUrl Receives a URL for the request to be redirected to.

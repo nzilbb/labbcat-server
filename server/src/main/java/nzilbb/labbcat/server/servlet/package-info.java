@@ -79,9 +79,9 @@
  *
  * <p> Annotation Graph store functions include:
  * <ul>
- *  <li> {@link StoreQuery GraphStoreQuery} functions for querying transcripts/annotations. </li>
- *  <li> {@link Store GraphStore} functions for editing transcripts/annotations </li>
- *  <li> {@link StoreAdministration GraphStoreAdministration} functions for defining the
+ *  <li> {@link nzilbb.labbcat.server.api.Store GraphStoreQuery} functions for querying transcripts/annotations. </li>
+ *  <li> {@link nzilbb.labbcat.server.api.edit.Store GraphStore} functions for editing transcripts/annotations </li>
+ *  <li> {@link nzilbb.labbcat.server.api.admin.Store GraphStoreAdministration} functions for defining the
  * data schema, annotation automation, etc. </li>
  *  <li> and other LaBB-CAT-specific functions which listed below &hellip;</li>
  * </ul>

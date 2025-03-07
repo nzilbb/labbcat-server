@@ -83,12 +83,15 @@ public class TaskWebApp extends APIRequestHandler {
    
   /**
    * GET handler.
+   * @param method HTTP method of the request.
+   * @param requestURI The URL of the request, excluding the query string.
    * @param pathInfo The URL path.
-   * @param parameters Request parameter map.
+   * @param queryString The URL's query string.
    * @param requestHeaders Access to HTTP request headers.
+   * @param requestBody Access to the body of the request.
    * @param out Response body output stream.
-   * @param contentType Receives the content type for specification in the response headers.
-   * @param fileName Receives the filename for specification in the response headers.
+   * @param contentTypeConsumer Receives the content type for specification in the response headers.
+   * @param contentEncoding Receives the character encoding of the recponse.
    * @param httpStatus Receives the response status code, in case or error.
    */
   public void get(

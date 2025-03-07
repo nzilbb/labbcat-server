@@ -176,7 +176,7 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param parameters Request parameter map.
    * @param requestHeaders Access to HTTP request headers.
    * @param out Response body output stream.
-   * @param contentType Receives the content type for specification in the response headers.
+   * @param contentTypeConsumer Receives the content type for specification in the response headers.
    * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
    */

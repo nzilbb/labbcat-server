@@ -252,7 +252,7 @@ public class TableServletBase extends APIRequestHandler {
    * @param parameters Request parameter map.
    * @param requestHeaders Access to HTTP request headers.
    * @param out Response body output stream.
-   * @param contentType Receives the content type for specification in the response headers.
+   * @param contentTypeConsumer Receives the content type for specification in the response headers.
    * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
    */
@@ -586,12 +586,10 @@ public class TableServletBase extends APIRequestHandler {
   
   /**
    * POST handler - add a new row.
-   * @param pathInfo The URL path.
    * @param requestBody Stream containing the request body.
    * @param requestHeaders Access to HTTP request headers.
    * @param out Response body output stream.
-   * @param contentType Receives the content type for specification in the response headers.
-   * @param fileName Receives the filename for specification in the response headers.
+   * @param contentTypeConsumer Receives the content type for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
    */
   public void post(InputStream requestBody, UnaryOperator<String> requestHeaders, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<Integer> httpStatus) {
@@ -779,7 +777,6 @@ public class TableServletBase extends APIRequestHandler {
     * @param out Stream for writing the response.
     * @param contentTypeConsumer Consumer for receiving the output content type..
     * @param httpStatus Receives the response status code, in case or error.
-    * @return A JSON object as the request response.
     */
   public void put(InputStream requestBody, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<Integer> httpStatus) {
     try {
@@ -931,10 +928,8 @@ public class TableServletBase extends APIRequestHandler {
   /**
    * DELETE handler - remove existing row.
    * @param pathInfo The URL path.
-   * @param requestHeaders Access to HTTP request headers.
    * @param out Response body output stream.
-   * @param contentType Receives the content type for specification in the response headers.
-   * @param fileName Receives the filename for specification in the response headers.
+   * @param contentTypeConsumer Receives the content type for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
    */
   public void delete(String pathInfo, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<Integer> httpStatus) {

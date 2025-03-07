@@ -20,6 +20,10 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 /**
- * <p>Servlets related to annotator management.
+ * <p> <tt>/api/edit/annotator/&hellip;</tt>
+ * : Annotator web apps for users with 'edit' privileges.
+ *
+ * <p> (These class implementations are decoupled from any HTTP request/response object model.
+ * HTTP transaction details are currently implemented by JSP files in <tt>src/main/jsp/edit/annotator/</tt>)
  */
 package nzilbb.labbcat.server.api.edit.annotator;

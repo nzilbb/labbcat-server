@@ -60,7 +60,7 @@ import org.xml.sax.*;
 /**
  * Endpoints starting <tt>/api/edit/store/&hellip;</tt> provide an HTTP-based API for access to
  * <a href="https://nzilbb.github.io/ag/apidocs/nzilbb/ag/GraphStore.html">GraphStore</a>
- * functions. This includes all requests supported by {@link StoreQuery}.
+ * functions. This includes all requests supported by {@link nzilbb.labbcat.server.api.Store}.
  * <p> The endpoints documented here only work for <b>POST</b> HTTP requests and return a JSON response with the same standard envelope structure:
  * <dl>
  *  <dt>title</dt> <dd>(string) The title of the LaBB-CAT instance.</dd>

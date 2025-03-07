@@ -251,7 +251,6 @@ public class Praat extends APIRequestHandler {
   /**
    * The POST method for the servlet.
    * @param parameters Request parameter map.
-   * @param contentType Receives the content type for specification in the response headers.
    * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
    * @return JSON-encoded object representing the response

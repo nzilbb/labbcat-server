@@ -652,10 +652,7 @@ public class LabbcatServlet extends HttpServlet {
    * <p> The message is assumed to be a MessageFormat template like 
    * "Row could not be added: {0}"
    * @param request The request, for discovering the locale.
-   * @param message The message format to localize.
-   * @param args Arguments to be substituted into the message. 
-   * @return The localized message (or if the messages couldn't be localized, the
-   * original message) with the given arguments substituted. 
+   * @return The resources to use for localization. 
    */
   public ResourceBundle inferResourceBundle(HttpServletRequest request) {
     String language = request.getHeader("Accept-Language");

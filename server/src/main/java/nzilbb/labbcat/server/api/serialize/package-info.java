@@ -20,10 +20,10 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 /**
- * <p> <tt>/api/admin/annotator/&hellip;</tt>
- * : Annotator web apps for users with 'admin' privileges.
+ * <p> <tt>/api/serialize/&hellip;</tt>
+ * : API endpoints related to serialization of annotation graphs/fragments.
  *
  * <p> (These class implementations are decoupled from any HTTP request/response object model.
- * HTTP transaction details are currently implemented by JSP files in <tt>src/main/jsp/admin/annotator/</tt>)
+ * HTTP transaction details are currently implemented by JSP files in <tt>src/main/jsp/serialize/</tt>)
  */
-package nzilbb.labbcat.server.api.admin.annotator;
+package nzilbb.labbcat.server.api.serialize;
