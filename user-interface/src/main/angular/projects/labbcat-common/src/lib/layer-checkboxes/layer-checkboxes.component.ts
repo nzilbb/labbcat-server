@@ -129,7 +129,7 @@ export class LayerCheckboxesComponent implements OnInit {
                 || layer.parentId == "segment") {
                 this.segmentLayers.push(layer);
             } else if (layer.id == this.schema.wordLayerId) {
-                if (!this.excludeWord) this.phraseLayers.push(layer);
+                if (!this.excludeWord) this.wordLayers.push(layer);
             } else if (layer.parentId == this.schema.wordLayerId) {
                 this.wordLayers.push(layer);
             } else if (layer.id == this.schema.turnLayerId) {
