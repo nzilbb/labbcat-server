@@ -36,7 +36,7 @@ handling in JSP pages in a Tomcat-version-agnostic manner.
 
 In order to maintain the advantages of precompiled Java code (compile-time syntax and type
 checking, and automated unit testing), code handling API requests is split between classes
-in `src/src/main/java/nzilbb/labbcat/server/api/` (which implement 'business logic')
+in `src/main/java/nzilbb/labbcat/server/api/` (which implement 'business logic')
 and JSP pages in `src/main/jsp/` (which implement request parsing and response encoding).
 
 ## Archive compilation
