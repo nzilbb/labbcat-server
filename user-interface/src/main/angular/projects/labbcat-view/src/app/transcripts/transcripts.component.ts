@@ -736,7 +736,7 @@ export class TranscriptsComponent implements OnInit {
         if (this.participantQuery) {
             // expressions like:
             //  labels("participant").includes(["AP511_MikeThorpe"])
-            // or from participants page:
+            // or from participantso page:
             //  ['AP511_MikeThorpe'].includesAny(labels('participant'))
             // have to be replaced with:
             //  ['AP511_MikeThorpe'].includes(id)
@@ -749,7 +749,6 @@ export class TranscriptsComponent implements OnInit {
                              ".includes(id)");
             params["participants"] = this.participantDescription;
         }
-        console.log('params ' + JSON.stringify(params));
         return params;
     }
 
