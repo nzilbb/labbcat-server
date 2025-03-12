@@ -451,14 +451,13 @@ export class TranscriptsComponent implements OnInit {
             queryParams
         });        
 
-        if (this.participantQuery) {
-            if (this.query) this.query += " && ";
-            this.query += this.participantQuery;
-        }
-
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
         let queryExpression = this.query;
+        if (this.participantQuery) {
+            if (queryExpression) queryExpression += " && ";
+            queryExpression += this.participantQuery;
+        }
         // count matches
         this.labbcatService.labbcat.countMatchingTranscriptIds(
             queryExpression, (matchCount, errors, messages) => {
@@ -736,15 +735,21 @@ export class TranscriptsComponent implements OnInit {
         }
         if (this.participantQuery) {
             // expressions like:
-            // labels("participant").includes(["AP511_MikeThorpe"])
+            //  labels("participant").includes(["AP511_MikeThorpe"])
+            // or from participant page:
+            //  ['AP511_MikeThorpe'].includesAny(labels('participant'))
             // have to be replaced with:
-            // ['AP511_MikeThorpe'].includes(id)
+            //  ['AP511_MikeThorpe'].includes(id)
             params["participant_expression"] = 
                 this.participantQuery
                     .replace(/labels\('participant'\).includesAny\((\[.*\])\)/,
-                             "$1\.includes\(id\)");
+                             "$1\.includes\(id\)")
+            // from participant page:
+                    .replace(".includesAny(labels('participant'))",
+                             ".includes(id)");
             params["participants"] = this.participantDescription;
         }
+        console.log('params ' + JSON.stringify(params));
         return params;
     }
 

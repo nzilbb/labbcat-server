@@ -2,7 +2,7 @@
 <div id="spinner"><lib-wait *ngIf="loadingList || listTranscriptsTimer >= 0"></lib-wait></div>
 <div class="transcripts">
   <form #form method="post">
-    <input type="hidden" name="query" [(ngModel)]="query">
+    <input type="hidden" name="query" value="{{query+(query&&participantQuery?' && ':'')+participantQuery}}">
     <input *ngIf="!showSerializationOptions" type="hidden" name="mimeType" [(ngModel)]="mimeType">
     <table>
       <caption *ngIf="matchCount >= 0">
