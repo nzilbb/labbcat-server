@@ -736,7 +736,7 @@ export class TranscriptsComponent implements OnInit {
         if (this.participantQuery) {
             // expressions like:
             //  labels("participant").includes(["AP511_MikeThorpe"])
-            // or from participant page:
+            // or from participants page:
             //  ['AP511_MikeThorpe'].includesAny(labels('participant'))
             // have to be replaced with:
             //  ['AP511_MikeThorpe'].includes(id)
@@ -744,7 +744,7 @@ export class TranscriptsComponent implements OnInit {
                 this.participantQuery
                     .replace(/labels\('participant'\).includesAny\((\[.*\])\)/,
                              "$1\.includes\(id\)")
-            // from participant page:
+            // from participants page:
                     .replace(".includesAny(labels('participant'))",
                              ".includes(id)");
             params["participants"] = this.participantDescription;
