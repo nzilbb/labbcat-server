@@ -451,13 +451,14 @@ export class TranscriptsComponent implements OnInit {
             queryParams
         });        
 
+        if (this.participantQuery) {
+            if (this.query) this.query += " && ";
+            this.query += this.participantQuery;
+        }
+
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
         let queryExpression = this.query;
-        if (this.participantQuery) {
-            if (queryExpression) queryExpression += " && ";
-            queryExpression += this.participantQuery;
-        }
         // count matches
         this.labbcatService.labbcat.countMatchingTranscriptIds(
             queryExpression, (matchCount, errors, messages) => {
