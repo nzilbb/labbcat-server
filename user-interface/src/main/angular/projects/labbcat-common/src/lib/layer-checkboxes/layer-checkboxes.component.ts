@@ -27,6 +27,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() includeDataType: boolean;
     /** Show the alignment of each layer */
     @Input() includeAlignment: boolean;
+    /** Show whether each layer allows vertical peers */
+    @Input() includeVerticalPeers: boolean;
     /** Allow participant attribute layers to be selected */
     @Input() participant: boolean;
     /** Don't allow the 'participant' layer to be selected */

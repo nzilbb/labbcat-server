@@ -118,6 +118,10 @@
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"           
            i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
+      <img *ngIf="includeVerticalPeers" class="vertical-peers"
+           src="{{layer.peersOverlap ? imagesLocation + '/vertical-peers.svg' : undefined}}" 
+           alt="{{layer.peersOverlap ? '[|=]' : ''}}"
+           i18n-title="Layer vertical-peers descriptions" title="Allows vertical peers: {{layer.peersOverlap ? 'true' : 'false'}}">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
@@ -184,6 +188,10 @@
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
+      <img *ngIf="includeVerticalPeers" class="vertical-peers"
+           src="{{layer.peersOverlap ? imagesLocation + '/vertical-peers.svg' : undefined}}" 
+           alt="{{layer.peersOverlap ? '[|=]' : ''}}"
+           i18n-title="Layer vertical-peers descriptions" title="Allows vertical peers: {{layer.peersOverlap ? 'true' : 'false'}}">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
@@ -254,6 +262,10 @@
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
+      <img *ngIf="includeVerticalPeers" class="vertical-peers"
+           src="{{layer.peersOverlap ? imagesLocation + '/vertical-peers.svg' : undefined}}" 
+           alt="{{layer.peersOverlap ? '[|=]' : ''}}"
+           i18n-title="Layer vertical-peers descriptions" title="Allows vertical peers: {{layer.peersOverlap ? 'true' : 'false'}}">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
@@ -320,6 +332,10 @@
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
+      <img *ngIf="includeVerticalPeers" class="vertical-peers"
+           src="{{layer.peersOverlap ? imagesLocation + '/vertical-peers.svg' : undefined}}" 
+           alt="{{layer.peersOverlap ? '[|=]' : ''}}"
+           i18n-title="Layer vertical-peers descriptions" title="Allows vertical peers: {{layer.peersOverlap ? 'true' : 'false'}}">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"

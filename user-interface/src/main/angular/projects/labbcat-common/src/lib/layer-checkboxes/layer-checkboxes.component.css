@@ -51,7 +51,7 @@
 .share-end:checked + label .locked { display: inherit; }
 .share-end:checked + label .unlocked { display: none; }
 
-img.data-type, img.alignment {
+img.data-type, img.alignment, img.vertical-peers {
     height: 1rem;
     padding-right: 0.2rem;
 }
