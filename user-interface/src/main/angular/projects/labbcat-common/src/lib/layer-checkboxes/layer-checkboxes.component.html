@@ -112,7 +112,7 @@
       </span>
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"           
-           i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
+           i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
@@ -174,7 +174,7 @@
       </span>
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
-           i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
+           i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
@@ -236,7 +236,7 @@
       </span>
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
-           i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
+           i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
@@ -298,7 +298,7 @@
       </span>
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
-           i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
+           i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
