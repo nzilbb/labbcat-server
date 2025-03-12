@@ -97,7 +97,7 @@ public class Attributes extends APIRequestHandler { // TODO unit test
       SqlGraphStoreAdministration store = getStore();
       // arrays of transcripts and delimiters
       String[] id = parameters.getStrings("id");
-      if (id == null) {
+      if (id.length == 0) {
         String ids = parameters.getString("ids");
         if (ids != null) {
           // R can't send multiple parameters with the same value, so the workaround is
