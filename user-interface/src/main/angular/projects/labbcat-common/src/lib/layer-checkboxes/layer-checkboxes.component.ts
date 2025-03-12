@@ -23,6 +23,8 @@ export class LayerCheckboxesComponent implements OnInit {
     /** Allow the relationship (containing or contained) to be specified when a spanning
         layer is selected */ 
     @Input() includeRelationship: boolean;
+    /** Show the data type of each layer */
+    @Input() includeDataType: boolean;
     /** Show the alignment of each layer */
     @Input() includeAlignment: boolean;
     /** Allow participant attribute layers to be selected */

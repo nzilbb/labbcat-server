@@ -51,9 +51,9 @@
 .share-end:checked + label .locked { display: inherit; }
 .share-end:checked + label .unlocked { display: none; }
 
-img.alignment {
-    height: 12px;
-    padding-right: 3px;
+img.data-type, img.alignment {
+    height: 1rem;
+    padding-right: 0.2rem;
 }
 .interpreted-selector {
     margin-left: 10px;

@@ -110,6 +110,10 @@
 	  <option value="subordinate">contained</option>
         </select>
       </span>
+      <img *ngIf="includeDataType" class="data-type"
+           src="{{imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+'.png'}}"
+           i18n-title="Layer data types" title="Data type: {{['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined}}"
+           alt="{{['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined}}">
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"           
            i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
@@ -172,6 +176,10 @@
           </label>
         </ng-container>
       </span>
+      <img *ngIf="includeDataType" class="data-type"
+           src="{{imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+'.png'}}"
+           i18n-title="Layer data types" title="Data type: {{['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined}}"
+           alt="{{['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined}}">
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
@@ -234,6 +242,14 @@
           </label>
         </ng-container>
       </span>
+      <!-- TODO 
+        Potentially replace layer.subtype=='X' with layer_manager_id=='StanfordParser'
+        Currently, layer.subtype can only be set to X by modifying the MySQL table
+      -->
+      <img *ngIf="includeDataType" class="data-type"
+           src="{{imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+'.png'}}"
+           i18n-title="Layer data types" title="Data type: {{['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined}}"
+           alt="{{['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined}}">
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
@@ -296,6 +312,10 @@
           </label>
         </ng-container>
       </span>
+      <img *ngIf="includeDataType" class="data-type"
+           src="{{imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+'.png'}}"
+           i18n-title="Layer data types" title="Data type: {{['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined}}"
+           alt="{{['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined}}">
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
