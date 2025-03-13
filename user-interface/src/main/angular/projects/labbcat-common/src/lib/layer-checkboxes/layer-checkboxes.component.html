@@ -115,9 +115,9 @@
            i18n-title="Layer data types" title="Data type: {{['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined}}"
            alt="{{['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined}}">
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"           
-           i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
-           alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
+           src="{{imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+'.svg'}}"
+           i18n-title="Layer alignment descriptions" title="Alignment: {{['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
+           alt="{{['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <img *ngIf="includeVerticalPeers" class="vertical-peers"
            src="{{layer.peersOverlap ? imagesLocation + '/vertical-peers.svg' : undefined}}" 
            alt="{{layer.peersOverlap ? '[|=]' : ''}}"
@@ -185,9 +185,9 @@
            i18n-title="Layer data types" title="Data type: {{['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined}}"
            alt="{{['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined}}">
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
-           i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
-           alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
+           src="{{imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+'.svg'}}"
+           i18n-title="Layer alignment descriptions" title="Alignment: {{['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
+           alt="{{['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <img *ngIf="includeVerticalPeers" class="vertical-peers"
            src="{{layer.peersOverlap ? imagesLocation + '/vertical-peers.svg' : undefined}}" 
            alt="{{layer.peersOverlap ? '[|=]' : ''}}"
@@ -259,9 +259,9 @@
            i18n-title="Layer data types" title="Data type: {{['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined}}"
            alt="{{['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined}}">
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
-           i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
-           alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
+           src="{{imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+'.svg'}}"
+           i18n-title="Layer alignment descriptions" title="Alignment: {{['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
+           alt="{{['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <img *ngIf="includeVerticalPeers" class="vertical-peers"
            src="{{layer.peersOverlap ? imagesLocation + '/vertical-peers.svg' : undefined}}" 
            alt="{{layer.peersOverlap ? '[|=]' : ''}}"
@@ -329,9 +329,9 @@
            i18n-title="Layer data types" title="Data type: {{['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined}}"
            alt="{{['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined}}">
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
-           i18n-title="Layer alignment descriptions" title="Alignment: {{layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
-           alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
+           src="{{imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+'.svg'}}"
+           i18n-title="Layer alignment descriptions" title="Alignment: {{['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval' }}"
+           alt="{{['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <img *ngIf="includeVerticalPeers" class="vertical-peers"
            src="{{layer.peersOverlap ? imagesLocation + '/vertical-peers.svg' : undefined}}" 
            alt="{{layer.peersOverlap ? '[|=]' : ''}}"
