@@ -311,8 +311,10 @@ export class TranscriptComponent implements OnInit {
                                 this.transcript.id, l, (count, errors, messages) => {
                                     if (count) { // annotations in this layer
                                         // remove grey-out style
-                                        this.schema.layers[l].description += ` (${count})`;
+                                        this.schema.layers[l].description += ` (${count} annotations)`;
                                         this.layerStyles[l] = {};
+                                    } else {
+                                        this.schema.layers[l].description += ' (0 annotations)';
                                     }
                                 });
                         } // next temporal layer
