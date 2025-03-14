@@ -258,7 +258,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       return;
     }
     String[] filter = parameters.getStrings("filter");
-    if (utterance == null && threadId == null &&
+    if (utterance.length == 0 && threadId == null &&
         (id.length != start.length || id.length != end.length
          || (filter.length != 0 && id.length != filter.length))) {
       contentType.accept("text/plain;charset=UTF-8");
@@ -268,6 +268,9 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       } catch(IOException exception) {}
       return;
     }
+    context.servletLog("utterance: " + utterance.length);
+    context.servletLog("start: " + start.length);
+    context.servletLog("end: " + end.length);
     
     boolean prefixNames = parameters.getString("prefix") != null;
     boolean tagTarget = parameters.getString("tag") != null;
@@ -287,7 +290,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         
         // utterances
         Vector<String> vUtterances = new Vector<String>();
-        if (utterance != null) {
+        if (utterance.length > 0) {
           for (String matchId : utterance) vUtterances.add(matchId);
         } else if (id != null) {
           if (filter == null) { // not filtering by turn etc.
@@ -335,7 +338,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         for (String l : layerId) layersToLoad.add(l);
         
         Vector<String> vUtterances = new Vector<String>();
-        if (utterance != null) {
+        if (utterance.length > 0) {
           for (String matchId : utterance) vUtterances.add(matchId);
         } else if (id != null) {
           if (filter == null) { // not filtering by turn etc.
