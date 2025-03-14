@@ -584,7 +584,7 @@
     
   } // Annotation methods
 
-  layerAndAncestors = function(schema, layerId) {
+  function layerAndAncestors(schema, layerId) {
     var ancestors = [ schema.layers[layerId] ];
     while (ancestors[ancestors.length-1].parent
            && !ancestors.includes(ancestors[ancestors.length-1].parent)) {
@@ -593,7 +593,7 @@
     return ancestors.map(l=>l.id);
   }
 
-  firstCommonAncestorLayer = function(schema, layer1, layer2) {
+  function firstCommonAncestorLayer(schema, layer1, layer2) {
     if (layer1 == layer2) return layer1;
     var ancestors1 = layerAndAncestors(schema, layer1).filter(l=>l!=layer1);
     var ancestors2 = layerAndAncestors(schema, layer2).filter(l=>l!=layer2);
