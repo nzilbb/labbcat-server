@@ -268,9 +268,6 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       } catch(IOException exception) {}
       return;
     }
-    context.servletLog("utterance: " + utterance.length);
-    context.servletLog("start: " + start.length);
-    context.servletLog("end: " + end.length);
     
     boolean prefixNames = parameters.getString("prefix") != null;
     boolean tagTarget = parameters.getString("tag") != null;
