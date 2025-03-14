@@ -1347,10 +1347,11 @@ export class TranscriptComponent implements OnInit {
             const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
             this.praatUtteranceName = this.transcript.id
                 .replace(/\.[a-zA-Z][^.]*$/,"") // remove extension
+                .replace(/[^a-zA-Z0-9]+/g,"_") // Praat isn't inclusive about object names
                 +("__"+utterance.start.offset).replace(".","_")
                 +("_"+utterance.end.offset).replace(".","_");
             const audioUrl = this.baseUrl+"soundfragment"
-                +"?id="+this.transcript.id
+                +"?id="+transcriptIdForUrl
                 +"&start="+utterance.start.offset
                 +"&end="+utterance.end.offset;
             this.textGridUrl = this.baseUrl
@@ -1400,10 +1401,12 @@ export class TranscriptComponent implements OnInit {
             const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
             this.praatUtteranceName = this.transcript.id
                 .replace(/\.[a-zA-Z][^.]*$/,"") // remove extension
+                .replace(/[^a-zA-Z0-9]+/g,"_") // Praat isn't inclusive about object names
+                .replace(" ","_")
                 +("__"+firstUtterance.start.offset).replace(".","_")
                 +("_"+lastUtterance.end.offset).replace(".","_");
             const audioUrl = this.baseUrl+"soundfragment"
-                +"?id="+this.transcript.id
+                +"?id="+transcriptIdForUrl
                 +"&start="+firstUtterance.start.offset
                 +"&end="+lastUtterance.end.offset;
             this.textGridUrl = this.baseUrl
