@@ -37,12 +37,14 @@ span.attribute {
 #attributesSelection  lib-layer-checkboxes {
     display: inline-block;
     position: absolute;
+    overflow-x: hidden; 
     overflow-y: hidden;
     max-height: 24px;
     border: 1px solid silver;
     width: 162px;
 }
 #attributesSelection lib-layer-checkboxes:hover {
+    overflow-x: auto;
     overflow-y: auto; 
     max-height: 120px;
     background: white;
