@@ -46,6 +46,14 @@
               [disabled]="selectedIds.length == 0"
               i18n-title title="Delete record"
               ></lib-button>
+            <lib-button
+              *ngIf="user && user.roles.includes('edit') && !nextPage"
+              (press)="generate()"
+              [disabled]="selectedIds.length == 0"
+              img="cog.svg" icon="⚙"
+              i18n-label label="Generate"
+              i18n-title title="Regenerate layers for all selected transcripts"
+              ></lib-button>
             <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
               <select name="layer_id"
                       i18n-title title="Which layer to generate">
@@ -55,14 +63,6 @@
                 </ng-container>
               </select>
             </div>
-            <lib-button
-              *ngIf="user && user.roles.includes('edit') && !nextPage"
-              (press)="generate()"
-              [disabled]="selectedIds.length == 0"
-              img="cog.svg" icon="⚙"
-              i18n-label label="Generate"
-              i18n-title title="Regenerate layers for all selected transcripts"
-              ></lib-button>
             <lib-button
               *ngIf="!nextPage"
               (press)="exportMedia()"
