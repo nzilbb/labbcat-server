@@ -9,11 +9,14 @@
     <ng-container *ngFor="let category of Object.keys(categories)">
       <div class="category" [class.unlabelled]="category == ''">
         
-        <span *ngIf="regularExpression" class="title">
-          <a href="#" (click)="selectCategory($event, category)"
-             i18n-title="Any CATEGORY-NAME" title="Any {{category}}">{{category}}</a>
-        </span>
-        <span *ngIf="!regularExpression" class="title">{{category}}</span>
+        <div class="category-and-nb">
+          <span *ngIf="regularExpression" class="title">
+            <a href="#" (click)="selectCategory($event, category)"
+               i18n-title="Any CATEGORY-NAME" title="Any {{category}}">{{category}}</a>
+          </span>
+          <span *ngIf="!regularExpression" class="title">{{category}}</span>
+          <span *ngIf="category == 'CONSONANT'" class="nb">Other consonants: Use normal IPA</span>
+        </div>
         
         <ng-container *ngFor="let subcategory of Object.keys(categories[category])">
           <div class="subcategory"
