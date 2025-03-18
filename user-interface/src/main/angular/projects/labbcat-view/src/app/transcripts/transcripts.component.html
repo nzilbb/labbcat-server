@@ -88,6 +88,7 @@
               i18n-title title="Convert to selected format"
               ></lib-button>
             <select name="mimeType" *ngIf="showSerializationOptions"
+                      id="mimeTypeSelection"
                       i18n-title title="Format to convert to"
                       [(ngModel)]="mimeType"
                       (change)="onChangeMimeType()">

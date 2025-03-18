@@ -68,7 +68,7 @@ span.attribute {
     display: inline-block;
     vertical-align: middle;
 }
-#generateLayerSelection, #attributesSelection, #serializationOptions {
+#generateLayerSelection, #attributesSelection, #serializationOptions, #mimeTypeSelection {
     animation: roll-out 1s ease;
 }
 .participant-filter, .participant-filter img {
