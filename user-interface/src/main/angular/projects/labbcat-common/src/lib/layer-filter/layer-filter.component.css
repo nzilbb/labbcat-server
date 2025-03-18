@@ -65,6 +65,7 @@ fieldset > div > input {
     max-height: 120px;
     background: white;
     border: 1px solid silver;
+    z-index: 5;
 }
 .select .large:hover > span:first-child::after {
     content: '';
