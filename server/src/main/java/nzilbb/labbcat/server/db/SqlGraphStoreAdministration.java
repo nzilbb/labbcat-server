@@ -636,9 +636,15 @@ public class SqlGraphStoreAdministration
           sql.setString(
             1, Optional.ofNullable(layer.getDescription())
             .orElse(oldVersion.getDescription()));
-          sql.setString(
-            2, Optional.ofNullable(layer.getCategory())
-            .orElse(oldVersion.getCategory()));
+          String category = Optional.ofNullable(layer.getCategory())
+            .orElse(oldVersion.getCategory());
+          // layer category is like "transcript_General" but we save without the class prefix
+          if ("speaker".equals(oldVersion.get("class_id"))) {
+            category = category.replaceAll("^participant_","");
+          } else {
+            category = category.replaceAll("^transcript_","");
+          }
+          sql.setString(2, category);
           String subtype = Optional.ofNullable((String)layer.get("subtype"))
             .orElse((String)oldVersion.get("subtype"));
           subtype = subtype.equals("select")?"select":"string";
@@ -839,7 +845,8 @@ public class SqlGraphStoreAdministration
           +" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         try {
           sql.setString(1, Optional.ofNullable(layer.getDescription()).orElse(layer.getId()));
-          if (layer.getCategory() == null || layer.getCategory().length() == 0) { // no category
+          String category = layer.getCategory();
+          if (category == null || category.length() == 0) { // no category
             // select the first category
             PreparedStatement sqlCategory = getConnection().prepareStatement(
               "SELECT category FROM attribute_category WHERE class_id = ?"
@@ -848,16 +855,22 @@ public class SqlGraphStoreAdministration
             ResultSet rsCategory = sqlCategory.executeQuery();
             try {
               if (rsCategory.next()) {
-                layer.setCategory(rsCategory.getString(1));
+                category = rsCategory.getString(1);
               } else {            
-                layer.setCategory("General");
+                category = "General";
               }
             } finally {
               rsCategory.close();
               sqlCategory.close();
             }
           }
-          sql.setString(2, layer.getCategory());
+          // layer category is like "transcript_General" but we save without the class prefix
+          if ("speaker".equals(layer.get("class_id"))) {
+            category = category.replaceAll("^participant_","");
+          } else {
+            category = category.replaceAll("^transcript_","");
+          }
+          sql.setString(2, category);
           subtype = subtype.equals("select")?"select":"string";
           if (Constants.TYPE_NUMBER.equals(layer.getType())) {
             subtype = "number";  // TODO handle type = number/integer
