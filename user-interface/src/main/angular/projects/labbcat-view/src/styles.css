@@ -381,6 +381,9 @@ table {
 tbody tr:nth-child(odd) {
     background: #EEEEEE;
 }
+tbody tr:nth-child(even) {
+    background: #FFFFFF;
+}
 
 .hidden-panel {
     max-height: 0px;
@@ -417,6 +420,9 @@ tbody tr:nth-child(odd) {
 }
 .attribute-list .attribute:nth-child(odd) {
     background: #EEEEEE;
+}
+.attribute-list .attribute:nth-child(even) {
+    background: #FFFFFF;
 }
 .attribute-list .attribute label {
     width: 50%
@@ -483,7 +489,8 @@ lib-pagination .current {
         display: table-row;
         padding-bottom: 0px;
     }
-    .list > .item:nth-child(even) { background: #FAFAFA; }
+    .list > .item:nth-child(odd) { background: #FAFAFA; }
+    .list > .item:nth-child(even) { background: #FFFFFF; }
     .list > .item > span { display: table-cell; }
     .list > .item > span.header-only { display: table-cell; }
     .list > .item > span > legend { display: none; }
