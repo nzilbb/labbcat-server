@@ -224,17 +224,7 @@ export class TranscriptComponent implements OnInit {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.readOnlyCategories(
                 "transcript", (categories, errors, messages) => {
-                this.categoryLabels = ["Participants", "Layers", "Formats"]; // TODO i18n
-                    for (let category of categories) {
-                        const layerCategory = "transcript_"+category.category;
-                        category.label = category.category;
-                        if (!category.description) {
-                            category.description = `Attributes: ${category.category}`; // TODO i18n
-                        }
-                        category.icon = "attributes.svg";
-                        this.categories[layerCategory] = category;
-                        this.categoryLabels.push(layerCategory);
-                    }
+                    this.categoryLabels = ["Participants", "Layers", "Formats"]; // TODO i18n
                     // extra pseudo categories
                     this.categories["Layers"] = { // TODO i18n
                         label: "Layers", // TODO i18n
@@ -251,6 +241,21 @@ export class TranscriptComponent implements OnInit {
                         description: "Export the transcript in a selected format",
                         icon: "document.svg"
                     }; // TODO i18n
+                    
+                    for (let category of categories) {
+                        const layerCategory = "transcript_"+category.category;
+                        category.label = category.category;
+                        if (!category.description) {
+                            category.description = `Attributes: ${category.category}`; // TODO i18n
+                        }
+                        category.icon = "attributes.svg";
+                        this.categories[layerCategory] = category;
+                        this.categoryLabels.push(layerCategory);
+                    }
+                    if (this.categoryLabels.length == 4) { // only one actual category
+                        // just label the tab 'attributes'
+                        this.categories[this.categoryLabels[3]].label = "Attributes" // TODO i18n
+                    }
                     resolve();
                 });
         });
