@@ -59,7 +59,7 @@ export class ParticipantComponent implements OnInit {
             this.labbcatService.labbcat.readOnlyCategories(
                 "participant", (categories, errors, messages) => {
                     for (let category of categories) {
-                        this.categories[category.category] = category;
+                        this.categories["participant_"+category.category] = category;
                     }
                     resolve();
                 });

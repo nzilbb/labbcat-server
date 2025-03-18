@@ -63,6 +63,10 @@ export class AdminAttributesComponent extends AdminComponent implements OnInit {
             this.labbcatService.labbcat.readCategories(
                 this.class_id, (categories, errors, messages) => {
                     this.categories = categories;
+                    this.categories.forEach(c=> {
+                        c.label = c.category
+                        c.category = this.scope+"_"+c.label;
+                    })
                     resolve();
                 });
         });

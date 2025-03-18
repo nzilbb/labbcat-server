@@ -115,6 +115,21 @@ export class LayerCheckboxesComponent implements OnInit {
         this.segmentLayers = [];
         this.categorySelections = {};
         if (!this.selected) this.selected = [] as string[];
+
+        // add category selectors in defined order
+        for (let c in this.schema.categories) {
+            if (c.startsWith("participant_")) { // participant attribute category
+                if (this.participant) this.categorySelections[c] = false;
+            } else if (c.startsWith("transcript_")) {  // transcript attribute category
+                if (this.transcript) this.categorySelections[c] = false;
+            } else  { // temporal layer category/project
+                if (this.span || this.phrase || this.word) {
+                     this.categorySelections[c] = false;
+                }
+            }
+
+        } // next category
+        
         for (let l in this.schema.layers) {
             let layer = this.schema.layers[l] as Layer;
             if (this.selected.includes(layer.id)) {
@@ -164,11 +179,6 @@ export class LayerCheckboxesComponent implements OnInit {
         if (this.span) allLayers = allLayers.concat(this.spanLayers);
         if (this.phrase) allLayers = allLayers.concat(this.phraseLayers);
         if (this.word) allLayers = allLayers.concat(this.wordLayers);
-        for (let layer of allLayers) {
-            if (layer.category && !this.categorySelections.hasOwnProperty(layer.category)) {
-                this.categorySelections[layer.category] = false;
-            }
-        }
     }
     
     Categories(): string[] {

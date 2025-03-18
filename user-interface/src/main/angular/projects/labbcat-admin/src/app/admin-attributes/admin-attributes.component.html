@@ -49,7 +49,7 @@
     <select #category
             [(ngModel)]="categoryFilter">
       <option selected value="" i18n="Category label">Category</option>
-      <option *ngFor="let category of categories" value="{{category.category}}">{{category.category}}</option>
+      <option *ngFor="let category of categories" value="{{category.category}}">{{category.label}}</option>
     </select>
     <img src="{{imagesLocation+'/filter.svg'}}" i18n-alt alt="Filter"
          i18n-title title="Filter the list"
@@ -113,7 +113,7 @@
         <select #category
                 [(ngModel)]="layer.category"
                 (input)="onChange(layer)">
-          <option *ngFor="let category of categories" value="{{category.category}}">{{category.category}}</option>
+          <option *ngFor="let category of categories" value="{{category.category}}">{{category.label}}</option>
         </select>
       </span>
       <span class="buttons">

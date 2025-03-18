@@ -53,8 +53,13 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.readCategories(
                 "transcript", (categories, errors, messages) => {
+                    this.categoryLabels = [];
                     for (let category of categories) {
-                        this.categories[category.category] = category;
+                        const layerCategory = "transcript_"+category.category;
+                        this.categories[layerCategory] = category;
+                        this.categoryLabels.push(layerCategory);
+                        // select first category by default
+                        if (!this.currentCategory) this.currentCategory = layerCategory;
                     }
                     resolve();
                 });
@@ -68,7 +73,6 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                 this.attributes = [];
                 this.textAreas = [];
                 this.categoryLayers = {};
-                this.categoryLabels = [];
                 this.multiValueAttributes = {};
                 this.otherValues = {};
                 let corpusLayer: Layer; // corpus layer - save it for last
@@ -93,12 +97,9 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                             // categorise layers by category
                             if (!this.categoryLayers[layer.category]) {
                                 this.categoryLayers[layer.category] = [];
-                                this.categoryLabels.push(layer.category);
-                                // select first category by default
-                                if (!this.currentCategory) this.currentCategory = layer.category;
                             }
                             this.categoryLayers[layer.category].push(layer);
-                        // track multi-value attributes
+                            // track multi-value attributes
                             if (layer.peers && this.definesValidLabels(layer)) {
                                 this.multiValueAttributes[layer.id] = {};
                                 for (let label of Object.keys(layer.validLabels)) {

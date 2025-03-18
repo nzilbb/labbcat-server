@@ -55,7 +55,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
             this.labbcatService.labbcat.readCategories(
                 "participant", (categories, errors, messages) => {
                     for (let category of categories) {
-                        this.categories[category.category] = category;
+                        this.categories["participant_"+category.category] = category;
                     }
                     // extra pseudo category that allows administration of corpora
                     this.categories["Corpora"] = {

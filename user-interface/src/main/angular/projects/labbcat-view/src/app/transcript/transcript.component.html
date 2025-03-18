@@ -238,7 +238,7 @@
              title="{{categories[category].description}}">
         <img *ngIf="categories[category].icon"
              src="{{imagesLocation}}/{{categories[category].icon}}" alt="{{categories[category].description}}">
-        {{category}}
+        {{categories[category].label}}
       </label>
     </div>
     <div *ngFor="let category of categoryLabels"

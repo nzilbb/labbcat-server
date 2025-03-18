@@ -3,7 +3,7 @@
           i18n-title title="Layer Categories"
           *ngIf="scopeCount > 1"
           i18n="layer type header">Projects</legend>
-  <label *ngFor="let c of Categories()" title="{{c}}"
+  <label *ngFor="let c of Categories()" title="{{schema.categories[c]}}"
          class="category-{{c}}">
     <lib-grouped-checkbox
       group="category"

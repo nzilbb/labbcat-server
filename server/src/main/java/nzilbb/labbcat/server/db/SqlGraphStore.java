@@ -639,6 +639,30 @@ public class SqlGraphStore implements GraphStore {
         }
       } // next layer
       schema.setParticipantLayerId("participant");
+      
+      // category ordering
+      try {
+        PreparedStatement sql = getConnection().prepareStatement(
+          "SELECT CONCAT (CASE class_id"
+          +" WHEN 'speaker' THEN 'participant_'"
+          +" WHEN 'transcript' THEN 'transcript_'"
+          +" ELSE '' END, category) as category,"
+          +" COALESCE(description, category) AS description"
+          +" FROM attribute_category"
+          +" ORDER BY class_id, display_order");
+        ResultSet rs = sql.executeQuery();
+        try {
+          schema.getCategories().clear();
+          while (rs.next()) {
+            schema.getCategories().put(rs.getString("category"), rs.getString("description"));
+          } // next category
+        } finally {
+          rs.close();
+          sql.close();
+        }
+      } catch(SQLException exception) {
+        System.err.println("SqlGraphStore.getSchema - can't get category order: " + exception);
+      }
     }
     return schema;
   }
@@ -823,7 +847,7 @@ public class SqlGraphStore implements GraphStore {
     } else {
       layer.setType(Constants.TYPE_STRING);
     }
-    layer.setCategory(rs.getString("category"));
+    layer.setCategory("transcript_"+rs.getString("category"));
       
     // other attributes
     layer.put("class_id", rs.getString("class_id"));
@@ -889,7 +913,7 @@ public class SqlGraphStore implements GraphStore {
     } else {
       layer.setType(Constants.TYPE_STRING);
     }
-    layer.setCategory(rs.getString("category"));
+    layer.setCategory("participant_"+rs.getString("category"));
       
     // other attributes
     layer.put("class_id", rs.getString("class_id"));
