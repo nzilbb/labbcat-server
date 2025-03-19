@@ -23,6 +23,8 @@ export class LayerCheckboxesComponent implements OnInit {
     /** Allow the relationship (containing or contained) to be specified when a spanning
         layer is selected */ 
     @Input() includeRelationship: boolean;
+    /** Display icons */
+    @Input() displayIcons: boolean;
     /** Show the data type of each layer */
     @Input() includeDataType: boolean;
     /** Show the alignment of each layer */
@@ -120,6 +122,7 @@ export class LayerCheckboxesComponent implements OnInit {
         this.wordLayers = [];
         this.segmentLayers = [];
         this.categorySelections = {};
+        if (!this.displayIcons) this.displayIcons = true;
         if (!this.selected) this.selected = [] as string[];
 
         // add category selectors in defined order
@@ -238,5 +241,9 @@ export class LayerCheckboxesComponent implements OnInit {
     handleInterpretedRaw(layerId:string): void {
         this.interpretedRaw[layerId] = !this.interpretedRaw[layerId];
         this.interpretedRawChange.emit(this.interpretedRaw);
+    }
+    
+    toggleLayerIcons(): void {
+        this.displayIcons = !this.displayIcons;
     }
 }

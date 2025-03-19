@@ -348,9 +348,9 @@ img.preview {
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
-    lib-layer-checkboxes { /* layer selector is horizontal*/
+    lib-layer-checkboxes {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: center;
     }
 }

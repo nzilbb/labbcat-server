@@ -1,3 +1,13 @@
+#layerSelector {
+    margin-bottom: 6px;
+}
+@media all and (min-width: 640px) {
+    #layerSelector { 
+        display: flex;
+        flex-direction: row; 
+        margin-bottom: 2px;
+    }
+}
 .layers, .categories {
     display: flex;
     flex-direction: column;
@@ -61,4 +71,10 @@ img.data-type, img.alignment, img.vertical-peers {
 }
 .deselected {
     opacity: 0.33;
+}
+.icon-hider {
+    font-style: italic;
+}
+.no-display {
+    display: none;
 }
