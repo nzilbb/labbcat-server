@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Layer } from 'labbcat-common';
@@ -17,6 +17,10 @@ export class SearchComponent implements OnInit {
     
     user: User;
     schema: any;
+    imagesLocation : string;
+    tabLabels: string[];
+    currentTab: string;
+    tabs: object;
     matrix: Matrix;
     participantDescription: string;
     participantIds: string[];
@@ -35,8 +39,11 @@ export class SearchComponent implements OnInit {
         private labbcatService: LabbcatService,
         private messageService: MessageService,
         private route: ActivatedRoute,
-        private router: Router
-    ) { }
+        private router: Router,
+        @Inject('environment') private environment
+    ) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
         this.matrix = {
@@ -47,6 +54,7 @@ export class SearchComponent implements OnInit {
         this.participantIds = [];
         this.transcriptIds = [];
         this.readUserInfo();
+        this.setupTabs();
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
             
@@ -96,6 +104,30 @@ export class SearchComponent implements OnInit {
         this.labbcatService.labbcat.getUserInfo((user, errors, messages) => {
             this.user = user as User;
         });
+    }
+    setupTabs(): void {
+        this.tabs = {};
+        this.tabs["Participants"] = { // TODO i18n
+            label: "Participants", // TODO i18n
+            description: "Narrow down the participants to search",
+            icon: "filter.svg"
+        }; // TODO i18n
+        this.tabs["Transcripts"] = { // TODO i18n
+            label: "Transcripts", // TODO i18n
+            description: "Narrow down the transcripts to search",
+            icon: "filter.svg"
+        }; // TODO i18n
+        this.tabs["Matrix"] = { // TODO i18n
+            label: "Matrix", // TODO i18n
+            description: "Specify layers and patterns for searching the corpus",
+            icon: "layers.svg"
+        };
+        this.tabs["Options"] = { // TODO i18n
+            label: "Options", // TODO i18n
+            description: "Specify search options",
+            icon: "cog.svg"
+        };
+        this.tabLabels = Object.keys(this.tabs);
     }
 
     /** Ensure fields are filled in correctly, the value may have been passed in */

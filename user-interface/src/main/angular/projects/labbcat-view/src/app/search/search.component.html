@@ -1,5 +1,20 @@
 <h1 id="title" i18n>Search</h1>
-<div class="search-matrix">
+<div id="attributes" class="attribute-list tabs">
+  <div class="tab-labels">
+    <label *ngFor="let tab of tabLabels"
+           [ngClass]="(tab==currentTab)?'tab-label active':'tab-label inactive'"
+           (click)="currentTab = (currentTab == tab ? null : tab)"
+           title="{{tabs[tab].description}}">
+      <img *ngIf="tabs[tab].icon"
+           src="{{imagesLocation}}/{{tabs[tab].icon}}" alt="{{tabs[tab].description}}">
+      {{tabs[tab].label}}
+    </label>
+  </div>
+  <div *ngFor="let tab of tabLabels"
+       [ngClass]="(tab==currentTab)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
+    
+    <!-- participants tab -->
+    <div *ngIf="currentTab == 'Participants'" id="participants">
   <h3>
     <lib-link
       i18n-label label="Participants"
@@ -32,7 +47,10 @@
   </div>
 
   <!-- TODO specify IDs from file -->
-
+    </div>
+    
+    <!-- transcripts tab -->
+    <div *ngIf="currentTab == 'Transcripts'" id="transcripts">
   <h3 i18n></h3>
   <h3>
     <lib-link
@@ -59,7 +77,10 @@
     [processing]="loadingTranscripts">
     ></lib-button>
   <p *ngIf="!transcriptDescription" i18n="Any (transcript)">[any]</p>
-
+    </div>
+    
+    <!-- search matrix tab -->
+    <div *ngIf="currentTab == 'Matrix'" id="matrix">
   <h3 i18n>Pattern</h3>
 
   <app-search-matrix
@@ -67,7 +88,10 @@
     [(columns)]="matrix.columns"
     (keydown.enter)="search()"
     ></app-search-matrix>
-
+    </div>
+    
+    <!-- options tab -->
+    <div *ngIf="currentTab == 'Options'" id="options">
   <div class="list">
     <div class="item">
       <label>
@@ -103,6 +127,12 @@
         <span i18n>No matches, only a summary of results</span></label>
     </div>
   </div>
+    </div>
+    
+  </div>
+</div>
+
+<div class="search-matrix">
   <lib-button
     i18n-title title="Search for instance of this pattern"
     i18n-label label="Search"
