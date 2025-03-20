@@ -2,7 +2,10 @@
     trimDirectiveWhitespaces="true"
     import = "java.io.File" 
     import = "java.io.FileInputStream"
+    import = "java.io.PrintWriter" 
+    import = "java.io.StringWriter" 
     import = "java.io.IOException" 
+    import = "java.io.OutputStream" 
     import = "java.io.UnsupportedEncodingException"
     import = "java.net.MalformedURLException"
     import = "java.net.URL"
@@ -16,6 +19,10 @@
     import = "java.util.Locale"
     import = "java.util.Optional"
     import = "java.util.ResourceBundle"
+    import = "javax.json.Json" 
+    import = "javax.json.JsonObject" 
+    import = "javax.json.JsonObjectBuilder" 
+    import = "javax.json.JsonValue" 
     import = "javax.xml.parsers.*"
     import = "javax.xml.xpath.*"
     import = "nzilbb.labbcat.server.db.*"
@@ -427,5 +434,66 @@
     if (!dir.exists()) dir.mkdir();
     return dir;
   } // end of getTranscriberDir()   
+
+  /**
+   * Encode the given Throwable as a JSON failure response and write it as the request reponse.
+   * @param t
+   * @param response
+   */
+  public void jsonError(Throwable t, HttpServletResponse response) {
+    OutputStream out = null;
+    try {
+      out = response.getOutputStream();
+      String message = ""+t.getMessage();
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      t.printStackTrace(pw);
+      JsonObjectBuilder exception = Json.createObjectBuilder()
+        .add("type", t.getClass().getSimpleName())
+        .add("message", message)
+        .add("stackTrace", sw.toString());
+      if (t.getCause() != null) {
+        sw = new StringWriter();
+        pw = new PrintWriter(sw);
+        t.getCause().printStackTrace(pw);
+        exception.add("cause", Json.createObjectBuilder()
+                      .add("type", t.getCause().getClass().getSimpleName())
+                      .add("message", ""+t.getCause().getMessage())
+                      .add("stackTrace", sw.toString()));
+      }
+      
+      JsonObjectBuilder result = Json.createObjectBuilder()
+        .add("title", Optional.ofNullable(title).orElse(""))
+        .add("version", Optional.ofNullable(version).orElse(""))
+        .add("code", 1) // TODO deprecate?
+        .add("errors", Json.createArrayBuilder().add(message))
+        .add("exception", exception)
+        .add("messages", Json.createArrayBuilder())
+        .add("model", JsonValue.NULL);
+      JsonObject json = result.build();
+      try {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      } catch(Exception x2) {}
+      out.write(json.toString().getBytes());
+      out.flush();
+    } catch(Exception x1) {
+      try {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      } catch(Exception exception) {}
+      if (out != null) {
+        try {
+          out.write(t.toString().getBytes());
+          t.printStackTrace(new PrintWriter(out));
+          out.flush();
+        } catch(Exception exception) {
+          System.err.println("base.jsp ("+title+"): failed to report exception: " + t);
+          t.printStackTrace(System.err);
+        }
+      } else {
+        System.err.println("base.jsp ("+title+"): could not report exception: " + t);
+        t.printStackTrace(System.err);
+      }
+    }
+  } // end of jsonError()
 
 %>

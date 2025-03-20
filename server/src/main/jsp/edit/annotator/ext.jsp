@@ -1,4 +1,4 @@
-<%@ page info="Annotator Extention" isErrorPage="true"
+<%@ page info="Annotator Extension" isErrorPage="true"
     import = "nzilbb.labbcat.server.api.edit.annotator.ExtWebApp" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 

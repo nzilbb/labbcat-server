@@ -32,15 +32,10 @@ import java.util.Vector;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class RequestParameters extends HashMap<String,Object> {
-  // Attributes:
-  
-  // Methods:
-  
   /**
    * Default constructor.
    */
-  public RequestParameters()
-  {
+  public RequestParameters() {
   } // end of constructor
   
   /**

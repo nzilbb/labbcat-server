@@ -11,7 +11,6 @@
     import = "nzilbb.labbcat.server.api.RequestParameters" 
 %><%
 {
-log("file-upload-tomcat9");
   RequestParameters parameters = new RequestParameters();
   try {
     ServletFileUpload fileupload = new ServletFileUpload(new DiskFileItemFactory());

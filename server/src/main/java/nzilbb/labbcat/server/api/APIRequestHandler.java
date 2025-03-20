@@ -38,6 +38,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -147,20 +148,29 @@ public class APIRequestHandler {
    * @return An object for returning as the request result.
    */
   @SuppressWarnings("unchecked")
-  protected JsonObject successResult(
-    Object result, String message, Object... args) {
+  protected JsonObject successResult(Object result, String message, Object... args) {
+    return successResult(result, new Vector<String>(){{
+      if (message != null) add(localize(message, args));
+    }}); 
+  }
+  
+  /**
+   * Creates a JSON object representing a success result, with the given model.
+   * @param result The result object.
+   * @param messages An optional list of  messages to include in the response envelope.
+   * @return An object for returning as the request result.
+   */
+  @SuppressWarnings("unchecked")
+  protected JsonObject successResult(Object result, List<String> messages) {
     
     JsonObjectBuilder response = Json.createObjectBuilder()
       .add("title", Optional.ofNullable(context.getTitle()).orElse(defaultTitle))
       .add("version", context.getVersion())
       .add("code", 0) // TODO deprecate?
-      .add("errors", Json.createArrayBuilder());      
-    if (message == null) {
-      response = response.add("messages", Json.createArrayBuilder());
-    } else {
-      response = response.add(
-        "messages", Json.createArrayBuilder()
-        .add(localize(message, args)));
+      .add("errors", Json.createArrayBuilder());
+    JsonArrayBuilder jsonMessages = Json.createArrayBuilder();
+    if (messages != null) {
+      for (String message : messages) jsonMessages.add(message);
     }
     if (result != null) {
       if (result instanceof JsonValue) {
