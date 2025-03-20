@@ -25,21 +25,14 @@
         align-items: center;
     }
 }
-#participant-ids, #transcript-ids {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-height: 30vh;
-    overflow: auto;
+.all {
+    font-style: italic;
 }
-#participant-ids a, #transcript-ids a {
-    padding-right: 5px;
+.list {
+    padding-inline-start: 40px;
 }
-#participant-ids a:after, #transcript-ids a:after  {
-    content: ', ';
-}
-#participant-ids a:last-child:after, #transcript-ids a:last-child:after  {
-    content: '';
+.load-more {
+    margin-left: 40px;
 }
 .item label {
     display: inline-block;

@@ -21,22 +21,23 @@
         label="Filter participants"
         title="Narrow down the participants to search by filtering by participant attributes"
         ></lib-button>
-      <p *ngIf="participantDescription" id="participantDescription" i18n>{{participantDescription}}</p>
-      <div *ngIf="participantIds" class="list" id="participant-ids">
-        <a *ngFor="let participantId of participantIds"
-           [routerLink]="user.roles.includes('edit')?'../edit/participant':'../participant'"
-           [queryParams]="{ id: participantId }"
-           i18n-title title="Edit participant"
-           target="participant">{{participantId}}</a>
+      <div id="participant-ids">
+        <!-- TODO if participantDescription is attribute-based, display as ul; otherwise don't display -->
+        <p>Selected participants{{participantDescription ? ' ['+participantDescription+']' : ''}}:
+          <span *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)" class="all">all</span>
+        </p>
+        <ul class="list">
+          <li *ngFor="let participantId of participantIds">{{participantId}}</li>
+        </ul>
       </div>
       <lib-button
         *ngIf="participantIds.length < participantCount"
+        class="load-more"
         i18n-title title="List more participants"
         img="ellipses.svg" icon="…"
         (click)="loadMoreParticipants()"
         [processing]="loadingParticipants">
         ></lib-button>
-      <p *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)">[any]</p>
       <div *ngIf="!participantIds || !participantIds.length" id="file-chooser">
         <label for="csv" i18n>Load participants from file</label>
         <input type="file" id="csv" (change)="selectFile($event.target.files)">
@@ -51,21 +52,23 @@
         label="Filter transcripts"
         title="Narrow down the transcripts to search by filtering by transcript attributes"
         ></lib-button>
-      <p *ngIf="transcriptDescription" id="transcriptDescription" i18n>{{transcriptDescription}}</p>
-      <div *ngIf="transcriptIds" class="list" id="transcript-ids">
-        <a *ngFor="let transcriptId of transcriptIds"
-           href="transcript?id={{transcriptId}}"
-           i18n-title title="Open transcript"
-           target="{{transcriptId}}">{{transcriptId}}</a>
+      <div id="transcript-ids">
+        <!-- TODO if transcriptDescription is attribute-based, display as ul; otherwise don't display -->
+        <p>Selected transcripts{{transcriptDescription ? ' ['+transcriptDescription+']' : ''}}:
+          <span *ngIf="!transcriptIds || !transcriptIds.length" i18n="Any (transcript)" class="all">all{{participantIds.length ? ' transcripts with selected participants' : ''}}</span>
+        </p>
+        <ul class="list">
+          <li *ngFor="let transcriptId of transcriptIds">{{transcriptId}}</li>
+        </ul>
       </div>
       <lib-button
         *ngIf="transcriptIds.length < transcriptCount"
+        class="load-more"
         i18n-title title="List more transcripts"
         img="ellipses.svg" icon="…"
         (click)="loadMoreTranscripts()"
         [processing]="loadingTranscripts">
         ></lib-button>
-      <p *ngIf="!transcriptDescription" i18n="Any (transcript)">[any]</p>
     </div>
     
     <!-- search matrix tab -->
