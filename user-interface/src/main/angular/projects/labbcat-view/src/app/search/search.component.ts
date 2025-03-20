@@ -87,16 +87,21 @@ export class SearchComponent implements OnInit {
                     if (this.matrix.participantQuery) {
                         this.participantDescription = params["participants"]
                             || "Selected participants"; // TODO i18n
+                        this.currentTab = "Participants";
                     }
                     
                     this.matrix.transcriptQuery = params["transcript_expression"];
                     if (this.matrix.transcriptQuery) {
                         this.transcriptDescription = params["transcripts"]
                             || "Selected transcripts"; // TODO i18n
+                        this.currentTab = "Transcripts";
                     }
                 }
                 this.listParticipants(false);
                 this.listTranscripts();
+                if (!this.currentTab) {
+                    this.currentTab = "Matrix";
+                }
             });
         });
     }
