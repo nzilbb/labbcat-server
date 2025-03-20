@@ -129,7 +129,22 @@ export class SearchComponent implements OnInit {
         };
         this.tabLabels = Object.keys(this.tabs);
     }
-
+    selectParticipants(): void {
+        this.router.navigate(["participants"], {
+            queryParams: {
+                to: "search"
+            }
+        });
+    }
+    selectTranscripts(): void {
+        this.router.navigate(["transcripts"], {
+            queryParams: {
+                to: "search",
+                participant_expression: this.participantQueryForTranscripts(),
+                participants: this.participantDescription
+            }
+        });
+    }
     /** Ensure fields are filled in correctly, the value may have been passed in */
     standardizeMatrix(matrix: Matrix): Matrix {
         if (!matrix.hasOwnProperty("participantQuery")) matrix.participantQuery = "";
