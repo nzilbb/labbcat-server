@@ -83,7 +83,7 @@ public class TestUpload
     try {
       
       // upload transcript
-      l.setVerbose(true);
+      // l.setVerbose(true);
       nzilbb.labbcat.model.Upload upload = l.transcriptUpload(transcript, false);
       assertNotNull("ID returned", upload.getId());
 
@@ -121,7 +121,6 @@ public class TestUpload
       // upload transcript
       //l.setVerbose(true);
       nzilbb.labbcat.model.Upload upload = l.transcriptUpload(transcript, media, false);
-      System.out.println("ID " + upload.getId());
       assertTrue("corpus parameter" + upload.getParameters(),
                  upload.getParameters().containsKey("labbcat_corpus"));
       assertNotNull("corpus parameter has default",
@@ -135,12 +134,22 @@ public class TestUpload
       assertNotNull("transcript_type parameter has default",
                     upload.getParameters().get("labbcat_transcript_type").getValue());
 
-      // finalize parameters
+      // finalize upload
+      //l.setVerbose(true);
       upload = l.transcriptUploadParameters(upload);
-      System.out.println("transcripts " + upload.getTranscripts());
+      assertNotNull("transcript threads returned",
+                    upload.getTranscripts());
+      assertEquals("There's one thread " + upload.getTranscripts(),
+                   1, upload.getTranscripts().size());
 
-      // TODO wait for transcript threads before deleting
+      // transcript name should match file name
       
+      String threadId = upload.getTranscripts().get(transcript.getName());
+      assertNotNull("transcript thread is specified " +upload.getTranscripts(),
+                    threadId);
+      // cancel layer generation, we don't care about it         
+      l.cancelTask(threadId);
+      l.releaseTask(threadId);      
       
     } finally {
       l.setVerbose(false);
@@ -154,6 +163,82 @@ public class TestUpload
                      0, l.countMatchingTranscriptIds("id = '"+transcript.getName()+"'"));
         assertEquals("Participant has been deleted from the store",
                      0, l.countMatchingParticipantIds("id = '"+participantId+"'"));
+      } catch (Exception x) {
+        System.err.println("Unexpectedly can't delete test transcript: " + x);
+      }
+    }    
+  }
+  
+  /**
+   * Test /api/edit/transcript/upload/* API; uploading an existing file.
+   */
+  @Test public void transcriptUploadExisting() throws Exception {
+    File transcript = new File(getDir().getParentFile(), "nzilbb.labbcat.server.test.txt");
+    File[] media = {
+      new File(getDir().getParentFile(), "nzilbb.labbcat.server.test.wav")
+    };
+    File document = new File(getDir().getParentFile(), "nzilbb.labbcat.server.test.doc");
+    String participantId = "UnitTester";
+    assertTrue("Ensure transcript exists: " + transcript.getPath(), transcript.exists());
+    assertTrue("Ensure media exists: " + media[0].getPath(), media[0].exists());
+    assertTrue("Ensure document exists: " + document.getPath(), document.exists());
+    try {
+      
+      // ensure transcript/participant don't already exist
+      try {
+        l.deleteTranscript(transcript.getName());
+      } catch(ResponseException exception) {}
+      try {
+        l.deleteParticipant(participantId);
+      } catch(ResponseException exception) {}
+
+      // upload transcript
+      nzilbb.labbcat.model.Upload upload = l.transcriptUpload(transcript, media, false);
+      // finalize upload
+      upload = l.transcriptUploadParameters(upload);
+      String threadId = upload.getTranscripts().get(transcript.getName());
+      assertNotNull("transcript thread is specified " +upload.getTranscripts(),
+                    threadId);
+      // cancel layer generation, we don't care about it         
+      l.cancelTask(threadId);
+      l.releaseTask(threadId);
+
+      // ensure upload was successful
+      assertEquals("Transcript has been added to the store",
+                   1, l.countMatchingTranscriptIds("id = '"+transcript.getName()+"'"));
+
+      // now upload again
+      // l.setVerbose(true);
+      upload = l.transcriptUpload(transcript, true);
+
+      assertTrue("generate parameter" + upload.getParameters(),
+                 upload.getParameters().containsKey("labbcat_generate"));
+      assertTrue("generation enabled by default",
+                 (Boolean)upload.getParameters().get("labbcat_generate").getValue());
+      
+      // // disable generation
+      // upload.getParameters().get("labbcat_generate").setValue(Boolean.FALSE);
+
+      upload = l.transcriptUploadParameters(upload);
+      threadId = upload.getTranscripts().get(transcript.getName());
+      assertNotNull("transcript thread is specified " +upload.getTranscripts(),
+                    threadId);
+      // cancel layer generation, we don't care about it         
+      l.cancelTask(threadId);
+      l.releaseTask(threadId);
+      
+    } finally {
+      l.setVerbose(false);
+      try {
+        // delete transcript/participant
+        // l.deleteTranscript(transcript.getName());
+        // l.deleteParticipant(participantId);
+            
+        // // ensure the transcript/participant no longer exist
+        // assertEquals("Transcript has been deleted from the store",
+        //              0, l.countMatchingTranscriptIds("id = '"+transcript.getName()+"'"));
+        // assertEquals("Participant has been deleted from the store",
+        //              0, l.countMatchingParticipantIds("id = '"+participantId+"'"));
       } catch (Exception x) {
         System.err.println("Unexpectedly can't delete test transcript: " + x);
       }

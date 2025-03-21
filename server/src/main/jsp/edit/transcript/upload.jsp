@@ -3,7 +3,9 @@
     import = "nzilbb.labbcat.server.api.edit.transcript.Upload" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
-    import = "javax.json.JsonWriter" 
+    import = "javax.json.JsonWriter"
+    import = "nz.ac.canterbury.ling.Labbcat"
+    import = "nz.ac.canterbury.ling.LayersDataGenerator"
 %><%@ include file="../../base.jsp" %><%{
       if ("POST".equals(request.getMethod())) { // POST uploads files
         // load multipart request parameters - the implementation depends on the servlet container:
@@ -29,7 +31,24 @@
         Upload handler = new Upload();
         initializeHandler(handler, request);
         JsonObject json = handler.put(
-          request.getPathInfo(), parseParameters(request), (status)->response.setStatus(status));
+          request.getPathInfo(), parseParameters(request), (status)->response.setStatus(status),
+          (graph)-> { // layer generator
+            // TODO replace this legacy method for generating layers, once all layer managers are annotators
+            LayersDataGenerator generator = new LayersDataGenerator(
+              (Labbcat)getServletContext().getAttribute("labbcat"));
+            if (request.getRemoteUser() != null) {	
+              generator.setWho(request.getRemoteUser());
+            } else {
+              generator.setWho(request.getRemoteHost());
+            }
+
+            // ensure threads don't hang around too long, as they might be uploading a huge batch
+            generator.setWaitToDieMilliseconds(5000);
+            
+            generator.setName(graph.getId());
+            generator.runGenerateTranscript(-1, null, (Integer)graph.get("@ag_id"));
+            return ""+generator.getId();
+          });
         if (json != null) {
           JsonWriter writer = Json.createWriter(response.getWriter());
           writer.writeObject(json);   

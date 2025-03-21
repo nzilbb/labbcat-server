@@ -79,6 +79,8 @@ public class APIRequestHandler {
   public static final int SC_NOT_FOUND = 404;
   public static final int SC_METHOD_NOT_ALLOWED = 405;
   public static final int SC_CONFLICT = 409;
+  public static final int SC_UNSUPPORTED_MEDIA_TYPE = 415;
+  public static final int SC_UNPROCESSABLE_CONTENT = 422;
   public static final int SC_INTERNAL_SERVER_ERROR = 500;
   
   // Attributes:   
@@ -260,6 +262,65 @@ public class APIRequestHandler {
     }
     response = response
       .add("messages", Json.createArrayBuilder())
+      .add("model", JsonValue.NULL);
+    return response.build();
+  } // end of failureResult()
+  
+  /**
+   * Creates a JSON object representing a possibly partialfailure result.
+   * @param messages An optional list of information messages to include in the response envelope.
+   * @param error The error message to return.
+   * @param args Arguments to be substituted into the message, if any
+   * @return An object for returning as the request result.
+   */
+  protected JsonObject failureResult(List<String> messages, String error, Object... args) {
+    
+    JsonObjectBuilder response = Json.createObjectBuilder()
+      .add("title", Optional.ofNullable(context.getTitle()).orElse(defaultTitle))
+      .add("version", context.getVersion())
+      .add("code", 1); // TODO deprecate?
+    if (error == null) {
+      response = response
+        .add("errors", Json.createArrayBuilder());
+    } else {
+      response = response
+        .add("errors", Json.createArrayBuilder().add(
+               localize(error, args)));
+    }
+    JsonArrayBuilder jsonMessages = Json.createArrayBuilder();
+    if (messages != null) {
+      for (String message : messages) jsonMessages.add(message);
+    }
+    response = response
+      .add("messages", jsonMessages)
+      .add("model", JsonValue.NULL);
+    return response.build();
+  } // end of failureResult()
+  
+  /**
+   * Creates a JSON object representing a possibly partialfailure result.
+   * @param messages An optional list of information messages to include in the response envelope.
+   * @param error The error message to return.
+   * @param args Arguments to be substituted into the message, if any
+   * @return An object for returning as the request result.
+   */
+  protected JsonObject failureResult(List<String> messages, List<String> errors) {
+    
+    JsonObjectBuilder response = Json.createObjectBuilder()
+      .add("title", Optional.ofNullable(context.getTitle()).orElse(defaultTitle))
+      .add("version", context.getVersion())
+      .add("code", 1); // TODO deprecate?
+    JsonArrayBuilder jsonErrors = Json.createArrayBuilder();
+    if (errors != null) {
+      for (String error : errors) jsonErrors.add(error);
+    }
+    JsonArrayBuilder jsonMessages = Json.createArrayBuilder();
+    if (messages != null) {
+      for (String message : messages) jsonMessages.add(message);
+    }
+    response = response
+      .add("errors", jsonErrors)
+      .add("messages", jsonMessages)
       .add("model", JsonValue.NULL);
     return response.build();
   } // end of failureResult()

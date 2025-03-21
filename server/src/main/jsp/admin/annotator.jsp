@@ -45,7 +45,7 @@
         writer.close();
       }
     } else if ("OPTIONS".equals(request.getMethod())) {
-      response.addHeader("Allow", "OPTIONS, GET, POST, PUT, DELETE");
+      response.addHeader("Allow", "OPTIONS, GET, POST");
     } else {
       response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }

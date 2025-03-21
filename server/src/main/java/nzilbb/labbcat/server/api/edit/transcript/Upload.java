@@ -26,10 +26,13 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.TreeSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -46,6 +49,10 @@ import nzilbb.ag.serialize.util.ConfigurationHelper;
 import nzilbb.ag.serialize.util.IconHelper;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.DefaultOffsetGenerator;
+import nzilbb.ag.util.Merger;
+import nzilbb.ag.util.Normalizer;
+import nzilbb.ag.util.ParticipantRenamer;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.api.APIRequestHandler;
@@ -142,6 +149,8 @@ import nzilbb.util.IO;
  *       <dd> The episode the new transcript(s) belong(s) to. </dd> 
  *   <dt> labbcat_transcript_type </dt>
  *       <dd> The transcript type for the new transcript(s). </dd> 
+ *   <dt> labbcat_generate </dt>
+ *       <dd> Whether to re-regenerate layers of automated annotations or not. </dd> 
  *  </dl>
  * <p><b>Output</b>: A JSON-encoded response containing a <q>model</q> with the following
  * attributes:
@@ -181,7 +190,7 @@ public class Upload extends APIRequestHandler {
    * @return JSON-encoded object representing the response
    */
   public JsonObject post(RequestParameters requestParameters, Consumer<Integer> httpStatus) {
-    context.servletLog("post " + requestParameters.getFile("transcript").getPath());
+    context.servletLog("POST post " + requestParameters.getFile("transcript").getPath());
     File dir = null;
     try {
       SqlGraphStoreAdministration store = getStore();
@@ -189,29 +198,29 @@ public class Upload extends APIRequestHandler {
         boolean merge = !Optional.ofNullable(requestParameters.getString("merge")).orElse("false")
           .equals("false");
         String dirPrefix = merge?"_merge_":"_new_";
-        context.servletLog("merge " + merge);
+        context.servletLog("POST merge " + merge);
         
         // generate an ID/directory to save files
         dir = Files.createTempDirectory(uploadsDir.toPath(), dirPrefix).toFile();
         dir.deleteOnExit();
         String id = dir.getName();
-        context.servletLog("id " + id);
+        context.servletLog("POST id " + id);
 
         Vector<NamedStream> streams = new Vector<NamedStream>();
 
         // get transcript file(s)
         Vector<File> uploadedTranscripts = requestParameters.getFiles("transcript");
-        context.servletLog("transcripts " + uploadedTranscripts.size());
+        context.servletLog("POST transcripts " + uploadedTranscripts.size());
         if (uploadedTranscripts.size() == 0) {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("No file received.");
         }
         for (File uploadedTranscript : uploadedTranscripts) {
-          context.servletLog("transcript " + uploadedTranscript.getPath());
+          context.servletLog("POST transcript " + uploadedTranscript.getPath());
           File transcript = new File(dir, uploadedTranscript.getName());
           IO.Rename(uploadedTranscript, transcript);
           transcript.deleteOnExit();
-          context.servletLog(" now " + transcript.getPath() + " " + transcript.exists());
+          context.servletLog("POST  now " + transcript.getPath() + " " + transcript.exists());
           streams.add(new NamedStream(transcript));
         }
 
@@ -235,12 +244,12 @@ public class Upload extends APIRequestHandler {
         
         // get the serializer using first transcript name (there's usually only one anyway)
         File transcript = requestParameters.getFile("transcript");
-        context.servletLog("main transcript " + transcript.getName());
+        context.servletLog("POST main transcript " + transcript.getName());
         GraphDeserializer deserializer = store.deserializerForFilesSuffix(
           "."+IO.Extension(transcript));
         if (deserializer == null) {
           IO.RecursivelyDelete​(dir);
-          httpStatus.accept(SC_BAD_REQUEST);
+          httpStatus.accept(SC_UNSUPPORTED_MEDIA_TYPE);
           return failureResult("No converter installed for: {0}", transcript.getName());
         }
         // configure deserializer
@@ -256,9 +265,15 @@ public class Upload extends APIRequestHandler {
           streams.toArray(new NamedStream[0]), schema);
 
         JsonObjectBuilder model = Json.createObjectBuilder().add("id", id);
-        context.servletLog("model.id " + id);
+        context.servletLog("POST model.id " + id);
         JsonArrayBuilder parameters = Json.createArrayBuilder();
-        if (!merge) {
+        if (merge) {
+          deserializerParameters.addParameter(
+            new Parameter(
+              "labbcat_generate", Boolean.class, "Generate Annotations",
+              "Whether to (re)generate layers of automated annotations", true))
+            .setValue(Boolean.TRUE);
+        } else { // new transcript
           // ask for corpus, episode, and transcript type
           TreeSet<String> options = new TreeSet<String>() {{
               for (String option : store.getCorpusIds()) add(option);
@@ -287,7 +302,7 @@ public class Upload extends APIRequestHandler {
             .setValue(options.first());
         }
         model.add("parameters", deserializerParameters.toJson());
-        context.servletLog("success " + localize("Uploaded: {0}", transcript.getName()));
+        context.servletLog("POST success " + localize("Uploaded: {0}", transcript.getName()));
         return successResult(model.build(), "Uploaded: {0}", transcript.getName());
       } finally {
         cacheStore(store);
@@ -297,7 +312,7 @@ public class Upload extends APIRequestHandler {
       try {
         httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       } catch(Exception exception) {}
-      context.servletLog("Upload.post: unhandled exception: " + ex);
+      context.servletLog("POST Upload.post: unhandled exception: " + ex);
       ex.printStackTrace(System.err);
       return failureResult(ex);
     }
@@ -309,11 +324,14 @@ public class Upload extends APIRequestHandler {
    * @param requestParameters Request parameter map.
    * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
+   * @param layerGenerator A function that will start a layer generation thread for the
+   * given transcript, and return the thread ID.
    * @return JSON-encoded object representing the response
    */
   public JsonObject put(
-    String pathInfo, RequestParameters requestParameters, Consumer<Integer> httpStatus) {
-    context.servletLog("put " + pathInfo + " " + requestParameters);
+    String pathInfo, RequestParameters requestParameters,Consumer<Integer> httpStatus,
+    Function<Graph,String> layerGenerator) {
+    context.servletLog("PUT " + pathInfo + " " + requestParameters);
     
     // get ID/directory of saved files
     if (pathInfo == null || pathInfo.equals("/") || pathInfo.indexOf('/') < 0) {
@@ -326,12 +344,19 @@ public class Upload extends APIRequestHandler {
       httpStatus.accept(SC_BAD_REQUEST);
       return failureResult("No ID specified.");
     }        
-    context.servletLog("id " + id);
+    context.servletLog("PUT id " + id);
     
     File dir = null;
     try {
       SqlGraphStoreAdministration store = getStore();
-      context.servletLog("store " + store.getId());
+      context.servletLog("PUT store " + store.getId());
+      boolean keepOriginal = !"0".equals(store.getSystemAttribute("keepOriginal"));
+      boolean generateMissingMedia = !"0".equals(store.getSystemAttribute("generateMissingMedia"));
+      boolean generateLayers =
+        !Optional.ofNullable(requestParameters.getString("labbcat_generate")).orElse("false")
+        .equals("false");
+      context.servletLog("PUT generateLayers " + generateLayers + " - " + requestParameters);
+
       try {
         boolean merge = id.startsWith("_merge_");
         dir = new File(uploadsDir, id);
@@ -339,29 +364,31 @@ public class Upload extends APIRequestHandler {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("Invalid ID: {0}", id);
         }
-        context.servletLog("merge " + merge);
+        context.servletLog("PUT merge " + merge);
 
         Vector<NamedStream> streams = new Vector<NamedStream>();
 
         // get transcript files
         File transcript = null;
+        Vector<File> transcripts = new Vector<File>();
         for (File t : dir.listFiles(f->f.isFile())) {
           if (transcript == null) transcript = t;
+          transcripts.add(t);
           streams.add(new NamedStream(t));
         }
-        context.servletLog("transcript " + transcript);
+        context.servletLog("PUT transcript " + transcript);
         if (transcript == null) {
-          // TODO are we setting main speakers?
-          IO.RecursivelyDelete​(dir);
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("No transcripts found for: {0}", id);
         }
 
         // get media files in directories named after their parameters
+        HashMap<String,File[]> trackSuffixToMediaFiles = new HashMap<String,File[]>();
         for (File mediaDir : dir.listFiles(f->f.isDirectory())) {
           String trackSuffix = mediaDir.getName().substring(5);
-          for (File media : mediaDir.listFiles(f->f.isFile())) {
-            context.servletLog("media " + media);
+          trackSuffixToMediaFiles.put(trackSuffix, mediaDir.listFiles(f->f.isFile()));
+          for (File media : trackSuffixToMediaFiles.get(trackSuffix)) {
+            context.servletLog("PUT media " + media);
             streams.add(new NamedStream(media));
           } // next media file
         } // next track 
@@ -370,8 +397,7 @@ public class Upload extends APIRequestHandler {
         GraphDeserializer deserializer = store.deserializerForFilesSuffix(
           "."+IO.Extension(transcript));
         if (deserializer == null) {
-          IO.RecursivelyDelete​(dir);
-          httpStatus.accept(SC_BAD_REQUEST);
+          httpStatus.accept(SC_UNSUPPORTED_MEDIA_TYPE);
           return failureResult("No converter installed for: {0}", transcript.getName());
         }
         
@@ -395,63 +421,394 @@ public class Upload extends APIRequestHandler {
         try {
           deserializer.setParameters(deserializerParameters);
         } catch (SerializationParametersMissingException x) {
-          if (dir != null) IO.RecursivelyDelete​(dir);
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult(x);
         }
 
         // deserialize
         Graph[] graphs = deserializer.deserialize();
-        context.servletLog("graphs " + graphs.length);
-        context.servletLog("graph " + graphs[0].getId());
+        context.servletLog("PUT graphs " + graphs.length);
+        context.servletLog("PUT graph " + graphs[0].getId());
         Vector<String> messages = new Vector<String>();
-        messages.add(localize("Saved: {0}", transcript.getName())); // TODO i18n
+        Vector<String> errors = new Vector<String>();
         for (String warning : deserializer.getWarnings()) {
           messages.add(warning);
         } // next error
         
         JsonObjectBuilder model = Json.createObjectBuilder().add("id", id);
+        JsonObjectBuilder transcriptThreads = Json.createObjectBuilder();
 
-        // TODO check ID
+        // pass through the graph list twice, once for merging and error checks, then again to save
+        
+        // for each resulting graph
+        for (int g = 0; g < graphs.length; g++) {
+          Graph graph = graphs[g];
+          context.servletLog("PUT graph " + graph.getId());
+          graph.trackChanges();
+          if (graph.getId() == null) { // no ID is set
+            // use the name of the (first) uploaded file
+            if (graphs.length == 1) {
+              graph.setId(transcript.getName());
+            } else { // use number the IDs
+              graph.setId(
+                IO.WithoutExtension(transcript.getName())
+                + "-" + (g+1)
+                + "." + IO.Extension(transcript.getName()));
+            }
+          } // no ID set
+          
+          // check existence
+          String regexpSafeID = IO.WithoutExtension(graph.getId())
+            // escape regexp special characters
+            .replaceAll("([/\\[\\]()?.])","\\\\$1");
+          boolean existingTranscript = store.countMatchingTranscriptIds​(
+            "/^"+regexpSafeID+"\\.[^.]+$/.test(id)") > 0;
+          context.servletLog("PUT existingTranscript " + existingTranscript + " \"/^"+regexpSafeID+"\\.[^.]+$/.test(id)\"");
+          if (!existingTranscript && merge) {
+            httpStatus.accept(SC_NOT_FOUND);
+            return failureResult(messages, "Transcript not found: {0}", graph.getId());
+          } else if (existingTranscript && !merge) {
+            httpStatus.accept(SC_BAD_REQUEST);
+            return failureResult(messages, "Transcript already exists: {0}", graph.getId());
+          }
 
-        // TODO check existence
+          if (!existingTranscript) {
+            context.servletLog("PUT !existingTranscript");
+            
+            // set corpus
+            String corpusParameter = Optional.ofNullable(
+              requestParameters.getString("labbcat_corpus")).orElse("");
+            String corpus = corpusParameter; // given corpus...
+            if (corpus.length() == 0) { //... or the first corpus
+              corpus = store.getCorpusIds()[0];
+            }
+            if (graph.getLayer(schema.getCorpusLayerId()) == null) {
+              graph.addLayer(store.getLayer(schema.getCorpusLayerId()));
+              graph.getSchema().setCorpusLayerId(schema.getCorpusLayerId());
+            }
+            Annotation corpusAttribute = graph.first(schema.getCorpusLayerId());
+            context.servletLog("PUT corpus " + corpus);
+            if (corpusAttribute == null) { // create annotation
+              graph.createTag(graph, schema.getCorpusLayerId(), corpus);
+            } else { // transcript has it's own corpus already
+              // only update it if we're explicitly given an corpus
+              if (corpusParameter.length() > 0) {
+                corpusAttribute.setLabel(corpusParameter);
+              }
+            }		   
 
-        // TODO set corpus/episode/type
+            // set episode
+            String episodeParameter = Optional.ofNullable( // given episode, or the transcript file name
+              requestParameters.getString("labbcat_episode")).orElse("");
+            String episode = episodeParameter.length() > 0?
+              episodeParameter : IO.WithoutExtension(transcript.getName());
+            if (graph.getLayer(schema.getEpisodeLayerId()) == null) {
+              graph.addLayer(store.getLayer(schema.getEpisodeLayerId()));
+              graph.getSchema().setEpisodeLayerId(schema.getEpisodeLayerId());
+            }
+            Annotation episodeAttribute = graph.first(schema.getEpisodeLayerId());
+            context.servletLog("PUT episode " + episode);
+            if (episodeAttribute == null) { // create annotation
+              graph.createTag(graph, schema.getEpisodeLayerId(), episode);
+            } else { // transcript has it's own episode already
+              // only update it if we're explicitly given an episode
+              if (episodeParameter.length() > 0) {
+                episodeAttribute.setLabel(episodeParameter);
+              }
+            }		   
 
-        // TODO structure standardization
+            // set transcript type
+            String transcriptTypeParameter = Optional.ofNullable(
+              requestParameters.getString("labbcat_transcript_type")).orElse("");
+            String transcriptType = transcriptTypeParameter; // given transcript_type...
+            if (transcriptType.length() == 0) { //... or the first transcript_type
+              transcriptType = store.getLayer("transcript_type").getValidLabels()
+                .keySet().iterator().next();
+            }
+            if (graph.getLayer("transcript_type") == null) {
+              graph.addLayer(store.getLayer("transcript_type"));
+            }
+            Annotation transcriptTypeAttribute = graph.first("transcript_type");
+            context.servletLog("PUT transcriptType " + transcriptType);
+            if (transcriptTypeAttribute == null) { // create annotation
+              graph.createTag(graph, "transcript_type", transcriptType);
+            } else { // transcript has it's own transcript_type already
+              // only update it if we're explicitly given an transcript_type
+              if (transcriptTypeParameter.length() > 0) {
+                transcriptTypeAttribute.setLabel(transcriptTypeParameter);
+              }
+            }
+          } // not an existing transcript
+          
+          // structure standardization
+          new DefaultOffsetGenerator().transform(graph);          
+          graph.commit();
 
-        // TODO merge
+          if (merge) {
+            context.servletLog("PUT merge...");
+            
+            Graph newGraph = graph;
+            
+            // normalize the graph before merge
+            if (newGraph.getSchema().getParticipantLayer() != null // (if we have required layers)
+                && newGraph.getSchema().getTurnLayer() != null
+                && newGraph.getSchema().getUtteranceLayerId() != null) {
+              Normalizer normalizer = new Normalizer();
+              normalizer.setMinimumTurnPauseLength(
+                Double.parseDouble(store.getSystemAttribute("minTurnPause")));
+              normalizer.transform(newGraph);
+              newGraph.commit();
+            }
+            if (newGraph.getOffsetGranularity() == null) newGraph.setOffsetGranularity(0.001);
+			   
+            // existing graph is the "original" version
+            graphs[g] = store.getTranscript(graph.getId());
+            graph = graphs[g];
+            graph.trackChanges();
+            context.servletLog("getTrascript " + graph.getId() + " episode " + graph.first("episode"));
+            
+            // check participant IDs, set main participant(s)
+            context.servletLog("PUT processParticipants...");
+            processParticipants(
+              graph, graph.first(schema.getEpisodeLayerId()).getLabel(), store, schema,
+              transcript.getName());
 
-        // TODO report changes
+            Merger merger = new Merger(newGraph);
+            try { // merge
+              //merger.setDebug(true);
+              merger.transform(graph);
+              Set<Change> changes = graph.getTracker().getChanges();
+              if (merger.getDebug()) messages.addAll(merger.getLog());
+              
+              if (merger.getErrors().size() > 0) {
+                errors.add(localize("Could not merge changes into {0}: {1}", graph.getId(), ""));
+                errors.addAll(merger.getErrors());
+                continue;
+              }
+              
+              // report changes
+              int anchorChanges = 0;
+              for (Change change : changes) {
+                if (change.getObject() instanceof Anchor) {
+                  anchorChanges++;
+                } else { // Annotation
+                  Annotation a = (Annotation)change.getObject();
+                  if (change.getOperation() == Change.Operation.Update) {
+                    if (!"label".equals(change.getKey())) { // only count label changes
+                      continue;
+                    }
+                  }
+                  String operation = "@" + a.getChange();
+                  Layer layer = a.getLayer();
+                  if (layer.containsKey(operation)) {
+                    layer.put(operation, new Integer(((Integer)layer.get(operation)) + 1));
+                  } else {
+                    layer.put(operation, new Integer(1));
+                  }
+                }
+              } // next change
+              for (String layerId : new TreeSet<String>(graph.getSchema().getLayers().keySet())) {
+                Layer layer = graph.getLayer(layerId);
+                String message = "";
+                if (layer.containsKey("@" + Change.Operation.Create)) 
+                  message += " " + localize("New: {0,number,integer}",
+                                            layer.get("@" + Change.Operation.Create));
+                if (layer.containsKey("@" + Change.Operation.Update)) 
+                  message += " " + localize("Changed: {0,number,integer}",
+                                            layer.get("@" + Change.Operation.Update));
+                if (layer.containsKey("@" + Change.Operation.Destroy)) 
+                  message += " " + localize("Removed: {0,number,integer}",
+                                            layer.get("@" + Change.Operation.Destroy));
+                if (message.length() > 1) {
+                  messages.add(graph.getId() + ": " + layerId + " -" + message);
+                }
+              }
+              if (anchorChanges > 0) messages.add("Changed offsets: " + anchorChanges);
+            } catch(TransformationException exception) {
+              if (merger.getDebug()) messages.addAll(merger.getLog());
+              errors.add(localize("Could not merge changes into {0}: {1}",
+                                  graph.getId(), exception.getMessage()));
+            } // merge failed
 
-        // TODO check participants, set their corpora
+          } else { // a new transcript
+            context.servletLog("PUT new ");
+            
+            // check participant IDs, set main participant(s)
+            context.servletLog("PUT processParticipants...");
+            processParticipants(
+              graph, graph.first(schema.getEpisodeLayerId()).getLabel(), store, schema,
+              transcript.getName());
+            
+            // mark for creation
+            graph.create();
+          }
 
-        // TODO save
+        } // next graph
 
-        // TODO save media
+        if (errors.size() > 0) {
+          httpStatus.accept(SC_CONFLICT);
+          return failureResult(messages, errors);
+        }
 
-        // TODO generate missing media
+        // no errors, so we can save the transcripts
+        
+        // for each resulting graph
+        for (int g = 0; g < graphs.length; g++) {
+          Graph graph = graphs[g];
+          context.servletLog("PUT ...graph " + graph.getId());
 
-        // TODO generate layers
-
-        // TODO ask for main participant settings?
-
-        // TODO delete temporary files
-
-        //model.add("parameters", parameters.toJson());
+          // save graph into graph store
+          store.saveTranscript(graph);
+          context.servletLog("PUT transcript saved");
+              
+          // save files
+          if (keepOriginal) {
+            context.servletLog("PUT keepOriginal ");
+            // usually there's one transcript file, and it should be the 'source' of the one graph
+            // but if there are multiple files, the rest are saved as 'documents',
+            // and if there are multiple graphs, *all* transcript files are documents of the first
+            boolean fileIsSource = graphs.length == 1;
+            for (File file : transcripts) {
+              if (fileIsSource) {
+                try {
+                  context.servletLog("PUT source " + file.getName());
+                  store.saveSource(graph.getId(), file.toURI().toString());
+                } catch(Exception exception) {
+                  errors.add(localize("Error saving transcript {0}: {1}",
+                                      file.toURI().toString(), exception.getMessage()));
+                }
+                fileIsSource = false;
+              } else {
+                try {
+                  context.servletLog("PUT document " + file.getName());
+                  store.saveEpisodeDocument(graph.getId(), file.toURI().toString());
+                } catch(Exception exception) {
+                  errors.add(localize("Error saving document {0}: {1}",
+                                      file.toURI().toString(), exception.getMessage()));
+                }
+              }
+            } // next transcript
+            
+            // save media files
+            for (String suffix : trackSuffixToMediaFiles.keySet()) {
+              for (File file : trackSuffixToMediaFiles.get(suffix)) {
+                if (suffix.length() == 0) { // no track
+                  // is it media, or a document?
+                  MediaFile media = new MediaFile(file);
+                  if (media.getMimeType() == null
+                      || (!media.getMimeType().startsWith("audio")
+                          && !media.getMimeType().startsWith("video")
+                          && !media.getMimeType().startsWith("image"))) {
+                    try {
+                      context.servletLog("PUT document " + file.getName());
+                      store.saveEpisodeDocument(graph.getId(), file.toURI().toString());
+                    } catch(Exception exception) {
+                      errors.add(localize("Error saving document {0}: {1}",
+                                          file.toURI().toString(), exception.getMessage()));
+                    }
+                    break; // don's save as media
+                  } // not a known media file
+                } // no track suffix
+                try {
+                  context.servletLog("PUT media " + file.getName());
+                  store.saveMedia(graph.getId(), file.toURI().toString(), suffix);
+                } catch(Exception exception) {
+                  errors.add(localize("Error saving media {0}: {1}",
+                                      file.toURI().toString(), exception.getMessage()));
+                }
+              } // next file
+            } // next track
+          } // keepOriginal
+          
+          if (generateMissingMedia) {
+            // generate any missing media
+            try {
+              store.generateMissingMedia(graph.getId());
+            } catch(Exception exception) {
+              errors.add(localize("Error generating missing media: {0}",
+                                  exception.getMessage()));
+            }
+          } // generateMissingMedia
+          
+          // generate layers
+          if (generateLayers || !merge) { // TODO
+            if (layerGenerator != null) {
+              context.servletLog("PUT generateLayers " + graph.getId());
+              transcriptThreads.add(graph.getId(), layerGenerator.apply(graph));
+            }
+          }
+          
+          messages.add(localize("Saved: {0}", graph.getId()));
+          
+        } // next graph
+        model.add("transcripts", transcriptThreads.build());
+        
         return successResult(model.build(), messages);
+        
       } finally {
-        cacheStore(store);
+          // close database etc.
+          cacheStore(store);
+          // always delete files
+          if (dir != null) IO.RecursivelyDelete​(dir);
       }
     } catch(Exception ex) {
-      context.servletLog("Exception " + ex);
+      context.servletLog("PUT Exception " + ex);
       if (dir != null) IO.RecursivelyDelete​(dir);
       try {
         httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       } catch(Exception exception) {}
-      context.servletLog("Upload.post: unhandled exception: " + ex);
+      context.servletLog("PUT Upload.post: unhandled exception: " + ex);
       ex.printStackTrace(System.err);
       return failureResult(ex);
+    }
+  }
+
+  /** 
+   * Set main participants and rename participants if required.
+   */
+  void processParticipants(
+    Graph graph, String episode, SqlGraphStoreAdministration store, Schema schema,
+    String transcriptName) throws Exception {
+    if (graph.getSchema().getParticipantLayerId() != null) {
+      // rename generic speakers, and mark default main speakers
+      if (graph.getLayer("main_participant") == null) {
+        graph.addLayer(store.getLayer("main_participant"));
+      }
+      boolean needMainSpeakers = graph.all("main_participant").length == 0;
+      String regularExpression = store.getSystemAttribute("genericSpeakerRegexp");    
+      Pattern genericPattern = null;
+      if (regularExpression != null && regularExpression.trim().length() > 0) {
+        genericPattern = Pattern.compile(regularExpression);
+      } // generic speaker pattern defined
+      // for each participant
+      Annotation[] participants = graph.list(schema.getParticipantLayerId());
+      for (Annotation participant : participants) {
+        // does the participant have a 'generic' name?
+        if (genericPattern != null
+            && genericPattern.matcher(participant.getLabel()).matches()) {
+          // rename the participant to something more specific
+          String oldName = participant.getLabel();
+          new ParticipantRenamer(
+            participant.getLabel(), participant.getLabel() + " " + episode)
+            .transform(graph);
+        }
+        if (needMainSpeakers) {
+          // is the participant's name in the transcript name?
+          if (graph.getId().replaceAll("\\.[a-zA-Z][^.]*$","").toLowerCase().replaceAll(" ","")
+              .indexOf(participant.getLabel().toLowerCase().replaceAll(" ","")) >= 0) {
+            // mark it as a main participant
+            graph.createTag(participant, "main_participant", participant.getLabel());
+          }
+        }
+      } // next participant
+      // if nobody has been marked as a main participant
+      if (graph.list("main_participant").length == 0) {
+        // mark everyone as a main participant
+        for (Annotation participant : participants) {
+          graph.createTag(participant, "main_participant", participant.getLabel());
+        }
+      }
+      graph.commit();
     }
   }
 
