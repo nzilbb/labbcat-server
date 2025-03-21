@@ -67,15 +67,38 @@ public class TestUpload
       fail("Could not create Labbcat object");
     }
   }
-    
+  
   /**
    * Test /api/edit/transcript/* API, specifically:
    * <ul>
    *  <li> transcriptUpload </li>
-   *  <li> transcriptSave </li>
+   *  <li> transcriptUploadDelete </li>
    * </ul>
    */
-  @Test public void transcriptUploadSaveNew() throws Exception {
+  @Test public void transcriptUploadDelete()
+    throws Exception {
+    
+    File transcript = new File(getDir().getParentFile(), "nzilbb.labbcat.server.test.txt");
+    assertTrue("Ensure transcript exists: " + transcript.getPath(), transcript.exists());
+    try {
+      
+      // upload transcript
+      l.setVerbose(true);
+      nzilbb.labbcat.model.Upload upload = l.transcriptUpload(transcript, false);
+      assertNotNull("ID returned", upload.getId());
+
+      // delete upload
+      l.transcriptUploadDelete(upload);
+      
+    } finally {
+      l.setVerbose(false);
+    }
+  }
+    
+  /**
+   * Test /api/edit/transcript/upload/* API; uploading a new file.
+   */
+  @Test public void transcriptUploadNew() throws Exception {
     File transcript = new File(getDir().getParentFile(), "nzilbb.labbcat.server.test.txt");
     File[] media = {
       new File(getDir().getParentFile(), "nzilbb.labbcat.server.test.wav")
@@ -113,7 +136,7 @@ public class TestUpload
                     upload.getParameters().get("labbcat_transcript_type").getValue());
 
       // finalize parameters
-      upload = l.transcriptSave(upload);
+      upload = l.transcriptUploadParameters(upload);
       System.out.println("transcripts " + upload.getTranscripts());
 
       // TODO wait for transcript threads before deleting
