@@ -28,7 +28,7 @@
 .all {
     font-style: italic;
 }
-.list {
+.participant-list, .transcript-list {
     padding-inline-start: 40px;
 }
 .load-more {

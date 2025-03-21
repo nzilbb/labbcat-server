@@ -32,7 +32,7 @@
         <p>Selected participants{{participantDescription ? ' ['+participantDescription+']' : ''}}:
           <span *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)" class="all">all</span>
         </p>
-        <ul *ngIf="participantIds && participantIds.length" class="list">
+        <ul *ngIf="participantIds && participantIds.length" class="participant-list">
           <li *ngFor="let participantId of participantIds">{{participantId}}</li>
         </ul>
       </div>
@@ -63,7 +63,7 @@
         <p>Selected transcripts{{transcriptDescription ? ' ['+transcriptDescription+']' : ''}}:
           <span *ngIf="!transcriptIds || !transcriptIds.length" i18n="Any (transcript)" class="all">all{{participantIds.length ? ' transcripts with selected participants' : ''}}</span>
         </p>
-        <ul *ngIf="transcriptIds && transcriptIds.length" class="list">
+        <ul *ngIf="transcriptIds && transcriptIds.length" class="transcript-list">
           <li *ngFor="let transcriptId of transcriptIds">{{transcriptId}}</li>
         </ul>
       </div>
