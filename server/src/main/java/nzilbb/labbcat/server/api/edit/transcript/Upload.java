@@ -163,11 +163,15 @@ import nzilbb.util.IO;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class Upload extends APIRequestHandler {
+
+  File uploadsDir;
   
   /**
    * Default constructor.
    */
   public Upload() {
+    uploadsDir = new File(new File(System.getProperty("java.io.tmpdir")), "LaBB-CAT.Upload");
+    if (!uploadsDir.exists()) uploadsDir.mkdir();
   } // end of constructor
 
   /**
@@ -188,7 +192,7 @@ public class Upload extends APIRequestHandler {
         context.servletLog("merge " + merge);
         
         // generate an ID/directory to save files
-        dir = Files.createTempDirectory(store.getFiles().toPath(), dirPrefix).toFile();
+        dir = Files.createTempDirectory(uploadsDir.toPath(), dirPrefix).toFile();
         dir.deleteOnExit();
         String id = dir.getName();
         context.servletLog("id " + id);
@@ -206,6 +210,7 @@ public class Upload extends APIRequestHandler {
           context.servletLog("transcript " + uploadedTranscript.getPath());
           File transcript = new File(dir, uploadedTranscript.getName());
           IO.Rename(uploadedTranscript, transcript);
+          transcript.deleteOnExit();
           context.servletLog(" now " + transcript.getPath() + " " + transcript.exists());
           streams.add(new NamedStream(transcript));
         }
@@ -222,6 +227,7 @@ public class Upload extends APIRequestHandler {
             for (File uploadedMedia : requestParameters.getFiles(parameterName)) {
               File media = new File(subdir, uploadedMedia.getName());
               IO.Rename(uploadedMedia, media);
+              media.deleteOnExit();
               streams.add(new NamedStream(media));
             }
           } // media file
@@ -328,7 +334,7 @@ public class Upload extends APIRequestHandler {
       context.servletLog("store " + store.getId());
       try {
         boolean merge = id.startsWith("_merge_");
-        dir = new File(store.getFiles(), id);
+        dir = new File(uploadsDir, id);
         if (!dir.exists()) {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("Invalid ID: {0}", id);
@@ -478,7 +484,7 @@ public class Upload extends APIRequestHandler {
       SqlGraphStoreAdministration store = getStore();
       context.servletLog("store " + store.getId());
       try {
-        dir = new File(store.getFiles(), id);
+        dir = new File(uploadsDir, id);
         if (!dir.exists()) {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("Invalid ID: {0}", id);
