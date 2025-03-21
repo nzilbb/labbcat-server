@@ -10,10 +10,10 @@
       {{tabs[tab].label}}
       <span
         *ngIf="tab == 'Participants' && participantIds && participantIds.length"
-        class="participant-count">({{participantIds.length}})</span>
+        class="participant-count">({{participantIds.length + (participantIds.length < participantCount ? '+' : '')}})</span>
       <span
         *ngIf="tab == 'Transcripts' && transcriptIds && transcriptIds.length"
-        class="transcript-count">({{transcriptIds.length}})</span>
+        class="transcript-count">({{transcriptIds.length + (transcriptIds.length < transcriptCount ? '+' : '')}})</span>
     </label>
   </div>
   <div *ngFor="let tab of tabLabels"
