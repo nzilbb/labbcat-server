@@ -8,6 +8,12 @@
       <img *ngIf="tabs[tab].icon"
            src="{{imagesLocation}}/{{tabs[tab].icon}}" alt="{{tabs[tab].description}}">
       {{tabs[tab].label}}
+      <span
+        *ngIf="tab == 'Participants' && participantIds && participantIds.length"
+        class="participant-count">({{participantIds.length}})</span>
+      <span
+        *ngIf="tab == 'Transcripts' && transcriptIds && transcriptIds.length"
+        class="transcript-count">({{transcriptIds.length}})</span>
     </label>
   </div>
   <div *ngFor="let tab of tabLabels"
@@ -26,7 +32,7 @@
         <p>Selected participants{{participantDescription ? ' ['+participantDescription+']' : ''}}:
           <span *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)" class="all">all</span>
         </p>
-        <ul class="list">
+        <ul *ngIf="participantIds && participantIds.length" class="list">
           <li *ngFor="let participantId of participantIds">{{participantId}}</li>
         </ul>
       </div>
@@ -57,7 +63,7 @@
         <p>Selected transcripts{{transcriptDescription ? ' ['+transcriptDescription+']' : ''}}:
           <span *ngIf="!transcriptIds || !transcriptIds.length" i18n="Any (transcript)" class="all">all{{participantIds.length ? ' transcripts with selected participants' : ''}}</span>
         </p>
-        <ul class="list">
+        <ul *ngIf="transcriptIds && transcriptIds.length" class="list">
           <li *ngFor="let transcriptId of transcriptIds">{{transcriptId}}</li>
         </ul>
       </div>
