@@ -96,7 +96,7 @@ import nzilbb.util.IO;
  *   <dt> parameters </dt>
  *       <dd> An array of parameter objects representing information that's still required
  *        to finalize the upload. These represent parameters that must be passed into a
- *        subsequent call to {@link /api/edit/transcript/save Save}. This subsequent call
+ *        subsequent call to {@link /api/edit/transcript/upload/${id} PUT}. This subsequent call
  *        must be made to finish the upload process, even if <q>parameters</q> is an empty
  *        array.</dd> 
  *  </dl>
@@ -140,7 +140,7 @@ import nzilbb.util.IO;
  * <a href="POST">POST</a>. 
  * <p> The URL-encoded parameters should include values for the parameters returned by 
  *  the earlier POST request. These may include both information
- * required by the format  deserializer (e.g. mappings from tiers to LaBB-CAT layers) 
+ * required by the format deserializer (e.g. mappings from tiers to LaBB-CAT layers) 
  * and also general information required by LaBB-CAT, such as:
  *  <dl>
  *   <dt> labbcat_corpus </dt>
