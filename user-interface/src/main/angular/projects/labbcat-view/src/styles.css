@@ -412,6 +412,7 @@ tbody tr:nth-child(even) {
     width: fit-content;
     min-width: 50vw;
     margin: auto;
+    background: #FFFFFF;
 }
 .attribute-list .attribute {
     display: flex;
