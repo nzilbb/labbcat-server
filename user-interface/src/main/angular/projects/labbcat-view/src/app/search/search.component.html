@@ -24,13 +24,20 @@
       <lib-button
         (press)="selectParticipants()"
         img="people.svg"
-        label="Filter participants"
+        label="{{!participantIds || !participantIds.length ? 'Filter participants' : 'Modify filter' }}"
         title="Narrow down the participants to search by filtering by participant attributes"
+        ></lib-button>
+      <lib-button
+        *ngIf="participantIds && participantIds.length"
+        (press)="clearParticipantFilter()"
+        img="people.svg"
+        label="Clear filter"
+        title="Clear participant filter"
         ></lib-button>
       <div id="participant-ids">
         <!-- TODO if participantDescription is attribute-based, display as ul; otherwise don't display -->
         <p>Selected participants{{participantDescription ? ' ['+participantDescription+']' : ''}}:
-          <span *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)" class="all">all</span>
+          <span *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)" class="all">all{{transcriptIds.length ? ' participants in selected transcripts' : ''}}</span>
         </p>
         <ul *ngIf="participantIds && participantIds.length" class="participant-list">
           <li *ngFor="let participantId of participantIds">{{participantId}}</li>
@@ -55,8 +62,15 @@
       <lib-button
         (press)="selectTranscripts()"
         img="document.svg"
-        label="Filter transcripts"
+        label="{{!transcriptIds || !transcriptIds.length ? 'Filter transcripts' : 'Modify filter'}}"
         title="Narrow down the transcripts to search by filtering by transcript attributes"
+        ></lib-button>
+      <lib-button
+        *ngIf="transcriptIds && transcriptIds.length"
+        (press)="clearTranscriptFilter()"
+        img="people.svg"
+        label="Clear filter"
+        title="Clear transcript filter"
         ></lib-button>
       <div id="transcript-ids">
         <!-- TODO if transcriptDescription is attribute-based, display as ul; otherwise don't display -->

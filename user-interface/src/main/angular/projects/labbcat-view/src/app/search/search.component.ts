@@ -96,6 +96,10 @@ export class SearchComponent implements OnInit {
                             || "Selected transcripts"; // TODO i18n
                         this.currentTab = "Transcripts";
                     }
+                    
+                    if (params["current_tab"]) {
+                        this.currentTab = params["current_tab"];
+                    }
                 }
                 this.listParticipants(false);
                 this.listTranscripts();
@@ -147,6 +151,19 @@ export class SearchComponent implements OnInit {
             }
         });
     }
+    clearParticipantFilter(): void {
+        this.participantDescription = "";
+        this.participantIds = [];
+        this.participantCount = 0;
+        this.router.navigate([], {
+            queryParams: {
+                participant_expression: null,
+                participants: null,
+                current_tab: 'Participants'
+            },
+            queryParamsHandling: 'merge'
+        });
+    }
     selectTranscripts(): void {
         this.router.navigate(["transcripts"], {
             queryParams: {
@@ -154,6 +171,19 @@ export class SearchComponent implements OnInit {
                 participant_expression: this.participantQueryForTranscripts(),
                 participants: this.participantDescription
             }
+        });
+    }
+    clearTranscriptFilter(): void {
+        this.transcriptDescription = "";
+        this.transcriptIds = [];
+        this.transcriptCount = 0;
+        this.router.navigate([], {
+            queryParams: {
+                transcript_expression: null,
+                transcripts: null,
+                current_tab: 'Transcripts'
+            },
+            queryParamsHandling: 'merge'
         });
     }
     /** Ensure fields are filled in correctly, the value may have been passed in */
