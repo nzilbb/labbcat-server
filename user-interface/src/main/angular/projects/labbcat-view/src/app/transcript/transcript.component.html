@@ -324,16 +324,16 @@
           </li>
           <li>Formatted:
           <br><span style="font-style: italic;">File will include layers you've selected</span>
-        <ul>
-          <li *ngFor="let serializer of serializers"
-              i18n-title title="Convert to selected format">
-            <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.wordLayerId | urlEncode}}&layerId={{schema.utteranceLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
-               class="lnk">
-              <img src="{{serializer.icon}}" alt="⚙">
-              <span>{{serializer.name}}</span>
-            </a>
-          </li>
-        </ul>
+            <ul>
+              <li *ngFor="let serializer of serializers"
+                  i18n-title title="Convert to selected format">
+                <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.wordLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
+                   class="lnk">
+                  <img src="{{serializer.icon}}" alt="⚙">
+                  <span>{{serializer.name}}</span>
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
         <lib-link *ngIf="transcript.first('episode')"
