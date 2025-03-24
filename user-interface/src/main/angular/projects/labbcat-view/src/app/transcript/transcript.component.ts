@@ -149,6 +149,7 @@ export class TranscriptComponent implements OnInit {
                 this.generableLayers = [];
                 this.attributes = [];
                 this.categoryLayers = {};
+                this.categoryLabels = ["Participants", "Layers", "Export"]; // TODO i18n
                 for (let layerId in this.schema.layers) {
                     const layer = this.schema.layers[layerId] as Layer;
                     // detemine which layers can be regenerated
@@ -226,7 +227,7 @@ export class TranscriptComponent implements OnInit {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.readOnlyCategories(
                 "transcript", (categories, errors, messages) => {
-                    this.categoryLabels = ["Participants", "Layers", "Formats"]; // TODO i18n
+                    this.categoryLabels = ["Participants", "Layers", "Export"]; // TODO i18n
                     // extra pseudo categories
                     this.categories["Layers"] = { // TODO i18n
                         label: "Layers", // TODO i18n
@@ -238,10 +239,9 @@ export class TranscriptComponent implements OnInit {
                         description: "The participants in the transcript",
                         icon: "people.svg"
                     }; // TODO i18n
-                    this.categories["Formats"] = { // TODO i18n
-                        label: "Formats", // TODO i18n
+                    this.categories["Export"] = { // TODO i18n
                         description: "Export the transcript in a selected format",
-                        icon: "document.svg"
+                        icon: "cog.svg"
                     }; // TODO i18n
                     
                     for (let category of categories) {

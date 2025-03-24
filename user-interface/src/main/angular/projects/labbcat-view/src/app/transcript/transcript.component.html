@@ -302,8 +302,28 @@
                   img="people.svg" icon="👥"
                   href="edit/transcript/mainParticipants?id={{id | urlEncode}}"></lib-link>
       </div>
-      <!-- formats tab -->
-      <div *ngIf="currentCategory == 'Formats'" id="formats">
+      <!-- export tab -->
+      <div *ngIf="currentCategory == 'Export'" id="export">
+        <ul>
+          <li *ngIf="originalFile">Original transcription: 
+            <ul>
+              <li id="original-file-link"
+                  i18n-title title="Original transcript file"
+                  [ngClass]="{'divergent': transcript.first('divergent')}"
+                  [attr.title]="transcript.first('divergent')?'The text of this transcript may have changed since the original file was uploaded':null"><!-- TODO i18n -->
+                  
+                <a href="{{originalFile}}"
+                   class="lnk"
+                   (click)="divergentCheck();"
+                   download="{{transcript.id}}">
+                  <img src="{{imagesLocation}}/other.svg" alt="🗎">
+                  <span>{{transcript.id}}</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li>Formatted:
+          <br><span style="font-style: italic;">File will include layers you've selected</span>
         <ul>
           <li *ngFor="let serializer of serializers"
               i18n-title title="Convert to selected format">
@@ -313,18 +333,7 @@
               <span>{{serializer.name}}</span>
             </a>
           </li>
-          <li *ngIf="originalFile"
-              id="original-file-link"
-              i18n-title title="Original transcript file"
-              [ngClass]="{'divergent': transcript.first('divergent')}"
-              [attr.title]="transcript.first('divergent')?'The text of this transcript may have changed since the original file was uploaded':null"><!-- TODO i18n -->
-            <a href="{{originalFile}}"
-               class="lnk"
-               (click)="divergentCheck();"
-               download="{{transcript.id}}">
-              <img src="{{imagesLocation}}/other.svg" alt="🗎">
-              <span>{{transcript.id}}</span>
-            </a>
+        </ul>
           </li>
         </ul>
         <lib-link *ngIf="transcript.first('episode')"

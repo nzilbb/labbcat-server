@@ -354,3 +354,8 @@ img.preview {
         justify-content: center;
     }
 }
+
+.ul-nb {
+    list-style-type: none;
+    font-style: italic;
+}
