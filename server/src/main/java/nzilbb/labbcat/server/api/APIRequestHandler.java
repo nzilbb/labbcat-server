@@ -174,6 +174,7 @@ public class APIRequestHandler {
     if (messages != null) {
       for (String message : messages) jsonMessages.add(message);
     }
+    response.add("messages", jsonMessages);
     if (result != null) {
       if (result instanceof JsonValue) {
         response = response.add("model", (JsonValue)result);
