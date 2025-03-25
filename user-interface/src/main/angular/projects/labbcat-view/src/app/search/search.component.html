@@ -34,6 +34,35 @@
         label="Clear filter"
         title="Clear participant filter"
         ></lib-button>
+      <details *ngIf="!participantIds || !participantIds.length" id="file-chooser">
+        <summary i18n><span style="font-style: italic;">Or</span> upload file with participants to search</summary>
+        <div class="advanced">
+          <input type="file" id="csv" (change)="selectFile($event.target.files)">
+          <p>Accepted formats:</p>
+          <ul>
+            <li>Plain text (.txt)
+              <ul>
+                <li>One participant code per line</li>
+                <li>Invalid participant codes ignored</li>
+              </ul>
+            </li>
+            <li>Comma-separated values (.csv)
+              <ul>
+                <li>Participant codes in the first column</li>
+                <li>Invalid participant codes ignored</li>
+                <li>Duplicate participant codes ignored</li>
+              </ul>
+            </li>
+            <li>Tab-separated values (.tsv)
+              <ul>
+                <li>Participant codes in the first column</li>
+                <li>Invalid participant codes ignored</li>
+                <li>Duplicate participant codes ignored</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </details>
       <div id="participant-ids">
         <!-- TODO if participantDescription is attribute-based, display as ul; otherwise don't display -->
         <p>Selected participants{{participantDescription ? ' ['+participantDescription+']' : ''}}:
@@ -51,10 +80,6 @@
         (click)="loadMoreParticipants()"
         [processing]="loadingParticipants">
         ></lib-button>
-      <div *ngIf="!participantIds || !participantIds.length" id="file-chooser">
-        <label for="csv" i18n>Load participants from file</label>
-        <input type="file" id="csv" (change)="selectFile($event.target.files)">
-      </div>
     </div>
     
     <!-- transcripts tab -->

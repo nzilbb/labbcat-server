@@ -16,7 +16,7 @@
     margin-left: -1px; /* to make annoying overshoot at least symmetrical */
 }
 .tab-body > div {
-    padding-top: 10px;
+    padding: 10px;
 }
 @media all and (min-width: 640px) {
     #matrix { 
@@ -37,11 +37,19 @@
 .item label {
     display: inline-block;
 }
-#file-chooser label {
-    padding-right: 5px;
+details > .advanced {
+    border: 1px solid silver;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding: 10px;
 }
-#file-chooser label:after {
-    content: ':';
+details[open] > div {
+    animation-name: roll-down;
+    animation-duration: 1s;
+}
+#file-chooser {
+    padding-top: 10px;
 }
 @media all and (min-width: 640px) {
     lib-layer-checkboxes {
