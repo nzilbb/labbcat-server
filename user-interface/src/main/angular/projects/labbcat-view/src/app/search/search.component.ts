@@ -140,7 +140,7 @@ export class SearchComponent implements OnInit {
         this.tabLabels = Object.keys(this.tabs);
     }
     selectParticipants(): void {
-        if (this.transcriptDescription) {
+        if (this.transcriptIds && this.transcriptIds.length) {
             if (!confirm("This will clear the transcript filter." // TODO i18n
                          +"\nAre you sure you want to select participants?")) {
                 return;
