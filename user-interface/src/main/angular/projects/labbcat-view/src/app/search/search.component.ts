@@ -102,8 +102,8 @@ export class SearchComponent implements OnInit {
                         this.currentTab = params["current_tab"];
                     }
                 }
-                this.listParticipants(false);
-                this.listTranscripts(false);
+                this.listParticipants();
+                this.listTranscripts();
                 if (!this.currentTab) {
                     this.currentTab = "Matrix";
                 }
@@ -212,7 +212,7 @@ export class SearchComponent implements OnInit {
     participantCount = 0;
     loadingParticipants = false;
     /** List participants that match the filters */
-    listParticipants(fromFile: boolean): void {
+    listParticipants(): void {
         this.participantIds = [];
         if (this.matrix.participantQuery) {
             this.labbcatService.labbcat.countMatchingParticipantIds(
@@ -222,7 +222,7 @@ export class SearchComponent implements OnInit {
                     this.participantCount = participantCount;
                     if (this.participantCount) {
                         this.loadMoreParticipants();
-                    } else if (fromFile) { // list loaded from file
+                    } else if (this.participantsFile) { // list loaded from file
                         this.messageService.error("No valid participants in file."); // TODO i18n
                     }
 
@@ -246,7 +246,7 @@ export class SearchComponent implements OnInit {
     transcriptCount = 0;
     loadingTranscripts = false;
     /** List transcripts that match the filters */
-    listTranscripts(fromFile: boolean): void {
+    listTranscripts(): void {
         this.transcriptIds = [];
         if (this.matrix.transcriptQuery) {
             this.labbcatService.labbcat.countMatchingTranscriptIds(
@@ -257,7 +257,7 @@ export class SearchComponent implements OnInit {
                     this.transcriptCount = transcriptCount;
                     if (this.transcriptCount) {
                         this.loadMoreTranscripts();
-                    } else if (fromFile) { // list loaded from file
+                    } else if (this.transcriptsFile) { // list loaded from file
                         this.messageService.error("No valid transcripts in file."); // TODO i18n
                     }
                 });
@@ -375,10 +375,13 @@ export class SearchComponent implements OnInit {
                     component.messageService.error(
                         "File is empty: " + component.participantsFile.name); // TODO i18n
                 } else {
-                    component.matrix.participantQuery = "["+idList.join(",")+"].includes(id)";
-                    console.log("component.matrix.participantQuery " + component.matrix.participantQuery);
-                    this.listParticipants(true);
-                    this.listTranscripts(false);
+                    this.router.navigate([], {
+                        queryParams: {
+                            participant_expression: "["+idList.join(",")+"].includes(id)",
+                            participants: "From uploaded file"
+                        },
+                        queryParamsHandling: 'merge'
+                    });
                 }                
             }
         };
@@ -430,10 +433,13 @@ export class SearchComponent implements OnInit {
                     component.messageService.error(
                         "File is empty: " + component.transcriptsFile.name); // TODO i18n
                 } else {
-                    component.matrix.transcriptQuery = "["+idList.join(",")+"].includes(id)";
-                    console.log("component.matrix.transcriptQuery " + component.matrix.transcriptQuery);
-                    this.listParticipants(false);
-                    this.listTranscripts(true);
+                    this.router.navigate([], {
+                        queryParams: {
+                            transcript_expression: "["+idList.join(",")+"].includes(id)",
+                            transcripts: "From uploaded file"
+                        },
+                        queryParamsHandling: 'merge'
+                    });
                 }                
             }
         };
