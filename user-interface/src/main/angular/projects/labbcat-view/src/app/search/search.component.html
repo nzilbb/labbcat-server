@@ -154,15 +154,6 @@
         ></lib-button>
     </div>
     
-    <!-- search matrix tab -->
-    <div *ngIf="currentTab == 'Matrix'" id="matrix">
-      <app-search-matrix
-        [schema]="schema"
-        [(columns)]="matrix.columns"
-        (keydown.enter)="search()"
-        ></app-search-matrix>
-    </div>
-        
     <!-- options tab -->
     <div *ngIf="currentTab == 'Options'" id="options">
       <div class="list">
@@ -204,7 +195,13 @@
     
   </div>
 </div>
-
+<div class="search-matrix">
+  <app-search-matrix
+    [schema]="schema"
+    [(columns)]="matrix.columns"
+    (keydown.enter)="search()"
+    ></app-search-matrix>
+</div>
 <div class="search-button">
   <lib-button
     i18n-title title="Search for instance of this pattern"

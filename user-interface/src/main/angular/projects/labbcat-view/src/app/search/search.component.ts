@@ -104,9 +104,6 @@ export class SearchComponent implements OnInit {
                 }
                 this.listParticipants();
                 this.listTranscripts();
-                if (!this.currentTab) {
-                    this.currentTab = "Matrix";
-                }
             });
         });
     }
@@ -127,11 +124,6 @@ export class SearchComponent implements OnInit {
             description: "Narrow down the transcripts to search",
             icon: "filter.svg"
         }; // TODO i18n
-        this.tabs["Matrix"] = { // TODO i18n
-            label: "Matrix", // TODO i18n
-            description: "Specify layers and patterns for searching the corpus",
-            icon: "layers.svg"
-        };
         this.tabs["Options"] = { // TODO i18n
             label: "Options", // TODO i18n
             description: "Specify search options",
