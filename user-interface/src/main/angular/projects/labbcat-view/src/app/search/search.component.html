@@ -34,11 +34,13 @@
         label="Clear filter"
         title="Clear participant filter"
         ></lib-button>
-      <details *ngIf="!participantIds || !participantIds.length" id="file-chooser">
-        <summary i18n><span style="font-style: italic;">Or</span> upload file with participants to search</summary>
+      <div *ngIf="!participantIds || !participantIds.length" class="file-chooser">
+        <label for="csv" i18n><span style="font-style: italic;">Or</span> Load participants from file</label>
+        <input type="file" id="participant-csv" (change)="selectParticipantFile($event.target.files)">
+      <details>
+        <summary i18n>Accepted upload formats</summary>
         <div class="advanced">
-          <input type="file" id="csv" (change)="selectFile($event.target.files)">
-          <p>Accepted formats:</p>
+          <p></p>
           <ul>
             <li>Plain text (.txt)
               <ul>
@@ -63,6 +65,7 @@
           </ul>
         </div>
       </details>
+      </div>
       <div id="participant-ids">
         <!-- TODO if participantDescription is attribute-based, display as ul; otherwise don't display -->
         <p>Selected participants{{participantDescription ? ' ['+participantDescription+']' : ''}}:
@@ -97,6 +100,41 @@
         label="Clear filter"
         title="Clear transcript filter"
         ></lib-button>
+      <div *ngIf="!transcriptIds || !transcriptIds.length" class="file-chooser">
+        <label for="csv" i18n><span style="font-style: italic;">Or</span> Load participants from file</label>
+        <input type="file" id="transcript-csv" (change)="selectTranscriptFile($event.target.files)">
+      <details>
+        <summary i18n><span style="font-style: italic;">Or</span> upload file with transcripts to search</summary>
+        <div class="advanced">
+          <p>Accepted upload formats</p>
+          <ul>
+            <li>Plain text (.txt)
+              <ul>
+                <li>One transcript name per line</li>
+                <li>Invalid transcript names ignored</li>
+                <li *ngIf="participantIds.length">Transcripts <strong>without selected participants</strong> ignored</li>
+              </ul>
+            </li>
+            <li>Comma-separated values (.csv)
+              <ul>
+                <li>Transcript names in the first column</li>
+                <li>Invalid transcript names ignored</li>
+                <li>Duplicate transcript names ignored</li>
+                <li *ngIf="participantIds.length">Transcripts <strong>without selected participants</strong> ignored</li>
+              </ul>
+            </li>
+            <li>Tab-separated values (.tsv)
+              <ul>
+                <li>Transcript names in the first column</li>
+                <li>Invalid transcript names ignored</li>
+                <li>Duplicate transcript names ignored</li>
+                <li *ngIf="participantIds.length">Transcripts <strong>without selected participants</strong> ignored</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </details>
+      </div>
       <div id="transcript-ids">
         <!-- TODO if transcriptDescription is attribute-based, display as ul; otherwise don't display -->
         <p>Selected transcripts{{transcriptDescription ? ' ['+transcriptDescription+']' : ''}}:

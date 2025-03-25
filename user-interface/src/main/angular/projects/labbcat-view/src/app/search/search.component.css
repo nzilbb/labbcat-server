@@ -48,8 +48,15 @@ details[open] > div {
     animation-name: roll-down;
     animation-duration: 1s;
 }
-#file-chooser {
+.file-chooser {
     padding-top: 10px;
+    padding-bottom: 10px;
+}
+.file-chooser label {
+    padding-right: 5px;
+}
+.file-chooser label:after {
+    content: ':';
 }
 @media all and (min-width: 640px) {
     lib-layer-checkboxes {

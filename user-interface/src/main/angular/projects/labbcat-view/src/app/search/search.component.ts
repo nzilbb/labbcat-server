@@ -27,6 +27,7 @@ export class SearchComponent implements OnInit {
     participantsFile: File;
     transcriptDescription: string;
     transcriptIds: string[];
+    transcriptsFile: File;
     mainParticipantOnly: boolean;
     onlyAligned: boolean;
     firstMatchOnly: boolean;
@@ -102,7 +103,7 @@ export class SearchComponent implements OnInit {
                     }
                 }
                 this.listParticipants(false);
-                this.listTranscripts();
+                this.listTranscripts(false);
                 if (!this.currentTab) {
                     this.currentTab = "Matrix";
                 }
@@ -245,7 +246,7 @@ export class SearchComponent implements OnInit {
     transcriptCount = 0;
     loadingTranscripts = false;
     /** List transcripts that match the filters */
-    listTranscripts(): void {
+    listTranscripts(fromFile: boolean): void {
         this.transcriptIds = [];
         if (this.matrix.transcriptQuery) {
             this.labbcatService.labbcat.countMatchingTranscriptIds(
@@ -256,6 +257,8 @@ export class SearchComponent implements OnInit {
                     this.transcriptCount = transcriptCount;
                     if (this.transcriptCount) {
                         this.loadMoreTranscripts();
+                    } else if (fromFile) { // list loaded from file
+                        this.messageService.error("No valid transcripts in file."); // TODO i18n
                     }
                 });
         } // there is a transcriptExpression
@@ -331,9 +334,9 @@ export class SearchComponent implements OnInit {
                     "labels('participant').includesAny($1)");
     }
     
-    /** Called when a CSV file is selected; parses the file to determine CSV fields. */
-    selectFile(files: File[]): void {
-        console.log("selectFile " + files.length);
+    /** Called when a participant CSV file is selected; parses the file to determine CSV fields. */
+    selectParticipantFile(files: File[]): void {
+        console.log("selectParticipantFile " + files.length);
         if (files.length == 0) return;
         this.participantsFile = files[0]
         if (!this.participantsFile.name.endsWith(".csv")
@@ -375,7 +378,7 @@ export class SearchComponent implements OnInit {
                     component.matrix.participantQuery = "["+idList.join(",")+"].includes(id)";
                     console.log("component.matrix.participantQuery " + component.matrix.participantQuery);
                     this.listParticipants(true);
-                    this.listTranscripts();
+                    this.listTranscripts(false);
                 }                
             }
         };
@@ -384,5 +387,59 @@ export class SearchComponent implements OnInit {
         };
         reader.readAsText(this.participantsFile);
         
+    }
+    
+    /** Called when a transcript CSV file is selected; parses the file to determine CSV fields. */
+    selectTranscriptFile(files: File[]): void {
+        console.log("selectTranscriptFile " + files.length);
+        if (files.length == 0) return;
+        this.transcriptsFile = files[0]
+        if (!this.transcriptsFile.name.endsWith(".csv")
+            && !this.transcriptsFile.name.endsWith(".tsv")
+            && !this.transcriptsFile.name.endsWith(".txt")) {
+            this.messageService.error("You must select a text file (.txt, .csv, or .tsv)"); // TODO i18n
+            this.transcriptsFile = null;
+            return;
+        }
+        
+        const reader = new FileReader();
+        const component = this;
+        reader.onload = () => {
+            console.log("onload " + files.length);
+            const csvData = reader.result;  
+            let lines = (<string>csvData).split(/\r\n|\n/);
+            console.log("lines " + lines.length);
+            // remove blank lines
+            lines = lines.filter(l=>l.length>0);
+            // if the file has fields/columns, use the first field/column
+            if (/.*,.*/.test(lines[0])) { // CSV
+                lines = lines.map(l=>l.split(",")[0]);
+            } else if (/.*;.*/.test(lines[0])) { // Non-English CSV
+                lines = lines.map(l=>l.split(";")[0]);
+            } else if (/.*\t.*/.test(lines[0])) { // TSV
+                lines = lines.map(l=>l.split("\t")[0]);
+            }
+            console.log("non-blank lines " + lines.length);
+            if (lines.length == 0) {
+                component.messageService.error(
+                    "File is empty: " + component.transcriptsFile.name); // TODO i18n
+            } else {
+                let idList = lines.map(
+                    l=>"'"+l.replace(/\\/g, "\\\\").replace(/'/g, "\\'")+"'");
+                if (idList.length == 0) {
+                    component.messageService.error(
+                        "File is empty: " + component.transcriptsFile.name); // TODO i18n
+                } else {
+                    component.matrix.transcriptQuery = "["+idList.join(",")+"].includes(id)";
+                    console.log("component.matrix.transcriptQuery " + component.matrix.transcriptQuery);
+                    this.listParticipants(false);
+                    this.listTranscripts(true);
+                }                
+            }
+        };
+        reader.onerror = function () {  
+            component.messageService.error("Error reading " + component.transcriptsFile.name);
+        };
+        reader.readAsText(this.transcriptsFile);
     }
 }
