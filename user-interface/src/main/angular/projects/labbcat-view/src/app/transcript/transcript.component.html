@@ -264,6 +264,7 @@
           excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true" excludeWord="true"
           category="true"
           [styles]="layerStyles"
+          [disabled]="disabledLayerIds"
           [interpretedRaw]="interpretedRaw"
           [selected]="selectedLayerIds"
           (selectedChange)="layersChanged($event)"></lib-layer-checkboxes>

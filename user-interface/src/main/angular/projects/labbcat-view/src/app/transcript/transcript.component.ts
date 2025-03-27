@@ -16,6 +16,7 @@ export class TranscriptComponent implements OnInit {
     
     schema : any;
     layerStyles : { [key: string] : any };
+    disabledLayerIds : string[];
     user : User;
     baseUrl : string;
     imagesLocation : string;
@@ -78,6 +79,7 @@ export class TranscriptComponent implements OnInit {
         this.selectedLayerIds = [];
         this.interpretedRaw = {};
         this.layerStyles = {};
+        this.disabledLayerIds = [];
         this.playingId = [];
         this.previousPlayingId = [];
     }
@@ -306,7 +308,6 @@ export class TranscriptComponent implements OnInit {
                             if (layer.id == this.schema.utteranceLayerId) continue;
                             if (layer.id == this.schema.wordLayerId) continue;
                             // a temporal layer
-                            this.layerStyles[l] = { color: "silver" };
                             this.labbcatService.labbcat.countAnnotations(
                                 this.transcript.id, l, (count, errors, messages) => {
                                     if (count) { // annotations in this layer
@@ -315,6 +316,8 @@ export class TranscriptComponent implements OnInit {
                                         this.layerStyles[l] = {};
                                     } else {
                                         this.schema.layers[l].description += ' (0 annotations)';
+                                        this.layerStyles[l] = { color: "silver" };
+                                        this.disabledLayerIds.push(l);
                                     }
                                 });
                         } // next temporal layer
