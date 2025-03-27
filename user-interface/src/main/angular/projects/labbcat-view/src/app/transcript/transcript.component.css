@@ -325,6 +325,14 @@ lib-layer-checkboxes {  /* layer selection on top of media */
     z-index: 5;
 }
 
+.annotation img.icon {
+}
+img.preview {
+    max-width: 200px;
+    position: absolute;
+    z-index: 5;
+}
+
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
     lib-layer-checkboxes { /* layer selector is horizontal*/

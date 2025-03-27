@@ -13,6 +13,7 @@ export interface Annotation {
     next: any;
     start: any;
     end: any;
+    dataUrl: any;
 
     // property that may be present for annotations individually via API
     annotations: any;

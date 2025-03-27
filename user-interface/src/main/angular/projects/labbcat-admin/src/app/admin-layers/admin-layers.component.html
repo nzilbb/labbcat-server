@@ -78,6 +78,8 @@
           <option value="number" i18n="Label type option">Number</option>
           <option value="ipa" i18n="Label type option">Phonological</option>
           <option *ngIf="scope == 'phrase'" value="tree" i18n="Label type option">Tree</option>
+          <!-- Is it a binary object layer? -->
+          <option *ngIf="layer.type.indexOf('/')>0" value="{{layer.type}}">{{layer.type}}</option>
         </select>
       </span>
       <span class="layer-alignment" i18n-title title="Alignment"><legend i18n>Alignment</legend>

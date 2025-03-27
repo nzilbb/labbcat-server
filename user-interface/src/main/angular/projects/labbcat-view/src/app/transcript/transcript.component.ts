@@ -646,7 +646,6 @@ export class TranscriptComponent implements OnInit {
                                     unknownAnchorIds.add(a.endId);
                                 }
                             } // next annotation
-
                             
                             if (unknownAnchorIds.size) {
                                 // there might be a lot of anchors to load,
@@ -655,11 +654,12 @@ export class TranscriptComponent implements OnInit {
                                 this.loadAnchorsIncrementally(unknownAnchorIds).then(()=>{
                                     // add annotations to graph once we've got all the anchors
                                     for (let a of annotations) {
-                                        this.transcript.addAnnotation(
-                                            new this.labbcatService.ag.Annotation(
-                                                layerId, a.label, this.transcript,
-                                                a.startId, a.endId,
-                                                a.id, a.parentId));
+                                        const annotation = new this.labbcatService.ag.Annotation(
+                                            layerId, a.label, this.transcript,
+                                            a.startId, a.endId,
+                                            a.id, a.parentId);
+                                        if (a.dataUrl) annotation.dataUrl = a.dataUrl;
+                                        this.transcript.addAnnotation(annotation);
                                     }
                                     
                                     // next page
@@ -670,10 +670,11 @@ export class TranscriptComponent implements OnInit {
                             } else { // all anchors are already loaded
                                 // we've got all the anchors, so add the annotations to the graph
                                 for (let a of annotations) {
-                                    this.transcript.addAnnotation(
-                                        new this.labbcatService.ag.Annotation(
-                                            layerId, a.label, this.transcript, a.startId, a.endId,
-                                            a.id, a.parentId));
+                                    const annotation = new this.labbcatService.ag.Annotation(
+                                        layerId, a.label, this.transcript, a.startId, a.endId,
+                                        a.id, a.parentId);
+                                    if (a.dataUrl) annotation.dataUrl = a.dataUrl;
+                                    this.transcript.addAnnotation(annotation);
                                 }
                                 
                                 // next page

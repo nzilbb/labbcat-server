@@ -398,6 +398,19 @@
                           <a *ngSwitchCase="'tree'"
                              class="tree" href="#{{annotation.id}}"
                              (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
+                          <a *ngSwitchCase="'image/png'"
+                             class="image" href="#{{annotation.id}}"
+                             href="{{annotation.dataUrl}}"
+                             target="{{annotation.id}}"
+                             (mouseover)="annotation.preview = true;"
+                             (mouseout)="annotation.preview = false;"
+                             ><img *ngIf="!annotation.preview"
+                                   class="icon"
+                                   src="{{imagesLocation}}/image.svg"
+                                   i18n-alt alt="📷"
+                                   ><img *ngIf="annotation.preview"
+                                         class="preview" src="{{annotation.dataUrl}}"
+                                         i18n-alt alt="📷"></a>
                           <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                         </ng-container>
                       </label>&nbsp;</span>
