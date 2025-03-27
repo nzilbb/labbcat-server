@@ -55,6 +55,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() segment: boolean;
     /** Layer styles - key is the layerId, value is the CSS style definition for the layer */
     @Input() styles: { [key: string] : any };
+    /** Input list of IDs of layers whose checkbox should be disabled */
+    @Input() disabled: string[];
     /** A layer ID to exclude options (annotation count, anchoring, etc.) for */
     @Input() excludeOptionsForLayerId: string;
     /** Input list of IDs of selected (ticked) layers */
@@ -97,6 +99,7 @@ export class LayerCheckboxesComponent implements OnInit {
         if (this.word) this.scopeCount++;
         if (this.segment) this.scopeCount++;
         if (!this.styles) this.styles = {};
+        if (!this.disabled) this.disabled = [];
         if (!this.interpretedRaw) this.interpretedRaw = {};
     }
 

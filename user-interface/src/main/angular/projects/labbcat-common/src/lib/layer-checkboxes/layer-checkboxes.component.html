@@ -23,13 +23,14 @@
   <ng-container *ngFor="let layer of participantAttributes">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
            title="{{layer.description}}"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
         value="{{layer.id}}"
         [checked]="layer._selected"
+        [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
@@ -39,13 +40,13 @@
                title-i18n title="How many linked annotations to include">
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-0.svg'}}" alt="[🏷]">
+           src="{{imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]">
       <span class="layer-id">{{ParticipantLayerLabel(layer.id)}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           src="{{imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-           (click)="handleInterpretedRaw(layer.id)"></label>
+           (click)="!this.disabled.includes(layer.id) ? handleInterpretedRaw(layer.id) : ''"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -57,13 +58,14 @@
   <ng-container *ngFor="let layer of transcriptAttributes">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
            title="{{layer.description}}"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
         value="{{layer.id}}"
         [checked]="layer._selected"
+        [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
@@ -73,13 +75,13 @@
                title-i18n title="How many linked annotations to include">
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-0.svg'}}" alt="[🏷]">
+           src="{{imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]">
       <span class="layer-id">{{TranscriptLayerLabel(layer.id)}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           src="{{imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-           (click)="handleInterpretedRaw(layer.id)"></label>
+           (click)="!this.disabled.includes(layer.id) ? handleInterpretedRaw(layer.id) : ''"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -91,13 +93,14 @@
   <ng-container *ngFor="let layer of spanLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
            title="{{layer.description}}"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
         value="{{layer.id}}"
         [checked]="layer._selected"
+        [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
@@ -111,7 +114,7 @@
         </select>
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"           
+           src="{{imagesLocation+'/alignment-'+layer.alignment+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}"           
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
@@ -131,13 +134,14 @@
   <ng-container *ngFor="let layer of phraseLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
            title="{{layer.description}}"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
         value="{{layer.id}}"
         [checked]="layer._selected"
+        [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
@@ -173,7 +177,7 @@
         </ng-container>
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
+           src="{{imagesLocation+'/alignment-'+layer.alignment+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
@@ -193,13 +197,14 @@
   <ng-container *ngFor="let layer of wordLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
            title="{{layer.description}}"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
         value="{{layer.id}}"
         [checked]="layer._selected"
+        [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
@@ -235,7 +240,7 @@
         </ng-container>
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
+           src="{{imagesLocation+'/alignment-'+layer.alignment+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
@@ -255,13 +260,14 @@
   <ng-container *ngFor="let layer of segmentLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
            title="{{layer.description}}"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            [ngStyle]="styles[layer.id]">
       <lib-grouped-checkbox
         group="{{name}}"
         name="{{name}}"
         value="{{layer.id}}"
         [checked]="layer._selected"
+        [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
       <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
@@ -297,7 +303,7 @@
         </ng-container>
       </span>
       <img *ngIf="includeAlignment" class="alignment"
-           src="{{imagesLocation+'/alignment-'+layer.alignment+'.svg'}}"
+           src="{{imagesLocation+'/alignment-'+layer.alignment+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}"
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
