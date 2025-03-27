@@ -417,6 +417,9 @@ public class SqlGraphStoreAdministration
               subtype = "boolean";
             } else if (Constants.TYPE_TREE.equals(layer.getType())) {
               subtype = "X";
+            } else if (layer.getType().indexOf('/') > 0) { // a MIME type for binary annotations
+              // save as is
+              subtype = layer.getType();
             }
             PreparedStatement sql = getConnection().prepareStatement(
               "UPDATE layer SET type = ? WHERE layer_id = ?");
@@ -652,6 +655,9 @@ public class SqlGraphStoreAdministration
             subtype = "number";  // TODO handle type = number/integer
           } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
             subtype = "boolean";
+          } else if (layer.getType().indexOf('/') > 0) { // a MIME type for binary annotations
+            // save as is
+            subtype = layer.getType();
           } 
           if (layer.getValidLabels().keySet().size() > 0) {
             subtype = "select";
@@ -828,6 +834,9 @@ public class SqlGraphStoreAdministration
       subtype = "boolean";
     } else if (Constants.TYPE_TREE.equals(layer.getType())) {
       subtype = "X";
+    } else if (layer.getType().indexOf('/') > 0) { // a MIME type for binary annotations
+      // save as is
+      subtype = layer.getType();
     } 
     if (layer.containsKey("subtype")) { // the given subtype trumps the above
       subtype = layer.get("subtype").toString();
@@ -876,6 +885,9 @@ public class SqlGraphStoreAdministration
             subtype = "number";  // TODO handle type = number/integer
           } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
             subtype = "boolean";
+          } else if (layer.getType().indexOf('/') > 0) { // a MIME type for binary annotations
+            // save as is
+            subtype = layer.getType();
           } 
           if (layer.getValidLabels().keySet().size() > 0) {
             subtype = "select";
@@ -1404,7 +1416,7 @@ public class SqlGraphStoreAdministration
         sql.setInt(1, layer_id);
         sql.executeUpdate();
         sql.close();
-        
+
       } else { // attribute layer
 
         String class_id = (String)layer.get("class_id");
