@@ -122,7 +122,7 @@ export class TranscriptComponent implements OnInit {
                     // preselect layers?
                     let layerIds = params["layerId"]||params["l"]
                     if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
-                        layerIds = JSON.parse(sessionStorage.getItem("selectedLayerIds"));
+                        layerIds = [...new Set(JSON.parse(sessionStorage.getItem("selectedLayerIds")))];
                     }
                     if (!layerIds) layerIds = ["noise","comment"]; // noise and comment by default
                     if (layerIds) {
