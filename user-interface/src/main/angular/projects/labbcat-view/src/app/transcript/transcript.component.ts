@@ -92,30 +92,31 @@ export class TranscriptComponent implements OnInit {
                 });
             });
             this.readSerializers();
-            this.readAvailableMedia().then(()=>{
-                this.praatService.initialize().then((version: string)=>{
-                    console.log(`Praat integration version ${version}`);
-                    this.praatIntegration = version;
-                    this.praatProgress = {
-                        message: `Praat Integration ${this.praatIntegration}`,
-                        value: 0,
-                        maximum: 100
-                    };
-                    this.praatService.progressUpdates().subscribe((progress) => {
-                        this.praatProgress = progress;
-                    });
-                }, (canInstall: boolean)=>{
-                    if (canInstall) {
-                        console.log("Praat integration not installed but it could be");
-                        this.praatIntegration = "";
-                    } else {
-                        console.log("Praat integration: Incompatible browser");
-                            this.praatIntegration = null;
-                    }
-                });
-            });
             this.readSchema().then(() => {
                 this.readTranscript().then(()=>{ // some have to wait until transcript is loaded
+                    this.readAvailableMedia().then(()=>{
+                        this.praatService.initialize().then((version: string)=>{
+                            console.log(`Praat integration version ${version}`);
+                            this.praatIntegration = version;
+                            this.praatProgress = {
+                                message: `Praat Integration ${this.praatIntegration}`,
+                                value: 0,
+                                maximum: 100
+                            };
+                            this.praatService.progressUpdates().subscribe((progress) => {
+                                this.praatProgress = progress;
+                            });
+                        }, (canInstall: boolean)=>{
+                            if (canInstall) {
+                                console.log("Praat integration not installed but it could be");
+                                this.praatIntegration = "";
+                            } else {
+                                console.log("Praat integration: Incompatible browser");
+                                this.praatIntegration = null;
+                            }
+                        });
+                    });
+                    
                     // preselect layers?
                     let layerIds = params["layerId"]||params["l"]
                     if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
