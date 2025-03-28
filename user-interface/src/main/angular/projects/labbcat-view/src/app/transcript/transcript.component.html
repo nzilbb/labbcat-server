@@ -345,6 +345,14 @@
                   i18n-title title="Documents for this episode"
                   ></lib-link>
       </div>
+      <div *ngIf="currentCategory == 'Search'" id="search">
+        <lib-button
+          (press)="layeredSearch()"
+          img="magnifying-glass.svg" icon="🔍"
+          label="Layered Search"
+          title="Search this transcript for patterns on transcription layers"
+          ></lib-button>
+      </div>
       <!-- attribute category tabs -->
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
         <label for="{{layer.id}}" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">{{layer.description}}</label>

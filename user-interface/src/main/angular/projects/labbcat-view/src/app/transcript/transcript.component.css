@@ -246,6 +246,9 @@ nav, nav > div {
     border-top: none;
     margin-left: -1px; /* to make annoying overshoot at least symmetrical */
 }
+.tab-body > div {
+    padding: 10px;
+}
 .attribute-list .participant {
     padding: 5px;
 }

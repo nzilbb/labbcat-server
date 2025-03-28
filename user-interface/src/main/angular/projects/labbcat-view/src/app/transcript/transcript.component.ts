@@ -149,7 +149,7 @@ export class TranscriptComponent implements OnInit {
                 this.generableLayers = [];
                 this.attributes = [];
                 this.categoryLayers = {};
-                this.categoryLabels = ["Participants", "Layers", "Export"]; // TODO i18n
+                this.categoryLabels = [];
                 for (let layerId in this.schema.layers) {
                     const layer = this.schema.layers[layerId] as Layer;
                     // detemine which layers can be regenerated
@@ -186,6 +186,10 @@ export class TranscriptComponent implements OnInit {
                         this.categoryLayers[layer.category].push(layer);
                     }
                 } // next layer
+                this.categoryLabels.push("Participants"); // TODO i18n
+                this.categoryLabels.push("Layers"); // TODO i18n
+                this.categoryLabels.push("Search"); // TODO i18n
+                this.categoryLabels.push("Export"); // TODO i18n
                 resolve();
             });
         });
@@ -238,6 +242,10 @@ export class TranscriptComponent implements OnInit {
                         label: "Participants", // TODO i18n
                         description: "The participants in the transcript",
                         icon: "people.svg"
+                    }; // TODO i18n
+                    this.categories["Search"] = { // TODO i18n
+                        description: "Search this transcript",
+                        icon: "magnifying-glass.svg"
                     }; // TODO i18n
                     this.categories["Export"] = { // TODO i18n
                         description: "Export the transcript in a selected format",
@@ -1535,6 +1543,16 @@ export class TranscriptComponent implements OnInit {
                     });
             });
         } // 'edit' user
+    }
+    
+    /** Search button action */
+    layeredSearch(): void {
+        this.router.navigate(["search"], {
+            queryParams: {
+                transcript_expression: "['" + this.id + "'].includes(id)",
+                transcripts: this.id
+            }
+        });
     }
 
     hideWordMenu(): void {
