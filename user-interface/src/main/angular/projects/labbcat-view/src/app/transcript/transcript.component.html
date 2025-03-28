@@ -400,7 +400,7 @@
                              (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
                           <a *ngSwitchCase="'image/png'"
                              class="image" href="#{{annotation.id}}"
-                             href="{{annotation.dataUrl}}"
+                             href="{{annotation.dataUrl}}&show"
                              target="{{annotation.id}}"
                              (mouseover)="annotation.preview = true;"
                              (mouseout)="annotation.preview = false;"

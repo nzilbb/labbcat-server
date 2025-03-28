@@ -28,11 +28,6 @@ import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.zip.*;
-import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
-import javax.xml.parsers.*;
-import javax.xml.xpath.*;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphStoreAdministration;
 import nzilbb.ag.Schema;
@@ -50,8 +45,6 @@ import nzilbb.labbcat.server.api.RequestParameters;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
-import org.w3c.dom.*;
-import org.xml.sax.*;
 
 /**
  * <tt>/api/serialize/graphs</tt>
@@ -154,7 +147,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
     String[] layersToSerialize = parameters.getStrings("layerId");
     if (layersToSerialize.length == 0) {
       contentType.accept("text/plain;charset=UTF-8");
-      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      httpStatus.accept(SC_BAD_REQUEST);
       try {
         out.write(localize("No layers specified").getBytes()); // TODO i18n
       } catch(IOException exception) {}
