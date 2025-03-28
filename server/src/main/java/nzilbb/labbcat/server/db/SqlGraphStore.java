@@ -2908,6 +2908,7 @@ public class SqlGraphStore implements GraphStore {
       Layer layer = null;
       Graph graph = null;
       Vector<Annotation> annotations = new Vector<Annotation>();
+      String[] defaultGraphLayers = { "corpus", "episode" };
       while (rsAnnotation.next()) {
         if (layer == null) { // they'll all be on the same layer
           layer = schema.getLayer(rsAnnotation.getString("layer"));
@@ -2922,7 +2923,7 @@ public class SqlGraphStore implements GraphStore {
           if (graph == null || !graph.getId().equals(rsAnnotation.getString("graph"))) {
             // graph can change
             try {
-              graph = getTranscript(rsAnnotation.getString("graph"), null);
+              graph = getTranscript(rsAnnotation.getString("graph"), defaultGraphLayers);
             } catch(GraphNotFoundException exception) {
               System.err.println(
                 "getMatchingAnnotations: " + expression + " : " + exception);
@@ -4252,6 +4253,17 @@ public class SqlGraphStore implements GraphStore {
       AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
       AnnotationAgqlToSql.Query query = transformer.sqlFor(
         expression, "annotation_id", userWhereClauseGraph("", "graph"), "");
+      if (query.primaryLayer.getType().indexOf('/') > 0) { // type is a MIME-type
+        // there will be a file associated with each annotation, which must be deleted
+        Annotation[] annotations = getMatchingAnnotations(expression, null, null, true);
+        for (Annotation annotation : annotations) {
+          try {
+            File file = annotationDataFile(
+              annotation, annotation.getGraph(), query.primaryLayer.getType());
+            if (file != null && file.exists()) file.delete();
+          } catch(GraphNotFoundException exception) {}
+        } // next annotation        
+      }
       String delete = query.sql
         .replaceFirst("SELECT .*? FROM", "DELETE annotation.* FROM")
         .replaceAll("ORDER BY [^)]+$","");
@@ -7093,7 +7105,7 @@ public class SqlGraphStore implements GraphStore {
    * not exist.
    * @throws StoreException, PermissionException, GraphNotFoundException
    */
-  protected File annotationDataFile(Annotation annotation, Graph graph, String mimeType)
+  public File annotationDataFile(Annotation annotation, Graph graph, String mimeType)
     throws StoreException, PermissionException, GraphNotFoundException {
     if (mimeType.indexOf('/') < 0) return null; // not a MIME type
     String ext = MediaFile.MimeTypeToSuffix().get(mimeType);
@@ -7137,25 +7149,7 @@ public class SqlGraphStore implements GraphStore {
           if (getBaseUrl() == null) { // TODO check this isn't a security risk
             return annotationFile.toURI().toString();
           } else {
-            File layerDir = annotationFile.getParentFile();
-            File transcriptDir = layerDir.getParentFile();
-            File extDir = transcriptDir.getParentFile();
-            File episodeDir = extDir.getParentFile();
-            File corpusDir = episodeDir.getParentFile();
-            StringBuffer url = new StringBuffer(getBaseUrl())
-              .append("/files/")
-              .append(corpusDir.getName())
-              .append("/")
-              .append(episodeDir.getName())
-              .append("/")
-              .append(extDir.getName())
-              .append("/")
-              .append(transcriptDir.getName())
-              .append("/")
-              .append(layerDir.getName())
-              .append("/")
-              .append(annotationFile.getName());
-            return url.toString();
+            return getBaseUrl()+"/api/annotation/data?id="+annotation.getId();
           }
         } // user has access
       } catch (SQLException x) {
@@ -8940,13 +8934,38 @@ public class SqlGraphStore implements GraphStore {
 	    
       // for each layer
       PreparedStatement selectLayers = getConnection().prepareStatement(
-        "SELECT layer_id, scope FROM layer WHERE layer_id >= 0"
+        "SELECT layer_id, scope, short_description, type FROM layer WHERE layer_id >= 0"
         +" ORDER BY layer_id DESC");
       ResultSet rsLayers = selectLayers.executeQuery();
       PreparedStatement deleteLayerData = getConnection().prepareStatement(
         "DELETE FROM annotation_layer_? WHERE ag_id = ?");
       deleteLayerData.setInt(2, iAgId);
+      File annotationDataDir = null;
       while (rsLayers.next()) {
+        
+        // if it's a MIME type layer
+        
+        if (rsLayers.getString("type").indexOf('/') > 0) {
+          // delete all data files before we delete the annotations
+          Annotation[] annotations = getAnnotations(
+            graph.getId(), rsLayers.getString("short_description"), null, null, null);
+          File layerDir = null;
+          for (Annotation annotation : annotations) {
+            File file = annotationDataFile(annotation, graph, rsLayers.getString("type"));
+            if (file != null && file.exists()) {
+              file.delete();
+              if (layerDir == null) {
+                layerDir = file.getParentFile();
+                if (annotationDataDir == null) {
+                  annotationDataDir = layerDir.getParentFile();
+                }
+              }
+            }
+          } // next annotation
+          if (layerDir != null) layerDir.delete();
+        } // MIME type layer
+
+        // delete annotation rows
         int iLayerId = rsLayers.getInt("layer_id");
         deleteLayerData.setInt(1, iLayerId);
         deleteLayerData.executeUpdate();
@@ -8954,6 +8973,7 @@ public class SqlGraphStore implements GraphStore {
       deleteLayerData.close();
       rsLayers.close();
       selectLayers.close();
+      if (annotationDataDir != null) annotationDataDir.delete();
 	 
       PreparedStatement deleteAnchors = getConnection().prepareStatement(
         "DELETE FROM anchor WHERE ag_id = ?");
@@ -9652,7 +9672,7 @@ public class SqlGraphStore implements GraphStore {
    * @param s The string to escape.
    * @return The given string, with quotes escapeed.
    */
-  private String esc(String s) {
+  protected String esc(String s) {
     if (s == null) return "";
     return s.replace("\\","\\\\").replace("'","\\'");
   } // end of esc()

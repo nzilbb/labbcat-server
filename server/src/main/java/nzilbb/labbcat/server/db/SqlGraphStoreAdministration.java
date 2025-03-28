@@ -1360,6 +1360,19 @@ public class SqlGraphStoreAdministration
         if (layer_id < 0) {
           throw new StoreException("Cannot delete system layer: " + id + " ("+layer_id+")");
         }
+
+        // if it's a MIME type layer
+        if (layer.getType().indexOf('/') > 0) {
+          // delete all data files before we delete the annotations
+          Annotation[] annotations = getMatchingAnnotations(
+            "layer.id = '" + esc(layer.getId()) + "'", null, null, true);
+          for (Annotation annotation : annotations) {
+            try {
+              File file = annotationDataFile(annotation, annotation.getGraph(), layer.getType());
+              if (file != null && file.exists()) file.delete();
+            } catch(GraphNotFoundException exception) {}
+          } // next annotation
+        } // MIME type layer        
         
         // drop the annotation table
         PreparedStatement sql = getConnection().prepareStatement(
