@@ -191,6 +191,7 @@ public class AnnotationAgqlToSql {
     throws AGQLException {
 
     final Query q = new Query();
+    q.primaryLayer = layer;
     final Stack<String> conditions = new Stack<String>();
     final Flags flags = new Flags();      
     final Vector<String> extraJoins = new Vector<String>();
@@ -1225,6 +1226,7 @@ public class AnnotationAgqlToSql {
     throws AGQLException {
 
     final Query q = new Query();
+    q.primaryLayer = layer;
     final Stack<String> conditions = new Stack<String>();
     final Flags flags = new Flags();      
     final Vector<String> extraJoins = new Vector<String>();
@@ -1508,6 +1510,7 @@ public class AnnotationAgqlToSql {
     throws AGQLException {
 
     final Query q = new Query();
+    q.primaryLayer = layer;
     final Stack<String> conditions = new Stack<String>();
     final Flags flags = new Flags();      
     final Vector<String> extraJoins = new Vector<String>();
@@ -1791,6 +1794,7 @@ public class AnnotationAgqlToSql {
     throws AGQLException {
 
     final Query q = new Query();
+    q.primaryLayer = layer;
     final Stack<String> conditions = new Stack<String>();
     final Flags flags = new Flags();      
     final Vector<String> extraJoins = new Vector<String>();
@@ -2174,6 +2178,7 @@ public class AnnotationAgqlToSql {
   {
     public String sql;
     public List<Object> parameters = new Vector<Object>();
+    public Layer primaryLayer;
     
     /**
      * Creates a prepared statement from the sql string and the parameters.
