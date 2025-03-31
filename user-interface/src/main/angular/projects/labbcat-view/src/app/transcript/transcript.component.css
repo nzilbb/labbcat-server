@@ -9,6 +9,7 @@ lib-wait {
 #transcript {
     max-width: 1000px;
     margin: auto;
+    margin-top: 50px; /* Don't have media cover up tabs */
 }
 
 .main-participant {
@@ -268,7 +269,7 @@ lib-layer-checkboxes {  /* layer selection on top of media */
 
 #media {
     position: fixed;
-    top: 60px;
+    top: 20px; /* don't cover up tabs */
     right: 10px;
     min-width: 300px;
     background: var(--theme-background-color);
