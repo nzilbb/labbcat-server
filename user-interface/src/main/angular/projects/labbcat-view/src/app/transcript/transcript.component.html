@@ -561,6 +561,7 @@
               <span class="layer layer-{{word.layerId}}"
                     [class.highlight]="word.id == highlitId"
                     [class.match]="word.id != highlitId && matchTokens[word.id]"
+                    [class.menu-word]="menuId == word.id"
                     (click)="menuId = menuId == word.id?null:word.id; $event.stopPropagation();"
                     [attr.title]="matchTokens[word.id]?'Result '+matchTokens[word.id]:null">
                 <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>

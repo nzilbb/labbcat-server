@@ -20,6 +20,10 @@ lib-wait {
 .match {
     background-color: lightgreen;
 }
+.menu-word {
+    font-style: italic;
+    color: #003594;
+}
 @keyframes fade-background-in {
     from { background-color: transparent; }
     to { background-color: lightgray; }
