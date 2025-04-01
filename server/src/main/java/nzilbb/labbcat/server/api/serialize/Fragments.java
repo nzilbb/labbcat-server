@@ -200,7 +200,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       try {
-        out.write(localize("No MIME type specified").getBytes()); // TODO i18n
+        out.write(localize("No MIME type specified.").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -211,7 +211,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       try {
-        out.write(localize("No layers specified").getBytes()); // TODO i18n
+        out.write(localize("No layers specified.").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -233,7 +233,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     String[] id = parameters.getStrings("id");
     if (id.length == 0 && utterance.length == 0 && threadId == null) {
       contentType.accept("text/plain;charset=UTF-8");
-      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      httpStatus.accept(SC_BAD_REQUEST);
       try {
         out.write(localize("No IDs specified").getBytes()); // TODO i18n       
       } catch(IOException exception) {}
@@ -242,7 +242,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     String[] start = parameters.getStrings("start");
     if (start.length == 0 && utterance.length == 0 && threadId == null) {
       contentType.accept("text/plain;charset=UTF-8");
-      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      httpStatus.accept(SC_BAD_REQUEST);
       try {
         out.write(localize("No start offsets specified").getBytes()); // TODO i18n
       } catch(IOException exception) {}
@@ -251,7 +251,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     String[] end = parameters.getStrings("end");
     if (end.length == 0 && utterance.length == 0 && threadId == null) {
       contentType.accept("text/plain;charset=UTF-8");
-      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      httpStatus.accept(SC_BAD_REQUEST);
       try {
         out.write(localize("No end offsets specified").getBytes()); // TODO i18n
       } catch(IOException exception) {}
@@ -262,7 +262,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         (id.length != start.length || id.length != end.length
          || (filter.length != 0 && id.length != filter.length))) {
       contentType.accept("text/plain;charset=UTF-8");
-      httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      httpStatus.accept(SC_BAD_REQUEST);
       try {
         out.write(localize("Mismatched number of id, start, end, and filter parameters").getBytes()); // TODO i18n
       } catch(IOException exception) {}
@@ -338,7 +338,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         if (utterance.length > 0) {
           for (String matchId : utterance) vUtterances.add(matchId);
         } else if (id != null) {
-          if (filter == null) { // not filtering by turn etc.
+          if (filter == null || filter.length == 0) { // not filtering by turn etc.
             for (int f = 0; f < id.length; f++) {
               vUtterances.add(
                 id[f]+";"+start[f]+"-"+end[f]
@@ -356,7 +356,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         GraphSerializer serializer = store.serializerForMimeType(mimeType);
         if (serializer == null) {
          contentType.accept("text/plain;charset=UTF-8");
-         httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+         httpStatus.accept(SC_BAD_REQUEST);
          out.write(localize("Invalid MIME type: {0}", mimeType).getBytes()); // TODO i18n
          return;
         }
@@ -402,6 +402,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           new Consumer<SerializationException>() {
             public void accept(SerializationException exception) {
               context.servletLog("Fragments: " + exception);
+              exception.printStackTrace(System.err);
             }},
           layerId, mimeType, store);
         
@@ -409,7 +410,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         if (files.size() == 0) {
           contentType.accept("text/plain;charset=UTF-8");
           httpStatus.accept(SC_NOT_FOUND);
-          out.write(localize("No files wer generated.").getBytes()); // TODO i18n
+          out.write(localize("No files were generated.").getBytes()); // TODO i18n
         } else if (files.size() == 1) { // one file only
             // don't zip a single file, just return the file
           contentType.accept(mimeType);
@@ -466,11 +467,11 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     } catch(Exception ex) {
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
+      ex.printStackTrace(System.err);
       try {
         out.write(ex.toString().getBytes());
       } catch(IOException exception) {
         context.servletLog("Files.get: could not report unhandled exception: " + ex);
-        ex.printStackTrace(System.err);
       }
     }
   }
