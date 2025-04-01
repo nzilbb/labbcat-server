@@ -290,7 +290,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         if (utterance.length > 0) {
           for (String matchId : utterance) vUtterances.add(matchId);
         } else if (id != null) {
-          if (filter == null) { // not filtering by turn etc.
+          if (filter == null || filter.length == 0) { // not filtering by turn etc.
             for (int f = 0; f < id.length; f++) {
               vUtterances.add(
                 id[f]+";"+start[f]+"-"+end[f]
