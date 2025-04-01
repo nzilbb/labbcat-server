@@ -154,12 +154,13 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         column.layers[layerId].pop();
     }
 
-    appendToPattern(match: MatrixLayerMatch, suffix: string, focusId: string): void {
-        match.pattern += suffix;
+    appendToPattern(match: MatrixLayerMatch, insertion: string, focusId: string): void {
         const input = document.getElementById(focusId) as any;
-        if (input) { // set the text cursor to after the inserted text
+        if (input) {
+            const oldCursor = input.selectionStart;
+            match.pattern = match.pattern.substring(0, oldCursor) + insertion + match.pattern.substring(oldCursor, input.value.length);
             input.focus();
-            input.selectionStart = input.value.length;
+            input.setSelectionRange(oldCursor, oldCursor + insertion.length); // highlight insertion - doesn't seem to work
             // make sure toolip is updated:
             window.setTimeout(()=>{
                 input.dispatchEvent(new Event('input'));
