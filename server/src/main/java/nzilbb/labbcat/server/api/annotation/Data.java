@@ -22,22 +22,23 @@
 
 package nzilbb.labbcat.server.api.annotation;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.Locale;
-import java.io.FileInputStream;
-import java.io.File;
-import java.io.OutputStream;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
-import nzilbb.ag.Annotation;
-import nzilbb.ag.Layer;
+import java.util.zip.ZipOutputStream;
 import nzilbb.ag.Anchor;
+import nzilbb.ag.Annotation;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphStoreAdministration;
+import nzilbb.ag.Layer;
 import nzilbb.labbcat.server.api.APIRequestHandler;
 import nzilbb.labbcat.server.api.RequestParameters;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
@@ -53,11 +54,14 @@ import nzilbb.util.IO;
  *   <dl>
  *     <dt><span class="paramLabel">Parameters:</span></dt>
  *     <dd><code>id</code> - One or more annotations IDs.</dd>
+ *     <dd><code>expression</code> - An expression to determine the annotations IDs.
+ *                             e.g. "['e_144_17346', 'e_144_17347'].includes(id)"</dd>
  *     <dd><code>name</code> - Optional name of the collection.</dd>
  *     <dd><code>show</code> - Optional parameter for suppressing disposition/filename headers,
  *                             intended to allow easy display of the image in a browser,
  *                             without the browser offering to download the file.</dd>
  *   </dl>
+ * <p> One of <code>id</code> or <code>expression</code> must be specified.
  * <p><b>Output</b>: If one annotation ID is specified, the associated data file is
  * returned. If multiple IDs are specified, a ZIP file is returned, which contains all the
  * data files.
@@ -94,6 +98,27 @@ public class Data extends APIRequestHandler { // TODO unit test
       try {
         // arrays of transcripts and delimiters
         String[] ids = parameters.getStrings("id");
+        if (ids.length == 0) {
+          String expression = parameters.getString("expression");
+          if (expression == null) {
+            contentType.accept("text/plain;charset=UTF-8");
+            httpStatus.accept(SC_BAD_REQUEST);
+            try {
+              out.write(localize("No ID specified.").getBytes());
+            } catch(IOException exception) {}
+            return;
+          }
+          Annotation[] annotations = store.getMatchingAnnotations(expression);
+          if (annotations.length == 0) {
+            contentType.accept("text/plain;charset=UTF-8");
+            httpStatus.accept(SC_NOT_FOUND);
+            try {
+              out.write(localize("There are no matching IDs.").getBytes());
+            } catch(IOException exception) {}
+            return;
+          }
+          ids = Arrays.stream(annotations).map(a->a.getId()).toArray(String[]::new); 
+        }
         Layer layer = null; // they're probably all from the same layer, but if not, ok
         int validIdCount = 0;
         for (String id : ids ) {
@@ -152,7 +177,7 @@ public class Data extends APIRequestHandler { // TODO unit test
         } // next anntation ID
 
         if (validIdCount == 0) {
-          // no IDs were valis
+          // no IDs were valid
           contentType.accept("text/plain;charset=UTF-8");
           httpStatus.accept(SC_NOT_FOUND);
           try {
