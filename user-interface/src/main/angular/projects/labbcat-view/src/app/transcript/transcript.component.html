@@ -226,6 +226,11 @@
                   img="media-skip-backward.svg" icon="⏪"
                   i18n-title title="Repeat"
                   ></lib-button>      
+      <lib-link *ngIf="user && user.roles.includes('edit')"
+                class="buttons"
+                i18n-title title="Edit Media"
+                img="wrench.svg" icon="🔧"
+                href="edit/transcript/media?id={{id | urlEncode}}"></lib-link>
     </div>
   </div>
 
