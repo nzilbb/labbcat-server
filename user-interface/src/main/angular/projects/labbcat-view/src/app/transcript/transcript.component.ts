@@ -735,7 +735,9 @@ export class TranscriptComponent implements OnInit {
         // process them by parent, so that phrases from one speaker can't interfere with
         // those of another speaker
         for (let parent of this.transcript.all(layer.parentId)) {
-            const spans = (parent.all(layer.id)||[])
+            let spans = parent.all(layer.id);
+            if (!spans) continue; // prevent hangups from empty layers
+            spans = spans
             // first, order all annotations so that
             // i) annotations with earlier starts are earlier
             // ii) where starts are equal, longer annotations are earlier
