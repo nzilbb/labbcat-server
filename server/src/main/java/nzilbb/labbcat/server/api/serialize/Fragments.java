@@ -397,7 +397,23 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           serializer,
           new Consumer<NamedStream>() {
             public void accept(NamedStream stream) {
-              files.add(stream);
+              if (serializer.getCardinality() == GraphSerializer.Cardinality.NToOne) {
+                // there will only be one stream, so start writing it immediately
+                if (stream.getMimeType() != null) {
+                  contentType.accept(stream.getMimeType());
+                } else {
+                  contentType.accept(serializer.getDescriptor().getMimeType());
+                }
+                fileName.accept(stream.getName());               
+                try {
+                  IO.Pump(stream.getStream(), out);       
+                } catch(IOException exception) {
+                  context.servletLog("Could not stream output "+stream.getName()+": " + exception);
+                  exception.printStackTrace(System.err);
+                }
+              } else { // could be one of many streams
+                files.add(stream);
+              }
             }},
           new Consumer<SerializationException>() {
             public void accept(SerializationException exception) {
