@@ -130,6 +130,11 @@ nav, nav > div {
     display: inline-block;
     width: 100%;
 }
+/* padding between utterances in the same turn */
+.utterance:not(:first-child) {
+    padding-top: 0.75em;
+}
+
 .token {
     display: inline-block;
 }
