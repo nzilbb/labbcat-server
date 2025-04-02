@@ -1556,14 +1556,29 @@ export class TranscriptComponent implements OnInit {
                     });
             });
         } // 'edit' user
-    }
-    
-    /** Search button action */
-    layeredSearch(): void {
+    }    
+    /** Search button actions */
+    searchTranscript(): void {
         this.router.navigate(["search"], {
             queryParams: {
                 transcript_expression: "['" + this.id + "'].includes(id)",
                 transcripts: this.id
+            }
+        });
+    }
+    searchEpisode(): void {
+        this.router.navigate(["search"], {
+            queryParams: {
+                transcript_expression: "first('episode').label == '" + this.transcript.first('episode').label + "'",
+                transcripts: 'episode = ' + this.transcript.first('episode').label
+            }
+        });
+    }
+    searchParticipant(participant: string): void {
+        this.router.navigate(["search"], {
+            queryParams: {
+                participant_expression: "['" + participant + "'].includes(id)",
+                participants: participant
             }
         });
     }

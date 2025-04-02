@@ -11,7 +11,24 @@ lib-wait {
     margin: auto;
     margin-top: 50px; /* Don't have media cover up tabs */
 }
-
+#search {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+#search > div {
+    display: flex;
+    align-items: center;
+}
+#search > div:not(:first-child) {
+    padding-top: 10px;
+}
+#search label:after {
+    content: ': ';
+}
+#search label {
+    padding-right: 10px;
+}
 .main-participant {
     font-weight: bold;
 }
