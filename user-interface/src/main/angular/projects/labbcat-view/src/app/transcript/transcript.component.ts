@@ -311,8 +311,11 @@ export class TranscriptComponent implements OnInit {
                             this.labbcatService.labbcat.countAnnotations(
                                 this.transcript.id, l, (count, errors, messages) => {
                                     if (count) { // annotations in this layer
-                                        // remove grey-out style
-                                        this.schema.layers[l].description += ` (${count} annotations)`;
+                                        if (count == 1) {
+                                            this.schema.layers[l].description += ` (${count} annotation)`;
+                                        } else {
+                                            this.schema.layers[l].description += ` (${count} annotations)`;
+                                        }
                                         this.layerStyles[l] = {};
                                     } else {
                                         this.schema.layers[l].description += ' (0 annotations)';
