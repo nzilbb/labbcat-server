@@ -59,7 +59,7 @@
           } // multiple values for the same parameter
         } // it's a file
     } // next item
-  } catch(FileUploadException exception) {
+  } catch(Throwable exception) {
     // not a multipart request, just load regular parameters
     Enumeration enNames = request.getParameterNames();
     while (enNames.hasMoreElements()) {
