@@ -446,7 +446,8 @@ export class TranscriptComponent implements OnInit {
     loadThread(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
             if (task) {
-                if (task.layers) this.layersChanged(task.layers.filter(l=>l!="orthography"));
+                let taskLayers = task.layers.filter(l=>l!="orthography");
+                if (task.layers) this.layersChanged(taskLayers, true);
                 this.highlightSearchResults(0);
             }
         });
@@ -634,6 +635,16 @@ export class TranscriptComponent implements OnInit {
                         if (page == 0) {
                             if (errors) errors.forEach(m => 
                                 this.messageService.error(`${layerId}: ${m}`));
+<<<<<<< HEAD
+=======
+                            if (messages) {
+                                messages.forEach(m => this.messageService.info(`${layerId}: ${m}`));
+                                if (messages.includes("There are no annotations.")) {
+                                    this.layerStyles[layerId] = { color: "silver" };
+                                    this.disabledLayerIds.push(layerId);
+                                }
+                            }
+>>>>>>> 840e11b8 (transcript: If task layer is empty, allow it to generate 'There are no annotations' message)
                         }
                         if (annotations.length) {
                             const unknownAnchorIds = new Set<string>();
