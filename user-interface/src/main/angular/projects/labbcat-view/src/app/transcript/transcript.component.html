@@ -331,8 +331,12 @@
               </li>
             </ul>
           </li>
-          <li>Formatted:
-          <br><span style="font-style: italic;">File will include layers you've selected</span>
+          <li>Export formatted, including selected layers (<span 
+            *ngFor="let layerId of selectedLayerIds"
+            class="layer-id"
+            [title]="schema.layers[layerId].description"
+            [style]="layerStyles[layerId]"
+            >{{layerId}}</span>):
             <ul>
               <li *ngFor="let serializer of serializers"
                   i18n-title title="Convert to selected format">

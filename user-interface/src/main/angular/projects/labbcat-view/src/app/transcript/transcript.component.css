@@ -270,6 +270,9 @@ nav, nav > div {
 .speaker label.main-participant:after {
     content: ' (main participant):';
 }
+#export .layer-id:not(:first-child) {
+    padding-left: 0.5em;
+}
 /* Media */
 
 
