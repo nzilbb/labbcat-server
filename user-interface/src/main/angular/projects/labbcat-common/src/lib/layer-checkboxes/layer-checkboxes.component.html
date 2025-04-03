@@ -1,3 +1,4 @@
+<div id="layerSelector">
 <fieldset *ngIf="category && Categories().length > 0" class="categories">
   <legend class="header"
           i18n-title title="Layer Categories"
@@ -42,6 +43,11 @@
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]">
       <span class="layer-id">{{ParticipantLayerLabel(layer.id)}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
            src="{{imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]"
@@ -77,6 +83,11 @@
       <img *ngIf="includeAlignment" class="alignment"
            src="{{imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]">
       <span class="layer-id">{{TranscriptLayerLabel(layer.id)}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
            src="{{imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]"
@@ -118,9 +129,14 @@
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           src="{{imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
@@ -181,9 +197,14 @@
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           src="{{imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
@@ -244,9 +265,14 @@
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           src="{{imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
@@ -307,11 +333,30 @@
            i18n-title="Layer alignment descriptions" title="{{layer.alignment==2? 'Labelled interval' :layer.alignment==1? 'Labelled moment' : 'Label' }}"
            alt="{{layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' }}">
       <span class="layer-id">{{layer.id}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-           src="{{imagesLocation+'/interpreted.svg'}}" alt="[🏷]"
+           src="{{imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            (click)="handleInterpretedRaw(layer.id)"></label>
     </label>
   </ng-container>
+</fieldset>
+</div>
+<fieldset *ngIf="(annotationCounts | json) != '{}'" class="icon-hider">
+  <label 
+    *ngIf="(annotationCounts | json) != '{}'"
+    title="Hide the number of annotations in each layer">
+    <lib-grouped-checkbox
+      group="hideLayerCounts"
+      name="hideLayerCounts"
+      [checked]="!displayCounts"
+      (change)="toggleLayerCounts()"
+      ></lib-grouped-checkbox>
+    Hide annotation counts
+  </label>
 </fieldset>

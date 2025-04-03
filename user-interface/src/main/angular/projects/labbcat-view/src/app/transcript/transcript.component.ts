@@ -17,6 +17,7 @@ export class TranscriptComponent implements OnInit {
     schema : any;
     layerStyles : { [key: string] : any };
     disabledLayerIds : string[];
+    layerCounts : { [key: string] : any };
     user : User;
     baseUrl : string;
     imagesLocation : string;
@@ -80,6 +81,7 @@ export class TranscriptComponent implements OnInit {
         this.interpretedRaw = {};
         this.layerStyles = {};
         this.disabledLayerIds = [];
+        this.layerCounts = {};
         this.playingId = [];
         this.previousPlayingId = [];
     }
@@ -310,6 +312,7 @@ export class TranscriptComponent implements OnInit {
                             // a temporal layer
                             this.labbcatService.labbcat.countAnnotations(
                                 this.transcript.id, l, (count, errors, messages) => {
+                                    this.layerCounts[l] = count;
                                     if (count) { // annotations in this layer
                                         if (count == 1) {
                                             this.schema.layers[l].description += ` (${count} annotation)`;
