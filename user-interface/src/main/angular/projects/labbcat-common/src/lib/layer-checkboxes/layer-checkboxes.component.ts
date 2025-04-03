@@ -125,12 +125,8 @@ export class LayerCheckboxesComponent implements OnInit {
         this.wordLayers = [];
         this.segmentLayers = [];
         this.categorySelections = {};
-        let displayIcons = sessionStorage.getItem("displayLayerIcons");
-        if (displayIcons) { 
-          this.displayIcons = (displayIcons=="true");
-        } else {
-          this.displayIcons = true;
-        }
+        const displayIcons = sessionStorage.getItem("displayLayerIcons");
+        this.displayIcons = JSON.parse(displayIcons || 'true');
         if (!this.selected) this.selected = [] as string[];
 
         // add category selectors in defined order
@@ -247,12 +243,14 @@ export class LayerCheckboxesComponent implements OnInit {
         this.selectedChange.emit(this.selected);
     }
     handleInterpretedRaw(layerId:string): void {
-        this.interpretedRaw[layerId] = !this.interpretedRaw[layerId];
-        this.interpretedRawChange.emit(this.interpretedRaw);
+        if (!this.disabled || !this.disabled.includes(layerId)) {
+            this.interpretedRaw[layerId] = !this.interpretedRaw[layerId];
+            this.interpretedRawChange.emit(this.interpretedRaw);
+        }
     }
     
     toggleLayerIcons(): void {
         this.displayIcons = !this.displayIcons;
-        sessionStorage.setItem("displayLayerIcons", this.displayIcons.toString());
+        sessionStorage.setItem("displayLayerIcons", JSON.stringify(this.displayIcons));
     }
 }

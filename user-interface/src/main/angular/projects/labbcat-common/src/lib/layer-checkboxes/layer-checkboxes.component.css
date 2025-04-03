@@ -75,6 +75,12 @@ img.data-type, img.alignment, img.vertical-peers {
 .icon-hider {
     font-style: italic;
 }
-.no-display {
-    display: none;
+@media all and (min-width: 640px) {
+    .icon-hider { 
+        display: flex;
+        flex-direction: row;
+    }
+    .icon-hider label {
+        flex-grow: 1;
+    }
 }
