@@ -286,22 +286,31 @@
         </div>
       </div>
       <!-- participants tab -->
-      <div *ngIf="currentCategory == 'Participants'" id="participants">
-        <ul>
-          <li *ngFor="let participant of transcript.all('participant')"
-              [ngClass]="{'participant':true, 'main-participant': participant.first('main_participant')}">
-            <a href="{{baseUrl}}{{user && user.roles.includes('edit')?'edit/':''}}participant?id={{participant.label}}">
-              {{participant.label}}
-            </a>
-          </li>
-        </ul>
+      <ng-container *ngIf="currentCategory == 'Participants'">
+        <div *ngFor="let participant of transcript.all('participant')" class="attribute speaker">
+          <label 
+            [ngClass]="{'participant':true, 'main-participant': participant.first('main_participant')}"
+            >{{participant.label}}</label>
+          <lib-button
+            (press)="viewAttributes(participant.label)"
+            img="csv.svg" icon=",a,"
+            label="Attributes"
+            title="{{user && user.roles.includes('edit')?'Edit':'View'}} this participant's attributes"
+            ></lib-button>
+          <lib-button
+            (press)="listTranscripts(participant.label)"
+            img="document.svg" icon="📄"
+            label="List transcripts"
+            title="List transcripts including this participant"
+            ></lib-button>
+        </div>
         <lib-link *ngIf="user && user.roles.includes('edit')"
                   class="buttons"
                   i18n-title title="Main Participants"
                   i18n-label label="Main Participants"
                   img="people.svg" icon="👥"
                   href="edit/transcript/mainParticipants?id={{id | urlEncode}}"></lib-link>
-      </div>
+      </ng-container>
       <!-- export tab -->
       <div *ngIf="currentCategory == 'Export'" id="export">
         <ul>

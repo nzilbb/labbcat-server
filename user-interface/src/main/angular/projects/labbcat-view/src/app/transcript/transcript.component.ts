@@ -1553,7 +1553,31 @@ export class TranscriptComponent implements OnInit {
                     });
             });
         } // 'edit' user
-    }    
+    }
+    /** Participants button actions */
+    viewAttributes(participant: string): void {
+        if (this.user.roles.includes("edit")) {
+            this.router.navigate(["edit","participant"], {
+                queryParams: {
+                    id: participant
+                }
+            });
+        } else {
+            this.router.navigate(["participant"], {
+                queryParams: {
+                    id: participant
+                }
+            });
+        }
+    }
+    listTranscripts(participant: string): void {
+        this.router.navigate(["transcripts"], {
+            queryParams: {
+                participant_expression: "['" + participant + "'].includesAny(labels('participant'))",
+                participants: participant
+            }
+        });
+    }
     /** Search button actions */
     searchTranscript(): void {
         this.router.navigate(["search"], {

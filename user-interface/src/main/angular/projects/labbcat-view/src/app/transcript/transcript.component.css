@@ -258,12 +258,17 @@ nav, nav > div {
     display: inline-block;
     vertical-align: middle;
 }
+.attribute-list .attribute.speaker,
 .attribute-list .attribute.search {
     align-items: center;
 }
+.attribute-list .attribute.speaker label,
 .attribute-list .attribute.search label {
     width: 20%;
     min-width: 10em;
+}
+.speaker label.main-participant:after {
+    content: ' (main participant):';
 }
 /* Media */
 
