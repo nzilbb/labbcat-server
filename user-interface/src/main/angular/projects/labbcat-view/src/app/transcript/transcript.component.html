@@ -331,7 +331,9 @@
               </li>
             </ul>
           </li>
-          <li>Export formatted, including selected layers (<span 
+          <li>Export formatted, including transcript lines (<span 
+            class="layer-id no-pad"
+            >utterance</span>) and selected layers (<span 
             *ngFor="let layerId of selectedLayerIds"
             class="layer-id"
             [title]="schema.layers[layerId].description"
@@ -340,7 +342,7 @@
             <ul>
               <li *ngFor="let serializer of serializers"
                   i18n-title title="Convert to selected format">
-                <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.wordLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
+                <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.utteranceLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
                    class="lnk">
                   <img src="{{serializer.icon}}" alt="⚙">
                   <span>{{serializer.name}}</span>
