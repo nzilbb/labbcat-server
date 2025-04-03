@@ -3,6 +3,7 @@
         title="{{error || title}}"
         class="{{classes}}"
         [class.error]="error"
+        [style.text-transform]="noCaps ? '' : 'capitalize'"
         [appAutofocus]="autofocus?true:false">
   <img src="{{processing?imagesLocation+'/wait.gif':img.startsWith('http')?img:imagesLocation+'/'+img}}" alt="{{icon}}">
   <label i18n>{label, select, New {New} Save {Save} Delete {Delete} other {{{label}}}}</label>

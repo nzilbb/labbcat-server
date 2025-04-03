@@ -635,8 +635,6 @@ export class TranscriptComponent implements OnInit {
                         if (page == 0) {
                             if (errors) errors.forEach(m => 
                                 this.messageService.error(`${layerId}: ${m}`));
-<<<<<<< HEAD
-=======
                             if (messages) {
                                 messages.forEach(m => this.messageService.info(`${layerId}: ${m}`));
                                 if (messages.includes("There are no annotations.")) {
@@ -644,7 +642,6 @@ export class TranscriptComponent implements OnInit {
                                     this.disabledLayerIds.push(layerId);
                                 }
                             }
->>>>>>> 840e11b8 (transcript: If task layer is empty, allow it to generate 'There are no annotations' message)
                         }
                         if (annotations.length) {
                             const unknownAnchorIds = new Set<string>();
