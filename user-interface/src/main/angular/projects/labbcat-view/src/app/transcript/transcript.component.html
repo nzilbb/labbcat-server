@@ -346,23 +346,25 @@
                   ></lib-link>
       </div>
       <!-- search tab -->
-      <div *ngIf="currentCategory == 'Search'" id="search">
-        <div id="search-transcripts">
+      <ng-container *ngIf="currentCategory == 'Search'">
+        <div id="search-transcripts" class="attribute search">
           <label>Search transcripts</label>
           <lib-button
             (press)="searchTranscript()"
             img="magnifying-glass.svg" icon="🔍"
             label="{{id}}"
             title="Search this transcript for patterns on transcription layers"
+            noCaps="true"
             ></lib-button>
           <lib-button
             (press)="searchEpisode()"
             img="magnifying-glass.svg" icon="🔍"
-            label="episode {{transcript.first('episode').label}}"
+            label="Episode {{transcript.first('episode').label}}"
             title="Search transcripts in this episode for patterns on transcription layers"
+            noCaps="true"
             ></lib-button>
         </div>
-        <div id="search-participants">
+        <div id="search-participants" class="attribute search">
           <label>Search participants</label>
           <lib-button
             *ngFor="let participant of participants"
@@ -370,9 +372,10 @@
             img="magnifying-glass.svg" icon="🔍"
             label="{{participant}}"
             title="Search this participant's utterances for patterns on transcription layers"
+            noCaps="true"
             ></lib-button>
         </div>
-      </div>
+      </ng-container>
       <!-- attribute category tabs -->
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
         <label for="{{layer.id}}" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">{{layer.description}}</label>
