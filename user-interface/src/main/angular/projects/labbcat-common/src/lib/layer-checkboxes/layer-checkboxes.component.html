@@ -44,7 +44,7 @@
            [src]="imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]">
       <span class="layer-id">{{ParticipantLayerLabel(layer.id)}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
-           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           i18n-title title="Toggle between displaying IPA vs. DISC symbols"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            (click)="handleInterpretedRaw(layer.id)"></label>
@@ -79,7 +79,7 @@
            [src]="imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]">
       <span class="layer-id">{{TranscriptLayerLabel(layer.id)}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
-           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           i18n-title title="Toggle between displaying IPA vs. DISC symbols"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            (click)="handleInterpretedRaw(layer.id)"></label>
@@ -134,7 +134,7 @@
            [title]="'Allows vertical peers: ' + layer.peersOverlap ? 'True' : 'False'">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
-           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           i18n-title title="Toggle between displaying IPA vs. DISC symbols"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            [style.display]="displayIcons ? 'inline' : 'none'"
@@ -212,7 +212,7 @@
            [title]="'Allows vertical peers: ' + layer.peersOverlap ? 'True' : 'False'">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
-           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           i18n-title title="Toggle between displaying IPA vs. DISC symbols"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            [style.display]="displayIcons ? 'inline' : 'none'"
@@ -294,7 +294,7 @@
            [title]="'Allows vertical peers: ' + layer.peersOverlap ? 'True' : 'False'">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
-           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           i18n-title title="Toggle between displaying IPA vs. DISC symbols"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            [style.display]="displayIcons ? 'inline' : 'none'"
@@ -373,7 +373,7 @@
            [title]="'Allows vertical peers: ' + layer.peersOverlap ? 'True' : 'False'">
       <span class="layer-id">{{layer.id}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
-           i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+           i18n-title title="Toggle between displaying IPA vs. DISC symbols"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
            [style.display]="displayIcons ? 'inline' : 'none'"
