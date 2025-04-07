@@ -64,6 +64,12 @@
               </select>
             </div>
             <lib-button
+              *ngIf="showGenerateLayerSelection"
+              (press)="collapseGenerate()"
+              img="left-triangle.png" icon="🞀"
+              i18n-title title="Collapse 'Generate' options"
+              ></lib-button>
+            <lib-button
               *ngIf="!nextPage"
               (press)="exportMedia()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
@@ -96,6 +102,12 @@
                         value="{{serializer.mimeType}}">{{serializer.name}}</option>
               </select>
             <lib-button
+              *ngIf="showSerializationOptions"
+              (press)="collapseExportFormat()"
+              img="left-triangle.png" icon="🞀"
+              i18n-title title="Collapse 'Export Formatted' options"
+              ></lib-button>
+            <lib-button
               *ngIf="!nextPage"
               (press)="exportAttributes()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"
@@ -111,6 +123,12 @@
                 excludeMainParticipant="{{true}}"
                 ></lib-layer-checkboxes>
             </span>
+            <lib-button
+              *ngIf="showAttributesSelection"
+              (press)="collapseExportAttributes()"
+              img="left-triangle.png" icon="🞀"
+              i18n-title title="Collapse 'Export Attributes' options"
+              ></lib-button>
             <lib-button
               *ngIf="!nextPage || nextPage == 'search'"
               (press)="layeredSearch()"
