@@ -331,10 +331,7 @@ export class TranscriptsComponent implements OnInit {
                 
                 // from?
                 if (this.filterValues[layer.id][0]) {
-                    if (this.query) {
-                    this.query += " && ";
-                    this.queryDescription += ", ";
-                }
+                    if (this.query) this.query += " && ";
                     const value = (layer.subtype == "integer"?
                         parseInt:parseFloat)(this.filterValues[layer.id][0])
                     this.query += "first('"+this.esc(layer.id)+"').label >= "+ value;
@@ -342,11 +339,7 @@ export class TranscriptsComponent implements OnInit {
                 
                 // to?
                 if (this.filterValues[layer.id][1]) {
-                    if (this.query) {
-                    this.query += " && ";
-                    this.queryDescription += ", ";
-                }
-                    
+                    if (this.query) this.query += " && ";
                     const value = (layer.subtype == "integer"?
                         parseInt:parseFloat)(this.filterValues[layer.id][1])
                     this.query += "first('"+this.esc(layer.id)+"').label <= "+ value;
@@ -356,7 +349,7 @@ export class TranscriptsComponent implements OnInit {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
                         +" " + this.filterValues[layer.id][0]
-                        + "-" + this.filterValues[layer.id][1];
+                        + "–" + this.filterValues[layer.id][1];
                 } else if (this.filterValues[layer.id][0]) {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
@@ -397,7 +390,7 @@ export class TranscriptsComponent implements OnInit {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
                         +" " + this.filterValues[layer.id][0]
-                        + "-" + this.filterValues[layer.id][1];
+                        + "–" + this.filterValues[layer.id][1];
                 } else if (this.filterValues[layer.id][0]) {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description

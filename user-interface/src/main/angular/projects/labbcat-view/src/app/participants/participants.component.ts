@@ -289,7 +289,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += 
                         "Transcript count " + this.filterValues[layer.id][0] // TODO i18n
-                        + "-" + this.filterValues[layer.id][1];
+                        + "–" + this.filterValues[layer.id][1];
                 } else if (this.filterValues[layer.id][0]) {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription +=
@@ -359,7 +359,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
                         +" " + this.filterValues[layer.id][0]
-                        + "-" + this.filterValues[layer.id][1];
+                        + "–" + this.filterValues[layer.id][1];
                 } else if (this.filterValues[layer.id][0]) {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
@@ -396,7 +396,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
                         +" " + this.filterValues[layer.id][0]
-                        + "-" + this.filterValues[layer.id][1];
+                        + "–" + this.filterValues[layer.id][1];
                 } else if (this.filterValues[layer.id][0]) {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
