@@ -703,25 +703,16 @@ export class ParticipantsComponent implements OnInit {
     }
     /** Query parameters for selected participants */
     selectedParticipantsQueryParameters(participantIdParameter: string): Params {
-        let participantDescription = this.queryDescription;
-        if (this.selectedIds.length > 0) { // individual check-boxes selected
-            if (this.selectedIds.length == 1) {
-                participantDescription = this.selectedIds[0];
-            } else if (this.selectedIds.length <= 5) {
-                participantDescription = this.selectedIds.join(", ");
-            } else {
-                participantDescription = ""+this.selectedIds.length + " selected participants"; // TODO i18n
-            }
+        if (this.selectedIds.length > 0) { // individual check-boxes selected - don't send a participants param
             return {
                 participant_expression: "["
                     + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                    + "].includes(id)",
-                participants: participantDescription
+                    + "].includes(id)"
             };
         } else if (this.query) { // no check-boxes selected but some filter applied
             return {
                 participant_expression: this.query,
-                participants: participantDescription
+                participants: this.queryDescription
             };
         } else { // no check-boxes selected or filter applied
             return {
