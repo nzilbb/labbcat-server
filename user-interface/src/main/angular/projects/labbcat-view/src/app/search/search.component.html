@@ -21,6 +21,7 @@
     
     <!-- participants tab -->
     <div *ngIf="currentTab == 'Participants'" id="participants">
+      <div id="participant-chooser">
       <lib-button
         (press)="selectParticipants()"
         img="people.svg"
@@ -65,6 +66,7 @@
         </div>
       </details>
       </div>
+      </div>
       <div id="participant-ids">
         <!-- TODO if participantDescription is attribute-based, display as ul; otherwise don't display -->
         <p>Selected participants{{participantDescription ? ' ['+participantDescription+']' : ''}}:
@@ -86,6 +88,7 @@
     
     <!-- transcripts tab -->
     <div *ngIf="currentTab == 'Transcripts'" id="transcripts">
+      <div id="transcript-chooser">
       <lib-button
         (press)="selectTranscripts()"
         img="document.svg"
@@ -133,8 +136,8 @@
         </div>
       </details>
       </div>
+      </div>
       <div id="transcript-ids">
-        <!-- TODO if transcriptDescription is attribute-based, display as ul; otherwise don't display -->
         <p>Selected transcripts{{transcriptDescription ? ' ['+transcriptDescription+']' : ''}}:
           <span *ngIf="!transcriptIds || !transcriptIds.length" i18n="Any (transcript)" class="all">all transcripts{{participantIds.length ? ' with selected participants' : ''}}</span>
         </p>

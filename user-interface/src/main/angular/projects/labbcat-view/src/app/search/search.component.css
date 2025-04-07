@@ -32,6 +32,17 @@
         flex-direction: column; 
         align-items: center;
     }
+    #participant-chooser, #transcript-chooser {
+        display: flex;
+    }
+    .file-chooser {
+        padding-left: 10px;
+        flex-grow: 1;
+    }
+}
+#participant-chooser lib-button,
+#transcript-chooser lib-button {
+    padding-bottom: 10px;
 }
 .all {
     font-style: italic;
@@ -57,7 +68,6 @@ details[open] > div {
     animation-duration: 1s;
 }
 .file-chooser {
-    padding-top: 10px;
     padding-bottom: 10px;
 }
 .file-chooser label {
