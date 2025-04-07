@@ -40,7 +40,6 @@
       <details>
         <summary i18n>Accepted upload formats</summary>
         <div class="advanced">
-          <p></p>
           <ul>
             <li>Plain text (.txt)
               <ul>
@@ -101,12 +100,11 @@
         title="Clear transcript filter"
         ></lib-button>
       <div *ngIf="!transcriptIds || !transcriptIds.length" class="file-chooser">
-        <label for="csv" i18n><span style="font-style: italic;">Or</span> Load participants from file</label>
+        <label for="csv" i18n><span style="font-style: italic;">Or</span> Load transcripts from file</label>
         <input type="file" id="transcript-csv" (change)="selectTranscriptFile($event.target.files)">
       <details>
-        <summary i18n><span style="font-style: italic;">Or</span> upload file with transcripts to search</summary>
+        <summary i18n>Accepted upload formats</summary>
         <div class="advanced">
-          <p>Accepted upload formats</p>
           <ul>
             <li>Plain text (.txt)
               <ul>
