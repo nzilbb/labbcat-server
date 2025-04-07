@@ -18,3 +18,7 @@
 .links lib-link {
     padding: 10px;
 }
+#toggleLayerIds {
+    padding-top: 5px;
+    font-style: italic;
+}

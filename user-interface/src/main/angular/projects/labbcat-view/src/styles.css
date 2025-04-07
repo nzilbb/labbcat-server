@@ -421,7 +421,12 @@ tbody tr:nth-child(odd) {
 .attribute-list .attribute label {
     width: 50%
 }
-.attribute-list .attribute label:after {
+.attribute-list .attribute .values {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+.attribute-list .attribute > label:after {
     content: ':';
 }
 .attribute-list .attribute .values {

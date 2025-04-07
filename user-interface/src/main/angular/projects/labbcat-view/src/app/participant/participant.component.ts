@@ -25,6 +25,7 @@ export class ParticipantComponent implements OnInit {
     currentCategory: string;
     categories: object; // string->Category
     participant: Annotation;
+    displayLayerIds = true;
     
     constructor(
         @Inject('environment') private environment,
@@ -120,4 +121,10 @@ export class ParticipantComponent implements OnInit {
             });       
     }
 
+    ParticipantLayerLabel(id): string {
+        return id.replace(/^participant_/,"");
+    }
+    toggleLayerIds(): void {
+        this.displayLayerIds = !this.displayLayerIds;
+    }
 }

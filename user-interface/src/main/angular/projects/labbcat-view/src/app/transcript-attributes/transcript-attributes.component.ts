@@ -21,6 +21,7 @@ export class TranscriptAttributesComponent implements OnInit {
     currentCategory: string;
     categories: object; // string->Category
     transcript: Annotation;
+    displayLayerIds = true;
     
     constructor(
         private labbcatService: LabbcatService,
@@ -112,5 +113,11 @@ export class TranscriptAttributesComponent implements OnInit {
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.transcript = transcript;
             });       
+    }
+    TranscriptLayerLabel(id): string {
+        return id.replace(/^transcript_/,"");
+    }
+    toggleLayerIds(): void {
+        this.displayLayerIds = !this.displayLayerIds;
     }
 }

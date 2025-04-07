@@ -1,7 +1,7 @@
 <lib-wait *ngIf="!participant"></lib-wait>
 <div *ngIf="participant" id="header" class="attribute-list">
   <div class="attribute">
-    <label for="label" i18n="Participant ID label">Name</label>
+    <label for="label" i18n="Participant ID label" title="APLS speaker code">Name<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">participant</span>)</span></label>
     <span id="label" class="values"><div class="value" id="title">{{participant.label}}</div></span>
   </div>
 </div>
@@ -17,7 +17,7 @@
   <div *ngFor="let category of categoryLabels"
        [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
-        <label for="{{layer.id}}" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">{{layer.description}}</label>
+        <label for="{{layer.id}}" title="{{layer.hint}}">{{layer.description}}<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">{{ParticipantLayerLabel(layer.id)}}</span>)</span></label>
         <span *ngIf="participant.annotations && participant.annotations[layer.id]"
               id="{{layer.id}}" class="values">
           <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
@@ -32,6 +32,10 @@
           </div>
         </span>
       </div>
+      <label id="toggleLayerIds">
+        <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
+        Hide layer names
+      </label>
     </div>
 </div>
 <div *ngIf="participant" class="links">
