@@ -332,15 +332,6 @@ export class TranscriptComponent implements OnInit {
         for (let id in this.transcript.anchors) {
             const anchor = this.transcript.anchors[id] as Anchor;
             anchor.id = id; // ensure ID is set
-            // initialise links to annotations
-            anchor.startOf = {};
-            anchor.startOf[turnLayerId] = [];
-            anchor.startOf[utteranceLayerId] = [];
-            anchor.startOf[wordLayerId] = [];
-            anchor.endOf = {};
-            anchor.endOf[turnLayerId] = [];
-            anchor.endOf[utteranceLayerId] = [];
-            anchor.endOf[wordLayerId] = [];
             this.anchors[id] = anchor;
         }
 

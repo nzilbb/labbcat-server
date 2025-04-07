@@ -112,6 +112,18 @@
       if (!annotation.parent && annotation.parentId) {
         annotation.parent = this.annotations[annotation.parentId];
       }
+      if (this.anchors[annotation.startId]) {
+        if (!this.anchors[annotation.startId].startOf[annotation.layerId]) {
+          this.anchors[annotation.startId].startOf[annotation.layerId] = []
+        }
+        this.anchors[annotation.startId].startOf[annotation.layerId].push(annotation);
+      }
+      if (this.anchors[annotation.endId]) {
+        if (!this.anchors[annotation.endId].endOf[annotation.layerId]) {
+          this.anchors[annotation.endId].endOf[annotation.layerId] = []
+        }
+        this.anchors[annotation.endId].endOf[annotation.layerId].push(annotation);
+      }
       if (annotation.parent) {
 	if (!annotation.parent[annotation.layerId]) annotation.parent[annotation.layerId] = [];
         var existing = annotation.parent[annotation.layerId].findIndex(
@@ -143,7 +155,7 @@
     addAnchor : function(anchor) {
       anchor.graph = this;
       if (!anchor.id) anchor.id = "+" + (++nzilbb.ag._lastId);
-      this.anchors[anchor.id] = anchor;
+      this.anchors[anchor.id] = this.anchors[anchor.id] || anchor;
     },
     
     first : function(layerId) {
@@ -448,7 +460,7 @@
       var tags = [];
       for (var i in this.start.startOf[layerId]) {
 	var other = this.start.startOf[layerId][i];
-	if (this.startsWith(other)) tags.push(other);
+	if (this.endsWith(other)) tags.push(other);
       } // next annotation that starts here
       return tags;
     },

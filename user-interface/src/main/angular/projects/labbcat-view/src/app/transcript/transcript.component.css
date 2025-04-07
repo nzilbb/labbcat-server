@@ -124,6 +124,10 @@ nav, nav > div {
     display: block;
 }
 
+.utterance-tag {
+    display: inline-block;
+    width: 100%;
+}
 .token {
     display: inline-block;
 }
@@ -138,39 +142,39 @@ nav, nav > div {
     display: flex;
     flex-direction: column;
 }
-.token .layer.span .annotation.during {
+.layer.span .annotation.during {
     border-top: 1px solid;
 }
-.token .layer.span .annotation.during label {
+.layer.span .annotation.during label {
     position: absolute;
 }
-.token .layer.span .annotation.first {
+.layer.span .annotation.first {
     border-top: 1px solid;
     border-left: 1px solid;
     border-top-left-radius: 5px;
 }
-.token .layer.span.alignment-2 .annotation.last {
+.layer.span.alignment-2 .annotation.last {
     border-top: 1px solid;
     border-right: 1px solid;
     border-top-right-radius: 5px;
 }
-.token .layer.span.alignment-2 .annotation.first.last {
+.layer.span.alignment-2 .annotation.first.last {
     text-align: center;
 }
-.token .layer.span .annotation.first.last label {
+.layer.span .annotation.first.last label {
     position: revert;
 }
-.token .layer.span .annotation.empty {
+.layer.span .annotation.empty {
     border-top: 1px solid transparent;
 }
-.token .alignment-0 .annotation:not(:first-child) {
+.alignment-0 .annotation:not(:first-child) {
     position: fixed;
     opacity: 0;
 }
-.token .layer.span .annotation label.continued {
+.layer.span .annotation label.continued {
     margin-left: 10px;
 }
-.token .layer.span .annotation label.continued::before {
+.layer.span .annotation label.continued::before {
     content: '… ';
 }
 
