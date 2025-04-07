@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -68,6 +68,7 @@ import nzilbb.ag.automation.UsesGraphStore;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.ql.AGQLException;
+import nzilbb.ag.ql.QL;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.IconHelper;
 import nzilbb.ag.util.AnnotationsByAnchor;
@@ -1152,7 +1153,7 @@ public class SqlGraphStore implements GraphStore {
           + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
           + " AND role_permission.attribute_name = 'corpus'" 
           + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
-          + " WHERE user_id = '"+esc(getUser())+"'");
+          + " WHERE user_id = '"+QL.Esc(getUser())+"'");
         ResultSet rsValuePattern = sqlValuePattern.executeQuery();
         if (rsValuePattern.next()) {
           sql.close();
@@ -1489,21 +1490,21 @@ public class SqlGraphStore implements GraphStore {
   private String userWhereClauseGraph(String prefix, String transcriptTableAlias) {
     if (getUser() != null && !getUserRoles().contains("admin") && getPermissionsSpecified()) {
       return " " + prefix
-        +" (("+transcriptTableAlias+".create_user = '"+esc(getUser())+"')"
+        +" (("+transcriptTableAlias+".create_user = '"+QL.Esc(getUser())+"')"
         +" OR EXISTS (SELECT * FROM role"
         + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
         + " INNER JOIN annotation_transcript access_attribute" 
         + " ON access_attribute.layer = role_permission.attribute_name" 
         + " AND access_attribute.label REGEXP role_permission.value_pattern"
         + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
-        + " WHERE user_id = '"+esc(getUser())+"'"
+        + " WHERE user_id = '"+QL.Esc(getUser())+"'"
         + " AND access_attribute.ag_id = "+transcriptTableAlias+".ag_id)"
         +" OR EXISTS (SELECT * FROM role"
         + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
         + " AND role_permission.attribute_name = 'corpus'" 
         + " AND role_permission.entity REGEXP '.*t.*'" // transcript access
         + " WHERE "+transcriptTableAlias+".corpus_name REGEXP role_permission.value_pattern"
-        + " AND user_id = '"+esc(getUser())+"')) ";
+        + " AND user_id = '"+QL.Esc(getUser())+"')) ";
     }
     return "";
   } // end of userWhereClauseGraph()
@@ -1650,7 +1651,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public String[] getTranscriptIdsInCorpus(String id)
     throws StoreException, PermissionException {
-    return getMatchingTranscriptIds("first('corpus').label = '"+esc(id)+"'");
+    return getMatchingTranscriptIds("first('corpus').label = '"+QL.Esc(id)+"'");
   }
 
   /**
@@ -1662,7 +1663,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public String[] getTranscriptIdsWithParticipant(String id)
     throws StoreException, PermissionException {
-    return getMatchingTranscriptIds("'"+esc(id)+"' IN labels('participant')");
+    return getMatchingTranscriptIds("'"+QL.Esc(id)+"' IN labels('participant')");
   }
    
   /**
@@ -2574,10 +2575,10 @@ public class SqlGraphStore implements GraphStore {
               && layer.getParent().getParentId().equals(
                 schema.getWordLayerId()))) { // segment child
         // table has word_annotation_id
-        String select = "DISTINCT annotation.*, '"+esc(layerId)+"' AS layer,"
+        String select = "DISTINCT annotation.*, '"+QL.Esc(layerId)+"' AS layer,"
           +" graph.transcript_id AS graph";
         if (limit.equals("COUNT(*)")) {
-          select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+          select = "COUNT(*), '"+QL.Esc(layerId)+"' AS layer";
           limit = "";
         }
             
@@ -2594,9 +2595,9 @@ public class SqlGraphStore implements GraphStore {
             +" annotation.label, annotation.label_status,"
             +" annotation.annotated_by, annotation.annotated_when,"
             +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-            +" '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph";
+            +" '"+QL.Esc(layerId)+"' AS layer, graph.transcript_id AS graph";
           if (limit.equals("COUNT(*)")) {
-            select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+            select = "COUNT(*), '"+QL.Esc(layerId)+"' AS layer";
             limit = "";
           }
           
@@ -2605,19 +2606,19 @@ public class SqlGraphStore implements GraphStore {
             +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
             +" INNER JOIN annotation_layer_0 word ON word.ag_id = graph.ag_id"
             +" WHERE word.annotation_id = " + word_annotation_id
-            +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
+            +" AND layer = '"+QL.Esc(""+layer.get("attribute"))+"'"
             + userWhereClauseGraph("AND", "graph")
             +" ORDER BY annotation_id"
             + " " + limit;
         } else { // no access to layer
           if (limit.equals("COUNT(*)")) {
-            sSql = "SELECT 0, '"+esc(layerId)+"' AS layer";
+            sSql = "SELECT 0, '"+QL.Esc(layerId)+"' AS layer";
           } else {
             sSql = "SELECT NULL AS annotation_id, NULL AS speaker_number,"
               +" NULL AS label, NULL AS label_status,"
               +" NULL AS annotated_by, NULL AS annotated_when,"
               +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-              +" '"+esc(layerId)+"' AS layer, NULL AS graph";
+              +" '"+QL.Esc(layerId)+"' AS layer, NULL AS graph";
           }
         }
       } else if ("speaker".equals(layer.get("class_id"))) { // participant attribute
@@ -2626,9 +2627,9 @@ public class SqlGraphStore implements GraphStore {
             +" annotation.label, annotation.label_status,"
             +" annotation.annotated_by, annotation.annotated_when,"
             +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-            +" '"+esc(layerId)+"' AS layer, NULL AS graph";
+            +" '"+QL.Esc(layerId)+"' AS layer, NULL AS graph";
           if (limit.equals("COUNT(*)")) {
-            select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+            select = "COUNT(*), '"+QL.Esc(layerId)+"' AS layer";
             limit = "";
           }
           
@@ -2637,30 +2638,30 @@ public class SqlGraphStore implements GraphStore {
             +" INNER JOIN annotation_layer_11 turn ON turn.annotation_id = word.turn_annotation_id"
             +" INNER JOIN annotation_participant annotation ON turn.label = annotation.speaker_number"
             +" WHERE word.annotation_id = " + word_annotation_id
-            +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
+            +" AND layer = '"+QL.Esc(""+layer.get("attribute"))+"'"
             + userWhereClauseGraph("AND", "graph")
             +" ORDER BY annotation_id"
             + " " + limit;
         } else { // no access to layer
           if (limit.equals("COUNT(*)")) {
-            sSql = "SELECT 0, '"+esc(layerId)+"' AS layer";
+            sSql = "SELECT 0, '"+QL.Esc(layerId)+"' AS layer";
           } else {
             sSql = "SELECT NULL AS annotation_id, NULL AS speaker_number,"
               +" NULL AS label, NULL AS label_status,"
               +" NULL AS annotated_by, NULL AS annotated_when,"
               +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-              +" '"+esc(layerId)+"' AS layer, NULL AS graph";
+              +" '"+QL.Esc(layerId)+"' AS layer, NULL AS graph";
           }
         }
       } else if (layer.getParentId().equals(schema.getRoot().getId())
                  && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // freeform layer
         String select =
-          "DISTINCT annotation.*, '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph,"
+          "DISTINCT annotation.*, '"+QL.Esc(layerId)+"' AS layer, graph.transcript_id AS graph,"
           // these required because they're in the order clause:
           +" start.offset, end.offset, parent_id, annotation_id";
         String order = " ORDER BY start.offset, end.offset DESC, parent_id, annotation_id";
         if (limit.equals("COUNT(*)")) {
-          select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+          select = "COUNT(*), '"+QL.Esc(layerId)+"' AS layer";
           limit = "";
           order = "";
         }
@@ -2704,17 +2705,17 @@ public class SqlGraphStore implements GraphStore {
           +" annotation.label, annotation.label_status,"
           +" annotation.annotated_by, annotation.annotated_when,"
           +" NULL AS start_anchor_id, NULL AS end_anchor_id,"
-          +" '"+esc(layerId)+"' AS layer, graph.transcript_id AS graph";
+          +" '"+QL.Esc(layerId)+"' AS layer, graph.transcript_id AS graph";
         if (limit.equals("COUNT(*)")) {
-          select = "COUNT(*), '"+esc(layerId)+"' AS layer";
+          select = "COUNT(*), '"+QL.Esc(layerId)+"' AS layer";
           limit = "";
         }
             
         sSql = "SELECT " + select
           +" FROM annotation_transcript annotation"
           +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
-          +" WHERE graph.transcript_id = '" + esc(transcriptId) + "'"
-          +" AND layer = '"+esc(""+layer.get("attribute"))+"'"
+          +" WHERE graph.transcript_id = '" + QL.Esc(transcriptId) + "'"
+          +" AND layer = '"+QL.Esc(""+layer.get("attribute"))+"'"
           + userWhereClauseGraph("AND", "graph")
           +" ORDER BY annotation_id"
           + " " + limit;
@@ -2791,7 +2792,7 @@ public class SqlGraphStore implements GraphStore {
   public long countAnnotations(String id, String layerId, Integer maxOrdinal)
     throws StoreException, PermissionException, GraphNotFoundException {
     return countMatchingAnnotations(
-      "graph.id = '" + esc(id) + "' AND layer.id = '" + esc(layerId) + "'"
+      "graph.id = '" + QL.Esc(id) + "' AND layer.id = '" + QL.Esc(layerId) + "'"
       +(maxOrdinal==null?"":" AND ordinal <= " + maxOrdinal));
   }
   /**
@@ -2814,7 +2815,7 @@ public class SqlGraphStore implements GraphStore {
     String id, String layerId, Integer maxOrdinal, Integer pageLength, Integer pageNumber)
     throws StoreException, PermissionException, GraphNotFoundException {
     Annotation[] annotations = getMatchingAnnotations(
-      "graph.id = '" + esc(id) + "' AND layer.id = '" + esc(layerId) + "'"
+      "graph.id = '" + QL.Esc(id) + "' AND layer.id = '" + QL.Esc(layerId) + "'"
       +(maxOrdinal==null?"":" AND ordinal <= " + maxOrdinal), pageLength, pageNumber);
     Layer layer = getLayer(layerId);
     if (layer != null && layer.getType().indexOf('/') > 0) { // a MIME type
@@ -4326,7 +4327,7 @@ public class SqlGraphStore implements GraphStore {
         if (!layer.getPeers()) {
           String equals = expression.indexOf("===") > 0?"===":"==="; // match exactitude
           deleteMatchingAnnotations(
-            "layer == '"+esc(layerId)+"' "
+            "layer == '"+QL.Esc(layerId)+"' "
             +wordByLabel.group("extraConditions") // e.g. language conditions etc.
             +"&& first('"+sourceLayer+"').label "+equals+" '"+wordLabel+"'");
           ordinal = 1;
@@ -5245,7 +5246,7 @@ public class SqlGraphStore implements GraphStore {
     requireEdit();
     if (transcript.getChange() == Change.Operation.NoChange) return false;
       
-    // Timers timers = new Timers();
+    Timers timers = new Timers();
     // timers.start("saveGraph");
     Schema schema = getSchema();
     Graph graph = transcript;
@@ -5305,11 +5306,41 @@ public class SqlGraphStore implements GraphStore {
             .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
         }
       }
-      //v.setDebug(true);	 
-      if (graph.containsKey("@valid")) { // TODO remove this workaround
-        System.err.println("Graph " + graph.getId() + ": skipping validation");
+      //v.setDebug(true);
+      
+      // detect media-processor type changes (mediapipe, reaper) and skip unnecessary validation
+      // i.e. create/delete of annotations only on top-level childless non-interval layers
+      boolean topLevelChildlessNonIntervalChangesOnly
+        // it's a graph update:
+        = graph.getChange() != Change.Operation.Create
+        // there are no non-top-level/aligned changes:
+        && !transcript.getChangedAnnotations()
+        .filter(annotation -> annotation.getLayer() != null)
+        .map(annotation -> annotation.getLayer())
+        .distinct()
+        .filter(
+          // interval layers (interval boundaries would need checking)
+          layer -> layer.getAlignment() == Constants.ALIGNMENT_INTERVAL
+          // layers with child layers (children would need checking)
+          || layer.getChildren().size() > 0
+          // non-top-level layers (media processers are all top-level at this point)
+          || (layer.getParent() != null
+              && !layer.getParentId().equals(schema.getRoot().getId())))
+        .findAny().isPresent();
+      timers.end("topLevelChildlessNonIntervalChangesOnly"); // TODO false when it should be true
+      System.err.println("topLevelChildlessNonIntervalChangesOnly " + topLevelChildlessNonIntervalChangesOnly + " - " + timers);
+      
+      if (topLevelChildlessNonIntervalChangesOnly
+          || graph.containsKey("@valid")) { // TODO remove this workaround
+        System.err.println(
+          "Graph " + graph.getId() + ": skipping validation - "
+          + (topLevelChildlessNonIntervalChangesOnly?
+             "all top-level childless non-interval changes":"externally tagged as valid"));
+        timers.start("topLevelChildlessNonIntervalChangesOnly");
+        
         // but normalize anyway if it's new
-        if (graph.getChange() == Change.Operation.Create
+        if (!topLevelChildlessNonIntervalChangesOnly // don't need to normalize with these changes
+            && graph.getChange() == Change.Operation.Create
             && transcript.getSchema().getParticipantLayer() != null
             && transcript.getSchema().getTurnLayer() != null
             && transcript.getSchema().getUtteranceLayer() != null
@@ -5320,7 +5351,6 @@ public class SqlGraphStore implements GraphStore {
             .transform(transcript);
         }
       } else {
-
         // timers.start("normalize");
         if (transcript.getSchema().getParticipantLayer() != null
             && transcript.getSchema().getTurnLayer() != null
@@ -5351,47 +5381,49 @@ public class SqlGraphStore implements GraphStore {
       }
 
       // censor the graph?
-      String censorshipRegexp = getSystemAttribute("censorshipRegexp");
-      if (censorshipRegexp != null && censorshipRegexp.length() > 0) { // censorship required
-        Pattern censorshipPattern = Pattern.compile(censorshipRegexp);
-        String censorshipLayer = getSystemAttribute("censorshipLayer");
-        String censorshipLabel = getSystemAttribute("censorshipLabel");
-        int censoredCount = 0;
-        for (Annotation annotation : graph.all(censorshipLayer)) {
-          if (censorshipPattern.matcher(annotation.getLabel()).matches()) {
-            // matching annotation
-            censoredCount++;
-            // change all words to censorshipLabel
-            for (Annotation word : annotation.all(schema.getWordLayerId())) {
-              word.setLabel(censorshipLabel);
-            } // next word
-          } // matching annotation
-        } // next annotation
-      } // censorshipRegexp required
-
-      // last minute reversed-anchor check, just in case
-      for (Annotation a : graph.getAnnotationsById().values()) {
-        if (a.getChange() == Change.Operation.Destroy) continue;
-        Layer layer = a.getLayer();
-        if (layer != null && layer.getAlignment() > 0) {
-          if (a.getStart() != null) { // (could be in a fragment)
-            if (a.getStart().getOffset() == null) {
-              throw new StoreException(a.getId() + " (" + a.getLabel() + ") - no start offset.");
-            }
-            if (a.getEnd() != null) { // (could be in a fragment)
-              if (a.getEnd().getOffset() == null) {
-                throw new StoreException(a.getId() + " (" + a.getLabel() + ") - no end offset.");
+      if (!topLevelChildlessNonIntervalChangesOnly) {
+        String censorshipRegexp = getSystemAttribute("censorshipRegexp");
+        if (censorshipRegexp != null && censorshipRegexp.length() > 0) { // censorship required
+          Pattern censorshipPattern = Pattern.compile(censorshipRegexp);
+          String censorshipLayer = getSystemAttribute("censorshipLayer");
+          String censorshipLabel = getSystemAttribute("censorshipLabel");
+          int censoredCount = 0;
+          for (Annotation annotation : graph.all(censorshipLayer)) {
+            if (censorshipPattern.matcher(annotation.getLabel()).matches()) {
+              // matching annotation
+              censoredCount++;
+              // change all words to censorshipLabel
+              for (Annotation word : annotation.all(schema.getWordLayerId())) {
+                word.setLabel(censorshipLabel);
+              } // next word
+            } // matching annotation
+          } // next annotation
+        } // censorshipRegexp required
+        
+        // last minute reversed-anchor check, just in case
+        for (Annotation a : graph.getAnnotationsById().values()) {
+          if (a.getChange() == Change.Operation.Destroy) continue;
+          Layer layer = a.getLayer();
+          if (layer != null && layer.getAlignment() > 0) {
+            if (a.getStart() != null) { // (could be in a fragment)
+              if (a.getStart().getOffset() == null) {
+                throw new StoreException(a.getId() + " (" + a.getLabel() + ") - no start offset.");
               }
-              if (a.getStart().getOffset() > a.getEnd().getOffset()) {
-                throw new StoreException(
-                  a.getId() + " (" + a.getLabel() + ") - backwards: "
-                  +a.getStart()+"["+a.getStart().getId()+"]-"
-                  +a.getEnd()+"["+a.getEnd().getId()+"].");
-              }
+              if (a.getEnd() != null) { // (could be in a fragment)
+                if (a.getEnd().getOffset() == null) {
+                  throw new StoreException(a.getId() + " (" + a.getLabel() + ") - no end offset.");
+                }
+                if (a.getStart().getOffset() > a.getEnd().getOffset()) {
+                  throw new StoreException(
+                    a.getId() + " (" + a.getLabel() + ") - backwards: "
+                    +a.getStart()+"["+a.getStart().getId()+"]-"
+                    +a.getEnd()+"["+a.getEnd().getId()+"].");
+                }
             } // end is set
-          } // start is set
-        }
-      } // next annotation
+            } // start is set
+          }
+        } // next annotation
+      } // !mediaProcesserTypeChanges
       
       if (graph.getChange() == Change.Operation.Create) {
         // create the graph, to generate the ag_id
@@ -9637,15 +9669,5 @@ public class SqlGraphStore implements GraphStore {
       return null;
     }
   }
-
-  /**
-   * Escapes quotes in the given string for inclusion in QL or SQL queries.
-   * @param s The string to escape.
-   * @return The given string, with quotes escapeed.
-   */
-  protected String esc(String s) {
-    if (s == null) return "";
-    return s.replace("\\","\\\\").replace("'","\\'");
-  } // end of esc()
 
 } // end of class SqlGraphStore
