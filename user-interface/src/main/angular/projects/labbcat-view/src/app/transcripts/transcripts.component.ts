@@ -702,7 +702,7 @@ export class TranscriptsComponent implements OnInit {
     /** Query string for selected transcripts */
     selectedTranscriptsQueryParameters(transcriptIdParameter: string): Params {
         let params = {};
-        if (this.selectedIds.length > 0) {
+        if (this.selectedIds.length > 0) { // individual check-boxes selected
             let description = `${this.selectedIds.length} selected transcripts`; // TODO i18n
             switch (this.selectedIds.length) {
                 case 1:
@@ -727,10 +727,15 @@ export class TranscriptsComponent implements OnInit {
                     + "].includes(id)",
                 transcripts: description
             };
-        } else if (this.query) {
+        } else if (this.query) { // no check-boxes selected but some filter applied
             params = {
                 transcript_expression: this.query,
                 transcripts: this.queryDescription
+            };
+        } else { // no check-boxes selected or filter applied
+            params = {
+                transcript_expression: "/.+/.test(id)",
+                transcripts: "all transcripts"
             };
         }
         if (this.participantQuery) {
@@ -748,6 +753,9 @@ export class TranscriptsComponent implements OnInit {
                     .replace(".includesAny(labels('participant'))",
                              ".includes(id)");
             params["participants"] = this.participantDescription;
+            if (this.selectedIds.length==0 && !this.query) {
+                params["transcripts"] = "all transcripts with selected participants"
+            };
         }
         return params;
     }

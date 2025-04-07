@@ -704,7 +704,7 @@ export class ParticipantsComponent implements OnInit {
     /** Query parameters for selected participants */
     selectedParticipantsQueryParameters(participantIdParameter: string): Params {
         let participantDescription = this.queryDescription;
-        if (this.selectedIds.length > 0) {
+        if (this.selectedIds.length > 0) { // individual check-boxes selected
             if (this.selectedIds.length == 1) {
                 participantDescription = this.selectedIds[0];
             } else if (this.selectedIds.length <= 5) {
@@ -718,10 +718,15 @@ export class ParticipantsComponent implements OnInit {
                     + "].includes(id)",
                 participants: participantDescription
             };
-        } else if (this.query) {
+        } else if (this.query) { // no check-boxes selected but some filter applied
             return {
                 participant_expression: this.query,
                 participants: participantDescription
+            };
+        } else { // no check-boxes selected or filter applied
+            return {
+                participant_expression: "/.+/.test(id)",
+                participants: "all participants"
             };
         }
         return {};
