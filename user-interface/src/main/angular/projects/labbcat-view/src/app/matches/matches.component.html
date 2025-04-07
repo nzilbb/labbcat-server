@@ -201,12 +201,6 @@
       </option>
     </select>
   </div>
-  <div id="export-settings">
-    <div i18n-title title="Prefix each exported file name with the match number"><label>
-        <span i18n>Prefix Names</span>
-        <input name="prefix" type="checkbox">
-    </label></div>
-  </div>
   <div id="serialize" class="controls">
     <lib-button (press)="serialize();"
                 img="{{serializeImg}}" icon="📦"
@@ -227,6 +221,10 @@
                 value="{{serializer.mimeType}}">{{serializer.name}}</option>
       </select>
     </label>
+    <div i18n-title title="Prefix each exported file name with the match number"><label>
+        <span i18n>Prefix Names</span>
+        <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
+    </label></div>
     <div i18n-title title="Tag target annotation in each file"><label>
       <span i18n>Tag Targets</span>
       <input name="tag" type="checkbox" checked>
@@ -242,6 +240,16 @@
     <lib-button (press)="exportAudio();"
                 img="audio.svg" icon="🔊"
                 i18n-label label="Audio Export"></lib-button>
+    <lib-button (press)="audioOptions();"
+                img="down-triangle.png" icon="▼"
+                i18n-title title="Audio Export options"
+                ></lib-button>
+  </div>
+  <div id="audio-options" class="{{showAudioOptions?'short-unhidden-panel':'short-hidden-panel'}}">
+    <div i18n-title title="Prefix each exported file name with the match number"><label>
+        <span i18n>Prefix Names</span>
+        <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
+    </label></div>
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && generableLayers.length">
     <input #generate_layer type="hidden" name="generate_layer" value="">

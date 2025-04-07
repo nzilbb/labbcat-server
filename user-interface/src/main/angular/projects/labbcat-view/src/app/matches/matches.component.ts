@@ -42,6 +42,8 @@ export class MatchesComponent implements OnInit {
     selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "word", "segment" ];
+    showAudioOptions = false;
+    prefixNames = false;
     wordLayers = [];
     schema: any;
     generableLayers = []; // list of layerIds that can be generated from a list of utterances
@@ -269,6 +271,9 @@ export class MatchesComponent implements OnInit {
     serializationOptions(): void {
         this.showSerializationOptions = !this.showSerializationOptions;
     }
+    audioOptions(): void {
+        this.showAudioOptions = !this.showAudioOptions;
+    }
     emuOptions(): void {
         this.showEmuOptions = !this.showEmuOptions;
     }
@@ -362,5 +367,8 @@ export class MatchesComponent implements OnInit {
     // Math.min
     min(n1: number, n2: number): number {
         return Math.min(n1, n2);
+    }
+    togglePrefixNames(): void {
+        this.prefixNames = !this.prefixNames;
     }
 }
