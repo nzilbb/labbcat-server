@@ -74,11 +74,13 @@
         <select #labelType
                 [(ngModel)]="layer.type"
                 (input)="onChange(layer)">
-          <option value="string" i18n="Label type option">Text</option>
-          <option value="number" i18n="Label type option">Number</option>
-          <option value="ipa" i18n="Label type option">Phonological</option>
-          <option *ngIf="scope == 'phrase'" value="tree" i18n="Label type option">Tree</option>
-          <!-- Is it a binary object layer? -->
+          <!-- Binary object layer have a slash in their type, and cannot have the type changed -->
+          <ng-container *ngIf="layer.type.indexOf('/')<0">
+            <option value="string" i18n="Label type option">Text</option>
+            <option value="number" i18n="Label type option">Number</option>
+            <option value="ipa" i18n="Label type option">Phonological</option>
+            <option *ngIf="scope == 'phrase'" value="tree" i18n="Label type option">Tree</option>
+          </ng-container>
           <option *ngIf="layer.type.indexOf('/')>0" value="{{layer.type}}">{{layer.type}}</option>
         </select>
       </span>
