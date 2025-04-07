@@ -64,5 +64,10 @@ label > span {
     display: inline-block;
 }
 @media all and (min-width: 640px) {
-    .csv-checkboxes, lib-layer-checkboxes { flex-direction: row; }
+    .csv-checkboxes {
+        flex-direction: row;
+    }
+    lib-layer-checkboxes {
+        flex-direction: column;
+    }
 }

@@ -42,7 +42,7 @@
       </span>
       <img *ngIf="includeAlignment" class="alignment"
            [src]="imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]">
-      <span class="layer-id">{{ParticipantLayerLabel(layer.id)}}</span>
+      <span class="layer-id">{{displayAttributePrefixes ? layer.id : ParticipantLayerLabel(layer.id)}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Toggle between displaying IPA vs. DISC symbols"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
@@ -77,7 +77,7 @@
       </span>
       <img *ngIf="includeAlignment" class="alignment"
            [src]="imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]">
-      <span class="layer-id">{{TranscriptLayerLabel(layer.id)}}</span>
+      <span class="layer-id">{{displayAttributePrefixes ? layer.id : TranscriptLayerLabel(layer.id)}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Toggle between displaying IPA vs. DISC symbols"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
@@ -382,8 +382,10 @@
   </ng-container>
 </fieldset>
 </div>
-<fieldset *ngIf="includeDataType || includeAlignment || includeVerticalPeers" class="icon-hider">
-  <label title="Hide icons that correspond to layer properties">
+<fieldset *ngIf="!hideControls && (includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}' || participant || transcript)" id="controls">
+  <label 
+    *ngIf="includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}'"
+    title="Hide icons that correspond to layer properties">
     <!-- Don't actually need grouped-checkbox, but without it the alignment doesn't match Projects above -->
     <lib-grouped-checkbox
       group="hideLayerIcons"
@@ -392,5 +394,16 @@
       (change)="toggleLayerIcons()"
       ></lib-grouped-checkbox>
     Hide layer icons
+  </label>
+  <label 
+    *ngIf="participant || transcript"
+    title="Show full names for participant/transcript attributes">
+    <lib-grouped-checkbox
+      group="showAttributePrefixes"
+      name="showAttributePrefixes"
+      [checked]="displayAttributePrefixes"
+      (change)="toggleAttributePrefixes()"
+      ></lib-grouped-checkbox>
+    Show attribute prefixes
   </label>
 </fieldset>

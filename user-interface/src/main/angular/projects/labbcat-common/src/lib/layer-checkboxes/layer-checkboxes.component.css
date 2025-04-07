@@ -72,15 +72,15 @@ img.data-type, img.alignment, img.vertical-peers {
 .deselected {
     opacity: 0.33;
 }
-.icon-hider {
+#controls {
     font-style: italic;
 }
 @media all and (min-width: 640px) {
-    .icon-hider { 
+    #controls { 
         display: flex;
         flex-direction: row;
     }
-    .icon-hider label {
+    #controls label {
         flex-grow: 1;
     }
 }

@@ -25,6 +25,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() includeRelationship: boolean;
     /** Display icons */
     @Input() displayIcons: boolean;
+    /** Display prefixes for participant/transcript attributes */
+    @Input() displayAttributePrefixes: boolean;
     /** Show the data type of each layer */
     @Input() includeDataType: boolean;
     /** Show the alignment of each layer */
@@ -75,6 +77,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() interpretedRaw: { [key: string] : any };
     /** Output list of layers with interpreted (true) or raw (false) labels */
     @Output() interpretedRawChange = new EventEmitter<{ [key: string] : any }>();
+    /** Hide controls bar, overriding the effect of any other settings that would normally trigger showing it */
+    @Input() hideControls = false;
     
     participantAttributes: Layer[];
     transcriptAttributes: Layer[];
@@ -127,6 +131,8 @@ export class LayerCheckboxesComponent implements OnInit {
         this.categorySelections = {};
         const displayIcons = sessionStorage.getItem("displayLayerIcons");
         this.displayIcons = JSON.parse(displayIcons || 'true');
+        const displayAttributePrefixes = sessionStorage.getItem("displayAttributePrefixes");
+        this.displayAttributePrefixes = JSON.parse(displayAttributePrefixes || 'false');
         if (!this.selected) this.selected = [] as string[];
 
         // add category selectors in defined order
@@ -252,5 +258,9 @@ export class LayerCheckboxesComponent implements OnInit {
     toggleLayerIcons(): void {
         this.displayIcons = !this.displayIcons;
         sessionStorage.setItem("displayLayerIcons", JSON.stringify(this.displayIcons));
+    }
+    toggleAttributePrefixes(): void {
+        this.displayAttributePrefixes = !this.displayAttributePrefixes;
+        sessionStorage.setItem("displayAttributePrefixes", JSON.stringify(this.displayAttributePrefixes));
     }
 }
