@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.IconHelper;
+import nzilbb.ag.ql.QL;
 import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
 
@@ -1365,7 +1366,7 @@ public class SqlGraphStoreAdministration
         if (layer.getType().indexOf('/') > 0) {
           // delete all data files before we delete the annotations
           Annotation[] annotations = getMatchingAnnotations(
-            "layer.id = '" + esc(layer.getId()) + "'", null, null, true);
+            "layer.id = '" + QL.Esc(layer.getId()) + "'", null, null, true);
           for (Annotation annotation : annotations) {
             try {
               File file = annotationDataFile(annotation, annotation.getGraph(), layer.getType());
