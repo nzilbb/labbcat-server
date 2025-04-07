@@ -399,11 +399,11 @@
                           ><label
                              *ngIf="word == annotation.first('word') || word == utterance.first('word')"
                              [ngClass]="{'continued':word == utterance.first('word') && word != annotation.first('word')}">
-                        <ng-container [ngSwitch]="annotation.layer.type">
-                          <a *ngSwitchCase="'tree'"
+                        <ng-container [ngSwitch]="true">
+                          <a *ngSwitchCase="annotation.layer.type == 'tree'"
                              class="tree" href="#{{annotation.id}}"
                              (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
-                          <a *ngSwitchCase="'image/png'"
+                          <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
                              class="image" href="#{{annotation.id}}"
                              href="{{annotation.dataUrl}}&show"
                              target="{{annotation.id}}"
@@ -416,6 +416,14 @@
                                    ><img *ngIf="annotation.preview"
                                          class="preview" src="{{annotation.dataUrl}}"
                                          i18n-alt alt="📷"></a>
+                          <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
+                             class="blob" href="#{{annotation.id}}"
+                             href="{{annotation.dataUrl}}"
+                             target="{{annotation.id}}"
+                             ><img class="icon"
+                                   src="{{imagesLocation}}/other.svg"
+                                   i18n-alt alt="🗎"
+                                   ></a>
                           <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                         </ng-container>
                       </label>&nbsp;</span>
