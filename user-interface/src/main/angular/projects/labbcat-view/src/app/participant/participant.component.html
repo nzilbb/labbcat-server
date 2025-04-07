@@ -1,10 +1,5 @@
+<h1 id="title" i18n>Participant attributes: {{participant.label}}</h1>
 <lib-wait *ngIf="!participant"></lib-wait>
-<div *ngIf="participant" id="header" class="attribute-list">
-  <div class="attribute">
-    <label for="label" i18n="Participant ID label" title="APLS speaker code">Name<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">participant</span>)</span></label>
-    <span id="label" class="values"><div class="value" id="title">{{participant.label}}</div></span>
-  </div>
-</div>
 <div *ngIf="participant" id="attributes" class="attribute-list tabs">
   <div class="tab-labels">
     <label *ngFor="let category of categoryLabels"

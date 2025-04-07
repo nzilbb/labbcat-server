@@ -1,16 +1,13 @@
+<h1 id="title" i18n>Transcript attributes: {{transcript.id}}</h1>
 <lib-wait *ngIf="!transcript"></lib-wait>
 <div *ngIf="transcript" id="header" class="attribute-list">
   <div class="attribute">
-    <label for="label" i18n="Transcript ID label" title="Transcript file name">Name<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">transcript</span>)</span></label>
-    <span id="label" class="values"><div id="title" class="value">{{transcript.id}}</div></span>
+    <label for="corpus-attribute" i18n title="Collection of transcripts from a single research project">Corpus<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">corpus</span>)</span></label>
+    <span id="corpus-attribute" class="values"><div id="corpus" class="value">{{transcript['corpus'][0].label}}</div></span>
   </div>
   <div class="attribute">
     <label for="episode-attribute" i18n title="Series of transcripts from a single sociolinguistic interview">Episode<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">episode</span>)</span></label>
     <span id="episode-attribute" class="values"><div id="episode" class="value">{{transcript['episode'][0].label}}</div></span>
-  </div>
-  <div class="attribute">
-    <label for="corpus-attribute" i18n title="Collection of transcripts from a single research project">Corpus<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">corpus</span>)</span></label>
-    <span id="corpus-attribute" class="values"><div id="corpus" class="value">{{transcript['corpus'][0].label}}</div></span>
   </div>
 </div>
 <div *ngIf="transcript" id="attributes" class="attribute-list tabs">
