@@ -23,7 +23,7 @@
           i18n="layer type header">Participant</legend>
   <ng-container *ngFor="let layer of participantAttributes">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
-           [title]="layer.description"
+           [title]="layer.hint"
            class="layer-{{layer.id}}"
            [style]="styles[layer.id]">
       <lib-grouped-checkbox
@@ -58,7 +58,7 @@
           i18n="layer type header">Transcript</legend>
   <ng-container *ngFor="let layer of transcriptAttributes">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
-           [title]="layer.description"
+           [title]="layer.hint"
            class="layer-{{layer.id}}"
            [style]="styles[layer.id]">
       <lib-grouped-checkbox
