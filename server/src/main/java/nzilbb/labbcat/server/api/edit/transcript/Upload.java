@@ -53,6 +53,7 @@ import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.Merger;
 import nzilbb.ag.util.Normalizer;
 import nzilbb.ag.util.ParticipantRenamer;
+import nzilbb.ag.ql.QL;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.api.APIRequestHandler;
@@ -458,7 +459,7 @@ public class Upload extends APIRequestHandler {
           } // no ID set
           
           // check existence
-          String regexpSafeID = IO.WithoutExtension(graph.getId())
+          String regexpSafeID = QL.Esc(IO.WithoutExtension(graph.getId()))
             // escape regexp special characters
             .replaceAll("([/\\[\\]()?.])","\\\\$1");
           boolean existingTranscript = store.countMatchingTranscriptIds​(
