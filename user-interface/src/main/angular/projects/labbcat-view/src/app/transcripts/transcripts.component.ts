@@ -680,7 +680,27 @@ export class TranscriptsComponent implements OnInit {
         this.showSerializationOptions = false;
         this.serializeImg = "cog.svg";
     }
-    
+
+    /** Button action */
+    participants(): void {
+        let transcriptQuery = this.query;
+        let transcriptDescription = this.queryDescription;
+        if (this.selectedIds.length > 0) {
+            // query of the form ['spkr1','spkr2',...].includesAny(labels('transcript'))
+            const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
+            transcriptQuery = `[${ids}].includesAny(labels('transcript'))`;
+            if (this.selectedIds.length == 1) {
+                transcriptDescription = this.selectedIds[0];
+            } else {
+                transcriptDescription = this.selectedIds.length + " selected transcripts"; // TODO i18n
+            }
+        }
+        this.router.navigate(["participants"], { queryParams: {
+            transcript_expression: transcriptQuery,
+            transcripts: transcriptDescription
+        } });
+    }
+
     /** Button action */
     layeredSearch(): void {
         this.router.navigate(["search"], {
@@ -738,7 +758,7 @@ export class TranscriptsComponent implements OnInit {
             // from participants page:
                     .replace(".includesAny(labels('participant'))",
                              ".includes(id)");
-            params["participants"] = this.participantDescription;
+            // params["participants"] = this.participantDescription;
             if (this.selectedIds.length==0 && !this.query) {
                 params["transcripts"] = "all transcripts with selected participants"
             };

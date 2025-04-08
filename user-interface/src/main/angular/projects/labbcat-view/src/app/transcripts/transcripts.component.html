@@ -130,6 +130,14 @@
               i18n-title title="Collapse 'Export Attributes' options"
               ></lib-button>
             <lib-button
+              *ngIf="!nextPage && !participantQuery"
+              (press)="participants()"
+              [disabled]="!transcriptIds || transcriptIds.length == 0 || selectedIds.length == 0"
+              img="people.svg" icon="👥"
+              i18n-label label="List Participants"
+              i18n-title title="List participants in these transcripts"
+              ></lib-button>
+            <lib-button
               *ngIf="!nextPage || nextPage == 'search'"
               (press)="layeredSearch()"
               [disabled]="!transcriptIds || transcriptIds.length == 0"

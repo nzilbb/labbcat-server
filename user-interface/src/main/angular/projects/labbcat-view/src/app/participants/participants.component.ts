@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 
 import { Response, Layer, User } from 'labbcat-common';
@@ -29,17 +29,23 @@ export class ParticipantsComponent implements OnInit {
     queryDescription = ""; // Human-readable version of the query
     participantQuery = ""; // AGQL query string for pre-matching participants
     participantDescription = ""; // Human readable description of participant query
+    transcriptQuery = ""; // AGQL query string for pre-matching transcripts
+    transcriptDescription = ""; // Human readable description of transcript query
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0;
     nextPage: string;
+    imagesLocation: string;
     
     constructor(
         private labbcatService: LabbcatService,
         private messageService: MessageService,
         private route: ActivatedRoute,
-        private router: Router
-    ) { }
+        private router: Router,
+        @Inject('environment') private environment
+    ) { 
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
         this.filterLayers = [];
@@ -201,6 +207,14 @@ export class ParticipantsComponent implements OnInit {
                     this.participantDescription = "Selected participants";
                 }
             }
+            if (params["transcript_expression"]) {
+                this.transcriptQuery = params["transcript_expression"];
+                if (params["transcripts"]) {
+                    this.transcriptDescription = params["transcripts"];
+                } else {
+                    this.transcriptDescription = "Selected transcripts";
+                }
+            }
             this.listParticipants();
         });
     }
@@ -248,7 +262,9 @@ export class ParticipantsComponent implements OnInit {
     loadingList = false;
     /** List participants that match the filters */
     listParticipants(): void {
+        // this.query = this.participantQuery || this.transcriptQuery; // if any
         this.query = this.participantQuery; // if any
+        // this.queryDescription = this.participantDescription || this.transcriptDescription;
         this.queryDescription = this.participantDescription;
         for (let layer of this.filterLayers) {
 
@@ -437,6 +453,8 @@ export class ParticipantsComponent implements OnInit {
         if (this.nextPage) queryParams.to = this.nextPage; // pass through context parameters...
         if (this.participantQuery) queryParams.participant_expression = this.participantQuery;
         if (this.participantDescription) queryParams.participants = this.participantDescription;
+        if (this.transcriptQuery) queryParams.transcript_expression = this.transcriptQuery;
+        if (this.transcriptDescription) queryParams.transcripts = this.transcriptDescription;
         for (let layer of this.filterLayers) { // for each filter layer
             if (this.filterValues[layer.id].length > 0) { // there's at least one value
                 // add it to the query parameters
@@ -450,9 +468,14 @@ export class ParticipantsComponent implements OnInit {
         
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
+        let queryExpression = this.query;
+        if (this.transcriptQuery) {
+            if (queryExpression) queryExpression += " && ";
+            queryExpression += this.transcriptQuery;
+        }
         // count matches
         this.labbcatService.labbcat.countMatchingParticipantIds(
-            this.query, (matchCount, errors, messages) => {
+            queryExpression, (matchCount, errors, messages) => {
                 if (thisQuery != this.querySerial) return; // new query already sent
                 this.matchCount = matchCount;
                 if (errors) {
@@ -466,7 +489,7 @@ export class ParticipantsComponent implements OnInit {
 
                 // now get the matches for this page
                 this.labbcatService.labbcat.getMatchingParticipantIds(
-                    this.query, this.pageLength, this.p - 1 /* zero-based page numbers */,
+                    queryExpression, this.pageLength, this.p - 1 /* zero-based page numbers */,
                     (participantIds, errors, messages) => {
                         if (thisQuery != this.querySerial) return; // new query already sent
                         if (errors) errors.forEach(m => this.messageService.error(m));
@@ -703,24 +726,44 @@ export class ParticipantsComponent implements OnInit {
     }
     /** Query parameters for selected participants */
     selectedParticipantsQueryParameters(participantIdParameter: string): Params {
+        let params = {};
         if (this.selectedIds.length > 0) { // individual check-boxes selected - don't send a participants param
-            return {
+            params = {
                 participant_expression: "["
                     + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
                     + "].includes(id)"
             };
         } else if (this.query) { // no check-boxes selected but some filter applied
-            return {
+            params = {
                 participant_expression: this.query,
                 participants: this.queryDescription
             };
         } else { // no check-boxes selected or filter applied
-            return {
+            params = {
                 participant_expression: "/.+/.test(id)",
                 participants: "all participants"
             };
         }
-        return {};
+        if (this.transcriptQuery) {
+            // expressions like:
+            //  labels("transcript").includes(["CB01interview1.eaf"])
+            // or from transcripts page:
+            //  ['CB01interview1.eaf'].includesAny(labels('transcript'))
+            // have to be replaced with:
+            //  ['CB01interview1.eaf'].includes(id)
+            params["transcript_expression"] = 
+                this.transcriptQuery
+                    .replace(/labels\('transcript'\).includesAny\((\[.*\])\)/,
+                             "$1\.includes\(id\)")
+            // from transcripts page:
+                    .replace(".includesAny(labels('transcript'))",
+                             ".includes(id)");
+            // params["transcripts"] = this.transcriptDescription;
+            if (this.selectedIds.length==0 && !this.query) {
+                params["participants"] = "all participants in selected transcripts"
+            };
+        }
+        return params;
     }
 
     /** Query to append to href for links to other pages */

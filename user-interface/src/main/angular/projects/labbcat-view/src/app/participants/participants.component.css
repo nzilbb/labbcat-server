@@ -29,6 +29,9 @@ span.attribute {
     overflow: clip;
     font-style: italic;
 }
+.transcript-filter, .transcript-filter img {
+    width: 15px;
+}
 .buttons {
     text-align: left;
 }
