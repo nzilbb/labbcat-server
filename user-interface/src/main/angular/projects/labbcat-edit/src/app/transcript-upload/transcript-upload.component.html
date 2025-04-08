@@ -133,7 +133,7 @@
                [open]="!entry.transcriptThreads">
         <summary><span i18n>Parameters:</span> {{entry.transcriptId}}</summary>
         <ng-container *ngFor="let parameter of entry.parameters">
-          <div *ngIf="parameter.name != 'labbcat_episode' && parameter.name != 'labbcat_corpus' && parameter.name != 'labbcat_trancript_type'"
+          <div *ngIf="parameter.name != 'labbcat_episode' && parameter.name != 'labbcat_corpus' && parameter.name != 'labbcat_transcript_type'"
                class="item"
                title="{{parameter.hint}}">
             <label>{{parameter.label}}</label>
