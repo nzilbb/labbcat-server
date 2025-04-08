@@ -25,7 +25,7 @@ export class ParticipantComponent implements OnInit {
     currentCategory: string;
     categories: object; // string->Category
     participant: Annotation;
-    displayLayerIds = true;
+    displayLayerIds: boolean;
     
     constructor(
         @Inject('environment') private environment,
@@ -83,6 +83,8 @@ export class ParticipantComponent implements OnInit {
                 this.attributes = [];
                 this.categoryLayers = {};
                 this.categoryLabels = [];
+                const displayLayerIds = sessionStorage.getItem("displayLayerIds");
+                this.displayLayerIds = JSON.parse(displayLayerIds || 'true');
                 // participant attributes
                 for (let layerId in schema.layers) {
                     // main_participant this relates participants to transcripts, so ignore that
@@ -126,5 +128,6 @@ export class ParticipantComponent implements OnInit {
     }
     toggleLayerIds(): void {
         this.displayLayerIds = !this.displayLayerIds;
+        sessionStorage.setItem("displayLayerIds", JSON.stringify(this.displayLayerIds));
     }
 }
