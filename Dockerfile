@@ -1,18 +1,18 @@
-FROM tomcat:9.0.56
+FROM tomcat:9.0.102
 
 # install Praat
 RUN mkdir /opt/praat
 WORKDIR /opt/praat
-RUN wget https://www.fon.hum.uva.nl/praat/praat6413_linux-intel64-barren.tar.gz
-RUN tar xvf praat6413_linux-intel64-barren.tar.gz
-RUN rm praat6413_linux-intel64-barren.tar.gz
+RUN wget https://www.fon.hum.uva.nl/praat/praat6427_linux-intel64-barren.tar.gz
+RUN tar xvf praat6427_linux-intel64-barren.tar.gz
+RUN rm praat6427_linux-intel64-barren.tar.gz
 RUN cp praat_barren /usr/bin/praat
 
 # HTK cannot be distributed, but with a registers username/password, the source code can be
 # downloaded and compiled, so set up environment for HTK compilation
 RUN apt update && apt install -y \
     make libc6-dev-i386 libx11-dev gawk xorg-dev \
-    ffmpeg
+    ffmpeg 
 
 # extract the contents of labbcat.war into /labbcat
 RUN mkdir /labbcat
