@@ -18,6 +18,9 @@ tbody td.participant {
 tbody td:not(.participant) {
     text-align: center;
 }
+tbody .transcript-filter {
+    background: #fff;
+}
 span.attribute {
     display: block;
     max-height: 50px;
@@ -37,4 +40,7 @@ span.attribute {
 }
 .filters .controls {
     white-space: nowrap;
+}
+#clear-filters {
+    animation: fade-in 0.5s;
 }

@@ -657,27 +657,25 @@ export class ParticipantsComponent implements OnInit {
     
     /** Button action */
     transcripts(): void {
-        let participantQuery = this.query
-        // if we're matching participant ID, it's "id" here
-        // but needs to be "first('participant').label" on the transcripts page 
-            .replace(/\.test\(id\)/, ".test(first('participant').label)"); // TODO .test(labels('participant'))
-        let participantDescription = this.queryDescription;
-        if (this.selectedIds.length > 0) {
-            // query of the form [...].includes(first('participant').label)
+        let params = {};
+        if (this.selectedIds.length > 0) { // individual check-boxes selected - send a count
             const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
-            participantQuery = `[${ids}].includesAny(labels('participant'))`;
-            if (this.selectedIds.length == 1) {
-                participantDescription = this.selectedIds[0];
-            } else if (this.selectedIds.length <= 5) {
-                participantDescription = this.selectedIds.join(", ");
-            } else {
-                participantDescription = ""+this.selectedIds.length + " selected participants"; // TODO i18n
+            params = {
+                participant_expression: `[${ids}].includesAny(labels('participant'))`,
+                participants: this.selectedIds.length + " selected participant" + (this.selectedIds.length > 1 ? "s" : "")
             }
+        } else if (this.query) { // no check-boxes selected but some filter applied
+            params = {
+                participant_expression: this.query,
+                participants: this.queryDescription
+            }
+        } else { // no check-boxes selected or filter applied
+            params = {
+                participant_expression: "/.+/.test(id)",
+                participants: "all participants"
+            };
         }
-        this.router.navigate(["transcripts"], { queryParams: {
-            participant_expression: participantQuery,
-            participants: participantDescription
-        } });
+        this.router.navigate(["transcripts"], { queryParams: params });
     }
     
     /** Button action */

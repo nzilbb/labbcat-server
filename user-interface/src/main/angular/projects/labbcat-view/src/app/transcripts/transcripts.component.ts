@@ -683,22 +683,30 @@ export class TranscriptsComponent implements OnInit {
 
     /** Button action */
     participants(): void {
-        let transcriptQuery = this.query;
-        let transcriptDescription = this.queryDescription;
-        if (this.selectedIds.length > 0) {
-            // query of the form ['spkr1','spkr2',...].includesAny(labels('transcript'))
+        let params = {};
+        if (this.selectedIds.length > 0) { // individual check-boxes selected - send a count
             const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
-            transcriptQuery = `[${ids}].includesAny(labels('transcript'))`;
-            if (this.selectedIds.length == 1) {
-                transcriptDescription = this.selectedIds[0];
-            } else {
-                transcriptDescription = this.selectedIds.length + " selected transcripts"; // TODO i18n
+            params = {
+                transcript_expression: `[${ids}].includesAny(labels('transcript'))`,
+                transcripts: this.selectedIds.length + " selected transcript" + (this.selectedIds.length > 1 ? "s" : "")
             }
+        } else if (this.query) { // no check-boxes selected but some filter applied
+            // participants page will throw an error if passed transcript attributes
+            //   "Can only get labels list for participant or transcript attributes: labels('transcript_type')"
+            // so we just pass the transcripts as a list and dress up the description
+            const ids = this.transcriptIds.map(id=>"'"+this.esc(id)+"'").join(",");
+            // this won't include transcripts that were selected prior to the filter then deselected - but that's consistent with other button behaviors
+            params = {
+                transcript_expression: `[${ids}].includesAny(labels('transcript'))`,
+                transcripts: this.queryDescription
+            }
+        } else { // no check-boxes selected or filter applied
+            params = {
+                transcript_expression: "/.+/.test(id)",
+                transcripts: "all transcripts"
+            };
         }
-        this.router.navigate(["participants"], { queryParams: {
-            transcript_expression: transcriptQuery,
-            transcripts: transcriptDescription
-        } });
+        this.router.navigate(["participants"], { queryParams: params });
     }
 
     /** Button action */

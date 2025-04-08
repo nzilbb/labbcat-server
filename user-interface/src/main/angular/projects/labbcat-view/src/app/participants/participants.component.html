@@ -5,7 +5,10 @@
   <table>
     <caption *ngIf="matchCount >= 0">
       <span i18n="Match count: {n}">Match count:</span>&nbsp;<span id="matchCount">{{matchCount}}</span>
-     <span id="query-description" *ngIf="queryDescription" title="{{queryDescription}}"> - {{queryDescription}} </span>
+     <span id="query-description" *ngIf="transcriptDescription || queryDescription">
+          <span *ngIf="transcriptDescription" [title]="transcriptDescription"> - Transcript filter [{{transcriptDescription}}]</span>
+          <span *ngIf="queryDescription" [title]=""> - {{queryDescription}} </span>
+        </span>
      </caption>
     <thead>
       <tr class="filters">
@@ -23,6 +26,8 @@
         </td>
         <td class="controls">
           <lib-button
+            id="clear-filters"
+            *ngIf="query"
             img="delete.svg" icon="⌫"
             (press)="clearFilters()"
             i18n-title title="Clear selected filters"
@@ -36,6 +41,7 @@
         </td>
       </tr><!-- Select from file -->
       <tr class="controls">
+        <td class="transcript-filter-filter" *ngIf="transcriptQuery"></td>
         <td colSpan="{{filterLayers.length}}">          
           <lib-button
             *ngIf="user && user.roles.includes('edit') && !nextPage"
@@ -79,7 +85,7 @@
           <lib-button
             *ngIf="!nextPage || nextPage == 'search'"
             (press)="layeredSearch()"
-            [disabled]="!participantIds || participantIds.length == 0"
+            [disabled]="matchCount < 1 && selectedIds.length == 0"
             img="magnifying-glass.svg" icon="🔍"
             i18n-label label="Layered Search"
             i18n-title title="Search transcripts including these participants"
