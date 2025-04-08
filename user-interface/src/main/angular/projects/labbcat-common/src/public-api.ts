@@ -8,6 +8,7 @@ export * from './lib/layer';
 export * from './lib/annotation';
 export * from './lib/anchor';
 export * from './lib/media-file';
+export * from './lib/serialization-descriptor';
 export * from './lib/user';
 export * from './lib/labbcat.service';
 export * from './lib/message.service';

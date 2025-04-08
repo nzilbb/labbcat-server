@@ -11,6 +11,7 @@ import { MissingAnnotationsComponent } from './missing-annotations/missing-annot
 import { ParticipantComponent } from './participant/participant.component';
 import { TranscriptAttributesComponent } from './transcript-attributes/transcript-attributes.component';
 import { TranscriptMediaComponent } from './transcript-media/transcript-media.component';
+import { TranscriptUploadComponent } from './transcript-upload/transcript-upload.component';
 
 @NgModule({
     declarations: [
@@ -18,7 +19,8 @@ import { TranscriptMediaComponent } from './transcript-media/transcript-media.co
         MissingAnnotationsComponent,
         ParticipantComponent,
         TranscriptAttributesComponent,
-        TranscriptMediaComponent
+        TranscriptMediaComponent,
+        TranscriptUploadComponent
     ],
     imports: [
         BrowserModule,
@@ -31,6 +33,8 @@ import { TranscriptMediaComponent } from './transcript-media/transcript-media.co
             { path: 'edit/transcript/attributes', component: TranscriptAttributesComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'edit/transcript/media', component: TranscriptMediaComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'edit/transcript/upload', component: TranscriptUploadComponent,
               canDeactivate: [PendingChangesGuard]}
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,

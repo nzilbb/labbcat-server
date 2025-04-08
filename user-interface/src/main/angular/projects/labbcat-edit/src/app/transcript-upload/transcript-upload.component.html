@@ -1,0 +1,172 @@
+<h1 i18n>Upload Transcripts</h1>
+
+<div id="header">
+  <fieldset id="defaults" class="list">
+    <legend i18n>Defaults</legend>
+    <div class="item">
+      <label for="defaultCorpus" i18n>Corpus</label>
+      <span class="value">
+        <legend i18n>Corpus</legend>
+        <select [(ngModel)]="defaultCorpus" [disabled]="processing"
+                id="defaultCorpus">
+          <option *ngFor="let label of corpora">{{label}}</option>
+        </select>
+      </span>
+    </div>
+    <div class="item">
+      <label for="defaultTranscriptType" i18n>Transcript Type</label>
+      <span class="value">
+        <legend i18n>Transcript Type</legend>
+        <select [(ngModel)]="defaultTranscriptType" [disabled]="processing"
+                id="defaultTranscriptType">
+          <option *ngFor="let label of transcriptTypes">{{label}}</option>
+        </select>
+      </span>
+    </div>
+    <div class="item"
+         i18n-title title="Whether to allow LaBB-CAT to make all decisions about tier/layer mappings and other options that are required during upload">
+      <label for="useDefaultParameterValues" i18n>Batch Mode</label>
+      <span class="value">
+        <legend i18n>Batch Mode</legend>
+        <input type="checkbox"
+               id="useDefaultParameterValues"
+               [(ngModel)]="useDefaultParameterValues">
+      </span>
+    </div>
+  </fieldset>
+  <div id="buttons">
+    <lib-button
+      i18n-label="Batch upload" label="Upload"
+      i18n-title title="Add all transcripts to LaBB-CAT"
+      img="upload.svg" icon="↑"
+      (press)="onUpload()"
+      [processing]="uploading"
+      [disabled]="processing || entries.length == 0"></lib-button>
+    <lib-button
+      i18n-label="Batch upload" label="Delete"
+      i18n-title title="Delete all transcripts from LaBB-CAT"
+      img="trash.svg" icon="🗑"
+      (press)="onDelete()"
+      [processing]="deleting"
+      [disabled]="processing || entries.length == 0"></lib-button>
+    <lib-button
+      i18n-label="Batch upload" label="Report"
+      i18n-title title="Report about uploads"
+      img="document.svg" icon="🗎"
+      (press)="onReport()"
+      [disabled]="processing || entries.length == 0"></lib-button>
+    <lib-button
+      i18n-label="Batch upload" label="Clear"
+      i18n-title title="Remove all files from the list"
+      img="cross-mark.svg" icon="❌"
+      (press)="onClear()"
+      [disabled]="processing || entries.length == 0"></lib-button>
+  </div>
+</div>
+<div id="dragdrop"
+     i18n-title title="Drop transcript and media files on to this area"
+     (dragover)="fileDragHover($event)"
+     (dragleave)="fileDragHover($event)"
+     (drop)="fileSelectHandler($event)"
+     [class.dragover]="hovering">
+  <div id="transcripts" class="transcript-batch" i18n-title title="Transcripts to upload">
+    <input type="file"
+           [(ngModel)]="fileSelector"
+           (change)="chooseFile($event)"
+           [disabled]="processing"
+           multiple observeFiles>
+    <div class="transcript-entry">
+      <span class="transcript-name header" i18n="Upload batch column">Transcript</span>
+      <span class="media-name header" i18n="Upload batch column">Media</span>
+      <span class="corpus header" i18n="Upload batch column">Corpus</span>
+      <span class="episode-name header" i18n="Upload batch column">Episode</span>
+      <span class="transcript-type header" i18n="Upload batch column">Type</span>
+      <span class="status header" i18n="Upload batch column">Status</span>
+      <span class="progress header" i18n="Upload batch column">Progress</span>
+      <span class="buttons header">&nbsp;</span>
+    </div>
+    <div *ngFor="let entry of entries" class="entry-container">
+      <div [class]="{ 'transcript-entry' : true, 'exists': entry.exists }">
+        <span class="transcript-name" title="{{entry.transcript.name}}">
+          <img *ngIf="entry.descriptor"
+               src="{{entry.descriptor.icon}}"
+               title="{{entry.descriptor.name}}">
+          <span *ngIf="!entry.exists">{{entry.transcript.name}}</span>
+          <a *ngIf="entry.exists"
+             target="{{entry.transcriptId}}"
+             href="{{baseUrl}}transcript?id={{entry.transcriptId}}"
+             >{{entry.transcript.name}}</a>
+        </span>
+        <span class="media-name" title="{{entry.mediaFileNames().join('\n')}}">
+          <span *ngFor="let ext of entry.mediaExtensions()">{{ext}} </span>
+        </span>
+        <select [(ngModel)]="entry.corpus"
+                class="corpus"
+                [disabled]="processing || entry.transcriptThreads">
+          <option *ngFor="let label of corpora">{{label}}</option>
+        </select>
+        <input type="text"
+               class="episode-name"
+               title="{{entry.episode}}"
+               [(ngModel)]="entry.episode"
+               [disabled]="processing || entry.transcriptThreads">
+        <select [(ngModel)]="entry.transcriptType"
+                class="transcript-type"
+                [disabled]="processing || entry.transcriptThreads">
+          <option *ngFor="let label of transcriptTypes">{{label}}</option>
+        </select>
+        <span class="status"
+              [class.error]="entry.errors.length > 0"
+              [title]="entry.errors.length > 0?entry.errors.join('\n'):entry.status">
+          <span *ngFor="let error of entry.errors">{{statusLabel(error)}}</span>
+          {{statusLabel(entry.status)}}
+        </span>
+        <progress max="100" [title]="entry.status" [value]="entry.progress">{{entry.progress}}%</progress>
+        <span class="buttons">
+          <button
+            i18n-title title="Remove this file from the list"
+            (click)="removeEntry(entry.id)"
+            [disabled]="processing || entry.transcriptThreads"><img src="{{imagesLocation}}/remove.svg" alt="➖"></button></span>
+      </div>
+      <details *ngIf="entry.parameters"
+               class="parameters list"
+               [open]="!entry.transcriptThreads">
+        <summary><span i18n>Parameters:</span> {{entry.transcriptId}}</summary>
+        <ng-container *ngFor="let parameter of entry.parameters">
+          <div *ngIf="parameter.name != 'labbcat_episode' && parameter.name != 'labbcat_corpus' && parameter.name != 'labbcat_trancript_type'"
+               class="item"
+               title="{{parameter.hint}}">
+            <label>{{parameter.label}}</label>
+            <span class="value">
+              <legend>{{parameter.label}}</legend>
+              <select *ngIf="parameter.possibleValues.length"
+                      [(ngModel)]="parameter.value"
+                      [disabled]="entry.transcriptThreads">
+                <option *ngFor="let option of parameter.possibleValues">{{option}}</option>
+              </select>
+              <input *ngIf="!parameter.possibleValues.length && parameter.type == 'java.lang.String'"
+                     type="text"
+                     [(ngModel)]="parameter.value"
+                     [disabled]="entry.transcriptThreads">
+              <input *ngIf="!parameter.possibleValues.length && parameter.type == 'java.lang.Integer'"
+                     type="number" step="1"
+                     [(ngModel)]="parameter.value"
+                     [disabled]="entry.transcriptThreads">
+              <input *ngIf="!parameter.possibleValues.length && parameter.type == 'java.lang.Double'"
+                     type="number" step="0.01"
+                     [(ngModel)]="parameter.value"
+                     [disabled]="entry.transcriptThreads">
+            </span>
+          </div>
+        </ng-container>
+        <div class="buttons">
+          <lib-button
+            action="save"
+            i18n-title title="Set the parameters for this transcript"
+            (press)="uploadParameters(entry)"
+            [disabled]="entry.transcriptThreads"></lib-button>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
