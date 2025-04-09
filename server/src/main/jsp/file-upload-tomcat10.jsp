@@ -54,17 +54,9 @@
           f.deleteOnExit();
           item.write(f.toPath());            
           if (!parameters.containsKey(item.getFieldName())) {
-            parameters.put(item.getFieldName(), f);
-          } else { // already got a file with this name - must be multiple files with the same name
-            Vector<File> files = null;
-            if (parameters.get(item.getFieldName()) instanceof Vector) {
-              files = (Vector<File>)parameters.get(item.getFieldName());
-            } else {
-              files = new Vector<File>();
-              parameters.put(item.getFieldName(), files);
-            }
-            files.add(f);
-          } // multiple values for the same parameter
+            parameters.put(item.getFieldName(), new Vector<File>());
+          } 
+          Vector<File> files = (Vector<File>)parameters.get(item.getFieldName());
         } // it's a file
     } // next item
   } catch(FileUploadException exception) {
