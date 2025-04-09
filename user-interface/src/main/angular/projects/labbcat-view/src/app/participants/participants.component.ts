@@ -31,6 +31,7 @@ export class ParticipantsComponent implements OnInit {
     participantDescription = ""; // Human readable description of participant query
     transcriptQuery = ""; // AGQL query string for pre-matching transcripts
     transcriptDescription = ""; // Human readable description of transcript query
+    defaultTranscriptFilter = "";
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0;
@@ -102,6 +103,12 @@ export class ParticipantsComponent implements OnInit {
                     }
                 }
             }
+            // read default transcript filter
+            this.labbcatService.labbcat.getSystemAttribute("defaultTranscriptFilter",
+                (attribute, errors, messages) => {
+                    this.defaultTranscriptFilter = attribute.value;
+                }
+            );
             resolve();
         });
     }
@@ -674,6 +681,12 @@ export class ParticipantsComponent implements OnInit {
                 participant_expression: "/.+/.test(id)",
                 participants: "all participants"
             };
+        }
+        // if there's a default transcript filter and no remembered transcript filter, override the default
+        if (this.defaultTranscriptFilter && !sessionStorage.getItem("lastQueryTranscripts")) {
+            for (let param of this.defaultTranscriptFilter.split("&").map(a => a.replace(/=.+/, ''))) {
+                params[param] = "";
+            }
         }
         this.router.navigate(["transcripts"], { queryParams: params });
     }
