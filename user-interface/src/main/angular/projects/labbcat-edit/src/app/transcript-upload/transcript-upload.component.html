@@ -36,6 +36,12 @@
   </fieldset>
   <div id="buttons">
     <lib-button
+      *ngIf="processing"
+      i18n-label="Batch upload" label="Cancel"
+      i18n-title title="Cancel current processing"
+      img="cross-mark.svg" icon="❌"
+      (press)="onCancel()"></lib-button>
+    <lib-button
       i18n-label="Batch upload" label="Upload"
       i18n-title title="Add all transcripts to LaBB-CAT"
       img="upload.svg" icon="↑"
@@ -52,7 +58,7 @@
     <lib-button
       i18n-label="Batch upload" label="Report"
       i18n-title title="Report about uploads"
-      img="document.svg" icon="🗎"
+      img="csv.svg" icon="🗎"
       (press)="onReport()"
       [disabled]="processing || entries.length == 0"></lib-button>
     <lib-button
@@ -77,6 +83,7 @@
            [disabled]="processing"
            multiple observeFiles>
     <div class="transcript-entry">
+      <span class="entry-selector header" i18n="Upload batch column">&nbsp;</span>
       <span class="transcript-name header" i18n="Upload batch column">Transcript</span>
       <span class="media-name header" i18n="Upload batch column">Media</span>
       <span class="corpus header" i18n="Upload batch column">Corpus</span>
@@ -86,8 +93,17 @@
       <span class="progress header" i18n="Upload batch column">Progress</span>
       <span class="buttons header">&nbsp;</span>
     </div>
-    <div *ngFor="let entry of entries" class="entry-container">
-      <div [class]="{ 'transcript-entry' : true, 'exists': entry.exists }">
+    <details *ngFor="let entry of entries" class="entry-container"
+             [open]="entry.parametersVisible">
+      <summary [class]="{ 'transcript-entry' : true, 'exists': entry.exists }">
+        <span class="entry-selector buttons">
+          <button *ngIf="entry.parameters"
+                  i18n-title title="Show/hide parameters"
+                  (click)="entry.parametersVisible = !entry.parametersVisible">
+            <img [src]="imagesLocation + '/' + (entry.parametersVisible?'collapse-down.svg':'expand-down.svg')" 
+                 [alt]="entry.parametersVisible?'▾':'▸'">
+          </button>
+        </span>
         <span class="transcript-name" title="{{entry.transcript?entry.transcript.name:''}}">
           <img *ngIf="entry.descriptor"
                src="{{entry.descriptor.icon}}"
@@ -104,17 +120,17 @@
         </span>
         <select [(ngModel)]="entry.corpus"
                 class="corpus"
-                [disabled]="processing || entry.transcriptThreads">
+                [disabled]="entry.exists || processing || entry.transcriptThreads">
           <option *ngFor="let label of corpora">{{label}}</option>
         </select>
         <input type="text"
                class="episode-name"
                title="{{entry.episode}}"
                [(ngModel)]="entry.episode"
-               [disabled]="processing || entry.transcriptThreads">
+               [disabled]="entry.exists || processing || entry.transcriptThreads">
         <select [(ngModel)]="entry.transcriptType"
                 class="transcript-type"
-                [disabled]="processing || entry.transcriptThreads">
+                [disabled]="entry.exists || processing || entry.transcriptThreads">
           <option *ngFor="let label of transcriptTypes">{{label}}</option>
         </select>
         <span class="status"
@@ -129,11 +145,9 @@
             i18n-title title="Remove this file from the list"
             (click)="removeEntry(entry.id)"
             [disabled]="processing || entry.transcriptThreads"><img src="{{imagesLocation}}/remove.svg" alt="➖"></button></span>
-      </div>
-      <details *ngIf="entry.parameters"
-               class="parameters list"
-               [open]="!entry.transcriptThreads">
-        <summary><span i18n>Parameters:</span> {{entry.transcriptId}}</summary>
+      </summary>
+      <div *ngIf="entry.parameters"
+               class="parameters list">
         <ng-container *ngFor="let parameter of entry.parameters">
           <div *ngIf="parameter.name != 'labbcat_episode' && parameter.name != 'labbcat_corpus' && parameter.name != 'labbcat_transcript_type'"
                class="item"
@@ -141,39 +155,40 @@
             <label>{{parameter.label}}</label>
             <span class="value">
               <legend>{{parameter.label}}</legend>
-              <select *ngIf="parameter.possibleValues.length"
+              <select *ngIf="parameter.possibleValues && parameter.possibleValues.length"
                       [(ngModel)]="parameter.value"
                       [disabled]="entry.transcriptThreads">
                 <option *ngFor="let option of parameter.possibleValues">{{option}}</option>
               </select>
-              <input *ngIf="!parameter.possibleValues.length && parameter.type == 'java.lang.String'"
+              <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.String'"
                      type="text"
                      [(ngModel)]="parameter.value"
                      [disabled]="entry.transcriptThreads">
-              <input *ngIf="!parameter.possibleValues.length && parameter.type == 'java.lang.Integer'"
+              <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Integer'"
                      type="number" step="1"
                      [(ngModel)]="parameter.value"
                      [disabled]="entry.transcriptThreads">
-              <input *ngIf="!parameter.possibleValues.length && parameter.type == 'java.lang.Double'"
+              <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Double'"
                      type="number" step="0.01"
                      [(ngModel)]="parameter.value"
                      [disabled]="entry.transcriptThreads">
-              <input *ngIf="!parameter.possibleValues.length && parameter.type == 'java.lang.Boolean'"
+              <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Boolean'"
                      type="checkbox"
                      [(ngModel)]="parameter.value"
                      [disabled]="entry.transcriptThreads">
             </span>
           </div>
         </ng-container>
-        <div class="buttons">
+        <div *ngIf="!entry.transcriptThreads && uploading"
+             class="item controls">
+          <span>&nbsp;</span>
           <lib-button
-            *ngIf="!entry.transcriptThreads"
             action="save"
             autofocus="true"
             i18n-title title="Set the parameters for this transcript"
             (press)="uploadParameters(entry)"></lib-button>
         </div>
-      </details>
-    </div>
+      </div>
+    </details>
   </div>
 </div>

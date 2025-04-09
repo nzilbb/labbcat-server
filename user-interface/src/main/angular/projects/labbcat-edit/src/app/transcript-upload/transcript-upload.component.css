@@ -30,7 +30,7 @@ div.transcript-batch {
     text-align: left;
 }
 
-div.transcript-batch div.transcript-entry {
+div.transcript-batch .transcript-entry {
     display: flex;
     flex-direction: row;
     height: 23px;
@@ -38,48 +38,54 @@ div.transcript-batch div.transcript-entry {
     vertical-align: middle;
 }
 
-div.transcript-entry span.header {
+.transcript-entry span.header {
 }
-div.transcript-entry span {
+.transcript-entry span {
     text-align: center;
 }
-div.transcript-entry span.transcript-name {
+.transcript-entry span.entry-selector {
+    width: 3%;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 0px;
+}
+.transcript-entry span.transcript-name {
     width: 15%;
     vertical-align: middle;
     text-align: left;
     padding-left: 10px;
     overflow: hidden;
 }
-div.transcript-entry span.media-name {
+.transcript-entry span.media-name {
     vertical-align: middle;
     padding-left: 10px;
     width: 10%;
     overflow: hidden;
 }
-div.transcript-entry .episode-name {
+.transcript-entry .episode-name {
     vertical-align: middle;
     width: 10%;
 }
-div.transcript-entry .corpus {
+.transcript-entry .corpus {
     vertical-align: middle;
     width: 5%;
 }
-div.transcript-entry .transcript-type {
+.transcript-entry .transcript-type {
     vertical-align: middle;
     width: 10%;
 }
-div.transcript-entry span.status {
+.transcript-entry span.status {
     vertical-align: middle;
     width: 20%;
     padding-left: 10px;
     overflow: hidden;
 }
-div.transcript-entry progress, div.transcript-entry .progress {
+.transcript-entry progress, .transcript-entry .progress {
     vertical-align: middle;
     max-width: 20%;
 }
 
-div.transcript-entry div.buttons {
+.transcript-entry div.buttons {
     width: 5%;
     margin-left: 10px;
 }
@@ -90,17 +96,26 @@ span.buttons > button {
     min-width: 20px;
     padding: 0px;
 }
+span.buttons > button > img {
+    height: 15px;
+    width: 15px;
+}
 
 div.transcript-batch div.exists {
     color: orange;
-} 
+}
 
-.parameters summary {
-    padding-left: 10px;
+.parameters {
+    width: auto;
+    margin-left: 10px;
+    animation-name: roll-down;
+    animation-duration: 2s;
+    display: block;
 }
-.parameters .item label {
-    padding-left: 20px;
+.controls {
+    text-align: right;
 }
+
 .error {
     color: red;
 }

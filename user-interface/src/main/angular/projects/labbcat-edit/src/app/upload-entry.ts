@@ -15,6 +15,7 @@ export class UploadEntry {
     transcriptId?: string; // probably the same as transcript.name, but could be different
     uploadId?: string;
     parameters?: any[];
+    parametersVisible: boolean;
     transcriptThreads?: { [transcriptId: string] : string };
     threadPollInterval?: number;
 
@@ -26,6 +27,21 @@ export class UploadEntry {
         this.progress = 0;
         this.selected = false;
         this.exists = false;
+    }
+
+    resetState() {
+        this.status = "";
+        this.errors = [];
+        this.progress = 0;
+        this.selected = false;
+        this.uploadId = null;
+        this.parameters = null;
+        this.parametersVisible = false;
+        this.transcriptThreads = null;
+        if (this.threadPollInterval) {
+            clearInterval(this.threadPollInterval);
+            this.threadPollInterval = null;
+        }
     }
 
     addMedia(file: File, trackSuffix: string): void {

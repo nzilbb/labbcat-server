@@ -264,11 +264,15 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         }
         // check whether it exists
         this.labbcatService.labbcat.getTranscript(
-            file.name, ["transcript"], (result, errors, messages) => {
+            file.name, ["transcript", "corpus", "episode", "transcript_type"],
+            (transcript, errors, messages) => {
                 if (!errors) {
                     entry.exists = true;
                     entry.status = "Already exists"; // TODO i18n
-                    entry.transcriptId = result.id;
+                    entry.transcriptId = transcript.id;
+                    entry.corpus = transcript.corpus[0].label;
+                    entry.episode = transcript.episode[0].label;
+                    entry.transcriptType = transcript.transcript_type[0].label;
                 }
             });
     }
@@ -312,22 +316,39 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         if (!this.entries.find(e => !e.uploadId)) {
             this.messageService.info(
                 "All transcripts have already been uploaded."); // TODO i18n
-        } else if (confirm(
+        } else if (this.entries.length == 1 || confirm(
             "Are you sure you want to upload these transcripts to LaBB-CAT?")) { // TODO i18n
+            // reset errors/statuses
+            for (let entry of this.entries) entry.resetState();
+            
+            // start upload
+            this.uploading = true;
             this.uploadNextTranscript();
         }
     }
     uploadNextTranscript(): void {
         // are there any entries that can be deleted?
         const uploadableEntry = this.entries.find(e => e.transcript && !e.uploadId);
-        if (!uploadableEntry) { // there are no entries left to delete
+        if (!this.uploading // cancelled
+            || !uploadableEntry) { // there are no entries left to delete
             this.processing = this.uploading = false;
         } else {
             this.processing = this.uploading = true;
             uploadableEntry.progress = 0;
-            this.labbcatService.labbcat.transcriptUpload( // TODO fails on Firefox
-                uploadableEntry.transcript, uploadableEntry.media, uploadableEntry.exists,
+            const media = {};
+            for (let trackSuffix in uploadableEntry.media) {
+                media[trackSuffix] = [];
+                for (let file of uploadableEntry.media[trackSuffix]) {
+                    media[trackSuffix].push(file);
+                } // next file
+            } // next track
+            this.labbcatService.labbcat.transcriptUpload( // TODO labbcat_generate
+                uploadableEntry.transcript, media, uploadableEntry.exists,
                 (result, errors, messages) => {
+                    if (!this.uploading) { // cancelled
+                        this.processing = false;
+                        return;
+                    }
                     if (errors) {
                         uploadableEntry.errors = uploadableEntry.errors.concat(errors);
                         if (this.useDefaultParameterValues) { // batch mode
@@ -343,6 +364,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                     }
                     uploadableEntry.uploadId = result.id;
                     uploadableEntry.parameters = result.parameters || [];
+                    uploadableEntry.parametersVisible = true;
                     // look for parameters we already know the answer to
                     let parameter = uploadableEntry.parameters.find(p=>p.name == "labbcat_corpus");
                     if (parameter) parameter.value = uploadableEntry.corpus;
@@ -350,7 +372,9 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                     if (parameter) parameter.value = uploadableEntry.episode;
                     parameter = uploadableEntry.parameters.find(
                         p=>p.name == "labbcat_transcript_type");
-                    if (parameter) parameter.value = uploadableEntry.transcriptType;
+                    if (parameter) {
+                        parameter.value = uploadableEntry.transcriptType;
+                    }
 
                     // are there any other parameters to show?
                     parameter = uploadableEntry.parameters.find(p=>
@@ -373,9 +397,17 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     }
     // the user clicked save parameters, or we could continue without asking the user
     uploadParameters(uploadableEntry: UploadEntry): void {
+        if (!this.uploading) { // cancelled
+            this.processing = false;
+            return;
+        }
+        uploadableEntry.parametersVisible = false;
         // immmediately disable the parameters button
         uploadableEntry.transcriptThreads = {};
         // send the parameter to the server
+        const parameterValues = {};
+        for (let parameter of uploadableEntry.parameters) {
+        }
         this.labbcatService.labbcat.transcriptUploadParameters(
             uploadableEntry.uploadId, uploadableEntry.parameters, (result, errors, messages) => {
                 if (messages) {
@@ -413,27 +445,30 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                             if (task) {
                                 uploadableEntry.progress = 50 + (task.percentComplete/2);
                                 uploadableEntry.status = task.status || uploadableEntry.status;
-                                if (uploadableEntry.progress == 100) {
-                                    uploadableEntry.exists = true;
-                                    clearInterval(uploadableEntry.threadPollInterval);
-                                    uploadableEntry.threadPollInterval = null;
-                                    // if all the uploads are complete
-                                    if (!this.entries.find(e=>e.threadPollInterval)) {
-                                        setTimeout(()=>{ // give the UI a chance to update
-                                            if (confirm("Do you want an upload report?")) { // TODO i18n
-                                                this.onReport();
-                                            }
-                                        }, 1000);
-                                    }
-                                }
                             }
+                            if (uploadableEntry.progress == 100 // task finished
+                                || !task) { // or not there any more
+                                uploadableEntry.exists = true;
+                                clearInterval(uploadableEntry.threadPollInterval);
+                                uploadableEntry.threadPollInterval = null;
+                                // if all the uploads are complete
+                                if (!this.processing
+                                    && this.useDefaultParameterValues
+                                    && !this.entries.find(e=>e.threadPollInterval)) {
+                                    setTimeout(()=>{ // give the UI a chance to update
+                                        if (confirm("Do you want an upload report?")) { // TODO i18n
+                                            this.onReport();
+                                        }
+                                    }, 1000);
+                                }
+                            } // task finished
                         });
                 } // next transcript (there's probably only one)
             }, 1000);            
         }
     }
 
-    // returns a statsu string that's 40 characters or shorter
+    // returns a status string that's 40 characters or shorter
     statusLabel(status: string): string {
         return status.length < 40?
             status
@@ -447,6 +482,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 "None of the transcripts are currently in LaBB-CAT."); // TODO i18n
         } else if (confirm(
             "Are you sure you want to delete these transcripts from LaBB-CAT?")) { // TODO i18n
+            this.deleting = true;
             this.deleteNextTranscript();
         }
     }
@@ -454,7 +490,8 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     deleteNextTranscript(): void {
         // are there any entries that can be deleted?
         const deletableEntry = this.entries.find(e => e.exists);
-        if (!deletableEntry) { // there are no entries left to delete
+        if (!this.deleting // cancelled
+            || !deletableEntry) { // there are no entries left to delete
             this.processing = this.deleting = false;
         } else {
             this.processing = this.deleting = true;
@@ -480,15 +517,22 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 });
         }
     }
+    onCancel(): void {
+        this.uploading = this.deleting = false;
+        if (!this.useDefaultParameterValues) this.processing = false;
+    }
     onReport(): void {        
         let csv = "data:text/csv;charset=utf-8,";
-        csv += "Transcript,Media,Corpus,Episode,Type,Status,Errors";
+        csv += "Transcript,Media,Corpus,Episode,Type,Parameters,Status,Errors";
         for (let entry of this.entries) {
             csv += "\n" + (entry.transcript?entry.transcript.name:"")+","
                 +"\""+entry.mediaFileNames().join("\n")+"\","
                 +entry.corpus+","
                 +entry.episode+","
                 +entry.transcriptType+","
+                +"\""+(entry.parameters?entry.parameters
+                    .map(p=>p.name+"="+p.value)
+                    .join("\n"):"").replace(/"/g,"'")+"\","
                 +"\""+entry.status.replace(/"/g,"'")+"\","
                 +"\""+(entry.errors?entry.errors.join("\n"):"").replace(/"/g,"'")+"\"";
         } // next transcript

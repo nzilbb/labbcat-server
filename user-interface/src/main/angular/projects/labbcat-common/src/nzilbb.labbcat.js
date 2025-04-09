@@ -2867,10 +2867,10 @@
 	fd.append("transcript", transcript);
 	if (media) {
           if (typeof media != "object") media = { "" : [media] }; // convert to track->array map
-          for (var trackSuffix in Object.keys(media)) {
+          for (var trackSuffix of Object.keys(media)) {
             var files = media[trackSuffix];
             if (files) {
-	      if (files === Array) { // multiple files
+	      if (files.constructor === Array) { // multiple files
 	        for (var f in files) {
 	          fd.append("media"+trackSuffix, files[f]);
 	        } // next file
@@ -3035,6 +3035,16 @@
      * {@link #transcriptUpload}
      */
     transcriptUploadParameters(id, parameters, onResult) {
+      if (parameters.constructor === Array) { // array of parameter objects, not keys/values
+        var parameterValues = {}
+        for (var p in parameters) {
+          var parameter = parameters[p];
+          if (parameter.name) {
+            parameterValues[parameter.name] = parameter.value;
+          }
+        } // next parameter
+        parameters = parameterValues;
+      }
       this.createRequest(
         "transcriptUploadParameters", null, onResult,
         this.baseUrl+"api/edit/transcript/upload/"+encodeURIComponent(id)
