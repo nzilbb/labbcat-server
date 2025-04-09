@@ -13,15 +13,15 @@
     align-items: center;
     justify-content: flex-end;
 }
-#dragdrop {
+#drag-drop {
     min-height: 300px;
     border: 2px #DEE6EF dashed;
     text-align: center;
 }
-div#dragdrop:hover, div.hover {
+div#drag-drop:hover, div.hover {
     border: 2px #777777 dashed;
 }
-div#dragdrop.dragover {
+div#drag-drop.dragover {
     border: 2px var(--theme-block-color) dashed;
 }
 div.transcript-batch {
