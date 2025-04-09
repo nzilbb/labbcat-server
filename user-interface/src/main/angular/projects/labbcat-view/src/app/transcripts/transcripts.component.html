@@ -197,16 +197,10 @@
 <div class="buttons">
   <lib-link
     *ngIf="user && user.roles.includes('edit') && !nextPage"
-    href="{{baseUrl}}edit/transcript/new"
+    href="{{baseUrl}}edit/transcript/batch"
     img="document.svg" icon="➕"
     i18n-label label="Upload Transcript"
     i18n-title title="Add or update a transcript"></lib-link>
-  <lib-link
-    *ngIf="user && user.roles.includes('edit') && !nextPage"
-    href="{{baseUrl}}edit/transcript/newBatch"
-    img="folder.svg" icon="📁"
-    i18n-label label="Upload Transcript Batch"
-    i18n-title title="Add or update many transcripts at once"></lib-link>
   <lib-link
     *ngIf="user && user.roles.includes('edit') && !nextPage"
     href="{{baseUrl}}edit/transcript/attributesBatch"
