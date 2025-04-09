@@ -417,7 +417,14 @@ public class Upload extends APIRequestHandler {
         // set parameter values from request
         for (String name : deserializerParameters.keySet()) {
           String value = requestParameters.getString(name);
-          if (value != null) deserializerParameters.get(name).setValue(value);
+          if (value != null) {
+            Parameter parameter = deserializerParameters.get(name); 
+            if (parameter.getType().equals(Layer.class)) {
+              parameter.setValue(schema.getLayer(value));
+            } else {
+              parameter.setValue(value);
+            }
+          }
         } // next deserializer parameter
         try {
           deserializer.setParameters(deserializerParameters);
