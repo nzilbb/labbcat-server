@@ -21,9 +21,6 @@ tbody td.transcript {
 tbody td:not(.transcript) {
     text-align: center;
 }
-tbody .participant-filter {
-    background: #fff;
-}
 span.attribute {
     display: block;
     max-height: 50px;
@@ -79,14 +76,21 @@ span.attribute {
 #generateLayerSelection, #attributesSelection, #serializationOptions, #mimeTypeSelection {
     animation: roll-out 1s ease;
 }
-.participant-filter, .participant-filter img {
-    width: 15px;
-}
 .buttons {
     text-align: left;
 }
 .filters .controls {
     white-space: nowrap;
+}
+.button-container {
+    display: flex;
+}
+.participant-filter {
+    margin-left: auto;
+}
+.participant-filter img {
+    width: 15px;
+    padding-right: 5px;
 }
 #clear-filters {
     animation: fade-in 0.5s;

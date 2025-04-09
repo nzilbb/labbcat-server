@@ -12,10 +12,6 @@
      </caption>
     <thead>
       <tr class="filters">
-        <td class="transcript-filter" *ngIf="transcriptQuery">
-          <img i18n-title title="{{transcriptDescription}}"
-               src="{{imagesLocation+'/document.svg'}}" alt="📄">
-        </td>
         <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
           <lib-layer-filter            
             [layer]="layer"
@@ -26,30 +22,23 @@
         </td>
         <td class="controls">
           <lib-button
-            id="clear-filters"
-            *ngIf="query"
-            img="delete.svg" icon="⌫"
-            (press)="clearFilters()"
-            i18n-title title="Clear selected filters"
-            ></lib-button>
-          <lib-button
             *ngIf="(!user || user.roles.includes('admin')) && !nextPage"
             img="filter.svg" icon="👥"
             (press)="setDefaultFilter()"
             i18n-title title="Set this as the default filter for all users"
             ></lib-button>
+          <lib-button
+            id="clear-filters"
+            *ngIf="query"
+            img="delete.svg" icon="⌫"
+            (press)="clearFilters()"
+            i18n-title title="Clear participant filters"
+            ></lib-button>
         </td>
       </tr><!-- Select from file -->
       <tr class="controls">
-        <td class="transcript-filter-filter" *ngIf="transcriptQuery"></td>
         <td colSpan="{{filterLayers.length}}">          
-          <lib-button
-            *ngIf="transcriptQuery"
-            (press)="clearTranscriptFilter()"
-            img="delete.svg" icon="⌫"
-            i18n-label label="Clear transcript filter"
-            i18n-title title="Clear filters relating to transcripts"
-            ></lib-button>
+          <div class="button-container">
           <lib-button
             *ngIf="user && user.roles.includes('edit') && !nextPage"
             action="delete"
@@ -82,14 +71,6 @@
             i18n-title title="Export attributes to CSV"
             ></lib-button>
           <lib-button
-            *ngIf="!nextPage && !transcriptQuery"
-            (press)="transcripts()"
-            [disabled]="!participantIds || participantIds.length == 0 || ((filterValues['--transcript-count'][0] || filterValues['--transcript-count'][1]) && selectedIds.length == 0)"
-            img="document.svg" icon="📄"
-            i18n-label label="List Transcripts"
-            i18n-title title="List transcripts including these participants"
-            ></lib-button>
-          <lib-button
             *ngIf="!nextPage || nextPage == 'search'"
             (press)="layeredSearch()"
             [disabled]="matchCount < 1 && selectedIds.length == 0"
@@ -97,12 +78,31 @@
             i18n-label label="Layered Search"
             i18n-title title="Search transcripts including these participants"
             ></lib-button>
+          <lib-button
+            *ngIf="!nextPage && !transcriptQuery"
+            (press)="transcripts()"
+            [disabled]="!participantIds || participantIds.length == 0 || ((filterValues['--transcript-count'][0] || filterValues['--transcript-count'][1]) && selectedIds.length == 0)"
+            img="document.svg" icon="📄"
+            i18n-label label="List Transcripts"
+            i18n-title title="List transcripts including these participants"
+            ></lib-button>
+          <div *ngIf="transcriptQuery" class="transcript-filter">
+            <img
+              i18n-title [title]="transcriptDescription"
+              src="{{imagesLocation+'/document.svg'}}" alt="📄">
+            <lib-button
+              (press)="clearTranscriptFilter()"
+              img="delete.svg" icon="⌫"
+              i18n-label label="Clear transcript filter"
+              i18n-title title="Clear filters relating to transcripts"
+              ></lib-button>
+          </div>
+          </div>
         </td>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let id of participantIds">
-        <td class="transcript-filter" *ngIf="transcriptQuery"></td><!-- transcript-filter -->
         <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
           <span class="id" *ngIf="layer.id == schema.participantLayerId">
             <lib-grouped-checkbox
