@@ -142,9 +142,14 @@
         <progress max="100" [title]="entry.status" [value]="entry.progress">{{entry.progress}}%</progress>
         <span class="buttons">
           <button
+            *ngIf="!entry.transcriptThreads"
             i18n-title title="Remove this file from the list"
             (click)="removeEntry(entry.id)"
-            [disabled]="processing || entry.transcriptThreads"><img src="{{imagesLocation}}/remove.svg" alt="➖"></button></span>
+            [disabled]="processing"><img src="{{imagesLocation}}/remove.svg" alt="➖"></button>
+          <button
+            *ngIf="entry.transcriptThreads"
+            i18n-title title="Cancel"
+            (click)="cancelThreads(entry)"><img src="{{imagesLocation}}/cross-mark.svg" alt="❌"></button></span>
       </summary>
       <div *ngIf="entry.parameters"
                class="parameters list">

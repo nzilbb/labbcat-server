@@ -5,6 +5,8 @@ import { UploadEntry } from '../upload-entry';
 import { MessageService, LabbcatService, MediaFile, Annotation, Layer,
          SerializationDescriptor } from 'labbcat-common';
 
+// TODO labbcat_generate checkbox
+// TODO batch change of corpus/episode/type
 @Component({
   selector: 'app-transcript-upload',
   templateUrl: './transcript-upload.component.html',
@@ -196,6 +198,12 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
 
     parseFile(file: File, path: string) {
         const extension = file.name.replace(/^.*(\.[^.]+)$/, "$1").toLowerCase();
+        if (extension == ".csv") { // usually uploading csv files as transcripts is a mistake
+            // if there are other transcripts that are not csv, then ignore this file
+            const nonCsvTranscript = this.entries.find(
+                e=>e.transcript && !e.transcript.name.endsWith(".csv"));
+            if (nonCsvTranscript) return;
+        }
         const descriptor = this.deserializers[extension];
         if (descriptor) {
             this.addTranscript(file, descriptor, path);
@@ -348,7 +356,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                     media[trackSuffix].push(file);
                 } // next file
             } // next track
-            this.labbcatService.labbcat.transcriptUpload( // TODO labbcat_generate
+            this.labbcatService.labbcat.transcriptUpload(
                 uploadableEntry.transcript, media, uploadableEntry.exists,
                 (result, errors, messages) => {
                     if (!this.uploading) { // cancelled
@@ -452,11 +460,12 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                                 uploadableEntry.progress = 50 + (task.percentComplete/2);
                                 uploadableEntry.status = task.status || uploadableEntry.status;
                             }
-                            if (uploadableEntry.progress == 100 // task finished
-                                || !task) { // or not there any more
+                            if (!task // task is gone
+                                || !task.running) { // or not running any more
                                 uploadableEntry.exists = true;
                                 clearInterval(uploadableEntry.threadPollInterval);
                                 uploadableEntry.threadPollInterval = null;
+                                uploadableEntry.transcriptThreads = null;
                                 // if all the uploads are complete
                                 if (!this.processing
                                     && this.useDefaultParameterValues
@@ -471,6 +480,21 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                         });
                 } // next transcript (there's probably only one)
             }, 1000);            
+        }
+    }
+
+    cancelThreads(uploadableEntry: UploadEntry): void {
+        if (uploadableEntry.transcriptThreads) {
+            for (let transcriptId in uploadableEntry.transcriptThreads) {
+                this.labbcatService.labbcat.cancelTask(
+                    uploadableEntry.transcriptThreads[transcriptId],
+                    (task, errors, messages) => {
+                        if (task) {
+                            uploadableEntry.progress = 50 + (task.percentComplete/2);
+                            uploadableEntry.status = task.status || uploadableEntry.status;
+                        }
+                    });
+            } // next transcript (there's probably only one)
         }
     }
 
