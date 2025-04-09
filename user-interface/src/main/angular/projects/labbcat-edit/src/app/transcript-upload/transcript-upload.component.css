@@ -48,7 +48,6 @@ div.transcript-entry span.transcript-name {
     vertical-align: middle;
     text-align: left;
     padding-left: 10px;
-    font-weight: bold;
     overflow: hidden;
 }
 div.transcript-entry span.media-name {
@@ -96,6 +95,9 @@ div.transcript-batch div.exists {
     color: orange;
 } 
 
+.parameters summary {
+    padding-left: 10px;
+}
 .parameters .item label {
     padding-left: 20px;
 }

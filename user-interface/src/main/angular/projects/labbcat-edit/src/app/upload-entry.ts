@@ -16,6 +16,7 @@ export class UploadEntry {
     uploadId?: string;
     parameters?: any[];
     transcriptThreads?: { [transcriptId: string] : string };
+    threadPollInterval?: number;
 
     constructor(id: string) {
         this.id = id;

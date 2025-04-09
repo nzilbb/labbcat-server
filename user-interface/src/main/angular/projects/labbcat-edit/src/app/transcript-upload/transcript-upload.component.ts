@@ -288,8 +288,10 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     getEntry(id: string): UploadEntry {
         let entry = this.entries.find(e => e.id == id);
         if (!entry) {
-            console.log("create new " + id);
             entry = new UploadEntry(id);
+            entry.corpus = this.defaultCorpus;
+            entry.transcriptType = this.defaultTranscriptType;
+            entry.episode = entry.id;
             this.entries.push(entry);
         }
         return entry;
@@ -297,6 +299,11 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
 
     // button handlers
     removeEntry(id: string) {
+        const entry = this.entries.find(e=>e.id == id);
+        if (entry && entry.threadPollInterval) {
+            // if it's monitoring thread, stop monitoring
+            clearInterval(entry.threadPollInterval);
+        }
         this.entries = this.entries.filter(e=>e.id != id);
     }
     
@@ -312,19 +319,24 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     }
     uploadNextTranscript(): void {
         // are there any entries that can be deleted?
-        const uploadableEntry = this.entries.find(e => !e.uploadId);
+        const uploadableEntry = this.entries.find(e => e.transcript && !e.uploadId);
         if (!uploadableEntry) { // there are no entries left to delete
             this.processing = this.uploading = false;
         } else {
             this.processing = this.uploading = true;
             uploadableEntry.progress = 0;
-            this.labbcatService.labbcat.transcriptUpload(
+            this.labbcatService.labbcat.transcriptUpload( // TODO fails on Firefox
                 uploadableEntry.transcript, uploadableEntry.media, uploadableEntry.exists,
                 (result, errors, messages) => {
                     if (errors) {
                         uploadableEntry.errors = uploadableEntry.errors.concat(errors);
-                        this.processing = this.uploading = false;
-                        return;
+                        if (this.useDefaultParameterValues) { // batch mode
+                            // continue with next transcript
+                            this.uploadNextTranscript();
+                        } else { // not in batch mode, so stop here
+                            this.processing = this.uploading = false;
+                            return;
+                        }
                     }
                     if (messages) {
                         uploadableEntry.status = messages.join("\n");
@@ -371,11 +383,14 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 }
                 if (errors) {
                     uploadableEntry.errors = uploadableEntry.errors.concat(errors);
-                    this.processing = this.uploading = false;                    
-                } else {
-                    // try next transcript
-                    this.uploadNextTranscript();
+                    if (!this.useDefaultParameterValues) { // not in batch mode, so stop here
+                        this.processing = this.uploading = false;
+                        return;
+                    }
                 }
+                // try next transcript
+                this.uploadNextTranscript();
+                
                 if (result) {
                     uploadableEntry.transcriptThreads = result.transcripts;
                     this.monitorThreads(uploadableEntry);
@@ -390,7 +405,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     monitorThreads(uploadableEntry: UploadEntry): void {
         if (uploadableEntry.transcriptThreads) {
             // repeatedly poll the task status
-            setInterval(()=>{
+            uploadableEntry.threadPollInterval = setInterval(()=>{
                 for (let transcriptId in uploadableEntry.transcriptThreads) {
                     this.labbcatService.labbcat.taskStatus(
                         uploadableEntry.transcriptThreads[transcriptId],
@@ -400,6 +415,16 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                                 uploadableEntry.status = task.status || uploadableEntry.status;
                                 if (uploadableEntry.progress == 100) {
                                     uploadableEntry.exists = true;
+                                    clearInterval(uploadableEntry.threadPollInterval);
+                                    uploadableEntry.threadPollInterval = null;
+                                    // if all the uploads are complete
+                                    if (!this.entries.find(e=>e.threadPollInterval)) {
+                                        setTimeout(()=>{ // give the UI a chance to update
+                                            if (confirm("Do you want an upload report?")) { // TODO i18n
+                                                this.onReport();
+                                            }
+                                        }, 1000);
+                                    }
                                 }
                             }
                         });
@@ -440,7 +465,9 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                         deletableEntry.errors = errors;
                     }
                     if (messages) {
-                        deletableEntry.status = messages.join("\n");
+                        deletableEntry.status = messages.join("\n")
+                        // remove transcript name from message, we already know it
+                            .replace(": "+deletableEntry.transcript.name,"");
                     }
                     // mark it as no longer existing
                     deletableEntry.exists = false;
@@ -454,6 +481,28 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         }
     }
     onReport(): void {        
+        let csv = "data:text/csv;charset=utf-8,";
+        csv += "Transcript,Media,Corpus,Episode,Type,Status,Errors";
+        for (let entry of this.entries) {
+            csv += "\n" + (entry.transcript?entry.transcript.name:"")+","
+                +"\""+entry.mediaFileNames().join("\n")+"\","
+                +entry.corpus+","
+                +entry.episode+","
+                +entry.transcriptType+","
+                +"\""+entry.status.replace(/"/g,"'")+"\","
+                +"\""+(entry.errors?entry.errors.join("\n"):"").replace(/"/g,"'")+"\"";
+        } // next transcript
+        const encodedUri = encodeURI(csv);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        const now = new Date();
+        link.setAttribute("download", "batch-"+now
+            .toISOString().substring(0,16).replace(/[-:]/g,"").replace("T","-")
+            +".csv");
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
     onClear(): void {
         this.entries = [];

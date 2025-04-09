@@ -71,6 +71,7 @@
      [class.dragover]="hovering">
   <div id="transcripts" class="transcript-batch" i18n-title title="Transcripts to upload">
     <input type="file"
+           i18n-title title="Select files for upload"
            [(ngModel)]="fileSelector"
            (change)="chooseFile($event)"
            [disabled]="processing"
@@ -87,15 +88,16 @@
     </div>
     <div *ngFor="let entry of entries" class="entry-container">
       <div [class]="{ 'transcript-entry' : true, 'exists': entry.exists }">
-        <span class="transcript-name" title="{{entry.transcript.name}}">
+        <span class="transcript-name" title="{{entry.transcript?entry.transcript.name:''}}">
           <img *ngIf="entry.descriptor"
                src="{{entry.descriptor.icon}}"
                title="{{entry.descriptor.name}}">
-          <span *ngIf="!entry.exists">{{entry.transcript.name}}</span>
-          <a *ngIf="entry.exists"
+          <span *ngIf="entry.transcript && !entry.exists">{{entry.transcript.name}}</span>
+          <a *ngIf="entry.transcript && entry.exists"
              target="{{entry.transcriptId}}"
              href="{{baseUrl}}transcript?id={{entry.transcriptId}}"
-             >{{entry.transcript.name}}</a>
+             >{{entry.transcriptId||entry.transcript.name}}</a>
+          <span *ngIf="!entry.transcript" i18n>[no transcript yet]</span>
         </span>
         <span class="media-name" title="{{entry.mediaFileNames().join('\n')}}">
           <span *ngFor="let ext of entry.mediaExtensions()">{{ext}} </span>
@@ -161,10 +163,11 @@
         </ng-container>
         <div class="buttons">
           <lib-button
+            *ngIf="!entry.transcriptThreads"
             action="save"
+            autofocus="true"
             i18n-title title="Set the parameters for this transcript"
-            (press)="uploadParameters(entry)"
-            [disabled]="entry.transcriptThreads"></lib-button>
+            (press)="uploadParameters(entry)"></lib-button>
         </div>
       </details>
     </div>
