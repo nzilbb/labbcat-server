@@ -312,8 +312,18 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         if (!this.entries.find(e => !e.uploadId)) {
             this.messageService.info(
                 "All transcripts have already been uploaded."); // TODO i18n
-        } else if (this.entries.length == 1 || confirm(
-            "Are you sure you want to upload these transcripts to LaBB-CAT?")) { // TODO i18n
+        } else {
+            const existingTranscripts = this.entries.filter(e=>e.exists);
+            if (existingTranscripts.length > 0
+                && !confirm("Some transcripts already exist in LaBB-CAT.\nDo you want to re-upload them?")) { // TODO i18n
+                if (existingTranscripts.length != this.entries.length
+                    && confirm("Do you want to ignore the existing transcripts, and upload the others?")) { // TODO i18n
+                    this.entries = this.entries.filter(e=>!e.exists);
+                } else { // don't want to upload others either
+                    return;
+                }
+            } // there are existing transcripts we don't want to upload
+            
             // reset errors/statuses
             for (let entry of this.entries) entry.resetState();
             
