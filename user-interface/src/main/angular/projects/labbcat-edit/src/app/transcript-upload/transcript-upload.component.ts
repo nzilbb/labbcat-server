@@ -148,7 +148,6 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
 
     // file selection
     fileSelectHandler(e: DragEvent): void {
-        console.log("fileSelectHandler "+e);
         // cancel event and hover styling
         this.fileDragHover(e);
 
@@ -171,7 +170,6 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     }
     
     parseItem(item: FileSystemEntry, path: string): void {
-        console.log("parseItem: " + item + " " + path);
         path = path || "";
         if (item.isFile) {
             const fileEntry = item as FileSystemFileEntry;
@@ -199,7 +197,6 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     parseFile(file: File, path: string) {
         const extension = file.name.replace(/^.*(\.[^.]+)$/, "$1").toLowerCase();
         const descriptor = this.deserializers[extension];
-        console.log(`parseFile ${file.name} - ${extension} - ${descriptor}`);
         if (descriptor) {
             this.addTranscript(file, descriptor, path);
         } else if (file.type) {
@@ -221,7 +218,6 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     }
 
     addTranscript(file: File, deserializer: SerializationDescriptor, path: string) {
-        console.log(`addTranscript ${path}/${file.name} (${deserializer.name})`);
         const id = this.stripExtension(file.name);
         
         const entry = this.getEntry(id);
