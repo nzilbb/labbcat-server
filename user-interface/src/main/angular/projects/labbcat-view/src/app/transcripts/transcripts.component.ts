@@ -547,6 +547,19 @@ export class TranscriptsComponent implements OnInit {
     }
 
     /** Button action */
+    clearParticipantFilter() : void {
+        this.participantQuery = "";
+        this.participantDescription = "";
+        this.router.navigate([], {
+            queryParams: {
+                participant_expression: null,
+                participants: null
+            },
+            queryParamsHandling: 'merge'
+        });
+    }
+
+    /** Button action */
     clearFilters() : void {
         this.initializeFilters().then(()=>{
             this.listTranscripts();

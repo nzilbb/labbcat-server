@@ -581,6 +581,19 @@ export class ParticipantsComponent implements OnInit {
     }
 
     /** Button action */
+    clearTranscriptFilter() : void {
+        this.transcriptQuery = "";
+        this.transcriptDescription = "";
+        this.router.navigate([], {
+            queryParams: {
+                transcript_expression: null,
+                transcripts: null
+            },
+            queryParamsHandling: 'merge'
+        });
+    }
+
+    /** Button action */
     newParticipant(): void {
         var name = prompt(
             "Please enter the new participant's name\nor leave this blank to generate a name automatically", ""); // TODO i18n

@@ -44,6 +44,13 @@
         <td class="transcript-filter-filter" *ngIf="transcriptQuery"></td>
         <td colSpan="{{filterLayers.length}}">          
           <lib-button
+            *ngIf="transcriptQuery"
+            (press)="clearTranscriptFilter()"
+            img="delete.svg" icon="⌫"
+            i18n-label label="Clear transcript filter"
+            i18n-title title="Clear filters relating to transcripts"
+            ></lib-button>
+          <lib-button
             *ngIf="user && user.roles.includes('edit') && !nextPage"
             action="delete"
             (press)="deleteParticipants()" [processing]="deleting"

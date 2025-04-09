@@ -46,6 +46,13 @@
           <td class="participant-filter" *ngIf="participantQuery"></td>
           <td colSpan="{{filterLayers.length}}">
             <lib-button
+              *ngIf="participantQuery"
+              (press)="clearParticipantFilter()"
+              img="delete.svg" icon="⌫"
+              i18n-label label="Clear participant filter"
+              i18n-title title="Clear filters relating to participants"
+              ></lib-button>
+            <lib-button
               *ngIf="user && user.roles.includes('edit') && !nextPage"
               action="delete"
               (press)="deleteTranscripts()" [processing]="deleting"
