@@ -38,12 +38,19 @@
             }
           } // multiple values for same parameter
         } else { // it's a file
-          File f = File.createTempFile("anycontainer-", "-"+item.getName());
+          String fileName = item.getName();
+          // some browsers provide a full path, which must be truncated
+          int lastSlash = fileName.lastIndexOf('/');
+          if (lastSlash < 0) lastSlash = fileName.lastIndexOf('\\');
+          if (lastSlash >= 0) fileName = fileName.substring(lastSlash + 1);
+          // // '+' is misinterpreted as an HTML-encoded ' ' in some places
+          // fileName = fileName.replaceAll("\\+","_");
+          File f = File.createTempFile("file-upload-tomcat10-", "-"+fileName);
           f.delete();
           f.deleteOnExit();
           f.mkdir();
           // ensure the server file's name is the same as the client file's name
-          f = new File(f, item.getName());
+          f = new File(f, fileName);
           f.deleteOnExit();
           item.write(f.toPath());            
           if (!parameters.containsKey(item.getFieldName())) {
