@@ -158,6 +158,10 @@
                      type="number" step="0.01"
                      [(ngModel)]="parameter.value"
                      [disabled]="entry.transcriptThreads">
+              <input *ngIf="!parameter.possibleValues.length && parameter.type == 'java.lang.Boolean'"
+                     type="checkbox"
+                     [(ngModel)]="parameter.value"
+                     [disabled]="entry.transcriptThreads">
             </span>
           </div>
         </ng-container>
