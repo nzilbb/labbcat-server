@@ -704,11 +704,24 @@ export class TranscriptsComponent implements OnInit {
     /** Button action */
     participants(): void {
         let params = {};
-        if (this.selectedIds.length > 0) { // individual check-boxes selected - send a count
-            const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
+        if (this.selectedIds.length > 0) { // individual check-boxes selected
+            // check if the user has selected all check-boxes corresponding to a filter
+            // TODO handle the case where all transcripts' check-boxes are selected
+            const allFilteredSelected = this.selectedIds.length == this.matchCount &&
+                this.selectedIds.length == this.transcriptIds.length &&
+                this.selectedIds.every((x, i) => x == this.transcriptIds[i]);
+            // participants page will throw an error if passed transcript query attributes
+            //   "Can only get labels list for participant or transcript attributes: labels('transcript_type')"
+            // so we just pass the transcripts as a list and dress up the description
             params = {
-                transcript_expression: `[${ids}].includesAny(labels('transcript'))`,
-                transcripts: this.selectedIds.length + " selected transcript" + (this.selectedIds.length > 1 ? "s" : "")
+                transcript_expression: "["
+                    + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                    + "].includesAny(labels('transcript'))"
+            };
+            if (allFilteredSelected) { // user has selected all check-boxes corresponding to a filter
+                params["transcripts"] = this.queryDescription;
+            } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
+                params["transcripts"] = this.selectedIds.length + " selected transcript" + (this.selectedIds.length > 1 ? "s" : "");
             }
         } else if (this.query) { // no check-boxes selected but some filter applied
             // participants page will throw an error if passed transcript attributes
@@ -761,12 +774,25 @@ export class TranscriptsComponent implements OnInit {
     /** Query string for selected transcripts */
     selectedTranscriptsQueryParameters(transcriptIdParameter: string): Params {
         let params = {};
-        if (this.selectedIds.length > 0) { // individual check-boxes selected - don't send a transcripts param
+        if (this.selectedIds.length > 0) { // individual check-boxes selected
+            // check if the user has selected all check-boxes corresponding to a filter
+            const allFilteredSelected = this.selectedIds.length == this.matchCount &&
+                this.selectedIds.length == this.transcriptIds.length &&
+                this.selectedIds.every((x, i) => x == this.transcriptIds[i]);
+            // TODO handle the case where all transcripts' check-boxes are selected
+            if (allFilteredSelected) { // user has selected all check-boxes corresponding to a filter
+                params = {
+                    transcript_expression: this.query,
+                    transcripts: this.queryDescription
+                };
+            } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
+                // don't send a transcripts param (transcript count is visible in tab title)
             params = {
-                transcript_expression : "["
+                transcript_expression: "["
                     + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
                     + "].includes(id)"
             };
+            }
         } else if (this.query) { // no check-boxes selected but some filter applied
             params = {
                 transcript_expression: this.query,

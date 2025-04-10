@@ -678,11 +678,24 @@ export class ParticipantsComponent implements OnInit {
     /** Button action */
     transcripts(): void {
         let params = {};
-        if (this.selectedIds.length > 0) { // individual check-boxes selected - send a count
-            const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
+        if (this.selectedIds.length > 0) { // individual check-boxes selected
+            // check if the user has selected all check-boxes corresponding to a filter
+            const allFilteredSelected = this.selectedIds.length == this.matchCount &&
+                this.selectedIds.length == this.participantIds.length &&
+                this.selectedIds.every((x, i) => x == this.participantIds[i]);
+            // TODO handle the case where all participants' check-boxes are selected
+            if (allFilteredSelected) { // user has selected all check-boxes corresponding to a filter
+                params = {
+                    participant_expression: this.query,
+                    participants: this.queryDescription
+                };
+            } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
             params = {
-                participant_expression: `[${ids}].includesAny(labels('participant'))`,
+                participant_expression: "["
+                    + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                    + "].includesAny(labels('participant'))",
                 participants: this.selectedIds.length + " selected participant" + (this.selectedIds.length > 1 ? "s" : "")
+            };
             }
         } else if (this.query) { // no check-boxes selected but some filter applied
             params = {
@@ -751,12 +764,25 @@ export class ParticipantsComponent implements OnInit {
     /** Query parameters for selected participants */
     selectedParticipantsQueryParameters(participantIdParameter: string): Params {
         let params = {};
-        if (this.selectedIds.length > 0) { // individual check-boxes selected - don't send a participants param
+        if (this.selectedIds.length > 0) { // individual check-boxes selected
+            // check if the user has selected all check-boxes corresponding to a filter
+            const allFilteredSelected = this.selectedIds.length == this.matchCount &&
+                this.selectedIds.length == this.participantIds.length &&
+                this.selectedIds.every((x, i) => x == this.participantIds[i]);
+            // TODO handle the case where all participants' check-boxes are selected
+            if (allFilteredSelected) { // user has selected all check-boxes corresponding to a filter
+                params = {
+                    participant_expression: this.query,
+                    participants: this.queryDescription
+                };
+            } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
+                // don't send a participants param (participant count is visible in tab title)
             params = {
                 participant_expression: "["
                     + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
                     + "].includes(id)"
             };
+            }
         } else if (this.query) { // no check-boxes selected but some filter applied
             params = {
                 participant_expression: this.query,
