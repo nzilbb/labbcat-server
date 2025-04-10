@@ -5500,8 +5500,16 @@ public class SqlGraphStore implements GraphStore {
             }
           }
         } catch(ParseException parseX) {
-          throw new StoreException("Could not parse anchor ID:"
-                                   + anchor.getId());
+          throw new StoreException(
+            "Could not parse anchor ID:" + anchor.getId()
+            + ":" + anchor.getChange() + " - "
+            + anchor.endingAnnotations()
+            .map(a->a.getId()+":"+a.getLayerId()+":"+a.getChange()+":"+a.getLabel())
+            .collect(Collectors.joining(";"))
+            + "->"
+            + anchor.startingAnnotations()
+            .map(a->a.getId()+":"+a.getLayerId()+":"+a.getChange()+":"+a.getLabel())
+            .collect(Collectors.joining(";")));
         }
       } // next anchor
       for (Annotation annotation : changedAnnotations) {
