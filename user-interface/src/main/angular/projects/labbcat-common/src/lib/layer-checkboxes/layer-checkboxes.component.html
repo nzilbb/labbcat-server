@@ -382,8 +382,18 @@
   </ng-container>
 </fieldset>
 </div>
-<fieldset *ngIf="!hideControls && (includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}' || participant || transcript)" id="controls">
-  <label 
+<fieldset *ngIf="!hideControls && (participant || transcript || includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}')" id="controls">
+  <div *ngIf="participant || transcript" class="label-spacer">
+  <label
+    title="Show full names for participant/transcript attributes">
+    <lib-grouped-checkbox
+      group="showAttributePrefixes"
+      name="showAttributePrefixes"
+      [checked]="displayAttributePrefixes"
+      (change)="toggleAttributePrefixes()"
+      ></lib-grouped-checkbox>
+    Show attribute prefixes</label>
+  </div>
   <div
     *ngIf="includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}'"
     class="label-spacer">
@@ -397,16 +407,5 @@
       (change)="toggleLayerIcons()"
       ></lib-grouped-checkbox>
     Hide layer icons</label>
-  </div>
-  <div *ngIf="participant || transcript" class="label-spacer">
-  <label
-    title="Show full names for participant/transcript attributes">
-    <lib-grouped-checkbox
-      group="showAttributePrefixes"
-      name="showAttributePrefixes"
-      [checked]="displayAttributePrefixes"
-      (change)="toggleAttributePrefixes()"
-      ></lib-grouped-checkbox>
-    Show attribute prefixes</label>
   </div>
 </fieldset>
