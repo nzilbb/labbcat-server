@@ -39,64 +39,64 @@
       <tr class="controls">
         <td colSpan="{{filterLayers.length}}">          
           <div class="button-container">
-          <lib-button
-            *ngIf="user && user.roles.includes('edit') && !nextPage"
-            action="delete"
-            (press)="deleteParticipants()" [processing]="deleting"
-            [disabled]="selectedIds.length == 0"
-            i18n-title title="Delete record"
-            ></lib-button>
-          <lib-button
-            *ngIf="user && user.roles.includes('edit') && !nextPage"
-            (press)="mergeParticipants()"
-            [disabled]="selectedIds.length < 2"
-            img="people.svg" icon="👥"
-            i18n-label label="Merge"
-            i18n-title title="Merge selected participant records into one record"
-            ></lib-button>
-          <lib-button
-            *ngIf="!nextPage"
-            (press)="allUtterances()"
-            [disabled]="selectedIds.length == 0"
-            img="all-utterances.svg" icon="“"
-            i18n-label label="All Utterances"
-            i18n-title title="List all utterances by these participants"
-            ></lib-button>
-          <lib-button
-            *ngIf="!nextPage && !transcriptQuery"
-            (press)="exportAttributes()"
-            [disabled]="!participantIds || participantIds.length == 0"
-            img="csv.svg" icon=",a,"
-            i18n-label label="Export Attributes"
-            i18n-title title="Export attributes to CSV"
-            ></lib-button>
-          <lib-button
-            *ngIf="!nextPage || nextPage == 'search'"
-            (press)="layeredSearch()"
-            [disabled]="matchCount < 1 && selectedIds.length == 0"
-            img="magnifying-glass.svg" icon="🔍"
-            i18n-label label="Layered Search"
-            i18n-title title="Search transcripts including these participants"
-            ></lib-button>
-          <lib-button
-            *ngIf="!nextPage && !transcriptQuery"
-            (press)="transcripts()"
-            [disabled]="!participantIds || participantIds.length == 0 || ((filterValues['--transcript-count'][0] || filterValues['--transcript-count'][1]) && selectedIds.length == 0)"
-            img="document.svg" icon="📄"
-            i18n-label label="List Transcripts"
-            i18n-title title="List transcripts including these participants"
-            ></lib-button>
-          <div *ngIf="transcriptQuery" class="transcript-filter">
-            <img
-              i18n-title [title]="transcriptDescription"
-              src="{{imagesLocation+'/document.svg'}}" alt="📄">
             <lib-button
-              (press)="clearTranscriptFilter()"
-              img="delete.svg" icon="⌫"
-              i18n-label label="Clear transcript filter"
-              i18n-title title="Clear filters relating to transcripts"
+              *ngIf="user && user.roles.includes('edit') && !nextPage"
+              action="delete"
+              (press)="deleteParticipants()" [processing]="deleting"
+              [disabled]="selectedIds.length == 0"
+              i18n-title title="Delete record"
               ></lib-button>
-          </div>
+            <lib-button
+              *ngIf="user && user.roles.includes('edit') && !nextPage"
+              (press)="mergeParticipants()"
+              [disabled]="selectedIds.length < 2"
+              img="people.svg" icon="👥"
+              i18n-label label="Merge"
+              i18n-title title="Merge selected participant records into one record"
+              ></lib-button>
+            <lib-button
+              *ngIf="user && user.roles.includes('edit') && !nextPage"
+              (press)="allUtterances()"
+              [disabled]="selectedIds.length == 0"
+              img="all-utterances.svg" icon="“"
+              i18n-label label="All Utterances"
+              i18n-title title="List all utterances by these participants"
+              ></lib-button>
+            <lib-button
+              *ngIf="!nextPage && !transcriptQuery"
+              (press)="exportAttributes()"
+              [disabled]="!participantIds || participantIds.length == 0"
+              img="csv.svg" icon=",a,"
+              i18n-label label="Export Attributes"
+              i18n-title title="Export attributes to CSV"
+              ></lib-button>
+            <lib-button
+              *ngIf="!nextPage || nextPage == 'search'"
+              (press)="layeredSearch()"
+              [disabled]="matchCount < 1 && selectedIds.length == 0"
+              img="magnifying-glass.svg" icon="🔍"
+              i18n-label label="Layered Search"
+              i18n-title title="Search transcripts including these participants"
+              ></lib-button>
+            <lib-button
+              *ngIf="!nextPage && !transcriptQuery"
+              (press)="transcripts()"
+              [disabled]="!participantIds || participantIds.length == 0 || ((filterValues['--transcript-count'][0] || filterValues['--transcript-count'][1]) && selectedIds.length == 0)"
+              img="document.svg" icon="📄"
+              i18n-label label="List Transcripts"
+              i18n-title title="List transcripts including these participants"
+              ></lib-button>
+            <div *ngIf="transcriptQuery" class="transcript-filter">
+              <img
+                i18n-title [title]="transcriptDescription"
+                src="{{imagesLocation+'/document.svg'}}" alt="📄">
+              <lib-button
+                (press)="clearTranscriptFilter()"
+                img="delete.svg" icon="⌫"
+                i18n-label label="Clear transcript filter"
+                i18n-title title="Clear filters relating to transcripts"
+                ></lib-button>
+            </div>
           </div>
         </td>
       </tr>

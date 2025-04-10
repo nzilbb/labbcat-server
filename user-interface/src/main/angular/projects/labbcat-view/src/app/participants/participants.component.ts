@@ -690,12 +690,12 @@ export class ParticipantsComponent implements OnInit {
                     participants: this.queryDescription
                 };
             } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
-            params = {
-                participant_expression: "["
-                    + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                    + "].includesAny(labels('participant'))",
-                participants: this.selectedIds.length + " selected participant" + (this.selectedIds.length > 1 ? "s" : "")
-            };
+                params = {
+                    participant_expression: "["
+                        + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                        + "].includesAny(labels('participant'))",
+                    participants: this.selectedIds.length + " selected participant" + (this.selectedIds.length > 1 ? "s" : "")
+                };
             }
         } else if (this.query) { // no check-boxes selected but some filter applied
             params = {
@@ -777,11 +777,11 @@ export class ParticipantsComponent implements OnInit {
                 };
             } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
                 // don't send a participants param (participant count is visible in tab title)
-            params = {
-                participant_expression: "["
-                    + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                    + "].includes(id)"
-            };
+                params = {
+                    participant_expression: "["
+                        + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                        + "].includes(id)"
+                };
             }
         } else if (this.query) { // no check-boxes selected but some filter applied
             params = {
@@ -808,7 +808,6 @@ export class ParticipantsComponent implements OnInit {
             // from transcripts page:
                     .replace(".includesAny(labels('transcript'))",
                              ".includes(id)");
-            // params["transcripts"] = this.transcriptDescription;
             if (this.selectedIds.length==0 && !this.query) {
                 params["participants"] = "all participants in selected transcripts"
             };
