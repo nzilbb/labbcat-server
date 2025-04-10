@@ -104,14 +104,14 @@
     <tbody>
       <tr *ngFor="let id of participantIds">
         <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
-          <span class="id" *ngIf="layer.id == schema.participantLayerId">
+          <span class="id" *ngIf="layer.id == schema.participantLayerId" [title]="'participant: ' + id">
             <lib-grouped-checkbox
               group="participant"
               name="id"
               value="{{id}}"
               [checked]="selectedIds.includes(id)"
               (checkedChange)="selectedIds.includes(id)?selectedIds.splice(selectedIds.indexOf(id),1):selectedIds.push(id)"></lib-grouped-checkbox>
-            <a href="{{(user && user.roles.includes('edit'))?'edit/':''}}participant?id={{id | urlEncode}}" title="{{id}}">{{id}}</a>
+            {{id}}
           </span>
           <span class="attribute" *ngIf="layer.id != schema.participantLayerId && attributeValues[id].annotations">
 
@@ -130,7 +130,14 @@
             </span>
           </span>
         </td>
-        <td></td><!-- column for filter buttons -->
+        <td class="buttons">
+          <lib-link 
+            i18n-title title="Attributes"
+            [img]="user && user.roles.includes('edit') ? 'wrench.svg' : 'csv.svg'"
+            [icon]="user && user.roles.includes('edit') ? '🔧' : ',a,'"
+            [href]="(user && user.roles.includes('edit') ?'edit/':'') + 'participant?id=' + (id | urlEncode)"
+            ></lib-link>
+        </td>
       </tr>
     </tbody>
   </table>
