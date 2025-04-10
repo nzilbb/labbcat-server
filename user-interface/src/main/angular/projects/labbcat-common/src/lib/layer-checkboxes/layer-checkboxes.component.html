@@ -384,28 +384,28 @@
 </div>
 <fieldset *ngIf="!hideControls && (participant || transcript || includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}')" id="controls">
   <div *ngIf="participant || transcript" class="label-spacer">
-  <label
-    title="Show full names for participant/transcript attributes">
-    <lib-grouped-checkbox
-      group="showAttributePrefixes"
-      name="showAttributePrefixes"
-      [checked]="displayAttributePrefixes"
-      (change)="toggleAttributePrefixes()"
-      ></lib-grouped-checkbox>
-    Show attribute prefixes</label>
+    <label
+      title="Show full names for participant/transcript attributes">
+      <lib-grouped-checkbox
+        group="showAttributePrefixes"
+        name="showAttributePrefixes"
+        [checked]="displayAttributePrefixes"
+        (change)="toggleAttributePrefixes()"
+        ></lib-grouped-checkbox>
+      Show attribute prefixes</label>
   </div>
   <div
     *ngIf="includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}'"
     class="label-spacer">
-  <label
-    title="Hide icons that correspond to layer properties">
-    <!-- Don't actually need grouped-checkbox, but without it the alignment doesn't match Projects above -->
-    <lib-grouped-checkbox
-      group="hideLayerIcons"
-      name="hideLayerIcons"
-      [checked]="!displayIcons"
-      (change)="toggleLayerIcons()"
-      ></lib-grouped-checkbox>
-    Hide layer icons</label>
+    <label
+      title="Hide icons that correspond to layer properties">
+      <!-- Don't actually need grouped-checkbox, but without it the alignment doesn't match Projects above -->
+      <lib-grouped-checkbox
+        group="hideLayerIcons"
+        name="hideLayerIcons"
+        [checked]="!displayIcons"
+        (change)="toggleLayerIcons()"
+        ></lib-grouped-checkbox>
+      Hide layer icons</label>
   </div>
 </fieldset>
