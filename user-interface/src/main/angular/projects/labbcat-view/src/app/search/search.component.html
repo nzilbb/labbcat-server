@@ -9,11 +9,11 @@
            src="{{imagesLocation}}/{{tabs[tab].icon}}" alt="{{tabs[tab].description}}">
       {{tabs[tab].label}}
       <span
-        *ngIf="tab == 'Participants' && participantIds && participantIds.length"
-        class="participant-count">({{participantIds.length + (participantIds.length < participantCount ? '+' : '')}})</span>
+        *ngIf="tab == 'Participants' && ((participantIds && participantIds.length) || (transcriptIds && transcriptIds.length))"
+        class="participant-count">({{(participantIds && participantIds.length) ? (participantIds.length + (participantIds.length < participantCount ? '+' : '')) : '*'}})</span>
       <span
-        *ngIf="tab == 'Transcripts' && transcriptIds && transcriptIds.length"
-        class="transcript-count">({{transcriptIds.length + (transcriptIds.length < transcriptCount ? '+' : '')}})</span>
+        *ngIf="tab == 'Transcripts' && ((transcriptIds && transcriptIds.length) || (participantIds && participantIds.length))"
+        class="transcript-count">({{(transcriptIds && transcriptIds.length) ? (transcriptIds.length + (transcriptIds.length < transcriptCount ? '+' : '')) : '*'}})</span>
     </label>
   </div>
   <div *ngFor="let tab of tabLabels"
@@ -31,7 +31,7 @@
       <lib-button
         *ngIf="participantIds && participantIds.length"
         (press)="clearParticipantFilter()"
-        img="people.svg"
+        img="delete.svg"
         label="Clear filter"
         title="Clear participant filter"
         ></lib-button>
@@ -98,7 +98,7 @@
       <lib-button
         *ngIf="transcriptIds && transcriptIds.length"
         (press)="clearTranscriptFilter()"
-        img="people.svg"
+        img="delete.svg"
         label="Clear filter"
         title="Clear transcript filter"
         ></lib-button>

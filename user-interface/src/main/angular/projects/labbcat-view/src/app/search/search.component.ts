@@ -124,7 +124,7 @@ export class SearchComponent implements OnInit {
         }; // TODO i18n
         this.tabs["Options"] = { // TODO i18n
             label: "Options", // TODO i18n
-            description: "Specify search options",
+            description: "Configure options for matching and displaying search results",
             icon: "cog.svg"
         };
         this.tabLabels = Object.keys(this.tabs);
