@@ -80,7 +80,7 @@ img.data-type, img.alignment, img.vertical-peers {
         display: flex;
         flex-direction: row;
     }
-    #controls label {
+    #controls .label-spacer {
         flex-grow: 1;
     }
 }
