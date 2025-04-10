@@ -139,15 +139,15 @@
           <span *ngFor="let error of entry.errors">{{statusLabel(error)}}</span>
           {{statusLabel(entry.status)}}
         </span>
-        <progress max="100" [title]="entry.status" [value]="entry.progress">{{entry.progress}}%</progress>
+        <progress max="100" [title]="''+entry.progress+'% '+entry.status" [value]="entry.progress">{{entry.progress}}%</progress>
         <span class="buttons">
           <button
-            *ngIf="!entry.transcriptThreads"
+            *ngIf="!entry.threadPollInterval"
             i18n-title title="Remove this file from the list"
             (click)="removeEntry(entry.id)"
             [disabled]="processing"><img src="{{imagesLocation}}/remove.svg" alt="➖"></button>
           <button
-            *ngIf="entry.transcriptThreads"
+            *ngIf="entry.threadPollInterval"
             i18n-title title="Cancel"
             (click)="cancelThreads(entry)"><img src="{{imagesLocation}}/cross-mark.svg" alt="❌"></button></span>
       </summary>
@@ -162,29 +162,29 @@
               <legend>{{parameter.label}}</legend>
               <select *ngIf="parameter.possibleValues && parameter.possibleValues.length"
                       [(ngModel)]="parameter.value"
-                      [disabled]="entry.transcriptThreads">
+                      [disabled]="entry.transcriptThreads || entry.progress > 50">
                 <option *ngFor="let option of parameter.possibleValues">{{option}}</option>
               </select>
               <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.String'"
                      type="text"
                      [(ngModel)]="parameter.value"
-                     [disabled]="entry.transcriptThreads">
+                     [disabled]="entry.transcriptThreads || entry.progress > 50">
               <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Integer'"
                      type="number" step="1"
                      [(ngModel)]="parameter.value"
-                     [disabled]="entry.transcriptThreads">
+                     [disabled]="entry.transcriptThreads || entry.progress > 50">
               <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Double'"
                      type="number" step="0.01"
                      [(ngModel)]="parameter.value"
-                     [disabled]="entry.transcriptThreads">
+                     [disabled]="entry.transcriptThreads || entry.progress > 50">
               <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Boolean'"
                      type="checkbox"
                      [(ngModel)]="parameter.value"
-                     [disabled]="entry.transcriptThreads">
+                     [disabled]="entry.transcriptThreads || entry.progress > 50">
             </span>
           </div>
         </ng-container>
-        <div *ngIf="!entry.transcriptThreads && uploading"
+        <div *ngIf="uploading && !entry.transcriptThreads && entry.progress <= 50"
              class="item controls">
           <span>&nbsp;</span>
           <lib-button

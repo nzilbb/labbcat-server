@@ -317,7 +317,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     
     uploading = false;
     onUpload(): void {
-        if (!this.entries.find(e => !e.uploadId)) {
+        if (!this.entries.find(e => !e.uploadId || e.errors)) { // (can retry errored uploads)
             this.messageService.info(
                 "All transcripts have already been uploaded."); // TODO i18n
         } else {
@@ -449,7 +449,8 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
             });
     }
     monitorThreads(uploadableEntry: UploadEntry): void {
-        if (uploadableEntry.transcriptThreads) {
+        if (uploadableEntry.transcriptThreads // threads are set
+            && Object.keys(uploadableEntry.transcriptThreads).length) { // and aren't empty
             // repeatedly poll the task status
             uploadableEntry.threadPollInterval = setInterval(()=>{
                 for (let transcriptId in uploadableEntry.transcriptThreads) {

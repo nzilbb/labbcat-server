@@ -549,7 +549,7 @@ public class Upload extends APIRequestHandler {
           } // not an existing transcript
           
           // structure standardization
-          new DefaultOffsetGenerator().transform(graph);          
+          new DefaultOffsetGenerator().transform(graph);
           graph.commit();
 
           if (merge) {

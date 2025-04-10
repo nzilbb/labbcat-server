@@ -101,10 +101,6 @@ span.buttons > button > img {
     width: 15px;
 }
 
-div.transcript-batch div.exists {
-    color: orange;
-}
-
 .parameters {
     width: auto;
     margin-left: 10px;
