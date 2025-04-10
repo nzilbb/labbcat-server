@@ -84,9 +84,12 @@ span.attribute {
 }
 .button-container {
     display: flex;
+    align-items: center;
 }
 .participant-filter {
     margin-left: auto;
+    display: flex;
+    align-items: center;
 }
 .participant-filter img {
     width: 15px;
