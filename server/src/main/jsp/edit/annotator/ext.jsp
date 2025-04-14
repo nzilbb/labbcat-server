@@ -3,12 +3,13 @@
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
+%><%!
+    ExtWebApp handler = new ExtWebApp(); // only one instance
 %><%@ include file="../../base.jsp" %><%{
     if ("GET".equals(request.getMethod())
         || "POST".equals(request.getMethod())
         || "PUT".equals(request.getMethod())
         || "DELETE".equals(request.getMethod())) { // GET/POST/PUT/DELETE
-      ExtWebApp handler = new ExtWebApp();
       initializeHandler(handler, request);
       handler.get(
         request.getMethod(),
