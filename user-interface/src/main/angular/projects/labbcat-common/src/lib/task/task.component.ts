@@ -45,7 +45,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
         } else {
             this.readTaskStatus();
         }
-        this.progressBar.nativeElement.scrollIntoView();
+        if (this.progressBar) this.progressBar.nativeElement.scrollIntoView();
     }
     ngOnDestroy(): void {
         clearTimeout(this.timeout);
