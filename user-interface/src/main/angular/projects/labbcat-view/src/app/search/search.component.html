@@ -23,6 +23,7 @@
     <div *ngIf="currentTab == 'Participants'" id="participants">
       <div id="participant-chooser">
       <lib-button
+        *ngIf="!participantIds || !participantIds.length || participantDescription"
         (press)="selectParticipants()"
         img="people.svg"
         label="{{!participantIds || !participantIds.length ? 'Filter participants' : 'Modify filter' }}"
@@ -32,8 +33,8 @@
         *ngIf="participantIds && participantIds.length"
         (press)="clearParticipantFilter()"
         img="delete.svg"
-        label="Clear filter"
-        title="Clear participant filter"
+        [label]="participantDescription ? 'Clear filter' : 'Clear selections'"
+        [title]="participantDescription ? 'Clear participant filter' : 'Clear participant selections'"
         ></lib-button>
       <div *ngIf="!participantIds || !participantIds.length" class="file-chooser">
         <label for="csv" i18n><span style="font-style: italic;">Or</span> Load participants from file</label>
@@ -91,6 +92,7 @@
     <div *ngIf="currentTab == 'Transcripts'" id="transcripts">
       <div id="transcript-chooser">
       <lib-button
+        *ngIf="!transcriptIds || !transcriptIds.length || transcriptDescription"
         (press)="selectTranscripts()"
         img="document.svg"
         label="{{!transcriptIds || !transcriptIds.length ? 'Filter transcripts' : 'Modify filter'}}"
@@ -100,8 +102,8 @@
         *ngIf="transcriptIds && transcriptIds.length"
         (press)="clearTranscriptFilter()"
         img="delete.svg"
-        label="Clear filter"
-        title="Clear transcript filter"
+        [label]="transcriptDescription ? 'Clear filter' : 'Clear selections'"
+        [title]="transcriptDescription ? 'Clear transcript filter' : 'Clear transcript selections'"
         ></lib-button>
       <div *ngIf="!transcriptIds || !transcriptIds.length" class="file-chooser">
         <label for="csv" i18n><span style="font-style: italic;">Or</span> Load transcripts from file</label>
