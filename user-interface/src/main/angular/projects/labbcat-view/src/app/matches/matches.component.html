@@ -99,7 +99,9 @@
                 i18n-title title="Export results to CSV"
                 i18n-label label="CSV Export"></lib-button>
     <lib-button (press)="csvOptions();"
-                img="down-triangle.png" icon="▼"
+                img="down-triangle.png"
+                [icon]="showCsvOptions ? '▲' : '▼'"
+                [imgStyle]="showCsvOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
                 i18n-title title="CSV export options"
                 ></lib-button>
   </div>
@@ -175,7 +177,9 @@
                 img="emu.png" icon="eμ"
                 i18n-label label="EMU WebApp"></lib-button>
     <lib-button (press)="emuOptions();"
-                img="down-triangle.png" icon="▼"
+                img="down-triangle.png"
+                [icon]="showEmuOptions ? '▲' : '▼'"
+                [imgStyle]="showEmuOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
                 i18n-title title="EMU WebApp options"
                 ></lib-button>
   </div>
@@ -206,7 +210,9 @@
                 img="{{serializeImg}}" icon="📦"
                 i18n-label label="Utterance Export"></lib-button>
     <lib-button (press)="serializationOptions();"
-                img="down-triangle.png" icon="▼"
+                img="down-triangle.png"
+                [icon]="showSerializationOptions ? '▲' : '▼'"
+                [imgStyle]="showSerializationOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
                 i18n-title title="Utterance Export options"
                 ></lib-button>
   </div>
@@ -222,11 +228,11 @@
       </select>
     </label>
     <div i18n-title title="Prefix each exported file name with the match number"><label>
-        <span i18n>Prefix Names</span>
+        <span i18n>Prefix names</span>
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
     </label></div>
     <div i18n-title title="Tag target annotation in each file"><label>
-      <span i18n>Tag Targets</span>
+      <span i18n>Tag targets</span>
       <input name="tag" type="checkbox" checked>
     </label></div>
     <fieldset>
@@ -241,13 +247,15 @@
                 img="audio.svg" icon="🔊"
                 i18n-label label="Audio Export"></lib-button>
     <lib-button (press)="audioOptions();"
-                img="down-triangle.png" icon="▼"
+                img="down-triangle.png"
+                [icon]="showAudioOptions ? '▲' : '▼'"
+                [imgStyle]="showAudioOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
                 i18n-title title="Audio Export options"
                 ></lib-button>
   </div>
   <div id="audio-options" class="{{showAudioOptions?'short-unhidden-panel':'short-hidden-panel'}}">
     <div i18n-title title="Prefix each exported file name with the match number"><label>
-        <span i18n>Prefix Names</span>
+        <span i18n>Prefix names</span>
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
     </label></div>
   </div>
