@@ -19,8 +19,7 @@
     padding: 10px;
 }
 #participants, #transcripts {
-    max-height: 300px;
-    overflow-y: auto;
+
     overflow-x: clip;
 }
 .search-matrix {
@@ -49,9 +48,12 @@
 }
 .participant-list, .transcript-list {
     padding-inline-start: 40px;
+    max-height: 200px;
+    overflow-y: auto;
 }
 .load-more {
     margin-left: 40px;
+    padding-top: 5px;
 }
 .item label {
     display: inline-block;

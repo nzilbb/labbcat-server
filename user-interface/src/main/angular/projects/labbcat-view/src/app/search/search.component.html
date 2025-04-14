@@ -80,6 +80,7 @@
         *ngIf="participantIds.length < participantCount"
         class="load-more"
         i18n-title title="List more participants"
+        label="List more"
         img="ellipses.svg" icon="…"
         (click)="loadMoreParticipants()"
         [processing]="loadingParticipants">
@@ -149,6 +150,7 @@
         *ngIf="transcriptIds.length < transcriptCount"
         class="load-more"
         i18n-title title="List more transcripts"
+        label="List more"
         img="ellipses.svg" icon="…"
         (click)="loadMoreTranscripts()"
         [processing]="loadingTranscripts">
