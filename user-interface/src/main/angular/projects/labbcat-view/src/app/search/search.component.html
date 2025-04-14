@@ -162,6 +162,7 @@
     <!-- options tab -->
     <div *ngIf="currentTab == 'Options'" id="options">
       <div class="list">
+        <span class="list-label">Match options</span>
         <div class="item">
           <label>
             <input type="checkbox" [(ngModel)]="mainParticipantOnly" id="mainParticipantOnly">
@@ -179,7 +180,6 @@
             <span i18n>Only one match per transcript.</span></label>
         </div>
         <div class="item">
-          
           <label i18n-title title="Exclude simultaneous speech">
             <input type="checkbox"[(ngModel)]="excludeSimultaneousSpeech">
             <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
@@ -190,6 +190,9 @@
                    [disabled]="!excludeSimultaneousSpeech">
             <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
         </div>
+      </div>
+      <div class="list">
+        <span class="list-label">Display option</span>
         <div class="item">
           <label i18n-title title="Do not open a list of matches when search is complete">
             <input type="checkbox" [(ngModel)]="suppressResults" id="suppressResults" >

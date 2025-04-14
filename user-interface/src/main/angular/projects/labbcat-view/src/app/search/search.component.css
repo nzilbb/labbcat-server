@@ -78,6 +78,13 @@ details[open] > div {
 .file-chooser label:after {
     content: ':';
 }
+.list {
+    margin-top: 5px;
+}
+.list-label {
+    font-style: italic;
+    font-weight: bold;
+}
 @media all and (min-width: 640px) {
     lib-layer-checkboxes {
         display: flex;
