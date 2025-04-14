@@ -74,13 +74,15 @@ export class SearchComponent implements OnInit {
                             }]
                         } as Matrix);
                     }
-                    
+                }
+                if (!this.matrix.participantQuery) { // don't override participantQuery specified in searchJson, if any
                     this.matrix.participantQuery = params["participant_expression"];
                     if (this.matrix.participantQuery) {
                         this.participantDescription = params["participants"]
                             || "Selected participants"; // TODO i18n
                     }
-                    
+                }
+                if (!this.matrix.transcriptQuery) { // don't override transcriptQuery specified in searchJson, if any
                     this.matrix.transcriptQuery = params["transcript_expression"];
                     if (this.matrix.transcriptQuery) {
                         this.transcriptDescription = params["transcripts"]
@@ -97,7 +99,30 @@ export class SearchComponent implements OnInit {
             this.user = user as User;
         });
     }
-
+    selectParticipants(): void {
+        let params = { to: "search" };
+        // remember the search columns, if the user has made any changes to it
+        const searchColumns = JSON.stringify({ columns: this.matrix.columns });
+        const defaultColumns = JSON.stringify({columns:[{"layers":{"orthography":[{"id":"orthography","pattern":"","not":false,"min":null,"max":null,"anchorStart":false,"anchorEnd":false,"target":false}]},"adj":1}]});
+        if (searchColumns != defaultColumns) { // search columns aren't the default
+            params["searchJson"] = searchColumns;
+        }
+        this.router.navigate(["participants"], { queryParams: params });
+    }
+    selectTranscripts(): void {
+        let params = {
+            to: "search",
+            participant_expression: this.participantQueryForTranscripts(),
+            participants: this.participantDescription
+        };
+        // remember the search columns, if the user has made any changes to it
+        const searchColumns = JSON.stringify({ columns: this.matrix.columns });
+        const defaultColumns = JSON.stringify({columns:[{"layers":{"orthography":[{"id":"orthography","pattern":"","not":false,"min":null,"max":null,"anchorStart":false,"anchorEnd":false,"target":false}]},"adj":1}]});
+        if (searchColumns != defaultColumns) { // search columns aren't the default
+            params["searchJson"] = searchColumns;
+        }
+        this.router.navigate(["transcripts"], { queryParams: params });
+    }
     /** Ensure fields are filled in correctly, the value may have been passed in */
     standardizeMatrix(matrix: Matrix): Matrix {
         if (!matrix.hasOwnProperty("participantQuery")) matrix.participantQuery = "";
