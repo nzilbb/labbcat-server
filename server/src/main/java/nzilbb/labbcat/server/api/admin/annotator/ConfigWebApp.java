@@ -77,12 +77,13 @@ import nzilbb.webapp.StandAloneWebApp;
 @RequiredRole("admin")
 public class ConfigWebApp extends APIRequestHandler {
   
-  HashMap<String,AnnotatorDescriptor> activeAnnotators = new HashMap<String,AnnotatorDescriptor>();
+  HashMap<String,AnnotatorDescriptor> activeAnnotators;
   
   /**
-   * Default constructor.
+   * Constructor.
    */
-  public ConfigWebApp() {
+  public ConfigWebApp(HashMap<String,AnnotatorDescriptor> activeAnnotators) {
+    this.activeAnnotators = activeAnnotators;
   } // end of constructor
   
   /**

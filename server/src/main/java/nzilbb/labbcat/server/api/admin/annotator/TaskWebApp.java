@@ -72,13 +72,13 @@ import nzilbb.webapp.StandAloneWebApp;
 @RequiredRole("admin")
 public class TaskWebApp extends APIRequestHandler {
    
-  HashMap<String,HashMap<String,AnnotatorDescriptor>> activeAnnotators
-  = new HashMap<String,HashMap<String,AnnotatorDescriptor>>();
+  HashMap<String,HashMap<String,AnnotatorDescriptor>> activeAnnotators;
    
   /**
-   * Default constructor.
+   * Constructor.
    */
-  public TaskWebApp() {
+  public TaskWebApp(HashMap<String,HashMap<String,AnnotatorDescriptor>> activeAnnotators) {
+    this.activeAnnotators = activeAnnotators;
   } // end of constructor
    
   /**

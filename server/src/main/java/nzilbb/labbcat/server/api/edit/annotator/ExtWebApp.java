@@ -73,13 +73,13 @@ import nzilbb.webapp.StandAloneWebApp;
 @RequiredRole("edit")
 public class ExtWebApp extends APIRequestHandler {
   
-  HashMap<String,AnnotatorDescriptor> activeAnnotators
-  = new HashMap<String,AnnotatorDescriptor>();
+  HashMap<String,AnnotatorDescriptor> activeAnnotators;
   
   /**
-   * Default constructor.
+   * Constructor.
    */
-  public ExtWebApp() {
+  public ExtWebApp(HashMap<String,AnnotatorDescriptor> activeAnnotators) {
+    this.activeAnnotators = activeAnnotators;
   } // end of constructor
   
   /**

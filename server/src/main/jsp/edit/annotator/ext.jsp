@@ -1,15 +1,18 @@
 <%@ page info="Annotator Extension" isErrorPage="true"
     import = "nzilbb.labbcat.server.api.edit.annotator.ExtWebApp" 
+    import = "nzilbb.ag.automation.util.AnnotatorDescriptor"
+    import = "java.util.HashMap"
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%!
-    ExtWebApp handler = new ExtWebApp(); // only one instance
+  HashMap<String,AnnotatorDescriptor> activeAnnotators = new HashMap<String,AnnotatorDescriptor>();
 %><%@ include file="../../base.jsp" %><%{
     if ("GET".equals(request.getMethod())
         || "POST".equals(request.getMethod())
         || "PUT".equals(request.getMethod())
         || "DELETE".equals(request.getMethod())) { // GET/POST/PUT/DELETE
+      ExtWebApp handler = new ExtWebApp(activeAnnotators);
       initializeHandler(handler, request);
       handler.get(
         request.getMethod(),

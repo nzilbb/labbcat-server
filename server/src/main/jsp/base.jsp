@@ -218,6 +218,7 @@
             }
           } catch (Exception x) {
             log("isUserInRole: " + x);
+            x.printStackTrace(System.err);
             return false;
           }
         }

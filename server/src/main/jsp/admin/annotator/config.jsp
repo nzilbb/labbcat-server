@@ -1,15 +1,18 @@
 <%@ page info="Annotator Configuration" isErrorPage="true"
     import = "nzilbb.labbcat.server.api.admin.annotator.ConfigWebApp" 
+    import = "nzilbb.ag.automation.util.AnnotatorDescriptor"
+    import = "java.util.HashMap"
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%!
-    ConfigWebApp handler = new ConfigWebApp();
+    HashMap<String,AnnotatorDescriptor> activeAnnotators = new HashMap<String,AnnotatorDescriptor>();
 %><%@ include file="../../base.jsp" %><%{
     if ("GET".equals(request.getMethod())
         || "POST".equals(request.getMethod())
         || "PUT".equals(request.getMethod())
         || "DELETE".equals(request.getMethod())) { // GET/POST/PUT/DELETE
+      ConfigWebApp handler = new ConfigWebApp(activeAnnotators);
       initializeHandler(handler, request);
       handler.get(
         request.getMethod(),

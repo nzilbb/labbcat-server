@@ -1,15 +1,19 @@
 <%@ page info="Annotator Task Parameters" isErrorPage="true"
-    import = "nzilbb.labbcat.server.api.admin.annotator.TaskWebApp" 
+    import = "nzilbb.labbcat.server.api.admin.annotator.TaskWebApp"
+    import = "nzilbb.ag.automation.util.AnnotatorDescriptor"
+    import = "java.util.HashMap"
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%!
-    TaskWebApp handler = new TaskWebApp();
+    HashMap<String,HashMap<String,AnnotatorDescriptor>> activeAnnotators
+      = new HashMap<String,HashMap<String,AnnotatorDescriptor>>();
 %><%@ include file="../../base.jsp" %><%{
     if ("GET".equals(request.getMethod())
         || "POST".equals(request.getMethod())
         || "PUT".equals(request.getMethod())
         || "DELETE".equals(request.getMethod())) { // GET/POST/PUT/DELETE
+      TaskWebApp handler = new TaskWebApp(activeAnnotators);
       initializeHandler(handler, request);
       handler.get(
         request.getMethod(),
