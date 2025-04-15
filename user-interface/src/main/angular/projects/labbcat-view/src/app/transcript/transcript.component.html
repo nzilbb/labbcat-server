@@ -570,7 +570,7 @@
                 <div class="header" id="utterance-options">
                   <a class="permalink"
                      i18n-title title="Permalink to utterance"
-                     href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{utterance.id}}"
+                     href="{{baseUrl}}transcript?transcript={{transcript.id}}{{threadId ? '&threadId=' + threadId : ''}}#{{utterance.id}}"
                      i18n>Utterance</a>
                 </div>
                 <ng-container *ngIf="hasWAV && praatIntegration">
@@ -638,7 +638,7 @@
                 <div class="header" id="word-options">
                   <a class="permalink"
                      i18n-title title="Permalink to word"
-                     href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{word.id}}"
+                     href="{{baseUrl}}transcript?transcript={{transcript.id}}{{threadId ? '&threadId=' + threadId : ''}}#{{word.id}}"
                      i18n>Word</a>
                 </div>
                 <div *ngIf="user && user.roles.includes('edit')"
