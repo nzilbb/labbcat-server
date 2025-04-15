@@ -34,8 +34,8 @@
         [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
-      <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
-        <input *ngIf="includeCounts && layer.peers && layer.id != schema.participantLayerId"
+      <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
+        <input *ngIf="IsCountable(layer)"
                type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
                class="include-count"
                title-i18n title="How many linked annotations to include">
@@ -67,8 +67,8 @@
         [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
-      <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
-        <input *ngIf="includeCounts && layer.peers && layer.id != schema.corpusLayerId"
+      <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
+        <input *ngIf="IsCountable(layer)"
                type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
                class="include-count"
                title-i18n title="How many linked annotations to include">
@@ -100,8 +100,8 @@
         [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
-      <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
-        <input *ngIf="includeCounts && layer.peers"
+      <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
+        <input *ngIf="IsCountable(layer)"
                type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
                class="include-count"
                title-i18n title="How many linked annotations to include">
@@ -169,7 +169,7 @@
             <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
           </label>
         </ng-container>
-        <input *ngIf="includeCounts && layer.peers && layer.id != schema.turnLayerId && layer.id != schema.utteranceLayerId"
+        <input *ngIf="IsCountable(layer)"
                type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
                class="include-count"
                title-i18n title="How many linked annotations to include">
@@ -247,7 +247,7 @@
             <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
           </label>
         </ng-container>
-        <input *ngIf="includeCounts && layer.peers && layer.id != schema.wordLayerId"
+        <input *ngIf="IsCountable(layer)"
                type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
                class="include-count"
                title-i18n title="How many linked annotations to include">
@@ -329,7 +329,7 @@
             <img class="locked" [src]="imagesLocation+'/lock-locked.svg'" alt="🔒">
           </label>
         </ng-container>
-        <input *ngIf="includeCounts && layer.peers && layer.id != schema.wordLayerId"
+        <input *ngIf="IsCountable(layer)"
                type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
                class="include-count"
                title-i18n title="How many linked annotations to include">

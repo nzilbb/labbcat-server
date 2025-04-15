@@ -229,7 +229,18 @@ export class LayerCheckboxesComponent implements OnInit {
             && layer.id != this.schema.utteranceLayerId
             && layer.id != this.schema.wordLayerId
             && layer.peers // multiple child annotations
-            && layer.alignment == 2; // inntervals
+            && layer.alignment == 2; // intervals
+            // N.B. not included in span layer fieldset
+    }
+    IsCountable(layer: Layer): boolean {
+        return this.includeCounts // only if enabled
+            && layer.id != this.schema.participantLayerId // not system layers...
+            && layer.id != this.schema.corpusLayerId
+            && layer.id != this.schema.root.id
+            && layer.id != this.schema.turnLayerId
+            && layer.id != this.schema.utteranceLayerId
+            && layer.id != this.schema.wordLayerId
+            && layer.peers; // multiple child annotations
     }
 
     handleCheckbox(layerId:string): void {
