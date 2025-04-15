@@ -114,13 +114,13 @@
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
            i18n-title="Layer data types"
-           [title]="'Data type: ' + ['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined"
+           [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined)"
            [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined">
       <img *ngIf="includeAlignment" class="alignment"
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
            i18n-title="Layer alignment descriptions"
-           [title]="'Alignment: ' + ['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval'"
+           [title]="'Alignment: ' + (['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval')"
            [alt]="['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' ">
       <img *ngIf="includeVerticalPeers" class="vertical-peers"
            [style.display]="displayIcons ? 'inline' : 'none'"
@@ -190,7 +190,7 @@
       </span>
       <img *ngIf="includeDataType" class="data-type"
            [style.display]="displayIcons ? 'inline' : 'none'"
-           [title]="'Data type: ' + ['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined"
+           [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined)"
            [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
            i18n-title="Layer data types"
            [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined">
@@ -198,7 +198,7 @@
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
            i18n-title="Layer alignment descriptions"
-           [title]="'Alignment: ' + ['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval'"
+           [title]="'Alignment: ' + (['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval')"
            [alt]="['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' ">
       <img *ngIf="includeVerticalPeers" class="vertical-peers"
            [style.display]="displayIcons ? 'inline' : 'none'"
@@ -272,7 +272,7 @@
       -->
       <img *ngIf="includeDataType" class="data-type"
            [style.display]="displayIcons ? 'inline' : 'none'"
-           [title]="'Data type: ' + ['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined"
+           [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined)"
            [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
            i18n-title="Layer data types"
            [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined">
@@ -280,7 +280,7 @@
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
            i18n-title="Layer alignment descriptions"
-           [title]="'Alignment: ' + ['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval'"
+           [title]="'Alignment: ' + (['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval')"
            [alt]="['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' ">
       <img *ngIf="includeVerticalPeers" class="vertical-peers"
            [style.display]="displayIcons ? 'inline' : 'none'"
@@ -351,7 +351,7 @@
       <img *ngIf="includeDataType" class="data-type"
            [style.display]="displayIcons ? 'inline' : 'none'"
            
-           [title]="'Data type: ' + ['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined"
+           [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='Number' ? 'numeric' : undefined)"
            [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
            i18n-title="Layer data types"
            [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined">
@@ -359,7 +359,7 @@
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
            i18n-title="Layer alignment descriptions"
-           [title]="'Alignment: ' + ['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval'"
+           [title]="'Alignment: ' + (['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval')"
            [alt]="['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' ">
       <img *ngIf="includeVerticalPeers" class="vertical-peers"
            [style.display]="displayIcons ? 'inline' : 'none'"
