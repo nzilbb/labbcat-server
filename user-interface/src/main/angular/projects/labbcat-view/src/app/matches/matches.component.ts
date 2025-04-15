@@ -149,10 +149,10 @@ export class MatchesComponent implements OnInit {
                         this.matches.push(match as Match);
                     }
                 } else {
-                for (let match of results.matches) {
-                    match._selected = true;
-                    this.matches.push(match as Match);
-                }
+                    for (let match of results.matches) {
+                        match._selected = true;
+                        this.matches.push(match as Match);
+                    }
                 }
                 this.alreadySelected = [];
                 this.moreLoading = this.allLoading = this.readingMatches = false;
