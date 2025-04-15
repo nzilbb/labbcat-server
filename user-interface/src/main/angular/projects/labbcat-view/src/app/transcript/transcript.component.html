@@ -369,6 +369,7 @@
          [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
       <div *ngFor="let utterance of block.utterances"
            id="{{utterance.id}}"
+           [attr.turn-id]="utterance.parentId"
            [class.utterance]="true"
            [class.main-participant]="utterance.first('participant').first('main_participant')"
            [class.highlight]="utterance.id == highlitId"
