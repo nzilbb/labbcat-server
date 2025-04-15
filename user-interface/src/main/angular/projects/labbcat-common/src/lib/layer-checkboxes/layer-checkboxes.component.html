@@ -156,7 +156,7 @@
         [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
-      <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
+      <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
         <ng-container *ngIf="IsAnchorable(layer)">
           <input type="checkbox" value="1" name="share_start_{{layer.id}}"
                  class="share-start"
@@ -234,7 +234,7 @@
         [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
-      <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
+      <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
         <ng-container *ngIf="IsAnchorable(layer)">
           <input type="checkbox" value="1" name="share_start_{{layer.id}}"
                  class="share-start"
@@ -316,7 +316,7 @@
         [disabled]="this.disabled.includes(layer.id)"
         (change)="handleCheckbox(layer.id);"
         ></lib-grouped-checkbox>
-      <span class="layer-options" *ngIf="layer._selected && layer.id != excludeOptionsForLayerId">
+      <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
         <ng-container *ngIf="IsAnchorable(layer)">
           <input type="checkbox" value="1" name="share_start_{{layer.id}}"
                  class="share-start"
