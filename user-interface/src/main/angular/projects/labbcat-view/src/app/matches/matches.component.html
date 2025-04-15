@@ -27,12 +27,12 @@
     <select [(ngModel)]="wordsContext" name="words_context" id="words_context"
             (change)="onChangeWordsContext()"
             i18n-title title="How much context to show before/after match">
-      <option value="1"  i18n="words context option">1 word</option>
-      <option value="5"  i18n="words context option">5 words</option>
-      <option value="10" i18n="words context option">10 words</option>
-      <option value="20" i18n="words context option">20 words</option>
-      <option value="-1" i18n="words context option">the whole line</option>
-      <option value="0"  i18n="words context option">no context</option>
+      <option value="1"  i18n="words context option">up to 1 word</option>
+      <option value="5"  i18n="words context option">up to 5 words</option>
+      <option value="10" i18n="words context option">up to 10 words</option>
+      <option value="20" i18n="words context option">up to 20 words</option>
+      <option value="0"  i18n="words context option">0 words</option>
+      <option value="-1" i18n="words context option">the entire utterance</option>
     </select>
     
   </div>
