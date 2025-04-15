@@ -1,12 +1,48 @@
+/* Adapted from https://codepen.io/alvarotrigo/pen/BaVBpYj */
 .messages {
-    height: 20px;
-    width: 80vw;
+    min-height: 0px;
+    width: 100vw;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .message {
     position: relative;
+    display: flex;
+    align-items: center;
     font-style: italic;
-    animation-name: sidle-fade;
+    animation-name: sidle-fade-semitrans;
     animation-duration: 10s;
     opacity: 0;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    width: fit-content;
+    max-width: 80vw;
+    z-index: 10;
+}
+
+.info {
+    background-color: #FDF7DF;
+    border: 1px solid #FEEC6F;
+    color: #C9971C;
+}
+
+.error {
+    background-color: #FEE;
+    border: 1px solid #EDD;
+    color: #A66;
+}
+
+.closebtn {
+    margin-left: 5px;
+    font-weight: bold;
+    font-size: 1.25em;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.closebtn:hover {
+    color: black;
 }

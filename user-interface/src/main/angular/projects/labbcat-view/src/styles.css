@@ -17,6 +17,12 @@
     90%  { opacity: 1; }
     100% { opacity: 0; }
 }
+@keyframes sidle-fade-semitrans {
+    0%   { opacity: 0; left: 5%; }
+    5%   { opacity: 0.92; left: 0%; }
+    95%  { opacity: 0.92; }
+    100% { opacity: 0; }
+}
 @keyframes fade-in {
     from { opacity: 0; }
     to { end: 1; }
