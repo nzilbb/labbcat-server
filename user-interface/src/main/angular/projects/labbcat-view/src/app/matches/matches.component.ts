@@ -35,7 +35,7 @@ export class MatchesComponent implements OnInit {
     serializers: SerializationDescriptor[];
     mimeTypeToSerializer = {};
     mimeType = "text/praat-textgrid";
-    serializeImg = "zip.png";
+    serializeImg = "cog.svg";
     showSerializationOptions = false;
     serializationLayers = [ "utterance", "word" ];
     showCsvOptions = false;
