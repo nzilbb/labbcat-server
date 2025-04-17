@@ -351,8 +351,10 @@ public class Upload extends APIRequestHandler {
     try {
       SqlGraphStoreAdministration store = getStore();
       context.servletLog("PUT store " + store.getId());
-      boolean keepOriginal = !"0".equals(store.getSystemAttribute("keepOriginal"));
-      boolean generateMissingMedia = !"0".equals(store.getSystemAttribute("generateMissingMedia"));
+      boolean keepOriginal = !"0".equals(store.getSystemAttribute("keepOriginal"))
+        && !"false".equals(store.getSystemAttribute("keepOriginal"));
+      boolean generateMissingMedia = !"0".equals(store.getSystemAttribute("generateMissingMedia"))
+        && !"false".equals(store.getSystemAttribute("generateMissingMedia"));
       boolean generateLayers =
         !Optional.ofNullable(requestParameters.getString("labbcat_generate")).orElse("false")
         .equals("false");
@@ -503,7 +505,7 @@ public class Upload extends APIRequestHandler {
               if (corpusParameter.length() > 0) {
                 corpusAttribute.setLabel(corpusParameter);
               }
-            }		   
+            }
 
             // set episode
             String episodeParameter = Optional.ofNullable( // given episode, or the transcript file name
