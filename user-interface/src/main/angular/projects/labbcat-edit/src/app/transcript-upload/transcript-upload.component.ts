@@ -220,8 +220,6 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         //  document.getElementById("fileselect").value = null;
         // provoke the UI to refresh to show the entries...
         setTimeout(() => { this.entries = this.entries; }, 100);
-        // ... and again after the existence checks
-        // setTimeout(() => { this.entries = this.entries; }, 1000);
         
     }
     
@@ -333,19 +331,6 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 }
             }
         }
-        // // check whether it exists TODO this doesn't work well with hundreds of files at once
-        // this.labbcatService.labbcat.getTranscript(
-        //     file.name, ["transcript", "corpus", "episode", "transcript_type"],
-        //     (transcript, errors, messages) => {
-        //         if (!errors) {
-        //             entry.exists = true;
-        //             entry.status = "Already exists"; // TODO i18n
-        //             entry.transcriptId = transcript.id;
-        //             entry.corpus = transcript.corpus[0].label;
-        //             entry.episode = transcript.episode[0].label;
-        //             entry.transcriptType = transcript.transcript_type[0].label;
-        //         }
-        //     });
     }
     
     addMedia(file: File): void {
