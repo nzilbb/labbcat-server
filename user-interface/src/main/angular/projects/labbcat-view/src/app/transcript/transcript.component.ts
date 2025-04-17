@@ -78,6 +78,7 @@ export class TranscriptComponent implements OnInit {
         this.selectedLayerIds = [];
         this.interpretedRaw = {};
         this.layerStyles = {};
+        this.categoryLabels = [];
         this.playingId = [];
         this.previousPlayingId = [];
     }
@@ -149,7 +150,6 @@ export class TranscriptComponent implements OnInit {
                 this.generableLayers = [];
                 this.attributes = [];
                 this.categoryLayers = {};
-                this.categoryLabels = [];
                 for (let layerId in this.schema.layers) {
                     const layer = this.schema.layers[layerId] as Layer;
                     // detemine which layers can be regenerated
@@ -186,10 +186,6 @@ export class TranscriptComponent implements OnInit {
                         this.categoryLayers[layer.category].push(layer);
                     }
                 } // next layer
-                this.categoryLabels.push("Participants"); // TODO i18n
-                this.categoryLabels.push("Layers"); // TODO i18n
-                this.categoryLabels.push("Search"); // TODO i18n
-                this.categoryLabels.push("Export"); // TODO i18n
                 resolve();
             });
         });
@@ -231,7 +227,20 @@ export class TranscriptComponent implements OnInit {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.readOnlyCategories(
                 "transcript", (categories, errors, messages) => {
-                    this.categoryLabels = ["Participants", "Layers", "Export"]; // TODO i18n
+                    for (let category of categories) {
+                        const layerCategory = "transcript_"+category.category;
+                        category.label = category.category;
+                        if (!category.description) {
+                            category.description = `Attributes: ${category.category}`; // TODO i18n
+                        }
+                        category.icon = "attributes.svg";
+                        this.categories[layerCategory] = category;
+                        this.categoryLabels.push(layerCategory);
+                    }
+                    if (this.categoryLabels.length == 1) { // only one actual category
+                        // just label the tab 'attributes'
+                        this.categories[this.categoryLabels[0]].label = "Attributes" // TODO i18n
+                    }
                     // extra pseudo categories
                     this.categories["Layers"] = { // TODO i18n
                         label: "Layers", // TODO i18n
@@ -244,28 +253,16 @@ export class TranscriptComponent implements OnInit {
                         icon: "people.svg"
                     }; // TODO i18n
                     this.categories["Search"] = { // TODO i18n
+                        label: "Search", // TODO i18n
                         description: "Search this transcript",
                         icon: "magnifying-glass.svg"
                     }; // TODO i18n
                     this.categories["Export"] = { // TODO i18n
+                        label: "Export", // TODO i18n
                         description: "Export the transcript in a selected format",
                         icon: "cog.svg"
                     }; // TODO i18n
-                    
-                    for (let category of categories) {
-                        const layerCategory = "transcript_"+category.category;
-                        category.label = category.category;
-                        if (!category.description) {
-                            category.description = `Attributes: ${category.category}`; // TODO i18n
-                        }
-                        category.icon = "attributes.svg";
-                        this.categories[layerCategory] = category;
-                        this.categoryLabels.push(layerCategory);
-                    }
-                    if (this.categoryLabels.length == 4) { // only one actual category
-                        // just label the tab 'attributes'
-                        this.categories[this.categoryLabels[3]].label = "Attributes" // TODO i18n
-                    }
+                    this.categoryLabels = this.categoryLabels.concat(["Participants","Layers","Search","Export"]);
                     resolve();
                 });
         });
