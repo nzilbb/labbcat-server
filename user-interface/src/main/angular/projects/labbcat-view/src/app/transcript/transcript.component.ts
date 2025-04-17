@@ -238,8 +238,9 @@ export class TranscriptComponent implements OnInit {
                         this.categoryLabels.push(layerCategory);
                     }
                     if (this.categoryLabels.length == 1) { // only one actual category
-                        // just label the tab 'attributes'
+                        // just label the tab 'attributes' with the tooltip 'Transcript attributes'
                         this.categories[this.categoryLabels[0]].label = "Attributes" // TODO i18n
+                        this.categories[this.categoryLabels[0]].description = "Transcript attributes" // TODO i18n
                     }
                     // extra pseudo categories
                     this.categories["Layers"] = { // TODO i18n
