@@ -359,11 +359,6 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
 
     // button handlers
     removeEntry(id: string) {
-        const entry = this.entries.find(e=>e.id == id);
-        if (entry && entry.threadPollInterval) {
-            // if it's monitoring thread, stop monitoring
-            clearInterval(entry.threadPollInterval);
-        }
         this.entries = this.entries.filter(e=>e.id != id);
     }
     
@@ -491,7 +486,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 
                 if (result) {
                     uploadableEntry.transcriptThreads = result.transcripts;
-                    this.monitorThreads(uploadableEntry);
+                    this.monitorThreads();
                     // it's theoretically possible that parameters were returned
                     if (result.parameters) {
                         uploadableEntry.uploadId = result.id || uploadableEntry.uploadId;
@@ -500,29 +495,31 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 }
             });
     }
-    monitorThreads(uploadableEntry: UploadEntry): void { // TODO slow when there are hunders of uploads
-        if (uploadableEntry.transcriptThreads // threads are set
-            && Object.keys(uploadableEntry.transcriptThreads).length) { // and aren't empty
-            // repeatedly poll the task status
-            uploadableEntry.threadPollInterval = setInterval(()=>{
-                for (let transcriptId in uploadableEntry.transcriptThreads) {
-                    this.labbcatService.labbcat.taskStatus(
-                        uploadableEntry.transcriptThreads[transcriptId],
-                        (task, errors, messages) => {
+    threadMonitor: number;
+    monitorThreads(): void { // TODO slow when there are hunders of uploads
+        if (this.threadMonitor) return; // already monitoring
+        this.threadMonitor = setInterval(()=>{
+            // get all task statuses
+            this.labbcatService.labbcat.getTasks((tasks, errors, messages) => {
+                for (let entry of this.entries) {
+                    if (entry.transcriptThreads) {
+                        for (let transcriptId in entry.transcriptThreads) {
+                            const taskId = entry.transcriptThreads[transcriptId];
+                            const task = tasks[taskId];
                             if (task) {
-                                uploadableEntry.progress = 50 + (task.percentComplete/2);
-                                uploadableEntry.status = task.status || uploadableEntry.status;
+                                entry.progress = 50 + (task.percentComplete/2);
+                                entry.status = task.status || entry.status;
                             }
                             if (!task // task is gone TODO this isn't working, polling continues
                                 || !task.running) { // or not running any more
-                                uploadableEntry.exists = true;
-                                clearInterval(uploadableEntry.threadPollInterval);
-                                uploadableEntry.threadPollInterval = null;
-                                uploadableEntry.transcriptThreads = null;
+                                entry.exists = true;
+                                entry.transcriptThreads = null;
                                 // if all the uploads are complete
                                 if (!this.processing
                                     && this.useDefaultParameterValues
-                                    && !this.entries.find(e=>e.threadPollInterval)) {
+                                    && !this.entries.find(e=>e.transcriptThreads)) {
+                                    clearInterval(this.threadMonitor);
+                                    this.threadMonitor = null;
                                     setTimeout(()=>{ // give the UI a chance to update
                                         if (confirm("Do you want an upload report?")) { // TODO i18n
                                             this.onReport();
@@ -530,10 +527,11 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                                     }, 1000);
                                 }
                             } // task finished
-                        });
-                } // next transcript (there's probably only one)
-            }, 1000);            
-        }
+                        } // next thread
+                    } // there are threads
+                } // next entry
+            }); // getTasks
+        }, 1000); // setInterval
     }
 
     cancelThreads(uploadableEntry: UploadEntry): void {

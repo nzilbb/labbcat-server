@@ -17,7 +17,6 @@ export class UploadEntry {
     parameters?: any[];
     parametersVisible: boolean;
     transcriptThreads?: { [transcriptId: string] : string };
-    threadPollInterval?: number;
 
     constructor(id: string) {
         this.id = id;
@@ -38,10 +37,6 @@ export class UploadEntry {
         this.parameters = null;
         this.parametersVisible = false;
         this.transcriptThreads = null;
-        if (this.threadPollInterval) {
-            clearInterval(this.threadPollInterval);
-            this.threadPollInterval = null;
-        }
     }
 
     addMedia(file: File, trackSuffix: string): void {
@@ -69,5 +64,9 @@ export class UploadEntry {
             } // next file
         } // next track
         return names;
+    }
+    // true if there are server-side threads processing the upload, false otherwise
+    generating(): boolean {
+        return this.transcriptThreads && Object.keys(this.transcriptThreads).length > 0;
     }
 }
