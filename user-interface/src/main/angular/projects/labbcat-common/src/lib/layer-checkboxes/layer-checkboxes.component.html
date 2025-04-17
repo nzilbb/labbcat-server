@@ -383,12 +383,12 @@
     <label
       title="Show full names for participant/transcript attributes">
       <lib-grouped-checkbox
-        group="showAttributePrefixes"
-        name="showAttributePrefixes"
-        [checked]="displayAttributePrefixes"
+        group="hideAttributePrefixes"
+        name="hideAttributePrefixes"
+        [checked]="!displayAttributePrefixes"
         (change)="toggleAttributePrefixes()"
         ></lib-grouped-checkbox>
-      Show attribute prefixes</label>
+      Hide attribute prefixes</label>
   </div>
   <div
     *ngIf="includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}'"

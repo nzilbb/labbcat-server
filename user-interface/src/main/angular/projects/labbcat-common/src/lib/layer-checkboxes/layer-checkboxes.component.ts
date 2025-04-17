@@ -130,10 +130,12 @@ export class LayerCheckboxesComponent implements OnInit {
         this.wordLayers = [];
         this.segmentLayers = [];
         this.categorySelections = {};
-        const displayIcons = sessionStorage.getItem("displayLayerIcons");
-        this.displayIcons = JSON.parse(displayIcons || 'true');
-        const displayAttributePrefixes = sessionStorage.getItem("displayAttributePrefixes");
-        this.displayAttributePrefixes = JSON.parse(displayAttributePrefixes || 'false');
+        this.displayIcons = JSON.parse(sessionStorage.getItem("displayLayerIcons")) ??
+            (typeof this.displayIcons == "string" ? this.displayIcons === "true" : this.displayIcons) ??
+            true;
+        this.displayAttributePrefixes = JSON.parse(sessionStorage.getItem("displayAttributePrefixes")) ??
+            (typeof this.displayAttributePrefixes == "string" ? this.displayAttributePrefixes === "true" : this.displayAttributePrefixes) ??
+            false;
         if (!this.selected) this.selected = [] as string[];
 
         // add category selectors in defined order
