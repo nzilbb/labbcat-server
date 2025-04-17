@@ -7,7 +7,7 @@ export class UploadEntry {
     episode?: string;
     transcriptType?: string;
     media: { [trackSuffix: string] : File[] };
-    exists: boolean;
+    exists?: boolean;
     status: string;
     errors: string[]
     progress: number;
@@ -26,7 +26,7 @@ export class UploadEntry {
         this.errors = [];
         this.progress = 0;
         this.selected = false;
-        this.exists = false;
+        this.exists = null; // don't know yet
     }
 
     resetState() {
