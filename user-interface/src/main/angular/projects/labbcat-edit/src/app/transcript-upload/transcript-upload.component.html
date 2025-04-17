@@ -23,6 +23,18 @@
         </select>
       </span>
     </div>
+    <div *ngIf="existingEntries "
+         class="item"
+         i18n-title title="Whether LaBB-CAT should run automatic layer generation when uploading existing transcripts">
+      <label for="generateLayers" i18n>Generate Layers</label>
+      <span class="value">
+        <legend i18n>Generate Layers</legend>
+        <input type="checkbox"
+               id="generateLayers"
+               [disabled]="processing"
+               [(ngModel)]="generateLayers">
+      </span>
+    </div>
     <div class="item"
          i18n-title title="Whether to allow LaBB-CAT to make all decisions about tier/layer mappings and other options that are required during upload">
       <label for="useDefaultParameterValues" i18n>Batch Mode</label>
@@ -167,7 +179,7 @@
       <div *ngIf="entry.parameters"
                class="parameters list">
         <ng-container *ngFor="let parameter of entry.parameters">
-          <div *ngIf="parameter.name != 'labbcat_episode' && parameter.name != 'labbcat_corpus' && parameter.name != 'labbcat_transcript_type'"
+          <div *ngIf="parameter.name != 'labbcat_episode' && parameter.name != 'labbcat_corpus' && parameter.name != 'labbcat_transcript_type' && parameter.name != 'labbcat_generate'"
                class="item"
                title="{{parameter.hint}}">
             <label>{{parameter.label}}</label>

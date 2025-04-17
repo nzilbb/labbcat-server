@@ -5,7 +5,6 @@ import { UploadEntry } from '../upload-entry';
 import { MessageService, LabbcatService, MediaFile, Annotation, Layer,
          SerializationDescriptor } from 'labbcat-common';
 
-// TODO labbcat_generate checkbox
 // TODO batch change of corpus/episode/type
 @Component({
   selector: 'app-transcript-upload',
@@ -20,10 +19,13 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     defaultCorpus: string;
     transcriptTypes: string[];
     defaultTranscriptType: string;
+    generateLayers = true;
     useDefaultParameterValues = false;
     deserializers: { [extension: string] : SerializationDescriptor };
     fileSelector: FileList;
     entries: UploadEntry[];
+    existingEntries = false;
+    newEntries = false;
     hovering = false;
     processing = false;
     
@@ -132,6 +134,11 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         });
     }
 
+    updateTranscriptExistence(): void {
+        this.existingEntries = this.entries.find(e=>e.exists) != null;
+        this.newEntries = this.entries.find(e=>!e.exists) != null;
+    }
+
     processingEntries = false;
     entriesForExistenceCheck: UploadEntry[] = [];
     // start checking for the existence of transcript entries
@@ -162,6 +169,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 });
         } else { // no more entries to check
             this.processingEntries = false;
+            this.updateTranscriptExistence();
         }
     }
     
@@ -360,6 +368,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     // button handlers
     removeEntry(id: string) {
         this.entries = this.entries.filter(e=>e.id != id);
+        this.updateTranscriptExistence();
     }
     
     uploading = false;
@@ -368,10 +377,9 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
             this.messageService.info(
                 "All transcripts have already been uploaded."); // TODO i18n
         } else {
-            const existingTranscripts = this.entries.filter(e=>e.exists);
-            if (existingTranscripts.length > 0
+            if (this.existingEntries && this.newEntries
                 && !confirm("Some transcripts already exist in LaBB-CAT.\nDo you want to re-upload them?")) { // TODO i18n
-                if (existingTranscripts.length != this.entries.length
+                if (this.newEntries
                     && confirm("Do you want to ignore the existing transcripts, and upload the others?")) { // TODO i18n
                     this.onClear(true, false);
                 } else { // don't want to upload others either
@@ -436,13 +444,16 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                     if (parameter) {
                         parameter.value = uploadableEntry.transcriptType;
                     }
+                    parameter = uploadableEntry.parameters.find(p=>p.name == "labbcat_generate");
+                    if (parameter) parameter.value = this.generateLayers;
 
                     // are there any other parameters to show?
                     parameter = uploadableEntry.parameters.find(p=>
                         p.name != "labbcat_corpus" && p.name != "labbcat_episode"
-                        && p.name != "labbcat_transcript_type") ;
+                        && p.name != "labbcat_transcript_type"
+                        && p.name != "labbcat_generate");
                     if (!parameter // no more parameters to set
-                        || this.useDefaultParameterValues) { // or we're iin batch mode
+                        || this.useDefaultParameterValues) { // or we're in batch mode
                         // so just keep going
                         this.uploadParameters(uploadableEntry);
                     }
@@ -486,7 +497,11 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 
                 if (result) {
                     uploadableEntry.transcriptThreads = result.transcripts;
-                    this.monitorThreads();
+                    if (uploadableEntry.generating()) {
+                        this.monitorThreads();
+                    } else {
+                        uploadableEntry.progress = 100;
+                    }
                     // it's theoretically possible that parameters were returned
                     if (result.parameters) {
                         uploadableEntry.uploadId = result.id || uploadableEntry.uploadId;
@@ -634,8 +649,9 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
             this.entries = [];
         } else if (existingTranscripts) {
             this.entries = this.entries.filter(e=>!e.exists);
-        }else if (newTranscripts) {
+        } else if (newTranscripts) {
             this.entries = this.entries.filter(e=>e.exists);
         }
+        this.updateTranscriptExistence();
     }
 }
