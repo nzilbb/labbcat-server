@@ -74,7 +74,8 @@
      (dragover)="fileDragHover($event)"
      (dragleave)="fileDragHover($event)"
      (drop)="fileSelectHandler($event)"
-     [class.dragover]="hovering">
+     [class.dragover]="hovering"
+     [class.processing-entries]="processingEntries">
   <div id="transcripts" class="transcript-batch" i18n-title title="Transcripts to upload">
     <input type="file"
            i18n-title title="Select files for upload"

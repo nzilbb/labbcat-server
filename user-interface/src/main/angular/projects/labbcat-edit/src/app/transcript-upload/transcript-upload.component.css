@@ -18,6 +18,9 @@
     border: 2px #DEE6EF dashed;
     text-align: center;
 }
+#drag-drop.processing-entries {
+    cursor: wait;
+}
 div#drag-drop:hover, div.hover {
     border: 2px #777777 dashed;
 }

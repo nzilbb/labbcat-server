@@ -131,13 +131,56 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
             });
         });
     }
+
+    processingEntries = false;
+    entriesForExistenceCheck: UploadEntry[] = [];
+    // start checking for the existence of transcript entries
+    checkTranscriptExistence(): void {
+        this.entriesForExistenceCheck = this.entries.filter(e=>e.exists == null);
+        setTimeout(()=>this.checkNextTranscript(), 1000);
+    }
+    // recursively check the next entry for existence
+    checkNextTranscript() : void {
+        if (this.entriesForExistenceCheck.length > 0) {
+            this.processingEntries = true;
+            const entry = this.entriesForExistenceCheck.shift();
+            // check whether it exists TODO this doesn't work well with hundreds of files at once
+            this.labbcatService.labbcat.getTranscript(
+                entry.transcript.name, ["transcript", "corpus", "episode", "transcript_type"],
+                (transcript, errors, messages) => {
+                    if (!errors) {
+                        entry.exists = true;
+                        entry.status = "Already exists"; // TODO i18n
+                        entry.transcriptId = transcript.id;
+                        entry.corpus = transcript.corpus[0].label;
+                        entry.episode = transcript.episode[0].label;
+                        entry.transcriptType = transcript.transcript_type[0].label;
+                    } else {
+                        entry.exists = false;
+                    }
+                    this.checkNextTranscript();
+                });
+        } else { // no more entries to check
+            this.processingEntries = false;
+        }
+    }
     
     chooseFile(event): void {
+        this.processingEntries = true;
+        const processItems = [] as Promise<void>[];
         for (let file of event.target.files) {
-            this.parseFile(file, null);
+            processItems.push(
+                this.parseFile(file, null));
         } // next file
         // unset file selector
-        event.target.value = null;;
+        event.target.value = null;
+
+        Promise.all(processItems).then(()=>{
+            // check for existence after all files handled
+            setTimeout(() => { // let the UI update first
+                this.checkTranscriptExistence(); },
+                       500);
+        });
     }
 
     // file drag hover
@@ -155,74 +198,98 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
 
         if (this.processing) return;
 
+        this.processingEntries = true;
+        
         if (e.dataTransfer && e.dataTransfer.items) { // items including directories (i.e. chrome)  
             const items = e.dataTransfer.items;
+            const processItems = [] as Promise<void>[];
             for (let i=0; i<items.length; i++) {
                 const item = items[i].webkitGetAsEntry();
                 if (item) {
-                    this.parseItem(item, null);
+                    processItems.push(
+                        this.parseItem(item, null));
                 }
             } // next item
+            Promise.all(processItems).then(()=>{
+                // check for existence after all files handled
+                setTimeout(() => { // let the UI update first
+                    this.checkTranscriptExistence(); },
+                           500);
+            });
         }
         //  document.getElementById("fileselect").value = null;
         // provoke the UI to refresh to show the entries...
         setTimeout(() => { this.entries = this.entries; }, 100);
         // ... and again after the existence checks
-        setTimeout(() => { this.entries = this.entries; }, 1000);
+        // setTimeout(() => { this.entries = this.entries; }, 1000);
+        
     }
     
-    parseItem(item: FileSystemEntry, path: string): void {
-        path = path || "";
-        if (item.isFile) {
-            const fileEntry = item as FileSystemFileEntry;
-            // Get file
-            fileEntry.file((file: File) => {                
-                this.parseFile(file, path);
-            });
-        } else if (item.isDirectory) {
-            const dirEntry = item as FileSystemDirectoryEntry;
-            // Get folder contents
-            const dirReader = dirEntry.createReader();
-            const component = this;
-            dirReader.readEntries(function(entries) {
-                entries.sort((i1, i2) => {
-                    if ( i1.name < i2.name ) return -1;
-                    if ( i1.name > i2.name ) return 1;
-                    return 0;});
-                for (let i in entries) {
-                    component.parseItem(entries[i], path + item.name + "/");
-                }
-            });
-        }
+    parseItem(item: FileSystemEntry, path: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const subitemPromises = [] as Promise<void>[];
+            path = path || "";
+            if (item.isFile) {
+                const fileEntry = item as FileSystemFileEntry;
+                // Get file
+                fileEntry.file((file: File) => {                
+                    subitemPromises.push(
+                        this.parseFile(file, path))
+                    ;                        
+                });
+            } else if (item.isDirectory) {
+                const dirEntry = item as FileSystemDirectoryEntry;
+                // Get folder contents
+                const dirReader = dirEntry.createReader();
+                const component = this;
+                dirReader.readEntries(function(entries) {
+                    entries.sort((i1, i2) => {
+                        if ( i1.name < i2.name ) return -1;
+                        if ( i1.name > i2.name ) return 1;
+                        return 0;});
+                    for (let i in entries) {
+                        subitemPromises.push(
+                            component.parseItem(entries[i], path + item.name + "/"));
+                    }
+                });
+            }
+            Promise.all(subitemPromises).then(()=>resolve());
+        }); // Promise
     }
 
-    parseFile(file: File, path: string) {
-        const extension = file.name.replace(/^.*(\.[^.]+)$/, "$1").toLowerCase();
-        if (extension == ".csv") { // usually uploading csv files as transcripts is a mistake
-            // if there are other transcripts that are not csv, then ignore this file
-            const nonCsvTranscript = this.entries.find(
-                e=>e.transcript && !e.transcript.name.endsWith(".csv"));
-            if (nonCsvTranscript) return;
-        }
-        const descriptor = this.deserializers[extension];
-        if (descriptor) {
-            this.addTranscript(file, descriptor, path);
-        } else if (file.type) {
-            if (file.type.startsWith("audio") 
-                || file.type.startsWith("video") 
-                || file.type.startsWith("image")) {
+    parseFile(file: File, path: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const extension = file.name.replace(/^.*(\.[^.]+)$/, "$1").toLowerCase();
+            if (extension == ".csv") { // usually uploading csv files as transcripts is a mistake
+                // if there are other transcripts that are not csv, then ignore this file
+                const nonCsvTranscript = this.entries.find(
+                    e=>e.transcript && !e.transcript.name.endsWith(".csv"));
+                if (nonCsvTranscript) {
+                    resolve();
+                    return;
+                }
+            }
+            const descriptor = this.deserializers[extension];
+            if (descriptor) {
+                this.addTranscript(file, descriptor, path);
+            } else if (file.type) {
+                if (file.type.startsWith("audio") 
+                    || file.type.startsWith("video") 
+                    || file.type.startsWith("image")) {
+                    this.addMedia(file);
+                }
+            } else if (file.name.endsWith(".wav")
+                || file.name.endsWith(".mp3")
+                || file.name.endsWith(".jpg")
+                || file.name.endsWith(".gif")
+                || file.name.endsWith(".png")
+                || file.name.endsWith(".mp4")
+                || file.name.endsWith(".mpeg")
+                || file.name.endsWith(".avi")) {
                 this.addMedia(file);
             }
-        } else if (file.name.endsWith(".wav")
-            || file.name.endsWith(".mp3")
-            || file.name.endsWith(".jpg")
-            || file.name.endsWith(".gif")
-            || file.name.endsWith(".png")
-            || file.name.endsWith(".mp4")
-            || file.name.endsWith(".mpeg")
-            || file.name.endsWith(".avi")) {
-            this.addMedia(file);
-        }
+            resolve();
+        }); // Promise
     }
 
     addTranscript(file: File, deserializer: SerializationDescriptor, path: string) {
@@ -266,19 +333,19 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 }
             }
         }
-        // check whether it exists
-        this.labbcatService.labbcat.getTranscript(
-            file.name, ["transcript", "corpus", "episode", "transcript_type"],
-            (transcript, errors, messages) => {
-                if (!errors) {
-                    entry.exists = true;
-                    entry.status = "Already exists"; // TODO i18n
-                    entry.transcriptId = transcript.id;
-                    entry.corpus = transcript.corpus[0].label;
-                    entry.episode = transcript.episode[0].label;
-                    entry.transcriptType = transcript.transcript_type[0].label;
-                }
-            });
+        // // check whether it exists TODO this doesn't work well with hundreds of files at once
+        // this.labbcatService.labbcat.getTranscript(
+        //     file.name, ["transcript", "corpus", "episode", "transcript_type"],
+        //     (transcript, errors, messages) => {
+        //         if (!errors) {
+        //             entry.exists = true;
+        //             entry.status = "Already exists"; // TODO i18n
+        //             entry.transcriptId = transcript.id;
+        //             entry.corpus = transcript.corpus[0].label;
+        //             entry.episode = transcript.episode[0].label;
+        //             entry.transcriptType = transcript.transcript_type[0].label;
+        //         }
+        //     });
     }
     
     addMedia(file: File): void {
@@ -448,7 +515,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 }
             });
     }
-    monitorThreads(uploadableEntry: UploadEntry): void {
+    monitorThreads(uploadableEntry: UploadEntry): void { // TODO slow when there are hunders of uploads
         if (uploadableEntry.transcriptThreads // threads are set
             && Object.keys(uploadableEntry.transcriptThreads).length) { // and aren't empty
             // repeatedly poll the task status
@@ -461,7 +528,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                                 uploadableEntry.progress = 50 + (task.percentComplete/2);
                                 uploadableEntry.status = task.status || uploadableEntry.status;
                             }
-                            if (!task // task is gone
+                            if (!task // task is gone TODO this isn't working, polling continues
                                 || !task.running) { // or not running any more
                                 uploadableEntry.exists = true;
                                 clearInterval(uploadableEntry.threadPollInterval);
