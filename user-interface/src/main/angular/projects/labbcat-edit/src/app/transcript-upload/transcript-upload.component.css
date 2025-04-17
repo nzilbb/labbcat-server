@@ -4,12 +4,13 @@
     flex-direction: row;
 }
 #defaults {
-    width: 50%;
 }
 #buttons {
     width: 50%;
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
     align-items: center;
     justify-content: flex-end;
 }

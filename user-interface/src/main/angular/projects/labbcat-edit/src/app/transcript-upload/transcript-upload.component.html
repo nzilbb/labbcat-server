@@ -62,10 +62,22 @@
       (press)="onReport()"
       [disabled]="processing || entries.length == 0"></lib-button>
     <lib-button
+      i18n-label="Batch upload" label="Clear Existing"
+      i18n-title title="Remove all files from the list that are already in LaBB-CAT"
+      img="delete.svg" icon="⌫"
+      (press)="onClear(true, false)"
+      [disabled]="processing || entries.length == 0"></lib-button>
+    <lib-button
+      i18n-label="Batch upload" label="Clear New"
+      i18n-title title="Remove all files from the list that are not already in LaBB-CAT"
+      img="delete.svg" icon="⌫"
+      (press)="onClear(false, true)"
+      [disabled]="processing || entries.length == 0"></lib-button>
+    <lib-button
       i18n-label="Batch upload" label="Clear"
       i18n-title title="Remove all files from the list"
       img="delete.svg" icon="⌫"
-      (press)="onClear()"
+      (press)="onClear(true, true)"
       [disabled]="processing || entries.length == 0"></lib-button>
   </div>
 </div>

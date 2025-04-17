@@ -373,7 +373,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 && !confirm("Some transcripts already exist in LaBB-CAT.\nDo you want to re-upload them?")) { // TODO i18n
                 if (existingTranscripts.length != this.entries.length
                     && confirm("Do you want to ignore the existing transcripts, and upload the others?")) { // TODO i18n
-                    this.entries = this.entries.filter(e=>!e.exists);
+                    this.onClear(true, false);
                 } else { // don't want to upload others either
                     return;
                 }
@@ -629,7 +629,13 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         link.click();
         document.body.removeChild(link);
     }
-    onClear(): void {
-        this.entries = [];
+    onClear(existingTranscripts: boolean, newTranscripts: boolean): void {
+        if (existingTranscripts && newTranscripts) {
+            this.entries = [];
+        } else if (existingTranscripts) {
+            this.entries = this.entries.filter(e=>!e.exists);
+        }else if (newTranscripts) {
+            this.entries = this.entries.filter(e=>e.exists);
+        }
     }
 }
