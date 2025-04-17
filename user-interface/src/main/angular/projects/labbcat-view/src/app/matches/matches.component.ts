@@ -49,6 +49,7 @@ export class MatchesComponent implements OnInit {
     generableLayers = []; // list of layerIds that can be generated from a list of utterances
     dictionaryDependentLayers = []; // list of layerIds managed by HTK
     dictionaryLayerIds = {}; // map of HTK layerIds to their pronunciation layer IDs
+    showDictionaryOptions = false;
     phoneAlignmentLayerIds = {}; // map of HTK layerIds to their phone layer IDs
     baseUrl: string;
     emuWebApp = false;
@@ -276,6 +277,9 @@ export class MatchesComponent implements OnInit {
     }
     emuOptions(): void {
         this.showEmuOptions = !this.showEmuOptions;
+    }
+    dictionaryOptions(): void {
+        this.showDictionaryOptions = !this.showDictionaryOptions;
     }
     emuWebapp(): void {
         let serverUrl = this.baseUrl.replace(/^http/,"ws") + "emu";

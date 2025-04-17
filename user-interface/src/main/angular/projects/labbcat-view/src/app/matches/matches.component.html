@@ -195,15 +195,25 @@
     <lib-button (press)="dictionary();"
                 img="book.svg" icon="📕"
                 i18n-label label="Dictionary"></lib-button>
+    <lib-button (press)="dictionaryOptions();"
+                img="down-triangle.png"
+                [icon]="showDictionaryOptions ? '▲' : '▼'"
+                [imgStyle]="showDictionaryOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
+                i18n-title title="EMU WebApp options"
+                ></lib-button>
+  </div>
+  <div id="dictionary-options" class="{{showDictionaryOptions?'unhidden-panel':'hidden-panel'}}">
+    <label>
+      <span>Layer for entries</span>
     <select name="definitionLayerId"
             i18n-title title="Layer for definitions of dictionary entries">
-      <option disabled i18n selected>Definition Layer</option>
       <option *ngFor="let layer of wordLayers"
               value="{{layer.id}}">
         <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
-        <ng-container *ngIf="layer.id == 'orthography'" i18n>[word list only]</ng-container>
+        <ng-container *ngIf="layer.id == 'orthography'" i18n>[just orthography, no entries]</ng-container>
       </option>
     </select>
+    </label>
   </div>
   <div id="serialize" class="controls">
     <lib-button (press)="serialize();"
