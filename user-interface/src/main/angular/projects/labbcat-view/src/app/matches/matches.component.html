@@ -205,14 +205,14 @@
   <div id="dictionary-options" class="{{showDictionaryOptions?'unhidden-panel':'hidden-panel'}}">
     <label>
       <span>Layer for entries</span>
-    <select name="definitionLayerId"
-            i18n-title title="Layer for definitions of dictionary entries">
-      <option *ngFor="let layer of wordLayers"
-              value="{{layer.id}}">
-        <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
-        <ng-container *ngIf="layer.id == 'orthography'" i18n>[just orthography, no entries]</ng-container>
-      </option>
-    </select>
+      <select name="definitionLayerId"
+              i18n-title title="Layer for definitions of dictionary entries">
+        <option *ngFor="let layer of wordLayers"
+                value="{{layer.id}}">
+          <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
+          <ng-container *ngIf="layer.id == 'orthography'" i18n>[just orthography, no entries]</ng-container>
+        </option>
+      </select>
     </label>
   </div>
   <div id="serialize" class="controls">
