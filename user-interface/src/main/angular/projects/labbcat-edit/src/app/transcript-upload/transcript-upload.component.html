@@ -64,7 +64,7 @@
     <lib-button
       i18n-label="Batch upload" label="Clear"
       i18n-title title="Remove all files from the list"
-      img="cross-mark.svg" icon="❌"
+      img="delete.svg" icon="⌫"
       (press)="onClear()"
       [disabled]="processing || entries.length == 0"></lib-button>
   </div>
@@ -100,7 +100,7 @@
           <button *ngIf="entry.parameters"
                   i18n-title title="Show/hide parameters"
                   (click)="entry.parametersVisible = !entry.parametersVisible">
-            <img [src]="imagesLocation + '/' + (entry.parametersVisible?'collapse-down.svg':'expand-down.svg')" 
+            <img [src]="imagesLocation + '/menu.svg'" 
                  [alt]="entry.parametersVisible?'▾':'▸'">
           </button>
         </span>
@@ -136,7 +136,7 @@
         <span class="status"
               [class.error]="entry.errors.length > 0"
               [title]="entry.errors.length > 0?entry.errors.join('\n'):entry.status">
-          <span *ngFor="let error of entry.errors">{{statusLabel(error)}}</span>
+          <span *ngIf="entry.errors.length > 0">{{statusLabel(entry.errors[0])}}</span>
           {{statusLabel(entry.status)}}
         </span>
         <progress max="100" [title]="''+entry.progress+'% '+entry.status" [value]="entry.progress">{{entry.progress}}%</progress>
