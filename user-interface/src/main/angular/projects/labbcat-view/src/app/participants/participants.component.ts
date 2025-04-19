@@ -330,6 +330,7 @@ export class ParticipantsComponent implements OnInit {
                     this.query += " && ";
                     this.queryDescription += ", ";
                 }
+                this.filterValues[layer.id].sort();
 
                 // the value "!" means "a label other than the labels in validLabels"...
                 
