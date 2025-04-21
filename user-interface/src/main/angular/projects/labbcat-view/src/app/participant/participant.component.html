@@ -1,7 +1,9 @@
 <h1 id="title" i18n>Participant attributes: {{participant.label}}</h1>
 <lib-wait *ngIf="!participant"></lib-wait>
 <div *ngIf="participant" id="attributes" class="attribute-list tabs">
-  <div class="tab-labels">
+  <div
+    *ngIf="categoryLabels.length > 1"
+    class="tab-labels">
     <label *ngFor="let category of categoryLabels"
            [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
            (click)="currentCategory = category"

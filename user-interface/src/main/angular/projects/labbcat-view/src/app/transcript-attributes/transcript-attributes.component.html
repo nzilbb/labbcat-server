@@ -11,7 +11,9 @@
   </div>
 </div>
 <div *ngIf="transcript" id="attributes" class="attribute-list tabs">
-  <div class="tab-labels">
+  <div 
+    *ngIf="categoryLabels.length > 1"
+    class="tab-labels">
     <label *ngFor="let category of categoryLabels"
            [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
            (click)="currentCategory = category"
