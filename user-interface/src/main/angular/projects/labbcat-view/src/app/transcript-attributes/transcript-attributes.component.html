@@ -1,5 +1,26 @@
 <h1 id="title" i18n>Transcript attributes: {{transcript.id}}</h1>
 <lib-wait *ngIf="!transcript"></lib-wait>
+<!-- previous/next transcript -->
+<nav>
+  <div *ngIf="transcript['previous-transcript']"
+       id="previous-transcript-link">
+    <a rel="prev" href="transcript/attributes?id={{transcript['previous-transcript'][0].label}}"
+       i18n-title title="Previous">
+      <img src="{{imagesLocation}}/previous.svg"
+           i18n-alt alt="Previous"
+           i18n-title title="Previous transcript in the episode">
+    </a>
+  </div>
+  <div *ngIf="transcript['next-transcript']"
+       id="next-transcript-link">
+    <a rel="next" href="transcript/attributes?id={{transcript['next-transcript'][0].label}}"
+       i18n-title title="Next">
+      <img src="{{imagesLocation}}/next.svg"
+           i18n-alt alt="Next"
+           i18n-title title="Next transcript in the episode">
+    </a>
+  </div>
+</nav>
 <div *ngIf="transcript" id="header" class="attribute-list">
   <div class="attribute">
     <label for="corpus-attribute" i18n title="Collection of transcripts from a single research project">Corpus<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">corpus</span>)</span></label>

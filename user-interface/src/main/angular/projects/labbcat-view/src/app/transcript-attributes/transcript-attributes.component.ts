@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Annotation, Response, Layer, User } from 'labbcat-common';
@@ -22,13 +22,17 @@ export class TranscriptAttributesComponent implements OnInit {
     categories: object; // string->Category
     transcript: Annotation;
     displayLayerIds: boolean;
+    imagesLocation: string;
     
     constructor(
         private labbcatService: LabbcatService,
         private messageService: MessageService,
         private route: ActivatedRoute,
-        private router: Router
-    ) { }
+        private router: Router,
+        @Inject('environment') private environment
+    ) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
         this.readBaseUrl();
@@ -111,7 +115,8 @@ export class TranscriptAttributesComponent implements OnInit {
     
     readTranscript(): void {
         this.labbcatService.labbcat.getTranscript(
-            this.id, this.attributes, (transcript, errors, messages) => {
+            this.id, this.attributes.concat(["previous-transcript", "next-transcript"]),
+            (transcript, errors, messages) => {
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.transcript = transcript;
