@@ -1928,7 +1928,7 @@
      * deserializers. 
      */
     getDeserializerDescriptors(onResult) {
-      this.createRequest("getSerializerDescriptors", null, onResult).send();
+      this.createRequest("getDeserializerDescriptors", null, onResult).send();
     }
 
     /**
