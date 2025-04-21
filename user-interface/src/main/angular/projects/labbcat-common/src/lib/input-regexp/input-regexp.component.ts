@@ -35,7 +35,7 @@ export class InputRegexpComponent implements OnInit {
                 :null;
         } catch(error) {
             this.regexpValid = false;
-            this.temporaryTitle = error;
+            this.temporaryTitle = error.message;
         }
     }
 }
