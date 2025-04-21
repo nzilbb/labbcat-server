@@ -83,8 +83,9 @@ export class ParticipantComponent implements OnInit {
                 this.attributes = [];
                 this.categoryLayers = {};
                 this.categoryLabels = [];
-                const displayLayerIds = sessionStorage.getItem("displayLayerIds");
-                this.displayLayerIds = JSON.parse(displayLayerIds || 'true');
+                this.displayLayerIds = JSON.parse(sessionStorage.getItem("displayLayerIds")) ??
+                    (typeof this.displayLayerIds == "string" ? this.displayLayerIds === "true" : this.displayLayerIds) ??
+                    true;
                 // participant attributes
                 for (let layerId in schema.layers) {
                     // main_participant this relates participants to transcripts, so ignore that
