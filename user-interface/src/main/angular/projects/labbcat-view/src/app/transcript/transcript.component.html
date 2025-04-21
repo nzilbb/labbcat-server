@@ -332,7 +332,7 @@
             </ul>
           </li>
           <li>Export formatted, including transcript lines (<span 
-            class="layer-id no-pad"
+            class="layer-id no-pad" [title]="schema.layers[schema.utteranceLayerId].description"
             >utterance</span>) and selected layers (<span 
             *ngFor="let layerId of selectedLayerIds"
             class="layer-id"

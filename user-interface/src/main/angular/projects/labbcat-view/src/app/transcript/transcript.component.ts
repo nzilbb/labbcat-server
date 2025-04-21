@@ -309,8 +309,6 @@ export class TranscriptComponent implements OnInit {
                             if (layer.id == this.schema.corpusLayerId) continue;
                             if (layer.id == this.schema.episodeLayerId) continue;
                             if (layer.id == this.schema.participantLayerId) continue;
-                            if (layer.id == this.schema.utteranceLayerId) continue;
-                            if (layer.id == this.schema.wordLayerId) continue;
                             // a temporal layer
                             this.layerStyles[l] = { color: "silver" };
                             this.labbcatService.labbcat.countAnnotations(
