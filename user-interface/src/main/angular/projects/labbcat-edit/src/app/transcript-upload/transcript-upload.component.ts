@@ -589,6 +589,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         if (!this.deleting // cancelled
             || !deletableEntry) { // there are no entries left to delete
             this.processing = this.deleting = false;
+            this.updateTranscriptExistence();
         } else {
             this.processing = this.deleting = true;
             deletableEntry.progress = 50;
