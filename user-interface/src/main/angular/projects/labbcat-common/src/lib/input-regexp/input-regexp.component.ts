@@ -25,7 +25,7 @@ export class InputRegexpComponent implements OnInit {
     checkRegularExpression(event: any): void {
         const value = event.target.value;
         try {
-            new RegExp(value);
+            new RegExp(value, "u");
             this.regexpValid = true;
             // if it's a long regular expression...
             this.temporaryTitle = value.length>10
@@ -35,7 +35,7 @@ export class InputRegexpComponent implements OnInit {
                 :null;
         } catch(error) {
             this.regexpValid = false;
-            this.temporaryTitle = error.message;
+            this.temporaryTitle = error.message.replace(': ', ' ').replace('/u:', '/:');
         }
     }
 }
