@@ -813,9 +813,12 @@ public class Upload extends APIRequestHandler {
       } // next participant
       // if nobody has been marked as a main participant
       if (graph.list("main_participant").length == 0) {
-        // mark everyone as a main participant
+        // mark everyone who says anything as a main participant
         for (Annotation participant : participants) {
-          graph.createTag(participant, "main_participant", participant.getLabel());
+          // do they have any turns?
+          if (participant.all(schema.getTurnLayerId()).length > 0) {
+            graph.createTag(participant, "main_participant", participant.getLabel());
+          }
         }
       }
       graph.commit();
