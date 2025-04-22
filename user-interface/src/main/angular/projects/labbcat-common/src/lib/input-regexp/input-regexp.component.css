@@ -5,3 +5,51 @@ input {
 .invalid {
     color: red;
 }
+.regexp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 5px;
+    margin-right: -5px;
+}
+/* Adapted from https://www.w3schools.com/css/css_tooltip.asp */
+.regexp-tooltip {
+    position: absolute;
+    top: 150%;
+    z-index: 5;
+    background-color: #FEE;
+    color: var(--theme-error-color);
+    text-align: center;
+    font-size: 0.9em;
+    padding: 5px 10px;
+    border-radius: 6px;
+    animation: 10s appearDisappear;
+    visibility: hidden;
+}
+.regexp-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent transparent #FEE transparent;
+    left: 47.5%;
+}
+@keyframes appearDisappear {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 0;
+        visibility: visible;
+    }
+    25% {
+        opacity: 1;
+    }
+    95% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
