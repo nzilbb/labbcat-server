@@ -126,15 +126,19 @@ nav, nav > div {
     display: block;
 }
 
-.utterance-tag {
-    display: inline-block;
-    width: 97.5%;
-}
 /* padding between utterances in the same turn */
 .utterance:not(:first-child) {
     padding-top: 0.75em;
 }
-
+.utterance-tag {
+    display: inline-block;
+}
+.consecutive .utterance-tag {
+    width: 97.5%;
+}
+.simultaneous .utterance-tag {
+    width: 95%;
+}
 .token {
     display: inline-block;
 }
