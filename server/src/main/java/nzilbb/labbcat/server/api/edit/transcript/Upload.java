@@ -199,29 +199,29 @@ public class Upload extends APIRequestHandler {
         boolean merge = !Optional.ofNullable(requestParameters.getString("merge")).orElse("false")
           .equals("false");
         String dirPrefix = merge?"_merge_":"_new_";
-        context.servletLog("POST merge " + merge);
+        // context.servletLog("POST merge " + merge);
         
         // generate an ID/directory to save files
         dir = Files.createTempDirectory(uploadsDir.toPath(), dirPrefix).toFile();
         dir.deleteOnExit();
         String id = dir.getName();
-        context.servletLog("POST id " + id);
+        // context.servletLog("POST id " + id);
 
         Vector<NamedStream> streams = new Vector<NamedStream>();
 
         // get transcript file(s)
         Vector<File> uploadedTranscripts = requestParameters.getFiles("transcript");
-        context.servletLog("POST transcripts " + uploadedTranscripts.size());
+        // context.servletLog("POST transcripts " + uploadedTranscripts.size());
         if (uploadedTranscripts.size() == 0) {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("No file received.");
         }
         for (File uploadedTranscript : uploadedTranscripts) {
-          context.servletLog("POST transcript " + uploadedTranscript.getPath());
+          // context.servletLog("POST transcript " + uploadedTranscript.getPath());
           File transcript = new File(dir, uploadedTranscript.getName());
           IO.Rename(uploadedTranscript, transcript);
           transcript.deleteOnExit();
-          context.servletLog("POST  now " + transcript.getPath() + " " + transcript.exists());
+          // context.servletLog("POST  now " + transcript.getPath() + " " + transcript.exists());
           streams.add(new NamedStream(transcript));
         }
 
@@ -245,7 +245,7 @@ public class Upload extends APIRequestHandler {
         
         // get the serializer using first transcript name (there's usually only one anyway)
         File transcript = requestParameters.getFile("transcript");
-        context.servletLog("POST main transcript " + transcript.getName());
+        // context.servletLog("POST main transcript " + transcript.getName());
         GraphDeserializer deserializer = store.deserializerForFilesSuffix(
           "."+IO.Extension(transcript));
         if (deserializer == null) {
@@ -266,7 +266,7 @@ public class Upload extends APIRequestHandler {
           streams.toArray(new NamedStream[0]), schema);
 
         JsonObjectBuilder model = Json.createObjectBuilder().add("id", id);
-        context.servletLog("POST model.id " + id);
+        // context.servletLog("POST model.id " + id);
         JsonArrayBuilder parameters = Json.createArrayBuilder();
         if (merge) {
           deserializerParameters.addParameter(
@@ -303,7 +303,7 @@ public class Upload extends APIRequestHandler {
             .setValue(options.first());
         }
         model.add("parameters", deserializerParameters.toJson());
-        context.servletLog("POST success " + localize("Uploaded: {0}", transcript.getName()));
+        // context.servletLog("POST success " + localize("Uploaded: {0}", transcript.getName()));
         return successResult(model.build(), "Uploaded: {0}", transcript.getName());
       } finally {
         cacheStore(store);
@@ -345,12 +345,12 @@ public class Upload extends APIRequestHandler {
       httpStatus.accept(SC_BAD_REQUEST);
       return failureResult("No ID specified.");
     }        
-    context.servletLog("PUT id " + id);
+    // context.servletLog("PUT id " + id);
     
     File dir = null;
     try {
       SqlGraphStoreAdministration store = getStore();
-      context.servletLog("PUT store " + store.getId());
+      // context.servletLog("PUT store " + store.getId());
       boolean keepOriginal = !"0".equals(store.getSystemAttribute("keepOriginal"))
         && !"false".equals(store.getSystemAttribute("keepOriginal"));
       boolean generateMissingMedia = !"0".equals(store.getSystemAttribute("generateMissingMedia"))
@@ -358,7 +358,7 @@ public class Upload extends APIRequestHandler {
       boolean generateLayers =
         !Optional.ofNullable(requestParameters.getString("labbcat_generate")).orElse("false")
         .equals("false");
-      context.servletLog("PUT generateLayers " + generateLayers + " - " + requestParameters);
+      // context.servletLog("PUT generateLayers " + generateLayers + " - " + requestParameters);
 
       try {
         boolean merge = id.startsWith("_merge_");
@@ -367,7 +367,7 @@ public class Upload extends APIRequestHandler {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("Invalid ID: {0}", id);
         }
-        context.servletLog("PUT merge " + merge);
+        // context.servletLog("PUT merge " + merge);
 
         Vector<NamedStream> streams = new Vector<NamedStream>();
 
@@ -379,7 +379,7 @@ public class Upload extends APIRequestHandler {
           transcripts.add(t);
           streams.add(new NamedStream(t));
         }
-        context.servletLog("PUT transcript " + transcript);
+        // context.servletLog("PUT transcript " + transcript);
         if (transcript == null) {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("No transcripts found for: {0}", id);
@@ -391,7 +391,7 @@ public class Upload extends APIRequestHandler {
           String trackSuffix = mediaDir.getName().substring(5);
           trackSuffixToMediaFiles.put(trackSuffix, mediaDir.listFiles(f->f.isFile()));
           for (File media : trackSuffixToMediaFiles.get(trackSuffix)) {
-            context.servletLog("PUT media " + media);
+            // context.servletLog("PUT media " + media);
             streams.add(new NamedStream(media));
           } // next media file
         } // next track 
@@ -437,8 +437,8 @@ public class Upload extends APIRequestHandler {
 
         // deserialize
         Graph[] graphs = deserializer.deserialize();
-        context.servletLog("PUT graphs " + graphs.length);
-        context.servletLog("PUT graph " + graphs[0].getId());
+        // context.servletLog("PUT graphs " + graphs.length);
+        // context.servletLog("PUT graph " + graphs[0].getId());
         Vector<String> messages = new Vector<String>();
         Vector<String> errors = new Vector<String>();
         for (String warning : deserializer.getWarnings()) {
@@ -449,11 +449,12 @@ public class Upload extends APIRequestHandler {
         JsonObjectBuilder transcriptThreads = Json.createObjectBuilder();
 
         // pass through the graph list twice, once for merging and error checks, then again to save
+        String corpusForParticipants = null;
         
         // for each resulting graph
         for (int g = 0; g < graphs.length; g++) {
           Graph graph = graphs[g];
-          context.servletLog("PUT graph " + graph.getId());
+          // context.servletLog("PUT graph " + graph.getId());
           graph.trackChanges();
           if (graph.getId() == null) { // no ID is set
             // use the name of the (first) uploaded file
@@ -473,7 +474,7 @@ public class Upload extends APIRequestHandler {
             .replaceAll("([/\\[\\]()?.])","\\\\$1");
           boolean existingTranscript = store.countMatchingTranscriptIds​(
             "/^"+regexpSafeID+"\\.[^.]+$/.test(id)") > 0;
-          context.servletLog("PUT existingTranscript " + existingTranscript + " \"/^"+regexpSafeID+"\\.[^.]+$/.test(id)\"");
+          // context.servletLog("PUT existingTranscript " + existingTranscript + " \"/^"+regexpSafeID+"\\.[^.]+$/.test(id)\"");
           if (!existingTranscript && merge) {
             httpStatus.accept(SC_NOT_FOUND);
             return failureResult(messages, "Transcript not found: {0}", graph.getId());
@@ -483,7 +484,7 @@ public class Upload extends APIRequestHandler {
           }
 
           if (!existingTranscript) {
-            context.servletLog("PUT !existingTranscript");
+            // context.servletLog("PUT !existingTranscript");
             
             // set corpus
             String corpusParameter = Optional.ofNullable(
@@ -492,12 +493,13 @@ public class Upload extends APIRequestHandler {
             if (corpus.length() == 0) { //... or the first corpus
               corpus = store.getCorpusIds()[0];
             }
+            corpusForParticipants = corpus;
             if (graph.getLayer(schema.getCorpusLayerId()) == null) {
               graph.addLayer(store.getLayer(schema.getCorpusLayerId()));
               graph.getSchema().setCorpusLayerId(schema.getCorpusLayerId());
             }
             Annotation corpusAttribute = graph.first(schema.getCorpusLayerId());
-            context.servletLog("PUT corpus " + corpus);
+            // context.servletLog("PUT corpus " + corpus);
             if (corpusAttribute == null) { // create annotation
               graph.createTag(graph, schema.getCorpusLayerId(), corpus);
             } else { // transcript has it's own corpus already
@@ -517,7 +519,7 @@ public class Upload extends APIRequestHandler {
               graph.getSchema().setEpisodeLayerId(schema.getEpisodeLayerId());
             }
             Annotation episodeAttribute = graph.first(schema.getEpisodeLayerId());
-            context.servletLog("PUT episode " + episode);
+            // context.servletLog("PUT episode " + episode);
             if (episodeAttribute == null) { // create annotation
               graph.createTag(graph, schema.getEpisodeLayerId(), episode);
             } else { // transcript has it's own episode already
@@ -539,7 +541,7 @@ public class Upload extends APIRequestHandler {
               graph.addLayer(store.getLayer("transcript_type"));
             }
             Annotation transcriptTypeAttribute = graph.first("transcript_type");
-            context.servletLog("PUT transcriptType " + transcriptType);
+            // context.servletLog("PUT transcriptType " + transcriptType);
             if (transcriptTypeAttribute == null) { // create annotation
               graph.createTag(graph, "transcript_type", transcriptType);
             } else { // transcript has it's own transcript_type already
@@ -555,7 +557,7 @@ public class Upload extends APIRequestHandler {
           graph.commit();
 
           if (merge) {
-            context.servletLog("PUT merge...");
+            // context.servletLog("PUT merge...");
             
             Graph newGraph = graph;
             
@@ -575,10 +577,10 @@ public class Upload extends APIRequestHandler {
             graphs[g] = store.getTranscript(graph.getId());
             graph = graphs[g];
             graph.trackChanges();
-            context.servletLog("getTrascript " + graph.getId() + " episode " + graph.first("episode"));
+            // context.servletLog("getTrascript " + graph.getId() + " episode " + graph.first("episode"));
             
             // check participant IDs, set main participant(s)
-            context.servletLog("PUT processParticipants...");
+            // context.servletLog("PUT processParticipants...");
             processParticipants(
               graph, graph.first(schema.getEpisodeLayerId()).getLabel(), store, schema,
               transcript.getName());
@@ -641,10 +643,10 @@ public class Upload extends APIRequestHandler {
             } // merge failed
 
           } else { // a new transcript
-            context.servletLog("PUT new ");
+            // context.servletLog("PUT new ");
             
             // check participant IDs, set main participant(s)
-            context.servletLog("PUT processParticipants...");
+            // context.servletLog("PUT processParticipants...");
             processParticipants(
               graph, graph.first(schema.getEpisodeLayerId()).getLabel(), store, schema,
               transcript.getName());
@@ -665,15 +667,33 @@ public class Upload extends APIRequestHandler {
         // for each resulting graph
         for (int g = 0; g < graphs.length; g++) {
           Graph graph = graphs[g];
-          context.servletLog("PUT ...graph " + graph.getId());
+          // context.servletLog("PUT ...graph " + graph.getId());
 
           // save graph into graph store
           store.saveTranscript(graph);
-          context.servletLog("PUT transcript saved");
+          // context.servletLog("PUT transcript saved");
+          if (corpusForParticipants != null) { // set corpus of participants
+            String[] corpusOnly = { schema.getCorpusLayerId() };
+            final String corpusLabel = corpusForParticipants;
+            for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
+              Annotation p = store.getParticipant(participant.getId(), corpusOnly);
+              if (!p.getAnnotations(schema.getCorpusLayerId())
+                  .stream()
+                  .filter(c->c.getLabel().equals(corpusLabel))
+                  .findAny()
+                  .isPresent()) { // not already there, so add it
+                p.addAnnotation(new Annotation(
+                                  null, corpusForParticipants, schema.getCorpusLayerId()))
+                  .create();
+                store.saveParticipant(p);
+                // context.servletLog("Saved participant corpus " + p + " " + p.getAnnotations().get("corpus"));
+              }
+            } // next participant
+          }
               
           // save files
           if (keepOriginal) {
-            context.servletLog("PUT keepOriginal ");
+            // context.servletLog("PUT keepOriginal ");
             // usually there's one transcript file, and it should be the 'source' of the one graph
             // but if there are multiple files, the rest are saved as 'documents',
             // and if there are multiple graphs, *all* transcript files are documents of the first
@@ -681,7 +701,7 @@ public class Upload extends APIRequestHandler {
             for (File file : transcripts) {
               if (fileIsSource) {
                 try {
-                  context.servletLog("PUT source " + file.getName());
+                  // context.servletLog("PUT source " + file.getName());
                   store.saveSource(graph.getId(), file.toURI().toString());
                 } catch(Exception exception) {
                   errors.add(localize("Error saving transcript {0}: {1}",
@@ -690,7 +710,7 @@ public class Upload extends APIRequestHandler {
                 fileIsSource = false;
               } else {
                 try {
-                  context.servletLog("PUT document " + file.getName());
+                  // context.servletLog("PUT document " + file.getName());
                   store.saveEpisodeDocument(graph.getId(), file.toURI().toString());
                 } catch(Exception exception) {
                   errors.add(localize("Error saving document {0}: {1}",
@@ -710,7 +730,7 @@ public class Upload extends APIRequestHandler {
                           && !media.getMimeType().startsWith("video")
                           && !media.getMimeType().startsWith("image"))) {
                     try {
-                      context.servletLog("PUT document " + file.getName());
+                      // context.servletLog("PUT document " + file.getName());
                       store.saveEpisodeDocument(graph.getId(), file.toURI().toString());
                     } catch(Exception exception) {
                       errors.add(localize("Error saving document {0}: {1}",
@@ -720,7 +740,7 @@ public class Upload extends APIRequestHandler {
                   } // not a known media file
                 } // no track suffix
                 try {
-                  context.servletLog("PUT media " + file.getName());
+                  // context.servletLog("PUT media " + file.getName());
                   store.saveMedia(graph.getId(), file.toURI().toString(), suffix);
                 } catch(Exception exception) {
                   errors.add(localize("Error saving media {0}: {1}",
@@ -741,9 +761,9 @@ public class Upload extends APIRequestHandler {
           } // generateMissingMedia
           
           // generate layers
-          if (generateLayers || !merge) { // TODO
+          if (generateLayers || !merge) {
             if (layerGenerator != null) {
-              context.servletLog("PUT generateLayers " + graph.getId());
+              // context.servletLog("PUT generateLayers " + graph.getId());
               transcriptThreads.add(graph.getId(), layerGenerator.apply(graph));
             }
           }
@@ -848,11 +868,11 @@ public class Upload extends APIRequestHandler {
       httpStatus.accept(SC_BAD_REQUEST);
       return failureResult("No ID specified.");
     }        
-    context.servletLog("id " + id);
+    // context.servletLog("id " + id);
     File dir = null;
     try {
       SqlGraphStoreAdministration store = getStore();
-      context.servletLog("store " + store.getId());
+      // context.servletLog("store " + store.getId());
       try {
         dir = new File(uploadsDir, id);
         if (!dir.exists()) {
