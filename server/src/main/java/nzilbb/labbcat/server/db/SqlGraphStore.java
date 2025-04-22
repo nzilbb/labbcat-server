@@ -5328,14 +5328,14 @@ public class SqlGraphStore implements GraphStore {
               && !layer.getParentId().equals(schema.getRoot().getId())))
         .findAny().isPresent();
       timers.end("topLevelChildlessNonIntervalChangesOnly"); // TODO false when it should be true
-      System.err.println("topLevelChildlessNonIntervalChangesOnly " + topLevelChildlessNonIntervalChangesOnly + " - " + timers);
+      // System.err.println("topLevelChildlessNonIntervalChangesOnly " + topLevelChildlessNonIntervalChangesOnly + " - " + timers);
       
       if (topLevelChildlessNonIntervalChangesOnly
           || graph.containsKey("@valid")) { // TODO remove this workaround
-        System.err.println(
-          "Graph " + graph.getId() + ": skipping validation - "
-          + (topLevelChildlessNonIntervalChangesOnly?
-             "all top-level childless non-interval changes":"externally tagged as valid"));
+        // System.err.println(
+        //   "Graph " + graph.getId() + ": skipping validation - "
+        //   + (topLevelChildlessNonIntervalChangesOnly?
+        //      "all top-level childless non-interval changes":"externally tagged as valid"));
         timers.start("topLevelChildlessNonIntervalChangesOnly");
         
         // but normalize anyway if it's new
@@ -7391,7 +7391,6 @@ public class SqlGraphStore implements GraphStore {
               } // Destroy
         } // switch on change type
       } else if (annotation.getLayerId().equals("audio_prompt")) {
-        System.out.println("saving " + annotation);
         switch (annotation.getChange()) {
           case Create:
           case Update: {
@@ -7402,12 +7401,10 @@ public class SqlGraphStore implements GraphStore {
             sqlUpdate.setInt(2, agId);
             sqlUpdate.executeUpdate();
             sqlUpdate.close();
-            System.out.println("updated " + annotation);
             break;
           }
         } // switch on change type
       }
-      System.out.println("finished with " + annotation);
       annotation.put("@SqlUpdated", Boolean.TRUE); // flag the annotation as having been updated
     } catch(ParseException exception) {
       System.err.println(
@@ -9445,7 +9442,7 @@ public class SqlGraphStore implements GraphStore {
         }});
     AnnotatorDescriptor finalDescriptor = null;
     for (File jar : possibleJars) {
-      System.out.println("jar " + jar.getName()); // TODO remove
+      // System.out.println("jar " + jar.getName()); // TODO remove
       try {
         AnnotatorDescriptor descriptor = new AnnotatorDescriptor(jar);
         Annotator annotator = descriptor.getInstance();
@@ -9468,15 +9465,15 @@ public class SqlGraphStore implements GraphStore {
             annotator.setStore(this);
           }
           
-          if (finalDescriptor == null || finalDescriptor.compareTo(descriptor) < 0) {
-            System.out.println( // TODO remove
-              (finalDescriptor==null?"Found":"Found newer")
-              +" v. " + descriptor.getVersion() + " ("+jar.getName()+")");
-            finalDescriptor = descriptor;
-          } else {
-            System.out.println( // TODO remove
-              "Older version ignored: " + descriptor.getVersion() + " ("+jar.getName()+")");
-          }
+          // if (finalDescriptor == null || finalDescriptor.compareTo(descriptor) < 0) {
+          //   System.out.println( // TODO remove
+          //     (finalDescriptor==null?"Found":"Found newer")
+          //     +" v. " + descriptor.getVersion() + " ("+jar.getName()+")");
+          //   finalDescriptor = descriptor;
+          // } else {
+          //   System.out.println( // TODO remove
+          //     "Older version ignored: " + descriptor.getVersion() + " ("+jar.getName()+")");
+          // }
         }
       } catch(Exception exception) {
         System.err.println("getAnnotatorDescriptor " + annotatorId + ": " + exception);
