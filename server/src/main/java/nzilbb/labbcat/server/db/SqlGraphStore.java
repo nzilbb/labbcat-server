@@ -9465,15 +9465,15 @@ public class SqlGraphStore implements GraphStore {
             annotator.setStore(this);
           }
           
-          // if (finalDescriptor == null || finalDescriptor.compareTo(descriptor) < 0) {
-          //   System.out.println( // TODO remove
-          //     (finalDescriptor==null?"Found":"Found newer")
-          //     +" v. " + descriptor.getVersion() + " ("+jar.getName()+")");
-          //   finalDescriptor = descriptor;
+          if (finalDescriptor == null || finalDescriptor.compareTo(descriptor) < 0) {
+            // System.out.println( // TODO remove
+            //   (finalDescriptor==null?"Found":"Found newer")
+            //   +" v. " + descriptor.getVersion() + " ("+jar.getName()+")");
+            finalDescriptor = descriptor;
           // } else {
           //   System.out.println( // TODO remove
           //     "Older version ignored: " + descriptor.getVersion() + " ("+jar.getName()+")");
-          // }
+          }
         }
       } catch(Exception exception) {
         System.err.println("getAnnotatorDescriptor " + annotatorId + ": " + exception);
