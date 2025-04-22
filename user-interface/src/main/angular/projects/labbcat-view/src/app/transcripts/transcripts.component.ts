@@ -318,7 +318,7 @@ export class TranscriptsComponent implements OnInit {
                             + " = " + this.filterValues[layer.id][0];
                     } else {
                         this.queryDescription += layer.description
-                            + " in " + this.filterValues[layer.id].join(",");
+                            + " in (" + this.filterValues[layer.id].join(",") + ")";
                     }
                 } else { // "!" 'other' selected
                     // so we *exclude* all values not selected
