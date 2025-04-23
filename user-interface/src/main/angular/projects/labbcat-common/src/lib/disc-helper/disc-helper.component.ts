@@ -12,8 +12,9 @@ export class DiscHelperComponent implements OnInit {
     
     ngOnInit(): void {
     }
-    select(symbol: string) {
+    select(event: Event, symbol: string): boolean {
         this.symbolSelected.emit(symbol);
+        if (event) event.stopPropagation();
         return false;
     }
 }

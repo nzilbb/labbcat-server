@@ -39,12 +39,13 @@ export class ValidLabelHelperComponent implements OnInit {
         }
     }
     
-    select(symbol: string): boolean {
+    select(event: Event, symbol: string): boolean {
         if (this.regularExpression) {
             // escape for regular expression
             symbol = symbol.replace(/([\?\.\*\|\^\$\(\)])/g,"\\$1");
         }
         this.symbolSelected.emit(symbol);
+        if (event) event.stopPropagation();
         return false;
     }
     
@@ -82,7 +83,7 @@ export class ValidLabelHelperComponent implements OnInit {
             this.symbolSelected.emit(pattern);
         }
     }
-    selectCategory(category: string): boolean {
+    selectCategory(event: Event, category: string): boolean {
         const labels = [] as ValidLabelDefinition[];
         for (let subcategory of Object.keys(this.categories[category])) {
             for (let label of this.categories[category][subcategory]) {
@@ -92,9 +93,10 @@ export class ValidLabelHelperComponent implements OnInit {
         if (labels.length) {
             this.selectLabels(labels);
         }
+        if (event) event.stopPropagation();
         return false;
     }
-    selectSubcategory(category: string, subcategory: string): boolean {
+    selectSubcategory(event: Event, category: string, subcategory: string): boolean {
         const labels = [] as ValidLabelDefinition[];
         for (let label of this.categories[category][subcategory]) {
             labels.push(label);
@@ -102,6 +104,7 @@ export class ValidLabelHelperComponent implements OnInit {
         if (labels.length) {
             this.selectLabels(labels);
         }
+        if (event) event.stopPropagation();
         return false;
     }
     

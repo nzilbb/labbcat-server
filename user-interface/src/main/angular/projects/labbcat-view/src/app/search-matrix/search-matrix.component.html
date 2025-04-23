@@ -5,9 +5,10 @@
   category="true"
   [(selected)]="selectedLayerIds"
   (selectedChange)="syncSelectedLayerIdsWithColumns($event)"
-  ></lib-layer-checkboxes>
+  (click)="hideHelper();"></lib-layer-checkboxes>
 
-<div class="columns">
+<div class="columns"
+     (click)="hideHelper();">
   <div class="column" *ngFor="let column of columns; index as c">
     <div class="layers">
       <fieldset *ngFor="let layerId of selectedLayerIds"
@@ -89,7 +90,7 @@
                     i18n-title title="Phoneme symbol selector"
                     class="small"
                     icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
-                    (press)="helperMatch = (helperMatch == match?null:match)"></lib-button>
+                    (press)="helperMatch = (helperMatch == match?null:match); $event.stopPropagation();"></lib-button>
                   <lib-disc-helper
                     *ngIf="!hasValidLabels(schema.layers[layerId]) && helperMatch == match"
                     (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-disc-helper>
@@ -122,7 +123,7 @@
                     i18n-title title="Symbol selector"
                     class="small"
                     icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
-                    (press)="helperMatch = (helperMatch == match?null:match)"></lib-button>
+                    (press)="helperMatch = (helperMatch == match?null:match); $event.stopPropagation();"></lib-button>
                   <lib-valid-label-helper
                     *ngIf="helperMatch == match"
                     regularExpression="{{true}}"

@@ -897,10 +897,12 @@ export class TranscriptComponent implements OnInit {
     highlitId: string;
     highlight(id: string): void {
         this.highlitId = id;
-        document.getElementById(id).scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
+        try {
+            document.getElementById(id).scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        } catch (x) {}
     }
 
     /* convert selectedLayerIds array into a series of URL parameters with the given name */
@@ -1492,4 +1494,7 @@ export class TranscriptComponent implements OnInit {
         } // 'edit' user
     }
 
+    hideWordMenu(): void {
+        this.menuId = null;
+    }
 }

@@ -48,7 +48,7 @@ export class ButtonComponent implements OnInit {
         if (!this.label) this.classes += " icon-only";
     }
 
-    handlePress(): void {
-        this.press.emit();
+    handlePress(event: Event): void {
+        this.press.emit(event);
     }
 }

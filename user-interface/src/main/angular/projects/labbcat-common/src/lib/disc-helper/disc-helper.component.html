@@ -1,48 +1,48 @@
 <div class="disc-helper">
   <a href="#" class="IPA" title="any consonant"
-     (click)="select('[bCdDfFghHjJklLmnNpPrRsStTvwxzZ_?]')">CONSONANT</a>:
-  <a href="#" class="IPA" title="glottal stop" (click)="select('?')"><span class="serif">ʔ</span></a>
-  <a href="#" class="IPA" title="flap" (click)="select('L')"><span class="serif">ɾ</span></a>
-  <a href="#" class="IPA" title="velar nasal" (click)="select('N')">ŋ</a>
-  <a href="#" class="IPA" title="voiceless dental fricative" (click)="select('T')">θ</a>
-  <a href="#" class="IPA" title="voiced dental fricative" (click)="select('D')">ð</a>
-  <a href="#" class="IPA" title="voiceless postalveolar fricative" (click)="select('S')">ʃ</a>
-  <a href="#" class="IPA" title="voiced postalveolar fricative" (click)="select('Z')">ʒ</a>
-  <a href="#" class="IPA" title="voiceless palatal fricative" (click)="select('C')">ç</a>
-  <a href="#" class="IPA" title="voiceless postalveolar affricate" (click)="select('J')">ʧ</a>
-  <a href="#" class="IPA" title="voiced postalveolar affricate" (click)="select('_')">ʤ</a>
-  <a href="#" (click)="select('+')">pf</a>
-  <a href="#" (click)="select('=')">ts</a>
+     (click)="select($event, '[bCdDfFghHjJklLmnNpPrRsStTvwxzZ_?]')">CONSONANT</a>:
+  <a href="#" class="IPA" title="glottal stop" (click)="select($event, '?')"><span class="serif">ʔ</span></a>
+  <a href="#" class="IPA" title="flap" (click)="select($event, 'L')"><span class="serif">ɾ</span></a>
+  <a href="#" class="IPA" title="velar nasal" (click)="select($event, 'N')">ŋ</a>
+  <a href="#" class="IPA" title="voiceless dental fricative" (click)="select($event, 'T')">θ</a>
+  <a href="#" class="IPA" title="voiced dental fricative" (click)="select($event, 'D')">ð</a>
+  <a href="#" class="IPA" title="voiceless postalveolar fricative" (click)="select($event, 'S')">ʃ</a>
+  <a href="#" class="IPA" title="voiced postalveolar fricative" (click)="select($event, 'Z')">ʒ</a>
+  <a href="#" class="IPA" title="voiceless palatal fricative" (click)="select($event, 'C')">ç</a>
+  <a href="#" class="IPA" title="voiceless postalveolar affricate" (click)="select($event, 'J')">ʧ</a>
+  <a href="#" class="IPA" title="voiced postalveolar affricate" (click)="select($event, '_')">ʤ</a>
+  <a href="#" (click)="select($event, '+')">pf</a>
+  <a href="#" (click)="select($event, '=')">ts</a>
   <br/>
   <a href="#" class="IPA" title="any vowel"
-     (click)="select('[BcEFHiIOPqQuUVWX0123456789~#{$@]')">VOWEL</a>:
-  <a href="#" class="IPA" title="KIT" (click)="select('I')">ɪ</a>
-  <a href="#" class="IPA" title="DRESS" (click)="select('E')">ε</a>
-  <a href="#" class="IPA" title="TRAP" (click)="select('{')">æ</a>
-  <a href="#" class="IPA" title="schwa" (click)="select('@')">ə</a>
-  <a href="#" class="IPA" title="FOOT" (click)="select('U')">ʊ</a>
-  <a href="#" class="IPA" title="STRUT" (click)="select('V')">ʌ</a>
-  <a href="#" class="IPA" title="LOT" (click)="select('Q')">ɒ</a>
-  <a href="#" class="IPA" title="&auml;sen" (click)="select(')')">εː</a>
-  <a href="#" class="IPA" title="&uuml;ppig" (click)="select('Y')">ʏ</a>
+     (click)="select($event, '[BcEFHiIOPqQuUVWX0123456789~#{$@]')">VOWEL</a>:
+  <a href="#" class="IPA" title="KIT" (click)="select($event, 'I')">ɪ</a>
+  <a href="#" class="IPA" title="DRESS" (click)="select($event, 'E')">ε</a>
+  <a href="#" class="IPA" title="TRAP" (click)="select($event, '{')">æ</a>
+  <a href="#" class="IPA" title="schwa" (click)="select($event, '@')">ə</a>
+  <a href="#" class="IPA" title="FOOT" (click)="select($event, 'U')">ʊ</a>
+  <a href="#" class="IPA" title="STRUT" (click)="select($event, 'V')">ʌ</a>
+  <a href="#" class="IPA" title="LOT" (click)="select($event, 'Q')">ɒ</a>
+  <a href="#" class="IPA" title="&auml;sen" (click)="select($event, ')')">εː</a>
+  <a href="#" class="IPA" title="&uuml;ppig" (click)="select($event, 'Y')">ʏ</a>
   &nbsp;&nbsp;
   <a
-    href="#" class="IPA" title="FLEECE" (click)="select('i')">iː</a>
-  <a href="#" class="IPA" title="BATH" (click)="select('#')">αː</a>
-  <a href="#" class="IPA" title="THOUGHT" (click)="select('$')">ɔː</a>
-  <a href="#" class="IPA" title="GOOSE" (click)="select('u')">uː</a>
-  <a href="#" class="IPA" title="NURSE" (click)="select('3')">ɜː</a>
-  <a href="#" class="IPA" title="&Ouml;fen" (click)="select('|')">øː</a>
+    href="#" class="IPA" title="FLEECE" (click)="select($event, 'i')">iː</a>
+  <a href="#" class="IPA" title="BATH" (click)="select($event, '#')">αː</a>
+  <a href="#" class="IPA" title="THOUGHT" (click)="select($event, '$')">ɔː</a>
+  <a href="#" class="IPA" title="GOOSE" (click)="select($event, 'u')">uː</a>
+  <a href="#" class="IPA" title="NURSE" (click)="select($event, '3')">ɜː</a>
+  <a href="#" class="IPA" title="&Ouml;fen" (click)="select($event, '|')">øː</a>
   &nbsp;&nbsp;
-  <a href="#" class="IPA" title="FACE" (click)="select('1')">eɪ</a>
-  <a href="#" class="IPA" title="PRICE" (click)="select('2')">αɪ</a>
-  <a href="#" class="IPA" title="CHOICE" (click)="select('4')">ɔɪ</a>
-  <a href="#" class="IPA" title="GOAT" (click)="select('5')">əʊ</a>
-  <a href="#" class="IPA" title="MOUTH" (click)="select('6')">αʊ</a>
-  <a href="#" class="IPA" title="NEAR" (click)="select('7')">ɪə</a>
-  <a href="#" class="IPA" title="SQUARE" (click)="select('8')">εə</a>
-  <a href="#" class="IPA" title="CURE" (click)="select('9')">ʊə</a>
-  <a href="#" class="IPA" title="weit" (click)="select('W')">ai</a>
-  <a href="#" class="IPA" title="Haut" (click)="select('B')">au</a>
-  <a href="#" class="IPA" title="freut" (click)="select('X')">ɔy</a> 
+  <a href="#" class="IPA" title="FACE" (click)="select($event, '1')">eɪ</a>
+  <a href="#" class="IPA" title="PRICE" (click)="select($event, '2')">αɪ</a>
+  <a href="#" class="IPA" title="CHOICE" (click)="select($event, '4')">ɔɪ</a>
+  <a href="#" class="IPA" title="GOAT" (click)="select($event, '5')">əʊ</a>
+  <a href="#" class="IPA" title="MOUTH" (click)="select($event, '6')">αʊ</a>
+  <a href="#" class="IPA" title="NEAR" (click)="select($event, '7')">ɪə</a>
+  <a href="#" class="IPA" title="SQUARE" (click)="select($event, '8')">εə</a>
+  <a href="#" class="IPA" title="CURE" (click)="select($event, '9')">ʊə</a>
+  <a href="#" class="IPA" title="weit" (click)="select($event, 'W')">ai</a>
+  <a href="#" class="IPA" title="Haut" (click)="select($event, 'B')">au</a>
+  <a href="#" class="IPA" title="freut" (click)="select($event, 'X')">ɔy</a> 
 </div>

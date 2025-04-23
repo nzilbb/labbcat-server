@@ -196,4 +196,8 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         return layer.id == 'segment'
             || layer.parentId == 'segment';
     }
+
+    hideHelper() {
+        this.helperMatch = null;
+    }
 }
