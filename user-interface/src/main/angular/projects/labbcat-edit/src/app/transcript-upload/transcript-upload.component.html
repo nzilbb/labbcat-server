@@ -36,8 +36,8 @@
       </span>
     </div>
     <div class="item"
-         i18n-title title="Whether to allow LaBB-CAT to make all decisions about tier/layer mappings and other options that are required during upload">
-      <label for="useDefaultParameterValues" i18n>Batch Mode</label>
+         i18n-title title="Whether to automate upload by allowing LaBB-CAT to make all decisions about tier/layer mappings and other options, and upload files one after the other automatically.">
+      <label for="useDefaultParameterValues" i18n>Automated Upload</label>
       <span class="value">
         <legend i18n>Batch Mode</legend>
         <input type="checkbox"
@@ -69,19 +69,19 @@
       [disabled]="processing || entries.length == 0"></lib-button>
     <lib-button
       i18n-label="Batch upload" label="Clear Existing"
-      i18n-title title="Remove all files from the list that are already in LaBB-CAT"
+      i18n-title title="Remove all files from the queue that are already in LaBB-CAT"
       img="delete.svg" icon="⌫"
       (press)="onClear(true, false)"
       [disabled]="processing || entries.length == 0"></lib-button>
     <lib-button
       i18n-label="Batch upload" label="Clear New"
-      i18n-title title="Remove all files from the list that are not already in LaBB-CAT"
+      i18n-title title="Remove all files from the queue that are not already in LaBB-CAT"
       img="delete.svg" icon="⌫"
       (press)="onClear(false, true)"
       [disabled]="processing || entries.length == 0"></lib-button>
     <lib-button
       i18n-label="Batch upload" label="Clear"
-      i18n-title title="Remove all files from the list"
+      i18n-title title="Remove all files from the queue"
       img="delete.svg" icon="⌫"
       (press)="onClear(true, true)"
       [disabled]="processing || entries.length == 0"></lib-button>
@@ -100,7 +100,7 @@
      (drop)="fileSelectHandler($event)"
      [class.dragover]="hovering"
      [class.processing-entries]="processingEntries">
-  <div id="transcripts" class="transcript-batch" i18n-title title="Transcripts to upload">
+  <div id="transcripts" class="transcript-batch" i18n-title title="Queue of transcripts to upload">
     <input type="file"
            i18n-title title="Select files for upload"
            [(ngModel)]="fileSelector"
@@ -168,7 +168,7 @@
         <span class="buttons">
           <button
             *ngIf="!entry.generating()"
-            i18n-title title="Remove this file from the list"
+            i18n-title title="Remove this file from the queue"
             (click)="removeEntry(entry.id)"
             [disabled]="processing"><img src="{{imagesLocation}}/remove.svg" alt="➖"></button>
           <button
