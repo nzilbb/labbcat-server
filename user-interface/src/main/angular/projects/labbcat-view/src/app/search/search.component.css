@@ -43,6 +43,18 @@
 #transcript-chooser lib-button {
     padding-bottom: 10px;
 }
+.filter-disabled .file-chooser {
+    color: lightgray;
+}
+.filter-disabled input {
+    color: lightgray;
+}
+.filter-disabled summary {
+    pointer-events: none;
+}
+#nb-disabled {
+    font-style: italic;
+}
 .all {
     font-style: italic;
 }
