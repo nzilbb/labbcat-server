@@ -10,7 +10,9 @@
   <nav>
     <div *ngIf="transcript.first('previous-transcript')"
          id="previous-transcript-link">
-      <a rel="prev" href="transcript?transcript={{transcript.first('previous-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
+      <a rel="prev"
+         href="transcript?transcript={{transcript.first('previous-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
+         accesskey="p"
          i18n-title title="Previous">
         <img src="{{imagesLocation}}/previous.svg"
              i18n-alt alt="Previous"
@@ -19,7 +21,9 @@
     </div>
     <div *ngIf="transcript.first('next-transcript')"
          id="next-transcript-link">
-      <a rel="next" href="transcript?transcript={{transcript.first('next-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
+      <a rel="next"
+         href="transcript?transcript={{transcript.first('next-transcript').label}}{{threadId?'&threadId='+threadId:''}}"
+         accesskey="n"
          i18n-title title="Next">
         <img src="{{imagesLocation}}/next.svg"
              i18n-alt alt="Next"
