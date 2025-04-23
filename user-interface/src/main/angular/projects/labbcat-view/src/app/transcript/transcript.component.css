@@ -175,9 +175,6 @@ nav, nav > div {
 .layer.span .annotation label.continued {
     margin-left: 10px;
 }
-.layer.span .annotation label.continued::before {
-    content: '… ';
-}
 
 .generate-layer {
     display: flex;
