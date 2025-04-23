@@ -227,10 +227,10 @@ button {
     font-size: 9pt;
     padding: 1px;
 }
-button:hover {
-    background: #DDDDDD;
+button:hover:not([disabled]) {
+    background: #BBBBBB;
 }
-button:active {
+button:active:not([disabled]) {
     border: 1px inset;
     background: #BBBBBB;
 }
