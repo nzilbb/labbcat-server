@@ -56,9 +56,10 @@ lib-wait {
 nav, nav > div {
     position: fixed;
     top: 50%;
+    z-index: 5; /* above media */
 }
 #previous-transcript-link {
-    left: 0px;
+    left: 10px;
     text-align: left;
 }
 #previous-transcript-link a:hover::after {
@@ -66,7 +67,7 @@ nav, nav > div {
     background-color: var(--theme-background-color);
 }
 #next-transcript-link {
-    right: 0px;
+    right: 10px;
     text-align: right;
 }
 #next-transcript-link a:hover::before {
