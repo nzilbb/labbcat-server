@@ -58,6 +58,7 @@
       <resource>
         <directory>src/main/resources</directory>
       </resource>
+      <!-- API endpoints -->
       <resource>
         <directory>src/main/jsp</directory>
         <includes><include>**/*.jsp</include></includes>
@@ -68,6 +69,12 @@
         <includes><include>web-fragment.xml</include></includes>
         <targetPath>META-INF/</targetPath>
       </resource>
+      <!-- UI resources -->
+      <!--resource>
+        <directory>../user-interface/target/labbcat-view/browser/</directory>
+        <includes><include>**/*</include></includes>
+        <targetPath>META-INF/resources/ui/</targetPath>
+      </resource-->
     </resources>
     <plugins>
       <plugin>
