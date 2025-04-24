@@ -773,13 +773,36 @@ export class TranscriptComponent implements OnInit {
                     // were there any?
                     if (span[wordLayerId].length == 0) { // no tokens included
                         let nearestWord = null;
+                        let linkedUtterance = null;
                         
-                        if (span.end.startOf[wordLayerId] // immediately precedes a word?
-                            && span.end.startOf[wordLayerId].length) {
-                            nearestWord = span.end.startOf[wordLayerId][0];
-                        } else if (span.start.endOf[wordLayerId] // immediately follows a word?
+                        if (span.start.endOf[wordLayerId] // immediately follows a word?
                             && span.start.endOf[wordLayerId].length) {
                             nearestWord = span.start.endOf[wordLayerId][0];
+                            // is it strung from the word end to the utterance end?
+                            const utterance = nearestWord.first(this.schema.utteranceLayerId);
+                            if (utterance && utterance.endId == span.endId) {
+                                linkedUtterance = utterance
+                                // tag the utterance so the visualization knows to prepend a column
+                                utterance.appendDummyToken = true;
+                                // ensure the span doesn't also get visualized with the word
+                                nearestWord = null;
+                            } else {
+                                // tag the span to 'jump' ahead, so it offset to the right to 
+                                // represent that it's between this word and the next
+                                span.jump = true;
+                            }
+                        } else if (span.end.startOf[wordLayerId] // immediately precedes a word?
+                            && span.end.startOf[wordLayerId].length) {
+                            nearestWord = span.end.startOf[wordLayerId][0];
+                            // is it strung from the utterance start to the word start?
+                            const utterance = nearestWord.first(this.schema.utteranceLayerId);
+                            if (utterance && utterance.startId == span.startId) {
+                                linkedUtterance = utterance
+                                // tag the utterance so the visualization knows to prepend a column
+                                utterance.prependDummyToken = true;
+                                // ensure the span doesn't also get visualized with the word
+                                nearestWord = null;
+                            }
                         } else if (span.start.startOf[wordLayerId] // starts with word?
                             && span.start.startOf[wordLayerId].length) {
                             nearestWord = span.start.startOf[wordLayerId][0];
@@ -816,7 +839,7 @@ export class TranscriptComponent implements OnInit {
                                 nearestWord[layer.id] = new Array(maxDepth+1);
                             }
                             nearestWord[layer.id][span._depth] = span;
-                        } else {
+                        } else if (!linkedUtterance) {
                             console.error(`Could not visualize: ${span.label}#${span.id} (${span.start}-${span.end})`);
                         }
                     } // no tokens included

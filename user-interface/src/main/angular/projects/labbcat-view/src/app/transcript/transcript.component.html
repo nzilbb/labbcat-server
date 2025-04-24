@@ -430,6 +430,69 @@
             </span>
           </ng-container>
         <div class="words">
+          <span *ngIf="utterance.prependDummyToken" class="token dummy">
+            <!-- phrase/span layers starting with this utterance and ending with the first word  -->
+            <ng-container *ngFor="let l of selectedLayerIds">
+              <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+                    class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
+                    style="color: {{transcript.schema.layers[l].colour}};"
+                    title="{{l}}">
+                <ng-container *ngFor="let annotation of utterance.start.startOf[l]">
+                  <span *ngIf="annotation && annotation.endId == utterance.first(schema.wordLayerId).startId"
+                        [attr.id]="annotation.id"
+                        [class.highlight]="annotation.id == highlitId"
+                        [ngClass]="{ 'annotation' : true, 'first' : true, 'during' : true, 'last' : true }"
+                        title="{{l}}: {{annotation.label}}"
+                        ><label>
+                      <ng-container [ngSwitch]="true">
+                        <a *ngSwitchCase="annotation.layer.type == 'tree'"
+                           class="tree" href="#{{annotation.id}}"
+                           (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
+                        <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
+                           class="image" href="#{{annotation.id}}"
+                           href="{{annotation.dataUrl}}&show"
+                           target="{{annotation.id}}"
+                           (mouseover)="annotation.preview = true;"
+                           (mouseout)="annotation.preview = false;"
+                           ><img *ngIf="!annotation.preview"
+                                 class="icon"
+                                 src="{{imagesLocation}}/image.svg"
+                                 i18n-alt alt="📷"
+                                 ><img *ngIf="annotation.preview"
+                                       class="preview" src="{{annotation.dataUrl}}"
+                                       i18n-alt alt="📷"></a>
+                        <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
+                           class="blob" href="#{{annotation.id}}"
+                           href="{{annotation.dataUrl}}"
+                           target="{{annotation.id}}"
+                           ><img class="icon"
+                                 src="{{imagesLocation}}/other.svg"
+                                 i18n-alt alt="🗎"
+                                 ></a>
+                        <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
+                      </ng-container>
+                    </label>&nbsp;</span>
+                  <span *ngIf="!annotation" class="annotation empty">&nbsp;</span>
+                </ng-container>
+              </span>
+            </ng-container>
+            <!-- no word layer annotations without a word, but leave vertical space for them -->
+            <ng-container *ngFor="let l of selectedLayerIds">
+              <span *ngIf="isWordLayer(transcript.schema.layers[l])"
+                    class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}}">
+                <span class="annotation">&nbsp;</span>
+              </span>
+            </ng-container>
+            <!-- no word token, but leave a space for it -->
+            <span class="layer"><span class="annotation">&nbsp;</span></span>
+            <!-- segment layers -->
+            <ng-container *ngFor="let l of selectedLayerIds">
+              <span *ngIf="isSegmentLayer(transcript.schema.layers[l])"
+                    class="layer layer-{{l}} segment">
+                <span class="annotation">&nbsp;</span>
+              </span>
+            </ng-container>
+          </span><!-- phrases/spans starting with this utterance and ending with the first word -->
           <span *ngFor="let word of utterance.all(schema.wordLayerId)"
                 class="word" id="{{word.id}}">
             <a id="{{word.startId}}" class="anchor"></a>
@@ -444,7 +507,7 @@
                     <span *ngIf="annotation && annotation.tagOn(schema.utteranceLayerId).length == 0"
                           [attr.id]="word == annotation.first('word')?annotation.id:(annotation.id+'-'+annotation.all('word').indexOf(word))"
                           [class.highlight]="annotation.id == highlitId"
-                          [ngClass]="{ 'annotation' : true, 'first' : word == annotation.first('word'), 'during' : true, 'last' : word == annotation.last('word') && word.end.offset <= annotation.end.offset }"
+                          [ngClass]="{ 'annotation' : true, 'first' : word == annotation.first('word'), 'during' : true, 'last' : word == annotation.last('word') && word.end.offset <= annotation.end.offset, 'jump' : annotation.jump }"
                           title="{{l}}: {{annotation.label}}"
                           ><label
                              *ngIf="word == annotation.first('word') || word == utterance.first('word')"
@@ -606,6 +669,69 @@
               </ng-container>
             </span>
           </span>
+          <span *ngIf="utterance.appendDummyToken" class="token dummy">
+            <!-- phrase/span layers starting with the last word and ending with this utterance  -->
+            <ng-container *ngFor="let l of selectedLayerIds">
+              <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+                    class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
+                    style="color: {{transcript.schema.layers[l].colour}};"
+                    title="{{l}}">
+                <ng-container *ngFor="let annotation of utterance.end.endOf[l]">
+                  <span *ngIf="annotation && annotation.startId == utterance.last(schema.wordLayerId).endId"
+                        [attr.id]="annotation.id"
+                        [class.highlight]="annotation.id == highlitId"
+                        [ngClass]="{ 'annotation' : true, 'first' : true, 'during' : true, 'last' : true }"
+                        title="{{l}}: {{annotation.label}}"
+                        ><label>
+                      <ng-container [ngSwitch]="true">
+                        <a *ngSwitchCase="annotation.layer.type == 'tree'"
+                           class="tree" href="#{{annotation.id}}"
+                           (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
+                        <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
+                           class="image" href="#{{annotation.id}}"
+                           href="{{annotation.dataUrl}}&show"
+                           target="{{annotation.id}}"
+                           (mouseover)="annotation.preview = true;"
+                           (mouseout)="annotation.preview = false;"
+                           ><img *ngIf="!annotation.preview"
+                                 class="icon"
+                                 src="{{imagesLocation}}/image.svg"
+                                 i18n-alt alt="📷"
+                                 ><img *ngIf="annotation.preview"
+                                       class="preview" src="{{annotation.dataUrl}}"
+                                       i18n-alt alt="📷"></a>
+                        <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
+                           class="blob" href="#{{annotation.id}}"
+                           href="{{annotation.dataUrl}}"
+                           target="{{annotation.id}}"
+                           ><img class="icon"
+                                 src="{{imagesLocation}}/other.svg"
+                                 i18n-alt alt="🗎"
+                                 ></a>
+                        <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
+                      </ng-container>
+                    </label>&nbsp;</span>
+                  <span *ngIf="!annotation" class="annotation empty">&nbsp;</span>
+                </ng-container>
+              </span>
+            </ng-container>
+            <!-- no word layer annotations without a word, but leave vertical space for them -->
+            <ng-container *ngFor="let l of selectedLayerIds">
+              <span *ngIf="isWordLayer(transcript.schema.layers[l])"
+                    class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}}">
+                <span class="annotation">&nbsp;</span>
+              </span>
+            </ng-container>
+            <!-- no word token, but leave a space for it -->
+            <span class="layer"><span class="annotation">&nbsp;</span></span>
+            <!-- segment layers -->
+            <ng-container *ngFor="let l of selectedLayerIds">
+              <span *ngIf="isSegmentLayer(transcript.schema.layers[l])"
+                    class="layer layer-{{l}} segment">
+                <span class="annotation">&nbsp;</span>
+              </span>
+            </ng-container>
+          </span> <!-- phrases/spans starting with the last word and ending with this utterance -->
         </div>
         <a *ngIf="utterance.last(transcript.schema.wordLayerId)"
            id="{{utterance.last(transcript.schema.wordLayerId).endId}}" class="anchor"></a>

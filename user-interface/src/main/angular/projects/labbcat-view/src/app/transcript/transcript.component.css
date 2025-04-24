@@ -175,6 +175,10 @@ nav, nav > div {
 .layer.span .annotation label.continued {
     margin-left: 10px;
 }
+.layer.span .annotation.jump {
+    position: relative;
+    left: 50%;
+}
 
 .generate-layer {
     display: flex;
