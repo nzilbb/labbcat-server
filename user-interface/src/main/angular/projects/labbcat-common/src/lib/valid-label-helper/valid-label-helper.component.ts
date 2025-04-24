@@ -42,7 +42,7 @@ export class ValidLabelHelperComponent implements OnInit {
     select(event: Event, symbol: string): boolean {
         if (this.regularExpression) {
             // escape for regular expression
-            symbol = symbol.replace(/([\?\.\*\|\^\$\(\)])/g,"\\$1");
+            symbol = symbol.replace(/([\?\.\*\|\^\$\(\)\{\}])/g,"\\$1");
         }
         this.symbolSelected.emit(symbol);
         if (event) event.stopPropagation();
