@@ -113,5 +113,16 @@
   <servlet><servlet-name>admin/annotator.jsp</servlet-name><jsp-file>/jsp/admin/annotator.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/annotator.jsp</servlet-name><url-pattern>/api/admin/annotator/*</url-pattern></servlet-mapping>
   <servlet-mapping><servlet-name>admin/annotator.jsp</servlet-name><url-pattern>/admin/annotator/*</url-pattern></servlet-mapping>
-  
+
+  <!-- Also map ui requests to their static resources, which are packed into the .jar -->
+  <!--servlet><servlet-name>ui.jsp</servlet-name><jsp-file>/jsp/ui.jsp</jsp-file></servlet>
+  <servlet-mapping>
+    <servlet-name>ui.jsp</servlet-name>
+    <url-pattern>/ui/en/search</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/ui/*</url-pattern>
+  </servlet-mapping-->
+
 </web-fragment>

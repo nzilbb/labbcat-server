@@ -1,7 +1,7 @@
-<header>
+<header innerHTML="{{header}}">
   <h1 *ngIf="!production">{{ title }}</h1>
-  <lib-messages></lib-messages>
 </header>
+<aside id="messages"><lib-messages></lib-messages></aside>
 <div id="main">
   <nav>
   </nav>
@@ -10,4 +10,4 @@
   </article>
   <aside><!-- user info --></aside>
 </div>
-<footer *ngIf="!production"><a [routerLink]="['/about']">Copyright &copy; 2020-2024 NZILBB</a></footer>
+<footer innerHTML="{{footer}}"></footer>

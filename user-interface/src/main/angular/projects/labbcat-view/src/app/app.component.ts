@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { Router, NavigationEnd } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -15,13 +18,21 @@ export class AppComponent {
     // TODO already has them 
     title = "";
     production = environment.production;
+    header = "";
+    footer = "";
     constructor(
         private router: Router,
         private titleService: Title,
-        private labbcatService: LabbcatService
+        private labbcatService: LabbcatService,
+        private http: HttpClient
     ) {
         router.events.subscribe((event) => {
             if (event instanceof NavigationEnd) {
+                // get header and footer
+                // this.http.get(`${environment.baseUrl}/header`, {responseType: "text"})
+                //     .subscribe((html) => this.header = html);
+                // this.http.get(`${environment.baseUrl}/footer`, {responseType: "text"})
+                //     .subscribe((html) => this.footer = html);
                 // publish page changes, so the page header can update help links 
                 window.postMessage({
                     app: "labbcat-view",
