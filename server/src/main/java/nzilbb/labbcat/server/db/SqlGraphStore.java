@@ -1578,6 +1578,26 @@ public class SqlGraphStore implements GraphStore {
       sqlAccess.close();
     }
     if (!bHasAccess) { // no a super user, and using permissions, so check the permission tables
+      if (id.startsWith("g_")) { // could be a g_nnn ID, where nnn is the ag_id
+        try { // we need the transcript_id
+          int ag_id = Integer.parseInt(id.substring(2));
+          PreparedStatement sqlId = getConnection().prepareStatement(
+            "SELECT transcript_id FROM transcript WHERE ag_id = ?");
+          sqlId.setInt(1, ag_id);
+          ResultSet rsId = sqlId.executeQuery();
+          try {
+            if (rsId.next()) {
+              id = rsId.getString("transcript_id");
+            }
+          } finally {
+            rsId.close();
+            sqlId.close();
+          }
+        } catch(Exception exception) {
+          System.err.println(
+            "SqlGraphStore.hasAccess("+id+"): can't parse " + id.substring(2) + ": " + exception);
+        }
+      }
       PreparedStatement sqlAccess = getConnection().prepareStatement(
         "SELECT role.role_id FROM role"
         + " INNER JOIN role_permission ON role.role_id = role_permission.role_id" 
