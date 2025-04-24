@@ -23,7 +23,7 @@ Tomcat 10 (without significant initial and ongoing coding and configuration over
 
 The main dependencies in this project are extensions of the `HttpServlet` class, which
 respond to HTTP requests, and so depend mainly on `HttpServletRequest` and
-`HttpServletResponse` only. Up until now, these have been directly references from
+`HttpServletResponse` only. Up until now, these have been directly referenced from
 precompiled code in `src/main/java/nzilbb/labbcat/server/servlet/`
 
 JSP files are compiled on demand by the servlet container in which they're running, so
@@ -31,12 +31,12 @@ derive and depend on whatever package names are implemented by that container. T
 that the same JSP file will work on Tomcat 9 and Tomcat 10 seamlessly, as long as they use
 objects and methods that are common to both Java EE and Jakarta EE.
 
-This means it's possible to implement the code that directly implement HTTP request
+This means it's possible to implement the code that directly implements HTTP request
 handling in JSP pages in a Tomcat-version-agnostic manner. 
 
 In order to maintain the advantages of precompiled Java code (compile-time syntax and type
 checking, and automated unit testing), code handling API requests is split between classes
-in `src/main/java/nzilbb/labbcat/server/servlet/` (which implement 'business logic') and
+in `src/main/java/nzilbb/labbcat/server/api/` (which implement 'business logic') and
 JSP pages here (which implement request parsing and response encoding).
 
 ### REST-style requests
