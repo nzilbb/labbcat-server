@@ -256,8 +256,8 @@ public class TestUpload
     assertTrue("There is at least one transcript type", typeLayer.getValidLabels().size() > 0);
     String transcriptType = typeLayer.getValidLabels().keySet().iterator().next();
 
-    File transcript = new File(getDir(), "nzilbb.labbcat.server.test.txt");
-    File media = new File(getDir(), "nzilbb.labbcat.server.test.doc");
+    File transcript = new File(getDir().getParentFile(), "nzilbb.labbcat.server.test.txt");
+    File media = new File(getDir().getParentFile(), "nzilbb.labbcat.server.test.doc");
     String participantId = "UnitTester";
     assertTrue("Ensure transcript exists: " + transcript.getPath(), transcript.exists());
     assertTrue("Ensure document exists: " + media.getPath(), media.exists());

@@ -132,7 +132,7 @@ public class TestStore
       assertTrue("countMatchingTranscriptIds: There are some matches",
                  count > 0);
 
-      ids = l.getMatchingTranscriptIds("/.+/.test(id)");
+      ids = l.getMatchingTranscriptIds("/^AP.+/.test(id)");
       assertTrue("countMatchingTranscriptIds: Some IDs are returned",
                  ids.length > 0);
       String graphId = ids[0];
@@ -148,7 +148,7 @@ public class TestStore
       }         
       
       long countAll = l.countAnnotations(graphId, "phonemes");
-      assertTrue("countAnnotations: There are some matches",
+      assertTrue("countAnnotations: There are some matches: " + graphId,
                  countAll > 0);
 
       long countFirsts = l.countAnnotations(graphId, "phonemes", 1);
