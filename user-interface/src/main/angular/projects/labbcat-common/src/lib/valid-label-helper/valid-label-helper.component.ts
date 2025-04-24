@@ -11,10 +11,13 @@ import { ValidLabelDefinition } from '../valid-label-definition';
 export class ValidLabelHelperComponent implements OnInit {
     @Input() layer: Layer;
     @Input() regularExpression: boolean;
+    @Input() nbText: string;
+    @Input() nbCategory: string;
     @Output() symbolSelected = new EventEmitter<string>();
 
     categories: any;
     maxLabelLength = 0;
+    nbLabels = [];
     
     Object = Object; // so we can call Object.keys in the template
 
@@ -35,6 +38,9 @@ export class ValidLabelHelperComponent implements OnInit {
                     this.categories[definition.category][definition.subcategory] = [];
                 }
                 this.categories[definition.category][definition.subcategory].push(definition);
+                if (!definition.display && !definition.selector) {
+                    this.nbLabels.push(definition.label);
+                }
             } // next label
         }
     }

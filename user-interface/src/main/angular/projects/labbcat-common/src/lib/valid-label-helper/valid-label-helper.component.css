@@ -50,4 +50,5 @@
 .nb {
     font-size: 0.9em;
     font-style: italic;
+    cursor: help;
 }

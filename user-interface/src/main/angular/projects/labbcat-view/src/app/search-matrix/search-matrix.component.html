@@ -98,6 +98,7 @@
                     *ngIf="hasValidLabels(schema.layers[layerId]) && helperMatch == match"
                     regularExpression="{{true}}"
                     [layer]="schema.layers[layerId]"
+                    nbText="Other consonants: Use normal IPA" nbCategory="CONSONANT"
                     (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-valid-label-helper>
                 </span>
               </span>
