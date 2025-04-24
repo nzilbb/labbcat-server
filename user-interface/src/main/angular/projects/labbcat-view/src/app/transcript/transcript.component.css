@@ -177,7 +177,9 @@ nav, nav > div {
 }
 .layer.span .annotation.jump {
     position: relative;
+    max-width: 50px;
     left: 50%;
+    white-space: nowrap;
 }
 
 .generate-layer {

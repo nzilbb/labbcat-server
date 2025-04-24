@@ -122,6 +122,7 @@ export class TranscriptComponent implements OnInit {
                     if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
                         layerIds = JSON.parse(sessionStorage.getItem("selectedLayerIds"));
                     }
+                    if (!layerIds) layerIds = ["noise","comment"]; // noise and comment by default
                     if (layerIds) {
                         if (Array.isArray(layerIds)) {
                             this.layersChanged(layerIds);
@@ -717,6 +718,7 @@ export class TranscriptComponent implements OnInit {
     
     indexTokensOnLayer(layer : Layer) : void {
         const wordLayerId = this.schema.wordLayerId;
+        const utteranceLayerId = this.schema.utteranceLayerId;
         // spans can overlap (e.g. n-gram annotations, syntactic parses)
         // we want
         //  a) each span to be visualised at the same height across all tokens, and
@@ -727,7 +729,7 @@ export class TranscriptComponent implements OnInit {
         // process them by parent, so that phrases from one speaker can't interfere with
         // those of another speaker
         for (let parent of this.transcript.all(layer.parentId)) {
-            const spans = parent.all(layer.id)
+            const spans = (parent.all(layer.id)||[])
             // first, order all annotations so that
             // i) annotations with earlier starts are earlier
             // ii) where starts are equal, longer annotations are earlier
@@ -771,15 +773,26 @@ export class TranscriptComponent implements OnInit {
                     } // next contained token
                     span[wordLayerId] = tokens;
                     // were there any?
-                    if (span[wordLayerId].length == 0) { // no tokens included
+                    let linkedUtterance = null;
+                    
+                    if (span.start.startOf[utteranceLayerId] // starts with utterance
+                        && span.start.startOf[utteranceLayerId].length) {
+                        const utterance = span.start.startOf[utteranceLayerId][0];
+                        if (utterance.end.offset == span.end.offset) {
+                            linkedUtterance = utterance;
+                            if (!linkedUtterance[layer.id]) linkedUtterance[layer.id] = [];
+                            linkedUtterance[layer.id].push(span);
+                            span.tagsUtterance = linkedUtterance;
+                        }
+                    }
+                    if (!linkedUtterance // not linked to an utterance
+                        && span[wordLayerId].length == 0) { // no tokens included
                         let nearestWord = null;
-                        let linkedUtterance = null;
-                        
                         if (span.start.endOf[wordLayerId] // immediately follows a word?
                             && span.start.endOf[wordLayerId].length) {
                             nearestWord = span.start.endOf[wordLayerId][0];
                             // is it strung from the word end to the utterance end?
-                            const utterance = nearestWord.first(this.schema.utteranceLayerId);
+                            const utterance = nearestWord.first(utteranceLayerId);
                             if (utterance && utterance.endId == span.endId) {
                                 linkedUtterance = utterance
                                 // tag the utterance so the visualization knows to prepend a column
@@ -795,7 +808,7 @@ export class TranscriptComponent implements OnInit {
                             && span.end.startOf[wordLayerId].length) {
                             nearestWord = span.end.startOf[wordLayerId][0];
                             // is it strung from the utterance start to the word start?
-                            const utterance = nearestWord.first(this.schema.utteranceLayerId);
+                            const utterance = nearestWord.first(utteranceLayerId);
                             if (utterance && utterance.startId == span.startId) {
                                 linkedUtterance = utterance
                                 // tag the utterance so the visualization knows to prepend a column
@@ -848,7 +861,7 @@ export class TranscriptComponent implements OnInit {
         } // next parent
 
         // for each utterance
-        for (let utterance of this.transcript.all(this.schema.utteranceLayerId)) {
+        for (let utterance of this.transcript.all(utteranceLayerId)) {
             // drop spans so that they're as near as possible to their tokens
             const utteranceWords = utterance.all(wordLayerId);
             const maxSpanIndexDuringUtterance = utteranceWords.reduce((maxSoFar, word) => {

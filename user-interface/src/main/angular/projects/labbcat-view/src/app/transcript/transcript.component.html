@@ -390,9 +390,8 @@
                   class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                   style="color: {{transcript.schema.layers[l].colour}};"
                   title="{{l}}">
-              <ng-container *ngFor="let annotation of utterance.start.startOf[l]">
-                <span *ngIf="annotation && annotation.tagOn(schema.utteranceLayerId).length > 0 && annotation.tagOn(schema.utteranceLayerId)[0].id == utterance.id"
-                      [attr.id]="annotation.id"
+              <ng-container *ngFor="let annotation of utterance[l]">
+                <span [attr.id]="annotation.id"
                       [class.highlight]="annotation.id == highlitId"
                       [ngClass]="{ 'annotation' : true, 'first' : true, 'during' : true, 'last' : utterance.endId == annotation.endId, 'utterance-tag' : true }"
                       title="{{l}}: {{annotation.label}}"
@@ -504,7 +503,7 @@
                       style="color: {{transcript.schema.layers[l].colour}};"
                       title="{{l}}">
                   <ng-container *ngFor="let annotation of word.all(l)">                    
-                    <span *ngIf="annotation && annotation.tagOn(schema.utteranceLayerId).length == 0"
+                    <span *ngIf="annotation && !annotation.tagsUtterance"
                           [attr.id]="word == annotation.first('word')?annotation.id:(annotation.id+'-'+annotation.all('word').indexOf(word))"
                           [class.highlight]="annotation.id == highlitId"
                           [ngClass]="{ 'annotation' : true, 'first' : word == annotation.first('word'), 'during' : true, 'last' : word == annotation.last('word') && word.end.offset <= annotation.end.offset, 'jump' : annotation.jump }"
