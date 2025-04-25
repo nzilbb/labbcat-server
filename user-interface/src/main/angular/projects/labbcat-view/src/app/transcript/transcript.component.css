@@ -53,10 +53,12 @@ lib-wait {
 #word-menu .header {
     height: 18px;
 }
-/* TODO This does't work in production because the URL fails:
-.permalink:hover::after {
-    content: ' ' url('/assets/link.svg') / '🔗';
-}*/
+.permalink {
+    font-size: 16px;
+}
+.permalink:hover {
+    text-decoration: none;
+}
 nav, nav > div {
     position: fixed;
     top: 50%;
