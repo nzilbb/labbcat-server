@@ -77,6 +77,13 @@ details > .advanced {
     border-bottom-left-radius: 8px;
     padding: 10px;
 }
+details > .advanced > ul {
+    padding-top: 5px;
+    padding-inline-start: 29px;
+}
+details > .advanced li ul {
+    padding-inline-start: 40px;
+}
 details[open] > div {
     animation-name: roll-down;
     animation-duration: 1s;

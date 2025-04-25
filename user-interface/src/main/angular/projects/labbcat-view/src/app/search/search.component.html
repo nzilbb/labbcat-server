@@ -40,8 +40,9 @@
         <label for="csv" i18n><span style="font-style: italic;">Or</span> Load participants from file</label>
         <input type="file" id="participant-csv" (change)="selectParticipantFile($event.target.files)">
       <details>
-        <summary i18n>Accepted upload formats</summary>
+        <summary i18n>What should the file look like?</summary>
         <div class="advanced">
+          One of the following:
           <ul>
             <li>Plain text (.txt)
               <ul>
@@ -113,8 +114,9 @@
         <input type="file" id="transcript-csv" (change)="selectTranscriptFile($event.target.files)"
           [disabled]="matrix.participantQuery && matrix.participantQuery.includes('all(\'transcript\').length')">
       <details>
-        <summary i18n>Accepted upload formats</summary>
+        <summary i18n>What should the file look like?</summary>
         <div class="advanced">
+          One of the following:
           <ul>
             <li>Plain text (.txt)
               <ul>
