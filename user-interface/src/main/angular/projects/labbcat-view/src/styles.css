@@ -106,7 +106,7 @@ app-root footer, app-root header { color: var(--theme-text-color); }
 app-root footer a, app-root header a { color: var(--theme-text-color); text-decoration: none; }
 
 /* Layout */
-app-root, #main { display: flex; flex-direction: column; }
+app-root, #main { display: flex; flex-direction: column; min-width: 80vw; }
 app-root article, app-root nav, app-root aside { order: 0; }
 app-root article { flex: 3 1 60%; min-height: 100px; }
 app-root nav { flex: 1 6 20%; }
