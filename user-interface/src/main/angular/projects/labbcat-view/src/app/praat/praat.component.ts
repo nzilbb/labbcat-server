@@ -12,6 +12,7 @@ export class PraatComponent implements OnInit {
 
     schema: any;
     participantAttributeLayers: Layer[];
+    layerCategories: string[];
     
     csv: File;
     rowCount: number;
@@ -115,12 +116,16 @@ export class PraatComponent implements OnInit {
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
             this.participantAttributeLayers = [];
+            this.layerCategories = [];
             for (let layerId in schema.layers) {
                 const layer = schema.layers[layerId] as Layer;
                 if (layer.parentId == this.schema.participantLayerId
                     && layer.alignment == 0
                     && layer.id != "main_participant") {  // participant attribute
                     this.participantAttributeLayers.push(layer)
+                    if (!this.layerCategories.includes(layer.category)) {
+                        this.layerCategories.push(layer.category);
+                    }
                 } // participant attribute
             } // next layer
             let genderLayer = this.participantAttributeLayers.find(

@@ -756,8 +756,8 @@
     <div class="advanced" id="show-script">
       <pre class="praat-prelude"><span class="praat-comment"># Below, you can write a custom <a href="https://www.fon.hum.uva.nl/praat/manual/Scripting.html" target="_blank">Praat script</a> that LaBB-CAT will run for each token.
 #
-# LaBB-CAT prefixes your custom script with code to open an audio file and extract a
-# defined part of it into a Sound object which is then selected.
+# LaBB-CAT prefixes your custom script with code to open a transcript audio file and
+# extract a defined part of it into a Sound object, which is then selected.
 # LaBB-CAT removes this Sound object after the script finishes executing to free up memory.
 # If your script creates any other objects, remove them before the end of the script
 # (otherwise Praat runs out of memory during very large batches).
@@ -771,23 +771,28 @@
 # numbers, or underscores.)
 #
 # Variables that are available to custom scripts are:</span>
-windowOffset = &hellip; <span class="praat-comment"># the value used for the Window Offset; how much context to include</span>
-windowAbsoluteStart = &hellip; <span class="praat-comment"># the start time of the window extracted relative to the start of the original audio file</span>
-windowAbsoluteEnd = &hellip; <span class="praat-comment"># the end time of the window extracted relative to the start of the original audio file</span>
-windowDuration = &hellip; <span class="praat-comment"># the duration of the window extracted (including window offset)</span>
-targetAbsoluteStart = &hellip; <span class="praat-comment"># the start time of the target interval relative to the start of the original audio file</span>
-targetAbsoluteEnd = &hellip; <span class="praat-comment"># the end time of the target interval relative to the start of the original audio file</span>
-targetStart = &hellip; <span class="praat-comment"># the start time of the target interval relative to the start of the window extracted</span>
-targetEnd = &hellip; <span class="praat-comment"># the end time of the target interval relative to the start of the window extracted</span>
-targetDuration = &hellip; <span class="praat-comment"># the duration of the target interval</span>
+windowOffset = {{windowOffset}} <span class="praat-comment"># how much context to include in extracted Sound object (set above as 'Context')</span>
+windowAbsoluteStart = &hellip; <span class="praat-comment"># the start time of the extracted Sound object relative to the transcript audio file</span>
+windowAbsoluteEnd = &hellip; <span class="praat-comment"># the end time of the extracted Sound object relative to the transcript audio file</span>
+windowDuration = &hellip; <span class="praat-comment"># the duration of the extracted Sound object (including windowOffset)</span>
+targetAbsoluteStart = &hellip; <span class="praat-comment"># the start time of the token relative to the transcript audio file
+                        # (i.e., the "{{headers[startTimeColumn]}}" column selected above)</span>
+targetAbsoluteEnd = &hellip; <span class="praat-comment"># the end time of the token relative to the transcript audio file
+                      # (i.e., the "{{headers[endTimeColumn]}}" column selected above)</span>
+targetStart = &hellip; <span class="praat-comment"># the start time of the token relative to the start of the extracted Sound object</span>
+targetEnd = &hellip; <span class="praat-comment"># the end time of the token relative to the start of the extracted Sound object</span>
+targetDuration = &hellip; <span class="praat-comment"># the duration of the token</span>
 sampleNumber = &hellip; <span class="praat-comment"># the number of the sample within the set of samples being processed</span>
-sampleName$ = &hellip; <span class="praat-comment"># the name of the extracted/selected Sound object</span>
+sampleName$ = &hellip; <span class="praat-comment"># the name of the extracted Sound object</span>
 <details id="attribute-variables"><summary class="praat-comment"># participant attribute variables</summary><div><ng-container *ngFor="let layer of participantAttributeLayers">
 <span id="{{'line_'+layer.id}}"
       class="{{customScriptLayers.includes(layer.id)?'praat-line-enabled':'praat-line-disabled'}}"
       i18n-title title="Tick to make attribute accessible to the script"
       ><input type="checkbox" (click)="toggleCustomScriptLayer(layer.id)"
-              >{{praatVariableName(layer.id)}}$ = "&hellip;"</span> <span class="praat-comment"># {{layer.id}} - {{layer.description}} ({{layer.category}})</span></ng-container></div></details>
+              >{{praatVariableName(layer.id)}}$ = "&hellip;"</span
+              > <span class="praat-comment"
+                ># {{layer.description}}<span *ngIf="layerCategories.length > 1"
+                  >({{layer.category.remove("participant_")}})</span></span></ng-container></div></details>
 selectObject: "Sound " + sampleName$
 </pre>
       <div id="load-controls">
