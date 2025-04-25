@@ -131,6 +131,14 @@ summary > label {
     min-width: 23.5%;
     display: inline-block;
 }
+summary > label > span {
+    display: inline-block;
+    width: fit-content;
+    cursor: zoom-in;
+}
+details[open] > summary > label > span {
+    cursor: zoom-out;
+}
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
