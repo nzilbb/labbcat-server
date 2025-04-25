@@ -816,8 +816,9 @@ removeObject: "Sound " + sampleName$</pre>
     <lib-button (press)="process()"
                 [processing]="processing"
                 [error]="processingError"
+                [disabled]="!extractF1 && !extractF2 && !extractF3 && !extractMinimumPitch && !extractMeanPitch && !extractMaximumPitch && !extractMaximumIntensity && !extractCOG1 && !extractCOG2 && !extractCOG23 && !customScript"
                 img="cog.svg" icon="⚙"
-                i18n-title title="Start processing"
+                i18n-title [title]="(!extractF1 && !extractF2 && !extractF3 && !extractMinimumPitch && !extractMeanPitch && !extractMaximumPitch && !extractMaximumIntensity && !extractCOG1 && !extractCOG2 && !extractCOG23 && !customScript) ? 'Select at least one measurement to extract or specify a custom script' : 'Start processing'"
                 i18n-label label="Process"
                 ></lib-button>
   </div>
