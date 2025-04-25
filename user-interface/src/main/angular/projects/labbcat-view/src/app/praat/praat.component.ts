@@ -35,7 +35,7 @@ export class PraatComponent implements OnInit {
     extractF3 = false;
     samplePoints = "0.5";
     useClassicFormant = true;
-    scriptFormant = "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50";
+    scriptFormant = "To Formant (burg): 0.0025, 5, formantCeiling, 0.025, 50";
     formantDifferentiateParticipants = true;
     formantDifferentiationLayerId: string;
     formantOtherPattern = [ "M" ];
@@ -86,7 +86,7 @@ export class PraatComponent implements OnInit {
     pitchCeilingOther = [ 250 ]; // male
     voicingThresholdDefault = 0.5; // female
     voicingThresholdOther = [ 0.4 ]; // male
-    scriptPitch = "To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling";
+    scriptPitch = "To Pitch (ac): 0, pitchFloor, 15, no, 0.03, voicingThreshold, 0.01, 0.35, 0.14, pitchCeiling";
     
     extractMaximumIntensity = false;
     intensityDifferentiateParticipants = true;
@@ -94,7 +94,7 @@ export class PraatComponent implements OnInit {
     intensityOtherPattern = [ "M" ];
     intensityPitchFloorDefault = 60; // female
     intensityPitchFloorOther = [ 30 ]; // male
-    scriptIntensity = "To Intensity... intensityPitchFloor 0 yes";
+    scriptIntensity = "To Intensity intensityPitchFloor, 0, yes";
     
     extractCOG1 = false;
     extractCOG2 = false;

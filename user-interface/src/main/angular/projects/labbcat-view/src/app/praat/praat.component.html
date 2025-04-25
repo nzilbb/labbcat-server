@@ -1,16 +1,34 @@
 <h1 id="title" i18n>Process with Praat</h1>
 
 <div id="file-chooser">
-  <label for="csv" i18n>Results File</label>
+  <label for="csv" i18n>Upload search results from file</label>
   <input type="file" id="csv" (change)="selectFile($event.target.files)" autofocus>
   <span *ngIf="rowCount" id="rowCount" i18n>{{rowCount}} rows</span>
+  <details *ngIf="!headers">
+    <summary i18n>What should the file look like?</summary>
+    <div class="advanced">
+      Comma-separated values (.csv) file exported from results of a <a href="search">search</a>, with:
+      <ul>
+        <li>One row per token you want to measure (word, segment, etc.)</li>
+        <li>Columns
+          <ul>
+            <li>Transcript name</li>
+            <li>Participant name</li>
+            <li>Start time for the token you want to measure</li>
+            <li>End time for the token you want to measure</li>
+            <li>(All other columns will be included in the output)</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div id="settings-form" *ngIf="headers">
   <div class="header" i18n="CSV column selector">Columns</div>
   <div class="item" id="transcript"
        i18n-title title="Which field identifies the name of the transcript">
-    <label for="transcriptColumn" i18n>Transcript Name column</label>
+    <label for="transcriptColumn" i18n>Transcript name</label>
     <span>
       <select id="transcriptColumn" [(ngModel)]="transcriptColumn">
         <ng-container *ngFor="let field of headers; let f = index">
@@ -20,7 +38,7 @@
   </div>
   <div class="item" id="participant"
        i18n-title title="Which field identifies the name of the participant speaking">
-    <label for="participantColumn" i18n>Participant column</label>
+    <label for="participantColumn" i18n>Participant name</label>
     <span>
       <select id="participantColumn" [(ngModel)]="participantColumn">
         <ng-container *ngFor="let field of headers; let f = index">
@@ -29,8 +47,8 @@
     </span>
   </div>
   <div class="item" id="start-time"
-       i18n-title title="Which field identifies the start time of the phone">
-    <label for="startTimeColumn" i18n>Start Time column</label>
+       i18n-title title="Which field identifies the start time of the token">
+    <label for="startTimeColumn" i18n>Token start time</label>
     <span>
       <select id="startTimeColumn" [(ngModel)]="startTimeColumn">
         <ng-container *ngFor="let field of headers; let f = index">
@@ -46,8 +64,8 @@
     </div>
   </div>
   <div class="item" id="end-time"
-       i18n-title title="Which field identifies the end time of the phone">
-    <label for="endTimeColumn" i18n>End Time column</label>
+       i18n-title title="Which field identifies the end time of the token">
+    <label for="endTimeColumn" i18n>Token end time</label>
     <span>
       <select id="endTimeColumn" [(ngModel)]="endTimeColumn">
         <ng-container *ngFor="let field of headers; let f = index">
@@ -66,7 +84,7 @@
   <div class="header" i18n>Praat Processing</div>
   
   <div class="item" id="window-offset"
-       i18n-title title="How much context, in seconds, to extract from the audio surrounding the segment">
+       i18n-title title="How much context, in seconds, to extract from the audio surrounding the token">
     <label for="windowOffset" i18n>Context</label>
     <span>
       ±<input id="windowOffset"
@@ -84,7 +102,7 @@
   </div>
   
   <details id="formants"
-       i18n-title title="Whether to extract formant measures">
+       i18n-title title="Settings for extracting formant measures">
     <summary>
       <label i18n>Formants</label>
       <span>
@@ -104,8 +122,8 @@
     </summary>
     <div class="advanced" id="advanced-formants">
       <div class="item"
-           i18n-title title="At which points in the duration of the segment at which to take measurements">
-        <label for="samplePoints" i18n>Sample Points</label>
+           i18n-title title="At which points in the duration of the token at which to take measurements">
+        <label for="samplePoints" i18n>Sample points</label>
         <span><input id="samplePoints" [(ngModel)]="samplePoints" type="text"></span>
         <div class="viz">
           <div class="before">&nbsp;</div>
@@ -123,7 +141,7 @@
            i18n-title title="Command Praat will use to extract formants">
         <label for="scriptFormant">
           <input type="radio" name="formantMethod"  [value]="false" [(ngModel)]="useFastTrack">
-        <span i18n>Praat Formant command</span></label>
+        <span i18n>Praat formant command</span></label>
         <span class="script">
           <input id="scriptFormant"
                  [(ngModel)]="scriptFormant"
@@ -133,10 +151,10 @@
       </div>
       <div class="settings-sets" class="{{useFastTrack?'hidden-panel':'unhidden-panel'}}">
         <fieldset class="settings-set default">
-          <legend i18n>Default Settings</legend>
+          <legend i18n>Default settings</legend>
           <div class="item"
                i18n-title title="Formant ceiling - value for formantCeiling in the Praat command">
-            <label for="formantCeilingDefault" i18n>Formant Ceiling</label>
+            <label for="formantCeilingDefault" i18n>Formant ceiling</label>
             <span>
               <input id="formantCeilingDefault"
                      [(ngModel)]="formantCeilingDefault"
@@ -173,7 +191,7 @@
             </legend>
             <div class="item"
                  i18n-title title="Maximum formant value - value for formantCeiling in the Praat command">
-              <label for="{{'formantCeilingOther'+o}}" i18n>Formant Ceiling</label>
+              <label for="{{'formantCeilingOther'+o}}" i18n>Formant ceiling</label>
               <span>
                 <input id="{{'formantCeilingOther'+o}}"
                        [(ngModel)]="formantCeilingOther[o]"
@@ -207,7 +225,7 @@
           <input id="fastTrackCoefficients" [(ngModel)]="fastTrackCoefficients" type="checkbox"
                  i18n-title title="Whether to return the regression coefficients from FastTrack">
           <label for="fastTrackCoefficients"
-                 i18n-title title="Whether to return the regression coefficients from FastTrack" i18n="FastTrack coefficients">Coefficients</label>
+                 i18n-title title="Whether to return the regression coefficients from FastTrack" i18n="FastTrack coefficients">Include regression coefficients</label>
           <a href="https://github.com/santiagobarreda/FastTrack" target="FastTrack"
              i18n-title title="The FastTrack source code and wiki"
              i18n>[more information]</a>
@@ -219,10 +237,10 @@
       <div class="{{useFastTrack?'long-unhidden-panel':'hidden-panel'}}">
         <div class="settings-sets">
           <fieldset class="settings-set default">
-            <legend i18n>Default Settings</legend>
+            <legend i18n>Default settings</legend>
             <div class="item"
-                 i18n-title title="FastTrack lowest snalysis frequency in Hertz">
-              <label for="fastTrackLowestAnalysisFrequencyDefault" i18n>Lowest Ceiling</label>
+                 i18n-title title="FastTrack lowest analysis frequency in Hertz">
+              <label for="fastTrackLowestAnalysisFrequencyDefault" i18n>Lowest ceiling</label>
               <span>
                 <input id="fastTrackLowestAnalysisFrequencyDefault"
                        [(ngModel)]="fastTrackLowestAnalysisFrequencyDefault"
@@ -233,7 +251,7 @@
             </div>
             <div class="item"
                  i18n-title title="FastTrack highest analysis frequency in Hertz">
-              <label for="fastTrackHighestAnalysisFrequencyDefault" i18n>Highest Ceiling</label>
+              <label for="fastTrackHighestAnalysisFrequencyDefault" i18n>Highest ceiling</label>
               <span>
                 <input id="fastTrackHighestAnalysisFrequencyDefault"
                        [(ngModel)]="fastTrackHighestAnalysisFrequencyDefault"
@@ -270,7 +288,7 @@
               </legend>
               <div class="item"
                    i18n-title title="FastTrack lowest snalysis frequency in Hertz">
-                <label for="{{'fastTrackLowestAnalysisFrequencyOther'+o}}" i18n>Lowest Ceiling</label>
+                <label for="{{'fastTrackLowestAnalysisFrequencyOther'+o}}" i18n>Lowest ceiling</label>
                 <span>
                   <input id="{{'fastTrackLowestAnalysisFrequencyOther'+o}}"
                          [(ngModel)]="fastTrackLowestAnalysisFrequencyOther[o]"
@@ -282,7 +300,7 @@
               </div>
               <div class="item"
                    i18n-title title="FastTrack highest snalysis frequency in Hertz">
-                <label for="{{'fastTrackHighestAnalysisFrequencyOther'+o}}" i18n>Highest Ceiling</label>
+                <label for="{{'fastTrackHighestAnalysisFrequencyOther'+o}}" i18n>Highest ceiling</label>
                 <span>
                   <input id="{{'fastTrackHighestAnalysisFrequencyOther'+o}}"
                          [(ngModel)]="fastTrackHighestAnalysisFrequencyOther[o]"
@@ -313,7 +331,7 @@
           <div class="advanced" id="advanced-fastrack">
             <div class="header" i18n="FastTrack advanced settings">Settings</div>
             <div class="item" i18n-title title="Number of analyses between low and high analysis limits. More analysis steps may improve results, but will increase analysis time (50% more steps = around 50% longer to analyze).">
-              <label for="fastTrackNumberOfSteps" i18n>Number of Steps</label>
+              <label for="fastTrackNumberOfSteps" i18n>Number of steps</label>
               <span>
                 <input id="fastTrackNumberOfSteps"
                        [(ngModel)]="fastTrackNumberOfSteps"
@@ -324,7 +342,7 @@
               </span>
             </div>
             <div class="item" i18n-title title="FastTrack number of coefficients for formant prediction. More coefficients allow for more sudden, and 'wiggly' formant motion.">
-              <label for="fastTrackNumberOfCoefficients" i18n>Number of Coefficients</label>
+              <label for="fastTrackNumberOfCoefficients" i18n>Number of coefficients</label>
               <span>
                 <input id="fastTrackNumberOfCoefficients"
                        [(ngModel)]="fastTrackNumberOfCoefficients"
@@ -335,7 +353,7 @@
               </span>
             </div>
             <div class="item" i18n-title title="FastTrack time step in seconds">
-              <label for="fastTrackTimeStep" i18n>Time Step</label>
+              <label for="fastTrackTimeStep" i18n>Time step</label>
               <span>
                 <input id="fastTrackTimeStep"
                        [(ngModel)]="fastTrackTimeStep"
@@ -346,7 +364,7 @@
               </span>
             </div>
             <div class="item" i18n-title title="FastTrack tracking method">
-              <label for="fastTrackTrackingMethod" i18n>Tracking Method</label>
+              <label for="fastTrackTrackingMethod" i18n>Tracking method</label>
               <span>
                 <select id="fastTrackTrackingMethod"
                         [(ngModel)]="fastTrackTrackingMethod"
@@ -465,7 +483,7 @@
                        [(ngModel)]="fastTrackEnableF3F4ProximityHeuristic"
                        i18n-title title="Uncheck to disable this heuristic"
                        [disabled]="!useFastTrack">
-                <span i18n>F3/F4 Proximity</span>
+                <span i18n>F3/F4 proximity</span>
               </label>
               <span class="long" i18n>If (F4 - F3) < 500 Hz, F1 and F2 should be at least 1500 Hz apart.</span>
                                                      </div>
@@ -474,7 +492,7 @@
       </div>
     </div>
   </details>  
-  <details id="pitch" i18n-title title="Whether to extract F0 (pitch) measures">
+  <details id="pitch" i18n-title title="Settings for extracting F0 (pitch) measures">
     <summary>
       <label i18n>Pitch</label>
       <span class="long">
@@ -490,15 +508,15 @@
          id="advanced-pitch">
       <div class="item"
            i18n-title title="Command Praat will use to extract pitch">
-        <label for="scriptPitch" i18n>Praat Pitch command</label>
+        <label for="scriptPitch" i18n>Praat pitch command</label>
         <span class="script"><input id="scriptPitch" [(ngModel)]="scriptPitch" type="text"></span>
       </div>
       <div class="settings-sets">
         <fieldset class="settings-set default">
-          <legend i18n>Default Settings</legend>
+          <legend i18n>Default settings</legend>
           <div class="item"
                i18n-title title="Pitch floor - value for pitchFloor in the Praat command">
-            <label for="pitchFloorDefault" i18n>Pitch Floor</label>
+            <label for="pitchFloorDefault" i18n>Pitch floor</label>
             <span>
               <input id="pitchFloorDefault"
                      [(ngModel)]="pitchFloorDefault"
@@ -508,7 +526,7 @@
           </div>
           <div class="item"
                i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
-            <label for="pitchCeilingDefault" i18n>Pitch Ceiling</label>
+            <label for="pitchCeilingDefault" i18n>Pitch ceiling</label>
             <span>
               <input id="pitchCeilingDefault"
                      [(ngModel)]="pitchCeilingDefault"
@@ -518,7 +536,7 @@
           </div>
           <div class="item"
                i18n-title title="Voicing Threshold - value for voicingThreshold in the Praat command">
-            <label for="voicingThresholdDefault" i18n>Voicing Threshold</label>
+            <label for="voicingThresholdDefault" i18n>Voicing threshold</label>
             <span>
               <input id="voicingThresholdDefault"
                      [(ngModel)]="voicingThresholdDefault"
@@ -553,7 +571,7 @@
             </legend>
             <div class="item"
                  i18n-title title="Pitch floor - value for pitchFloor in the Praat command">
-              <label for="{{'pitchFloorOther'+o}}" i18n>Pitch Floor</label>
+              <label for="{{'pitchFloorOther'+o}}" i18n>Pitch floor</label>
               <span>
                 <input id="{{'pitchFloorOther'+o}}"
                        [(ngModel)]="pitchFloorOther[o]"
@@ -564,7 +582,7 @@
             </div>
             <div class="item"
                  i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
-              <label for="pitchCeilingDefault" i18n>Pitch Ceiling</label>
+              <label for="pitchCeilingDefault" i18n>Pitch ceiling</label>
               <span>
                 <input id="{{'pitchCeilingOther'+o}}"
                        [(ngModel)]="pitchCeilingOther[o]"
@@ -604,7 +622,7 @@
   </details>
   
   <details id="intensity"
-           i18n-title title="Whether to extract intensity measures">
+           i18n-title title="Settings for extracting intensity measures">
     <summary>
       <label i18n>Intensity</label>
       <span>
@@ -615,15 +633,15 @@
     <div class="advanced" id="advanced-intensity">
       <div class="item"
            i18n-title title="Command Praat will use to extract intensity">
-        <label for="scriptIntensity" i18n>Praat Intensity command</label>
+        <label for="scriptIntensity" i18n>Praat intensity command</label>
         <span class="script"><input id="scriptIntensity" [(ngModel)]="scriptIntensity" type="text"></span>
       </div>
       <div class="settings-sets">
         <fieldset class="settings-set default">
-          <legend i18n>Default Settings</legend>
+          <legend i18n>Default settings</legend>
           <div class="item"
                i18n-title title="Pitch floor - value for intensityPitchFloor in the Praat command">
-            <label for="intensityPitchFloorDefault" i18n>Pitch Floor</label>
+            <label for="intensityPitchFloorDefault" i18n>Pitch floor</label>
             <span>
               <input id="intensityPitchFloorDefault"
                      [(ngModel)]="intensityPitchFloorDefault"
@@ -659,7 +677,7 @@
             </legend>
             <div class="item"
                  i18n-title title="Pitch floor - value for intensityPitchFloor in the Praat command">
-              <label for="{{'intensityPitchFloorOther'+o}}" i18n>Pitch Floor</label>
+              <label for="{{'intensityPitchFloorOther'+o}}" i18n>Pitch floor</label>
               <span>
                 <input id="{{'intensityPitchFloorOther'+o}}"
                        [(ngModel)]="intensityPitchFloorOther[o]"
@@ -688,34 +706,41 @@
   </details>
 
   <div class="item" id="cog"
-       i18n-title title="Whether to extract centre of gravity (COG) measures">
-    <label i18n>Centre of Gravity</label>
+       i18n-title title="Settings for extracting center of gravity (COG) measures">
+    <label i18n>Center of gravity</label>
     <span>
       <input id="extractCOG2" [(ngModel)]="extractCOG2" type="checkbox">
-      <label for="extractCOG2" i18n="Centre of gravity (COG)">p=2</label>
+      <label for="extractCOG2" i18n="Center of gravity (COG)">p=2</label>
       <input id="extractCOG1" [(ngModel)]="extractCOG1" type="checkbox">
-      <label for="extractCOG1" i18n="Centre of gravity (COG)">p=1</label>
+      <label for="extractCOG1" i18n="Center of gravity (COG)">p=1</label>
       <input id="extractCOG23" [(ngModel)]="extractCOG23" type="checkbox">
-      <label for="extractCOG23" i18n="Centre of gravity (COG)">p=⅔</label>
+      <label for="extractCOG23" i18n="Center of gravity (COG)">p=⅔</label>
     </span>    
   </div>
   
   <details id="custom"
-           i18n-title title="Write your own Praat script to execute for each segment">
+           i18n-title title="Write your own Praat script to execute for each token">
     <summary>
-      <label i18n>Custom Praat Script</label>
+      <label i18n>Custom Praat script</label>
     </summary>  
     <div class="advanced" id="show-script">
-      <pre class="praat-prelude"><span class="praat-comment"># LaBB-CAT prefixes this script with code to open a sound file and extract a defined part
-# of it into a Sound object which is then selected.
-# LaBB-CAT 'Remove's this Sound object after the script finishes executing; any other objects
-# created by the script must be 'Remove'd before the end of the script (otherwise Praat runs out
-# of memory during very large batches)
+      <pre class="praat-prelude"><span class="praat-comment"># Below, you can write a custom <a href="https://www.fon.hum.uva.nl/praat/manual/Scripting.html" target="_blank">Praat script</a> that LaBB-CAT will run for each token.
 #
-# LaBB-CAT assumes that all calls to the function 'print' correspond to fields for export
-# and each field must be printed on its own line.
-# 
-# Variables that can be assumed in the context of the script are:</span>
+# LaBB-CAT prefixes your custom script with code to open an audio file and extract a
+# defined part of it into a Sound object which is then selected.
+# LaBB-CAT removes this Sound object after the script finishes executing to free up memory.
+# If your script creates any other objects, remove them before the end of the script
+# (otherwise Praat runs out of memory during very large batches).
+#
+# To export a measurement, store it in a variable and print it with a newline character.
+# For example, if your script defines a variable called f1_50 and includes the following...
+#   print 'f1_50' 'newline$'
+# ...then for each token, LaBB-CAT will write the measurement to a CSV column called f1_50.
+# To round your measurement to N decimal places, use the suffix :N (e.g., 'f1_50:3').
+# (Note: Variables in Praat must start with a lowercase letter and consist of only letters,
+# numbers, or underscores.)
+#
+# Variables that are available to custom scripts are:</span>
 windowOffset = &hellip; <span class="praat-comment"># the value used for the Window Offset; how much context to include</span>
 windowAbsoluteStart = &hellip; <span class="praat-comment"># the start time of the window extracted relative to the start of the original audio file</span>
 windowAbsoluteEnd = &hellip; <span class="praat-comment"># the end time of the window extracted relative to the start of the original audio file</span>
@@ -733,7 +758,7 @@ sampleName$ = &hellip; <span class="praat-comment"># the name of the extracted/s
       i18n-title title="Tick to make attribute accessible to the script"
       ><input type="checkbox" (click)="toggleCustomScriptLayer(layer.id)"
               >{{praatVariableName(layer.id)}}$ = "&hellip;"</span> <span class="praat-comment"># {{layer.id}} - {{layer.description}} ({{layer.category}})</span></ng-container></div></details>
-select Sound sampleName$
+selectObject: "Sound " + sampleName$
 </pre>
       <div id="load-controls">
         <label for="load-local-script" i18n>Load script from file</label>
@@ -745,10 +770,9 @@ select Sound sampleName$
                 id="customScript"
                 i18n-placeholder placeholder="Your Praat script code goes here"
                 i18n-title title="Your Praat script code"></textarea>
-      <pre class="praat-postlude"><span class="praat-comment">## Don't forget to Remove any objects you created!
+      <pre class="praat-postlude"><span class="praat-comment">## Don't forget to remove any objects you created!
 # Finally, LaBB-CAT will remove the sample sound object</span>
-select Sound sampleName$
-Remove</pre>
+removeObject: "Sound " + sampleName$</pre>
       <div id="save-controls">
         <lib-button (press)="saveScript()"
                     img="download.svg" icon="💾"
