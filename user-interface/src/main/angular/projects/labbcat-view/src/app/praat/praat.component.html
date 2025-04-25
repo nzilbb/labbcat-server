@@ -169,7 +169,9 @@
             <input id="formantDifferentiateParticipants" type="checkbox"
                    [(ngModel)]="formantDifferentiateParticipants"
                    [disabled]="useFastTrack">
-            <label for="formantDifferentiateParticipants" i18n>Except participants whose</label>
+            <label for="formantDifferentiateParticipants"
+              [class.disabled]="!formantDifferentiateParticipants"
+              i18n>Except participants whose</label>
             <select id="formantDifferentiationLayerId" [(ngModel)]="formantDifferentiationLayerId"
                     i18n-title title="Attribute for differentiating participants"
                     [disabled]="!formantDifferentiateParticipants || useFastTrack">
@@ -180,7 +182,9 @@
           <fieldset class="settings-set other"
                     *ngFor="let pattern of formantOtherPattern; let o = index; trackBy: trackByFn">
             <legend>
-              <label><span i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
+              <label><span
+                [class.disabled]="!formantDifferentiateParticipants"
+                i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
                 <input [(ngModel)]="formantOtherPattern[o]"
                        class="regex"
                        type="text"
@@ -266,7 +270,9 @@
               <input id="fastTrackDifferentiateParticipants" type="checkbox"
                      [(ngModel)]="fastTrackDifferentiateParticipants"
                      [disabled]="!useFastTrack">
-              <label for="fastTrackDifferentiateParticipants" i18n>Except participants whose</label>
+              <label for="fastTrackDifferentiateParticipants"
+                [class.disabled]="!fastTrackDifferentiateParticipants"
+                i18n>Except participants whose</label>
               <select id="fastTrackDifferentiationLayerId" [(ngModel)]="fastTrackDifferentiationLayerId"
                       i18n-title title="Attribute for differentiating participants"
                       [disabled]="!fastTrackDifferentiateParticipants || !useFastTrack">
@@ -277,7 +283,9 @@
             <fieldset class="settings-set other"
                       *ngFor="let pattern of fastTrackOtherPattern; let o = index; trackBy: trackByFn">
               <legend>
-                <label><span i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
+                <label><span
+                  [class.disabled]="!fastTrackDifferentiateParticipants"
+                  i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
                   <input [(ngModel)]="fastTrackOtherPattern[o]"
                          class="regex"
                          type="text"
@@ -474,18 +482,22 @@
                        [disabled]="!useFastTrack">
                 <span i18n>Rhotic</span>
               </label>
-              <span class="long" i18n>If F3 < 2000 Hz, F1 and F2 should be at least 500 Hz apart.</span>
+              <span class="long"
+                [class.disabled]="!!fastTrackEnableRhoticHeuristic"
+                i18n>If F3 < 2000 Hz, F1 and F2 should be at least 500 Hz apart.</span>
                                               </div>
             <div class="item"
                  i18n-title title="If (F4 - F3) < 500 Hz, F1 and F2 should be at least 1500 Hz apart">
               <label>
                 <input type="checkbox"
-                       [(ngModel)]="fastTrackEnableF3F4ProximityHeuristic"
+                       [(ngModel)]="!fastTrackEnableF3F4ProximityHeuristic"
                        i18n-title title="Uncheck to disable this heuristic"
                        [disabled]="!useFastTrack">
                 <span i18n>F3/F4 proximity</span>
               </label>
-              <span class="long" i18n>If (F4 - F3) < 500 Hz, F1 and F2 should be at least 1500 Hz apart.</span>
+              <span class="long"
+                [class.disabled]="!fastTrackEnableF3F4ProximityHeuristic"
+                i18n>If (F4 - F3) < 500 Hz, F1 and F2 should be at least 1500 Hz apart.</span>
                                                      </div>
           </div>
         </details>
@@ -549,7 +561,9 @@
           <legend>
             <input id="pitchDifferentiateParticipants" type="checkbox"
                    [(ngModel)]="pitchDifferentiateParticipants">
-            <label for="pitchDifferentiateParticipants" i18n>Except participants whose</label>
+            <label for="pitchDifferentiateParticipants"
+              [class.disabled]="!pitchDifferentiateParticipants"
+              i18n>Except participants whose</label>
             <select id="pitchDifferentiationLayerId" [(ngModel)]="pitchDifferentiationLayerId"
                     i18n-title title="Attribute for differentiating participants"
                     [disabled]="!pitchDifferentiateParticipants">
@@ -560,7 +574,9 @@
           <fieldset class="settings-set other"
                     *ngFor="let pattern of pitchOtherPattern; let o = index; trackBy: trackByFn">
             <legend>
-              <label><span i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
+              <label><span
+                [class.disabled]="!pitchDifferentiateParticipants"
+                i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
                 <input [(ngModel)]="pitchOtherPattern[o]"
                        class="regex"
                        type="text"
@@ -654,7 +670,9 @@
           <legend>
             <input id="intensityDifferentiateParticipants" type="checkbox"
                    [(ngModel)]="intensityDifferentiateParticipants">
-            <label for="intensityDifferentiateParticipants" i18n>Except participants whose</label>
+            <label for="intensityDifferentiateParticipants"
+              [class.disabled]="!intensityDifferentiateParticipants"
+              i18n>Except participants whose</label>
             <select id="intensityDifferentiationLayerId"
                     [(ngModel)]="intensityDifferentiationLayerId"
                     i18n-title title="Attribute for differentiating participants"
@@ -666,7 +684,9 @@
           <fieldset class="settings-set other"
                     *ngFor="let pattern of intensityOtherPattern; let o = index; trackBy: trackByFn">
             <legend>
-              <label><span i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
+              <label><span
+                [class.disabled]="!intensityDifferentiateParticipants"
+                i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
                 <input [(ngModel)]="intensityOtherPattern[o]"
                        class="regex"
                        type="text"
