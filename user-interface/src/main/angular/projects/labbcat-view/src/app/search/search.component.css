@@ -44,10 +44,10 @@
     padding-bottom: 10px;
 }
 .filter-disabled .file-chooser {
-    color: lightgray;
+    color: silver;
 }
 .filter-disabled input {
-    color: lightgray;
+    color: silver;
 }
 .filter-disabled summary {
     pointer-events: none;
