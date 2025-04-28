@@ -207,7 +207,11 @@ export class MatchesComponent implements OnInit {
                 } // generable layer
                 if (layer.parentId == schema.wordLayerId
                     && layer.alignment == 0) {
-                    this.wordLayers.push(layer);
+                        if (layer.id == "orthography") { // orthography always at front
+                            this.wordLayers.unshift(layer);
+                        } else {
+                            this.wordLayers.push(layer);
+                        }
                 }
             }
         });
