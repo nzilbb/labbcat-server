@@ -131,6 +131,9 @@ export class SearchComponent implements OnInit {
                     if (!match.hasOwnProperty("anchorStart")) match.anchorStart = false;
                     if (!match.hasOwnProperty("anchorEnd")) match.anchorEnd = false;
                     if (!match.hasOwnProperty("target")) match.target = false;
+                    if (!match.hasOwnProperty("pattern")) match.pattern = "";
+                    if (!match.hasOwnProperty("min")) match.min = null;
+                    if (!match.hasOwnProperty("max")) match.max = null;
                 } // next match
             } // next column layer
         } // next column
@@ -163,15 +166,24 @@ export class SearchComponent implements OnInit {
                     }
                     if (match.hasOwnProperty("not") && !match.not) {
                         delete match.not;
-                    };
+                    }
                     if (match.hasOwnProperty("anchorStart") && !match.anchorStart) {
                         delete match.anchorStart;
-                    };
+                    }
                     if (match.hasOwnProperty("anchorEnd") && !match.anchorEnd) {
                         delete match.anchorEnd;
                     }
                     if (match.hasOwnProperty("target") && !match.target) {
                         delete match.target;
+                    }
+                    if (match.hasOwnProperty("pattern") && match.pattern == "") {
+                        delete match.pattern;
+                    }
+                    if (match.hasOwnProperty("min") && match.min == null) {
+                        delete match.min;
+                    }
+                    if (match.hasOwnProperty("max") && match.max == null) {
+                        delete match.max;
                     }
                 } // next match
             } // next column layer
