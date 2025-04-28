@@ -443,8 +443,6 @@ export class ParticipantsComponent implements OnInit {
         if (this.nextPage) queryParams.to = this.nextPage; // pass through context parameters...
         if (this.participantQuery) queryParams.participant_expression = this.participantQuery;
         if (this.participantDescription) queryParams.participants = this.participantDescription;
-        if (this.transcriptQuery) queryParams.transcript_expression = this.transcriptQuery;
-        if (this.transcriptDescription) queryParams.transcripts = this.transcriptDescription;
         if (this.searchJson) queryParams.searchJson = this.searchJson;
         for (let layer of this.filterLayers) { // for each filter layer
             if (this.filterValues[layer.id].length > 0) { // there's at least one value
