@@ -1,14 +1,12 @@
 <h1 id="title" i18n>Search</h1>
 <div class="search-matrix">
-  <h3>
-    <lib-link
-      i18n-label label="Participants"
-      img="filter.svg"
-      i18n-title title="Narrow down the participants to search by filtering by participant attributes"
-      routerLink="../participants"
-      [queryParams]="{to:'search'}"
-      ></lib-link>
-  </h3>
+  <h3>Participants</h3>
+  <lib-button
+    (press)="selectParticipants()"
+    img="people.svg"
+    label="Filter participants"
+    title="Narrow down the participants to search by filtering by participant attributes"
+    ></lib-button>
 
   <p *ngIf="participantDescription" id="participantDescription" i18n>{{participantDescription}}</p>
   <div *ngIf="participantIds" class="list" id="participant-ids">
@@ -32,17 +30,13 @@
   </div>
 
   <!-- TODO specify IDs from file -->
-
-  <h3 i18n></h3>
-  <h3>
-    <lib-link
-      i18n-label label="Transcripts"
-      img="filter.svg"
-      i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
-      routerLink="../transcripts"
-      [queryParams]="{to: 'search', participant_expression: participantQueryForTranscripts(), participants: participantDescription }"
-      ></lib-link>
-  </h3>
+  <h3>Transcripts</h3>
+  <lib-button
+    (press)="selectTranscripts()"
+    img="people.svg"
+    label="Filter transcripts"
+    title="Narrow down the transcripts to search by filtering by transcript attributes"
+    ></lib-button>
 
   <p *ngIf="transcriptDescription" id="transcriptDescription" i18n>{{transcriptDescription}}</p>
   <div *ngIf="transcriptIds" class="list" id="transcript-ids">
