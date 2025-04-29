@@ -1402,7 +1402,10 @@ export class TranscriptComponent implements OnInit {
                 +"&id="+transcriptIdForUrl
                 +"&layerId="+this.schema.utteranceLayerId
                 +"&layerId="+this.schema.wordLayerId
-                +this.selectedLayerIds.map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
+                +this.selectedLayerIds
+            // noise and comment layers are displayed by default but we don't want them here
+                    .filter(l=>l != "comment" && l != "noise")
+                    .map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
                 +"&start="+utterance.start.offset
                 +"&end="+utterance.end.offset
                 +"&filter="+utterance.parentId
