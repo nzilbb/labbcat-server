@@ -353,7 +353,7 @@
           </div>
         </div>
       </div>
-      <lib-link *ngIf="category == 'General' && user && user.roles.includes('edit')"
+      <lib-link *ngIf="user && user.roles.includes('edit')"
                 class="buttons"
                 href="{{baseUrl}}edit/transcript/attributes?id={{transcript.id}}"
                 img="wrench.svg" icon="🔧"
