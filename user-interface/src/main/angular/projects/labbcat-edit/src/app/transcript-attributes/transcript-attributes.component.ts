@@ -90,7 +90,7 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                         this.attributes.push(layer.id);
 
                         // ensure the transcript type layer has a category
-                        if (layer.id == "transcript_type") layer.category = "General";
+                        if (layer.id == "transcript_type") layer.category = "transcript_General";
                         
                         if (layer.category) {
                             
