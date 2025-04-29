@@ -85,7 +85,7 @@ export class TranscriptAttributesComponent implements OnInit {
                         this.attributes.push(layer.id);
                         
                         // ensure the transcript type layer has a category
-                        if (layer.id == "transcript_type") layer.category = "General";
+                        if (layer.id == "transcript_type") layer.category = "transcript_General";
                         if (layer.category) {
                             if (!this.categoryLayers[layer.category]) {
                                 this.categoryLayers[layer.category] = [];
