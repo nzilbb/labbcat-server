@@ -1515,9 +1515,7 @@ export class TranscriptComponent implements OnInit {
                     this.textGridUrl, // original URL for the file to upload
                     { automaticMapping: "true", todo: "upload" }, // extra HTTP request parameters
                     authorization).then((code: string)=>{
-                        if (code == "0") {
-                            this.praatUtterance = null;
-                        }
+                        this.praatUtterance = null;
                         this.praatProgress = {
                             message: "",
                             value: 100,
