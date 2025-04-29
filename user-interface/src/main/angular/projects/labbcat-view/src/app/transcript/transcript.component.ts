@@ -626,8 +626,6 @@ export class TranscriptComponent implements OnInit {
                         if (page == 0) {
                             if (errors) errors.forEach(m => 
                                 this.messageService.error(`${layerId}: ${m}`));
-                            if (messages) messages.forEach(m =>
-                                this.messageService.info(`${layerId}: ${m}`));
                         }
                         if (annotations.length) {
                             const unknownAnchorIds = new Set<string>();
@@ -919,6 +917,10 @@ export class TranscriptComponent implements OnInit {
             && layer.id != this.schema.wordLayerId)
             || (layer.parentId == this.schema.root.id
                 && layer.alignment > 0);
+    }
+    /** Test whether the layer is is empty */
+    isEmpty(layer : any) : boolean {
+        return !layer.annotations || layer.annotations.length == 0;
     }
     /** Test whether the layer is word scope layer */
     isWordLayer(layer : Layer) : boolean {

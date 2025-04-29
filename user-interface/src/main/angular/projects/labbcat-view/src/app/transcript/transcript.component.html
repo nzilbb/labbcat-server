@@ -386,7 +386,7 @@
                     ></lib-button>        
           <!-- phrase/span layers starting and ending with this utterance  -->
           <ng-container *ngFor="let l of selectedLayerIds">
-            <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+            <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
                   class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                   style="color: {{transcript.schema.layers[l].colour}};"
                   title="{{l}}">
@@ -432,7 +432,7 @@
           <span *ngIf="utterance.prependDummyToken" class="token dummy">
             <!-- phrase/span layers starting with this utterance and ending with the first word  -->
             <ng-container *ngFor="let l of selectedLayerIds">
-              <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+              <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
                     class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                     style="color: {{transcript.schema.layers[l].colour}};"
                     title="{{l}}">
@@ -498,7 +498,7 @@
             <span class="token">
               <!-- phrase/span layers for this word -->
               <ng-container *ngFor="let l of selectedLayerIds">
-                <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+                <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
                       class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                       style="color: {{transcript.schema.layers[l].colour}};"
                       title="{{l}}">
@@ -671,7 +671,7 @@
           <span *ngIf="utterance.appendDummyToken" class="token dummy">
             <!-- phrase/span layers starting with the last word and ending with this utterance  -->
             <ng-container *ngFor="let l of selectedLayerIds">
-              <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+              <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
                     class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                     style="color: {{transcript.schema.layers[l].colour}};"
                     title="{{l}}">
