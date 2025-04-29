@@ -946,6 +946,8 @@ export class TranscriptComponent implements OnInit {
     /* convert selectedLayerIds array into a series of URL parameters with the given name */
     selectedLayerIdParameters(parameterName: string): string {
         return this.selectedLayerIds
+        // noise and comment layers are displayed by default but we don't want them here
+            .filter(layerId => layerId != "comment" && layerId != "noise")
             .map(layerId => "&"+parameterName+"="+encodeURIComponent(layerId))
             .join("");
     }
