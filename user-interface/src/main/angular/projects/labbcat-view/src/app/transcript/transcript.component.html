@@ -241,7 +241,7 @@
 
   <!-- layer selector, attributes etc. -->
   <header id="attributes" class="attribute-list tabs">
-    <div class="tab-labels">
+    <div class="tab-labels" [class.video]="visibleVideoCount > 0">
       <label *ngFor="let category of categoryLabels"
              [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
              (click)="currentCategory = currentCategory == category?null:category"

@@ -191,6 +191,10 @@ nav, nav > div {
 
 /* Meta-data */
 
+.tab-labels.video {
+    width: 70vw; /* squish tabes to the right to avoid video */
+    max-width: 100%;
+}
 .tab-labels label {
     cursor: context-menu;
 }
@@ -219,6 +223,7 @@ nav, nav > div {
     width: 100%;
     text-align: left;
 }
+
 .buttons {
     display: block;
     padding-top: 4px;
