@@ -409,17 +409,17 @@
                          ><img *ngIf="!annotation.preview"
                                class="icon"
                                src="{{imagesLocation}}/image.svg"
-                               i18n-alt alt="📷"
+                               alt="📷"
                                ><img *ngIf="annotation.preview"
                                      class="preview" src="{{annotation.dataUrl}}"
-                                     i18n-alt alt="📷"></a>
+                                     alt="📷"></a>
                       <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                          class="blob" href="#{{annotation.id}}"
                          href="{{annotation.dataUrl}}"
                          target="{{annotation.id}}"
                          ><img class="icon"
                                src="{{imagesLocation}}/other.svg"
-                               i18n-alt alt="🗎"
+                               alt="🗎"
                                ></a>
                       <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                     </ng-container>
@@ -456,17 +456,17 @@
                            ><img *ngIf="!annotation.preview"
                                  class="icon"
                                  src="{{imagesLocation}}/image.svg"
-                                 i18n-alt alt="📷"
+                                 alt="📷"
                                  ><img *ngIf="annotation.preview"
                                        class="preview" src="{{annotation.dataUrl}}"
-                                       i18n-alt alt="📷"></a>
+                                       alt="📷"></a>
                         <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                            class="blob" href="#{{annotation.id}}"
                            href="{{annotation.dataUrl}}"
                            target="{{annotation.id}}"
                            ><img class="icon"
                                  src="{{imagesLocation}}/other.svg"
-                                 i18n-alt alt="🗎"
+                                 alt="🗎"
                                  ></a>
                         <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                       </ng-container>
@@ -524,17 +524,17 @@
                              ><img *ngIf="!annotation.preview"
                                    class="icon"
                                    src="{{imagesLocation}}/image.svg"
-                                   i18n-alt alt="📷"
+                                   alt="📷"
                                    ><img *ngIf="annotation.preview"
                                          class="preview" src="{{annotation.dataUrl}}"
-                                         i18n-alt alt="📷"></a>
+                                         alt="📷"></a>
                           <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                              class="blob" href="#{{annotation.id}}"
                              href="{{annotation.dataUrl}}"
                              target="{{annotation.id}}"
                              ><img class="icon"
                                    src="{{imagesLocation}}/other.svg"
-                                   i18n-alt alt="🗎"
+                                   alt="🗎"
                                    ></a>
                           <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                         </ng-container>
@@ -695,17 +695,17 @@
                            ><img *ngIf="!annotation.preview"
                                  class="icon"
                                  src="{{imagesLocation}}/image.svg"
-                                 i18n-alt alt="📷"
+                                 alt="📷"
                                  ><img *ngIf="annotation.preview"
                                        class="preview" src="{{annotation.dataUrl}}"
-                                       i18n-alt alt="📷"></a>
+                                       alt="📷"></a>
                         <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                            class="blob" href="#{{annotation.id}}"
                            href="{{annotation.dataUrl}}"
                            target="{{annotation.id}}"
                            ><img class="icon"
                                  src="{{imagesLocation}}/other.svg"
-                                 i18n-alt alt="🗎"
+                                 alt="🗎"
                                  ></a>
                         <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                       </ng-container>
