@@ -21,9 +21,9 @@
 //
 /**
  * <p> <tt>/api/annotation/&hellip;</tt>
- * : API endpoints providing Annotation data.
+ * : API endpoints providing annotation data.
  *
  * <p> (These class implementations are decoupled from any HTTP request/response object model.
  * HTTP transaction details are currently implemented by JSP files in <tt>src/main/jsp/</tt>)
  */
-package nzilbb.labbcat.server.api;
+package nzilbb.labbcat.server.api.annotation;
