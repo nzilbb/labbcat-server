@@ -81,7 +81,7 @@ import nzilbb.util.IO;
  *         name <q>media</q>, but there may be other tracks defined, e.g. there may be a
  *         track with suffix <q>_interviewer</q>, which would correspond to a parameter name
  *         <q>media_interviewer</q>.<br>
- *         See {@link Store#getMediaTracks} for a list of defined track suffixes.
+ *         See {@link nzilbb.labbcat.server.api.Store#getMediaTracks} for a list of defined track suffixes.
  *       </dd>
  *   <dt> merge </dt>
  *       <dd> If present, this parameter indicates that the upload corresponds to
@@ -92,12 +92,13 @@ import nzilbb.util.IO;
  * attributes:
  *  <dl>
  *   <dt> id </dt>
- *       <dd> A unique identifier for the upload which can be passed into subsequent calls
- *        to {@link /api/edit/transcript/save Save} for finalizing the upload parameters. </dd> 
+ *       <dd> A unique identifier for the upload which can be passed into subsequent PUT calls
+ *        to {@link #put(String,RequestParameters,Consumer,Function) /api/edit/transcript/upload/...} 
+ *        for finalizing the upload parameters. </dd> 
  *   <dt> parameters </dt>
  *       <dd> An array of parameter objects representing information that's still required
  *        to finalize the upload. These represent parameters that must be passed into a
- *        subsequent call to {@link /api/edit/transcript/upload/${id} PUT}. This subsequent call
+ *        subsequent PUT call to {@link #put(String,RequestParameters,Consumer,Function) /api/edit/transcript/upload/...}. This subsequent call
  *        must be made to finish the upload process, even if <q>parameters</q> is an empty
  *        array.</dd> 
  *  </dl>
@@ -109,7 +110,7 @@ import nzilbb.util.IO;
  *  <dl>
  *   <dt> name </dt>
  *       <dd> The name that should be used when specifying the value for the parameter
- *        when calling {@link /api/edit/transcript/save Save}. </dd> 
+ *        when PUTting {@link #put(String,RequestParameters,Consumer,Function) /api/edit/transcript/upload/...}. </dd> 
  *   <dt> label </dt>
  *       <dd> A label for the parameter intended for display to the user.</dd> 
  *   <dt> hint </dt>
@@ -323,7 +324,6 @@ public class Upload extends APIRequestHandler {
    * The PUT method for the servlet.
    * @param pathInfo The URL path from which the upload ID can be inferred.
    * @param requestParameters Request parameter map.
-   * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
    * @param layerGenerator A function that will start a layer generation thread for the
    * given transcript, and return the thread ID.
@@ -692,7 +692,7 @@ public class Upload extends APIRequestHandler {
           }
               
           // save files
-          if (keepOriginal) {
+          if (keepOriginal) { // TODO don't keep the 'original' if it's a merge AND the incoming transcript doesn't have the "word" layer (it will be annotations only)
             // context.servletLog("PUT keepOriginal ");
             // usually there's one transcript file, and it should be the 'source' of the one graph
             // but if there are multiple files, the rest are saved as 'documents',
@@ -848,8 +848,6 @@ public class Upload extends APIRequestHandler {
   /**
    * The DELETE method for the servlet.
    * @param pathInfo The URL path from which the upload ID can be inferred.
-   * @param requestParameters Request parameter map.
-   * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case or error.
    * @return JSON-encoded object representing the response
    */
