@@ -79,6 +79,16 @@ nav, nav > div {
     height: 16px;
     vertical-align: middle;
 }
+#attr-controls {
+    display: flex;
+    align-items: center;
+}
+#attr-controls > .label-spacer {
+    flex-grow: 1;
+}
+#attr-controls label {
+    font-style: italic;
+}
 /* consecutive blocks are vertical, simultaneous are horizontal */
 #temporal-blocks .block {
     display: flex;
@@ -248,6 +258,9 @@ nav, nav > div {
 }
 .tab-body > div {
     padding: 10px;
+}
+#attributes .attribute {
+    padding: 4px 10px;
 }
 .attribute-list .participant {
     padding: 5px;

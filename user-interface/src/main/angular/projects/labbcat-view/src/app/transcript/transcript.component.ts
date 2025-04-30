@@ -39,6 +39,7 @@ export class TranscriptComponent implements OnInit {
     categoryLabels: string[];
     currentCategory: string;
     categories: object; // string->Category
+    displayLayerIds: boolean;
 
     selectedLayerIds : string[];
     interpretedRaw: { [key: string] : boolean };
@@ -133,6 +134,9 @@ export class TranscriptComponent implements OnInit {
                     }
                     if (this.threadId) this.loadThread();
                     this.setOriginalFile();
+                    this.displayLayerIds = JSON.parse(sessionStorage.getItem("displayLayerIds")) ??
+                        (typeof this.displayLayerIds == "string" ? this.displayLayerIds === "true" : this.displayLayerIds) ??
+                        true;
                 }); // transcript read
             }); // subscribed to queryParams
         }); // after readSchema
@@ -170,15 +174,18 @@ export class TranscriptComponent implements OnInit {
                     // identify transcript attribute layers
                     if (layer.parentId == "transcript"
                         && layer.alignment == 0
-                        && layer.id != schema.participantLayerId
-                        && layer.id != schema.episodeLayerId
-                        && layer.id != schema.corpusLayerId) {
+                        && layer.id != schema.participantLayerId) {
 
                         // ensure we can iterate all layer IDs
                         this.attributes.push(layer.id);
                         
-                        // ensure the transcript type layer has a category
-                        if (layer.id == "transcript_type") layer.category = "transcript_General";
+                        // ensure 'organizational' layers have a category
+                        if (["transcript_type", schema.corpusLayerId, schema.episodeLayerId].includes(layer.id)) {
+                            layer.category = "transcript_General";
+                            layer.hint = layer.id == "transcript_type" ? "Sociolinguistic interview section"
+                                : layer.id == schema.corpusLayerId ? "Collection of transcripts from a single research project"
+                                : "Series of transcripts from a single sociolinguistic interview";
+                        }
                         
                         if (!this.categoryLayers[layer.category]) {
                             this.categoryLayers[layer.category] = [];
@@ -1598,6 +1605,14 @@ export class TranscriptComponent implements OnInit {
                 participants: participant
             }
         });
+    }
+    /** Toggle attribute IDs in Attributes tab(s) */
+    toggleLayerIds(): void {
+        this.displayLayerIds = !this.displayLayerIds;
+        sessionStorage.setItem("displayLayerIds", JSON.stringify(this.displayLayerIds));
+    }
+    TranscriptLayerLabel(id): string {
+        return id.replace(/^transcript_/,"");
     }
 
     hideWordMenu(): void {
