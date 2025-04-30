@@ -52,7 +52,7 @@
         <span *ngIf="transcript[layer.id]"
               id="{{layer.id}}" class="values">
           <div *ngFor="let annotation of transcript[layer.id]" class="value">
-            <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
+            <span class="label" title="Annotated by {{annotation.annotator}} on {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
             <ng-container *ngIf="layer.type == 'boolean'">
               <span *ngIf="annotation.label == '1'" class="description" i18n>true</span>
               <span *ngIf="annotation.label == '0'" class="description" i18n>false</span>
