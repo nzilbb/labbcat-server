@@ -1,4 +1,8 @@
+nzilbb.labbcat.server.api
+nzilbb.labbcat.server.api.admin
+nzilbb.labbcat.server.api.admin.roles
+nzilbb.labbcat.server.api.edit
+nzilbb.labbcat.server.api.edit.transcript
 nzilbb.labbcat.server.db
 nzilbb.labbcat.server.search
-nzilbb.labbcat.server.servlet
 nzilbb.labbcat.server.task
