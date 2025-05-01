@@ -3022,7 +3022,7 @@
      * @param {object} parameters Object with an attribute and value for each parameter
      * returned by the prior call to {@link #transcriptUpload}.
      * @param {resultCallback} onResult Invoked when the request has returned a
-     * result, which is and object that hass the following attributes::
+     * result, which is and object that hass the following attributes:
      * <dl>
      *  <dt> transcripts </dt> <dd> an object for which each key is a transcript name, and its 
      *          value is the threadId of the server task processing the uploaded transcript, 
@@ -3050,8 +3050,21 @@
         this.baseUrl+"api/edit/transcript/upload/"+encodeURIComponent(id)
           + "?"+this.parametersToQueryString(parameters),
         "PUT").send();
-    }
+    } // transcriptUploadParameters
 
+    /**
+     * Cancel a transcript upload started by a call to {@link #transcriptUpload}, 
+     * deleting any uploaded files from the server.
+     * @param {string} id Upload ID returned by the prior call to {@link #transcriptUpload}.
+     * @param {resultCallback} onResult Invoked when the request has returned.
+     */
+    transcriptUploadDelete(id, onResult) {
+      this.createRequest(
+        "transcriptUploadDelete", null, onResult,
+        this.baseUrl+"api/edit/transcript/upload/"+encodeURIComponent(id),
+        "DELETE").send();
+    } // transcriptUploadDelete
+    
     /**
      * Uploads a new transcript.
      * @param {file|string} transcript The transcript to upload. In a browser, this

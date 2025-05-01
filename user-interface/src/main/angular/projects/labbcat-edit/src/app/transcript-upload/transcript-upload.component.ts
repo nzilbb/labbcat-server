@@ -510,6 +510,24 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 }
             });
     }
+    // the user clicked save parameters, or we could continue without asking the user
+    skipEntry(uploadableEntry: UploadEntry, cancelling: boolean): void {
+        if (!this.uploading) { // cancelled
+            this.processing = false;
+            return;
+        }
+        uploadableEntry.parametersVisible = false;
+        // immmediately disable the parameters button
+        uploadableEntry.transcriptThreads = {};
+        // send the parameter to the server
+        // cancel the upload on the server
+        this.labbcatService.labbcat.transcriptUploadDelete(
+            uploadableEntry.uploadId, (result, errors, messages) => {
+                uploadableEntry.status = cancelling?"Cancelled.":"Skipped." // TODO i18n
+                // try next transcript
+                this.uploadNextTranscript();
+            });
+    }
     threadMonitor: number;
     monitorThreads(): void { // TODO slow when there are hunders of uploads
         if (this.threadMonitor) return; // already monitoring
@@ -592,6 +610,8 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
             this.updateTranscriptExistence();
         } else {
             this.processing = this.deleting = true;
+            // clear any previous errors
+            deletableEntry.errors = [];
             deletableEntry.progress = 50;
             this.labbcatService.labbcat.deleteTranscript(
                 deletableEntry.transcriptId, (result, errors, messages) => {
@@ -615,6 +635,10 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         }
     }
     onCancel(): void {
+        const currentlyUploadingEntry = this.entries.find(e => e.uploadId && !e.transcriptThreads);
+        if (currentlyUploadingEntry) {
+            this.skipEntry(currentlyUploadingEntry, true);
+        }
         this.uploading = this.deleting = false;
         if (!this.useDefaultParameterValues) this.processing = false;
     }

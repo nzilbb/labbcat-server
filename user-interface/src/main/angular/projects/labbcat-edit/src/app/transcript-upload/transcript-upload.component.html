@@ -213,6 +213,11 @@
              class="item controls">
           <span>&nbsp;</span>
           <lib-button
+            i18n-label="Batch upload" label="Skip"
+            i18n-title title="Skip this transcript and upload the next"
+            img="cross-mark.svg" icon="❌"
+            (press)="skipEntry(entry, false)"></lib-button>
+          <lib-button
             action="save"
             autofocus="true"
             i18n-title title="Set the parameters for this transcript"
