@@ -367,7 +367,7 @@ export class TranscriptComponent implements OnInit {
                     // add to the current utterance
                     // if the words starts after utterance u ends, increment
                     while (word.start.offset >= utterances[u].end.offset
-                        && u < utterances.length) {
+                        && u < utterances.length-1) {
                         u++;
                     }
                     utterances[u][wordLayerId].push(word);
@@ -1007,7 +1007,7 @@ export class TranscriptComponent implements OnInit {
     playingId : string[]; // IDs of currently playing utterances
     previousPlayingId : string[]; // keep a buffer of old IDs, so we can fade them out
     player: HTMLMediaElement;
-    stopAfter : number; // sto time for playing a selection
+    stopAfter : number; // stop time for playing a selection
     /** Event handler for when the time of a media player is updated */
     mediaTimeUpdate(event: Event): void {
         // only pay attention to the main player
