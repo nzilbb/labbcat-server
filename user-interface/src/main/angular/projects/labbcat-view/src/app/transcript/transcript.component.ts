@@ -1032,7 +1032,9 @@ export class TranscriptComponent implements OnInit {
 
             const audios = document.getElementsByTagName('audio');
             const videos = document.getElementsByTagName('video');
-            if (this.stopAfter && this.stopAfter <= this.player.currentTime) {
+            if (this.stopAfter && this.stopAfter <= this.player.currentTime
+                // try to pre-empt the stop time, so it doesn't play into the next utterance:
+                + 0.3) {
                 // arrived at stop time
                 this.stopAfter = null;
                 // stop all media
