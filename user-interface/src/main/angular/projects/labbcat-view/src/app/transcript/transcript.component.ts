@@ -867,7 +867,7 @@ export class TranscriptComponent implements OnInit {
                 const firstNonSpanIndexForWord = wordSpans.findIndex(span=>!span);
                 return Math.max(
                     maxSoFar,
-                    firstNonSpanIndexForWord == -1?wordSpans.length
+                    firstNonSpanIndexForWord == -1?wordSpans.length - 1
                         :firstNonSpanIndexForWord - 1);
             }, -1);
             utteranceWords.forEach((word)=>{
