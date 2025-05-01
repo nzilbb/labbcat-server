@@ -2802,7 +2802,7 @@
      * @param merge Whether the upload corresponds to updates to an existing transcript
      * (true) or a new transcript (false).
      * @param {resultCallback} onResult Invoked when the request has returned a
-     * result, which is and object that hass the following attributes:
+     * result, which is and object that has the following attributes:
      * <dl>
      *  <dt> id </dt> <dd> The unique identifier to use for this upload when subsequently
      *          calling {@link #transcriptUploadParameters}. </dd>
@@ -3022,7 +3022,7 @@
      * @param {object} parameters Object with an attribute and value for each parameter
      * returned by the prior call to {@link #transcriptUpload}.
      * @param {resultCallback} onResult Invoked when the request has returned a
-     * result, which is and object that hass the following attributes:
+     * result, which is and object that has the following attributes:
      * <dl>
      *  <dt> transcripts </dt> <dd> an object for which each key is a transcript name, and its 
      *          value is the threadId of the server task processing the uploaded transcript, 
