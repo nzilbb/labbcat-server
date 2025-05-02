@@ -33,7 +33,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     
     ngOnInit(): void {
         window.setTimeout(()=>{
-            this.progressBar.nativeElement.scrollIntoView();
+            if (this.progressBar) this.progressBar.nativeElement.scrollIntoView();
         }, 500);
     }
     ngOnChanges(changes: SimpleChanges): void {
