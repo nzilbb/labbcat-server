@@ -810,8 +810,9 @@ export class ParticipantsComponent implements OnInit {
                     .replace(".includesAny(labels('transcript'))",
                              ".includes(id)");
             if (this.selectedIds.length==0 && !this.query) {
-                params["participants"] = "all participants in selected transcripts"
-            };
+                delete params["participant_expression"];
+                params["participants"] = "all participants in selected transcripts";
+            }
         }
         return params;
     }
