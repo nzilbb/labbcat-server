@@ -132,20 +132,20 @@
                 i18n-title title="Collapse 'Export Attributes' options"
                 ></lib-button>
               <lib-button
-                *ngIf="!nextPage || nextPage == 'search'"
-                (press)="layeredSearch()"
-                [disabled]="matchCount < 1 && selectedIds.length == 0"
-                img="magnifying-glass.svg" icon="🔍"
-                i18n-label label="Layered Search"
-                i18n-title title="Search selected transcripts"
-                ></lib-button>
-              <lib-button
                 *ngIf="!nextPage && !participantQuery"
                 (press)="participants()"
                 [disabled]="matchCount < 1 && selectedIds.length == 0"
                 img="people.svg" icon="👥"
                 i18n-label label="List Participants"
                 i18n-title title="List participants in these transcripts"
+                ></lib-button>
+              <lib-button
+                *ngIf="!nextPage || nextPage == 'search'"
+                (press)="layeredSearch()"
+                [disabled]="matchCount < 1 && selectedIds.length == 0"
+                img="magnifying-glass.svg" icon="🔍"
+                i18n-label label="Layered Search"
+                i18n-title title="Search selected transcripts"
                 ></lib-button>
               <div *ngIf="participantQuery" class="participant-filter">
                 <img

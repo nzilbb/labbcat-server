@@ -71,20 +71,20 @@
               i18n-title title="Export attributes to CSV"
               ></lib-button>
             <lib-button
-              *ngIf="!nextPage || nextPage == 'search'"
-              (press)="layeredSearch()"
-              [disabled]="matchCount < 1 && selectedIds.length == 0"
-              img="magnifying-glass.svg" icon="🔍"
-              i18n-label label="Layered Search"
-              i18n-title title="Search transcripts including these participants"
-              ></lib-button>
-            <lib-button
               *ngIf="!nextPage && !transcriptQuery"
               (press)="transcripts()"
               [disabled]="!participantIds || participantIds.length == 0 || ((filterValues['--transcript-count'][0] || filterValues['--transcript-count'][1]) && selectedIds.length == 0)"
               img="document.svg" icon="📄"
               i18n-label label="List Transcripts"
               i18n-title title="List transcripts including these participants"
+              ></lib-button>
+            <lib-button
+              *ngIf="!nextPage || nextPage == 'search'"
+              (press)="layeredSearch()"
+              [disabled]="matchCount < 1 && selectedIds.length == 0"
+              img="magnifying-glass.svg" icon="🔍"
+              i18n-label label="Layered Search"
+              i18n-title title="Search transcripts including these participants"
               ></lib-button>
             <div *ngIf="transcriptQuery" class="transcript-filter">
               <img
