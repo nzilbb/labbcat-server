@@ -26,6 +26,7 @@ export class ParticipantComponent implements OnInit {
     categories: object; // string->Category
     participant: Annotation;
     displayLayerIds: boolean;
+    displayAttributePrefixes: boolean;
     
     constructor(
         @Inject('environment') private environment,
@@ -86,6 +87,9 @@ export class ParticipantComponent implements OnInit {
                 this.displayLayerIds = JSON.parse(sessionStorage.getItem("displayLayerIds")) ??
                     (typeof this.displayLayerIds == "string" ? this.displayLayerIds === "true" : this.displayLayerIds) ??
                     true;
+                this.displayAttributePrefixes = JSON.parse(sessionStorage.getItem("displayAttributePrefixes")) ??
+                    (typeof this.displayAttributePrefixes == "string" ? this.displayAttributePrefixes === "true" : this.displayAttributePrefixes) ??
+                    false;
                 // participant attributes
                 for (let layerId in schema.layers) {
                     // main_participant this relates participants to transcripts, so ignore that
@@ -130,5 +134,9 @@ export class ParticipantComponent implements OnInit {
     toggleLayerIds(): void {
         this.displayLayerIds = !this.displayLayerIds;
         sessionStorage.setItem("displayLayerIds", JSON.stringify(this.displayLayerIds));
+    }
+    toggleAttributePrefixes(): void {
+        this.displayAttributePrefixes = !this.displayAttributePrefixes;
+        sessionStorage.setItem("displayAttributePrefixes", JSON.stringify(this.displayAttributePrefixes));
     }
 }

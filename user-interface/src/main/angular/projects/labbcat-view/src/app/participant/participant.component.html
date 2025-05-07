@@ -14,7 +14,7 @@
   <div *ngFor="let category of categoryLabels"
        [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
-        <label for="{{layer.id}}" title="{{layer.hint}}">{{layer.description}}<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">{{ParticipantLayerLabel(layer.id)}}</span>)</span></label>
+        <label for="{{layer.id}}" title="{{layer.hint}}">{{layer.description}}<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">{{displayAttributePrefixes ? layer.id : ParticipantLayerLabel(layer.id)}}</span>)</span></label>
         <span *ngIf="participant.annotations && participant.annotations[layer.id]"
               id="{{layer.id}}" class="values">
           <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
@@ -29,10 +29,23 @@
           </div>
         </span>
       </div>
+      <div id="controls">
+        <div class="label-spacer">
       <label id="toggleLayerIds">
         <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
         Hide attribute names
       </label>
+        </div>
+        <div *ngIf="displayLayerIds" class="label-spacer">
+          <label title="Show full names for participant/transcript attributes">
+            <lib-grouped-checkbox
+              name="hideAttributePrefixes"
+              [checked]="!displayAttributePrefixes"
+              (change)="toggleAttributePrefixes()"
+              ></lib-grouped-checkbox>
+            Hide attribute prefixes</label>
+        </div>
+      </div>
     </div>
 </div>
 <div *ngIf="participant" class="links">

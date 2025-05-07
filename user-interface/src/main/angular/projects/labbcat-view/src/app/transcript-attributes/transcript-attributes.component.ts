@@ -22,6 +22,7 @@ export class TranscriptAttributesComponent implements OnInit {
     categories: object; // string->Category
     transcript: Annotation;
     displayLayerIds: boolean;
+    displayAttributePrefixes: boolean;
     imagesLocation: string;
     
     constructor(
@@ -82,6 +83,9 @@ export class TranscriptAttributesComponent implements OnInit {
                 this.displayLayerIds = JSON.parse(sessionStorage.getItem("displayLayerIds")) ??
                     (typeof this.displayLayerIds == "string" ? this.displayLayerIds === "true" : this.displayLayerIds) ??
                     true;
+                this.displayAttributePrefixes = JSON.parse(sessionStorage.getItem("displayAttributePrefixes")) ??
+                    (typeof this.displayAttributePrefixes == "string" ? this.displayAttributePrefixes === "true" : this.displayAttributePrefixes) ??
+                    false;
                 // transcript attributes
                 for (let layerId in schema.layers) {
                     const layer = schema.layers[layerId] as Layer;
@@ -128,5 +132,9 @@ export class TranscriptAttributesComponent implements OnInit {
     toggleLayerIds(): void {
         this.displayLayerIds = !this.displayLayerIds;
         sessionStorage.setItem("displayLayerIds", JSON.stringify(this.displayLayerIds));
+    }
+    toggleAttributePrefixes(): void {
+        this.displayAttributePrefixes = !this.displayAttributePrefixes;
+        sessionStorage.setItem("displayAttributePrefixes", JSON.stringify(this.displayAttributePrefixes));
     }
 }
