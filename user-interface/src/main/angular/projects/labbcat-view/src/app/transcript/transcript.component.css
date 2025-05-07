@@ -95,6 +95,9 @@ nav, nav > div {
 #attr-controls label {
     font-style: italic;
 }
+#attr-controls .disabled {
+    color: silver;
+}
 /* consecutive blocks are vertical, simultaneous are horizontal */
 #temporal-blocks .block {
     display: flex;

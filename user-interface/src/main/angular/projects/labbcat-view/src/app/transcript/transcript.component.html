@@ -422,11 +422,14 @@
               Hide attribute names
             </label>
           </div>
-          <div *ngIf="displayLayerIds" class="label-spacer">
-            <label title="Show full names for participant/transcript attributes">
+          <div class="label-spacer">
+            <label
+              [class.disabled]="!displayLayerIds"
+              title="Show full names for participant/transcript attributes">
               <lib-grouped-checkbox
                 name="hideAttributePrefixes"
                 [checked]="!displayAttributePrefixes"
+                [disabled]="!displayLayerIds"
                 (change)="toggleAttributePrefixes()"
                 ></lib-grouped-checkbox>
               Hide attribute prefixes</label>
