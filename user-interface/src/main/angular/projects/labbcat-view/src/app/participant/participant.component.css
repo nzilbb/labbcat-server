@@ -1,6 +1,9 @@
 #title span::before {
     content: ': ';
 }
+.attribute-list {
+    min-width: 60vw;
+}
 .attribute .value .description {
     padding-left: 10px;
 }
