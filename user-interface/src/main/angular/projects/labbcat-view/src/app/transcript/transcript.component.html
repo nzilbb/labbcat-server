@@ -393,28 +393,28 @@
       </ng-container>
       <!-- attribute category tabs -->
       <ng-container *ngIf="!['Participants','Layers','Search','Export'].includes(currentCategory)">
-      <div *ngFor="let layer of categoryLayers[category]" class="attribute">
-        <label
-          [for]="layer.id"
-          [title]="layer.hint ? layer.hint : ''"
-          >{{layer.description}}<span
-            class="layer-name"
-            [style.display]="displayLayerIds ? 'inline' : 'none'"
-            > (<span class="layer-id">{{displayAttributePrefixes ? layer.id : TranscriptLayerLabel(layer.id)}}</span>)</span></label>
-        <div *ngIf="transcript[layer.id]"
-              id="{{layer.id}}" class="values">
-          <div *ngFor="let annotation of transcript[layer.id]" class="value">
-            <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
-            <ng-container *ngIf="layer.type == 'boolean'">
-              <span *ngIf="annotation.label == '1'" class="description">true</span>
-              <span *ngIf="annotation.label == '0'" class="description">false</span>
-            </ng-container>
-            <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label">
-              <span class="description">{{layer.validLabels[annotation.label]}}</span>
-            </ng-container>
+        <div *ngFor="let layer of categoryLayers[category]" class="attribute">
+          <label
+            [for]="layer.id"
+            [title]="layer.hint ? layer.hint : ''"
+            >{{layer.description}}<span
+              class="layer-name"
+              [style.display]="displayLayerIds ? 'inline' : 'none'"
+              > (<span class="layer-id">{{displayAttributePrefixes ? layer.id : TranscriptLayerLabel(layer.id)}}</span>)</span></label>
+          <div *ngIf="transcript[layer.id]"
+                id="{{layer.id}}" class="values">
+            <div *ngFor="let annotation of transcript[layer.id]" class="value">
+              <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
+              <ng-container *ngIf="layer.type == 'boolean'">
+                <span *ngIf="annotation.label == '1'" class="description">true</span>
+                <span *ngIf="annotation.label == '0'" class="description">false</span>
+              </ng-container>
+              <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label">
+                <span class="description">{{layer.validLabels[annotation.label]}}</span>
+              </ng-container>
+            </div>
           </div>
         </div>
-      </div>
         <div id="attr-controls">
           <div class="label-spacer">
             <label id="toggleLayerIds">
@@ -431,13 +431,13 @@
                 ></lib-grouped-checkbox>
               Hide attribute prefixes</label>
           </div>
-      <lib-link *ngIf="user && user.roles.includes('edit')"
-                class="buttons"
-                href="{{baseUrl}}edit/transcript/attributes?id={{transcript.id}}"
-                img="wrench.svg" icon="🔧"
-                i18n-label label="Edit"
-                i18n-title title="Edit transcript attributes"
-                ></lib-link>
+          <lib-link *ngIf="user && user.roles.includes('edit')"
+                    class="buttons"
+                    href="{{baseUrl}}edit/transcript/attributes?id={{transcript.id}}"
+                    img="wrench.svg" icon="🔧"
+                    i18n-label label="Edit"
+                    i18n-title title="Edit transcript attributes"
+                    ></lib-link>
         </div>
       </ng-container>
     </div>
