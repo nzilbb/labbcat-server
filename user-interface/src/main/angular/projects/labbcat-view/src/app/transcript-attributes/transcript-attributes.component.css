@@ -39,6 +39,9 @@
         flex-grow: 1;
     }
 }
+#controls .disabled {
+    color: silver;
+}
 nav, nav > div {
     position: fixed;
     top: 50%;

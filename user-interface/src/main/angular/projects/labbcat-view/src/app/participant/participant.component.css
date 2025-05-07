@@ -39,3 +39,6 @@
         flex-grow: 1;
     }
 }
+#controls .disabled {
+    color: silver;
+}
