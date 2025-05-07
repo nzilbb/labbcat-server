@@ -400,7 +400,7 @@
           >{{layer.description}}<span
             class="layer-name"
             [style.display]="displayLayerIds ? 'inline' : 'none'"
-            > (<span class="layer-id">{{TranscriptLayerLabel(layer.id)}}</span>)</span></label>
+            > (<span class="layer-id">{{displayAttributePrefixes ? layer.id : TranscriptLayerLabel(layer.id)}}</span>)</span></label>
         <div *ngIf="transcript[layer.id]"
               id="{{layer.id}}" class="values">
           <div *ngFor="let annotation of transcript[layer.id]" class="value">
@@ -421,6 +421,15 @@
               <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
               Hide attribute names
             </label>
+          </div>
+          <div *ngIf="displayLayerIds" class="label-spacer">
+            <label title="Show full names for participant/transcript attributes">
+              <lib-grouped-checkbox
+                name="hideAttributePrefixes"
+                [checked]="!displayAttributePrefixes"
+                (change)="toggleAttributePrefixes()"
+                ></lib-grouped-checkbox>
+              Hide attribute prefixes</label>
           </div>
       <lib-link *ngIf="user && user.roles.includes('edit')"
                 class="buttons"
