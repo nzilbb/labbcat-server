@@ -1,3 +1,6 @@
+#title span::before {
+    content: ': ';
+}
 .attribute .value .description {
     padding-left: 10px;
 }
