@@ -363,7 +363,7 @@
       <!-- search tab -->
       <ng-container *ngIf="currentCategory == 'Search'">
         <div id="search-transcripts" class="attribute search">
-          <label>Search transcripts</label>
+          <label>Search transcript</label>
           <lib-button
             (press)="searchTranscript()"
             img="magnifying-glass.svg" icon="🔍"
@@ -371,10 +371,13 @@
             title="Search this transcript for patterns on transcription layers"
             noCaps="true"
             ></lib-button>
+        </div>
+        <div id="search-episode" class="attribute search">
+          <label>Search transcript series</label>
           <lib-button
             (press)="searchEpisode()"
             img="magnifying-glass.svg" icon="🔍"
-            label="Episode {{transcript.first('episode').label}}"
+            label="{{transcript.first('episode').label}}"
             title="Search transcripts in this episode for patterns on transcription layers"
             noCaps="true"
             ></lib-button>
