@@ -126,6 +126,8 @@ export class MatchesComponent implements OnInit {
                 this.mimeTypeToSerializer[descriptor.mimeType]
                     = descriptor as SerializationDescriptor;
             }
+            // alphabetical order
+            this.serializers.sort((a,b) => a.name.charCodeAt(0) - b.name.charCodeAt(0));
             // set initial icon
             this.onChangeMimeType();
         });
