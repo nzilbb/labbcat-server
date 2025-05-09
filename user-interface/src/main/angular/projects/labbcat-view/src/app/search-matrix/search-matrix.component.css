@@ -1,3 +1,9 @@
+@media all and (min-width: 640px) { 
+    .layer-checkboxes-container {
+        display: flex;
+        justify-content: center;
+    }
+}
 .columns {
     display: flex;
     flex-direction: row;
