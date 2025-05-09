@@ -233,10 +233,10 @@ button {
     font-size: 9pt;
     padding: 1px;
 }
-button:hover {
-    background: #DDDDDD;
+button:hover:not([disabled]) {
+    background: #BBBBBB;
 }
-button:active {
+button:active:not([disabled]) {
     border: 1px inset;
     background: #BBBBBB;
 }
@@ -387,6 +387,9 @@ table {
 tbody tr:nth-child(odd) {
     background: #EEEEEE;
 }
+tbody tr:nth-child(even) {
+    background: #FFFFFF;
+}
 
 .hidden-panel {
     max-height: 0px;
@@ -415,6 +418,7 @@ tbody tr:nth-child(odd) {
     width: fit-content;
     min-width: 50vw;
     margin: auto;
+    background: #FFFFFF;
 }
 .attribute-list .attribute {
     display: flex;
@@ -423,6 +427,9 @@ tbody tr:nth-child(odd) {
 }
 .attribute-list .attribute:nth-child(odd) {
     background: #EEEEEE;
+}
+.attribute-list .attribute:nth-child(even) {
+    background: #FFFFFF;
 }
 .attribute-list .attribute label {
     width: 50%
@@ -489,7 +496,8 @@ lib-pagination .current {
         display: table-row;
         padding-bottom: 0px;
     }
-    .list > .item:nth-child(even) { background: #FAFAFA; }
+    .list > .item:nth-child(odd) { background: #FAFAFA; }
+    .list > .item:nth-child(even) { background: #FFFFFF; }
     .list > .item > span { display: table-cell; }
     .list > .item > span.header-only { display: table-cell; }
     .list > .item > span > legend { display: none; }
