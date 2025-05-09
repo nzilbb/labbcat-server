@@ -100,6 +100,6 @@ export class ValidLabelHelperComponent implements OnInit {
     }
     escapeRegex(symbol: string): string {
         if (!this.regularExpression) return symbol;
-        return symbol.replace(/([\?\.\*\|\^\$\(\)\{\}\[\]\-])/g,"\\$1");
+        return symbol.replace(/([\?\.\*\|\^\$\(\)\{\}\[\]\-\+\\])/g,"\\$1");
     }
 }
