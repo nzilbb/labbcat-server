@@ -29,15 +29,15 @@
 }
 
 .info {
-    background-color: #FDF7DF;
-    border: 1px solid #FEEC6F;
-    color: #C9971C;
+    background-color: var(--theme-background-color);
+    border: 1px solid var(--theme-text-color);
+    color: var(--theme-text-color);
 }
 
 .error {
-    background-color: #FEE;
-    border: 1px solid #EDD;
-    color: #A66;
+    background-color: var(--theme-background-color);
+    border: 1px solid var(--theme-error-color);
+    color: var(--theme-error-color);
 }
 
 .closebtn {
