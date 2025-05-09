@@ -2,6 +2,7 @@
         [disabled]="disabled"
         title="{{error || title}}"
         class="{{classes}}"
+        [class.no-caps]="noCaps"
         [class.error]="error"
         [appAutofocus]="autofocus?true:false">
   <img src="{{processing?imagesLocation+'/wait.gif':img.startsWith('http')?img:imagesLocation+'/'+img}}" alt="{{icon}}">

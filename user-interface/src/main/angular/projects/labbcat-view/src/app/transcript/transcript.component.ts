@@ -39,6 +39,8 @@ export class TranscriptComponent implements OnInit {
     categoryLabels: string[];
     currentCategory: string;
     categories: object; // string->Category
+    displayLayerIds: boolean;
+    displayAttributePrefixes: boolean;
 
     selectedLayerIds : string[];
     interpretedRaw: { [key: string] : boolean };
@@ -78,6 +80,7 @@ export class TranscriptComponent implements OnInit {
         this.selectedLayerIds = [];
         this.interpretedRaw = {};
         this.layerStyles = {};
+        this.categoryLabels = [];
         this.playingId = [];
         this.previousPlayingId = [];
     }
@@ -132,6 +135,12 @@ export class TranscriptComponent implements OnInit {
                     }
                     if (this.threadId) this.loadThread();
                     this.setOriginalFile();
+                    this.displayLayerIds = JSON.parse(sessionStorage.getItem("displayLayerIds")) ??
+                        (typeof this.displayLayerIds == "string" ? this.displayLayerIds === "true" : this.displayLayerIds) ??
+                        true;
+                    this.displayAttributePrefixes = JSON.parse(sessionStorage.getItem("displayAttributePrefixes")) ??
+                        (typeof this.displayAttributePrefixes == "string" ? this.displayAttributePrefixes === "true" : this.displayAttributePrefixes) ??
+                        false;
                 }); // transcript read
             }); // subscribed to queryParams
         }); // after readSchema
@@ -169,15 +178,18 @@ export class TranscriptComponent implements OnInit {
                     // identify transcript attribute layers
                     if (layer.parentId == "transcript"
                         && layer.alignment == 0
-                        && layer.id != schema.participantLayerId
-                        && layer.id != schema.episodeLayerId
-                        && layer.id != schema.corpusLayerId) {
+                        && layer.id != schema.participantLayerId) {
 
                         // ensure we can iterate all layer IDs
                         this.attributes.push(layer.id);
                         
-                        // ensure the transcript type layer has a category
-                        if (layer.id == "transcript_type") layer.category = "transcript_General";
+                        // ensure 'organizational' layers have a category
+                        if (["transcript_type", schema.corpusLayerId, schema.episodeLayerId].includes(layer.id)) {
+                            layer.category = "transcript_General";
+                            layer.hint = layer.id == "transcript_type" ? "Sociolinguistic interview section"
+                                : layer.id == schema.corpusLayerId ? "Collection of transcripts from a single research project"
+                                : "Series of transcripts from a single sociolinguistic interview";
+                        }
                         
                         if (!this.categoryLayers[layer.category]) {
                             this.categoryLayers[layer.category] = [];
@@ -228,7 +240,21 @@ export class TranscriptComponent implements OnInit {
         return new Promise((resolve, reject) => {
             this.labbcatService.labbcat.readOnlyCategories(
                 "transcript", (categories, errors, messages) => {
-                    this.categoryLabels = ["Participants", "Layers", "Formats"]; // TODO i18n
+                    for (let category of categories) {
+                        const layerCategory = "transcript_"+category.category;
+                        category.label = category.category;
+                        if (!category.description) {
+                            category.description = `Attributes: ${category.category}`; // TODO i18n
+                        }
+                        category.icon = "attributes.svg";
+                        this.categories[layerCategory] = category;
+                        this.categoryLabels.push(layerCategory);
+                    }
+                    if (this.categoryLabels.length == 1) { // only one actual category
+                        // just label the tab 'attributes' with the tooltip 'Transcript attributes'
+                        this.categories[this.categoryLabels[0]].label = "Attributes" // TODO i18n
+                        this.categories[this.categoryLabels[0]].description = "Transcript attributes" // TODO i18n
+                    }
                     // extra pseudo categories
                     this.categories["Layers"] = { // TODO i18n
                         label: "Layers", // TODO i18n
@@ -240,26 +266,17 @@ export class TranscriptComponent implements OnInit {
                         description: "The participants in the transcript",
                         icon: "people.svg"
                     }; // TODO i18n
-                    this.categories["Formats"] = { // TODO i18n
-                        label: "Formats", // TODO i18n
-                        description: "Export the transcript in a selected format",
-                        icon: "document.svg"
+                    this.categories["Search"] = { // TODO i18n
+                        label: "Search", // TODO i18n
+                        description: "Search this transcript",
+                        icon: "magnifying-glass.svg"
                     }; // TODO i18n
-                    
-                    for (let category of categories) {
-                        const layerCategory = "transcript_"+category.category;
-                        category.label = category.category;
-                        if (!category.description) {
-                            category.description = `Attributes: ${category.category}`; // TODO i18n
-                        }
-                        category.icon = "attributes.svg";
-                        this.categories[layerCategory] = category;
-                        this.categoryLabels.push(layerCategory);
-                    }
-                    if (this.categoryLabels.length == 4) { // only one actual category
-                        // just label the tab 'attributes'
-                        this.categories[this.categoryLabels[3]].label = "Attributes" // TODO i18n
-                    }
+                    this.categories["Export"] = { // TODO i18n
+                        label: "Export", // TODO i18n
+                        description: "Export the transcript in a selected format",
+                        icon: "cog.svg"
+                    }; // TODO i18n
+                    this.categoryLabels = this.categoryLabels.concat(["Participants","Layers","Search","Export"]);
                     resolve();
                 });
         });
@@ -305,8 +322,6 @@ export class TranscriptComponent implements OnInit {
                             if (layer.id == this.schema.corpusLayerId) continue;
                             if (layer.id == this.schema.episodeLayerId) continue;
                             if (layer.id == this.schema.participantLayerId) continue;
-                            if (layer.id == this.schema.utteranceLayerId) continue;
-                            if (layer.id == this.schema.wordLayerId) continue;
                             // a temporal layer
                             this.layerStyles[l] = { color: "silver" };
                             this.labbcatService.labbcat.countAnnotations(
@@ -440,7 +455,8 @@ export class TranscriptComponent implements OnInit {
     loadThread(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
             if (task) {
-                if (task.layers) this.layersChanged(task.layers.filter(l=>l!="orthography"));
+                let taskLayers = task.layers.filter(l=>l!="orthography");
+                if (task.layers) this.layersChanged(taskLayers);
                 this.highlightSearchResults(0);
             }
         });
@@ -628,6 +644,12 @@ export class TranscriptComponent implements OnInit {
                         if (page == 0) {
                             if (errors) errors.forEach(m => 
                                 this.messageService.error(`${layerId}: ${m}`));
+                            if (messages) {
+                                messages.forEach(m => this.messageService.info(`${layerId}: ${m}`));
+                                if (messages.includes("There are no annotations.")) {
+                                    this.layerStyles[layerId] = { color: "silver" };
+                                }
+                            }
                         }
                         if (annotations.length) {
                             const unknownAnchorIds = new Set<string>();
@@ -729,7 +751,9 @@ export class TranscriptComponent implements OnInit {
         // process them by parent, so that phrases from one speaker can't interfere with
         // those of another speaker
         for (let parent of this.transcript.all(layer.parentId)) {
-            const spans = (parent.all(layer.id)||[])
+            let spans = parent.all(layer.id);
+            if (!spans) continue; // prevent hangups from empty layers
+            spans = spans
             // first, order all annotations so that
             // i) annotations with earlier starts are earlier
             // ii) where starts are equal, longer annotations are earlier
@@ -1537,6 +1561,67 @@ export class TranscriptComponent implements OnInit {
                     });
             });
         } // 'edit' user
+    }
+    /** Participants button actions */
+    viewAttributes(participant: string): void {
+        if (this.user.roles.includes("edit")) {
+            this.router.navigate(["edit","participant"], {
+                queryParams: {
+                    id: participant
+                }
+            });
+        } else {
+            this.router.navigate(["participant"], {
+                queryParams: {
+                    id: participant
+                }
+            });
+        }
+    }
+    listTranscripts(participant: string): void {
+        this.router.navigate(["transcripts"], {
+            queryParams: {
+                participant_expression: "['" + participant + "'].includesAny(labels('participant'))",
+                participants: participant
+            }
+        });
+    }
+    /** Search button actions */
+    searchTranscript(): void {
+        this.router.navigate(["search"], {
+            queryParams: {
+                transcript_expression: "['" + this.id + "'].includes(id)",
+                transcripts: this.id
+            }
+        });
+    }
+    searchEpisode(): void {
+        this.router.navigate(["search"], {
+            queryParams: {
+                transcript_expression: "first('episode').label == '" + this.transcript.first('episode').label + "'",
+                transcripts: 'episode = ' + this.transcript.first('episode').label
+            }
+        });
+    }
+    searchParticipant(participant: string): void {
+        this.router.navigate(["search"], {
+            queryParams: {
+                participant_expression: "['" + participant + "'].includes(id)",
+                participants: participant
+            }
+        });
+    }
+    /** Toggle attribute IDs in Attributes tab(s) */
+    toggleLayerIds(): void {
+        this.displayLayerIds = !this.displayLayerIds;
+        sessionStorage.setItem("displayLayerIds", JSON.stringify(this.displayLayerIds));
+    }
+    toggleAttributePrefixes(): void {
+        this.displayAttributePrefixes = !this.displayAttributePrefixes;
+        sessionStorage.setItem("displayAttributePrefixes", JSON.stringify(this.displayAttributePrefixes));
+    }
+    TranscriptLayerLabel(id): string {
+        return id.replace(/^transcript_/,"");
     }
 
     hideWordMenu(): void {

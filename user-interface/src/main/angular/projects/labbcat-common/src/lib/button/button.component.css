@@ -1,3 +1,6 @@
 button label {
     padding-left: 3px;
 }
+.no-caps {
+    text-transform: unset;
+}
