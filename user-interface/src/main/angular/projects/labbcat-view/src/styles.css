@@ -500,5 +500,9 @@ lib-pagination .current {
         background-image: url('assets/sine.svg');
         background-size: auto 100%;
     }
+    /* transcript permalink image URL here to ensure it works from the server */
+    #word-menu .permalink:hover::after {
+        content: ' ' url('assets/link.svg') / '🔗';
+    }
 }
 
