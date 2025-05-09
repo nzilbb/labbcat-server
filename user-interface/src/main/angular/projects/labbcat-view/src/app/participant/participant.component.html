@@ -1,12 +1,9 @@
+<h1 id="title" i18n>Participant attributes<span *ngIf="participant">{{participant.label}}</span></h1>
 <lib-wait *ngIf="!participant"></lib-wait>
-<div *ngIf="participant" id="header" class="attribute-list">
-  <div class="attribute">
-    <label for="label" i18n="Participant ID label">Name</label>
-    <span id="label" class="values"><div class="value" id="title">{{participant.label}}</div></span>
-  </div>
-</div>
 <div *ngIf="participant" id="attributes" class="attribute-list tabs">
-  <div class="tab-labels">
+  <div
+    *ngIf="categoryLabels.length > 1"
+    class="tab-labels">
     <label *ngFor="let category of categoryLabels"
            [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
            (click)="currentCategory = category"
@@ -17,7 +14,7 @@
   <div *ngFor="let category of categoryLabels"
        [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
-        <label for="{{layer.id}}" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">{{layer.description}}</label>
+        <label for="{{layer.id}}" title="{{layer.hint}}">{{layer.description}}<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">{{displayAttributePrefixes ? layer.id : ParticipantLayerLabel(layer.id)}}</span>)</span></label>
         <span *ngIf="participant.annotations && participant.annotations[layer.id]"
               id="{{layer.id}}" class="values">
           <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
@@ -31,6 +28,26 @@
             </ng-container>
           </div>
         </span>
+      </div>
+      <div id="controls">
+        <div class="label-spacer">
+          <label id="toggleLayerIds">
+            <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
+            Hide attribute names
+          </label>
+        </div>
+        <div class="label-spacer">
+          <label
+            [class.disabled]="!displayLayerIds"
+            title="Show full names for attributes">
+            <lib-grouped-checkbox
+              name="hideAttributePrefixes"
+              [checked]="!displayAttributePrefixes"
+              [disabled]="!displayLayerIds"
+              (change)="toggleAttributePrefixes()"
+              ></lib-grouped-checkbox>
+            Hide attribute prefixes</label>
+        </div>
       </div>
     </div>
 </div>
