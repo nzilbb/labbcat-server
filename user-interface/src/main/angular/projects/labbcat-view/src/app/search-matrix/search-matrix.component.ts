@@ -160,11 +160,14 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
             const oldCursor = input.selectionStart;
             match.pattern = match.pattern.substring(0, oldCursor) + insertion + match.pattern.substring(oldCursor, input.value.length);
             input.focus();
-            input.setSelectionRange(oldCursor, oldCursor + insertion.length); // highlight insertion - doesn't seem to work
             // make sure toolip is updated:
             window.setTimeout(()=>{
                 input.dispatchEvent(new Event('input'));
-            }, 200);
+                input.setSelectionRange(oldCursor, oldCursor + insertion.length);
+                window.setTimeout(()=>{
+                    input.setSelectionRange(oldCursor + insertion.length, oldCursor + insertion.length);
+                }, 1000);
+            }, 100);
         }
     }
 
