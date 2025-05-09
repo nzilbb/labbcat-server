@@ -63,7 +63,8 @@
 
 img.data-type, img.alignment, img.vertical-peers {
     height: 1rem;
-    padding-right: 0.2rem;
+    margin-right: 0.2rem;
+    cursor: help;
 }
 .interpreted-selector {
     margin-left: 10px;
