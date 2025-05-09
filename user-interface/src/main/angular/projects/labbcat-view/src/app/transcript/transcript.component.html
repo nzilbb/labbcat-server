@@ -369,6 +369,7 @@
          [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
       <div *ngFor="let utterance of block.utterances"
            id="{{utterance.id}}"
+           [attr.turn-id]="utterance.parentId"
            [class.utterance]="true"
            [class.main-participant]="utterance.first('participant').first('main_participant')"
            [class.highlight]="utterance.id == highlitId"
@@ -662,8 +663,7 @@
                         [class.highlight]="annotation.id == highlitId"
                         class="annotation">{{renderLabel(annotation)}}
                     <ng-container *ngIf="annotation.layer.type != 'ipa'">&nbsp;</ng-container></span>
-                  <span *ngIf="word.all(l).length == 0"
-                        class="annotation">&nbsp;</span>
+                  <span [class.annotation]="word.all(l).length == 0">&nbsp;</span>
                 </span>
               </ng-container>
             </span>

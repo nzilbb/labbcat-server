@@ -91,6 +91,7 @@ nav, nav > div {
 }
 #temporal-blocks .simultaneous .utterance {
     flex-grow: 1;
+    flex-basis: 0;
 }
 #temporal-blocks .consecutive, #temporal-blocks .simultaneous .utterance {
     border-left: 1px darkgray solid;
@@ -103,8 +104,8 @@ nav, nav > div {
 }
 
 /* only the first consecutive utterance, simultaneous utterances are all labelled */
-.words {
-    margin-left: 5%;
+.words, .utterance-tag {
+    margin-left: 2.5vw;
 }
 .words > .word  {
     padding-left: 0px;
@@ -125,9 +126,18 @@ nav, nav > div {
     display: block;
 }
 
+/* padding between utterances in the same turn */
+.utterance:not(:first-child) {
+    padding-top: 0.75em;
+}
 .utterance-tag {
     display: inline-block;
-    width: 100%;
+}
+.consecutive .utterance-tag {
+    width: 97.5%;
+}
+.simultaneous .utterance-tag {
+    width: 95%;
 }
 .token {
     display: inline-block;
