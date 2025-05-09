@@ -17,6 +17,12 @@
     90%  { opacity: 1; }
     100% { opacity: 0; }
 }
+@keyframes sidle-fade-semitrans {
+    0%   { opacity: 0; left: 5%; }
+    5%   { opacity: 0.92; left: 0%; }
+    95%  { opacity: 0.92; }
+    100% { opacity: 0; }
+}
 @keyframes fade-in {
     from { opacity: 0; }
     to { end: 1; }
@@ -100,7 +106,7 @@ app-root footer, app-root header { color: var(--theme-text-color); }
 app-root footer a, app-root header a { color: var(--theme-text-color); text-decoration: none; }
 
 /* Layout */
-app-root, #main { display: flex; flex-direction: column; }
+app-root, #main { display: flex; flex-direction: column; min-width: 80vw; }
 app-root article, app-root nav, app-root aside { order: 0; }
 app-root article { flex: 3 1 60%; min-height: 100px; }
 app-root nav { flex: 1 6 20%; }
