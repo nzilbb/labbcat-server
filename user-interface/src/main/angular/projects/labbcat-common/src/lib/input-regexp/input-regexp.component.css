@@ -53,3 +53,12 @@ input {
         opacity: 0;
     }
 }
+/* Adapted from https://github.com/just-the-docs/just-the-docs/blob/b5345f2/_sass/code.scss */
+.regexp-tooltip code {
+    padding: 0.2em 0.15em;
+    font-weight: 400;
+    background-color: #f5f6fa;
+    border: 1px solid #eeebee;
+    border-radius: 3px;
+    color: black;
+}

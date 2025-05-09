@@ -1,7 +1,8 @@
 <div class="regexp-container">
   <input
     type="text"
-    class="regexp {{className}} {{regexpValid?'':'invalid'}}"
+    class="regexp {{className}}"
+    [class.invalid]="regexpError"
     name="{{name}}"
     id="{{id}}"
     title="{{temporaryTitle || title}}"
@@ -11,7 +12,7 @@
     (ngModelChange)="valueChange.emit(value)"
     [appAutofocus]="autofocus?true:false">
   <span
-    *ngIf="!regexpValid"
+    *ngIf="regexpError"
     class="regexp-tooltip"
-    >{{ temporaryTitle }}</span>
+    >Invalid regular expression <code>{{value}}</code>: {{ regexpError }}</span>
 </div>
