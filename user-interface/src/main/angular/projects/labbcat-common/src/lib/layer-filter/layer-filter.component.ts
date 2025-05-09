@@ -58,6 +58,10 @@ export class LayerFilterComponent implements OnInit {
     }
     
     handleRangeChange(i: number, value: string): void {
+        // ensure both bounds exist
+        if (!this.values.length) {
+            this.values = ['',''];
+        }
         this.values[i] = value;
         this.changeValues.emit(this.values);
     }
