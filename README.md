@@ -57,7 +57,7 @@ use `ng serve labbcat-view` or `ng serve labbcat-edit` (respectively)
 
 ### Internationalization/Localization
 
-The user interface components are contain `i18n` attributes for resources that require
+The user interface components contain `i18n` attributes for resources that require
 translation to other languages. If changes are made, resource files can be generated for
 translation by executing the following shell script:
 
@@ -76,6 +76,8 @@ To localize to a new language/variety:
 2. Edit the new file with an XLIFF editor.
 3. Add the new locale to the "locales" setting in *user-interface/angular.json*
 
+For more information about how to internationalize the code so that such translation can
+occur, see `user-interface/src/main/angular/README.md`
 
 ### Deployment into LaBB-CAT
 
