@@ -22,7 +22,7 @@ lib-wait {
 }
 .menu-word {
     font-style: italic;
-    color: #003594;
+    color: var(--theme-text-color);
 }
 @keyframes fade-background-in {
     from { background-color: transparent; }
