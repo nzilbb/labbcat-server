@@ -42,11 +42,14 @@ export class MatchesComponent implements OnInit {
     selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "word", "segment" ];
+    showAudioOptions = false;
+    prefixNames = false;
     wordLayers = [];
     schema: any;
     generableLayers = []; // list of layerIds that can be generated from a list of utterances
     dictionaryDependentLayers = []; // list of layerIds managed by HTK
     dictionaryLayerIds = {}; // map of HTK layerIds to their pronunciation layer IDs
+    showDictionaryOptions = false;
     phoneAlignmentLayerIds = {}; // map of HTK layerIds to their phone layer IDs
     baseUrl: string;
     emuWebApp = false;
@@ -107,7 +110,7 @@ export class MatchesComponent implements OnInit {
             this.zeroPad = (""+task.size).length;
             this.searchedLayers = task.layers || [];
             this.selectedLayers = this.searchedLayers
-                .concat([ "word", "participant", "transcript", "corpus" ]);
+                .concat([ "word", "participant", "transcript" ]);
             // if they searched the segment layer
             if (this.searchedLayers.includes("segment")) {
                 // include segments in serialization by default
@@ -217,7 +220,11 @@ export class MatchesComponent implements OnInit {
                 } // generable layer
                 if (layer.parentId == schema.wordLayerId
                     && layer.alignment == 0) {
-                    this.wordLayers.push(layer);
+                        if (layer.id == "orthography") { // orthography always at front
+                            this.wordLayers.unshift(layer);
+                        } else {
+                            this.wordLayers.push(layer);
+                        }
                 }
             }
         });
@@ -283,8 +290,14 @@ export class MatchesComponent implements OnInit {
     serializationOptions(): void {
         this.showSerializationOptions = !this.showSerializationOptions;
     }
+    audioOptions(): void {
+        this.showAudioOptions = !this.showAudioOptions;
+    }
     emuOptions(): void {
         this.showEmuOptions = !this.showEmuOptions;
+    }
+    dictionaryOptions(): void {
+        this.showDictionaryOptions = !this.showDictionaryOptions;
     }
     emuWebapp(): void {
         let serverUrl = this.baseUrl.replace(/^http/,"ws") + "emu";
@@ -376,5 +389,8 @@ export class MatchesComponent implements OnInit {
     // Math.min
     min(n1: number, n2: number): number {
         return Math.min(n1, n2);
+    }
+    togglePrefixNames(): void {
+        this.prefixNames = !this.prefixNames;
     }
 }
