@@ -2860,7 +2860,7 @@
       }
       // create form
       var fd = new FormData();
-      fd.append("merge", ""+merge);
+      fd.append("merge", ""+(merge?true:false));
       
       if (!runningOnNode) {	
         
