@@ -44,12 +44,14 @@ div.transcript-batch .transcript-entry {
 
 .transcript-entry span.header {
 }
+.transcript-entry .entry-selector.header {
+    text-align: center;
+}
 .transcript-entry span {
     text-align: center;
 }
 .transcript-entry span.entry-selector {
     width: 3%;
-    vertical-align: middle;
     text-align: left;
     padding-left: 0px;
 }
