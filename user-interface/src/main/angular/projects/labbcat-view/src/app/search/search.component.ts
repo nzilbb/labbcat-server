@@ -77,15 +77,14 @@ export class SearchComponent implements OnInit {
                     
                     this.matrix.participantQuery = params["participant_expression"];
                     if (this.matrix.participantQuery) {
-                        this.participantDescription = params["participants"]
-                            || "Selected participants"; // TODO i18n
+                        this.participantDescription = params["participants"]; // TODO i18n
                     }
                     
                     this.matrix.transcriptQuery = params["transcript_expression"];
                     if (this.matrix.transcriptQuery) {
-                        this.transcriptDescription = params["transcripts"]
-                            || "Selected transcripts"; // TODO i18n
+                        this.transcriptDescription = params["transcripts"]; // TODO i18n
                     }
+                    
                 }
                 this.listParticipants(false);
                 this.listTranscripts();
