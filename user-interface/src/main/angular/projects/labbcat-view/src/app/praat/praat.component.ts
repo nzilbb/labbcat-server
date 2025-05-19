@@ -95,7 +95,7 @@ export class PraatComponent implements OnInit {
     intensityOtherPattern = [ "M" ];
     intensityPitchFloorDefault = 60; // female
     intensityPitchFloorOther = [ 30 ]; // male
-    scriptIntensity = "To Intensity intensityPitchFloor, 0, yes";
+    scriptIntensity = "To Intensity: intensityPitchFloor, 0, yes";
     
     extractCOG1 = false;
     extractCOG2 = false;
