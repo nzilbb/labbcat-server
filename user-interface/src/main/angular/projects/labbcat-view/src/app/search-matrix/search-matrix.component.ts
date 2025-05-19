@@ -88,6 +88,12 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
                 } // the layer isn't selected
             } // next column layer
             
+            // put layers in selectedLayerIds order
+            let newLayers = {};
+            for (let layerId of selectedLayerIds) {
+                newLayers[layerId] = column.layers[layerId];
+            }
+            column.layers = newLayers;
         } // next column
     }
 
