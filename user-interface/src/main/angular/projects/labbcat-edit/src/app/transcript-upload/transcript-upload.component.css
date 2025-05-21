@@ -15,6 +15,7 @@
     justify-content: flex-end;
 }
 #drag-drop {
+    width: 95vw;
     min-height: 300px;
     border: 2px #DEE6EF dashed;
     text-align: center;
