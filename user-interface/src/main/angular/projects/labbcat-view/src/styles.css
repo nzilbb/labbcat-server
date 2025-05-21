@@ -134,6 +134,9 @@ app-root footer {
     font-size: 10pt;
 }
 
+div.messages {
+    width: fit-content; /* ensure it's no wider than necessary, so it doesn't cover menu options */
+}
 div.messages div.error { color: var(--theme-error-color); font-weight: bold; }
 .message { color: black; }
 .error { color: var(--theme-error-color); }
