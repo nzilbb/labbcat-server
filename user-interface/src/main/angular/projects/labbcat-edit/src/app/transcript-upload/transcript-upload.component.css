@@ -122,5 +122,14 @@ span.buttons > button > img {
 }
 
 .error {
-    color: red;
+    color: var(--theme-error-color);
+}
+#always-visible-buttons {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 6;
+}
+.deselected {
+    opacity: 0.33;
 }
