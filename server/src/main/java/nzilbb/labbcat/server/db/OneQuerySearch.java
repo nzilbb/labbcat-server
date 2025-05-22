@@ -399,13 +399,16 @@ public class OneQuerySearch extends SearchTask {
           StringBuilder sSqlExtraJoin = new StringBuilder();
           if (bPhraseLayer || bSpanLayer) {
             if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+                sSqlExtraJoin.append(sSqlWordStartJoin);
+              }
               if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
                 sSqlExtraJoin.append(sSqlWordEndJoin);
               }
               if (bPhraseLayer) {
-                sSqlExtraJoin.append(TRAILING_META_REGEXP_JOIN.format(oArgs));
+                sSqlExtraJoin.append(PHRASE_INSTANTS_REGEXP_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoin.append(TRAILING_FREEFORM_REGEXP_JOIN.format(oArgs));
+                sSqlExtraJoin.append(SPAN_INSTANTS_REGEXP_JOIN.format(oArgs));
               }
             } else {
               // meta/freeform layer
@@ -998,10 +1001,17 @@ public class OneQuerySearch extends SearchTask {
             if (bPhraseLayer || bSpanLayer) {
               if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
                 // meta/freeform layer
+                if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+                  sSqlExtraJoin.append(sSqlWordStartJoin);
+                }
                 if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
                   sSqlExtraJoin.append(sSqlWordEndJoin);
                 }
-                sSqlExtraJoin.append(TRAILING_META_REGEXP_JOIN.format(oArgs));
+                if (bPhraseLayer) {
+                  sSqlExtraJoin.append(PHRASE_INSTANTS_REGEXP_JOIN.format(oArgs));
+                } else {
+                  sSqlExtraJoin.append(SPAN_INSTANTS_REGEXP_JOIN.format(oArgs));
+                }
               } else {
                 // meta/freeform layer
                 if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
@@ -3169,23 +3179,21 @@ public class OneQuerySearch extends SearchTask {
    *  <li>6: search-column suffix </li>
    * </ul>
    */
-  static final MessageFormat TRAILING_META_REGEXP_JOIN  = new MessageFormat(
+  static final MessageFormat PHRASE_INSTANTS_REGEXP_JOIN  = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
     + "  INNER JOIN anchor meta{6}_start_{0}"
-    + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
-    + "  INNER JOIN anchor meta{6}_end_{0}"
-    + "  ON meta{6}_end_{0}.anchor_id = search{6}_{0}.end_anchor_id)"
-    + "  ON search{6}_{0}.ag_id = word{6}.ag_id"
+    + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id)"
+    + "  ON search_{0}.ag_id = word{6}.ag_id"
     // same turn...
     + "  AND search{6}_{0}.turn_annotation_id = word{6}.turn_annotation_id"
     // meta bounds enclose word end time...
-    + "  AND meta{6}_start_{0}.offset <= word{6}_end.offset"
-    + "  AND meta{6}_end_{0}.offset >= word{6}_end.offset"
+    + "  AND meta_start_{0}.offset >= word{6}_start.offset"
+    + "  AND meta_start_{0}.offset < word{6}_end.offset"
     + "  AND {2,choice,0#search{6}_{0}.label|1#CAST(search{6}_{0}.label AS BINARY)}"
     + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}");
-  
+    
   /**
-   * Query for matching a trailing (following the word) freeform-layer label
+   * Query for matching a trailing freeform-instants-layer label
    * - uses <code>REGEXP</code>
    * <p> Arguments are:
    * <ul>
@@ -3196,16 +3204,14 @@ public class OneQuerySearch extends SearchTask {
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    * </ul>
    */
-  static final MessageFormat TRAILING_FREEFORM_REGEXP_JOIN  = new MessageFormat(
+  static final MessageFormat SPAN_INSTANTS_REGEXP_JOIN  = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search_{0}" 
     + "  INNER JOIN anchor meta_start_{0}"
-    + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id"
-    + "  INNER JOIN anchor meta_end_{0}"
-    + "  ON meta_end_{0}.anchor_id = search_{0}.end_anchor_id)"
-    + "  ON search_{0}.ag_id = word{6}.ag_id" // TODO word... is not a thing
-    // meta bounds enclose word end time...
-    + "  AND meta_start_{0}.offset <= word{6}_end.offset"
-    + "  AND meta_end_{0}.offset >= word{6}_end.offset"
+    + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id)"
+    + "  ON search_{0}.ag_id = word{6}.ag_id"
+    // word bounds enclose annotation start time...
+    + "  AND meta_start_{0}.offset >= word{6}_start.offset"
+    + "  AND meta_start_{0}.offset < word{6}_end.offset"
     + "  AND {2,choice,0#search_{0}.label|1#CAST(search_{0}.label AS BINARY)}"
     + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}");
   
