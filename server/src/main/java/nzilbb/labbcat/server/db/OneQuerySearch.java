@@ -1,5 +1,5 @@
 //
-// Copyright 2023-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2023-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1844,7 +1844,7 @@ public class OneQuerySearch extends SearchTask {
           parameters, schema,
           layerIsSpanningAndWordAnchored, participantCondition, transcriptCondition);
       }
-      //setStatus("SQL: " + q);
+      setStatus("SQL: " + q);
     } catch (Exception x) {
       setStatus(x.getMessage());
       if (!x.getMessage().equals("Cancelled.")) {
@@ -3202,10 +3202,10 @@ public class OneQuerySearch extends SearchTask {
     + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id"
     + "  INNER JOIN anchor meta_end_{0}"
     + "  ON meta_end_{0}.anchor_id = search_{0}.end_anchor_id)"
-    + "  ON search_{0}.ag_id = word.ag_id" // TODO word... is not a thing
+    + "  ON search_{0}.ag_id = word{6}.ag_id" // TODO word... is not a thing
     // meta bounds enclose word end time...
-    + "  AND meta_start_{0}.offset <= word_end.offset"
-    + "  AND meta_end_{0}.offset >= word_end.offset"
+    + "  AND meta_start_{0}.offset <= word{6}_end.offset"
+    + "  AND meta_end_{0}.offset >= word{6}_end.offset"
     + "  AND {2,choice,0#search_{0}.label|1#CAST(search_{0}.label AS BINARY)}"
     + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}");
   
