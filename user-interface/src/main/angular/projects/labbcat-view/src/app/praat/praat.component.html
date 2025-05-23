@@ -228,16 +228,30 @@
           <span i18n>FastTrack</span>        
         </label>
         <div class="long">
+          <div class="label-spacer">
           <input id="fastTrackCoefficients" [(ngModel)]="fastTrackCoefficients" type="checkbox"
+                 [disabled]="!useFastTrack"
                  i18n-title title="Whether to return the regression coefficients from FastTrack">
           <label for="fastTrackCoefficients"
+                 [class.disabled]="!useFastTrack"
                  i18n-title title="Whether to return the regression coefficients from FastTrack" i18n="FastTrack coefficients">Include regression coefficients</label>
-          <a href="https://github.com/santiagobarreda/FastTrack" target="FastTrack"
-             i18n-title title="The FastTrack source code and wiki"
-             i18n>[more information]</a>
-          <a href="https://doi.org/10.1515/lingvan-2020-0051" target="FastTrack"
-             i18n-title title="Reference for citing FastTrack"
-             i18n>[cite]</a>
+          </div>
+          <lib-link
+            href="https://doi.org/10.1515/lingvan-2020-0051"
+            img="book.svg"
+            icon="📕"
+            i18n-title title="Reference for citing FastTrack"
+            i18n-label label="Cite FastTrack"
+            target="FastTrack"
+            ></lib-link>
+          <lib-link
+            href="https://github.com/santiagobarreda/FastTrack"
+            img="howto.svg"
+            icon="🎓"
+            i18n-title title="The FastTrack source code and wiki"
+            i18n-label label="About FastTrack"
+            target="FastTrack"
+            ></lib-link>
         </div>
       </div>
       <div class="{{useFastTrack?'long-unhidden-panel':'hidden-panel'}}">
