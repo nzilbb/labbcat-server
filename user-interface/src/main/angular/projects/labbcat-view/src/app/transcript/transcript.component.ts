@@ -437,9 +437,11 @@ export class TranscriptComponent implements OnInit {
 
     loadThread(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
-            if (task) {
+            if (task && task.layers) {
                 if (task.layers) this.layersChanged(task.layers.filter(l=>l!="orthography"));
                 this.highlightSearchResults(0);
+            } else {
+                this.messageService.info("Could not find thread with id " + this.threadId);
             }
         });
     }
