@@ -487,14 +487,14 @@
                 <span i18n>Rhotic</span>
               </label>
               <span class="long"
-                [class.disabled]="!!fastTrackEnableRhoticHeuristic"
+                [class.disabled]="!fastTrackEnableRhoticHeuristic"
                 i18n>If F3 < 2000 Hz, F1 and F2 should be at least 500 Hz apart.</span>
                                               </div>
             <div class="item"
                  i18n-title title="If (F4 - F3) < 500 Hz, F1 and F2 should be at least 1500 Hz apart">
               <label>
                 <input type="checkbox"
-                       [(ngModel)]="!fastTrackEnableF3F4ProximityHeuristic"
+                       [(ngModel)]="fastTrackEnableF3F4ProximityHeuristic"
                        i18n-title title="Uncheck to disable this heuristic"
                        [disabled]="!useFastTrack">
                 <span i18n>F3/F4 proximity</span>
