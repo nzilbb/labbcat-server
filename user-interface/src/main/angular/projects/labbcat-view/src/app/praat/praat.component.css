@@ -1,4 +1,29 @@
+#file-chooser {
+    min-width: 80vw;
+}
+#file-chooser label {
+    padding-right: 5px;
+}
+#file-chooser label:after {
+    content: ":";
+}
+#file-chooser details {
+    padding-top: 5px;
+}
+details > .advanced {
+    border: 1px solid silver;
+    border-radius: 8px;
+    padding: 10px;
+}
+details > .advanced > ul {
+    padding-top: 5px;
+    padding-inline-start: 29px;
+}
+details > .advanced li ul {
+    padding-inline-start: 40px;
+}
 .header {
+    padding-top: 10px;
     font-weight: bold;
 }
 .small {
@@ -31,12 +56,13 @@ details[open] > div {
 #rowCount {
     padding-left: 1ch;
 }
-a[target=FastTrack] {
-    float: right;
-}
+
 .settings-sets, .alternatives {
     display: flex;
     flex-direction: column;
+}
+#advanced-formants > .settings-sets, #advanced-formants > .long-unhidden-panel {
+    margin-left: 25px;
 }
 /* Praat custom script styles */
 #customScript {
@@ -58,12 +84,15 @@ a[target=FastTrack] {
 #load-controls div {
     display: inline-block;
 }
-
+.disabled {
+    color: silver;
+}
 .item > .viz {
     display: none;
 }
 fieldset {
     border: 1px solid silver;
+    border-radius: 8px;
 }
 label[for=formantDifferentiateParticipants] {
     padding-right: 1ch;
@@ -91,16 +120,26 @@ fieldset.other {
     padding-right: 10px;
 }
 
+.item > * {
+    min-width: 25%;
+    display: inline-block;
+    vertical-align: top;
+}
+summary > label {
+    min-width: 23.5%;
+    display: inline-block;
+}
+summary > label > span {
+    display: inline-block;
+    width: fit-content;
+    cursor: zoom-in;
+}
+details[open] > summary > label > span {
+    cursor: zoom-out;
+}
+
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
-    .item > * {
-        width: 25%;
-        display: inline-block;
-    }
-    summary > label {
-        width: 23%;
-        display: inline-block;
-    }
     .item > .viz {
         width: 33vw;
         display: inline-table;
@@ -109,13 +148,21 @@ fieldset.other {
     }
     .item, .item > .viz {
         min-height: 25px;
+        display: flex;
     }
     .item > .script {
         width: 50%;
     }
     .item > .long {
-        width: 70%;
-        display: inline-block;
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+    }
+    .label-spacer {
+        flex-grow: 1;
+    }
+    lib-link[target=FastTrack] {
+        padding-left: 1em;
     }
     .script input {
         width: 100%;
