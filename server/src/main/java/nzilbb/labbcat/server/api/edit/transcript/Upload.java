@@ -451,6 +451,8 @@ public class Upload extends APIRequestHandler {
         // pass through the graph list twice, once for merging and error checks, then again to save
         String corpusForParticipants = null;
         
+        Graph newGraph = null; // the incoming changes, if we're merging a single graph
+        
         // for each resulting graph
         for (int g = 0; g < graphs.length; g++) {
           Graph graph = graphs[g];
@@ -482,7 +484,7 @@ public class Upload extends APIRequestHandler {
             httpStatus.accept(SC_BAD_REQUEST);
             return failureResult(messages, "Transcript already exists: {0}", graph.getId());
           }
-
+          
           if (!existingTranscript) {
             // context.servletLog("PUT !existingTranscript");
             
@@ -555,11 +557,11 @@ public class Upload extends APIRequestHandler {
           // structure standardization
           new DefaultOffsetGenerator().transform(graph);
           graph.commit();
-
+        
           if (merge) {
             // context.servletLog("PUT merge...");
             
-            Graph newGraph = graph;
+            newGraph = graph;
             
             // normalize the graph before merge
             if (newGraph.getSchema().getParticipantLayer() != null // (if we have required layers)
@@ -692,12 +694,20 @@ public class Upload extends APIRequestHandler {
           }
               
           // save files
-          if (keepOriginal) { // TODO don't keep the 'original' if it's a merge AND the incoming transcript doesn't have the "word" layer (it will be annotations only)
+          if (keepOriginal) {
             // context.servletLog("PUT keepOriginal ");
             // usually there's one transcript file, and it should be the 'source' of the one graph
             // but if there are multiple files, the rest are saved as 'documents',
             // and if there are multiple graphs, *all* transcript files are documents of the first
             boolean fileIsSource = graphs.length == 1;
+            // replace the 'original' if it's a merge AND the incoming transcript
+            // doesn't have the "word" layer (it will be annotations only)
+            if (fileIsSource && merge && newGraph != null) {
+              if (newGraph.first(schema.getWordLayerId()) == null) {
+                // no words, so not a 'source'
+                fileIsSource = false;
+              }
+            }
             for (File file : transcripts) {
               if (fileIsSource) {
                 try {
