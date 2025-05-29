@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Vector;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -74,8 +76,13 @@ public class OneQuerySearch extends SearchTask {
     // if there's no explicit target layer
     if (matrix.getTargetLayerId() == null) {
       // and there's a segment condition
+      final Set<String> segmentLayerIds = Arrays.stream(
+        schema.getMatchingLayers(
+          layer -> "segment".equals(layer.getId()) || "segment".equals(layer.getParentId())))
+        .map(layer -> layer.getId())
+        .collect(Collectors.toSet());
       matrix.layerMatchStream()
-        .filter(match -> "segment".equals(match.getId()))
+        .filter(match -> segmentLayerIds.contains(match.getId()))
         .filter(LayerMatch::HasCondition)
         .findAny()
         // make the segment condition the target
