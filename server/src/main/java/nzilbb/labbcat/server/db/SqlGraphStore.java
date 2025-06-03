@@ -781,7 +781,7 @@ public class SqlGraphStore implements GraphStore {
             } else { // not ARPAbet
               // IPA? if there are any labels that are 'ɪ' or 'ǝ'
               sqlTest.setString(1, "ɪ");
-              sqlTest.setString(2, "ǝ");
+              sqlTest.setString(2, "ɔ");
               rsTest = sqlTest.executeQuery();
               boolean ipa = rsTest.next();
               rsTest.close();
@@ -799,8 +799,8 @@ public class SqlGraphStore implements GraphStore {
                   System.err.println("layer " + layer.getId() + " inferred labels: IPA");
                 }
               } else { // not IPA
-                // DISC? if there are any labels that are '1' (FACE) or '$' (THOUGHT)
-                sqlTest.setString(1, "1");
+                // DISC? if there are any labels that are '9' (CURE) or '$' (THOUGHT)
+                sqlTest.setString(1, "9");
                 sqlTest.setString(2, "$");
                 rsTest = sqlTest.executeQuery();
                 boolean disc = rsTest.next();
@@ -830,7 +830,7 @@ public class SqlGraphStore implements GraphStore {
                       System.err.println("layer " + layer.getId() + " inferred labels: X-SAMPA");
                     } else { // not X-SAMPA
                       // standard SAMPA? if there are any labels that are 'i:' or 'I@'
-                      sqlTest.setString(1, "i:");
+                      sqlTest.setString(1, "O:");
                       sqlTest.setString(2, "I@");
                       rsTest = sqlTest.executeQuery();
                       boolean sampa = rsTest.next();
@@ -3617,17 +3617,43 @@ public class SqlGraphStore implements GraphStore {
             parameterGroups.put(layerId, groups);
             altQueries.put(layerId, null); // there is no alternative query
             altParameterGroups.put(layerId, null);
+          } else if (targetLayer.getParentId().equals(schema.getTurnLayerId())
+                     && targetLayer.getAlignment() != Constants.ALIGNMENT_NONE) { // phrase layer
+            String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
+              +" start.offset"
+              +" FROM annotation_layer_"+layer_id+" annotation"
+              +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+              +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+              +" INNER JOIN (annotation_layer_"+targetLayer.get("layer_id")+" target"
+              +" INNER JOIN anchor target_start ON target.start_anchor_id = target_start.anchor_id"
+              +" INNER JOIN anchor target_end ON target.end_anchor_id = target_end.anchor_id)"
+              +" ON annotation.turn_annotation_id = target.turn_annotation_id"
+              +" AND end.offset > target_start.offset"
+              +" AND start.offset < target_end.offset"
+              +(!anchorStartLayers.contains(layer.getId())?"":
+                " AND annotation.start_anchor_id = target.start_anchor_id")
+              +(!anchorEndLayers.contains(layer.getId())?"":
+                " AND annotation.end_anchor_id = target.end_anchor_id")
+              +" WHERE target.annotation_id = ?"
+              +" ORDER BY start.offset, annotation.annotation_id"
+              +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
+            Object[] groups = { layer.getId(), target_annotation_id_group };
+            queries.put(layerId, getConnection().prepareStatement(sql));
+            parameterGroups.put(layerId, groups);
+            altQueries.put(layerId, null); // there is no alternative query
+            altParameterGroups.put(layerId, null);
           } else if (targetLayer.getParentId().equals(schema.getRoot().getId())
                      && targetLayer.getAlignment() != Constants.ALIGNMENT_NONE) { // span layer
             String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph,"
               +" start.offset"
               +" FROM annotation_layer_"+layer_id+" annotation"
               +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+              +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
               +" INNER JOIN (annotation_layer_"+targetLayer.get("layer_id")+" target"
               +" INNER JOIN anchor target_start ON target.start_anchor_id = target_start.anchor_id"
               +" INNER JOIN anchor target_end ON target.end_anchor_id = target_end.anchor_id)"
               +" ON annotation.ag_id = target.ag_id"
-              +" AND start.offset >= target_start.offset"
+              +" AND end.offset > target_start.offset"
               +" AND start.offset < target_end.offset"
               +(!anchorStartLayers.contains(layer.getId())?"":
                 " AND annotation.start_anchor_id = target.start_anchor_id")
@@ -4017,7 +4043,19 @@ public class SqlGraphStore implements GraphStore {
         else if (layer.getParentId() != null
                  && layer.getParentId().equals(schema.getTurnLayerId())) { // phrase layer
           Integer layer_id = (Integer)layer.get("layer_id");
-          if (targetLayer.isAncestor(schema.getTurnLayerId())) {
+          if (targetLayer.getId().equals(layer.getId()) // target is selected layer
+              && targetOffset == 0) { // and we're after our own details
+            String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
+              +" FROM annotation_layer_"+layer_id+" annotation"
+              +" WHERE annotation.annotation_id = ?"
+              +" ORDER BY annotation.ordinal, annotation.annotation_id"
+              +" LIMIT 1"; // there can be only one match 
+            Object[] groups = { layer.getId(), target_annotation_id_group };
+            queries.put(layerId, getConnection().prepareStatement(sql));
+            parameterGroups.put(layerId, groups);
+            altQueries.put(layerId, null); // there is no alternative query
+            altParameterGroups.put(layerId, null);
+          } else if (targetLayer.isAncestor(schema.getTurnLayerId())) {
             // target table has turn_annotation_id field
             String sql = "SELECT DISTINCT annotation.*, ? AS layer,"
               +" annotation.ag_id AS graph,"
@@ -4060,12 +4098,12 @@ public class SqlGraphStore implements GraphStore {
                 // same turn as target
                 +" INNER JOIN annotation_layer_"+SqlConstants.LAYER_TRANSCRIPTION+" target"
                 +" ON annotation.turn_annotation_id = target.turn_annotation_id"
-                        
+                
                 // token is the original target before applying offset
                 +" INNER JOIN annotation_layer_"+targetLayer.get("layer_id")+" token"
                 +" ON target.turn_annotation_id = token.turn_annotation_id"
                 +" AND target.ordinal_in_turn = token.ordinal_in_turn + " + targetOffset
-                        
+                
                 +(!anchorStartLayers.contains(layer.getId())?"":
                   " AND token.start_anchor_id = target.start_anchor_id")
                 +(!anchorEndLayers.contains(layer.getId())?"":
@@ -4078,7 +4116,7 @@ public class SqlGraphStore implements GraphStore {
                 // target anchors
                 +" INNER JOIN anchor target_start"
                 +" ON target.start_anchor_id = target_start.anchor_id"
-
+                
                 // use token.annotation_id instead of target.annotation_id
                 +" WHERE token.annotation_id = ?"
                 // annotation includes target start time
@@ -4096,12 +4134,13 @@ public class SqlGraphStore implements GraphStore {
             altParameterGroups.put(layerId, null);
           } else { // can't process this layer
             queries.put(layerId, null);
-            Object[] reason = { "Couldn't get " + layer + " for targets from " + targetLayer };
+            Object[] reason = {
+              "Couldn't get " + layer + " (phrase) for targets from " + targetLayer };
             parameterGroups.put(layerId, reason);
             altQueries.put(layerId, null);
             altParameterGroups.put(layerId, null);
           }
-        }  else if ((layer.getParentId() == null
+        } else if ((layer.getParentId() == null
                      || layer.getParentId().equals(schema.getRoot().getId()))
                     && layer.getAlignment() != Constants.ALIGNMENT_NONE) { // freeform layer
           Integer layer_id = (Integer)layer.get("layer_id");
