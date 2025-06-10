@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -263,7 +263,10 @@ public class LabbcatServlet extends HttpServlet {
    * @return true if the user is in the given role, false otherwise.
    */
   public static boolean IsUserInRole(String role, HttpServletRequest request, Connection db)
-    throws SQLException {
+    throws SQLException {    
+    if ("/login".equals(request.getPathInfo())) { // if they haven'e logged in yet...
+      return false; // ...they're not in any role
+    }
     // load user groups
     if (request.getSession().getAttribute("security") == null) {
       String user = request.getRemoteUser();
@@ -304,6 +307,29 @@ public class LabbcatServlet extends HttpServlet {
         } // user is in user table
         rstUser.close();
         sqlUser.close();
+
+        // determine whether logout is possible
+        // look in web.xml for /web-app/login-config/auth-method == BASIC
+        File webXmlFile = new File(
+          request.getServletContext().getRealPath("/WEB-INF/web.xml"));
+        Boolean canLogout = Boolean.TRUE;
+        try {
+            XPathFactory xpathFactory = XPathFactory.newInstance();
+            XPath xpath = xpathFactory.newXPath();
+            InputSource sbis = new InputSource(new FileInputStream(webXmlFile));
+            Document document = DocumentBuilderFactory.newInstance()
+              .newDocumentBuilder()
+              .parse(sbis);
+            String authMethod = (String) xpath.evaluate(
+              "/web-app/login-config/auth-method", document, XPathConstants.STRING);
+            if ("BASIC".equals(authMethod)) {
+              canLogout = Boolean.FALSE;
+            }
+        } catch (Throwable t) {
+          System.err.println("Can't parse web.xml: " + t);
+        }
+        request.getSession().setAttribute("canLogout", canLogout);
+        
       } // using authentication
     } // security not set yet, must be logging on
          
