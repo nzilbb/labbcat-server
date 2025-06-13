@@ -6,6 +6,8 @@ table {
 }
 td.buttons {
     white-space: nowrap;
+    display: flex;
+    justify-content: flex-end;
 }
 #spinner {
     text-align: center;
