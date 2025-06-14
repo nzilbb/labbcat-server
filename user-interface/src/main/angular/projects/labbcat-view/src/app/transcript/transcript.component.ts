@@ -1562,19 +1562,11 @@ export class TranscriptComponent implements OnInit {
     }
     /** Participants button actions */
     viewAttributes(participant: string): void {
-        if (this.user.roles.includes("edit")) {
-            this.router.navigate(["edit","participant"], {
-                queryParams: {
-                    id: participant
-                }
-            });
-        } else {
-            this.router.navigate(["participant"], {
-                queryParams: {
-                    id: participant
-                }
-            });
-        }
+        this.router.navigate(["participant"], {
+            queryParams: {
+                id: participant
+            }
+        });
     }
     listTranscripts(participant: string): void {
         this.router.navigate(["transcripts"], {
