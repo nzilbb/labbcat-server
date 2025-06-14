@@ -1,4 +1,6 @@
-<ng-container *ngIf="pageLinks">
+<div class="outer-container"
+     [class.tall]="showAllLinks && pageLinks.length > maxForWide">
+<div *ngIf="pageLinks" class="inner-container">
   <lib-button (press)="go(currentPage-1)"
               [disabled]="currentPage <= 1"
               i18n-title title="Previous page"
@@ -15,7 +17,8 @@
               i18n-title title="Next page"
               img="right-triangle.png" icon="🞂"
               ></lib-button>
-</ng-container>
+</div>
+<div class="inner-container pages">
 <ng-container *ngFor="let hint of pageLinks; let pg = index" >
   <span *ngIf="!showAllLinks && pg == 3 && (currentPage <= 3 || currentPage == pageLinks.length)"
         class="ellipsis"
@@ -41,3 +44,5 @@
        href="#">{{pg+1}}</a>
   </span>
 </ng-container>
+</div>
+</div>
