@@ -1795,8 +1795,8 @@ public class SqlGraphStore implements GraphStore {
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       expression, sqlSelectClause, userWhereClause, publicAttributesOnly, sqlOrderClause);
-    // System.out.println("QL: " + expression);
-    // System.out.println("SQL: " + q.sql);
+    // System.err.println("QL: " + expression);
+    // System.err.println("SQL: " + q.sql);
     PreparedStatement sql = q.prepareStatement(getConnection());
     return sql;
   } // end of participantMatchSql()

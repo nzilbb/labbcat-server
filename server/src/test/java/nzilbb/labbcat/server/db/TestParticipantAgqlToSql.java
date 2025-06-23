@@ -146,6 +146,20 @@ public class TestParticipantAgqlToSql {
     assertEquals("Parameter count - id", 0, q.parameters.size());
   }
 
+  /** SQL injection tests */
+  @Test public void sqlInjection() throws AGQLException {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "/' 1\\'' union select @@version -- /.test(id)",
+      "speaker_number, name", null, false, "ORDER BY speaker.name");
+    assertEquals("SQL - label",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE speaker.name REGEXP '\\' 1\\'\\' union select @@version -- '"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+
+  }
+
   @Test public void emptyExpression() throws AGQLException {
     ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
