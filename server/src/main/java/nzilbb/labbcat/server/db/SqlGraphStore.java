@@ -524,7 +524,9 @@ public class SqlGraphStore implements GraphStore {
 
       return layerIds.toArray(new String[0]);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
    
@@ -599,7 +601,9 @@ public class SqlGraphStore implements GraphStore {
         sql.close();               
       }
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
    
     // set parents
@@ -1209,7 +1213,9 @@ public class SqlGraphStore implements GraphStore {
         } // not a participant attribute
       } // not a temporal layer
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -1252,7 +1258,9 @@ public class SqlGraphStore implements GraphStore {
       sql.close();
       return corpora.toArray(new String[0]);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -1277,7 +1285,9 @@ public class SqlGraphStore implements GraphStore {
       sql.close();
       return participants.toArray(new String[0]);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
    
@@ -1446,7 +1456,9 @@ public class SqlGraphStore implements GraphStore {
         return null;
       }
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   } // end of getParticipant()
    
@@ -1552,7 +1564,9 @@ public class SqlGraphStore implements GraphStore {
       throw new StoreException(
         "Error parsing ID for participant: "+participant.getId(), exception);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
     return thereWereChanges;
   } // end of saveParticipant()
@@ -1736,7 +1750,9 @@ public class SqlGraphStore implements GraphStore {
       sql.close();
       return graphs.toArray(new String[0]);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -1834,7 +1850,9 @@ public class SqlGraphStore implements GraphStore {
         sql.close();
       }
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error from expression \""+expression+"\": " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
    
@@ -1907,7 +1925,9 @@ public class SqlGraphStore implements GraphStore {
       sql.close();
       return ids.toArray(new String[0]);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error from expression \""+expression+"\": " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -1995,7 +2015,9 @@ public class SqlGraphStore implements GraphStore {
         sql.close();
       }
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error from expression \""+expression+"\": " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
    
@@ -2052,7 +2074,9 @@ public class SqlGraphStore implements GraphStore {
       sql.close();
       return graphs.toArray(new String[0]);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error from expression \""+expression+"\": " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
    
@@ -2594,7 +2618,9 @@ public class SqlGraphStore implements GraphStore {
       graph.commit();
       return graph;
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -2961,7 +2987,9 @@ public class SqlGraphStore implements GraphStore {
         sql.close();
       }
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error from expression \""+expression+"\": " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -3045,7 +3073,9 @@ public class SqlGraphStore implements GraphStore {
 	 
       return annotations.toArray(new Annotation[0]);	 
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error from expression \""+expression+"\": " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -3143,7 +3173,9 @@ public class SqlGraphStore implements GraphStore {
         sql.close();
       }
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error from expression \""+expression+"\": " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -4414,7 +4446,9 @@ public class SqlGraphStore implements GraphStore {
         sql.close();
       }
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error from expression \""+expression+"\": " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
   
@@ -4623,7 +4657,9 @@ public class SqlGraphStore implements GraphStore {
       }
       return anchors.toArray(new Anchor[0]);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
    
@@ -5033,7 +5069,9 @@ public class SqlGraphStore implements GraphStore {
       fragment.commit();
       return fragment;
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }   
 
@@ -5335,7 +5373,9 @@ public class SqlGraphStore implements GraphStore {
       fragment.commit();
       return fragment;
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
   
@@ -6166,7 +6206,8 @@ public class SqlGraphStore implements GraphStore {
       }
     } catch(SQLException exception) {
       System.err.println("saveTranscript: " + exception.toString());
-      throw new StoreException(exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     } catch(TransformationException invalid) {
       System.err.println("saveTranscript: " + invalid.toString());
       throw new StoreException("Graph was not valid", invalid);
@@ -8015,7 +8056,9 @@ public class SqlGraphStore implements GraphStore {
       System.err.println("Error parsing parent ID: "+parent.getId());
       throw new StoreException("Error parsing parent ID: "+parent.getId());
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -8054,7 +8097,9 @@ public class SqlGraphStore implements GraphStore {
       System.err.println("Error parsing ID: "+annotationId);
       throw new StoreException("Error parsing ID: "+annotationId);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -8078,7 +8123,9 @@ public class SqlGraphStore implements GraphStore {
       sql.close();
       return tracks.toArray(new MediaTrackDefinition[0]);
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
 
@@ -8115,6 +8162,7 @@ public class SqlGraphStore implements GraphStore {
       }
     } catch(SQLException exception) {
       System.err.println("getMediaConversions: " + exception);
+      exception.printStackTrace(System.err);
     }
     return mConversionsFrom;
   } // end of mediaConversions()
@@ -9030,7 +9078,9 @@ public class SqlGraphStore implements GraphStore {
 
       } // there are missing files
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     } catch(MediaException exception) {
       throw new StoreException(exception);
     }
@@ -9142,7 +9192,9 @@ public class SqlGraphStore implements GraphStore {
       deleteTranscript.executeUpdate();
       deleteTranscript.close();
     } catch(SQLException exception) {
-      throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
     }
   }
    
@@ -9216,7 +9268,9 @@ public class SqlGraphStore implements GraphStore {
           sql.close();
         }
       } catch(SQLException exception) {
-        throw new StoreException(exception);
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
       }
     }
   }
