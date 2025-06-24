@@ -5663,7 +5663,7 @@ public class SqlGraphStore implements GraphStore {
       // the key is the layer_id, the value is a set of parent IDs of annotations to fix:
       HashMap<Integer,HashSet<String>> adjustPhraseOrdinals
         = new HashMap<Integer,HashSet<String>>();
-
+      Set<Anchor> createdThenDestroyedAnchors = new HashSet<Anchor>();
       for (Anchor anchor : changedAnchors) {
         // must be able to parse object's ID
         try {
@@ -5677,18 +5677,28 @@ public class SqlGraphStore implements GraphStore {
             }
           }
         } catch(ParseException parseX) {
-          throw new StoreException(
-            "Could not parse anchor ID:" + anchor.getId()
-            + ":" + anchor.getChange() + " - "
-            + anchor.endingAnnotations()
-            .map(a->a.getId()+":"+a.getLayerId()+":"+a.getChange()+":"+a.getLabel())
-            .collect(Collectors.joining(";"))
-            + "->"
-            + anchor.startingAnnotations()
-            .map(a->a.getId()+":"+a.getLayerId()+":"+a.getChange()+":"+a.getLabel())
-            .collect(Collectors.joining(";")));
+          if (anchor.getChange() == Change.Operation.Destroy) {
+            // if an anchor was created then destroyed in the same set of changes
+            // the ID will be invalid, so ignore it
+            createdThenDestroyedAnchors.add(anchor);
+          } else {
+            throw new StoreException(
+              "Could not parse anchor ID:" + anchor.getId()
+              + ":" + anchor.getChange() + " - "
+              + anchor.endingAnnotations()
+              .map(a->a.getId()+":"+a.getLayerId()+":"+a.getChange()+":"+a.getLabel())
+              .collect(Collectors.joining(";"))
+              + "->"
+              + anchor.startingAnnotations()
+              .map(a->a.getId()+":"+a.getLayerId()+":"+a.getChange()+":"+a.getLabel())
+              .collect(Collectors.joining(";")));
+          }
         }
       } // next anchor
+      
+      // remove created-then-destroyed anchors, we won't try to save them
+      for (Anchor a : createdThenDestroyedAnchors) changedAnchors.remove(a);
+      
       for (Annotation annotation : changedAnnotations) {
         if (annotation.getId().startsWith("m_")) {
           try {
