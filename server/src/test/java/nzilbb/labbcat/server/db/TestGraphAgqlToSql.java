@@ -169,9 +169,18 @@ public class TestGraphAgqlToSql {
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       "/' 1\\'' union select @@version -- /.test(id)",
       "speaker_number, name", null, false, "ORDER BY speaker.name");
-    assertEquals("SQL - label",
+    assertEquals("SQL - bad quote escaping with REGEXP",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE speaker.name REGEXP '\\' 1\\'\\' union select @@version -- '"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+
+    q = transformer.sqlFor(
+      "/\\\\' union select @@version -- /.test(id)",
+      "speaker_number, name", null, false, "ORDER BY speaker.name");
+    assertEquals("SQL - bad backslash escaping with REGEXP",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE speaker.name REGEXP '\\\\\\' union select @@version -- '"
                  +" ORDER BY speaker.name",
                  q.sql);
 

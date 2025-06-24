@@ -575,6 +575,34 @@ public class TestAnnotationAgqlToSql {
                  q.sql);
   }
 
+  /** SQL injection tests */
+  @Test public void sqlInjection() throws AGQLException {
+  AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+    AnnotationAgqlToSql.Query q = transformer.sqlFor(
+      "layer.id == 'orthography' && graph.id == ' 1\\'' union select @@version -- '",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("Graph ID - bad quote escaping",
+                 "SELECT DISTINCT annotation.*, 'orthography' AS layer"
+                 +" FROM annotation_layer_2 annotation"
+                 +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+                 +" WHERE 'orthography' = 'orthography'"
+                 +" AND graph.transcript_id = ' 1\\''" // union select @@version -- '"
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.ordinal, annotation.annotation_id",
+                 q.sql);
+
+    q = transformer.sqlFor(
+      "graph.id == '\\\\' union select @@version -- ' && layer.id == 'orthography'",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("Graph ID - bad quote escaping",
+                 "SELECT DISTINCT annotation.*, 'orthography' AS layer"
+                 +" FROM annotation_layer_2 annotation"
+                 +" INNER JOIN transcript graph ON annotation.ag_id = graph.ag_id"
+                 +" WHERE graph.transcript_id = '\\\\\\' union select @@version -- '"
+                 +" AND 'orthography' = 'orthography'"
+                 +" ORDER BY graph.transcript_id, annotation.parent_id, annotation.ordinal, annotation.annotation_id",
+                 q.sql);
+  }
+
   @Test public void graphAnnotationsByLayer() throws AGQLException {
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
     AnnotationAgqlToSql.Query q = transformer.sqlFor(

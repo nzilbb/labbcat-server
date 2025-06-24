@@ -152,16 +152,25 @@ public class TestParticipantAgqlToSql {
     ParticipantAgqlToSql.Query q = transformer.sqlFor(
       "/' 1\\'' union select @@version -- /.test(id)",
       "speaker_number, name", null, false, "ORDER BY speaker.name");
-    assertEquals("SQL - label",
+    assertEquals("SQL - bad quote escaping eith REGEXP incl. initial quote",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE speaker.name REGEXP '\\' 1\\'\\' union select @@version -- '"
                  +" ORDER BY speaker.name",
                  q.sql);
 
     q = transformer.sqlFor(
+      "/\\\\' union select @@version -- /.test(id)",
+      "speaker_number, name", null, false, "ORDER BY speaker.name");
+    assertEquals("SQL - bad backslash escaping with REGEXP",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE speaker.name REGEXP '\\\\\\' union select @@version -- '"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+
+    q = transformer.sqlFor(
       "id == '1\\'' union select @@version -- '",
       "speaker_number, name", null, false, "ORDER BY speaker.name");
-    assertEquals("SQL - label",
+    assertEquals("SQL - bad quote escaping with ==",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE speaker.name = '1\\''"
                  +" ORDER BY speaker.name",
@@ -170,7 +179,7 @@ public class TestParticipantAgqlToSql {
     q = transformer.sqlFor(
       "/1'' union select table_name from information_schema.tables where table_schema=database() -- /.test(id)",
       "speaker_number, name", null, false, "ORDER BY speaker.name");
-    assertEquals("SQL - label",
+    assertEquals("SQL - bad escaping with REGEXP - not initial quote",
                  "SELECT speaker_number, name FROM speaker"
                  +" WHERE speaker.name REGEXP '1\\'\\' union select table_name from information_schema.tables where table_schema=database() -- '"
                  +" ORDER BY speaker.name",
