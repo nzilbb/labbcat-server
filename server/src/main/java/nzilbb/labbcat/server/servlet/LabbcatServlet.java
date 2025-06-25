@@ -269,70 +269,85 @@ public class LabbcatServlet extends HttpServlet {
     }
     // load user groups
     if (request.getSession().getAttribute("security") == null) {
-      String user = request.getRemoteUser();
-      if (user == null) { // not using authentication
-        request.getSession().setAttribute("security", "none");
-        request.getSession().setAttribute("group_view", Boolean.TRUE);
-        request.getSession().setAttribute("group_edit", Boolean.TRUE);
-        request.getSession().setAttribute("group_admin", Boolean.TRUE);
-      } else { // using authentication
-        PreparedStatement sqlUserGroups = db.prepareStatement(
-          "SELECT role_id FROM role WHERE user_id = ?");
-        sqlUserGroups.setString(1, user);
-        ResultSet rstUserGroups = sqlUserGroups.executeQuery();
-        while (rstUserGroups.next()) {
-          request.getSession().setAttribute(
-            "group_" + rstUserGroups.getString("role_id"), Boolean.TRUE);
-        } // next group
-        rstUserGroups.close();
-        sqlUserGroups.close();
-		     
-        // check what kind of security we're using
-        PreparedStatement sqlUser = db.prepareStatement(
-          "SELECT reset_password FROM miner_user WHERE user_id = ?");
-        sqlUser.setString(1, user);
-        ResultSet rstUser = sqlUser.executeQuery();
-        if (rstUser.next()) {
-          // this user id is in the user table - this means we're
-          // using JDBCRealm security to connect to our own DB
-          request.getSession().setAttribute("security", "JDBCRealm");
-          if (rstUser.getInt("reset_password") == 1) {
-            request.setAttribute("reset_password", Boolean.TRUE);
-          }
-        } else {
-          // this user id is not in the user table - this means
-          // we're using some other security mechanism - probably
-          // LDAP via JNDI
-          request.getSession().setAttribute("security", "JNDIRealm");
-        } // user is in user table
-        rstUser.close();
-        sqlUser.close();
-
-        // determine whether logout is possible
-        // look in web.xml for /web-app/login-config/auth-method == BASIC
-        File webXmlFile = new File(
-          request.getServletContext().getRealPath("/WEB-INF/web.xml"));
-        Boolean canLogout = Boolean.TRUE;
-        try {
-            XPathFactory xpathFactory = XPathFactory.newInstance();
-            XPath xpath = xpathFactory.newXPath();
-            InputSource sbis = new InputSource(new FileInputStream(webXmlFile));
-            Document document = DocumentBuilderFactory.newInstance()
-              .newDocumentBuilder()
-              .parse(sbis);
+      // check ser server context for already-loaded info
+      try {
+        if (request.getServletContext().getAttribute("auth") == null) {
+          // look in web.xml
+          File webXmlFile = new File(
+            request.getServletContext().getRealPath("/WEB-INF/web.xml"));
+          XPathFactory xpathFactory = XPathFactory.newInstance();
+          XPath xpath = xpathFactory.newXPath();
+          InputSource sbis = new InputSource(new FileInputStream(webXmlFile));
+          Document document = DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder()
+            .parse(sbis);
+          // is there a /web-app/security-constraint/auth-constraint/role-name == view
+          String securityConstraint = (String)xpath.evaluate(
+            "/web-app/security-constraint/auth-constraint/role-name[contains(text(),'view')]",
+            document, XPathConstants.STRING);
+          boolean viewRole = "view".equals(securityConstraint);
+          if (!viewRole && request.getRemoteUser() == null) {
+            request.getServletContext().setAttribute("auth", Boolean.FALSE);
+          } else { // view role
+            request.getServletContext().setAttribute("auth", Boolean.TRUE);
+            // determine whether logout is possible
+            // look in web.xml for /web-app/login-config/auth-method == BASIC
+            Boolean canLogout = Boolean.TRUE;
             String authMethod = (String) xpath.evaluate(
               "/web-app/login-config/auth-method", document, XPathConstants.STRING);
             if ("BASIC".equals(authMethod)) {
               canLogout = Boolean.FALSE;
             }
-        } catch (Throwable t) {
-          System.err.println("Can't parse web.xml: " + t);
+            request.getServletContext().setAttribute("canLogout", canLogout);
+          }
         }
-        request.getSession().setAttribute("canLogout", canLogout);
-        
-      } // using authentication
+        if (!(Boolean)request.getServletContext().getAttribute("auth")) {      
+          request.getSession().setAttribute("security", "none");
+          request.getSession().setAttribute("group_view", Boolean.TRUE);
+          request.getSession().setAttribute("group_edit", Boolean.TRUE);
+          request.getSession().setAttribute("group_admin", Boolean.TRUE);
+        } else { // auth configured          
+          request.getSession().setAttribute(
+            "canLogout",
+            request.getServletContext().getAttribute("canLogout"));
+          if (request.getRemoteUser() != null) {
+            PreparedStatement sqlUserGroups = db.prepareStatement(
+              "SELECT role_id FROM role WHERE user_id = ?");
+            sqlUserGroups.setString(1, request.getRemoteUser());
+            ResultSet rstUserGroups = sqlUserGroups.executeQuery();
+            while (rstUserGroups.next()) {
+              request.getSession().setAttribute(
+                "group_" + rstUserGroups.getString("role_id"), Boolean.TRUE);
+            } // next group
+            rstUserGroups.close();
+            sqlUserGroups.close();
+		     
+            PreparedStatement sqlUser = db.prepareStatement(
+              "SELECT reset_password FROM miner_user WHERE user_id = ?");
+            sqlUser.setString(1, request.getRemoteUser());
+            ResultSet rstUser = sqlUser.executeQuery();
+            if (rstUser.next()) {
+              // this user id is in the user table - this means we're
+              // using JDBCRealm security to connect to our own DB
+              request.getSession().setAttribute("security", "JDBCRealm");
+              if (rstUser.getInt("reset_password") == 1) {
+                request.setAttribute("reset_password", Boolean.TRUE);
+              }
+            } else {
+              // this user id is not in the user table - this means
+              // we're using some other security mechanism - probably
+              // LDAP via JNDI
+              request.getSession().setAttribute("security", "JNDIRealm");
+            } // user is in user table
+            rstUser.close();
+            sqlUser.close();
+          } // user is set
+        } // view role
+      } catch (Throwable t) {
+        System.err.println("IsUserInRole: Can't parse web.xml: " + t);
+      }
     } // security not set yet, must be logging on
-         
+    
     return request.getSession().getAttribute("group_" + role) != null;
   } // end of IsUserInRole()
   
