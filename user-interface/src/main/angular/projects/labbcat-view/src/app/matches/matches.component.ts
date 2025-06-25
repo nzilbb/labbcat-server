@@ -35,7 +35,7 @@ export class MatchesComponent implements OnInit {
     serializers: SerializationDescriptor[];
     mimeTypeToSerializer = {};
     mimeType = "text/praat-textgrid";
-    serializeImg = "zip.png";
+    serializeImg = "cog.svg";
     showSerializationOptions = false;
     serializationLayers = [ "utterance", "word" ];
     showCsvOptions = false;
@@ -55,6 +55,7 @@ export class MatchesComponent implements OnInit {
     moreLoading = false;
     allLoading = false;
     readingMatches = false;
+    alreadySelected: boolean[]; // just for onChangeWordsContext()
 
     // for HTK/layer generation
     generateLayerId: string;
@@ -71,6 +72,7 @@ export class MatchesComponent implements OnInit {
     
     ngOnInit(): void {
         this.matches = [];
+        if (!this.alreadySelected) this.alreadySelected = [];
         this.transcriptUrl = this.labbcatService.labbcat.baseUrl + "transcript";
         this.readingMatches = true;
         this.route.queryParams.subscribe((params) => {
@@ -126,6 +128,8 @@ export class MatchesComponent implements OnInit {
                 this.mimeTypeToSerializer[descriptor.mimeType]
                     = descriptor as SerializationDescriptor;
             }
+            // alphabetical order
+            this.serializers.sort((a,b) => a.name.charCodeAt(0) - b.name.charCodeAt(0));
             // set initial icon
             this.onChangeMimeType();
         });
@@ -133,17 +137,26 @@ export class MatchesComponent implements OnInit {
     
     readMatches(): void {
         this.readingMatches = true;
+        const pageLength = this.alreadySelected.length || this.pageLength;
         this.labbcatService.labbcat.getMatches(
-            this.threadId, this.wordsContext, this.pageLength, this.pageNumber,
+            this.threadId, this.wordsContext, pageLength, this.pageNumber,
             (results, errors, messages) => {
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
                 this.name = results.name;
                 this.matchCount = results.matchCount;
-                for (let match of results.matches) {
-                    match._selected = true;
-                    this.matches.push(match as Match);
+                if (this.alreadySelected.length) {
+                    for (let [idx, match] of results.matches.entries()) {
+                        match._selected = this.alreadySelected[idx];
+                        this.matches.push(match as Match);
+                    }
+                } else {
+                    for (let match of results.matches) {
+                        match._selected = true;
+                        this.matches.push(match as Match);
+                    }
                 }
+                this.alreadySelected = [];
                 this.moreLoading = this.allLoading = this.readingMatches = false;
             });
     }
@@ -239,9 +252,10 @@ export class MatchesComponent implements OnInit {
     }
 
     onChangeWordsContext(): void {
-        // reload the first page
+        // get already-selected
+        this.alreadySelected = this.matches.map(match => match._selected);
+        // reload the currently-showing results
         this.matches = [];
-        this.pageLength = 20;
         this.pageNumber = 0;
         this.readMatches();
     }

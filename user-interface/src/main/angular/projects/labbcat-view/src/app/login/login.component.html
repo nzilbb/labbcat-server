@@ -1,0 +1,31 @@
+<h1 i18n="Page title">Login</h1>
+<div id="login-form">
+  <p *ngIf="error" class="error" i18n>Login error</p>
+  <div class="list">
+    <div class="item">
+      <label for="username" i18n>Username</label>
+      <span class="value">
+        <input [(ngModel)]="username"
+               type="text"
+               i18n-placeholder placeholder="Username"
+               i18n-title title="Your user ID"
+               name="j_username" autofocus></span>
+    </div>
+    <div class="item">
+      <label for="password">Password</label>
+      <span class="value">
+        <input [(ngModel)]="password"
+               type="password"
+               i18n-placeholder placeholder="Password"
+               i18n-title title="Your pass phrase"
+               name="j_password"></span>
+    </div>
+  </div>
+    <div class="buttons">
+      <lib-button
+        img="account-login.svg" icon="→]"
+        i18n-label="Button label" label="Login"
+        [disabled]="!username || !password"
+        (press)="login()"></lib-button>
+    </div>
+</div>

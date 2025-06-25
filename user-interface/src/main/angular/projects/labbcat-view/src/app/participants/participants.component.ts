@@ -739,6 +739,6 @@ export class ParticipantsComponent implements OnInit {
 
     /** Add escapes for query string values */
     esc(value: string): string {
-        return value.replace(/\\/,"\\\\").replace(/'/,"\\'");
+        return value.replaceAll(/\\/g,"\\\\").replaceAll(/'/g,"\\'");
     }
 }

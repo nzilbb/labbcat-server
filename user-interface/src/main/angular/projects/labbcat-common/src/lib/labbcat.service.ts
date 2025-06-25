@@ -30,20 +30,23 @@ export class LabbcatService {
         })
     }
 
-    login(user: string, password: string, url = "/") {
-        this.labbcat = new labbcat.LabbcatAdmin(this.environment.baseUrl);
-        // do a request to ensure we're in
-        this.labbcat.getId((result, errors, messages, call)=>{
-            console.log("errors " + JSON.stringify(errors));
-            if (errors) {
-                if (errors[0].endsWith("401")) {
-                    this.messageService.error("User ID or pass phrase incorrect");
+    login(user: string, password: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            this.labbcat = new labbcat.LabbcatAdmin(this.environment.baseUrl);
+            // do a request to ensure we're in
+            this.labbcat.verbose = true;
+            this.labbcat.login(user, password, (result, errors, messages, call)=>{
+                console.log("errors " + JSON.stringify(errors));
+                if (errors) {
+                    if (errors[0].endsWith("401")) {
+                        reject(["User ID or pass phrase incorrect"]); // TODO i18n
+                    } else {
+                        reject(errors.join("\n"));
+                    }
                 } else {
-                    for (let message of errors) this.messageService.error(message);
+                    resolve(messages);
                 }
-            } else {
-                this.router.navigateByUrl(url);
-            }
+            });
         });
     }
 

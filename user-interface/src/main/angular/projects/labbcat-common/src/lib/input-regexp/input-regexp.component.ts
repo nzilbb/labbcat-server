@@ -15,7 +15,7 @@ export class InputRegexpComponent implements OnInit {
     @Output() valueChange = new EventEmitter<string>();
     @Input() autofocus: boolean;
     temporaryTitle: string;
-    regexpValid = true;
+    regexpError: string;
     
     constructor() { }
     
@@ -25,8 +25,8 @@ export class InputRegexpComponent implements OnInit {
     checkRegularExpression(event: any): void {
         const value = event.target.value;
         try {
-            new RegExp(value);
-            this.regexpValid = true;
+            new RegExp(value, "u");
+            this.regexpError = "";
             // if it's a long regular expression...
             this.temporaryTitle = value.length>10
             // show the regular expression as the tool-tip
@@ -34,8 +34,8 @@ export class InputRegexpComponent implements OnInit {
             // but otherwise, use the given title
                 :null;
         } catch(error) {
-            this.regexpValid = false;
-            this.temporaryTitle = error;
+            this.temporaryTitle = error.message.replace(': ', ' ').replace('/u:', '/:');
+            this.regexpError = error.message.match("(?<=/u: ).+");
         }
     }
 }
