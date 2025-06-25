@@ -17,6 +17,12 @@
     90%  { opacity: 1; }
     100% { opacity: 0; }
 }
+@keyframes sidle-fade-semitrans {
+    0%   { opacity: 0; left: 5%; }
+    5%   { opacity: 0.92; left: 0%; }
+    95%  { opacity: 0.92; }
+    100% { opacity: 0; }
+}
 @keyframes fade-in {
     from { opacity: 0; }
     to { end: 1; }
@@ -100,11 +106,11 @@ app-root footer, app-root header { color: var(--theme-text-color); }
 app-root footer a, app-root header a { color: var(--theme-text-color); text-decoration: none; }
 
 /* Layout */
-app-root, #main { display: flex; flex-direction: column; }
+app-root, #main { display: flex; flex-direction: column; min-width: 80vw; }
 app-root article, app-root nav, app-root aside { order: 0; }
 app-root article { flex: 3 1 60%; min-height: 100px; }
 app-root nav { flex: 1 6 20%; }
-app-root aside { flex: 1 6 10%; min-height: 100px; }
+app-root aside { flex: 1 6 10%; min-height: 30px; }
 app-root header { min-height: 0px; }
 app-root footer { min-height: 50px; }
 /* Layout on wider screens - 3 columns */
@@ -128,6 +134,9 @@ app-root footer {
     font-size: 10pt;
 }
 
+div.messages {
+    width: fit-content; /* ensure it's no wider than necessary, so it doesn't cover menu options */
+}
 div.messages div.error { color: var(--theme-error-color); font-weight: bold; }
 .message { color: black; }
 .error { color: var(--theme-error-color); }
@@ -227,10 +236,10 @@ button {
     font-size: 9pt;
     padding: 1px;
 }
-button:hover {
-    background: #DDDDDD;
+button:hover:not([disabled]) {
+    background: #BBBBBB;
 }
-button:active {
+button:active:not([disabled]) {
     border: 1px inset;
     background: #BBBBBB;
 }
@@ -381,6 +390,9 @@ table {
 tbody tr:nth-child(odd) {
     background: #EEEEEE;
 }
+tbody tr:nth-child(even) {
+    background: #FFFFFF;
+}
 
 .hidden-panel {
     max-height: 0px;
@@ -409,6 +421,7 @@ tbody tr:nth-child(odd) {
     width: fit-content;
     min-width: 50vw;
     margin: auto;
+    background: #FFFFFF;
 }
 .attribute-list .attribute {
     display: flex;
@@ -417,6 +430,9 @@ tbody tr:nth-child(odd) {
 }
 .attribute-list .attribute:nth-child(odd) {
     background: #EEEEEE;
+}
+.attribute-list .attribute:nth-child(even) {
+    background: #FFFFFF;
 }
 .attribute-list .attribute label {
     width: 50%
@@ -483,7 +499,8 @@ lib-pagination .current {
         display: table-row;
         padding-bottom: 0px;
     }
-    .list > .item:nth-child(even) { background: #FAFAFA; }
+    .list > .item:nth-child(odd) { background: #FAFAFA; }
+    .list > .item:nth-child(even) { background: #FFFFFF; }
     .list > .item > span { display: table-cell; }
     .list > .item > span.header-only { display: table-cell; }
     .list > .item > span > legend { display: none; }
@@ -493,6 +510,10 @@ lib-pagination .current {
     #settings-form .item > .viz {
         background-image: url('assets/sine.svg');
         background-size: auto 100%;
+    }
+    /* transcript permalink image URL here to ensure it works from the server */
+    #word-menu .permalink:hover::after {
+        content: ' ' url('assets/link.svg') / '🔗';
     }
 }
 

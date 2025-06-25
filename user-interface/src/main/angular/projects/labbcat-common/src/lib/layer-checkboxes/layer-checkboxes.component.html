@@ -22,7 +22,7 @@
           *ngIf="scopeCount > 1"
           i18n="layer type header">Participant</legend>
   <ng-container *ngFor="let layer of participantAttributes">
-    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            title="{{layer.description}}"
            class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
@@ -62,7 +62,7 @@
           *ngIf="scopeCount > 1"
           i18n="layer type header">Transcript</legend>
   <ng-container *ngFor="let layer of transcriptAttributes">
-    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            title="{{layer.description}}"
            class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
@@ -102,7 +102,7 @@
           *ngIf="scopeCount > 1"
           i18n="layer type header">Span</legend>
   <ng-container *ngFor="let layer of spanLayers">
-    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            title="{{layer.description}}"
            class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
@@ -148,7 +148,7 @@
           *ngIf="scopeCount > 1"
           i18n="layer type header">Phrase</legend>
   <ng-container *ngFor="let layer of phraseLayers">
-    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            title="{{layer.description}}"
            class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
@@ -216,7 +216,7 @@
           *ngIf="scopeCount > 1"
           i18n="layer type header">Word</legend>
   <ng-container *ngFor="let layer of wordLayers">
-    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            title="{{layer.description}}"
            class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            style="{{styles[layer.id]}}">
@@ -284,7 +284,7 @@
           *ngIf="scopeCount > 1"
           i18n="layer type header" >Segment</legend>
   <ng-container *ngFor="let layer of segmentLayers">
-    <label *ngIf="!category || !layer.category || categorySelections[layer.category]"
+    <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            title="{{layer.description}}"
            class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            [ngStyle]="styles[layer.id]">

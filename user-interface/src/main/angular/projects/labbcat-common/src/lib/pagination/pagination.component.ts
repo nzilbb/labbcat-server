@@ -22,7 +22,7 @@ export class PaginationComponent implements OnInit {
     go(page: number): boolean {
         this.goToPage.emit(page);
         this.currentPage = page;
-        if (page > 4) this.showAllLinks = true;
+        if (page > 3 && page < this.pageLinks.length) this.showAllLinks = true;
         return false;
     }
     

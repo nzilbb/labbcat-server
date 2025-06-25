@@ -1,5 +1,5 @@
 //
-// Copyright 2019-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -119,13 +119,13 @@ public class ParticipantAgqlToSql {
           }
         }
         private String unquote(String s) {
-          return s.substring(1, s.length() - 1);
+          return escape(s.substring(1, s.length() - 1));
         }
         private String attribute(String s) {
           return s.replaceAll("^(participant|transcript)_","");
         }
         private String escape(String s) {
-          return s.replaceAll("\\'", "\\\\'");
+          return QL.Esc(s);
         }
         @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) {
           space();
@@ -419,6 +419,7 @@ public class ParticipantAgqlToSql {
           try { // ensure string literals use single, not double, quotes
             conditions.push("'"+unquote(ctx.patternOperand.getText())+"'");
           } catch(Exception exception) { // not a string literal
+            System.out.println("not a string literal " + exception);
             conditions.push(ctx.patternOperand.getText());
           }
           if (needsClosingParentheses) conditions.push("))");

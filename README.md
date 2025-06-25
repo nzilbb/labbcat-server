@@ -25,6 +25,26 @@ There currently three components here:
 - `mvn package -pl :nzilbb.labbcat.server -Dmaven.test.skip` - builds *target/nzilbb.labbcat.server-n.n.n.jar* without running tests
 - `mvn site -pl :nzilbb.labbcat.server` - build javadoc/API documentation in *docs*.
 
+#### Test prerequisites
+
+If automated tests are run, they require the following in order to complete successfully:
+
+- A test LaBB-CAT instance available at http://localhost:8080/labbcat/
+- Password protection
+- An 'admin' user with the credentials specified in\
+  `server/src/test/java/nzilbb/labbcat/server/api/TestStore.java`
+- A 'view'-only user with the credentials specified in\
+  `server/src/test/java/nzilbb/labbcat/server/api/admin/roles/TestPermissions.java`
+- Some transcripts uploaded (e.g. the Demo corpus)
+- One transcript that matches the pattern `AP511.+\.eaf`
+- No empty corpora
+- A layer called `phonemes` with annotations
+- The first participant on the 'participants' page to have a value for `participant_gender`
+  and for `participant_notes`
+- The first participant must have been force-aligned.
+- The plain text formatter installed
+- The Praat TextGrid formatter installed
+
 ### Documentation
 
 More documentation is available [here](https://nzilbb.github.io/labbcat-server/)
@@ -57,7 +77,7 @@ use `ng serve labbcat-view` or `ng serve labbcat-edit` (respectively)
 
 ### Internationalization/Localization
 
-The user interface components are contain `i18n` attributes for resources that require
+The user interface components contain `i18n` attributes for resources that require
 translation to other languages. If changes are made, resource files can be generated for
 translation by executing the following shell script:
 
@@ -76,6 +96,8 @@ To localize to a new language/variety:
 2. Edit the new file with an XLIFF editor.
 3. Add the new locale to the "locales" setting in *user-interface/angular.json*
 
+For more information about how to internationalize the code so that such translation can
+occur, see `user-interface/src/main/angular/README.md`
 
 ### Deployment into LaBB-CAT
 

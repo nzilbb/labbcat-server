@@ -150,6 +150,9 @@ public class ExtWebApp extends APIRequestHandler {
         }
 
         final Annotator annotator = descriptor.getInstance();
+        if (annotator.getClass().isAnnotationPresent(UsesGraphStore.class)) {
+          annotator.setStore(store);
+        }
         InputStream stream = null;
 
         String contentType = StandAloneWebApp.ContentTypeForName(resource);
