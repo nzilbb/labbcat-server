@@ -7,16 +7,16 @@
   <details *ngIf="!headers">
     <summary i18n>What should the file look like?</summary>
     <div class="advanced">
-      Comma-separated values (.csv) file exported from results of a <a href="search">search</a>, with:
+      <span i18n>Comma-separated values (.csv) file exported from results of a search, with</span>
       <ul>
-        <li>One row per token you want to measure (word, segment, etc.)</li>
-        <li>Columns
+        <li i18n>One row per token you want to measure (word, segment, etc.)</li>
+        <li><span i18n="Columns">Columns</span>
           <ul>
-            <li>Transcript name</li>
-            <li>Participant name</li>
-            <li>Start time for the token you want to measure</li>
-            <li>End time for the token you want to measure</li>
-            <li>(All other columns will be included in the output)</li>
+            <li i18n>Transcript name</li>
+            <li i18n>Participant name</li>
+            <li i18n>Start time for the token you want to measure</li>
+            <li i18n>End time for the token you want to measure</li>
+            <li i18n>(All other columns will be included in the output)</li>
           </ul>
         </li>
       </ul>
@@ -104,9 +104,7 @@
   <details id="formants"
        i18n-title title="Settings for extracting formant measures">
     <summary>
-      <label i18n>
-        <span onclick="a = event.target.parentElement.parentElement.parentElement ; a.open = !a.open;">Formants</span>
-      </label>
+      <label onclick="a = event.target.parentElement.parentElement ; a.open = !a.open;" i18n>Formants</label>
       <span>
         <input id="extractF1" [(ngModel)]="extractF1" type="checkbox"
                i18n-title title="Whether to extract the first formant">
@@ -234,7 +232,7 @@
                  i18n-title title="Whether to return the regression coefficients from FastTrack">
           <label for="fastTrackCoefficients"
                  [class.disabled]="!useFastTrack"
-                 i18n-title title="Whether to return the regression coefficients from FastTrack" i18n="FastTrack coefficients">Include regression coefficients</label>
+                 i18n-title title="Whether to return the regression coefficients from FastTrack" i18n="Include (FastTrack) regression coefficients">Include regression coefficients</label>
           </div>
           <lib-link
             href="https://doi.org/10.1515/lingvan-2020-0051"
@@ -350,9 +348,7 @@
         </div>
         <details>
           <summary>
-            <label i18n>
-              <span onclick="a = event.target.parentElement.parentElement.parentElement ; a.open = !a.open;">Advanced</span>
-            </label>
+            <label onclick="a = event.target.parentElement.parentElement ; a.open = !a.open;" i18n>Advanced</label>
           </summary>
           <div class="advanced" id="advanced-fastrack">
             <div class="header" i18n="FastTrack advanced settings">Settings</div>
@@ -524,9 +520,7 @@
   </details>  
   <details id="pitch" i18n-title title="Settings for extracting F0 (pitch) measures">
     <summary>
-      <label i18n>
-        <span onclick="a = event.target.parentElement.parentElement.parentElement ; a.open = !a.open;">Pitch</span>
-      </label>
+      <label onclick="a = event.target.parentElement.parentElement ; a.open = !a.open;" i18n>Pitch</label>
       <span class="long">
         <input id="extractMinimumPitch" [(ngModel)]="extractMinimumPitch" type="checkbox">
         <label for="extractMinimumPitch" i18n="Minimum pitch">Minimum</label>
@@ -660,9 +654,7 @@
   <details id="intensity"
            i18n-title title="Settings for extracting intensity measures">
     <summary>
-      <label i18n>
-        <span onclick="a = event.target.parentElement.parentElement.parentElement ; a.open = !a.open;">Intensity</span>
-      </label>
+      <label onclick="a = event.target.parentElement.parentElement ; a.open = !a.open;" i18n>Intensity</label>
       <span>
         <input id="extractMaximumIntensity" [(ngModel)]="extractMaximumIntensity" type="checkbox">
         <label for="extractMaximumIntensity" i18n="Maximum intensity">Maximum</label>
@@ -763,9 +755,7 @@
   <details id="custom"
            i18n-title title="Write your own Praat script to execute for each token">
     <summary>
-      <label i18n>
-        <span onclick="a = event.target.parentElement.parentElement.parentElement ; a.open = !a.open;">Custom Praat script</span>
-      </label>
+      <label onclick="a = event.target.parentElement.parentElement ; a.open = !a.open;" i18n>Custom Praat script</label>
     </summary>  
     <div class="advanced" id="show-script">
       <pre class="praat-prelude"><span class="praat-comment"># Below, you can write a custom <a href="https://www.fon.hum.uva.nl/praat/manual/Scripting.html" target="_blank">Praat script</a> that LaBB-CAT will run for each token.
@@ -832,14 +822,24 @@ removeObject: "Sound " + sampleName$</pre>
     </div>
   </details>
   <div class="controls">
-    <lib-button (press)="process()"
+    <lib-button *ngIf="extractF1 || extractF2 || extractF3 || extractMinimumPitch || extractMeanPitch || extractMaximumPitch || extractMaximumIntensity || extractCOG1 || extractCOG2 || extractCOG23 || customScript"
+                (press)="process()"
                 [processing]="processing"
                 [error]="processingError"
-                [disabled]="!extractF1 && !extractF2 && !extractF3 && !extractMinimumPitch && !extractMeanPitch && !extractMaximumPitch && !extractMaximumIntensity && !extractCOG1 && !extractCOG2 && !extractCOG23 && !customScript"
                 img="cog.svg" icon="⚙"
-                i18n-title [title]="(!extractF1 && !extractF2 && !extractF3 && !extractMinimumPitch && !extractMeanPitch && !extractMaximumPitch && !extractMaximumIntensity && !extractCOG1 && !extractCOG2 && !extractCOG23 && !customScript) ? 'Select at least one measurement to extract or specify a custom script' : 'Start processing'"
+                i18n-title title="Start processing"
                 i18n-label label="Process"
                 ></lib-button>
+    <lib-button *ngIf="!extractF1 && !extractF2 && !extractF3 && !extractMinimumPitch && !extractMeanPitch && !extractMaximumPitch && !extractMaximumIntensity && !extractCOG1 && !extractCOG2 && !extractCOG23 && !customScript"
+                img="cog.svg" icon="⚙"
+                disabled="true"
+                i18n-title title="Select at least one measurement to extract or specify a custom script"
+                i18n-label label="Process"
+                ></lib-button>
+    <span *ngIf=""
+          class="process-tooltip"
+          i18n></span>
+          
   </div>
   <lib-task *ngIf="threadId" threadId="{{threadId}}" (finished)="finished($event)"></lib-task>
 </div>
