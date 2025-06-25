@@ -23,6 +23,10 @@ export class LayerCheckboxesComponent implements OnInit {
     /** Allow the relationship (containing or contained) to be specified when a spanning
         layer is selected */ 
     @Input() includeRelationship: boolean;
+    /** Display icons */
+    @Input() displayIcons: boolean;
+    /** Display layer counts */
+    @Input() displayCounts: boolean;
     /** Show the alignment of each layer */
     @Input() includeAlignment: boolean;
     /** Allow participant attribute layers to be selected */
@@ -55,6 +59,10 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() segment: boolean;
     /** Layer styles - key is the layerId, value is the CSS style definition for the layer */
     @Input() styles: { [key: string] : any };
+    /** Annotation counts - key is the layerId, value is the number of annotations (e.g. in a transcript) */
+    @Input() annotationCounts: { [key: string] : any };
+    /** Input list of IDs of layers whose checkbox should be disabled */
+    @Input() disabled: string[];
     /** A layer ID to exclude options (annotation count, anchoring, etc.) for */
     @Input() excludeOptionsForLayerId: string;
     /** Input list of IDs of selected (ticked) layers */
@@ -97,6 +105,8 @@ export class LayerCheckboxesComponent implements OnInit {
         if (this.word) this.scopeCount++;
         if (this.segment) this.scopeCount++;
         if (!this.styles) this.styles = {};
+        if (!this.annotationCounts) this.annotationCounts = {};
+        if (!this.disabled) this.disabled = [];
         if (!this.interpretedRaw) this.interpretedRaw = {};
     }
 
@@ -114,6 +124,9 @@ export class LayerCheckboxesComponent implements OnInit {
         this.wordLayers = [];
         this.segmentLayers = [];
         this.categorySelections = {};
+        this.displayCounts = JSON.parse(sessionStorage.getItem("displayLayerCounts")) ??
+            (typeof this.displayCounts == "string" ? this.displayCounts === "true" : this.displayCounts) ??
+            true;
         if (!this.selected) this.selected = [] as string[];
 
         // add category selectors in defined order
@@ -232,5 +245,9 @@ export class LayerCheckboxesComponent implements OnInit {
     handleInterpretedRaw(layerId:string): void {
         this.interpretedRaw[layerId] = !this.interpretedRaw[layerId];
         this.interpretedRawChange.emit(this.interpretedRaw);
+    }
+    toggleLayerCounts(): void {
+        this.displayCounts = !this.displayCounts;
+        sessionStorage.setItem("displayLayerCounts", JSON.stringify(this.displayCounts));
     }
 }
