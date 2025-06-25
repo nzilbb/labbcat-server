@@ -350,13 +350,13 @@
 <fieldset *ngIf="(annotationCounts | json) != '{}'" class="icon-hider">
   <label 
     *ngIf="(annotationCounts | json) != '{}'"
-    title="Hide the number of annotations in each layer">
+    i18n-title title="Hide the number of annotations in each layer">
     <lib-grouped-checkbox
       group="hideLayerCounts"
       name="hideLayerCounts"
       [checked]="!displayCounts"
       (change)="toggleLayerCounts()"
       ></lib-grouped-checkbox>
-    Hide annotation counts
+    <span i18n>Hide annotation counts</span>
   </label>
 </fieldset>

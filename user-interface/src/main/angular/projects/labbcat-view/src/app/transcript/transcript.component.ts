@@ -315,13 +315,13 @@ export class TranscriptComponent implements OnInit {
                                     this.layerCounts[l] = count;
                                     if (count) { // annotations in this layer
                                         if (count == 1) {
-                                            this.schema.layers[l].description += ` (${count} annotation)`;
+                                            this.schema.layers[l].description += ` (${count} annotation)`; // TODO i18n
                                         } else {
-                                            this.schema.layers[l].description += ` (${count} annotations)`;
+                                            this.schema.layers[l].description += ` (${count} annotations)`; // TODO i18n
                                         }
                                         this.layerStyles[l] = {};
                                     } else {
-                                        this.schema.layers[l].description += ' (0 annotations)';
+                                        this.schema.layers[l].description += ' (0 annotations)'; // TODO i18n
                                         this.layerStyles[l] = { color: "silver" };
                                         this.disabledLayerIds.push(l);
                                     }
