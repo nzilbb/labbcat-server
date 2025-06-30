@@ -15,6 +15,7 @@
     justify-content: flex-end;
 }
 #drag-drop {
+    width: 95vw;
     min-height: 300px;
     border: 2px #DEE6EF dashed;
     text-align: center;
@@ -44,12 +45,14 @@ div.transcript-batch .transcript-entry {
 
 .transcript-entry span.header {
 }
+.transcript-entry .entry-selector.header {
+    text-align: center;
+}
 .transcript-entry span {
     text-align: center;
 }
 .transcript-entry span.entry-selector {
     width: 3%;
-    vertical-align: middle;
     text-align: left;
     padding-left: 0px;
 }
@@ -120,5 +123,14 @@ span.buttons > button > img {
 }
 
 .error {
-    color: red;
+    color: var(--theme-error-color);
+}
+#always-visible-buttons {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 6;
+}
+.deselected {
+    opacity: 0.33;
 }

@@ -1,5 +1,5 @@
 //
-// Copyright 2023-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2023-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Vector;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -74,8 +76,13 @@ public class OneQuerySearch extends SearchTask {
     // if there's no explicit target layer
     if (matrix.getTargetLayerId() == null) {
       // and there's a segment condition
+      final Set<String> segmentLayerIds = Arrays.stream(
+        schema.getMatchingLayers(
+          layer -> "segment".equals(layer.getId()) || "segment".equals(layer.getParentId())))
+        .map(layer -> layer.getId())
+        .collect(Collectors.toSet());
       matrix.layerMatchStream()
-        .filter(match -> "segment".equals(match.getId()))
+        .filter(match -> segmentLayerIds.contains(match.getId()))
         .filter(LayerMatch::HasCondition)
         .findAny()
         // make the segment condition the target
@@ -317,15 +324,18 @@ public class OneQuerySearch extends SearchTask {
               if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
                 sSqlExtraJoinsFirst.append(sSqlWordStartJoin);
               }
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
+                sSqlExtraJoinsFirst.append(sSqlWordEndJoin);
+              }
               if (bPhraseLayer) {
-                sSqlExtraJoinsFirst.append(CONTAINING_META_NUMERIC_MAX_JOIN.format(oArgs));
+                sSqlExtraJoinsFirst.append(OVERLAPPING_PHRASE_NUMERIC_MAX_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs));
+                sSqlExtraJoinsFirst.append(OVERLAPPING_SPAN_NUMERIC_MAX_JOIN.format(oArgs));
               }
             } // un-anchored meta condition
           } else if (bUseWordContainsJoins
                      && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
-            // word-containing-segment layer
+            // word-overlapping-segment layer
             if (sSqlExtraJoinsFirst.indexOf(sSqlSegmentStartJoin) < 0) {
               sSqlExtraJoinsFirst.append(sSqlSegmentStartJoin);
             }
@@ -347,10 +357,13 @@ public class OneQuerySearch extends SearchTask {
               if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
                 sSqlExtraJoinsFirst.append(sSqlWordStartJoin);
               }
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
+                sSqlExtraJoinsFirst.append(sSqlWordEndJoin);
+              }
               if (bPhraseLayer) {
-                sSqlExtraJoinsFirst.append(CONTAINING_META_NUMERIC_MIN_JOIN.format(oArgs));
+                sSqlExtraJoinsFirst.append(OVERLAPPING_PHRASE_NUMERIC_MIN_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs));
+                sSqlExtraJoinsFirst.append(OVERLAPPING_SPAN_NUMERIC_MIN_JOIN.format(oArgs));
               }
             } // un-anchors meta condition
           } else if (bUseWordContainsJoins
@@ -377,10 +390,13 @@ public class OneQuerySearch extends SearchTask {
               if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
                 sSqlExtraJoinsFirst.append(sSqlWordStartJoin);
               }
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
+                sSqlExtraJoinsFirst.append(sSqlWordEndJoin);
+              }
               if (bPhraseLayer) {
-                sSqlExtraJoinsFirst.append(CONTAINING_META_NUMERIC_RANGE_JOIN.format(oArgs));
+                sSqlExtraJoinsFirst.append(OVERLAPPING_PHRASE_NUMERIC_RANGE_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoinsFirst.append(CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs));
+                sSqlExtraJoinsFirst.append(OVERLAPPING_SPAN_NUMERIC_RANGE_JOIN.format(oArgs));
               }
             } // un-anchored meta condition
           } else if (bUseWordContainsJoins
@@ -399,15 +415,18 @@ public class OneQuerySearch extends SearchTask {
           StringBuilder sSqlExtraJoin = new StringBuilder();
           if (bPhraseLayer || bSpanLayer) {
             if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
+              if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+                sSqlExtraJoin.append(sSqlWordStartJoin);
+              }
               if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
                 sSqlExtraJoin.append(sSqlWordEndJoin);
               }
               if (bPhraseLayer) {
-                sSqlExtraJoin.append(TRAILING_META_REGEXP_JOIN.format(oArgs));
+                sSqlExtraJoin.append(PHRASE_INSTANTS_REGEXP_JOIN.format(oArgs));
               } else {
-                sSqlExtraJoin.append(TRAILING_FREEFORM_REGEXP_JOIN.format(oArgs));
+                sSqlExtraJoin.append(SPAN_INSTANTS_REGEXP_JOIN.format(oArgs));
               }
-            } else {
+            } else { // not an instant layer
               // meta/freeform layer
               if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
                 // anchored to start of word
@@ -419,10 +438,13 @@ public class OneQuerySearch extends SearchTask {
                 if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
                   sSqlExtraJoin.append(sSqlWordStartJoin);
                 }
+                if (sSqlExtraJoinsFirst.indexOf(sSqlWordEndJoin) < 0) {
+                  sSqlExtraJoin.append(sSqlWordEndJoin);
+                }
                 if (bPhraseLayer) {
-                  sSqlExtraJoin.append(CONTAINING_META_REGEXP_JOIN.format(oArgs));
+                  sSqlExtraJoin.append(OVERLAPPING_PHRASE_REGEXP_JOIN.format(oArgs));
                 } else {
-                  sSqlExtraJoin.append(CONTAINING_FREEFORM_REGEXP_JOIN.format(oArgs));
+                  sSqlExtraJoin.append(OVERLAPPING_SPAN_REGEXP_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
             }
@@ -915,10 +937,13 @@ public class OneQuerySearch extends SearchTask {
                 if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
                   sSqlExtraJoins.append(sSqlWordStartJoin);
                 }
+                if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
+                  sSqlExtraJoins.append(sSqlWordEndJoin);
+                }
                 if (bPhraseLayer) {
-                  sSqlExtraJoins.append(CONTAINING_META_NUMERIC_MAX_JOIN.format(oArgs));
+                  sSqlExtraJoins.append(OVERLAPPING_PHRASE_NUMERIC_MAX_JOIN.format(oArgs));
                 } else {
-                  sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_MAX_JOIN.format(oArgs));
+                  sSqlExtraJoins.append(OVERLAPPING_SPAN_NUMERIC_MAX_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
             } else if (bUseWordContainsJoins
@@ -945,10 +970,13 @@ public class OneQuerySearch extends SearchTask {
                 if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
                   sSqlExtraJoins.append(sSqlWordStartJoin);
                 }
+                if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
+                  sSqlExtraJoins.append(sSqlWordEndJoin);
+                }
                 if (bPhraseLayer) {
-                  sSqlExtraJoins.append(CONTAINING_META_NUMERIC_MIN_JOIN.format(oArgs));
+                  sSqlExtraJoins.append(OVERLAPPING_PHRASE_NUMERIC_MIN_JOIN.format(oArgs));
                 } else {
-                  sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_MIN_JOIN.format(oArgs));
+                  sSqlExtraJoins.append(OVERLAPPING_SPAN_NUMERIC_MIN_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
             } else if (bUseWordContainsJoins
@@ -975,10 +1003,13 @@ public class OneQuerySearch extends SearchTask {
                 if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
                   sSqlExtraJoins.append(sSqlWordStartJoin);
                 }
+                if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
+                  sSqlExtraJoins.append(sSqlWordEndJoin);
+                }
                 if (bPhraseLayer) {
-                  sSqlExtraJoins.append(CONTAINING_META_NUMERIC_RANGE_JOIN.format(oArgs));
+                  sSqlExtraJoins.append(OVERLAPPING_PHRASE_NUMERIC_RANGE_JOIN.format(oArgs));
                 } else {
-                  sSqlExtraJoins.append(CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN.format(oArgs));
+                  sSqlExtraJoins.append(OVERLAPPING_SPAN_NUMERIC_RANGE_JOIN.format(oArgs));
                 }
               } // un-anchored meta condition
             } else if (bUseWordContainsJoins
@@ -998,10 +1029,17 @@ public class OneQuerySearch extends SearchTask {
             if (bPhraseLayer || bSpanLayer) {
               if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
                 // meta/freeform layer
+                if (sSqlExtraJoinsFirst.indexOf(sSqlWordStartJoin) < 0) {
+                  sSqlExtraJoin.append(sSqlWordStartJoin);
+                }
                 if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
                   sSqlExtraJoin.append(sSqlWordEndJoin);
                 }
-                sSqlExtraJoin.append(TRAILING_META_REGEXP_JOIN.format(oArgs));
+                if (bPhraseLayer) {
+                  sSqlExtraJoin.append(PHRASE_INSTANTS_REGEXP_JOIN.format(oArgs));
+                } else {
+                  sSqlExtraJoin.append(SPAN_INSTANTS_REGEXP_JOIN.format(oArgs));
+                }
               } else {
                 // meta/freeform layer
                 if (layerMatch.getAnchorStart() && bWordAnchoredMetaLayer) {
@@ -1014,10 +1052,13 @@ public class OneQuerySearch extends SearchTask {
                   if (sSqlExtraJoins.indexOf(sSqlWordStartJoin) < 0) {
                     sSqlExtraJoin.append(sSqlWordStartJoin);
                   }
+                  if (sSqlExtraJoins.indexOf(sSqlWordEndJoin) < 0) {
+                    sSqlExtraJoin.append(sSqlWordEndJoin);
+                  }
                   if (bPhraseLayer) {
-                    sSqlExtraJoin.append(CONTAINING_META_REGEXP_JOIN.format(oArgs));
+                    sSqlExtraJoin.append(OVERLAPPING_PHRASE_REGEXP_JOIN.format(oArgs));
                   } else {
-                    sSqlExtraJoin.append(CONTAINING_FREEFORM_REGEXP_JOIN.format(oArgs));
+                    sSqlExtraJoin.append(OVERLAPPING_SPAN_REGEXP_JOIN.format(oArgs));
                   }
                 } // un-anchored meta condition
               }
@@ -1844,7 +1885,7 @@ public class OneQuerySearch extends SearchTask {
           parameters, schema,
           layerIsSpanningAndWordAnchored, participantCondition, transcriptCondition);
       }
-      //setStatus("SQL: " + q);
+      setStatus("SQL: " + q);
     } catch (Exception x) {
       setStatus(x.getMessage());
       if (!x.getMessage().equals("Cancelled.")) {
@@ -2846,7 +2887,7 @@ public class OneQuerySearch extends SearchTask {
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    * </ul>
    */
-  static final MessageFormat CONTAINING_META_NUMERIC_MAX_JOIN = new MessageFormat(
+  static final MessageFormat OVERLAPPING_PHRASE_NUMERIC_MAX_JOIN = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search_{0}" 
     + "  INNER JOIN anchor meta_start_{0}"
     + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id"
@@ -2856,7 +2897,7 @@ public class OneQuerySearch extends SearchTask {
     // same turn...
     + "  AND search_{0}.turn_annotation_id = word.turn_annotation_id" // TODO word... is not a thing
     // meta bounds enclose word start time...
-    + "  AND meta_start_{0}.offset <= word_start.offset"
+    + "  AND meta_start_{0}.offset < word_end.offset"
     + "  AND meta_end_{0}.offset > word_start.offset"
     + "  AND CAST(search_{0}.label AS DECIMAL) < ? {4}");
   
@@ -2871,7 +2912,7 @@ public class OneQuerySearch extends SearchTask {
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    * </ul>
    */
-  static final MessageFormat CONTAINING_FREEFORM_NUMERIC_MAX_JOIN = new MessageFormat(
+  static final MessageFormat OVERLAPPING_SPAN_NUMERIC_MAX_JOIN = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search_{0}" 
     + "  INNER JOIN anchor meta_start_{0}"
     + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id"
@@ -2879,7 +2920,7 @@ public class OneQuerySearch extends SearchTask {
     + "  ON meta_end_{0}.anchor_id = search_{0}.end_anchor_id)"
     + "  ON search_{0}.ag_id = word.ag_id" // TODO word... is not a thing
     // meta bounds enclose word start time...
-    + "  AND meta_start_{0}.offset <= word_start.offset"
+    + "  AND meta_start_{0}.offset < word_end.offset"
     + "  AND meta_end_{0}.offset > word_start.offset"
     + "  AND CAST(search_{0}.label AS DECIMAL) < ? {4}");
   
@@ -2967,7 +3008,7 @@ public class OneQuerySearch extends SearchTask {
    *  <li>6: search-column suffix </li>
    * </ul>
    */
-  static final MessageFormat CONTAINING_META_NUMERIC_MIN_JOIN = new MessageFormat(
+  static final MessageFormat OVERLAPPING_PHRASE_NUMERIC_MIN_JOIN = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
     + "  INNER JOIN anchor meta{6}_start_{0}"
     + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
@@ -2977,7 +3018,7 @@ public class OneQuerySearch extends SearchTask {
     // same turn...
     + "  AND search{6}_{0}.turn_annotation_id = word{6}.turn_annotation_id"
     // meta bounds enclose word start time...
-    + "  AND meta{6}_start_{0}.offset <= word{6}_start.offset"
+    + "  AND meta{6}_start_{0}.offset < word{6}_end.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
     + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ? {4}");
   /**
@@ -2992,7 +3033,7 @@ public class OneQuerySearch extends SearchTask {
    *  <li>6: search-column suffix </li>
    * </ul>
    */
-  static final MessageFormat CONTAINING_FREEFORM_NUMERIC_MIN_JOIN = new MessageFormat(
+  static final MessageFormat OVERLAPPING_SPAN_NUMERIC_MIN_JOIN = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
     + "  INNER JOIN anchor meta{6}_start_{0}"
     + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
@@ -3000,7 +3041,7 @@ public class OneQuerySearch extends SearchTask {
     + "  ON meta{6}_end_{0}.anchor_id = search{6}_{0}.end_anchor_id)"
     + "  ON search{6}_{0}.ag_id = word{6}.ag_id"
     // meta bounds enclose word start time...
-    + "  AND meta{6}_start_{0}.offset <= word{6}_start.offset"
+    + "  AND meta{6}_start_{0}.offset < word{6}_end.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
     + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ? {4}");
   
@@ -3085,7 +3126,7 @@ public class OneQuerySearch extends SearchTask {
    *  <li>6: search-column suffix </li>
    * </ul>
    */
-  static final MessageFormat CONTAINING_META_NUMERIC_RANGE_JOIN = new MessageFormat(
+  static final MessageFormat OVERLAPPING_PHRASE_NUMERIC_RANGE_JOIN = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
     + "  INNER JOIN anchor meta{6}_start_{0}"
     + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
@@ -3095,7 +3136,7 @@ public class OneQuerySearch extends SearchTask {
     // same turn...
     + "  AND search{6}_{0}.turn_annotation_id = word{6}.turn_annotation_id"
     // meta bounds enclose word start time...
-    + "  AND meta{6}_start_{0}.offset <= word{6}_start.offset"
+    + "  AND meta{6}_start_{0}.offset < word{6}_end.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
     + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ?"
     + "  AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
@@ -3108,7 +3149,7 @@ public class OneQuerySearch extends SearchTask {
    *  <li>6: search-column suffix </li>
    * </ul>
    */
-  static final MessageFormat CONTAINING_FREEFORM_NUMERIC_RANGE_JOIN = new MessageFormat(
+  static final MessageFormat OVERLAPPING_SPAN_NUMERIC_RANGE_JOIN = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
     + "  INNER JOIN anchor meta{6}_start_{0}"
     + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
@@ -3169,23 +3210,21 @@ public class OneQuerySearch extends SearchTask {
    *  <li>6: search-column suffix </li>
    * </ul>
    */
-  static final MessageFormat TRAILING_META_REGEXP_JOIN  = new MessageFormat(
+  static final MessageFormat PHRASE_INSTANTS_REGEXP_JOIN  = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
     + "  INNER JOIN anchor meta{6}_start_{0}"
-    + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
-    + "  INNER JOIN anchor meta{6}_end_{0}"
-    + "  ON meta{6}_end_{0}.anchor_id = search{6}_{0}.end_anchor_id)"
-    + "  ON search{6}_{0}.ag_id = word{6}.ag_id"
+    + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id)"
+    + "  ON search_{0}.ag_id = word{6}.ag_id"
     // same turn...
     + "  AND search{6}_{0}.turn_annotation_id = word{6}.turn_annotation_id"
     // meta bounds enclose word end time...
-    + "  AND meta{6}_start_{0}.offset <= word{6}_end.offset"
-    + "  AND meta{6}_end_{0}.offset >= word{6}_end.offset"
+    + "  AND meta_start_{0}.offset >= word{6}_start.offset"
+    + "  AND meta_start_{0}.offset < word{6}_end.offset"
     + "  AND {2,choice,0#search{6}_{0}.label|1#CAST(search{6}_{0}.label AS BINARY)}"
     + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}");
-  
+    
   /**
-   * Query for matching a trailing (following the word) freeform-layer label
+   * Query for matching a trailing freeform-instants-layer label
    * - uses <code>REGEXP</code>
    * <p> Arguments are:
    * <ul>
@@ -3196,16 +3235,14 @@ public class OneQuerySearch extends SearchTask {
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    * </ul>
    */
-  static final MessageFormat TRAILING_FREEFORM_REGEXP_JOIN  = new MessageFormat(
+  static final MessageFormat SPAN_INSTANTS_REGEXP_JOIN  = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search_{0}" 
     + "  INNER JOIN anchor meta_start_{0}"
-    + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id"
-    + "  INNER JOIN anchor meta_end_{0}"
-    + "  ON meta_end_{0}.anchor_id = search_{0}.end_anchor_id)"
-    + "  ON search_{0}.ag_id = word.ag_id" // TODO word... is not a thing
-    // meta bounds enclose word end time...
-    + "  AND meta_start_{0}.offset <= word_end.offset"
-    + "  AND meta_end_{0}.offset >= word_end.offset"
+    + "  ON meta_start_{0}.anchor_id = search_{0}.start_anchor_id)"
+    + "  ON search_{0}.ag_id = word{6}.ag_id"
+    // word bounds enclose annotation start time...
+    + "  AND meta_start_{0}.offset >= word{6}_start.offset"
+    + "  AND meta_start_{0}.offset < word{6}_end.offset"
     + "  AND {2,choice,0#search_{0}.label|1#CAST(search_{0}.label AS BINARY)}"
     + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}");
   
@@ -3257,7 +3294,7 @@ public class OneQuerySearch extends SearchTask {
    *  <li>6: search-column suffix </li>
    * </ul>
    */
-  static final MessageFormat CONTAINING_META_REGEXP_JOIN  = new MessageFormat(
+  static final MessageFormat OVERLAPPING_PHRASE_REGEXP_JOIN = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
     + "  INNER JOIN anchor meta{6}_start_{0}"
     + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
@@ -3266,8 +3303,8 @@ public class OneQuerySearch extends SearchTask {
     + "  ON search{6}_{0}.ag_id = word{6}.ag_id"
     // same turn...
     + "  AND search{6}_{0}.turn_annotation_id = word{6}.turn_annotation_id"
-    // meta bounds enclose word start time...
-    + "  AND meta{6}_start_{0}.offset <= word{6}_start.offset"
+    // phrase bounds overlap word bounds...
+    + "  AND meta{6}_start_{0}.offset < word{6}_end.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
     + "  AND {2,choice,0#search{6}_{0}.label|1#CAST(search{6}_{0}.label AS BINARY)}"
     + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}");
@@ -3284,15 +3321,15 @@ public class OneQuerySearch extends SearchTask {
    *  <li>6: search-column suffix </li>
    * </ul>
    */
-  static final MessageFormat CONTAINING_FREEFORM_REGEXP_JOIN  = new MessageFormat(
+  static final MessageFormat OVERLAPPING_SPAN_REGEXP_JOIN  = new MessageFormat(
     " INNER JOIN (annotation_layer_{0} search{6}_{0}" 
     + "  INNER JOIN anchor meta{6}_start_{0}"
     + "  ON meta{6}_start_{0}.anchor_id = search{6}_{0}.start_anchor_id"
     + "  INNER JOIN anchor meta{6}_end_{0}"
     + "  ON meta{6}_end_{0}.anchor_id = search{6}_{0}.end_anchor_id)"
     + "  ON search{6}_{0}.ag_id = word{6}.ag_id"
-    // meta bounds enclose word start time...
-    + "  AND meta{6}_start_{0}.offset <= word{6}_start.offset"
+    // span bounds overlap word bounds...
+    + "  AND meta{6}_start_{0}.offset < word{6}_end.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
     + "  AND {2,choice,0#search{6}_{0}.label|1#CAST(search{6}_{0}.label AS BINARY)}"
     + " {1} REGEXP {2,choice,0#|1#BINARY} ? {4}");

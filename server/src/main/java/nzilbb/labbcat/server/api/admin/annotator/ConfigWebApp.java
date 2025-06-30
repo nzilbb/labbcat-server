@@ -159,6 +159,9 @@ public class ConfigWebApp extends APIRequestHandler {
         }
         
         final Annotator annotator = descriptor.getInstance();
+        if (annotator.getClass().isAnnotationPresent(UsesGraphStore.class)) {
+          annotator.setStore(store);
+        }
         InputStream stream = null;
             
         contentTypeConsumer.accept(StandAloneWebApp.ContentTypeForName(resource));

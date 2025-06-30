@@ -241,7 +241,7 @@
 
   <!-- layer selector, attributes etc. -->
   <header id="attributes" class="attribute-list tabs">
-    <div class="tab-labels">
+    <div class="tab-labels" [class.video]="visibleVideoCount > 0">
       <label *ngFor="let category of categoryLabels"
              [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
              (click)="currentCategory = currentCategory == category?null:category"
@@ -307,7 +307,7 @@
         <ul>
           <li *ngFor="let serializer of serializers"
               i18n-title title="Convert to selected format">
-            <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.wordLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
+            <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.wordLayerId | urlEncode}}&layerId={{schema.utteranceLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
                class="lnk">
               <img src="{{serializer.icon}}" alt="⚙">
               <span>{{serializer.name}}</span>
@@ -353,7 +353,7 @@
           </div>
         </div>
       </div>
-      <lib-link *ngIf="category == 'General' && user && user.roles.includes('edit')"
+      <lib-link *ngIf="user && user.roles.includes('edit') && currentCategory == 'transcript_General'"
                 class="buttons"
                 href="{{baseUrl}}edit/transcript/attributes?id={{transcript.id}}"
                 img="wrench.svg" icon="🔧"
@@ -369,6 +369,7 @@
          [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
       <div *ngFor="let utterance of block.utterances"
            id="{{utterance.id}}"
+           [attr.turn-id]="utterance.parentId"
            [class.utterance]="true"
            [class.main-participant]="utterance.first('participant').first('main_participant')"
            [class.highlight]="utterance.id == highlitId"
@@ -386,7 +387,7 @@
                     ></lib-button>        
           <!-- phrase/span layers starting and ending with this utterance  -->
           <ng-container *ngFor="let l of selectedLayerIds">
-            <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+            <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
                   class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                   style="color: {{transcript.schema.layers[l].colour}};"
                   title="{{l}}">
@@ -409,17 +410,17 @@
                          ><img *ngIf="!annotation.preview"
                                class="icon"
                                src="{{imagesLocation}}/image.svg"
-                               i18n-alt alt="📷"
+                               alt="📷"
                                ><img *ngIf="annotation.preview"
                                      class="preview" src="{{annotation.dataUrl}}"
-                                     i18n-alt alt="📷"></a>
+                                     alt="📷"></a>
                       <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                          class="blob" href="#{{annotation.id}}"
                          href="{{annotation.dataUrl}}"
                          target="{{annotation.id}}"
                          ><img class="icon"
                                src="{{imagesLocation}}/other.svg"
-                               i18n-alt alt="🗎"
+                               alt="🗎"
                                ></a>
                       <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                     </ng-container>
@@ -432,7 +433,7 @@
           <span *ngIf="utterance.prependDummyToken" class="token dummy">
             <!-- phrase/span layers starting with this utterance and ending with the first word  -->
             <ng-container *ngFor="let l of selectedLayerIds">
-              <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+              <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
                     class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                     style="color: {{transcript.schema.layers[l].colour}};"
                     title="{{l}}">
@@ -456,17 +457,17 @@
                            ><img *ngIf="!annotation.preview"
                                  class="icon"
                                  src="{{imagesLocation}}/image.svg"
-                                 i18n-alt alt="📷"
+                                 alt="📷"
                                  ><img *ngIf="annotation.preview"
                                        class="preview" src="{{annotation.dataUrl}}"
-                                       i18n-alt alt="📷"></a>
+                                       alt="📷"></a>
                         <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                            class="blob" href="#{{annotation.id}}"
                            href="{{annotation.dataUrl}}"
                            target="{{annotation.id}}"
                            ><img class="icon"
                                  src="{{imagesLocation}}/other.svg"
-                                 i18n-alt alt="🗎"
+                                 alt="🗎"
                                  ></a>
                         <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                       </ng-container>
@@ -498,7 +499,7 @@
             <span class="token">
               <!-- phrase/span layers for this word -->
               <ng-container *ngFor="let l of selectedLayerIds">
-                <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+                <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
                       class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                       style="color: {{transcript.schema.layers[l].colour}};"
                       title="{{l}}">
@@ -524,17 +525,17 @@
                              ><img *ngIf="!annotation.preview"
                                    class="icon"
                                    src="{{imagesLocation}}/image.svg"
-                                   i18n-alt alt="📷"
+                                   alt="📷"
                                    ><img *ngIf="annotation.preview"
                                          class="preview" src="{{annotation.dataUrl}}"
-                                         i18n-alt alt="📷"></a>
+                                         alt="📷"></a>
                           <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                              class="blob" href="#{{annotation.id}}"
                              href="{{annotation.dataUrl}}"
                              target="{{annotation.id}}"
                              ><img class="icon"
                                    src="{{imagesLocation}}/other.svg"
-                                   i18n-alt alt="🗎"
+                                   alt="🗎"
                                    ></a>
                           <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                         </ng-container>
@@ -561,6 +562,7 @@
               <span class="layer layer-{{word.layerId}}"
                     [class.highlight]="word.id == highlitId"
                     [class.match]="word.id != highlitId && matchTokens[word.id]"
+                    [class.menu-word]="menuId == word.id"
                     (click)="menuId = menuId == word.id?null:word.id; $event.stopPropagation();"
                     [attr.title]="matchTokens[word.id]?'Result '+matchTokens[word.id]:null">
                 <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>
@@ -573,41 +575,6 @@
                      href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{utterance.id}}"
                      i18n>Utterance</a>
                 </div>
-                <ng-container *ngIf="hasWAV && praatIntegration">
-                  <div class="item" id="praat-open">
-                    <lib-menu-option        
-                      (press)="praatUtteranceAudio(utterance);"
-                      img="praat.png" icon="👄"
-                      i18n-label label="Open in Praat"
-                      i18n-title title="Open utterance audio in Praat"
-                      ></lib-menu-option>
-                  </div>
-                  <div class="item" id="praat-open-textgrid">
-                    <lib-menu-option        
-                      (press)="praatUtteranceTextGrid(utterance);"
-                      img="praat.png" icon="👄"
-                      i18n-label label="Open TextGrid"
-                      i18n-title title="Open utterance audio and TextGrid in Praat"
-                      ></lib-menu-option>
-                  </div>
-                  <div class="item" id="praat-open-textgrid">
-                    <lib-menu-option        
-                      (press)="praatUtteranceContextTextGrid(utterance);"
-                      img="praat.png" icon="👄"
-                      i18n-label label="Open TextGrid ± 1 utterance"
-                      i18n-title title="Open utterance audio and TextGrid in Praat, including previous and next utterances"
-                      ></lib-menu-option>
-                  </div>
-                </ng-container>
-                <div *ngIf="hasWAV"
-                     class="item" id="extract-audio-option">
-                  <lib-menu-option        
-                    (press)="utteranceAudio(utterance);"
-                    img="audio.svg" icon="🔊"
-                    i18n-label label="Audio"
-                    i18n-title title="Extract utterance audio fragment"
-                    ></lib-menu-option>
-                </div>
                 <div *ngIf="visibleVideoCount + visibleAudioCount > 0"
                      class="item" id="play-utterance-option">
                   <lib-menu-option        
@@ -617,6 +584,50 @@
                     i18n-title title="Play this utterance"
                     ></lib-menu-option>
                 </div>
+                <div *ngIf="hasWAV"
+                     class="item" id="extract-audio-option">
+                  <lib-menu-option        
+                    (press)="utteranceAudio(utterance); menuId = null;"
+                    img="audio.svg" icon="🔊"
+                    i18n-label label="Extract audio"
+                    i18n-title title="Extract audio fragment for this utterance"
+                    ></lib-menu-option>
+                </div>
+                <ng-container *ngIf="hasWAV && praatIntegration">
+                  <div class="item" id="praat-open">
+                    <lib-menu-option        
+                      (press)="praatUtteranceAudio(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open audio in Praat"
+                      i18n-title title="Open utterance audio in Praat"
+                      ></lib-menu-option>
+                  </div>
+                  <div class="item" id="praat-open-textgrid">
+                    <lib-menu-option        
+                      (press)="praatUtteranceTextGrid(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open TextGrid in Praat"
+                      i18n-title title="Open utterance audio and TextGrid in Praat"
+                      ></lib-menu-option>
+                  </div>
+                  <div class="item" id="praat-open-textgrid">
+                    <lib-menu-option        
+                      (press)="praatUtteranceContextTextGrid(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open TextGrid incl. ± 1 utterance in Praat"
+                      i18n-title title="Open utterance audio and TextGrid in Praat, including previous and next utterances"
+                      ></lib-menu-option>
+                  </div>
+                </ng-container>
+                <div *ngIf="correctionEnabled"
+                     class="item" id="suggest-correction-option">
+                  <lib-menu-option        
+                    (press)="suggestCorrection(utterance); menuId = null;"
+                    img="edit.svg" icon="✎"
+                    i18n-label label="Suggest correction"
+                    i18n-title title="Suggest a correction to the transcription of this utterance"
+                    ></lib-menu-option>
+                </div>
                 <div *ngIf="user && user.roles.includes('edit')"
                      class="item" id="edit-utterance-option">
                   <lib-menu-option        
@@ -624,15 +635,6 @@
                     img="edit.svg" icon="✎"
                     i18n-label label="Edit Transcript"
                     i18n-title title="Edit utterance transcript"
-                    ></lib-menu-option>
-                </div>
-                <div *ngIf="correctionEnabled"
-                     class="item" id="suggest-correction-option">
-                  <lib-menu-option        
-                    (press)="suggestCorrection(utterance);"
-                    img="edit.svg" icon="✎"
-                    i18n-label label="Suggest Correction"
-                    i18n-title title="Suggest a correction to the transcription of this utterance"
                     ></lib-menu-option>
                 </div>
                 <div class="header" id="word-options">
@@ -662,8 +664,7 @@
                         [class.highlight]="annotation.id == highlitId"
                         class="annotation">{{renderLabel(annotation)}}
                     <ng-container *ngIf="annotation.layer.type != 'ipa'">&nbsp;</ng-container></span>
-                  <span *ngIf="word.all(l).length == 0"
-                        class="annotation">&nbsp;</span>
+                  <span [class.annotation]="word.all(l).length == 0">&nbsp;</span>
                 </span>
               </ng-container>
             </span>
@@ -671,7 +672,7 @@
           <span *ngIf="utterance.appendDummyToken" class="token dummy">
             <!-- phrase/span layers starting with the last word and ending with this utterance  -->
             <ng-container *ngFor="let l of selectedLayerIds">
-              <span *ngIf="isSpanningLayer(transcript.schema.layers[l])"
+              <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
                     class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}} span"
                     style="color: {{transcript.schema.layers[l].colour}};"
                     title="{{l}}">
@@ -695,17 +696,17 @@
                            ><img *ngIf="!annotation.preview"
                                  class="icon"
                                  src="{{imagesLocation}}/image.svg"
-                                 i18n-alt alt="📷"
+                                 alt="📷"
                                  ><img *ngIf="annotation.preview"
                                        class="preview" src="{{annotation.dataUrl}}"
-                                       i18n-alt alt="📷"></a>
+                                       alt="📷"></a>
                         <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                            class="blob" href="#{{annotation.id}}"
                            href="{{annotation.dataUrl}}"
                            target="{{annotation.id}}"
                            ><img class="icon"
                                  src="{{imagesLocation}}/other.svg"
-                                 i18n-alt alt="🗎"
+                                 alt="🗎"
                                  ></a>
                         <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
                       </ng-container>

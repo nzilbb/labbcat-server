@@ -22,6 +22,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     task: Task;
     timeout: number;
     cancelling = false;
+    resultsOpened: boolean;
     @ViewChild('progress', {static: false}) progressBar: ElementRef;    
     @ViewChild('resultAnchor', {static: false}) taskResultAnchor: ElementRef;    
         
@@ -33,7 +34,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     
     ngOnInit(): void {
         window.setTimeout(()=>{
-            this.progressBar.nativeElement.scrollIntoView();
+            if (this.progressBar) this.progressBar.nativeElement.scrollIntoView();
         }, 500);
     }
     ngOnChanges(changes: SimpleChanges): void {
@@ -45,7 +46,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
         } else {
             this.readTaskStatus();
         }
-        this.progressBar.nativeElement.scrollIntoView();
+        if (this.progressBar) this.progressBar.nativeElement.scrollIntoView();
     }
     ngOnDestroy(): void {
         clearTimeout(this.timeout);
@@ -60,7 +61,10 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
 
                 // update model
                 this.task = task || this.task;
-                
+
+                // if still running, results haven't been opened
+                if (this.task.running) this.resultsOpened = false;
+
                 // if finished and there's a result URL, open the results
                 if (!this.task.running && this.task.resultUrl) {
                     this.finished.emit(this.task);
@@ -84,7 +88,6 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    resultsOpened = false;
     openResults(): void {
         if (!this.task.running && this.task.resultUrl && !this.resultsOpened) {
             setTimeout(()=>{ // wait a second for the anchor component to come into being

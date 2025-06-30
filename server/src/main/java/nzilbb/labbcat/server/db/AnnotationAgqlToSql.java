@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -210,15 +210,13 @@ public class AnnotationAgqlToSql {
           }
         }
         private String unquote(String s) {
-          return s.substring(1, s.length() - 1)
-            // unescape any remaining quotes
-            .replace("\\'","'").replace("\\\"","\"").replace("\\/","/");
+          return escape(s.substring(1, s.length() - 1));
         }
         private String attribute(String s) {
           return s.replaceAll("^(participant|transcript)_","");
         }
         private String escape(String s) {
-          return s.replaceAll("\\'", "\\\\'");
+          return QL.Esc(s);
         }
         @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
           space();
@@ -959,12 +957,9 @@ public class AnnotationAgqlToSql {
           } else {
             conditions.push(" REGEXP ");
           }
-          try
-          { // ensure string literals use single, not double, quotes
+          try { // ensure string literals use single, not double, quotes
             conditions.push("'"+unquote(ctx.patternOperand.getText())+"'");
-          }
-          catch(Exception exception)
-          { // not a string literal
+          } catch(Exception exception) { // not a string literal
             conditions.push(ctx.patternOperand.getText());
           }
         }
@@ -1049,7 +1044,7 @@ public class AnnotationAgqlToSql {
           space();
           try
           { // ensure string literals use single, not double, quotes
-            conditions.push("'"+unquote(ctx.literal().stringLiteral().getText()).replace("'","\\'")+"'");
+            conditions.push("'"+unquote(ctx.literal().stringLiteral().getText())+"'");
           }
           catch(Exception exception)
           { // not a string literal
@@ -1110,7 +1105,7 @@ public class AnnotationAgqlToSql {
           if (ctx.other != null) {
             errors.add("Can only reference this annotation's layer: " + ctx.getText());
           } else {
-            conditions.push("'"+layer.getId().replaceAll("'","\\'")+"'");
+            conditions.push("'"+escape(layer.getId())+"'");
           }
         }
         @Override public void exitParentIdExpression(AGQLParser.ParentIdExpressionContext ctx) {
@@ -1245,12 +1240,10 @@ public class AnnotationAgqlToSql {
           }
         }
         private String unquote(String s) {
-          return s.substring(1, s.length() - 1)
-            // unescape any remaining quotes
-            .replace("\\'","'").replace("\\\"","\"").replace("\\/","/");
+          return escape(s.substring(1, s.length() - 1));
         }
         private String escape(String s) {
-          return s.replaceAll("\\'", "\\\\'");
+          return QL.Esc(s);
         }
         @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
           space();
@@ -1529,12 +1522,10 @@ public class AnnotationAgqlToSql {
           }
         }
         private String unquote(String s) {
-          return s.substring(1, s.length() - 1)
-            // unescape any remaining quotes
-            .replace("\\'","'").replace("\\\"","\"").replace("\\/","/");
+          return escape(s.substring(1, s.length() - 1));
         }
         private String escape(String s) {
-          return s.replaceAll("\\'", "\\\\'");
+          return QL.Esc(s);
         }
         @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
           space();
@@ -1813,12 +1804,10 @@ public class AnnotationAgqlToSql {
           }
         }
         private String unquote(String s) {
-          return s.substring(1, s.length() - 1)
-            // unescape any remaining quotes
-            .replace("\\'","'").replace("\\\"","\"").replace("\\/","/");
+          return escape(s.substring(1, s.length() - 1));
         }
         private String escape(String s) {
-          return s.replaceAll("\\'", "\\\\'");
+          return QL.Esc(s);
         }
         @Override public void exitIdExpression(AGQLParser.IdExpressionContext ctx) { 
           space();
@@ -2071,9 +2060,7 @@ public class AnnotationAgqlToSql {
     AGQLBaseListener listener = new AGQLBaseListener() {
         MessageFormat fmtAnnotationId = new MessageFormat("e{0}_{1,number,0}_{2,number,0}");
         String unquote(String s) {
-          return s.substring(1, s.length() - 1)
-            // unescape any remaining quotes
-            .replace("\\'","'").replace("\\\"","\"").replace("\\/","/");
+          return QL.Esc(s.substring(1, s.length() - 1));
         }
         @Override public void exitComparisonPredicate(AGQLParser.ComparisonPredicateContext ctx) {
           if (ctx.comparisonOperator().EQ() != null) { // LHS == RHS

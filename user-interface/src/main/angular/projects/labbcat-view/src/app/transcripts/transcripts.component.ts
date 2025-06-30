@@ -242,6 +242,8 @@ export class TranscriptsComponent implements OnInit {
                 this.mimeTypeToSerializer[descriptor.mimeType]
                     = descriptor as SerializationDescriptor;
             }
+            // alphabetical order
+            this.serializers.sort((a,b) => a.name.charCodeAt(0) - b.name.charCodeAt(0));
         });
     }
     
@@ -744,6 +746,6 @@ export class TranscriptsComponent implements OnInit {
 
     /** Add escapes for query string values */
     esc(value: string): string {
-        return value.replace(/\\/,"\\\\").replace(/'/,"\\'");
+        return value.replaceAll(/\\/g,"\\\\").replaceAll(/'/g,"\\'");
     }
 }
