@@ -86,13 +86,13 @@ export class SearchComponent implements OnInit {
                     
                     this.matrix.participantQuery = params["participant_expression"];
                     if (this.matrix.participantQuery) {
-                        this.participantDescription = params["participants"]; // TODO i18n
+                        this.participantDescription = params["participants"];
                         this.currentTab = "Participants";
                     }
                     
                     this.matrix.transcriptQuery = params["transcript_expression"];
                     if (this.matrix.transcriptQuery) {
-                        this.transcriptDescription = params["transcripts"]; // TODO i18n
+                        this.transcriptDescription = params["transcripts"];
                         this.currentTab = "Transcripts";
                     }
                     
@@ -112,27 +112,26 @@ export class SearchComponent implements OnInit {
     }
     setupTabs(): void {
         this.tabs = {};
-        this.tabs["Participants"] = { // TODO i18n
+        this.tabs["Participants"] = {
             label: "Participants", // TODO i18n
-            description: "Narrow down the participants to search",
+            description: "Narrow down the participants to search", // TODO i18n
             icon: "filter.svg"
         }; // TODO i18n
-        this.tabs["Transcripts"] = { // TODO i18n
+        this.tabs["Transcripts"] = {
             label: "Transcripts", // TODO i18n
-            description: "Narrow down the transcripts to search",
+            description: "Narrow down the transcripts to search", // TODO i18n
             icon: "filter.svg"
         }; // TODO i18n
-        this.tabs["Options"] = { // TODO i18n
+        this.tabs["Options"] = {
             label: "Options", // TODO i18n
-            description: "Configure options for matching and displaying search results",
+            description: "Configure options for matching and displaying search results", // TODO i18n
             icon: "cog.svg"
         };
         this.tabLabels = Object.keys(this.tabs);
     }
     selectParticipants(): void {
         if (this.transcriptIds && this.transcriptIds.length) {
-            if (!confirm("This will clear the transcript filter." // TODO i18n
-                         +"\nAre you sure you want to select participants?")) {
+            if (!confirm("This will clear the transcript filter.\nAre you sure you want to select participants?")) { // TODO i18n
                 return;
             }
         }
@@ -370,7 +369,7 @@ export class SearchComponent implements OnInit {
                     this.router.navigate([], {
                         queryParams: {
                             participant_expression: "["+idList.join(",")+"].includes(id)",
-                            participants: "From uploaded file"
+                            participants: "From uploaded file" // TODO i18n
                         },
                         queryParamsHandling: 'merge'
                     });
@@ -428,7 +427,7 @@ export class SearchComponent implements OnInit {
                     this.router.navigate([], {
                         queryParams: {
                             transcript_expression: "["+idList.join(",")+"].includes(id)",
-                            transcripts: "From uploaded file"
+                            transcripts: "From uploaded file" // TODO i18n
                         },
                         queryParamsHandling: 'merge'
                     });
@@ -436,7 +435,7 @@ export class SearchComponent implements OnInit {
             }
         };
         reader.onerror = function () {  
-            component.messageService.error("Error reading " + component.transcriptsFile.name);
+            component.messageService.error("Error reading " + component.transcriptsFile.name); // TODO i18n
         };
         reader.readAsText(this.transcriptsFile);
     }

@@ -31,7 +31,7 @@
         flex-direction: column; 
         align-items: center;
     }
-    #participant-chooser, #transcript-chooser {
+    #participant-chooser, #transcript-chooser, #transcript-chooser-disabled {
         display: flex;
     }
     .file-chooser {
@@ -40,16 +40,17 @@
     }
 }
 #participant-chooser lib-button,
-#transcript-chooser lib-button {
+#transcript-chooser lib-button, 
+#transcript-chooser-disabled lib-button {
     padding-bottom: 10px;
 }
-.filter-disabled .file-chooser {
+#transcript-chooser-disabled .file-chooser {
     color: silver;
 }
-.filter-disabled input {
+#transcript-chooser-disabled input {
     color: silver;
 }
-.filter-disabled summary {
+#transcript-chooser-disabled summary {
     pointer-events: none;
 }
 #nb-disabled {
