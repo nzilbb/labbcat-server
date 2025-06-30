@@ -18,7 +18,9 @@
                type="password"
                i18n-placeholder placeholder="Password"
                i18n-title title="Your pass phrase"
-               name="j_password"></span>
+               name="j_password"
+               (keydown.enter)="login()"
+               ></span>
     </div>
   </div>
     <div class="buttons">
