@@ -1,5 +1,5 @@
 //
-// Copyright 2019-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -163,6 +163,29 @@ public class TestGraphAgqlToSql {
     assertEquals("Parameter count - id", 0, q.parameters.size());
   }
 
+  /** SQL injection tests */
+  @Test public void sqlInjection() throws AGQLException {
+    ParticipantAgqlToSql transformer = new ParticipantAgqlToSql(getSchema());
+    ParticipantAgqlToSql.Query q = transformer.sqlFor(
+      "/' 1\\'' union select @@version -- /.test(id)",
+      "speaker_number, name", null, false, "ORDER BY speaker.name");
+    assertEquals("SQL - bad quote escaping with REGEXP",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE speaker.name REGEXP '\\' 1\\'\\' union select @@version -- '"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+
+    q = transformer.sqlFor(
+      "/\\\\' union select @@version -- /.test(id)",
+      "speaker_number, name", null, false, "ORDER BY speaker.name");
+    assertEquals("SQL - bad backslash escaping with REGEXP",
+                 "SELECT speaker_number, name FROM speaker"
+                 +" WHERE speaker.name REGEXP '\\\\\\' union select @@version -- '"
+                 +" ORDER BY speaker.name",
+                 q.sql);
+
+  }
+  
   @Test public void emptyExpression() throws AGQLException {
     GraphAgqlToSql transformer = new GraphAgqlToSql(getSchema());
     GraphAgqlToSql.Query q = transformer.sqlFor(

@@ -1,11 +1,18 @@
-<input
-  type="text"
-  class="regexp {{className}} {{regexpValid?'':'invalid'}}"
-  name="{{name}}"
-  id="{{id}}"
-  title="{{temporaryTitle || title}}"
-  placeholder="{{placeholder}}"
-  (input)="checkRegularExpression($event)"
-  [(ngModel)]="value"
-  (ngModelChange)="valueChange.emit(value)"
-  [appAutofocus]="autofocus?true:false">
+<div class="regexp-container">
+  <input
+    type="text"
+    class="regexp {{className}}"
+    [class.invalid]="regexpError"
+    name="{{name}}"
+    id="{{id}}"
+    title="{{temporaryTitle || title}}"
+    placeholder="{{placeholder}}"
+    (input)="checkRegularExpression($event)"
+    [(ngModel)]="value"
+    (ngModelChange)="valueChange.emit(value)"
+    [appAutofocus]="autofocus?true:false">
+  <span
+    *ngIf="regexpError"
+    class="regexp-tooltip"
+    >Invalid regular expression <code>{{value}}</code>: {{ regexpError }}</span>
+</div>

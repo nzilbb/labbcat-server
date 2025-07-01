@@ -454,8 +454,10 @@ public class Results extends APIRequestHandler { // TODO unit test
         
         try {
           String searchName = "";
+          String targetLayer = "";
           if (search.getMatrix() != null) {
             searchName = search.getMatrix().getDescription();
+            targetLayer = search.getMatrix().getTargetLayerId();
           }
           if (searchName == null || searchName.trim().length() == 0) {
             searchName = search.getDescription();
@@ -470,7 +472,8 @@ public class Results extends APIRequestHandler { // TODO unit test
           }
           
           outputStart(
-            jsonOut, csvOut, searchName, results.size(), multiWordMatches, options, layers, csvLayers, schema);
+            jsonOut, csvOut, searchName, results.size(), multiWordMatches, options, layers,
+            csvLayers, schema, targetLayer);
           try {
             if (pageLength == null) pageLength = results.size();
             if (pageNumber == null) pageNumber = Integer.valueOf(0);
@@ -489,6 +492,7 @@ public class Results extends APIRequestHandler { // TODO unit test
             for (String layerId : csvLayers.keySet())
               
               if (contentType.startsWith("text/csv")) {
+                final String finalTargetLayer = targetLayer;
                 // process the data rows
                 store.getMatchAnnotations(
                   results, csvLayers, anchorStartLayers, anchorEndLayers, 0,
@@ -531,13 +535,21 @@ public class Results extends APIRequestHandler { // TODO unit test
                               break;
                             case Constants.ALIGNMENT_INSTANT:
                               csvOut.print(""); // time
+                              break;
+                            default: 
+                              if (layer.getId().equals(finalTargetLayer)) {
+                                // always output alignments of target layer
+                                csvOut.print(""); // start
+                                csvOut.print(""); // end
+                              }
                           }
                         } else {
                           assert layer.getId().equals(annotation.getLayerId())
                             : "layer.getId().equals(annotation.getLayerId()) - "
                             + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
                           csvOut.print(annotation.getLabel());
-                          if (layer.getAlignment() != Constants.ALIGNMENT_NONE) { // offsets
+                          if (layer.getAlignment() != Constants.ALIGNMENT_NONE
+                              || layer.getId().equals(finalTargetLayer)) { // offsets
                             String[] anchorIds = {
                               annotation.getStartId(), annotation.getEndId() };
                             Anchor[] anchors = store.getAnchors(null, anchorIds);
@@ -549,7 +561,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                                 csvOut.print("");
                               }
                               if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
-                              // only one offset
+                                // only one offset
                                 break;
                               }
                             } // next anchor
@@ -624,7 +636,7 @@ public class Results extends APIRequestHandler { // TODO unit test
   void outputStart(
     JsonGenerator jsonOut, CSVPrinter csvOut, String searchName, long matchCount,
     boolean multiWordMatches, LinkedHashSet<String> options, LinkedHashSet<String> layers,
-    LinkedHashMap<String,Integer> csvLayers, Schema schema)
+    LinkedHashMap<String,Integer> csvLayers, Schema schema, String targetLayer)
     throws IOException {
     if (csvOut != null) {
       // Send column headers
@@ -690,9 +702,19 @@ public class Results extends APIRequestHandler { // TODO unit test
                 } else { // tag
                   if (csvLayers.get(id) == 1) {
                     csvOut.print("Target " + id);
+                    if (id.equals(targetLayer)) {
+                      // always output alignments of target layer
+                      csvOut.print("Target " + id + " start");
+                      csvOut.print("Target " + id + " end");
+                    }
                   } else {
                     for (int i = 1; i <= csvLayers.get(id) ; i++) {
                       csvOut.print("Target " + id + " " + i);
+                      if (id.equals(targetLayer)) {
+                        // always output alignments of target layer
+                        csvOut.print("Target " + id + " " + i + " start");
+                        csvOut.print("Target " + id + " " + i + " end");
+                      }
                     }
                   }
                 }

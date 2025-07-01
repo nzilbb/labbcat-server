@@ -218,6 +218,8 @@ export class TranscriptComponent implements OnInit {
                 this.mimeTypeToSerializer[descriptor.mimeType]
                     = descriptor as SerializationDescriptor;
             }
+            // alphabetical order
+            this.serializers.sort((a,b) => a.name.charCodeAt(0) - b.name.charCodeAt(0));
         });
     }
 
@@ -900,7 +902,7 @@ export class TranscriptComponent implements OnInit {
                     && (display == definition.label // replace whole labels only
                         || annotation.layer.type == "ipa") // unless it's a phonological layer
                    ) { // there is a display version of this label
-                    display = display.replace(definition.label, definition.display);
+                    display = display.replaceAll(definition.label, definition.display);
                     if (annotation.layer.type != "ipa") { // whole label replaced
                         break;
                     }

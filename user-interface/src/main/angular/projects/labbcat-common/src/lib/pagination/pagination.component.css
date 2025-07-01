@@ -1,0 +1,20 @@
+.outer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 75vw;
+    margin: auto;
+}
+.tall {
+    flex-direction: column;
+}
+.inner-container {
+    display: flex;
+    justify-content: center;
+}
+.inner-container > * {
+    padding: 3px;
+}
+.tall > .pages {
+    flex-wrap: wrap;
+}
