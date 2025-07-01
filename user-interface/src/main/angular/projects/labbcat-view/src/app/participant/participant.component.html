@@ -20,8 +20,8 @@
           <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
             <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
             <ng-container *ngIf="layer.type == 'boolean'">
-              <span *ngIf="annotation.label == '1'" class="description">true</span>
-              <span *ngIf="annotation.label == '0'" class="description">false</span>
+              <span *ngIf="annotation.label == '1'" class="description" i18n>true</span>
+              <span *ngIf="annotation.label == '0'" class="description" i18n>false</span>
             </ng-container>
             <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label">
               <span class="description">{{layer.validLabels[annotation.label]}}</span>
@@ -31,22 +31,22 @@
       </div>
       <div id="controls">
         <div class="label-spacer">
-          <label id="toggleLayerIds">
+          <label id="toggleLayerIds" i18n-title title="Hide attribute names">
             <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
-            Hide attribute names
+            <span i18n>Hide attribute names</span>
           </label>
         </div>
         <div class="label-spacer">
           <label
             [class.disabled]="!displayLayerIds"
-            title="Show full names for attributes">
+            i18n-title title="Hide full names for attributes">
             <lib-grouped-checkbox
               name="hideAttributePrefixes"
               [checked]="!displayAttributePrefixes"
               [disabled]="!displayLayerIds"
               (change)="toggleAttributePrefixes()"
               ></lib-grouped-checkbox>
-            Hide attribute prefixes</label>
+            <span i18n>Hide attribute prefixes</span></label>
         </div>
       </div>
     </div>
