@@ -73,7 +73,7 @@ public class Attributes extends APIRequestHandler { // TODO unit test
     // check parameters
     String[] nameOnly = { "transcript" };
     String[] selectedAttributes = parameters.getStrings("layer");
-    if (selectedAttributes == null) {
+    if (selectedAttributes == null || selectedAttributes.length == 0) {
       String layers = parameters.getString("layers");
       if (layers != null) {
         // R can't send multiple parameters with the same value, so the workaround is
@@ -81,7 +81,7 @@ public class Attributes extends APIRequestHandler { // TODO unit test
         selectedAttributes = layers.split("\n");
       }
     }
-    if (selectedAttributes == null) {
+    if (selectedAttributes == null || selectedAttributes.length == 0) {
       selectedAttributes = nameOnly;
     }
     
