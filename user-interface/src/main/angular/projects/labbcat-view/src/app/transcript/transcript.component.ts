@@ -254,26 +254,26 @@ export class TranscriptComponent implements OnInit {
                         this.categories[this.categoryLabels[0]].description = "Transcript attributes" // TODO i18n
                     }
                     // extra pseudo categories
-                    this.categories["Layers"] = { // TODO i18n
+                    this.categories["Layers"] = {
                         label: "Layers", // TODO i18n
-                        description: "Annotation layers for display",
+                        description: "Annotation layers for display", // TODO i18n
                         icon: "layers.svg"
-                    }; // TODO i18n
-                    this.categories["Participants"] = { // TODO i18n
+                    };
+                    this.categories["Participants"] = {
                         label: "Participants", // TODO i18n
-                        description: "The participants in the transcript",
+                        description: "The participants in the transcript", // TODO i18n
                         icon: "people.svg"
-                    }; // TODO i18n
-                    this.categories["Search"] = { // TODO i18n
+                    };
+                    this.categories["Search"] = {
                         label: "Search", // TODO i18n
-                        description: "Search this transcript",
+                        description: "Search this transcript", // TODO i18n
                         icon: "magnifying-glass.svg"
-                    }; // TODO i18n
-                    this.categories["Export"] = { // TODO i18n
+                    };
+                    this.categories["Export"] = {
                         label: "Export", // TODO i18n
-                        description: "Export the transcript in a selected format",
+                        description: "Export the transcript in a selected format", // TODO i18n
                         icon: "cog.svg"
-                    }; // TODO i18n
+                    };
                     this.categoryLabels = this.categoryLabels.concat(["Participants","Layers","Search","Export"]);
                     resolve();
                 });

@@ -290,9 +290,6 @@ nav, nav > div {
     width: 20%;
     min-width: 10em;
 }
-.speaker label.main-participant:after {
-    content: ' (main participant):';
-}
 #export .layer-id:not(:last-of-type):not(.no-pad) {
     padding-right: 0.5em;
 }

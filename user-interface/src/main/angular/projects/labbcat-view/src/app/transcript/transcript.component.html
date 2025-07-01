@@ -288,20 +288,29 @@
       <!-- participants tab -->
       <ng-container *ngIf="currentCategory == 'Participants'">
         <div *ngFor="let participant of transcript.all('participant')" class="attribute speaker">
-          <label 
-            [ngClass]="{'participant':true, 'main-participant': participant.first('main_participant')}"
+          <label *ngIf="participant.first('main_participant')" class="participant main_participant"
+            >{{participant.label}} <span i18n>(main participant)</span></label>
+          <label *ngIf="!participant.first('main_participant')" class="participant"
             >{{participant.label}}</label>
           <lib-button
+            *ngIf="user && user.roles.includes('edit')"
+            (press)="viewAttributes(participant.label)"
+            img="wrench.svg" icon=",a,"
+            i18n-label label="Attributes"
+            i18n-title title="Edit this participant's attributes"
+            ></lib-button>
+          <lib-button
+            *ngIf="!user || !user.roles.includes('edit')"
             (press)="viewAttributes(participant.label)"
             img="csv.svg" icon=",a,"
-            label="Attributes"
-            title="{{user && user.roles.includes('edit')?'Edit':'View'}} this participant's attributes"
+            i18n-label label="Attributes"
+            i18n-title title="View this participant's attributes"
             ></lib-button>
           <lib-button
             (press)="listTranscripts(participant.label)"
             img="document.svg" icon="📄"
-            label="List transcripts"
-            title="List transcripts including this participant"
+            i18n-label label="List transcripts"
+            i18n-title title="List transcripts including this participant"
             ></lib-button>
         </div>
         <lib-link *ngIf="user && user.roles.includes('edit')"
@@ -363,33 +372,33 @@
       <!-- search tab -->
       <ng-container *ngIf="currentCategory == 'Search'">
         <div id="search-transcripts" class="attribute search">
-          <label>Search transcript</label>
+          <label i18n>Search transcript</label>
           <lib-button
             (press)="searchTranscript()"
             img="magnifying-glass.svg" icon="🔍"
             label="{{id}}"
-            title="Search this transcript for patterns on transcription layers"
+            i18n-title title="Search this transcript for patterns on transcription layers"
             noCaps="true"
             ></lib-button>
         </div>
         <div id="search-episode" class="attribute search">
-          <label>Search transcript series</label>
+          <label i18n>Search transcript series</label>
           <lib-button
             (press)="searchEpisode()"
             img="magnifying-glass.svg" icon="🔍"
             label="{{transcript.first('episode').label}}"
-            title="Search transcripts in this episode for patterns on transcription layers"
+            i18n-title title="Search transcripts in this episode for patterns on transcription layers"
             noCaps="true"
             ></lib-button>
         </div>
         <div id="search-participants" class="attribute search">
-          <label>Search participants</label>
+          <label i18m>Search participants</label>
           <lib-button
             *ngFor="let participant of participants"
             (press)="searchParticipant(participant)"
             img="magnifying-glass.svg" icon="🔍"
             label="{{participant}}"
-            title="Search this participant's utterances for patterns on transcription layers"
+            i18n-title title="Search this participant's utterances for patterns on transcription layers"
             noCaps="true"
             ></lib-button>
         </div>
@@ -409,8 +418,8 @@
             <div *ngFor="let annotation of transcript[layer.id]" class="value">
               <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
               <ng-container *ngIf="layer.type == 'boolean'">
-                <span *ngIf="annotation.label == '1'" class="description">true</span>
-                <span *ngIf="annotation.label == '0'" class="description">false</span>
+                <span *ngIf="annotation.label == '1'" class="description" i18n>true</span>
+                <span *ngIf="annotation.label == '0'" class="description" i18n>false</span>
               </ng-container>
               <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label">
                 <span class="description">{{layer.validLabels[annotation.label]}}</span>
@@ -420,22 +429,22 @@
         </div>
         <div id="attr-controls">
           <div class="label-spacer">
-            <label id="toggleLayerIds">
+            <label id="toggleLayerIds" i18n-title title="Hide attribute names">
               <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
-              Hide attribute names
+              <span i18n>Hide attribute names</span>
             </label>
           </div>
           <div class="label-spacer">
             <label
               [class.disabled]="!displayLayerIds"
-              title="Show full names for participant/transcript attributes">
+              i18n-title title="Hide full names for participant/transcript attributes">
               <lib-grouped-checkbox
                 name="hideAttributePrefixes"
                 [checked]="!displayAttributePrefixes"
                 [disabled]="!displayLayerIds"
                 (change)="toggleAttributePrefixes()"
                 ></lib-grouped-checkbox>
-              Hide attribute prefixes</label>
+              <span i18n>Hide attribute prefixes</span></label>
           </div>
           <lib-link *ngIf="user && user.roles.includes('edit')"
                     class="buttons"
