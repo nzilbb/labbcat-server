@@ -1,11 +1,11 @@
 <div class="valid-label-helper" [class.hierarchical]="categories">
-  <ng-container *ngIf="!categories"><!-- non-hierarchical picker -->
+  <ng-container *ngIf="!categories"><!-- non-heirarchical picker -->
     <span *ngFor="let label of Object.keys(layer.validLabels)">
       <a href="#" class="valid-label" title="{{layer.validLabels[label]}}" (click)="select($event, label)">{{label}}</a>
     </span>
   </ng-container>
   
-  <ng-container *ngIf="categories"><!-- hierarchical picker -->
+  <ng-container *ngIf="categories"><!-- heirarchical picker -->
     <ng-container *ngFor="let category of Object.keys(categories)">
       <div class="category" [class.unlabelled]="category == ''">
         
@@ -15,9 +15,7 @@
                i18n-title="Any CATEGORY-NAME" title="Any {{category}}">{{category}}</a>
           </span>
           <span *ngIf="!regularExpression" class="title">{{category}}</span>
-          <span *ngIf="nbText && nbLabels.length && nbCategory && category == nbCategory"
-            [title]="nbLabels.join(' ')"
-            class="nb">{{nbText}}</span>
+          <span *ngIf="category == 'CONSONANT'" class="nb">Other consonants: Use normal IPA</span>
         </div>
         
         <ng-container *ngFor="let subcategory of Object.keys(categories[category])">
