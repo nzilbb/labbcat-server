@@ -74,14 +74,14 @@
       <lib-button (press)="moreMatches()" [processing]="moreLoading"
                   [disabled]="matchCount - matches.length <= 0"
                   i18n-title title="Show more results"
-                  label="{{min(pageLength, matchCount - matches.length)}} More Matches"
+                  i18n-label label="{{min(pageLength, matchCount - matches.length)}} More Matches"
                   img="down-triangle.png" icon="▼"
                   >
       </lib-button>
       <lib-button (press)="allMatches()" [processing]="allLoading"
                   [disabled]="matchCount - matches.length <= 0"
                   i18n-title title="Show all results"
-                  label="{{matchCount - matches.length}} Remaining Matches"
+                  i18n-label label="{{matchCount - matches.length}} Remaining Matches"
                   img="down-double-triangle.png" icon="⏬"
                   >
       </lib-button>
@@ -204,7 +204,7 @@
   </div>
   <div id="dictionary-options" class="{{showDictionaryOptions?'unhidden-panel':'hidden-panel'}}">
     <label>
-      <span>Layer for entries</span>
+      <span i18n="layer for dictionary entries">Layer for entries</span>
       <select name="definitionLayerId"
               i18n-title title="Layer for definitions of dictionary entries">
         <option *ngFor="let layer of wordLayers"
