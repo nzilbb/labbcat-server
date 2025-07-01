@@ -242,6 +242,13 @@ nav, nav > div {
 #layers, #participants, #formats {
     padding-top: 10px;
 }
+@media all and (min-width: 640px) {
+    #layers { 
+        display: flex;
+        flex-direction: column; 
+        align-items: center;
+    }
+}
 /* TODO This does't work in production because the URL fails:
 .participants ul {
     list-style: circle;
@@ -405,7 +412,7 @@ img.preview {
 @media all and (min-width: 640px) {
     lib-layer-checkboxes { /* layer selector is horizontal*/
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: center;
     }
 }
