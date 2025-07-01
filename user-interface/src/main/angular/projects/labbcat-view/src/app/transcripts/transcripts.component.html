@@ -7,14 +7,13 @@
     <table>
       <caption *ngIf="matchCount >= 0">
         <span i18n="Match count: {n}">Match count:</span>&nbsp;<span id="matchCount">{{matchCount}}</span>
-        <span id="query-description" *ngIf="queryDescription" title="{{queryDescription}}"> - {{queryDescription}} </span>
+        <span id="query-description" *ngIf="participantDescription || queryDescription">
+          <span *ngIf="participantDescription" [title]="participantDescription"> - Participant filter [{{participantDescription}}]</span>
+          <span *ngIf="queryDescription" [title]=""> - {{queryDescription}} </span>
+        </span>
       </caption>
       <thead>
         <tr class="filters">
-          <td class="participant-filter" *ngIf="participantQuery">
-            <img i18n-title title="{{participantDescription}}"
-                 src="{{imagesLocation+'/people.svg'}}" alt="👥">
-          </td>
           <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
             <lib-layer-filter            
               [layer]="layer"
@@ -25,77 +24,141 @@
           </td>
           <td class="controls">
             <lib-button
-              img="delete.svg" icon="⌫"
-              (press)="clearFilters()"
-              i18n-title title="Clear selected filters"
-              ></lib-button>
-            <lib-button
               *ngIf="(!user || user.roles.includes('admin')) && !nextPage"
               img="filter.svg" icon="👥"
               (press)="setDefaultFilter()"
               i18n-title title="Set this as the default filter for all users"
               ></lib-button>
+            <lib-button
+              id="clear-filters"
+              *ngIf="query"
+              img="delete.svg" icon="⌫"
+              (press)="clearFilters()"
+              i18n-title title="Clear transcript filters"
+              ></lib-button>
           </td>
         </tr><!-- Select from file -->
         <tr class="controls">
-          <td colSpan="{{filterLayers.length + (participantQuery?1:0)}}">
-            <lib-button
-              *ngIf="user && user.roles.includes('edit') && !nextPage"
-              action="delete"
-              (press)="deleteTranscripts()" [processing]="deleting"
-              [disabled]="selectedIds.length == 0"
-              i18n-title title="Delete record"
+          <td colSpan="{{filterLayers.length}}">
+            <div class="button-container">
+              <lib-button
+                *ngIf="user && user.roles.includes('edit') && !nextPage"
+                action="delete"
+                (press)="deleteTranscripts()" [processing]="deleting"
+                [disabled]="selectedIds.length == 0"
+                i18n-title title="Delete record"
+                ></lib-button>
+              <lib-button
+                *ngIf="user && user.roles.includes('edit') && !nextPage"
+                (press)="generate()"
+                [disabled]="selectedIds.length == 0"
+                img="cog.svg" icon="⚙"
+                i18n-label label="Generate"
+                i18n-title title="Regenerate layers for all selected transcripts"
+                ></lib-button>
+              <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
+                <select name="layer_id"
+                        i18n-title title="Which layer to generate">
+                  <option value="" i18n>All layers</option>
+                  <ng-container *ngFor="let layer of generableLayers">
+                    <option value="{{layer.layer_id}}">{{layer.id}}</option>
+                  </ng-container>
+                </select>
+              </div>
+              <lib-button
+                *ngIf="showGenerateLayerSelection"
+                (press)="collapseGenerate()"
+                img="left-triangle.png" icon="🞀"
+                i18n-title title="Collapse 'Generate' options"
+                ></lib-button>
+              <lib-button
+                *ngIf="!nextPage"
+                (press)="exportMedia()"
+                [disabled]="!transcriptIds || transcriptIds.length == 0"
+                img="audio.svg" icon="🔊"
+                i18n-label label="Export Media"
+                i18n-title title="Export media files of all selected transcripts"
               ></lib-button>
-            <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
-              <select name="layer_id"
-                      i18n-title title="Which layer to generate">
-                <option value="" i18n>All layers</option>
-                <ng-container *ngFor="let layer of generableLayers">
-                  <option value="{{layer.layer_id}}">{{layer.id}}</option>
-                </ng-container>
-              </select>
+              <lib-button
+                *ngIf="!nextPage"
+                (press)="exportTranscripts()"
+                [disabled]="!transcriptIds || transcriptIds.length == 0"
+                img="document.svg" icon="📄"
+                i18n-label label="Export Original"
+                i18n-title title="Export original transcript of all selected transcripts"
+                ></lib-button>
+              <lib-button
+                *ngIf="!nextPage"
+                (press)="exportFormat()"
+                [disabled]="!transcriptIds || transcriptIds.length == 0"
+                img="{{serializeImg}}" icon="⚙"
+                i18n-label label="Export Formatted"
+                i18n-title title="Convert to selected format"
+                ></lib-button>
+              <select name="mimeType" *ngIf="showSerializationOptions"
+                        id="mimeTypeSelection"
+                        i18n-title title="Format to convert to"
+                        [(ngModel)]="mimeType"
+                        (change)="onChangeMimeType()">
+                  <option *ngFor="let serializer of serializers"
+                          value="{{serializer.mimeType}}">{{serializer.name}}</option>
+                </select>
+              <lib-button
+                *ngIf="showSerializationOptions"
+                (press)="collapseExportFormat()"
+                img="left-triangle.png" icon="🞀"
+                i18n-title title="Collapse 'Export Formatted' options"
+                ></lib-button>
+              <lib-button
+                *ngIf="!nextPage"
+                (press)="exportAttributes()"
+                [disabled]="!transcriptIds || transcriptIds.length == 0"
+                img="csv.svg" icon=",a,"
+                i18n-label label="Export Attributes"
+                i18n-title title="Export attributes to CSV"
+                ></lib-button>
+              <span id="attributesSelection" *ngIf="showAttributesSelection">
+                <lib-layer-checkboxes
+                  name="layer"
+                  transcript="{{true}}"
+                  selected="{{[schema.root.id]}}"
+                  excludeMainParticipant="{{true}}"
+                  ></lib-layer-checkboxes>
+              </span>
+              <lib-button
+                *ngIf="showAttributesSelection"
+                (press)="collapseExportAttributes()"
+                img="left-triangle.png" icon="🞀"
+                i18n-title title="Collapse 'Export Attributes' options"
+                ></lib-button>
+              <lib-button
+                *ngIf="!nextPage && !participantQuery"
+                (press)="participants()"
+                [disabled]="matchCount < 1 && selectedIds.length == 0"
+                img="people.svg" icon="👥"
+                i18n-label label="List Participants"
+                i18n-title title="List participants in these transcripts"
+                ></lib-button>
+              <lib-button
+                *ngIf="!nextPage || nextPage == 'search'"
+                (press)="layeredSearch()"
+                [disabled]="matchCount < 1 && selectedIds.length == 0"
+                img="magnifying-glass.svg" icon="🔍"
+                i18n-label label="Layered Search"
+                i18n-title title="Search selected transcripts"
+                ></lib-button>
+              <div *ngIf="participantQuery" class="participant-filter">
+                <img
+                  i18n-title [title]="participantDescription"
+                  src="{{imagesLocation+'/people.svg'}}" alt="👥">
+                <lib-button
+                  (press)="clearParticipantFilter()"
+                  img="delete.svg" icon="⌫"
+                  i18n-label label="Clear participant filter"
+                  i18n-title title="Clear filters relating to participants"
+                  ></lib-button>
+              </div>
             </div>
-            <lib-button
-              *ngIf="user && user.roles.includes('edit') && !nextPage"
-              (press)="generate()"
-              [disabled]="selectedIds.length == 0"
-              img="cog.svg" icon="⚙"
-              i18n-label label="Generate"
-              i18n-title title="Regenerate layers for all selected transcripts"
-              ></lib-button>
-            <lib-button
-              *ngIf="!nextPage"
-              (press)="exportMedia()"
-              [disabled]="!transcriptIds || transcriptIds.length == 0"
-              img="audio.svg" icon="🔊"
-              i18n-label label="Export Media"
-              i18n-title title="Save media files of all selected transcripts"
-            ></lib-button>
-            <lib-button
-              *ngIf="!nextPage"
-              (press)="exportTranscripts()"
-              [disabled]="!transcriptIds || transcriptIds.length == 0"
-              img="document.svg" icon="📄"
-              i18n-label label="Export Transcripts"
-              i18n-title title="Save original transcript of all selected transcripts"
-              ></lib-button>
-            <span id="attributesSelection" *ngIf="showAttributesSelection">
-              <lib-layer-checkboxes
-                name="layer"
-                transcript="{{true}}"
-                hideControls="true"
-                selected="{{[schema.root.id]}}"
-                excludeMainParticipant="{{true}}"
-                ></lib-layer-checkboxes>
-            </span>
-            <lib-button
-              *ngIf="!nextPage"
-              (press)="exportAttributes()"
-              [disabled]="!transcriptIds || transcriptIds.length == 0"
-              img="csv.svg" icon=",a,"
-              i18n-label label="Export Attributes"
-              i18n-title title="Export attributes to CSV"
-              ></lib-button>
             <div id="serializationOptions" *ngIf="showSerializationOptions">
               <fieldset i18n-title title="Annotation layers to include in the exported files">
                 <legend i18n>Layers</legend>
@@ -106,36 +169,12 @@
                   selected="{{[schema.wordLayerId]}}"
                   ></lib-layer-checkboxes>
               </fieldset>
-              <select name="mimeType"
-                      i18n-title title="Format to convert to"
-                      [(ngModel)]="mimeType"
-                      (change)="onChangeMimeType()">
-                <option *ngFor="let serializer of serializers"
-                        value="{{serializer.mimeType}}">{{serializer.name}}</option>
-              </select>
             </div>
-            <lib-button
-              *ngIf="!nextPage"
-              (press)="exportFormat()"
-              [disabled]="!transcriptIds || transcriptIds.length == 0"
-              img="{{serializeImg}}" icon="⚙"
-              i18n-label label="Export Format"
-              i18n-title title="Convert to selected format"
-              ></lib-button>
-            <lib-button
-              *ngIf="!nextPage || nextPage == 'search'"
-              (press)="layeredSearch()"
-              [disabled]="!transcriptIds || transcriptIds.length == 0"
-              img="magnifying-glass.svg" icon="🔍"
-              i18n-label label="Layered Search"
-              i18n-title title="Search transcripts including these transcripts"
-              ></lib-button>
           </td>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let id of transcriptIds">
-          <td class="participant-filter" *ngIf="participantQuery"></td><!-- participant-filter -->
           <td *ngFor="let layer of filterLayers" class="{{layer.id}}">
             <span class="id" *ngIf="layer.id == schema.root.id">
               <lib-grouped-checkbox
@@ -177,11 +216,11 @@
                       href="edit/transcript/media?id={{id | urlEncode}}"></lib-link>
             <lib-link *ngIf="user && user.roles.includes('edit')"
                       i18n-title title="Attributes"
-                      img="attributes.svg" icon="🔧"
+                      img="wrench.svg" icon="🔧"
                       href="edit/transcript/attributes?id={{id | urlEncode}}"></lib-link>
             <lib-link *ngIf="!user || !user.roles.includes('edit')"
                       i18n-title title="Attributes"
-                      img="wrench.svg" icon="🔧"
+                      img="csv.svg" icon=",a,"
                       href="transcript/attributes?id={{id | urlEncode}}"></lib-link>
           </td>
         </tr>

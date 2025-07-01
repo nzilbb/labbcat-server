@@ -24,7 +24,7 @@
   <ng-container *ngFor="let layer of participantAttributes">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            [title]="layer.hint"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            [style]="styles[layer.id]">
       <lib-grouped-checkbox
         [group]="name"
@@ -40,12 +40,19 @@
                class="include-count"
                title-i18n title="How many linked annotations to include">
       </span>
+      <img *ngIf="includeAlignment" class="alignment"
+           src="{{imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]">
       <span class="layer-id">{{displayAttributePrefixes ? layer.id : ParticipantLayerLabel(layer.id)}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-           (click)="handleInterpretedRaw(layer.id)"></label>
+           (click)="!this.disabled.includes(layer.id) ? handleInterpretedRaw(layer.id) : ''"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -57,7 +64,7 @@
   <ng-container *ngFor="let layer of transcriptAttributes">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            [title]="layer.hint"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            [style]="styles[layer.id]">
       <lib-grouped-checkbox
         [group]="name"
@@ -73,12 +80,19 @@
                class="include-count"
                title-i18n title="How many linked annotations to include">
       </span>
+      <img *ngIf="includeAlignment" class="alignment"
+           src="{{imagesLocation+'/alignment-0'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'}}" alt="[🏷]">
       <span class="layer-id">{{displayAttributePrefixes ? layer.id : TranscriptLayerLabel(layer.id)}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
            [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-           (click)="handleInterpretedRaw(layer.id)"></label>
+           (click)="!this.disabled.includes(layer.id) ? handleInterpretedRaw(layer.id) : ''"></label>
     </label>
   </ng-container>
 </fieldset>
@@ -90,7 +104,7 @@
   <ng-container *ngFor="let layer of spanLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            [title]="layer.description"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            [style]="styles[layer.id]">
       <lib-grouped-checkbox
         [group]="name"
@@ -129,6 +143,11 @@
            i18n-title="Layer vertical-peers descriptions"
            [title]="'Allows vertical peers: ' + (layer.peersOverlap ? 'True' : 'False')">
       <span class="layer-id">{{layer.id}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
@@ -146,7 +165,7 @@
   <ng-container *ngFor="let layer of phraseLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            [title]="layer.description"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            [style]="styles[layer.id]">
       <lib-grouped-checkbox
         [group]="name"
@@ -207,6 +226,11 @@
            i18n-title="Layer vertical-peers descriptions"
            [title]="'Allows vertical peers: ' + (layer.peersOverlap ? 'True' : 'False')">
       <span class="layer-id">{{layer.id}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
@@ -224,7 +248,7 @@
   <ng-container *ngFor="let layer of wordLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            [title]="layer.description"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            [style]="styles[layer.id]">
       <lib-grouped-checkbox
         [group]="name"
@@ -289,6 +313,11 @@
            i18n-title="Layer vertical-peers descriptions"
            [title]="'Allows vertical peers: ' + (layer.peersOverlap ? 'True' : 'False')">
       <span class="layer-id">{{layer.id}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
@@ -306,7 +335,7 @@
   <ng-container *ngFor="let layer of segmentLayers">
     <label *ngIf="!category || !layer.category || categorySelections[layer.category] || layer._selected"
            [title]="layer.description"
-           class="layer-{{layer.id}}"
+           class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
            [ngStyle]="styles[layer.id]">
       <lib-grouped-checkbox
         [group]="name"
@@ -368,6 +397,11 @@
            i18n-title="Layer vertical-peers descriptions"
            [title]="'Allows vertical peers: ' + (layer.peersOverlap ? 'True' : 'False')">
       <span class="layer-id">{{layer.id}}</span>
+      <span 
+        *ngIf="annotationCounts[layer.id] > -1" 
+        class="layer-count"
+        [style.display]="displayCounts ? 'inline' : 'none'"
+        >{{annotationCounts[layer.id]}}</span>
       <label><img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
            i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
            [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
@@ -378,7 +412,7 @@
   </ng-container>
 </fieldset>
 </div>
-<fieldset *ngIf="!hideControls && (participant || transcript || includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}')" id="controls">
+<fieldset *ngIf="!hideControls && (participant || transcript || includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}' || (annotationCounts | json) != '{}')" id="controls">
   <div *ngIf="participant || transcript" class="label-spacer">
     <label
       title="Show full names for participant/transcript attributes">
@@ -403,5 +437,17 @@
         (change)="toggleLayerIcons()"
         ></lib-grouped-checkbox>
       Hide layer icons</label>
+  </div>
+  <div *ngIf="(annotationCounts | json) != '{}'" class="label-spacer">
+    <label
+      i18n-title title="Hide the number of annotations in each layer">
+      <lib-grouped-checkbox
+        group="hideLayerCounts"
+        name="hideLayerCounts"
+        [checked]="!displayCounts"
+        (change)="toggleLayerCounts()"
+        ></lib-grouped-checkbox>
+      <span i18n>Hide annotation counts</span>
+    </label>
   </div>
 </fieldset>

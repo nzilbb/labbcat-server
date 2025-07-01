@@ -66,6 +66,12 @@ img.data-type, img.alignment, img.vertical-peers {
     margin-right: 0.2rem;
     cursor: help;
 }
+.layer-count:before {
+    content: ' (';
+}
+.layer-count:after {
+    content: ')';
+}
 .interpreted-selector {
     margin-left: 10px;
     height: 15px;
@@ -84,4 +90,19 @@ img.data-type, img.alignment, img.vertical-peers {
     #controls .label-spacer {
         flex-grow: 1;
     }
+}
+.icon-hider {
+    font-style: italic;
+}
+@media all and (min-width: 640px) {
+    .icon-hider { 
+        display: flex;
+        flex-direction: row;
+    }
+    .icon-hider label {
+        flex-grow: 1;
+    }
+}
+.no-display {
+    display: none;
 }

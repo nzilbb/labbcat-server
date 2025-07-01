@@ -16,6 +16,7 @@ export class TranscriptComponent implements OnInit {
     
     schema : any;
     layerStyles : { [key: string] : any };
+    layerCounts : { [key: string] : any };
     user : User;
     baseUrl : string;
     imagesLocation : string;
@@ -78,6 +79,7 @@ export class TranscriptComponent implements OnInit {
         this.selectedLayerIds = [];
         this.interpretedRaw = {};
         this.layerStyles = {};
+        this.layerCounts = {};
         this.playingId = [];
         this.previousPlayingId = [];
     }
@@ -120,7 +122,7 @@ export class TranscriptComponent implements OnInit {
                     // preselect layers?
                     let layerIds = params["layerId"]||params["l"]
                     if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
-                        layerIds = JSON.parse(sessionStorage.getItem("selectedLayerIds"));
+                        layerIds = [...new Set(JSON.parse(sessionStorage.getItem("selectedLayerIds")))];
                     }
                     if (!layerIds) layerIds = ["noise","comment"]; // noise and comment by default
                     if (layerIds) {
@@ -218,6 +220,8 @@ export class TranscriptComponent implements OnInit {
                 this.mimeTypeToSerializer[descriptor.mimeType]
                     = descriptor as SerializationDescriptor;
             }
+            // alphabetical order
+            this.serializers.sort((a,b) => a.name.charCodeAt(0) - b.name.charCodeAt(0));
         });
     }
 
@@ -309,10 +313,16 @@ export class TranscriptComponent implements OnInit {
                             this.layerStyles[l] = { color: "silver" };
                             this.labbcatService.labbcat.countAnnotations(
                                 this.transcript.id, l, (count, errors, messages) => {
+                                    this.layerCounts[l] = count;
                                     if (count) { // annotations in this layer
-                                        // remove grey-out style
-                                        this.schema.layers[l].description += ` (${count})`;
+                                        if (count == 1) {
+                                            this.schema.layers[l].description += ` (${count} annotation)`; // TODO i18n
+                                        } else {
+                                            this.schema.layers[l].description += ` (${count} annotations)`; // TODO i18n
+                                        }
                                         this.layerStyles[l] = {};
+                                    } else {
+                                        this.schema.layers[l].description += ' (0 annotations)'; // TODO i18n
                                     }
                                 });
                         } // next temporal layer
@@ -437,8 +447,11 @@ export class TranscriptComponent implements OnInit {
 
     loadThread(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
+            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (messages) messages.forEach(m => this.messageService.info(m));
             if (task) {
-                if (task.layers) this.layersChanged(task.layers.filter(l=>l!="orthography"));
+                let taskLayers = task.layers.filter(l=>l!="orthography");
+                if (task.layers) this.layersChanged(taskLayers);
                 this.highlightSearchResults(0);
             }
         });
@@ -900,7 +913,7 @@ export class TranscriptComponent implements OnInit {
                     && (display == definition.label // replace whole labels only
                         || annotation.layer.type == "ipa") // unless it's a phonological layer
                    ) { // there is a display version of this label
-                    display = display.replace(definition.label, definition.display);
+                    display = display.replaceAll(definition.label, definition.display);
                     if (annotation.layer.type != "ipa") { // whole label replaced
                         break;
                     }

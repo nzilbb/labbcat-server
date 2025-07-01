@@ -29,6 +29,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() displayAttributePrefixes: boolean;
     /** Show the data type of each layer */
     @Input() includeDataType: boolean;
+    /** Display layer counts */
+    @Input() displayCounts: boolean;
     /** Show the alignment of each layer */
     @Input() includeAlignment: boolean;
     /** Show alignment as 0 for turn/word/segment */
@@ -65,6 +67,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() segment: boolean;
     /** Layer styles - key is the layerId, value is the CSS style definition for the layer */
     @Input() styles: { [key: string] : any };
+    /** Annotation counts - key is the layerId, value is the number of annotations (e.g. in a transcript) */
+    @Input() annotationCounts: { [key: string] : any };
     /** Input list of IDs of layers whose checkbox should be disabled */
     @Input() disabled: string[];
     /** A layer ID to exclude options (annotation count, anchoring, etc.) for */
@@ -113,6 +117,7 @@ export class LayerCheckboxesComponent implements OnInit {
         if (!this.styles) this.styles = {};
         if (!this.disabled) this.disabled = [];
         if (!this.excludeOptionsForLayerId) this.excludeOptionsForLayerId = [];
+        if (!this.annotationCounts) this.annotationCounts = {};
         if (!this.interpretedRaw) this.interpretedRaw = {};
     }
 
@@ -136,6 +141,9 @@ export class LayerCheckboxesComponent implements OnInit {
         this.displayAttributePrefixes = JSON.parse(sessionStorage.getItem("displayAttributePrefixes")) ??
             (typeof this.displayAttributePrefixes == "string" ? this.displayAttributePrefixes === "true" : this.displayAttributePrefixes) ??
             false;
+        this.displayCounts = JSON.parse(sessionStorage.getItem("displayLayerCounts")) ??
+            (typeof this.displayCounts == "string" ? this.displayCounts === "true" : this.displayCounts) ??
+            true;
         if (!this.selected) this.selected = [] as string[];
 
         // add category selectors in defined order
@@ -283,5 +291,9 @@ export class LayerCheckboxesComponent implements OnInit {
     toggleAttributePrefixes(): void {
         this.displayAttributePrefixes = !this.displayAttributePrefixes;
         sessionStorage.setItem("displayAttributePrefixes", JSON.stringify(this.displayAttributePrefixes));
+    }
+    toggleLayerCounts(): void {
+        this.displayCounts = !this.displayCounts;
+        sessionStorage.setItem("displayLayerCounts", JSON.stringify(this.displayCounts));
     }
 }

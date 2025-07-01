@@ -468,6 +468,8 @@ public class Doc extends APIRequestHandler {
    */
   protected File file(String pathInfo, Function<String,File> realPath) {
     String path = pathInfo;
+    // ensure there's no climbing up the file tree
+    path = path.replace("..","__");
     if (!path.endsWith(".html")) path += ".html";
     return realPath.apply("/doc"+path);
   } // end of file()
