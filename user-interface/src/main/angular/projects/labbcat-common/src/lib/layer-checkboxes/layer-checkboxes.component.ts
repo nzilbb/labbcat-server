@@ -161,12 +161,12 @@ export class LayerCheckboxesComponent implements OnInit {
                 }
             }
             // fill in missing attribute hints
-            if (layer.id == "participant") layer.hint = "APLS speaker code";
-            if (layer.id == "main_participant") layer.hint = "APLS speaker code for the participant being interviewed in a given transcript";
+            if (layer.id == "participant") layer.hint = "Participant";
+            if (layer.id == "main_participant") layer.hint = "Main participant";
             if (layer.id == "transcript") layer.hint = "Transcript file name";
-            if (layer.id == "corpus") layer.hint = "Collection of transcripts from a single research project";
-            if (layer.id == "episode") layer.hint = "Series of transcripts from a single sociolinguistic interview";
-            if (layer.id == "transcript_type") layer.hint = "Sociolinguistic interview section";
+            if (layer.id == "corpus") layer.hint = "Corpus";
+            if (layer.id == "episode") layer.hint = "Series of transcripts";
+            if (layer.id == "transcript_type") layer.hint = "Transcript type";
             if (layer.id == this.schema.root.id) {
                 if (!this.excludeRoot) this.transcriptAttributes.push(layer);
             } else if (layer.id == "segment"
