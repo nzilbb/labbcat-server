@@ -43,7 +43,7 @@
     "@types/node": "^20.12.7",
     "jasmine-core": "~5.1.2",
     "jasmine-spec-reporter": "~7.0.0",
-    "ng-packagr": "^17.3.0",
+    "ng-packagr": "^20.0.1",
     "protractor": "~7.0.0",
     "ts-node": "~10.9.2",
     "tslint": "~6.1.0",
