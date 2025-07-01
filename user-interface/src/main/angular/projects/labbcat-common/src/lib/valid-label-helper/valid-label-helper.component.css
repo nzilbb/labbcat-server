@@ -42,12 +42,3 @@
     flex-wrap: wrap;
     margin-left: 10px;
 }
-.category-and-nb {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-}
-.nb {
-    font-size: 0.9em;
-    font-style: italic;
-}
