@@ -14,6 +14,7 @@ export class LinkComponent implements OnInit {
     @Input() routerLink: string[];
     @Input() queryParams: object;
     @Input() href: string;
+    @Input() target: string;
     processing: false;
     
     imagesLocation: string;
@@ -26,6 +27,7 @@ export class LinkComponent implements OnInit {
     ngOnInit(): void {
         this.title = this.title || this.label;
         if (!this.label) this.classes += " icon-only";
+        this.target = this.target || "";
     }
     
 }
