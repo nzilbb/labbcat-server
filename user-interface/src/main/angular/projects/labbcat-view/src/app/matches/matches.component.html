@@ -210,7 +210,7 @@
         <option *ngFor="let layer of wordLayers"
                 value="{{layer.id}}">
           <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
-          <ng-container *ngIf="layer.id == 'orthography'" i18n>[just orthography, no entries]</ng-container>
+          <ng-container *ngIf="layer.id == 'orthography'" i18n>[word list only]</ng-container>
         </option>
       </select>
     </label>
