@@ -186,9 +186,6 @@ export class TranscriptComponent implements OnInit {
                         // ensure 'organizational' layers have a category
                         if (["transcript_type", schema.corpusLayerId, schema.episodeLayerId].includes(layer.id)) {
                             layer.category = "transcript_General";
-                            layer.hint = layer.id == "transcript_type" ? "Sociolinguistic interview section"
-                                : layer.id == schema.corpusLayerId ? "Collection of transcripts from a single research project"
-                                : "Series of transcripts from a single sociolinguistic interview";
                         }
                         
                         if (!this.categoryLayers[layer.category]) {
