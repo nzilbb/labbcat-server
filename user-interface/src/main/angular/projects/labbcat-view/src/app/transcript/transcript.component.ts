@@ -447,6 +447,8 @@ export class TranscriptComponent implements OnInit {
 
     loadThread(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
+            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (messages) messages.forEach(m => this.messageService.info(m));
             if (task) {
                 let taskLayers = task.layers.filter(l=>l!="orthography");
                 if (task.layers) this.layersChanged(taskLayers);
