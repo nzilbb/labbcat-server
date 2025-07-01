@@ -12,6 +12,8 @@ export class PaginationComponent implements OnInit {
     @Output() goToPage = new EventEmitter<number>();
     @Output() showAllPages = new EventEmitter<number>();
     showAllLinks = false;
+    /** Above this many pages, page links will move below the buttons */
+    maxForWide = 25;
     
     constructor() { }
     

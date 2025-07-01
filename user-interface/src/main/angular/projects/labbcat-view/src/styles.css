@@ -481,9 +481,6 @@ lib-pagination {
     font-weight: normal;
     font-size: 9pt;
 }
-lib-pagination > * {
-    padding: 3px;
-}
 lib-pagination .current {
     font-weight: bold;
     padding: 3px;
