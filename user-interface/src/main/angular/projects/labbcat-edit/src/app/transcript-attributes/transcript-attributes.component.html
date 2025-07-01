@@ -13,11 +13,11 @@
     </span>
   </div>
   <div class="attribute">
-    <label for="episode-attribute" i18n title="episode: Series of transcripts from a single sociolinguistic interview">Episode</label>
+    <label for="episode-attribute" i18n>Episode</label>
     <span id="episode-attribute" class="values"><div id="episode" class="value">{{transcript['episode'][0].label}}</div></span>
   </div>
   <div class="attribute">
-    <label for="corpus-attribute" i18n title="corpus: Collection of transcripts from a single research project">Corpus</label>
+    <label for="corpus-attribute" i18n>Corpus</label>
     <span id="corpus-attribute" class="values"><div id="corpus" class="value">{{transcript['corpus'][0].label}}</div></span>
   </div>
 </div>
@@ -32,7 +32,7 @@
   </div>
   <div *ngFor="let category of categoryLabels"
        [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
-      <div *ngFor="let layer of categoryLayers[category]" class="attribute" title="{{layer.id}}{{layer.id=='transcript_type'?': Sociolinguistic interview section' : layer.hint?': '+layer.hint:''}}">
+      <div *ngFor="let layer of categoryLayers[category]" class="attribute" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">
         <label for="{{layer.id}}">{{layer.description}}</label>
         <span id="values-{{layer.id}}" class="values">
           
