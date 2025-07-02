@@ -99,6 +99,7 @@ export class SearchComponent implements OnInit {
                     if (params["current_tab"]) {
                         this.currentTab = params["current_tab"];
                     }
+                    
                 }
                 this.listParticipants();
                 this.listTranscripts();

@@ -266,6 +266,7 @@
           [styles]="layerStyles"
           [interpretedRaw]="interpretedRaw"
           [selected]="selectedLayerIds"
+          [annotationCounts]="layerCounts"
           (selectedChange)="layersChanged($event)"></lib-layer-checkboxes>
         <div *ngIf="user && user.roles.includes('edit')" class="generate-layer">
           <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
@@ -549,7 +550,7 @@
                 <span *ngIf="isWordLayer(transcript.schema.layers[l])"
                       class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}}"
                       style="color: {{transcript.schema.layers[l].colour}};"
-                      title="{{l}}: {{word.labels(l).join(' ')}}">
+                      i18n-title="no annotation" title="{{l}}{{word.labels(l).length > 1 ? ' [' + word.labels(l).length + ']' : ''}}: {{word.labels(l).join(' ') || '(no annotation)'}}">
                   <span *ngFor="let annotation of word.all(l)"
                         id="{{annotation.id}}"
                         [class.highlight]="annotation.id == highlitId"
@@ -658,7 +659,7 @@
                 <span *ngIf="isSegmentLayer(transcript.schema.layers[l])"
                       class="layer layer-{{l}} segment"
                       style="color: {{transcript.schema.layers[l].colour}};"
-                      title="{{l}}: {{word.labels(l).join(' ')}}">
+                      i18n-title="no annotation" title="{{l}}: {{word.labels(l).join(' ') || '(no annotation)'}}">
                   <span *ngFor="let annotation of word.all(l)"
                         id="{{annotation.id}}"
                         [class.highlight]="annotation.id == highlitId"

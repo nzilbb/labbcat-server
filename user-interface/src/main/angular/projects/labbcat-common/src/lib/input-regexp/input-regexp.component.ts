@@ -26,16 +26,24 @@ export class InputRegexpComponent implements OnInit {
         const value = event.target.value;
         try {
             new RegExp(value, "u");
-            this.regexpError = "";
-            // if it's a long regular expression...
-            this.temporaryTitle = value.length>10
-            // show the regular expression as the tool-tip
-                ?value
-            // but otherwise, use the given title
-                :null;
+            this.validRegexp(value);
         } catch(error) {
-            this.temporaryTitle = error.message.replace(': ', ' ').replace('/u:', '/:');
-            this.regexpError = error.message.match("(?<=/u: ).+");
+            if (error.message.endsWith("Invalid escape")) {
+                this.validRegexp(value);
+            } else {
+                this.temporaryTitle = error.message.replace(': ', ' ').replace('/u:', '/:');
+                this.regexpError = error.message.match("(?<=/u: ).+");
+            }
         }
+    }
+    
+    validRegexp(regexp: string): void {
+        this.regexpError = "";
+        // if it's a long regular expression...
+        this.temporaryTitle = regexp.length>10
+        // show the regular expression as the tool-tip
+            ?regexp
+        // but otherwise, use the given title
+            :null;
     }
 }
