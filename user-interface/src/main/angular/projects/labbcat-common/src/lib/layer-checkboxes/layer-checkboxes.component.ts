@@ -25,10 +25,18 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() includeRelationship: boolean;
     /** Display icons */
     @Input() displayIcons: boolean;
+    /** Display prefixes for participant/transcript attributes */
+    @Input() displayAttributePrefixes: boolean;
+    /** Show the data type of each layer */
+    @Input() includeDataType: boolean;
     /** Display layer counts */
     @Input() displayCounts: boolean;
     /** Show the alignment of each layer */
     @Input() includeAlignment: boolean;
+    /** Show alignment as 0 for turn/word/segment */
+    @Input() spoofAlignment: boolean;
+    /** Show whether each layer allows vertical peers */
+    @Input() includeVerticalPeers: boolean;
     /** Allow participant attribute layers to be selected */
     @Input() participant: boolean;
     /** Don't allow the 'participant' layer to be selected */
@@ -64,7 +72,7 @@ export class LayerCheckboxesComponent implements OnInit {
     /** Input list of IDs of layers whose checkbox should be disabled */
     @Input() disabled: string[];
     /** A layer ID to exclude options (annotation count, anchoring, etc.) for */
-    @Input() excludeOptionsForLayerId: string;
+    @Input() excludeOptionsForLayerId: string[];
     /** Input list of IDs of selected (ticked) layers */
     @Input() selected: string[];
     /** Output list of IDs of selected (ticked) layers */
@@ -73,6 +81,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() interpretedRaw: { [key: string] : any };
     /** Output list of layers with interpreted (true) or raw (false) labels */
     @Output() interpretedRawChange = new EventEmitter<{ [key: string] : any }>();
+    /** Hide controls bar, overriding the effect of any other settings that would normally trigger showing it */
+    @Input() hideControls = false;
     
     participantAttributes: Layer[];
     transcriptAttributes: Layer[];
@@ -105,8 +115,9 @@ export class LayerCheckboxesComponent implements OnInit {
         if (this.word) this.scopeCount++;
         if (this.segment) this.scopeCount++;
         if (!this.styles) this.styles = {};
-        if (!this.annotationCounts) this.annotationCounts = {};
         if (!this.disabled) this.disabled = [];
+        if (!this.excludeOptionsForLayerId) this.excludeOptionsForLayerId = [];
+        if (!this.annotationCounts) this.annotationCounts = {};
         if (!this.interpretedRaw) this.interpretedRaw = {};
     }
 
@@ -124,6 +135,12 @@ export class LayerCheckboxesComponent implements OnInit {
         this.wordLayers = [];
         this.segmentLayers = [];
         this.categorySelections = {};
+        this.displayIcons = JSON.parse(sessionStorage.getItem("displayLayerIcons")) ??
+            (typeof this.displayIcons == "string" ? this.displayIcons === "true" : this.displayIcons) ??
+            true;
+        this.displayAttributePrefixes = JSON.parse(sessionStorage.getItem("displayAttributePrefixes")) ??
+            (typeof this.displayAttributePrefixes == "string" ? this.displayAttributePrefixes === "true" : this.displayAttributePrefixes) ??
+            false;
         this.displayCounts = JSON.parse(sessionStorage.getItem("displayLayerCounts")) ??
             (typeof this.displayCounts == "string" ? this.displayCounts === "true" : this.displayCounts) ??
             true;
@@ -151,6 +168,13 @@ export class LayerCheckboxesComponent implements OnInit {
                     this.categorySelections[layer.category] = true;
                 }
             }
+            // fill in missing attribute hints
+            if (layer.id == "participant") layer.hint = "Participant";
+            if (layer.id == "main_participant") layer.hint = "Main participant";
+            if (layer.id == "transcript") layer.hint = "Transcript file name";
+            if (layer.id == "corpus") layer.hint = "Corpus";
+            if (layer.id == "episode") layer.hint = "Series of transcripts";
+            if (layer.id == "transcript_type") layer.hint = "Transcript type";
             if (layer.id == this.schema.root.id) {
                 if (!this.excludeRoot) this.transcriptAttributes.push(layer);
             } else if (layer.id == "segment"
@@ -216,7 +240,18 @@ export class LayerCheckboxesComponent implements OnInit {
             && layer.id != this.schema.utteranceLayerId
             && layer.id != this.schema.wordLayerId
             && layer.peers // multiple child annotations
-            && layer.alignment == 2; // inntervals
+            && layer.alignment == 2; // intervals
+            // N.B. not included in span layer fieldset
+    }
+    IsCountable(layer: Layer): boolean {
+        return this.includeCounts // only if enabled
+            && layer.id != this.schema.participantLayerId // not system layers...
+            && layer.id != this.schema.corpusLayerId
+            && layer.id != this.schema.root.id
+            && layer.id != this.schema.turnLayerId
+            && layer.id != this.schema.utteranceLayerId
+            && layer.id != this.schema.wordLayerId
+            && layer.peers; // multiple child annotations
     }
 
     handleCheckbox(layerId:string): void {
@@ -243,8 +278,19 @@ export class LayerCheckboxesComponent implements OnInit {
         this.selectedChange.emit(this.selected);
     }
     handleInterpretedRaw(layerId:string): void {
-        this.interpretedRaw[layerId] = !this.interpretedRaw[layerId];
-        this.interpretedRawChange.emit(this.interpretedRaw);
+        if (!this.disabled || !this.disabled.includes(layerId)) {
+            this.interpretedRaw[layerId] = !this.interpretedRaw[layerId];
+            this.interpretedRawChange.emit(this.interpretedRaw);
+        }
+    }
+    
+    toggleLayerIcons(): void {
+        this.displayIcons = !this.displayIcons;
+        sessionStorage.setItem("displayLayerIcons", JSON.stringify(this.displayIcons));
+    }
+    toggleAttributePrefixes(): void {
+        this.displayAttributePrefixes = !this.displayAttributePrefixes;
+        sessionStorage.setItem("displayAttributePrefixes", JSON.stringify(this.displayAttributePrefixes));
     }
     toggleLayerCounts(): void {
         this.displayCounts = !this.displayCounts;

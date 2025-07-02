@@ -69,7 +69,7 @@ span.attribute {
 }
 #serializationOptions  lib-layer-checkboxes {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 }
 #generateLayerSelection {
     display: inline-block;
