@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 
 import { Response, Layer, User } from 'labbcat-common';
@@ -29,6 +29,9 @@ export class ParticipantsComponent implements OnInit {
     queryDescription = ""; // Human-readable version of the query
     participantQuery = ""; // AGQL query string for pre-matching participants
     participantDescription = ""; // Human readable description of participant query
+    transcriptQuery = ""; // AGQL query string for pre-matching transcripts
+    transcriptDescription = ""; // Human readable description of transcript query
+    defaultTranscriptFilter = "";
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0;
@@ -40,8 +43,11 @@ export class ParticipantsComponent implements OnInit {
         private labbcatService: LabbcatService,
         private messageService: MessageService,
         private route: ActivatedRoute,
-        private router: Router
-    ) { }
+        private router: Router,
+        @Inject('environment') private environment
+    ) { 
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
         this.filterLayers = [];
@@ -98,6 +104,12 @@ export class ParticipantsComponent implements OnInit {
                     }
                 }
             }
+            // read default transcript filter
+            this.labbcatService.labbcat.getSystemAttribute("defaultTranscriptFilter",
+                (attribute, errors, messages) => {
+                    this.defaultTranscriptFilter = attribute.value;
+                }
+            );
             resolve();
         });
     }
@@ -207,6 +219,14 @@ export class ParticipantsComponent implements OnInit {
                     this.participantDescription = "Selected participants";
                 }
             }
+            if (params["transcript_expression"]) {
+                this.transcriptQuery = params["transcript_expression"];
+                if (params["transcripts"]) {
+                    this.transcriptDescription = params["transcripts"];
+                } else {
+                    this.transcriptDescription = "Selected transcripts";
+                }
+            }
             this.listParticipants();
         });
     }
@@ -254,7 +274,9 @@ export class ParticipantsComponent implements OnInit {
     loadingList = false;
     /** List participants that match the filters */
     listParticipants(): void {
+        // this.query = this.participantQuery || this.transcriptQuery; // if any
         this.query = this.participantQuery; // if any
+        // this.queryDescription = this.participantDescription || this.transcriptDescription;
         this.queryDescription = this.participantDescription;
         for (let layer of this.filterLayers) {
 
@@ -295,7 +317,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += 
                         "Transcript count " + this.filterValues[layer.id][0] // TODO i18n
-                        + "-" + this.filterValues[layer.id][1];
+                        + "–" + this.filterValues[layer.id][1];
                 } else if (this.filterValues[layer.id][0]) {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription +=
@@ -313,6 +335,7 @@ export class ParticipantsComponent implements OnInit {
                     this.query += " && ";
                     this.queryDescription += ", ";
                 }
+                this.filterValues[layer.id].sort();
 
                 // the value "!" means "a label other than the labels in validLabels"...
                 
@@ -325,7 +348,7 @@ export class ParticipantsComponent implements OnInit {
                             + " = " + this.filterValues[layer.id][0];
                     } else {
                         this.queryDescription += layer.description
-                            + " in " + this.filterValues[layer.id].join(",");
+                            + " in (" + this.filterValues[layer.id].join(",") + ")";
                     }
                 } else { // "!" 'other' selected
                     // so we *exclude* all values not selected
@@ -365,7 +388,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
                         +" " + this.filterValues[layer.id][0]
-                        + "-" + this.filterValues[layer.id][1];
+                        + "–" + this.filterValues[layer.id][1];
                 } else if (this.filterValues[layer.id][0]) {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
@@ -402,7 +425,7 @@ export class ParticipantsComponent implements OnInit {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
                         +" " + this.filterValues[layer.id][0]
-                        + "-" + this.filterValues[layer.id][1];
+                        + "–" + this.filterValues[layer.id][1];
                 } else if (this.filterValues[layer.id][0]) {
                     if (this.queryDescription) this.queryDescription += ", ";
                     this.queryDescription += layer.description
@@ -457,9 +480,14 @@ export class ParticipantsComponent implements OnInit {
         
         this.loadingList = true;
         const thisQuery = ++this.querySerial;
+        let queryExpression = this.query;
+        if (this.transcriptQuery) {
+            if (queryExpression) queryExpression += " && ";
+            queryExpression += this.transcriptQuery;
+        }
         // count matches
         this.labbcatService.labbcat.countMatchingParticipantIds(
-            this.query, (matchCount, errors, messages) => {
+            queryExpression, (matchCount, errors, messages) => {
                 if (thisQuery != this.querySerial) return; // new query already sent
                 this.matchCount = matchCount;
                 if (errors) {
@@ -473,7 +501,7 @@ export class ParticipantsComponent implements OnInit {
 
                 // now get the matches for this page
                 this.labbcatService.labbcat.getMatchingParticipantIds(
-                    this.query, this.pageLength, this.p - 1 /* zero-based page numbers */,
+                    queryExpression, this.pageLength, this.p - 1 /* zero-based page numbers */,
                     (participantIds, errors, messages) => {
                         if (thisQuery != this.querySerial) return; // new query already sent
                         if (errors) errors.forEach(m => this.messageService.error(m));
@@ -555,6 +583,19 @@ export class ParticipantsComponent implements OnInit {
         this.pageLength = this.matchCount;
         this.p = 1;
         this.listParticipants();
+    }
+
+    /** Button action */
+    clearTranscriptFilter() : void {
+        this.transcriptQuery = "";
+        this.transcriptDescription = "";
+        this.router.navigate([], {
+            queryParams: {
+                transcript_expression: null,
+                transcripts: null
+            },
+            queryParamsHandling: 'merge'
+        });
     }
 
     /** Button action */
@@ -641,27 +682,44 @@ export class ParticipantsComponent implements OnInit {
     
     /** Button action */
     transcripts(): void {
-        let participantQuery = this.query
-        // if we're matching participant ID, it's "id" here
-        // but needs to be "first('participant').label" on the transcripts page 
-            .replace(/\.test\(id\)/, ".test(first('participant').label)"); // TODO .test(labels('participant'))
-        let participantDescription = this.queryDescription;
-        if (this.selectedIds.length > 0) {
-            // query of the form [...].includes(first('participant').label)
-            const ids = this.selectedIds.map(id=>"'"+this.esc(id)+"'").join(",");
-            participantQuery = `[${ids}].includesAny(labels('participant'))`;
-            if (this.selectedIds.length == 1) {
-                participantDescription = this.selectedIds[0];
-            } else if (this.selectedIds.length <= 5) {
-                participantDescription = this.selectedIds.join(", ");
-            } else {
-                participantDescription = ""+this.selectedIds.length + " selected participants"; // TODO i18n
+        let params = {};
+        if (this.selectedIds.length > 0) { // individual check-boxes selected
+            // check if the user has selected all check-boxes corresponding to a filter
+            const allFilteredSelected = this.selectedIds.length == this.matchCount &&
+                this.selectedIds.length == this.participantIds.length &&
+                this.selectedIds.every((x, i) => x == this.participantIds[i]);
+            // TODO handle the case where all participants' check-boxes are selected
+            if (allFilteredSelected) { // user has selected all check-boxes corresponding to a filter
+                params = {
+                    participant_expression: this.query,
+                    participants: this.queryDescription
+                };
+            } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
+                params = {
+                    participant_expression: "["
+                        + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                        + "].includesAny(labels('participant'))",
+                    participants: this.selectedIds.length + " selected participant" + (this.selectedIds.length > 1 ? "s" : "")
+                };
+            }
+        } else if (this.query) { // no check-boxes selected but some filter applied
+            params = {
+                participant_expression: this.query,
+                participants: this.queryDescription
+            }
+        } else { // no check-boxes selected or filter applied
+            params = {
+                participant_expression: "/.+/.test(id)",
+                participants: "all participants"
+            };
+        }
+        // if there's a default transcript filter and no remembered transcript filter, override the default
+        if (this.defaultTranscriptFilter && !sessionStorage.getItem("lastQueryTranscripts")) {
+            for (let param of this.defaultTranscriptFilter.split("&").map(a => a.replace(/=.+/, ''))) {
+                params[param] = "";
             }
         }
-        this.router.navigate(["transcripts"], { queryParams: {
-            participant_expression: participantQuery,
-            participants: participantDescription
-        } });
+        this.router.navigate(["transcripts"], { queryParams: params });
     }
     
     /** Button action */
@@ -710,28 +768,57 @@ export class ParticipantsComponent implements OnInit {
     }
     /** Query parameters for selected participants */
     selectedParticipantsQueryParameters(participantIdParameter: string): Params {
-        let participantDescription = this.queryDescription;
-        if (this.selectedIds.length > 0) {
-            if (this.selectedIds.length == 1) {
-                participantDescription = this.selectedIds[0];
-            } else if (this.selectedIds.length <= 5) {
-                participantDescription = this.selectedIds.join(", ");
-            } else {
-                participantDescription = ""+this.selectedIds.length + " selected participants"; // TODO i18n
+        let params = {};
+        if (this.selectedIds.length > 0) { // individual check-boxes selected
+            // check if the user has selected all check-boxes corresponding to a filter
+            const allFilteredSelected = this.selectedIds.length == this.matchCount &&
+                this.selectedIds.length == this.participantIds.length &&
+                this.selectedIds.every((x, i) => x == this.participantIds[i]);
+            // TODO handle the case where all participants' check-boxes are selected
+            if (allFilteredSelected) { // user has selected all check-boxes corresponding to a filter
+                params = {
+                    participant_expression: this.query,
+                    participants: this.queryDescription
+                };
+            } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
+                // don't send a participants param (participant count is visible in tab title)
+                params = {
+                    participant_expression: "["
+                        + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                        + "].includes(id)"
+                };
             }
-            return {
-                participant_expression: "["
-                    + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                    + "].includes(id)",
-                participants: participantDescription
-            };
-        } else if (this.query) {
-            return {
+        } else if (this.query) { // no check-boxes selected but some filter applied
+            params = {
                 participant_expression: this.query,
-                participants: participantDescription
+                participants: this.queryDescription
+            };
+        } else { // no check-boxes selected or filter applied
+            params = {
+                participant_expression: "/.+/.test(id)",
+                participants: "all participants"
             };
         }
-        return {};
+        if (this.transcriptQuery) {
+            // expressions like:
+            //  labels("transcript").includes(["CB01interview1.eaf"])
+            // or from transcripts page:
+            //  ['CB01interview1.eaf'].includesAny(labels('transcript'))
+            // have to be replaced with:
+            //  ['CB01interview1.eaf'].includes(id)
+            params["transcript_expression"] = 
+                this.transcriptQuery
+                    .replace(/labels\('transcript'\).includesAny\((\[.*\])\)/,
+                             "$1\.includes\(id\)")
+            // from transcripts page:
+                    .replace(".includesAny(labels('transcript'))",
+                             ".includes(id)");
+            if (this.selectedIds.length==0 && !this.query) {
+                delete params["participant_expression"];
+                params["participants"] = "all participants in selected transcripts";
+            }
+        }
+        return params;
     }
 
     /** Query to append to href for links to other pages */
@@ -746,6 +833,6 @@ export class ParticipantsComponent implements OnInit {
 
     /** Add escapes for query string values */
     esc(value: string): string {
-        return value.replace(/\\/,"\\\\").replace(/'/,"\\'");
+        return value.replaceAll(/\\/g,"\\\\").replaceAll(/'/g,"\\'");
     }
 }

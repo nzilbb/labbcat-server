@@ -20,6 +20,10 @@ lib-wait {
 .match {
     background-color: lightgreen;
 }
+.menu-word {
+    font-style: italic;
+    color: var(--theme-text-color);
+}
 @keyframes fade-background-in {
     from { background-color: transparent; }
     to { background-color: lightgray; }
@@ -49,10 +53,12 @@ lib-wait {
 #word-menu .header {
     height: 18px;
 }
-/* TODO This does't work in production because the URL fails:
-.permalink:hover::after {
-    content: ' ' url('/assets/link.svg') / '🔗';
-}*/
+.permalink {
+    font-size: 16px;
+}
+.permalink:hover {
+    text-decoration: none;
+}
 nav, nav > div {
     position: fixed;
     top: 50%;
@@ -91,6 +97,7 @@ nav, nav > div {
 }
 #temporal-blocks .simultaneous .utterance {
     flex-grow: 1;
+    flex-basis: 0;
 }
 #temporal-blocks .consecutive, #temporal-blocks .simultaneous .utterance {
     border-left: 1px darkgray solid;
@@ -103,8 +110,8 @@ nav, nav > div {
 }
 
 /* only the first consecutive utterance, simultaneous utterances are all labelled */
-.words {
-    margin-left: 5%;
+.words, .utterance-tag {
+    margin-left: 2.5vw;
 }
 .words > .word  {
     padding-left: 0px;
@@ -125,9 +132,18 @@ nav, nav > div {
     display: block;
 }
 
+/* padding between utterances in the same turn */
+.utterance:not(:first-child) {
+    padding-top: 0.75em;
+}
 .utterance-tag {
     display: inline-block;
-    width: 100%;
+}
+.consecutive .utterance-tag {
+    width: 97.5%;
+}
+.simultaneous .utterance-tag {
+    width: 95%;
 }
 .token {
     display: inline-block;
@@ -191,6 +207,10 @@ nav, nav > div {
 
 /* Meta-data */
 
+.tab-labels.video {
+    width: 70vw; /* squish tabes to the right to avoid video */
+    max-width: 100%;
+}
 .tab-labels label {
     cursor: context-menu;
 }
@@ -201,6 +221,13 @@ nav, nav > div {
 }
 #layers, #participants, #formats {
     padding-top: 10px;
+}
+@media all and (min-width: 640px) {
+    #layers { 
+        display: flex;
+        flex-direction: column; 
+        align-items: center;
+    }
 }
 /* TODO This does't work in production because the URL fails:
 .participants ul {
@@ -219,6 +246,7 @@ nav, nav > div {
     width: 100%;
     text-align: left;
 }
+
 .buttons {
     display: block;
     padding-top: 4px;
@@ -345,7 +373,7 @@ img.preview {
 @media all and (min-width: 640px) {
     lib-layer-checkboxes { /* layer selector is horizontal*/
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: center;
     }
 }

@@ -17,6 +17,7 @@ import { SearchComponent } from './search/search.component';
 import { SearchMatrixComponent } from './search-matrix/search-matrix.component';
 import { AllUtterancesComponent } from './all-utterances/all-utterances.component';
 import { TranscriptComponent } from './transcript/transcript.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
@@ -30,13 +31,15 @@ import { TranscriptComponent } from './transcript/transcript.component';
       SearchComponent,
       SearchMatrixComponent,
       AllUtterancesComponent,
-      TranscriptComponent
+      TranscriptComponent,
+      LoginComponent
   ],
   imports: [
       BrowserModule,
       HttpClientModule,
       RouterModule.forRoot([
-          { path: 'about', component: AboutComponent },
+          { path: 'login', component: LoginComponent },
+          { path: 'login-error', component: LoginComponent },
           { path: 'search', component: SearchComponent },
           { path: 'matches', component: MatchesComponent },
           { path: 'task', component: TaskComponent },

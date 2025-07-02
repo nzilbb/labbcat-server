@@ -78,16 +78,15 @@ export class SearchComponent implements OnInit {
                 if (!this.matrix.participantQuery) { // don't override participantQuery specified in searchJson, if any
                     this.matrix.participantQuery = params["participant_expression"];
                     if (this.matrix.participantQuery) {
-                        this.participantDescription = params["participants"]
-                            || "Selected participants"; // TODO i18n
+                        this.participantDescription = params["participants"]; // TODO i18n
                     }
                 }
                 if (!this.matrix.transcriptQuery) { // don't override transcriptQuery specified in searchJson, if any
                     this.matrix.transcriptQuery = params["transcript_expression"];
                     if (this.matrix.transcriptQuery) {
-                        this.transcriptDescription = params["transcripts"]
-                            || "Selected transcripts"; // TODO i18n
+                        this.transcriptDescription = params["transcripts"]; // TODO i18n
                     }
+                    
                 }
                 this.listParticipants(false);
                 this.listTranscripts();

@@ -16,6 +16,7 @@ export class TranscriptComponent implements OnInit {
     
     schema : any;
     layerStyles : { [key: string] : any };
+    layerCounts : { [key: string] : any };
     user : User;
     baseUrl : string;
     imagesLocation : string;
@@ -78,6 +79,7 @@ export class TranscriptComponent implements OnInit {
         this.selectedLayerIds = [];
         this.interpretedRaw = {};
         this.layerStyles = {};
+        this.layerCounts = {};
         this.playingId = [];
         this.previousPlayingId = [];
     }
@@ -120,7 +122,7 @@ export class TranscriptComponent implements OnInit {
                     // preselect layers?
                     let layerIds = params["layerId"]||params["l"]
                     if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
-                        layerIds = JSON.parse(sessionStorage.getItem("selectedLayerIds"));
+                        layerIds = [...new Set(JSON.parse(sessionStorage.getItem("selectedLayerIds")))];
                     }
                     if (!layerIds) layerIds = ["noise","comment"]; // noise and comment by default
                     if (layerIds) {
@@ -218,6 +220,8 @@ export class TranscriptComponent implements OnInit {
                 this.mimeTypeToSerializer[descriptor.mimeType]
                     = descriptor as SerializationDescriptor;
             }
+            // alphabetical order
+            this.serializers.sort((a,b) => a.name.charCodeAt(0) - b.name.charCodeAt(0));
         });
     }
 
@@ -309,10 +313,16 @@ export class TranscriptComponent implements OnInit {
                             this.layerStyles[l] = { color: "silver" };
                             this.labbcatService.labbcat.countAnnotations(
                                 this.transcript.id, l, (count, errors, messages) => {
+                                    this.layerCounts[l] = count;
                                     if (count) { // annotations in this layer
-                                        // remove grey-out style
-                                        this.schema.layers[l].description += ` (${count})`;
+                                        if (count == 1) {
+                                            this.schema.layers[l].description += ` (${count} annotation)`; // TODO i18n
+                                        } else {
+                                            this.schema.layers[l].description += ` (${count} annotations)`; // TODO i18n
+                                        }
                                         this.layerStyles[l] = {};
+                                    } else {
+                                        this.schema.layers[l].description += ' (0 annotations)'; // TODO i18n
                                     }
                                 });
                         } // next temporal layer
@@ -367,7 +377,7 @@ export class TranscriptComponent implements OnInit {
                     // add to the current utterance
                     // if the words starts after utterance u ends, increment
                     while (word.start.offset >= utterances[u].end.offset
-                        && u < utterances.length) {
+                        && u < utterances.length-1) {
                         u++;
                     }
                     utterances[u][wordLayerId].push(word);
@@ -437,8 +447,11 @@ export class TranscriptComponent implements OnInit {
 
     loadThread(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
+            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (messages) messages.forEach(m => this.messageService.info(m));
             if (task) {
-                if (task.layers) this.layersChanged(task.layers.filter(l=>l!="orthography"));
+                let taskLayers = task.layers.filter(l=>l!="orthography");
+                if (task.layers) this.layersChanged(taskLayers);
                 this.highlightSearchResults(0);
             }
         });
@@ -626,8 +639,6 @@ export class TranscriptComponent implements OnInit {
                         if (page == 0) {
                             if (errors) errors.forEach(m => 
                                 this.messageService.error(`${layerId}: ${m}`));
-                            if (messages) messages.forEach(m =>
-                                this.messageService.info(`${layerId}: ${m}`));
                         }
                         if (annotations.length) {
                             const unknownAnchorIds = new Set<string>();
@@ -869,7 +880,7 @@ export class TranscriptComponent implements OnInit {
                 const firstNonSpanIndexForWord = wordSpans.findIndex(span=>!span);
                 return Math.max(
                     maxSoFar,
-                    firstNonSpanIndexForWord == -1?wordSpans.length
+                    firstNonSpanIndexForWord == -1?wordSpans.length - 1
                         :firstNonSpanIndexForWord - 1);
             }, -1);
             utteranceWords.forEach((word)=>{
@@ -902,7 +913,7 @@ export class TranscriptComponent implements OnInit {
                     && (display == definition.label // replace whole labels only
                         || annotation.layer.type == "ipa") // unless it's a phonological layer
                    ) { // there is a display version of this label
-                    display = display.replace(definition.label, definition.display);
+                    display = display.replaceAll(definition.label, definition.display);
                     if (annotation.layer.type != "ipa") { // whole label replaced
                         break;
                     }
@@ -919,6 +930,10 @@ export class TranscriptComponent implements OnInit {
             && layer.id != this.schema.wordLayerId)
             || (layer.parentId == this.schema.root.id
                 && layer.alignment > 0);
+    }
+    /** Test whether the layer is is empty */
+    isEmpty(layer : any) : boolean {
+        return !layer.annotations || layer.annotations.length == 0;
     }
     /** Test whether the layer is word scope layer */
     isWordLayer(layer : Layer) : boolean {
@@ -944,6 +959,8 @@ export class TranscriptComponent implements OnInit {
     /* convert selectedLayerIds array into a series of URL parameters with the given name */
     selectedLayerIdParameters(parameterName: string): string {
         return this.selectedLayerIds
+        // noise and comment layers are displayed by default but we don't want them here
+            .filter(layerId => layerId != "comment" && layerId != "noise")
             .map(layerId => "&"+parameterName+"="+encodeURIComponent(layerId))
             .join("");
     }
@@ -1003,7 +1020,7 @@ export class TranscriptComponent implements OnInit {
     playingId : string[]; // IDs of currently playing utterances
     previousPlayingId : string[]; // keep a buffer of old IDs, so we can fade them out
     player: HTMLMediaElement;
-    stopAfter : number; // sto time for playing a selection
+    stopAfter : number; // stop time for playing a selection
     /** Event handler for when the time of a media player is updated */
     mediaTimeUpdate(event: Event): void {
         // only pay attention to the main player
@@ -1028,7 +1045,9 @@ export class TranscriptComponent implements OnInit {
 
             const audios = document.getElementsByTagName('audio');
             const videos = document.getElementsByTagName('video');
-            if (this.stopAfter && this.stopAfter <= this.player.currentTime) {
+            if (this.stopAfter && this.stopAfter <= this.player.currentTime
+                // try to pre-empt the stop time, so it doesn't play into the next utterance:
+                + 0.3) {
                 // arrived at stop time
                 this.stopAfter = null;
                 // stop all media
@@ -1400,7 +1419,10 @@ export class TranscriptComponent implements OnInit {
                 +"&id="+transcriptIdForUrl
                 +"&layerId="+this.schema.utteranceLayerId
                 +"&layerId="+this.schema.wordLayerId
-                +this.selectedLayerIds.map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
+                +this.selectedLayerIds
+            // noise and comment layers are displayed by default but we don't want them here
+                    .filter(l=>l != "comment" && l != "noise")
+                    .map(l=>"&layerId="+l.replace(/ /g, "%20")).join("")
                 +"&start="+utterance.start.offset
                 +"&end="+utterance.end.offset
                 +"&filter="+utterance.parentId
@@ -1508,9 +1530,7 @@ export class TranscriptComponent implements OnInit {
                     this.textGridUrl, // original URL for the file to upload
                     { automaticMapping: "true", todo: "upload" }, // extra HTTP request parameters
                     authorization).then((code: string)=>{
-                        if (code == "0") {
-                            this.praatUtterance = null;
-                        }
+                        this.praatUtterance = null;
                         this.praatProgress = {
                             message: "",
                             value: 100,

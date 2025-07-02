@@ -241,6 +241,22 @@
           <context context-type="linenumber">202</context>
         </context-group>
       </trans-unit>
+<trans-unit id="7000097589771137011" datatype="html">
+        <source>Episode</source>
+        <target state="translated">Episodio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1164567695833119232" datatype="html">
+        <source>Corpus</source>
+        <target state="translated">Corpus</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">12,13</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="9b0a085531b3557c1a2c0b98276fb31d6b0682bb" datatype="html">
         <source>Word</source>
         <target state="translated">Palabra</target>
@@ -249,6 +265,773 @@
           <context context-type="linenumber">114</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+<trans-unit id="4452427314943113135" datatype="html">
+        <source>Previous</source>
+        <target state="translated">Anterior</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">18,20</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7001558189485977898" datatype="html">
+        <source>Previous transcript in the episode</source>
+        <target state="translated">Transcripción anterior en el episodio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">19,22</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3885497195825665706" datatype="html">
+        <source>Next</source>
+        <target state="translated">Siguiente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="633184826796620649" datatype="html">
+        <source>Next transcript in the episode</source>
+        <target state="translated">Transcripción siguiente en el episodio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">30,36</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4449299872132286256" datatype="html">
+        <source>video <x id="INTERPOLATION" equiv-text="{{trackSuffix.key}}"/></source>
+        <target state="translated">video <x id="INTERPOLATION" equiv-text="{{trackSuffix.key}}"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">40,41</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="647519077732949490" datatype="html">
+        <source>Tick to show media</source>
+        <target state="translated">Marcar para mostrar medios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">88,90</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">126,128</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1006562256968398209" datatype="html">
+        <source>video</source>
+        <target state="translated">video</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3111388915707252308" datatype="html">
+        <source>Download <x id="INTERPOLATION" equiv-text="{{file.name}}"/></source>
+        <target state="translated">Bajar <x id="INTERPOLATION" equiv-text="{{file.name}}"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">136</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">159</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="14839304400893024" datatype="html">
+        <source>audio <x id="INTERPOLATION" equiv-text="{{trackSuffix.key}}"/></source>
+        <target state="translated">audio <x id="INTERPOLATION" equiv-text="{{trackSuffix.key}}"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">84,85</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3915211453460723519" datatype="html">
+        <source>audio</source>
+        <target state="translated">audio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7547987530289788715" datatype="html">
+        <source>image <x id="INTERPOLATION" equiv-text="{{trackSuffix.key}}"/></source>
+        <target state="translated">imagen <x id="INTERPOLATION" equiv-text="{{trackSuffix.key}}"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">122,123</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3526205892584451052" datatype="html">
+        <source>image</source>
+        <target state="translated">imagen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">130</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2854176789095009946" datatype="html">
+        <source>other <x id="INTERPOLATION" equiv-text="{{trackSuffix.key}}"/></source>
+        <target state="translated">otro <x id="INTERPOLATION" equiv-text="{{trackSuffix.key}}"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">151,152</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3881818169480672345" datatype="html">
+        <source>other</source>
+        <target state="translated">otro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">154</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="172017983138759453" datatype="html">
+        <source>Local media file</source>
+        <target state="translated">Archivo de multimedia local</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">171,173</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">172,174</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3950000218578904188" datatype="html">
+        <source>Local media</source>
+        <target state="translated">Multimedia local</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">178,180</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">195,197</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2691439655456242230" datatype="html">
+        <source>Set up Praat integration</source>
+        <target state="translated">Instalar integración con Praat</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">222,224</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="9194349248149957102" datatype="html">
+        <source>Large video</source>
+        <target state="translated">Video Grande</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">227,230</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3571391964903695725" datatype="html">
+        <source>Repeat</source>
+        <target state="translated">Repetir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">233,234</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7307257245779005182" datatype="html">
+        <source>Edit Media</source>
+        <target state="translated">Editar Multimedia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">236,238</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8749603328740582549" datatype="html">
+        <source>Which layer to generate</source>
+        <target state="translated">Cuál capa a generar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">273,275</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">51,53</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="9214894060071366520" datatype="html">
+        <source>All layers</source>
+        <target state="translated">Todas las capas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">274,275</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">52,53</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1653119576157732912" datatype="html">
+        <source>Regenerate layers for this transcript</source>
+        <target state="translated">Regenerar capas para esta transcripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">284,288</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1482786409597207283" datatype="html">
+        <source>Main Participants</source>
+        <target state="translated">Participantes Principales</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">300,302</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">301,303</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">170,172</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7261224912907936290" datatype="html">
+        <source>Convert to selected format</source>
+        <target state="translated">Convertir a formato seleccionado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">309,310</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">122,125</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="120342046904318757" datatype="html">
+        <source>Original transcript file</source>
+        <target state="translated">Archivo de transcripción original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">318,320</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2774049696124473355" datatype="html">
+        <source>Episode Documents</source>
+        <target state="translated">Documentos del Episodio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">335,337</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2164777678925399417" datatype="html">
+        <source>Documents for this episode</source>
+        <target state="translated">Documentos asociados con este episodio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">336,339</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7585826646011739428" datatype="html">
+        <source>Edit</source>
+        <target state="translated">Editar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">361,362</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">650,651</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3268940969229475075" datatype="html">
+        <source>Edit transcript attributes</source>
+        <target state="translated">Editar atributos de la transcripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">361,366</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8698195166824296640" datatype="html">
+        <source>Import Changes</source>
+        <target state="translated">Importar Cambios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">384,385</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3422981570501596511" datatype="html">
+        <source>Import changes made to TextGrid into LaBB-CAT</source>
+        <target state="translated">Importar a LaBB-CAT cambios hechos al TextGrid </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">385,387</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2778032162035047655" datatype="html">
+        <source>Permalink to utterance</source>
+        <target state="translated">Permalink para esta locución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">572,573</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6087330636148303588" datatype="html">
+        <source>Utterance</source>
+        <target state="translated">Locución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">574,576</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8090051122207791010" datatype="html">
+        <source>Open in Praat</source>
+        <target state="translated">Abrir en Praat</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">581,583</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8953662033255273794" datatype="html">
+        <source>Open utterance audio in Praat</source>
+        <target state="translated">Abrir audio de la locución en Praat</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">582,585</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7146915036761336609" datatype="html">
+        <source>Open TextGrid</source>
+        <target state="translated">Abrir TextGrid</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">589,590</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1198996077745273128" datatype="html">
+        <source>Open utterance audio and TextGrid in Praat</source>
+        <target state="translated">Abrir audio y TextGrid de la locución en Praat</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">590,593</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2614972317549399247" datatype="html">
+        <source>Open TextGrid ± 1 utterance</source>
+        <target state="translated">Abrir TextGrid ± 1 locución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">597,598</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7976424333829428146" datatype="html">
+        <source>Open utterance audio and TextGrid in Praat, including previous and next utterances</source>
+        <target state="translated">Abrir audio y TextGrid en Praat, incluyendo la locución anterior, esta locución, y la próxima locución.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">598,601</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="347407180135731058" datatype="html">
+        <source>Audio</source>
+        <target state="translated">Audio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">608</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2298952512904972575" datatype="html">
+        <source>Extract utterance audio fragment</source>
+        <target state="translated">Extraer fragmento de audio que corresponde a esta locución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">608,611</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8564202903947049539" datatype="html">
+        <source>Play</source>
+        <target state="translated">Reproducir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">617,618</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6523242662340926404" datatype="html">
+        <source>Play this utterance</source>
+        <target state="translated">Reproducir esta locución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">617,620</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6245673234381686109" datatype="html">
+        <source>Edit Transcript</source>
+        <target state="translated">Editar Transcripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">625,627</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1851119172026253457" datatype="html">
+        <source>Edit utterance transcript</source>
+        <target state="translated">Editar transcripción de esta locución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">626,629</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8606724930548892810" datatype="html">
+        <source>Suggest Correction</source>
+        <target state="translated">Sugerir Corrección</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">634,635</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6046985492559399195" datatype="html">
+        <source>Suggest a correction to the transcription of this utterance</source>
+        <target state="translated">Sugerir una corrección para la transcripción de esta locución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">635,638</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4096341751894571759" datatype="html">
+        <source>Permalink to word</source>
+        <target state="translated">Permalink para esta palabra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">640,641</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7292644637239509166" datatype="html">
+        <source>Edit word token layers</source>
+        <target state="translated">Editar etiquetas en capas para palabras</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">650,653</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2901819387880218650" datatype="html">
+        <source>Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)</source>
+        <target state="translated">Mostrar interpretación de las etiquitas (por ejemplo usando el AFI) o las etiquetas originales (por ejemplo códigos de CELEX DISC)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">45,47</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">79,81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">119,121</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">181,183</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">243,245</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">305,307</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3261988220377553949" datatype="html">
+        <source>Upload Transcripts</source>
+        <target state="translated">Subir Transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">1,5</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2978028594818600343" datatype="html">
+        <source>Defaults</source>
+        <target state="translated">Opciones por Defecto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3062709378414401571" datatype="html">
+        <source>Transcript Type</source>
+        <target state="translated">Tipo de Transcripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">17,19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">19,20</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2847798448928571881" datatype="html">
+        <source>Whether LaBB-CAT should run automatic layer generation when uploading existing transcripts</source>
+        <target state="translated">Si LaBB-CAT debe generar capas automáticas al subir transcripciones que ya existen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">28,30</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3551668120999285773" datatype="html">
+        <source>Generate Layers</source>
+        <target state="translated">Generar Capas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">29,31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">31,33</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7529364102603583700" datatype="html">
+        <source>Whether to automate upload by allowing LaBB-CAT to make all decisions about tier/layer mappings and other options, and upload files one after the other automatically.</source>
+        <target state="translated">Si LaBB-CAT debe automatizar la carga de archivos, aceptando todos los valores de parámetros para gradas/capa y/o otras opciones, y subiendo los archivos uno tras del otro.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">39,40</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4217484061449923624" datatype="html">
+        <source>Automated Upload</source>
+        <target state="translated">Carga Automatizada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2159130950882492111" datatype="html">
+        <source>Cancel</source>
+        <target state="translated">Cancelar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">53,54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">177</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+<trans-unit id="9096686131068622693" datatype="html">
+        <source>Cancel current processing</source>
+        <target state="translated">Cancelar procesamiento corriente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">53,55</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6932865105766151309" datatype="html">
+        <source>Upload</source>
+        <target state="translated">Subir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">58,59</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+<trans-unit id="3166624348134525054" datatype="html">
+        <source>Add all transcripts to LaBB-CAT</source>
+        <target state="translated">Agregar todas las transcripciones a LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">58,61</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7022070615528435141" datatype="html">
+        <source>Delete</source>
+        <target state="translated">Eliminar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">65,66</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+<trans-unit id="2820872676306409920" datatype="html">
+        <source>Delete all transcripts from LaBB-CAT</source>
+        <target state="translated">Eliminar todas las transcripciones de LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">65,68</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6241314051833811894" datatype="html">
+        <source>Clear Existing</source>
+        <target state="translated">Remover Existentes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">71,72</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+<trans-unit id="1314711107137719783" datatype="html">
+        <source>Remove all files from the queue that are already in LaBB-CAT</source>
+        <target state="translated">Remover de la fila todos los archivos que ya están en LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">72,75</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7910680554145420703" datatype="html">
+        <source>Clear New</source>
+        <target state="translated">Remover Nuevos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">77,78</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+<trans-unit id="5080577260942093917" datatype="html">
+        <source>Remove all files from the queue that are not already in LaBB-CAT</source>
+        <target state="translated">Remover de la fila todos los archivos que no existen todavía en LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">78,81</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8700121026680200191" datatype="html">
+        <source>Clear</source>
+        <target state="translated">Remover</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">84,85</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+<trans-unit id="1733912613176236885" datatype="html">
+        <source>Remove all files from the queue</source>
+        <target state="translated">Remover todos los archivos de la fila</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">84,87</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7008439939460403347" datatype="html">
+        <source>Report</source>
+        <target state="translated">Informe</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">90,92</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+<trans-unit id="3650515205757147547" datatype="html">
+        <source>Report about uploads</source>
+        <target state="translated">Informe sobre carga de archivos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">90,93</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4187562861917781527" datatype="html">
+        <source>Drop transcript and media files on to this area</source>
+        <target state="translated">Soltar archivos de transcripción y multimedia sobre esta area</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">97,99</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3508360408943276456" datatype="html">
+        <source>Queue of transcripts to upload</source>
+        <target state="translated">File de transcripciones para subir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">103,105</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2728471020234722275" datatype="html">
+        <source>Select files for upload</source>
+        <target state="translated">Seleccionar archivos para subir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">105,107</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3250391385569692601" datatype="html">
+        <source>Media</source>
+        <target state="translated">Multimedia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">113,115</context>
+        </context-group>
+        <note priority="1" from="description">Upload batch column</note>
+      </trans-unit>
+<trans-unit id="8650499415827640724" datatype="html">
+        <source>Type</source>
+        <target state="translated">Tipo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">116,118</context>
+        </context-group>
+        <note priority="1" from="description">Upload batch column</note>
+      </trans-unit>
+<trans-unit id="5611592591303869712" datatype="html">
+        <source>Status</source>
+        <target state="translated">Estado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">117,119</context>
+        </context-group>
+        <note priority="1" from="description">Upload batch column</note>
+      </trans-unit>
+<trans-unit id="3419681791450150574" datatype="html">
+        <source>Progress</source>
+        <target state="translated">Progreso</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">118,121</context>
+        </context-group>
+        <note priority="1" from="description">Upload batch column</note>
+      </trans-unit>
+<trans-unit id="1773330174139432021" datatype="html">
+        <source>Show/hide parameters</source>
+        <target state="translated">Mostrar/ocular parámetros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">126,127</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7083176320247907066" datatype="html">
+        <source>[no transcript yet]</source>
+        <target state="translated">[sin transcripción]</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">141,143</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5362126518639961906" datatype="html">
+        <source>Remove this file from the queue</source>
+        <target state="translated">Remover este renglón de la fila</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">171,173</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1183709727643833610" datatype="html">
+        <source>Set the parameters for this transcript</source>
+        <target state="translated">Fijar parámetros para esta transcripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">218,220</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="84879f4170e14e46eb31490d9c1c81751bdfb361" datatype="html">
         <source>Segment Layers</source>
@@ -3014,6 +3797,34 @@
           <context context-type="linenumber">2</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+<trans-unit id="2901819387880218650" datatype="html">
+        <source>Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)</source>
+        <target state="translated">Mostrar interpretación de las etiquitas (por ejemplo usando el AFI) o las etiquetas originales (por ejemplo códigos de CELEX DISC)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">45,47</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">79,81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">119,121</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">181,183</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">243,245</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">305,307</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="676840cc7025773312b58c4dd0c77148e58ad797" datatype="html">
         <source>Participant Attributes</source>
