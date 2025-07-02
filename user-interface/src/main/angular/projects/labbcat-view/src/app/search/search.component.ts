@@ -74,12 +74,14 @@ export class SearchComponent implements OnInit {
                             }]
                         } as Matrix);
                     }
-                    
+                }
+                if (!this.matrix.participantQuery) { // don't override participantQuery specified in searchJson, if any
                     this.matrix.participantQuery = params["participant_expression"];
                     if (this.matrix.participantQuery) {
                         this.participantDescription = params["participants"]; // TODO i18n
                     }
-                    
+                }
+                if (!this.matrix.transcriptQuery) { // don't override transcriptQuery specified in searchJson, if any
                     this.matrix.transcriptQuery = params["transcript_expression"];
                     if (this.matrix.transcriptQuery) {
                         this.transcriptDescription = params["transcripts"]; // TODO i18n
@@ -96,7 +98,22 @@ export class SearchComponent implements OnInit {
             this.user = user as User;
         });
     }
-
+    selectParticipants(): void {
+        let params = { to: "search" };
+        const searchJson = this.buildSearchJsonParam();
+        if (searchJson.length) params["searchJson"] = searchJson;
+        this.router.navigate(["participants"], { queryParams: params });
+    }
+    selectTranscripts(): void {
+        let params = {
+            to: "search",
+            participant_expression: this.participantQueryForTranscripts(),
+            participants: this.participantDescription
+        };
+        const searchJson = this.buildSearchJsonParam();
+        if (searchJson.length) params["searchJson"] = searchJson;
+        this.router.navigate(["transcripts"], { queryParams: params });
+    }
     /** Ensure fields are filled in correctly, the value may have been passed in */
     standardizeMatrix(matrix: Matrix): Matrix {
         if (!matrix.hasOwnProperty("participantQuery")) matrix.participantQuery = "";
@@ -113,10 +130,74 @@ export class SearchComponent implements OnInit {
                     if (!match.hasOwnProperty("anchorStart")) match.anchorStart = false;
                     if (!match.hasOwnProperty("anchorEnd")) match.anchorEnd = false;
                     if (!match.hasOwnProperty("target")) match.target = false;
+                    if (!match.hasOwnProperty("pattern")) match.pattern = "";
+                    if (!match.hasOwnProperty("min")) match.min = null;
+                    if (!match.hasOwnProperty("max")) match.max = null;
                 } // next match
             } // next column layer
         } // next column
         return matrix;
+    }
+    /** Remove defaults that standardizeMatrix() restores, to minimize the size of requests */
+    condenseMatrix(matrix: Matrix): Matrix {
+        if (matrix.hasOwnProperty("participantQuery")
+            && matrix.participantQuery !== undefined
+            && !matrix.participantQuery.length) {
+            delete matrix.participantQuery;
+        }
+        if (matrix.hasOwnProperty("transcriptQuery")
+            && matrix.transcriptQuery !== undefined
+            && !matrix.transcriptQuery.length) {
+            delete matrix.transcriptQuery;
+        }
+        for (let column of matrix.columns) { // each column
+            if (column.hasOwnProperty("adj") && column.adj == 1) {
+                delete column.adj;
+            }
+            if (column.hasOwnProperty("layers") && !Object.keys(column.layers).length) {
+                delete column.layers;
+            }
+            for (let layerId in column.layers) { // each column layer
+                const matches = column.layers[layerId] as MatrixLayerMatch[];
+                for (let match of matches) {
+                    if (match.hasOwnProperty("id") && match.id == layerId) {
+                        delete match.id;
+                    }
+                    if (match.hasOwnProperty("not") && !match.not) {
+                        delete match.not;
+                    }
+                    if (match.hasOwnProperty("anchorStart") && !match.anchorStart) {
+                        delete match.anchorStart;
+                    }
+                    if (match.hasOwnProperty("anchorEnd") && !match.anchorEnd) {
+                        delete match.anchorEnd;
+                    }
+                    if (match.hasOwnProperty("target") && !match.target) {
+                        delete match.target;
+                    }
+                    if (match.hasOwnProperty("pattern") && match.pattern == "") {
+                        delete match.pattern;
+                    }
+                    if (match.hasOwnProperty("min") && match.min == null) {
+                        delete match.min;
+                    }
+                    if (match.hasOwnProperty("max") && match.max == null) {
+                        delete match.max;
+                    }
+                } // next match
+            } // next column layer
+        } // next column
+        return matrix;
+    }
+    /** Build searchJson parameter (or return empty string if the default) */
+    buildSearchJsonParam(): string {
+        const searchColumns = JSON.stringify({ columns: this.condenseMatrix(this.matrix).columns });
+        const defaultColumns = JSON.stringify({columns:[{layers:{orthography:[{pattern:"",min:null,max:null}]}}]});
+        let searchJson = "";
+        if (searchColumns != defaultColumns) { // search columns aren't the default
+            searchJson = searchColumns;
+        }
+        return searchJson;
     }
 
     participantCount = 0;
