@@ -415,20 +415,20 @@
 <fieldset *ngIf="!hideControls && (participant || transcript || includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}' || (annotationCounts | json) != '{}')" id="controls">
   <div *ngIf="participant || transcript" class="label-spacer">
     <label
-      title="Show full names for participant/transcript attributes">
+      i18n-title title="Show full names for participant/transcript attributes">
       <lib-grouped-checkbox
         group="hideAttributePrefixes"
         name="hideAttributePrefixes"
         [checked]="!displayAttributePrefixes"
         (change)="toggleAttributePrefixes()"
         ></lib-grouped-checkbox>
-      Hide attribute prefixes</label>
+      <span i18n>Hide attribute prefixes</span></label>
   </div>
   <div
     *ngIf="includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}'"
     class="label-spacer">
     <label
-      title="Hide icons that correspond to layer properties">
+      i18n-title title="Hide icons that correspond to layer properties">
       <!-- Don't actually need grouped-checkbox, but without it the alignment doesn't match Projects above -->
       <lib-grouped-checkbox
         group="hideLayerIcons"
@@ -436,7 +436,7 @@
         [checked]="!displayIcons"
         (change)="toggleLayerIcons()"
         ></lib-grouped-checkbox>
-      Hide layer icons</label>
+      <span i18n>Hide layer icons</span></label>
   </div>
   <div *ngIf="(annotationCounts | json) != '{}'" class="label-spacer">
     <label
