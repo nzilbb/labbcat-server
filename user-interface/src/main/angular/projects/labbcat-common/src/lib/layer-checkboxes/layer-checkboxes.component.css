@@ -94,6 +94,15 @@ img.data-type, img.alignment, img.vertical-peers {
 .icon-hider {
     font-style: italic;
 }
+.layers > table > tbody > tr {
+    background: revert;
+}
+td.layer-count {
+    text-align: right;
+}
+td.layer-id {
+    cursor: default;
+}
 @media all and (min-width: 640px) {
     .icon-hider { 
         display: flex;
