@@ -289,10 +289,8 @@
       <!-- participants tab -->
       <ng-container *ngIf="currentCategory == 'Participants'">
         <div *ngFor="let participant of transcript.all('participant')" class="attribute speaker">
-          <label *ngIf="participant.first('main_participant')" class="participant main_participant"
-            >{{participant.label}} <span i18n>(main participant)</span></label>
-          <label *ngIf="!participant.first('main_participant')" class="participant"
-            >{{participant.label}}</label>
+          <label class="participant" [class.main_participant]="participant.first('main_participant')"
+            >{{participant.label}}<span *ngIf="participant.first('main_participant')" i18n> (main participant)</span></label>
           <lib-button
             *ngIf="user && user.roles.includes('edit')"
             (press)="viewAttributes(participant.label)"
@@ -324,7 +322,7 @@
       <!-- export tab -->
       <div *ngIf="currentCategory == 'Export'" id="export">
         <ul>
-          <li *ngIf="originalFile">Original transcription: 
+          <li *ngIf="originalFile"><span i18n="export original transcript">Original transcript:</span>
             <ul>
               <li id="original-file-link"
                   i18n-title title="Original transcript file"
@@ -341,14 +339,15 @@
               </li>
             </ul>
           </li>
-          <li>Export formatted, including transcript lines (<span 
+          <li><span i18n>Export formatted, including transcript lines</span> (<span
             class="layer-id no-pad" [title]="schema.layers[schema.utteranceLayerId].description"
-            >utterance</span>) and selected layers (<span 
-            *ngFor="let layerId of selectedLayerIds"
-            class="layer-id"
-            [title]="schema.layers[layerId].description"
-            [style]="layerStyles[layerId]"
-            >{{layerId}}</span>):
+            >{{schema.utteranceLayerId}}</span>) <span
+            i18n="(Export formatted, including transcript lines) and selected layers">and selected layers</span> (<span
+              *ngFor="let layerId of selectedLayerIds"
+              class="layer-id"
+              [title]="schema.layers[layerId].description"
+              [style]="layerStyles[layerId]"
+              >{{layerId}}</span>):
             <ul>
               <li *ngFor="let serializer of serializers"
                   i18n-title title="Convert to selected format">
