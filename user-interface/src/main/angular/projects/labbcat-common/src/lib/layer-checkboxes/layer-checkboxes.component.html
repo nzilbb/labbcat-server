@@ -136,7 +136,9 @@
            i18n-title="Layer alignment descriptions"
            [title]="'Alignment: ' + (['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval')"
            [alt]="['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' ">
-      <img *ngIf="includeVerticalPeers" class="vertical-peers"
+      <img *ngIf="includeVerticalPeers"
+           class="vertical-peers"
+           [class.spacer]="!layer.peersOverlap"
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="layer.peersOverlap ? imagesLocation + '/vertical-peers'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg' : undefined" 
            [alt]="layer.peersOverlap ? '[|=]' : ''"
@@ -219,7 +221,9 @@
            i18n-title="Layer alignment descriptions"
            [title]="'Alignment: ' + (['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval')"
            [alt]="['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' ">
-      <img *ngIf="includeVerticalPeers" class="vertical-peers"
+      <img *ngIf="includeVerticalPeers"
+           class="vertical-peers"
+           [class.spacer]="!layer.peersOverlap"
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="layer.peersOverlap ? imagesLocation + '/vertical-peers'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg' : undefined" 
            [alt]="layer.peersOverlap ? '[|=]' : ''"
@@ -306,7 +310,9 @@
            i18n-title="Layer alignment descriptions"
            [title]="'Alignment: ' + (['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval')"
            [alt]="['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' ">
-      <img *ngIf="includeVerticalPeers" class="vertical-peers"
+      <img *ngIf="includeVerticalPeers"
+           class="vertical-peers"
+           [class.spacer]="!layer.peersOverlap"
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="layer.peersOverlap ? imagesLocation + '/vertical-peers'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg' : undefined" 
            [alt]="layer.peersOverlap ? '[|=]' : ''"
@@ -390,7 +396,9 @@
            i18n-title="Layer alignment descriptions"
            [title]="'Alignment: ' + (['turn','word','segment'].includes(layer.id) && spoofAlignment ? 'Complete interval' : layer.alignment==2? 'Sub-interval' :layer.alignment==1? 'Timepoint' : 'Complete interval')"
            [alt]="['turn','word','segment'].includes(layer.id) && spoofAlignment ? '[🏷]' : layer.alignment==2? '[↔]' :layer.alignment==1? '[📌]' : '[🏷]' ">
-      <img *ngIf="includeVerticalPeers" class="vertical-peers"
+      <img *ngIf="includeVerticalPeers"
+           class="vertical-peers"
+           [class.spacer]="!layer.peersOverlap"
            [style.display]="displayIcons ? 'inline' : 'none'"
            [src]="layer.peersOverlap ? imagesLocation + '/vertical-peers'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg' : undefined" 
            [alt]="layer.peersOverlap ? '[|=]' : ''"

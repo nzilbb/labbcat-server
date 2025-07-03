@@ -66,6 +66,9 @@ img.data-type, img.alignment, img.vertical-peers {
     margin-right: 0.2rem;
     cursor: help;
 }
+img.vertical-peers.spacer {
+    margin-right: 1.2rem;
+}
 .layer-count:before {
     content: ' (';
 }
