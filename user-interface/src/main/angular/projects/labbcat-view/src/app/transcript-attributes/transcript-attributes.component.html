@@ -26,11 +26,11 @@
 </nav>
 <div *ngIf="transcript" id="header" class="attribute-list">
   <div class="attribute">
-    <label for="corpus-attribute"><span i18n>Corpus</span><span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">corpus</span>)</span></label>
+    <label for="corpus-attribute"><span i18n>Corpus</span><span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">{{schema.corpusLayerId}}</span>)</span></label>
     <span id="corpus-attribute" class="values"><div id="corpus" class="value">{{transcript['corpus'][0].label}}</div></span>
   </div>
   <div class="attribute">
-    <label for="episode-attribute"><span i18n>Episode</span><span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">episode</span>)</span></label>
+    <label for="episode-attribute"><span i18n>Episode</span><span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">{{schema.episodeLayerId}}</span>)</span></label>
     <span id="episode-attribute" class="values"><div id="episode" class="value">{{transcript['episode'][0].label}}</div></span>
   </div>
 </div>
