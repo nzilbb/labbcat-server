@@ -496,8 +496,8 @@ lib-pagination .current {
         display: table-row;
         padding-bottom: 0px;
     }
-    .list > .item:nth-child(odd) { background: #FAFAFA; }
-    .list > .item:nth-child(even) { background: #FFFFFF; }
+    .list > .item:nth-of-type(odd) { background: #FAFAFA; }
+    .list > .item:nth-of-type(even) { background: #FFFFFF; }
     .list > .item > span { display: table-cell; }
     .list > .item > span.header-only { display: table-cell; }
     .list > .item > span > legend { display: none; }

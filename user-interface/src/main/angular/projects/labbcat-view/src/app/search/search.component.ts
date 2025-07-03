@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Layer } from 'labbcat-common';
@@ -17,12 +17,17 @@ export class SearchComponent implements OnInit {
     
     user: User;
     schema: any;
+    imagesLocation : string;
+    tabLabels: string[];
+    currentTab: string;
+    tabs: object;
     matrix: Matrix;
     participantDescription: string;
     participantIds: string[];
     participantsFile: File;
     transcriptDescription: string;
     transcriptIds: string[];
+    transcriptsFile: File;
     mainParticipantOnly: boolean;
     onlyAligned: boolean;
     firstMatchOnly: boolean;
@@ -35,8 +40,11 @@ export class SearchComponent implements OnInit {
         private labbcatService: LabbcatService,
         private messageService: MessageService,
         private route: ActivatedRoute,
-        private router: Router
-    ) { }
+        private router: Router,
+        @Inject('environment') private environment
+    ) {
+        this.imagesLocation = this.environment.imagesLocation;
+    }
     
     ngOnInit(): void {
         this.matrix = {
@@ -47,6 +55,7 @@ export class SearchComponent implements OnInit {
         this.participantIds = [];
         this.transcriptIds = [];
         this.readUserInfo();
+        this.setupTabs();
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
             
@@ -78,17 +87,23 @@ export class SearchComponent implements OnInit {
                 if (!this.matrix.participantQuery) { // don't override participantQuery specified in searchJson, if any
                     this.matrix.participantQuery = params["participant_expression"];
                     if (this.matrix.participantQuery) {
-                        this.participantDescription = params["participants"]; // TODO i18n
+                        this.participantDescription = params["participants"];
+                        this.currentTab = "Participants";
                     }
                 }
                 if (!this.matrix.transcriptQuery) { // don't override transcriptQuery specified in searchJson, if any
                     this.matrix.transcriptQuery = params["transcript_expression"];
                     if (this.matrix.transcriptQuery) {
-                        this.transcriptDescription = params["transcripts"]; // TODO i18n
+                        this.transcriptDescription = params["transcripts"];
+                        this.currentTab = "Transcripts";
+                    }
+                    
+                    if (params["current_tab"]) {
+                        this.currentTab = params["current_tab"];
                     }
                     
                 }
-                this.listParticipants(false);
+                this.listParticipants();
                 this.listTranscripts();
             });
         });
@@ -98,11 +113,49 @@ export class SearchComponent implements OnInit {
             this.user = user as User;
         });
     }
+    setupTabs(): void {
+        this.tabs = {};
+        this.tabs["Participants"] = {
+            label: "Participants", // TODO i18n
+            description: "Narrow down the participants to search", // TODO i18n
+            icon: "filter.svg"
+        }; // TODO i18n
+        this.tabs["Transcripts"] = {
+            label: "Transcripts", // TODO i18n
+            description: "Narrow down the transcripts to search", // TODO i18n
+            icon: "filter.svg"
+        }; // TODO i18n
+        this.tabs["Options"] = {
+            label: "Options", // TODO i18n
+            description: "Configure options for matching and displaying search results", // TODO i18n
+            icon: "cog.svg"
+        };
+        this.tabLabels = Object.keys(this.tabs);
+    }
     selectParticipants(): void {
+        if (this.transcriptIds && this.transcriptIds.length) {
+            if (!confirm("This will clear the transcript filter.\nAre you sure you want to select participants?")) { // TODO i18n
+                return;
+            }
+        }
         let params = { to: "search" };
         const searchJson = this.buildSearchJsonParam();
         if (searchJson.length) params["searchJson"] = searchJson;
         this.router.navigate(["participants"], { queryParams: params });
+    }
+    clearParticipantFilter(): void {
+        this.participantDescription = "";
+        this.participantIds = [];
+        this.participantCount = 0;
+        sessionStorage.removeItem("lastQueryParticipants");
+        this.router.navigate([], {
+            queryParams: {
+                participant_expression: null,
+                participants: null,
+                current_tab: 'Participants'
+            },
+            queryParamsHandling: 'merge'
+        });
     }
     selectTranscripts(): void {
         let params = {
@@ -113,6 +166,20 @@ export class SearchComponent implements OnInit {
         const searchJson = this.buildSearchJsonParam();
         if (searchJson.length) params["searchJson"] = searchJson;
         this.router.navigate(["transcripts"], { queryParams: params });
+    }
+    clearTranscriptFilter(): void {
+        this.transcriptDescription = "";
+        this.transcriptIds = [];
+        this.transcriptCount = 0;
+        sessionStorage.removeItem("lastQueryTranscripts");
+        this.router.navigate([], {
+            queryParams: {
+                transcript_expression: null,
+                transcripts: null,
+                current_tab: 'Transcripts'
+            },
+            queryParamsHandling: 'merge'
+        });
     }
     /** Ensure fields are filled in correctly, the value may have been passed in */
     standardizeMatrix(matrix: Matrix): Matrix {
@@ -203,7 +270,7 @@ export class SearchComponent implements OnInit {
     participantCount = 0;
     loadingParticipants = false;
     /** List participants that match the filters */
-    listParticipants(fromFile: boolean): void {
+    listParticipants(): void {
         this.participantIds = [];
         if (this.matrix.participantQuery) {
             this.labbcatService.labbcat.countMatchingParticipantIds(
@@ -213,7 +280,7 @@ export class SearchComponent implements OnInit {
                     this.participantCount = participantCount;
                     if (this.participantCount) {
                         this.loadMoreParticipants();
-                    } else if (fromFile) { // list loaded from file
+                    } else if (this.participantsFile) { // list loaded from file
                         this.messageService.error("No valid participants in file."); // TODO i18n
                     }
 
@@ -222,7 +289,7 @@ export class SearchComponent implements OnInit {
     }
 
     loadMoreParticipants() : void {
-        const pageLength = 10;
+        const pageLength = 50;
         this.loadingParticipants = true;
         this.labbcatService.labbcat.getMatchingParticipantIds(
             this.matrix.participantQuery, pageLength, this.participantIds.length / pageLength,
@@ -248,13 +315,15 @@ export class SearchComponent implements OnInit {
                     this.transcriptCount = transcriptCount;
                     if (this.transcriptCount) {
                         this.loadMoreTranscripts();
+                    } else if (this.transcriptsFile) { // list loaded from file
+                        this.messageService.error("No valid transcripts in file."); // TODO i18n
                     }
                 });
         } // there is a transcriptExpression
     }
 
     loadMoreTranscripts() : void {
-        const pageLength = 10;
+        const pageLength = 50;
         this.loadingTranscripts = true;
         this.labbcatService.labbcat.getMatchingTranscriptIds(
             this.transcriptQueryIncludingParticipantConditions(),
@@ -323,9 +392,9 @@ export class SearchComponent implements OnInit {
                     "labels('participant').includesAny($1)");
     }
     
-    /** Called when a CSV file is selected; parses the file to determine CSV fields. */
-    selectFile(files: File[]): void {
-        console.log("selectFile " + files.length);
+    /** Called when a participant CSV file is selected; parses the file to determine CSV fields. */
+    selectParticipantFile(files: File[]): void {
+        console.log("selectParticipantFile " + files.length);
         if (files.length == 0) return;
         this.participantsFile = files[0]
         if (!this.participantsFile.name.endsWith(".csv")
@@ -364,10 +433,13 @@ export class SearchComponent implements OnInit {
                     component.messageService.error(
                         "File is empty: " + component.participantsFile.name); // TODO i18n
                 } else {
-                    component.matrix.participantQuery = "["+idList.join(",")+"].includes(id)";
-                    console.log("component.matrix.participantQuery " + component.matrix.participantQuery);
-                    this.listParticipants(true);
-                    this.listTranscripts();
+                    this.router.navigate([], {
+                        queryParams: {
+                            participant_expression: "["+idList.join(",")+"].includes(id)",
+                            participants: "From uploaded file" // TODO i18n
+                        },
+                        queryParamsHandling: 'merge'
+                    });
                 }                
             }
         };
@@ -376,5 +448,62 @@ export class SearchComponent implements OnInit {
         };
         reader.readAsText(this.participantsFile);
         
+    }
+    
+    /** Called when a transcript CSV file is selected; parses the file to determine CSV fields. */
+    selectTranscriptFile(files: File[]): void {
+        console.log("selectTranscriptFile " + files.length);
+        if (files.length == 0) return;
+        this.transcriptsFile = files[0]
+        if (!this.transcriptsFile.name.endsWith(".csv")
+            && !this.transcriptsFile.name.endsWith(".tsv")
+            && !this.transcriptsFile.name.endsWith(".txt")) {
+            this.messageService.error("You must select a text file (.txt, .csv, or .tsv)"); // TODO i18n
+            this.transcriptsFile = null;
+            return;
+        }
+        
+        const reader = new FileReader();
+        const component = this;
+        reader.onload = () => {
+            console.log("onload " + files.length);
+            const csvData = reader.result;  
+            let lines = (<string>csvData).split(/\r\n|\n/);
+            console.log("lines " + lines.length);
+            // remove blank lines
+            lines = lines.filter(l=>l.length>0);
+            // if the file has fields/columns, use the first field/column
+            if (/.*,.*/.test(lines[0])) { // CSV
+                lines = lines.map(l=>l.split(",")[0]);
+            } else if (/.*;.*/.test(lines[0])) { // Non-English CSV
+                lines = lines.map(l=>l.split(";")[0]);
+            } else if (/.*\t.*/.test(lines[0])) { // TSV
+                lines = lines.map(l=>l.split("\t")[0]);
+            }
+            console.log("non-blank lines " + lines.length);
+            if (lines.length == 0) {
+                component.messageService.error(
+                    "File is empty: " + component.transcriptsFile.name); // TODO i18n
+            } else {
+                let idList = lines.map(
+                    l=>"'"+l.replace(/\\/g, "\\\\").replace(/'/g, "\\'")+"'");
+                if (idList.length == 0) {
+                    component.messageService.error(
+                        "File is empty: " + component.transcriptsFile.name); // TODO i18n
+                } else {
+                    this.router.navigate([], {
+                        queryParams: {
+                            transcript_expression: "["+idList.join(",")+"].includes(id)",
+                            transcripts: "From uploaded file" // TODO i18n
+                        },
+                        queryParamsHandling: 'merge'
+                    });
+                }                
+            }
+        };
+        reader.onerror = function () {  
+            component.messageService.error("Error reading " + component.transcriptsFile.name); // TODO i18n
+        };
+        reader.readAsText(this.transcriptsFile);
     }
 }

@@ -1,3 +1,4 @@
+<div class="layer-checkboxes-container">
 <lib-layer-checkboxes
   name="layer" includeAlignment="true" spoofAlignment="true"
   includeDataType="true" includeVerticalPeers="true"
@@ -7,6 +8,7 @@
   [(selected)]="selectedLayerIds"
   (selectedChange)="syncSelectedLayerIdsWithColumns($event)"
   (click)="hideHelper();"></lib-layer-checkboxes>
+</div>
 
 <div class="columns"
      (click)="hideHelper();">
