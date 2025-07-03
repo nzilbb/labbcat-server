@@ -61,9 +61,10 @@
 .share-end:checked + label .locked { display: inherit; }
 .share-end:checked + label .unlocked { display: none; }
 
-img.alignment {
-    height: 12px;
-    padding-right: 3px;
+img.data-type, img.alignment, img.vertical-peers {
+    height: 1rem;
+    margin-right: 0.2rem;
+    cursor: help;
 }
 .layer-count:before {
     content: ' (';
@@ -77,6 +78,18 @@ img.alignment {
 }
 .deselected {
     opacity: 0.33;
+}
+#controls {
+    font-style: italic;
+}
+@media all and (min-width: 640px) {
+    #controls { 
+        display: flex;
+        flex-direction: row;
+    }
+    #controls .label-spacer {
+        flex-grow: 1;
+    }
 }
 .icon-hider {
     font-style: italic;
