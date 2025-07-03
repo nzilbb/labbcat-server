@@ -40,11 +40,7 @@ export class ValidLabelHelperComponent implements OnInit {
     }
     
     select(event: Event, symbol: string): boolean {
-        if (this.regularExpression) {
-            // escape for regular expression
-            symbol = symbol.replace(/([\?\.\*\|\^\$\(\)])/g,"\\$1");
-        }
-        this.symbolSelected.emit(symbol);
+        this.symbolSelected.emit(this.escapeRegex(symbol));
         if (event) event.stopPropagation();
         return false;
     }
@@ -54,12 +50,7 @@ export class ValidLabelHelperComponent implements OnInit {
         if (this.maxLabelLength == 1) { // can use [...]
             for (let label of labels) {
                 if (!pattern) pattern = "[";
-                let symbol = label.label;
-                // escape for regular expression
-                if (symbol == "]" || symbol == "^" || symbol == "-") {
-                    symbol = "\\" + symbol;
-                }
-                pattern += symbol;
+                pattern += this.escapeRegex(label.label);
             }
             if (pattern) pattern += "]";
         } else { // multi-character symbols - have to use (...|...|...)
@@ -69,13 +60,7 @@ export class ValidLabelHelperComponent implements OnInit {
                 } else {
                     pattern += "|";
                 }
-                let symbol = label.label;
-                // escape for regular expression
-                if (symbol == "|" || symbol == "(" || symbol == ")"
-                    || symbol == "^" || symbol == "$") {
-                    symbol = "\\" + symbol;
-                }
-                pattern += symbol;
+                pattern += this.escapeRegex(label.label);
             }
             if (pattern) pattern += ")";
         }
@@ -107,5 +92,8 @@ export class ValidLabelHelperComponent implements OnInit {
         if (event) event.stopPropagation();
         return false;
     }
-    
+    escapeRegex(symbol: string): string {
+        if (!this.regularExpression) return symbol;
+        return symbol.replace(/([\?\.\*\|\^\$\(\)\{\}\[\]\-\+\\])/g,"\\$1");
+    }
 }
