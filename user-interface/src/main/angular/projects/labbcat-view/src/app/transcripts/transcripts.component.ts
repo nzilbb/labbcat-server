@@ -761,6 +761,7 @@ export class TranscriptsComponent implements OnInit {
     layeredSearch(): void {
         let params = this.selectedTranscriptsQueryParameters("participant_id");
         if (this.searchJson) params["searchJson"] = this.searchJson;
+        if (this.participantDescription) params["participants"] = this.participantDescription;
         this.router.navigate(["search"], { queryParams: params });
     }
 
