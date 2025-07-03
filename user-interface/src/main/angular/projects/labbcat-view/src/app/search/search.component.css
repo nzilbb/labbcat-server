@@ -1,3 +1,8 @@
+#search-form { /* prevent search form expanding too much, looks weird on large screens */
+    width: fit-content;
+    display: block;
+    margin: auto;
+}
 #attributes {
     width: 100%;
     text-align: left;
