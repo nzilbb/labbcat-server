@@ -228,7 +228,7 @@ nav, nav > div {
 /* Meta-data */
 
 .tab-labels.video {
-    width: 70vw; /* squish tabes to the right to avoid video */
+    width: 65vw; /* squish tabs to the right to avoid video */
     max-width: 100%;
 }
 .tab-labels label {
