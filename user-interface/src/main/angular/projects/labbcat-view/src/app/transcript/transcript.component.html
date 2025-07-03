@@ -377,17 +377,17 @@
             (press)="searchTranscript()"
             img="magnifying-glass.svg" icon="🔍"
             label="{{id}}"
-            i18n-title title="Search this transcript for patterns on transcription layers"
+            i18n-title title="Search this transcript for patterns on annotation layers"
             noCaps="true"
             ></lib-button>
         </div>
         <div id="search-episode" class="attribute search">
-          <label i18n>Search transcript series</label>
+          <label i18n>Search episode</label>
           <lib-button
             (press)="searchEpisode()"
             img="magnifying-glass.svg" icon="🔍"
             label="{{transcript.first('episode').label}}"
-            i18n-title title="Search transcripts in this episode for patterns on transcription layers"
+            i18n-title title="Search transcripts in this episode for patterns on annotation layers"
             noCaps="true"
             ></lib-button>
         </div>
@@ -398,7 +398,7 @@
             (press)="searchParticipant(participant)"
             img="magnifying-glass.svg" icon="🔍"
             label="{{participant}}"
-            i18n-title title="Search this participant's utterances for patterns on transcription layers"
+            i18n-title title="Search this participant's utterances for patterns on annotation layers"
             noCaps="true"
             ></lib-button>
         </div>
@@ -720,7 +720,7 @@
                     (press)="suggestCorrection(utterance); menuId = null;"
                     img="edit.svg" icon="✎"
                     i18n-label label="Suggest correction"
-                    i18n-title title="Suggest a correction to the transcription of this utterance"
+                    i18n-title title="Suggest a correction to the transcript of this utterance"
                     ></lib-menu-option>
                 </div>
                 <div *ngIf="user && user.roles.includes('edit')"
