@@ -453,6 +453,7 @@ tbody tr:nth-child(even) {
 .attribute-list .attribute .values {
     display: flex;
     flex-direction: column;
+    width: 50%;
 }
 
 /* tabs UX */

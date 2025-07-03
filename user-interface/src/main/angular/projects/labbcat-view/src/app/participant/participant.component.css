@@ -1,3 +1,9 @@
+#title .participant::before {
+    content: ': ';
+}
+.attribute-list {
+    min-width: 60vw;
+}
 .attribute .value .description {
     padding-left: 10px;
 }
@@ -17,4 +23,22 @@
 }
 .links lib-link {
     padding: 10px;
+}
+#controls {
+    font-style: italic;
+    display: flex;
+    flex-direction: column;
+    padding-top: 5px;
+}
+@media all and (min-width: 640px) {
+    #controls {
+        flex-direction: row;
+        align-items: flex-end;
+    }
+    #controls .label-spacer {
+        flex-grow: 1;
+    }
+}
+#controls .disabled {
+    color: silver;
 }

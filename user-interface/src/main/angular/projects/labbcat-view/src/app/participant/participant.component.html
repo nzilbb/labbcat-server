@@ -1,12 +1,12 @@
+<h1 id="title">
+  <span i18n="page header">Participant attributes</span>
+  <span *ngIf="participant" class="participant">{{participant.label}}</span>
+</h1>
 <lib-wait *ngIf="!participant"></lib-wait>
-<div *ngIf="participant" id="header" class="attribute-list">
-  <div class="attribute">
-    <label for="label" i18n="Participant ID label">Name</label>
-    <span id="label" class="values"><div class="value" id="title">{{participant.label}}</div></span>
-  </div>
-</div>
 <div *ngIf="participant" id="attributes" class="attribute-list tabs">
-  <div class="tab-labels">
+  <div
+    *ngIf="categoryLabels.length > 1"
+    class="tab-labels">
     <label *ngFor="let category of categoryLabels"
            [ngClass]="(category==currentCategory)?'tab-label active':'tab-label inactive'"
            (click)="currentCategory = category"
@@ -17,20 +17,40 @@
   <div *ngFor="let category of categoryLabels"
        [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
       <div *ngFor="let layer of categoryLayers[category]" class="attribute">
-        <label for="{{layer.id}}" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">{{layer.description}}</label>
+        <label for="{{layer.id}}" title="{{layer.hint}}">{{layer.description}}<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">{{displayAttributePrefixes ? layer.id : ParticipantLayerLabel(layer.id)}}</span>)</span></label>
         <span *ngIf="participant.annotations && participant.annotations[layer.id]"
               id="{{layer.id}}" class="values">
           <div *ngFor="let annotation of participant.annotations[layer.id]" class="value">
             <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
             <ng-container *ngIf="layer.type == 'boolean'">
-              <span *ngIf="annotation.label == '1'" class="description">true</span>
-              <span *ngIf="annotation.label == '0'" class="description">false</span>
+              <span *ngIf="annotation.label == '1'" class="description" i18n>true</span>
+              <span *ngIf="annotation.label == '0'" class="description" i18n>false</span>
             </ng-container>
             <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label">
               <span class="description">{{layer.validLabels[annotation.label]}}</span>
             </ng-container>
           </div>
         </span>
+      </div>
+      <div id="controls">
+        <div class="label-spacer">
+          <label id="toggleLayerIds" i18n-title title="Hide attribute names">
+            <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
+            <span i18n>Hide attribute names</span>
+          </label>
+        </div>
+        <div class="label-spacer">
+          <label
+            [class.disabled]="!displayLayerIds"
+            i18n-title title="Hide full names for attributes">
+            <lib-grouped-checkbox
+              name="hideAttributePrefixes"
+              [checked]="!displayAttributePrefixes"
+              [disabled]="!displayLayerIds"
+              (change)="toggleAttributePrefixes()"
+              ></lib-grouped-checkbox>
+            <span i18n>Hide attribute prefixes</span></label>
+        </div>
       </div>
     </div>
 </div>
