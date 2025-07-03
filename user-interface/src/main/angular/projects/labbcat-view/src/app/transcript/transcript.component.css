@@ -9,8 +9,8 @@ lib-wait {
 #transcript {
     max-width: 1000px;
     margin: auto;
+    margin-top: 50px; /* Don't have media cover up tabs */
 }
-
 .main-participant {
     font-weight: bold;
 }
@@ -84,6 +84,26 @@ nav, nav > div {
     width: 16px;
     height: 16px;
     vertical-align: middle;
+}
+#attr-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+@media all and (min-width: 640px) {
+    #attr-controls {
+        flex-direction: row;
+        align-items: center;
+    }
+    #attr-controls > .label-spacer {
+        flex-grow: 1;
+    }
+}
+#attr-controls label {
+    font-style: italic;
+}
+#attr-controls .disabled {
+    color: silver;
 }
 /* consecutive blocks are vertical, simultaneous are horizontal */
 #temporal-blocks .block {
@@ -269,6 +289,12 @@ nav, nav > div {
     border-top: none;
     margin-left: -1px; /* to make annoying overshoot at least symmetrical */
 }
+.tab-body > div {
+    padding: 10px;
+}
+#attributes .attribute {
+    padding: 4px 10px;
+}
 .attribute-list .participant {
     padding: 5px;
 }
@@ -278,7 +304,20 @@ nav, nav > div {
     display: inline-block;
     vertical-align: middle;
 }
+.attribute-list .attribute.speaker,
+.attribute-list .attribute.search {
+    align-items: center;
+}
+.attribute-list .attribute.speaker label,
+.attribute-list .attribute.search label {
+    width: 20%;
+    min-width: 10em;
+}
+#export .layer-id:not(:last-of-type):not(.no-pad) {
+    padding-right: 0.5em;
+}
 /* Media */
+
 
 lib-layer-checkboxes {  /* layer selection on top of media */
     background-color: var(--theme-background-color);
@@ -288,7 +327,7 @@ lib-layer-checkboxes {  /* layer selection on top of media */
 
 #media {
     position: fixed;
-    top: 60px;
+    top: 20px; /* don't cover up tabs */
     right: 10px;
     min-width: 300px;
     background: var(--theme-background-color);
@@ -376,4 +415,9 @@ img.preview {
         flex-direction: column;
         justify-content: center;
     }
+}
+
+.ul-nb {
+    list-style-type: none;
+    font-style: italic;
 }

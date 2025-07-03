@@ -228,7 +228,7 @@ input[type=number] {
 /* Copied styles from legacy stylesheet - TODO revise these when migration complete */
 button {
     white-space: nowrap;
-    min-width: 80px;
+    min-width: 60px;
     height: 45px;
     background: #CCCCCC;
     border: 1px outset;
@@ -437,7 +437,7 @@ tbody tr:nth-child(even) {
 .attribute-list .attribute label {
     width: 50%
 }
-.attribute-list .attribute label:after {
+.attribute-list .attribute > label:after {
     content: ':';
 }
 .attribute-list .attribute .values {
