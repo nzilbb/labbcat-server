@@ -1,4 +1,7 @@
-<h1 id="title" i18n>Transcript attributes<span *ngIf="transcript">{{transcript.id}}</span></h1>
+<h1 id="title">
+  <span i18n="page header">Transcript attributes</span>
+  <span *ngIf="transcript" class="transcript">{{transcript.id}}</span>
+</h1>
 <lib-wait *ngIf="!transcript"></lib-wait>
 <!-- previous/next transcript -->
 <nav>
@@ -23,11 +26,11 @@
 </nav>
 <div *ngIf="transcript" id="header" class="attribute-list">
   <div class="attribute">
-    <label for="corpus-attribute" i18n>Corpus<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">corpus</span>)</span></label>
+    <label for="corpus-attribute"><span i18n>Corpus</span><span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">corpus</span>)</span></label>
     <span id="corpus-attribute" class="values"><div id="corpus" class="value">{{transcript['corpus'][0].label}}</div></span>
   </div>
   <div class="attribute">
-    <label for="episode-attribute" i18n>Episode<span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">episode</span>)</span></label>
+    <label for="episode-attribute"><span i18n>Episode</span><span class="layer-name" [style.display]="displayLayerIds ? 'inline' : 'none'"> (<span class="layer-id">episode</span>)</span></label>
     <span id="episode-attribute" class="values"><div id="episode" class="value">{{transcript['episode'][0].label}}</div></span>
   </div>
 </div>

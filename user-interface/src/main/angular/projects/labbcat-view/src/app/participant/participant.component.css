@@ -1,4 +1,4 @@
-#title span::before {
+#title .participant::before {
     content: ': ';
 }
 .attribute-list {

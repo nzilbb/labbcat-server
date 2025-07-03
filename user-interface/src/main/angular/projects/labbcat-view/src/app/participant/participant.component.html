@@ -1,4 +1,7 @@
-<h1 id="title" i18n>Participant attributes<span *ngIf="participant">{{participant.label}}</span></h1>
+<h1 id="title">
+  <span i18n="page header">Participant attributes</span>
+  <span *ngIf="participant" class="participant">{{participant.label}}</span>
+</h1>
 <lib-wait *ngIf="!participant"></lib-wait>
 <div *ngIf="participant" id="attributes" class="attribute-list tabs">
   <div
