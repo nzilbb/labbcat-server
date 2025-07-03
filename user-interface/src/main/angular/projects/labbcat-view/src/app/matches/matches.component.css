@@ -57,6 +57,12 @@ lib-layer-checkboxes {
     display: flex;
     flex-direction: row;
 }
+input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+}
+#serialization-options {
+    max-width: fit-content;
+}
 .controls lib-button[label], label > span {
     min-width: 150px;
 }

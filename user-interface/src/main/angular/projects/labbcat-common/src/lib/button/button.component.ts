@@ -12,6 +12,7 @@ export class ButtonComponent implements OnInit {
     @Input() label: string;
     @Input() icon: string;
     @Input() img: string;
+    @Input() imgStyle: string;
     @Input() disabled: boolean;
     @Input() noCaps: boolean;
     @Output() press = new EventEmitter();

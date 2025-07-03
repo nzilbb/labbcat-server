@@ -409,6 +409,16 @@ tbody tr:nth-child(even) {
     overflow: auto;
     transition: max-height 0.5s;
 }
+.short-hidden-panel {
+    max-height: 0px;
+    overflow: hidden;
+    transition: max-height 0.2s;
+}
+.short-unhidden-panel {
+    max-height: 200px;
+    overflow: auto;
+    transition: max-height 0.2s;
+}
 .header {
     font-style: italic;
 }
