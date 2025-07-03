@@ -1,113 +1,294 @@
 <h1 id="title" i18n>Search</h1>
+<div id="attributes" class="attribute-list tabs">
+  <div class="tab-labels">
+    <label *ngFor="let tab of tabLabels"
+           [ngClass]="(tab==currentTab)?'tab-label active':'tab-label inactive'"
+           (click)="currentTab = (currentTab == tab ? null : tab)"
+           title="{{tabs[tab].description}}">
+      <img *ngIf="tabs[tab].icon"
+           src="{{imagesLocation}}/{{tabs[tab].icon}}" alt="{{tabs[tab].description}}">
+      {{tabs[tab].label}}
+      <span
+        *ngIf="tab == 'Participants' && ((participantIds && participantIds.length) || (transcriptIds && transcriptIds.length))"
+        class="participant-count">({{(participantIds && participantIds.length) ? (participantIds.length + (participantIds.length < participantCount ? '+' : '')) : '*'}})</span>
+      <span
+        *ngIf="tab == 'Transcripts' && ((transcriptIds && transcriptIds.length) || (participantIds && participantIds.length))"
+        class="transcript-count">({{(transcriptIds && transcriptIds.length) ? (transcriptIds.length + (transcriptIds.length < transcriptCount ? '+' : '')) : '*'}})</span>
+    </label>
+  </div>
+  <div *ngFor="let tab of tabLabels"
+       [ngClass]="(tab==currentTab)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
+    
+    <!-- participants tab -->
+    <div *ngIf="currentTab == 'Participants'" id="participants">
+      <div id="participant-chooser">
+        <lib-button
+          *ngIf="!participantIds || !participantIds.length"
+          (press)="selectParticipants()"
+          img="people.svg"
+          i18n-label label="Filter participants"
+          i18n-title title="Narrow down the participants to search by filtering by participant attributes"
+          ></lib-button>
+        <lib-button
+          *ngIf="participantIds && participantIds.length && participantDescription"
+          (press)="selectParticipants()"
+          img="people.svg"
+          i18n-label label="Modify filter"
+          i18n-title title="Modify current participant filter"
+          ></lib-button>
+        <lib-button
+          *ngIf="participantIds && participantIds.length && participantDescription"
+          (press)="clearParticipantFilter()"
+          img="delete.svg"
+          i18n-label label="Clear filter"
+          i18n-title title="Clear participant filter"
+          ></lib-button>
+        <lib-button
+          *ngIf="participantIds && participantIds.length && !participantDescription"
+          (press)="clearParticipantFilter()"
+          img="delete.svg"
+          i18n-label label="Clear selections"
+          i18n-title title="Clear participant selections"
+          ></lib-button>
+        <div *ngIf="!participantIds || !participantIds.length" class="file-chooser">
+          <label for="csv">
+            <em style="font-style: italic;" i18n>Or </em>
+            <span i18n>Load participants from file</span>
+          </label>
+          <input type="file" id="participant-csv" (change)="selectParticipantFile($event.target.files)">
+          <details>
+            <summary i18n>What should the file look like?</summary>
+            <div class="advanced">
+              <span i18n>One of the following:</span>
+              <ul>
+                <li><span i18n>Plain text (.txt)</span>
+                  <ul>
+                    <li i18n>One participant code per line</li>
+                    <li i18n>Invalid participant codes ignored</li>
+                  </ul>
+                </li>
+                <li><span i18n>Comma-separated values (.csv)</span>
+                  <ul>
+                    <li i18n>Participant codes in the first column</li>
+                    <li i18n>Invalid participant codes ignored</li>
+                    <li i18n>Duplicate participant codes ignored</li>
+                  </ul>
+                </li>
+                <li><span i18n>Tab-separated values (.tsv)</span>
+                  <ul>
+                    <li i18n>Participant codes in the first column</li>
+                    <li i18n>Invalid participant codes ignored</li>
+                    <li i18n>Duplicate participant codes ignored</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div id="participant-ids">
+        <!-- TODO if participantDescription is attribute-based, display as ul; otherwise don't display -->
+        <p><span i18n>Selected participants</span>{{participantDescription ? ' ['+participantDescription+']' : ''}}:
+          <span *ngIf="(!participantIds || !participantIds.length) && !transcriptIds.length" class="all" i18n>all participants</span>
+          <span *ngIf="(!participantIds || !participantIds.length) && transcriptIds.length" class="all" i18n>all participants in selected transcripts</span>
+        </p>
+        <ul *ngIf="participantIds && participantIds.length" class="participant-list">
+          <li *ngFor="let participantId of participantIds">{{participantId}}</li>
+        </ul>
+      </div>
+      <lib-button
+        *ngIf="participantIds.length < participantCount"
+        class="load-more"
+        i18n-title title="List more participants"
+        i18n-label label="List more"
+        img="ellipses.svg" icon="…"
+        (click)="loadMoreParticipants()"
+        [processing]="loadingParticipants">
+        ></lib-button>
+    </div>
+    
+    <!-- transcripts tab -->
+    <div *ngIf="currentTab == 'Transcripts'" id="transcripts">
+      <div *ngIf="!matrix.participantQuery || !matrix.participantQuery.includes('all(\'transcript\').length')"
+        id="transcript-chooser">
+        <lib-button
+          *ngIf="!transcriptIds || !transcriptIds.length"
+          (press)="selectTranscripts()"
+          img="people.svg"
+          i18n-label label="Filter transcripts"
+          i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
+          ></lib-button>
+        <lib-button
+          *ngIf="transcriptIds && transcriptIds.length && transcriptDescription"
+          (press)="selectTranscripts()"
+          img="people.svg"
+          i18n-label label="Modify filter"
+          i18n-title title="Modify current transcript filter"
+          ></lib-button>
+        <lib-button
+          *ngIf="transcriptIds && transcriptIds.length && transcriptDescription"
+          (press)="clearTranscriptFilter()"
+          img="delete.svg"
+          i18n-label label="Clear filter"
+          i18n-title title="Clear transcript filter"
+          ></lib-button>
+        <lib-button
+          *ngIf="transcriptIds && transcriptIds.length && !transcriptDescription"
+          (press)="clearTranscriptFilter()"
+          img="delete.svg"
+          i18n-label label="Clear selections"
+          i18n-title title="Clear transcript selections"
+          ></lib-button>
+        <div *ngIf="!transcriptIds || !transcriptIds.length" class="file-chooser">
+          <label for="csv">
+            <em style="font-style: italic;" i18n>Or </em>
+            <span i18n>Load transcripts from file</span>
+          </label>
+          <input type="file" id="transcript-csv" (change)="selectTranscriptFile($event.target.files)">
+          <details>
+            <summary i18n>What should the file look like?</summary>
+            <div class="advanced">
+              <span i18n>One of the following:</span>
+              <ul>
+                <li><span i18n>Plain text (.txt)</span>
+                  <ul>
+                    <li i18n>One transcript code per line</li>
+                    <li i18n>Invalid transcript codes ignored</li>
+                    <li *ngIf="participantIds.length">
+                      <span i18n="Transcripts (without selected participants ignored)">Transcripts</span>
+                      <strong i18n="(Transcripts) without selected participants (ignored)"> without selected participants </strong>
+                      <span i18n="(Transcripts without selected participants) ignored">ignored</span>
+                    </li>
+                  </ul>
+                </li>
+                <li><span i18n>Comma-separated values (.csv)</span>
+                  <ul>
+                    <li i18n>Transcript codes in the first column</li>
+                    <li i18n>Invalid transcript codes ignored</li>
+                    <li i18n>Duplicate transcript codes ignored</li>
+                    <li *ngIf="participantIds.length">
+                      <span i18n="Transcripts (without selected participants ignored)">Transcripts</span>
+                      <strong i18n="(Transcripts) without selected participants (ignored)"> without selected participants </strong>
+                      <span i18n="(Transcripts without selected participants) ignored">ignored</span>
+                    </li>
+                  </ul>
+                </li>
+                <li><span i18n>Tab-separated values (.tsv)</span>
+                  <ul>
+                    <li i18n>Transcript codes in the first column</li>
+                    <li i18n>Invalid transcript codes ignored</li>
+                    <li i18n>Duplicate transcript codes ignored</li>
+                    <li *ngIf="participantIds.length">
+                      <span i18n="Transcripts (without selected participants ignored)">Transcripts</span>
+                      <strong i18n="(Transcripts) without selected participants (ignored)"> without selected participants </strong>
+                      <span i18n="(Transcripts without selected participants) ignored">ignored</span>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div *ngIf="matrix.participantQuery && matrix.participantQuery.includes('all(\'transcript\').length')"
+        id="transcript-chooser-disabled"
+        i18n-title title="Filtering transcripts is disabled when the 'Transcript count' participant filter is active">
+        <lib-button
+          img="people.svg"
+          i18n-label label="Filter transcripts"
+          i18n-title title="Filtering transcripts is disabled when the 'Transcript count' participant filter is active"
+          disabled="true"
+          ></lib-button>
+        <div class="file-chooser">
+          <label for="csv">
+            <em style="font-style: italic;" i18n>Or </em>
+            <span i18n>Load transcripts from file</span>
+          </label>
+          <input type="file" disabled>
+        <details>
+          <summary i18n>What should the file look like?</summary>
+        </details>
+        </div>
+      </div>
+      <span *ngIf="matrix.participantQuery && matrix.participantQuery.includes('all(\'transcript\').length')"
+        id="nb-disabled">Filtering transcripts is disabled when the "Transcript count" participant filter is active</span>
+      <div id="transcript-ids">
+        <p><span i18n>Selected transcripts</span>{{transcriptDescription ? ' ['+transcriptDescription+']' : ''}}:
+          <span *ngIf="(!transcriptIds || !transcriptIds.length) && !participantIds.length" class="all" i18n>all transcripts</span>
+          <span *ngIf="(!transcriptIds || !transcriptIds.length) && participantIds.length" class="all" i18n>all transcripts with selected participants</span>
+        </p>
+        <ul *ngIf="transcriptIds && transcriptIds.length" class="transcript-list">
+          <li *ngFor="let transcriptId of transcriptIds">{{transcriptId}}</li>
+        </ul>
+      </div>
+      <lib-button
+        *ngIf="transcriptIds.length < transcriptCount"
+        class="load-more"
+        i18n-title title="List more transcripts"
+        i18n-label label="List more"
+        img="ellipses.svg" icon="…"
+        (click)="loadMoreTranscripts()"
+        [processing]="loadingTranscripts">
+        ></lib-button>
+    </div>
+    
+    <!-- options tab -->
+    <div *ngIf="currentTab == 'Options'" id="options">
+      <div class="list">
+        <span class="list-label" i18n>Match options</span>
+        <div class="item">
+          <label>
+            <input type="checkbox" [(ngModel)]="mainParticipantOnly" id="mainParticipantOnly">
+            <span i18n>Only include matches from the main participant in a transcript.</span></label>
+        </div>
+        <div class="item">
+          <label i18n-title
+                 title="Return words that have been reliably word-aligned - e.g. by HTK or manually">
+            <input type="checkbox" [(ngModel)]="onlyAligned" id="onlyAligned">
+            <span i18n>Only match words that are aligned.</span></label>
+        </div>
+        <div class="item">
+          <label i18n-title title="Return only the first match in each transcript">
+            <input type="checkbox" [(ngModel)]="firstMatchOnly" id="firstMatchOnly" >
+            <span i18n>Only one match per transcript.</span></label>
+        </div>
+        <div class="item">
+          <label i18n-title title="Exclude simultaneous speech">
+            <input type="checkbox"[(ngModel)]="excludeSimultaneousSpeech">
+            <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
+          <label i18n-title title="Define what counts as simultaneous speech">
+            <input name="overlap_threshold" id="overlap_threshold"
+                   class="numeric" style="width: 35px;" type="number"
+                   value="5"
+                   [disabled]="!excludeSimultaneousSpeech">
+            <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
+        </div>
+      </div>
+      <div class="list">
+        <span class="list-label" i18n>Display option</span>
+        <div class="item">
+          <label i18n-title title="Do not open a list of matches when search is complete">
+            <input type="checkbox" [(ngModel)]="suppressResults" id="suppressResults" >
+            <span i18n>No matches, only a summary of results</span></label>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
 <div class="search-matrix">
-  <h3>
-    <lib-link
-      i18n-label label="Participants"
-      img="filter.svg"
-      i18n-title title="Narrow down the participants to search by filtering by participant attributes"
-      routerLink="../participants"
-      [queryParams]="{to:'search'}"
-      ></lib-link>
-  </h3>
-
-  <p *ngIf="participantDescription" id="participantDescription" i18n>{{participantDescription}}</p>
-  <div *ngIf="participantIds" class="list" id="participant-ids">
-    <a *ngFor="let participantId of participantIds"
-       [routerLink]="user.roles.includes('edit')?'../edit/participant':'../participant'"
-       [queryParams]="{ id: participantId }"
-       i18n-title title="Edit participant"
-       target="participant">{{participantId}}</a>
-  </div>
-  <lib-button
-    *ngIf="participantIds.length < participantCount"
-    i18n-title title="List more participants"
-    img="ellipses.svg" icon="…"
-    (click)="loadMoreParticipants()"
-    [processing]="loadingParticipants">
-    ></lib-button>
-  <p *ngIf="!participantIds || !participantIds.length" i18n="Any (participant)">[any]</p>
-  <div *ngIf="!participantIds || !participantIds.length" id="file-chooser">
-    <label for="csv" i18n>Load participants from file</label>
-    <input type="file" id="csv" (change)="selectFile($event.target.files)">
-  </div>
-
-  <!-- TODO specify IDs from file -->
-
-  <h3 i18n></h3>
-  <h3>
-    <lib-link
-      i18n-label label="Transcripts"
-      img="filter.svg"
-      i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
-      routerLink="../transcripts"
-      [queryParams]="{to: 'search', participant_expression: participantQueryForTranscripts(), participants: participantDescription }"
-      ></lib-link>
-  </h3>
-
-  <p *ngIf="transcriptDescription" id="transcriptDescription" i18n>{{transcriptDescription}}</p>
-  <div *ngIf="transcriptIds" class="list" id="transcript-ids">
-    <a *ngFor="let transcriptId of transcriptIds"
-       href="transcript?id={{transcriptId}}"
-       i18n-title title="Open transcript"
-       target="{{transcriptId}}">{{transcriptId}}</a>
-  </div>
-  <lib-button
-    *ngIf="transcriptIds.length < transcriptCount"
-    i18n-title title="List more transcripts"
-    img="ellipses.svg" icon="…"
-    (click)="loadMoreTranscripts()"
-    [processing]="loadingTranscripts">
-    ></lib-button>
-  <p *ngIf="!transcriptDescription" i18n="Any (transcript)">[any]</p>
-
-  <h3 i18n>Pattern</h3>
-
   <app-search-matrix
     [schema]="schema"
     [(columns)]="matrix.columns"
     (keydown.enter)="search()"
     ></app-search-matrix>
-
-  <div class="list">
-    <div class="item">
-      <label>
-        <input type="checkbox" [(ngModel)]="mainParticipantOnly" id="mainParticipantOnly">
-        <span i18n>Only include transcripts for which these are the main participants.</span></label>
-    </div>
-    <div class="item">
-      <label i18n-title
-             title="Return words that have been reliably word-aligned - e.g. by HTK or manually">
-        <input type="checkbox" [(ngModel)]="onlyAligned" id="onlyAligned">
-        <span i18n>Only match words that are aligned.</span></label>
-    </div>
-    <div class="item">
-      <label i18n-title title="Return only the first match in each transcript">
-        <input type="checkbox" [(ngModel)]="firstMatchOnly" id="firstMatchOnly" >
-        <span i18n>Only one match per transcript.</span></label>
-    </div>
-    <div class="item">
-      
-      <label i18n-title title="Exclude simultaneous speech">
-        <input type="checkbox"[(ngModel)]="excludeSimultaneousSpeech">
-        <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
-      <label i18n-title title="Define what counts as simultaneous speech">
-        <input name="overlap_threshold" id="overlap_threshold"
-               class="numeric" style="width: 35px;" type="number"
-               value="5"
-               [disabled]="!excludeSimultaneousSpeech">
-        <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
-    </div>
-    <div class="item">
-      <label i18n-title title="Do not open a list of matches when search is complete">
-        <input type="checkbox" [(ngModel)]="suppressResults" id="suppressResults" >
-        <span i18n>No matches, only a summary of results</span></label>
-    </div>
-  </div>
+</div>
+<div class="search-button">
   <lib-button
     i18n-title title="Search for instance of this pattern"
     i18n-label label="Search"
     img="magnifying-glass.svg" icon="🔍"
     (click)="search()">
   </lib-button>
-  <lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"></lib-task>
 </div>
+<lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"></lib-task>

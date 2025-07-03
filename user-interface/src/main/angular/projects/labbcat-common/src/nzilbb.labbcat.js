@@ -342,6 +342,60 @@
     }
     
     /**
+     * Log in.
+     * @param {string} username The user's login ID.
+     * @param {string} password The user's password/phrase.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be:  {string} The annotation store's ID.
+     */
+    login(username, password, onResult) {
+      // when tomcat gets a successful form login, it sends a redirect to
+      // whatever the last request was, so let's make sure that's predictable
+      this.getId((id, errors, messages)=>{
+        if (!errors) { // already logged in
+          console.log(`no need to login`);
+          onResult("", null, ["Already logged in"], "login", username);
+        } else { // not already logged in
+          // now we know where we'll be redirected, send the login request
+          console.log(`login ${username}`);
+          var xhr = new XMLHttpRequest();
+          xhr.onResult = onResult;
+          xhr.addEventListener("load", function(e) {
+            console.log(`load: ${this.status}: ${this.responseText}`);
+            if (this.status == 303 || this.status == 200 || this.status == 404 || this.status == 408) {
+              onResult("OK", null, [`Logged in as ${username}`], "login", username);
+            } else {
+              onResult(this.responseText, [`${this.statusText}: ${this.status}`], [], "login", username);
+            }
+          }, false);
+          xhr.addEventListener("error", function(e) {
+            console.log(`error: ${this.status}: ${this.responseText}`);        
+            onResult("", ["Username/password invalid"], [], "login", username);
+          }, false);
+          xhr.addEventListener("abort", function(e) {
+            console.log(`abort: ${this.status}: ${this.responseText}`);
+            onResult("", ["Request aborted"], [], "login", username);
+          }, false);
+          if (exports.verbose) {
+            console.log("logging in: "+this.storeUrl + " as " + username);
+          }
+          xhr.open("POST", `${this.baseUrl}j_security_check`, true);
+          if (exports.language) {
+	    xhr.setRequestHeader("Accept-Language", exports.language);
+          }
+          xhr.raw = true;
+          xhr.setRequestHeader("Accept", "text/plain");
+          xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+          console.log(`about to send...`);
+          xhr.send(this.parametersToQueryString({
+            j_username: username,
+            j_password: password
+          }));
+        } // not already logged in
+      });
+    }
+    
+    /**
      * Gets the store's ID.
      * @param {resultCallback} onResult Invoked when the request has returned a
      * <var>result</var> which will be:  {string} The annotation store's ID.
@@ -2860,7 +2914,7 @@
       }
       // create form
       var fd = new FormData();
-      fd.append("merge", ""+merge);
+      fd.append("merge", ""+(merge?true:false));
       
       if (!runningOnNode) {	
         

@@ -28,6 +28,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
     newEntries = false;
     hovering = false;
     processing = false;
+    followProgress = true;
     
     constructor(
         labbcatService: LabbcatService,
@@ -411,6 +412,16 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                     media[trackSuffix].push(file);
                 } // next file
             } // next track
+
+            if (this.followProgress) {                
+                try { // scroll to the current entry
+                    document.getElementById(uploadableEntry.transcript.name).scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                } catch (x) {}
+            }
+            // start upload
             this.labbcatService.labbcat.transcriptUpload(
                 uploadableEntry.transcript, media, uploadableEntry.exists,
                 (result, errors, messages) => {
@@ -613,6 +624,15 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
             // clear any previous errors
             deletableEntry.errors = [];
             deletableEntry.progress = 50;
+            if (this.followProgress) {
+                try { // scroll to the current entry
+                    document.getElementById(deletableEntry.transcript.name).scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                } catch (x) {}
+            }
+            // delete it
             this.labbcatService.labbcat.deleteTranscript(
                 deletableEntry.transcriptId, (result, errors, messages) => {
                     if (errors) {
@@ -669,7 +689,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         link.click();
         document.body.removeChild(link);
     }
-    onClear(existingTranscripts: boolean, newTranscripts: boolean): void {
+    onClear(existingTranscripts: boolean, newTranscripts: boolean): void { // TODO also add clear entries with no media, entries with no transcript, selected entries
         if (existingTranscripts && newTranscripts) {
             this.entries = [];
         } else if (existingTranscripts) {

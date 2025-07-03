@@ -1,4 +1,16 @@
 <div class="messages">
-  <div *ngFor="let message of messageService.errors" class="error message"> {{message}} </div>
-  <div *ngFor="let message of messageService.messages" class="info message"> {{message}} </div>
+  <div *ngFor="let message of messageService.errors" class="error message">{{message}}
+    <span
+      class="closebtn"
+      title="Close message"
+      onclick="this.parentElement.style.display='none';"
+    >&times;</span>
+  </div>
+  <div *ngFor="let message of messageService.messages" class="info message">{{message}}
+    <span
+      class="closebtn"
+      title="Close message"
+      onclick="this.parentElement.style.display='none';"
+    >&times;</span>
+  </div>
 </div>

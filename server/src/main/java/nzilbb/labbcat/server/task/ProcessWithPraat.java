@@ -1608,13 +1608,15 @@ public class ProcessWithPraat extends Task {
    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
    */
   @Override public Integer getPercentComplete() {
-    if (batchTasks.size() > 0) {
-      int completedTasks = batchTasks.stream()
-        .mapToInt(task -> task.isDone()?1:0)
-        .sum();
-      if (completedTasks != batchTasks.size()) {
-        iPercentComplete = (int)((completedTasks * ALL_TASKS_FINISHED_PERCENTAGE)
-                                 / batchTasks.size());
+    synchronized (batchTasks) { // only one thread at a time to avoid ConcurrentModificationException
+      if (batchTasks.size() > 0) {
+        int completedTasks = batchTasks.stream()
+          .mapToInt(task -> task.isDone()?1:0)
+          .sum();
+        if (completedTasks != batchTasks.size()) {
+          iPercentComplete = (int)((completedTasks * ALL_TASKS_FINISHED_PERCENTAGE)
+                                   / batchTasks.size());
+        }
       }
     }
     return super.getPercentComplete();

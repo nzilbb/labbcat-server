@@ -259,13 +259,15 @@
           *ngIf="currentCategory == 'Layers'"
           [class.loading]="loading"
           [schema]="schema"
-          name="layer" includeAlignment="true"
+          name="layer" includeAlignment="true" spoofAlignment="true"
+          includeDataType="true" includeVerticalPeers="true"
           span="true" phrase="true" word="true" segment="true"
           excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true" excludeWord="true"
           category="true"
           [styles]="layerStyles"
           [interpretedRaw]="interpretedRaw"
           [selected]="selectedLayerIds"
+          [annotationCounts]="layerCounts"
           (selectedChange)="layersChanged($event)"></lib-layer-checkboxes>
         <div *ngIf="user && user.roles.includes('edit')" class="generate-layer">
           <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
@@ -286,45 +288,80 @@
         </div>
       </div>
       <!-- participants tab -->
-      <div *ngIf="currentCategory == 'Participants'" id="participants">
-        <ul>
-          <li *ngFor="let participant of transcript.all('participant')"
-              [ngClass]="{'participant':true, 'main-participant': participant.first('main_participant')}">
-            <a href="{{baseUrl}}{{user && user.roles.includes('edit')?'edit/':''}}participant?id={{participant.label}}">
-              {{participant.label}}
-            </a>
-          </li>
-        </ul>
+      <ng-container *ngIf="currentCategory == 'Participants'">
+        <div *ngFor="let participant of transcript.all('participant')" class="attribute speaker">
+          <label class="participant" [class.main_participant]="participant.first('main_participant')"
+            >{{participant.label}}<span *ngIf="participant.first('main_participant')" i18n> (main participant)</span></label>
+          <lib-link
+            *ngIf="user && user.roles.includes('edit')"
+            class="buttons"
+            href="edit/participant?id={{ participant.label | urlEncode }}"
+            img="wrench.svg" icon=",a,"
+            i18n-label label="Attributes"
+            i18n-title title="Edit this participant's attributes"
+            ></lib-link>
+          <lib-link
+            *ngIf="!user || !user.roles.includes('edit')"
+            class="buttons"
+            href="edit/participant?id={{ participant.label | urlEncode }}"
+            img="csv.svg" icon=",a,"
+            i18n-label label="Attributes"
+            i18n-title title="View this participant's attributes"
+            ></lib-link>
+          <lib-link
+            class="buttons"
+            href="transcripts?participant_expression=%5B%27{{ participant.label | urlEncode }}%27%5D.includesAny(labels(%27participant%27))&participants={{ participant.label | urlEncode }}"
+            img="document.svg" icon="📄"
+            i18n-label label="List transcripts"
+            i18n-title title="List transcripts including this participant"
+            ></lib-link>
+        </div>
         <lib-link *ngIf="user && user.roles.includes('edit')"
                   class="buttons"
                   i18n-title title="Main Participants"
                   i18n-label label="Main Participants"
                   img="people.svg" icon="👥"
                   href="edit/transcript/mainParticipants?id={{id | urlEncode}}"></lib-link>
-      </div>
-      <!-- formats tab -->
-      <div *ngIf="currentCategory == 'Formats'" id="formats">
+      </ng-container>
+      <!-- export tab -->
+      <div *ngIf="currentCategory == 'Export'" id="export">
         <ul>
-          <li *ngFor="let serializer of serializers"
-              i18n-title title="Convert to selected format">
-            <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.wordLayerId | urlEncode}}&layerId={{schema.utteranceLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
-               class="lnk">
-              <img src="{{serializer.icon}}" alt="⚙">
-              <span>{{serializer.name}}</span>
-            </a>
+          <li *ngIf="originalFile"><span i18n="export original transcript">Original transcript:</span>
+            <ul>
+              <li id="original-file-link"
+                  i18n-title title="Original transcript file"
+                  [ngClass]="{'divergent': transcript.first('divergent')}"
+                  [attr.title]="transcript.first('divergent')?'The text of this transcript may have changed since the original file was uploaded':null"><!-- TODO i18n -->
+                  
+                <a href="{{originalFile}}"
+                   class="lnk"
+                   (click)="divergentCheck();"
+                   download="{{transcript.id}}">
+                  <img src="{{imagesLocation}}/other.svg" alt="🗎">
+                  <span>{{transcript.id}}</span>
+                </a>
+              </li>
+            </ul>
           </li>
-          <li *ngIf="originalFile"
-              id="original-file-link"
-              i18n-title title="Original transcript file"
-              [ngClass]="{'divergent': transcript.first('divergent')}"
-              [attr.title]="transcript.first('divergent')?'The text of this transcript may have changed since the original file was uploaded':null"><!-- TODO i18n -->
-            <a href="{{originalFile}}"
-               class="lnk"
-               (click)="divergentCheck();"
-               download="{{transcript.id}}">
-              <img src="{{imagesLocation}}/other.svg" alt="🗎">
-              <span>{{transcript.id}}</span>
-            </a>
+          <li><span i18n>Export formatted, including transcript lines</span> (<span
+            class="layer-id no-pad" [title]="schema.layers[schema.utteranceLayerId].description"
+            >{{schema.utteranceLayerId}}</span>) <span
+            i18n="(Export formatted, including transcript lines) and selected layers">and selected layers</span> (<span
+              *ngFor="let layerId of selectedLayerIds"
+              class="layer-id"
+              [title]="schema.layers[layerId].description"
+              [style]="layerStyles[layerId]"
+              >{{layerId}}</span>):
+            <ul>
+              <li *ngFor="let serializer of serializers"
+                  i18n-title title="Convert to selected format">
+                <a href="{{baseUrl}}api/serialize/graphs?id={{transcript.id}}&mimeType={{serializer.mimeType | urlEncode}}&layerId={{schema.utteranceLayerId | urlEncode}}{{selectedLayerIdParameters('layerId')}}"
+                   class="lnk">
+                  <img src="{{serializer.icon}}" alt="⚙">
+                  <span>{{serializer.name}}</span>
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
         <lib-link *ngIf="transcript.first('episode')"
@@ -336,30 +373,92 @@
                   i18n-title title="Documents for this episode"
                   ></lib-link>
       </div>
+      <!-- search tab -->
+      <ng-container *ngIf="currentCategory == 'Search'">
+        <div id="search-transcripts" class="attribute search">
+          <label i18n>Search transcript</label>
+          <lib-button
+            (press)="searchTranscript()"
+            img="magnifying-glass.svg" icon="🔍"
+            label="{{id}}"
+            i18n-title title="Search this transcript for patterns on annotation layers"
+            noCaps="true"
+            ></lib-button>
+        </div>
+        <div id="search-episode" class="attribute search">
+          <label i18n>Search episode</label>
+          <lib-button
+            (press)="searchEpisode()"
+            img="magnifying-glass.svg" icon="🔍"
+            label="{{transcript.first('episode').label}}"
+            i18n-title title="Search transcripts in this episode for patterns on annotation layers"
+            noCaps="true"
+            ></lib-button>
+        </div>
+        <div id="search-participants" class="attribute search">
+          <label i18n>Search participants</label>
+          <lib-button
+            *ngFor="let participant of participants"
+            (press)="searchParticipant(participant)"
+            img="magnifying-glass.svg" icon="🔍"
+            label="{{participant}}"
+            i18n-title title="Search this participant's utterances for patterns on annotation layers"
+            noCaps="true"
+            ></lib-button>
+        </div>
+      </ng-container>
       <!-- attribute category tabs -->
-      <div *ngFor="let layer of categoryLayers[category]" class="attribute">
-        <label for="{{layer.id}}" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">{{layer.description}}</label>
-        <div *ngIf="transcript[layer.id]"
-              id="{{layer.id}}" class="values">
-          <div *ngFor="let annotation of transcript[layer.id]" class="value">
-            <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
-            <ng-container *ngIf="layer.type == 'boolean'">
-              <span *ngIf="annotation.label == '1'" class="description">true</span>
-              <span *ngIf="annotation.label == '0'" class="description">false</span>
-            </ng-container>
-            <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label">
-              <span class="description">{{layer.validLabels[annotation.label]}}</span>
-            </ng-container>
+      <ng-container *ngIf="!['Participants','Layers','Search','Export'].includes(currentCategory)">
+        <div *ngFor="let layer of categoryLayers[category]" class="attribute">
+          <label
+            [for]="layer.id"
+            [title]="layer.hint ? layer.hint : ''"
+            >{{layer.description}}<span
+              class="layer-name"
+              [style.display]="displayLayerIds ? 'inline' : 'none'"
+              > (<span class="layer-id">{{displayAttributePrefixes ? layer.id : TranscriptLayerLabel(layer.id)}}</span>)</span></label>
+          <div *ngIf="transcript[layer.id]"
+                id="{{layer.id}}" class="values">
+            <div *ngFor="let annotation of transcript[layer.id]" class="value">
+              <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
+              <ng-container *ngIf="layer.type == 'boolean'">
+                <span *ngIf="annotation.label == '1'" class="description" i18n>true</span>
+                <span *ngIf="annotation.label == '0'" class="description" i18n>false</span>
+              </ng-container>
+              <ng-container *ngIf="layer.validLabels[annotation.label] && layer.validLabels[annotation.label] != annotation.label">
+                <span class="description">{{layer.validLabels[annotation.label]}}</span>
+              </ng-container>
+            </div>
           </div>
         </div>
-      </div>
-      <lib-link *ngIf="user && user.roles.includes('edit')"
-                class="buttons"
-                href="{{baseUrl}}edit/transcript/attributes?id={{transcript.id}}"
-                img="wrench.svg" icon="🔧"
-                i18n-label label="Edit"
-                i18n-title title="Edit transcript attributes"
-                ></lib-link>
+        <div id="attr-controls">
+          <div class="label-spacer">
+            <label id="toggleLayerIds" i18n-title title="Hide attribute names">
+              <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
+              <span i18n>Hide attribute names</span>
+            </label>
+          </div>
+          <div class="label-spacer">
+            <label
+              [class.disabled]="!displayLayerIds"
+              i18n-title title="Hide full names for participant/transcript attributes">
+              <lib-grouped-checkbox
+                name="hideAttributePrefixes"
+                [checked]="!displayAttributePrefixes"
+                [disabled]="!displayLayerIds"
+                (change)="toggleAttributePrefixes()"
+                ></lib-grouped-checkbox>
+              <span i18n>Hide attribute prefixes</span></label>
+          </div>
+          <lib-link *ngIf="user && user.roles.includes('edit')"
+                    class="buttons"
+                    href="{{baseUrl}}edit/transcript/attributes?id={{transcript.id}}"
+                    img="wrench.svg" icon="🔧"
+                    i18n-label label="Edit"
+                    i18n-title title="Edit transcript attributes"
+                    ></lib-link>
+        </div>
+      </ng-container>
     </div>
   </header>
 
@@ -369,6 +468,7 @@
          [ngClass]="{ 'block': true, 'consecutive': block.consecutive, 'simultaneous': !block.consecutive}">
       <div *ngFor="let utterance of block.utterances"
            id="{{utterance.id}}"
+           [attr.turn-id]="utterance.parentId"
            [class.utterance]="true"
            [class.main-participant]="utterance.first('participant').first('main_participant')"
            [class.highlight]="utterance.id == highlitId"
@@ -548,7 +648,7 @@
                 <span *ngIf="isWordLayer(transcript.schema.layers[l])"
                       class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}}"
                       style="color: {{transcript.schema.layers[l].colour}};"
-                      title="{{l}}: {{word.labels(l).join(' ')}}">
+                      i18n-title="no annotation" title="{{l}}{{word.labels(l).length > 1 ? ' [' + word.labels(l).length + ']' : ''}}: {{word.labels(l).join(' ') || '(no annotation)'}}">
                   <span *ngFor="let annotation of word.all(l)"
                         id="{{annotation.id}}"
                         [class.highlight]="annotation.id == highlitId"
@@ -561,6 +661,7 @@
               <span class="layer layer-{{word.layerId}}"
                     [class.highlight]="word.id == highlitId"
                     [class.match]="word.id != highlitId && matchTokens[word.id]"
+                    [class.menu-word]="menuId == word.id"
                     (click)="menuId = menuId == word.id?null:word.id; $event.stopPropagation();"
                     [attr.title]="matchTokens[word.id]?'Result '+matchTokens[word.id]:null">
                 <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>
@@ -573,41 +674,6 @@
                      href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{utterance.id}}"
                      i18n>Utterance</a>
                 </div>
-                <ng-container *ngIf="hasWAV && praatIntegration">
-                  <div class="item" id="praat-open">
-                    <lib-menu-option        
-                      (press)="praatUtteranceAudio(utterance);"
-                      img="praat.png" icon="👄"
-                      i18n-label label="Open in Praat"
-                      i18n-title title="Open utterance audio in Praat"
-                      ></lib-menu-option>
-                  </div>
-                  <div class="item" id="praat-open-textgrid">
-                    <lib-menu-option        
-                      (press)="praatUtteranceTextGrid(utterance);"
-                      img="praat.png" icon="👄"
-                      i18n-label label="Open TextGrid"
-                      i18n-title title="Open utterance audio and TextGrid in Praat"
-                      ></lib-menu-option>
-                  </div>
-                  <div class="item" id="praat-open-textgrid">
-                    <lib-menu-option        
-                      (press)="praatUtteranceContextTextGrid(utterance);"
-                      img="praat.png" icon="👄"
-                      i18n-label label="Open TextGrid ± 1 utterance"
-                      i18n-title title="Open utterance audio and TextGrid in Praat, including previous and next utterances"
-                      ></lib-menu-option>
-                  </div>
-                </ng-container>
-                <div *ngIf="hasWAV"
-                     class="item" id="extract-audio-option">
-                  <lib-menu-option        
-                    (press)="utteranceAudio(utterance);"
-                    img="audio.svg" icon="🔊"
-                    i18n-label label="Audio"
-                    i18n-title title="Extract utterance audio fragment"
-                    ></lib-menu-option>
-                </div>
                 <div *ngIf="visibleVideoCount + visibleAudioCount > 0"
                      class="item" id="play-utterance-option">
                   <lib-menu-option        
@@ -617,6 +683,50 @@
                     i18n-title title="Play this utterance"
                     ></lib-menu-option>
                 </div>
+                <div *ngIf="hasWAV"
+                     class="item" id="extract-audio-option">
+                  <lib-menu-option        
+                    (press)="utteranceAudio(utterance); menuId = null;"
+                    img="audio.svg" icon="🔊"
+                    i18n-label label="Extract audio"
+                    i18n-title title="Extract audio fragment for this utterance"
+                    ></lib-menu-option>
+                </div>
+                <ng-container *ngIf="hasWAV && praatIntegration">
+                  <div class="item" id="praat-open">
+                    <lib-menu-option        
+                      (press)="praatUtteranceAudio(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open audio in Praat"
+                      i18n-title title="Open utterance audio in Praat"
+                      ></lib-menu-option>
+                  </div>
+                  <div class="item" id="praat-open-textgrid">
+                    <lib-menu-option        
+                      (press)="praatUtteranceTextGrid(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open TextGrid in Praat"
+                      i18n-title title="Open utterance audio and TextGrid in Praat"
+                      ></lib-menu-option>
+                  </div>
+                  <div class="item" id="praat-open-textgrid">
+                    <lib-menu-option        
+                      (press)="praatUtteranceContextTextGrid(utterance); menuId = null;"
+                      img="praat.png" icon="👄"
+                      i18n-label label="Open TextGrid incl. ± 1 utterance in Praat"
+                      i18n-title title="Open utterance audio and TextGrid in Praat, including previous and next utterances"
+                      ></lib-menu-option>
+                  </div>
+                </ng-container>
+                <div *ngIf="correctionEnabled"
+                     class="item" id="suggest-correction-option">
+                  <lib-menu-option        
+                    (press)="suggestCorrection(utterance); menuId = null;"
+                    img="edit.svg" icon="✎"
+                    i18n-label label="Suggest correction"
+                    i18n-title title="Suggest a correction to the transcript of this utterance"
+                    ></lib-menu-option>
+                </div>
                 <div *ngIf="user && user.roles.includes('edit')"
                      class="item" id="edit-utterance-option">
                   <lib-menu-option        
@@ -624,15 +734,6 @@
                     img="edit.svg" icon="✎"
                     i18n-label label="Edit Transcript"
                     i18n-title title="Edit utterance transcript"
-                    ></lib-menu-option>
-                </div>
-                <div *ngIf="correctionEnabled"
-                     class="item" id="suggest-correction-option">
-                  <lib-menu-option        
-                    (press)="suggestCorrection(utterance);"
-                    img="edit.svg" icon="✎"
-                    i18n-label label="Suggest Correction"
-                    i18n-title title="Suggest a correction to the transcription of this utterance"
                     ></lib-menu-option>
                 </div>
                 <div class="header" id="word-options">
@@ -656,14 +757,13 @@
                 <span *ngIf="isSegmentLayer(transcript.schema.layers[l])"
                       class="layer layer-{{l}} segment"
                       style="color: {{transcript.schema.layers[l].colour}};"
-                      title="{{l}}: {{word.labels(l).join(' ')}}">
+                      i18n-title="no annotation" title="{{l}}: {{word.labels(l).join(' ') || '(no annotation)'}}">
                   <span *ngFor="let annotation of word.all(l)"
                         id="{{annotation.id}}"
                         [class.highlight]="annotation.id == highlitId"
                         class="annotation">{{renderLabel(annotation)}}
                     <ng-container *ngIf="annotation.layer.type != 'ipa'">&nbsp;</ng-container></span>
-                  <span *ngIf="word.all(l).length == 0"
-                        class="annotation">&nbsp;</span>
+                  <span [class.annotation]="word.all(l).length == 0">&nbsp;</span>
                 </span>
               </ng-container>
             </span>

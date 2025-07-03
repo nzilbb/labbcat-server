@@ -46,13 +46,22 @@
       </span>
     </div>
   </fieldset>
-  <div id="buttons">
-    <lib-button
-      *ngIf="processing"
-      i18n-label="Batch upload" label="Cancel"
-      i18n-title title="Cancel current processing"
-      img="cross-mark.svg" icon="❌"
-      (press)="onCancel()"></lib-button>
+  <div id="buttons">    
+    <div id="always-visible-buttons">
+      <lib-button
+        *ngIf="processing"
+        i18n-label="Batch upload" label="Cancel"
+        i18n-title title="Cancel current processing"
+        img="cross-mark.svg" icon="❌"
+        (press)="onCancel()"></lib-button>
+      <lib-button
+        *ngIf="processing"
+        i18n-title title="Follow progress"
+        img="pin.svg" icon="📌"
+        (press)="followProgress = !followProgress"
+        [ngClass]="{'deselected' : !followProgress}"
+        ></lib-button>
+    </div>
     <lib-button
       i18n-label="Batch upload" label="Upload"
       i18n-title title="Add all transcripts to LaBB-CAT"
@@ -108,7 +117,7 @@
            [disabled]="processing"
            multiple observeFiles>
     <div class="transcript-entry">
-      <span class="entry-selector header">&nbsp;</span>
+      <span class="entry-selector header" i18n-title title="Queue length">{{entries.length}}</span>
       <span class="transcript-name header" i18n="Upload batch column">Transcript</span>
       <span class="media-name header" i18n="Upload batch column">Media</span>
       <span class="corpus header" i18n="Upload batch column">Corpus</span>
@@ -118,9 +127,10 @@
       <span class="progress header" i18n="Upload batch column">Progress</span>
       <span class="buttons header">&nbsp;</span>
     </div>
-    <details *ngFor="let entry of entries" class="entry-container"
+    <details *ngFor="let entry of entries; index as e" class="entry-container"
              [open]="entry.parametersVisible">
-      <summary [class]="{ 'transcript-entry' : true, 'exists': entry.exists }">
+      <summary [class]="{ 'transcript-entry' : true, 'exists': entry.exists }"
+               [id]="entry.transcript?entry.transcript.name||'entry-'+e:'entry-'+e">
         <span class="entry-selector buttons">
           <button *ngIf="entry.parameters"
                   i18n-title title="Show/hide parameters"

@@ -1,29 +1,119 @@
-#participant-ids, #transcript-ids {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-height: 30vh;
-    overflow: auto;
+#attributes {
+    width: 100%;
+    text-align: left;
 }
-#participant-ids a, #transcript-ids a {
-    padding-right: 5px;
+.tab-labels label {
+    cursor: context-menu;
 }
-#participant-ids a:after, #transcript-ids a:after  {
-    content: ', ';
+.tab-labels label img {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
 }
-#participant-ids a:last-child:after, #transcript-ids a:last-child:after  {
-    content: '';
+.tab-body {
+    border: 1px var(--theme-text-color) solid;
+    border-top: none;
+    margin-left: -1px; /* to make annoying overshoot at least symmetrical */
+}
+.tab-body > div {
+    padding: 10px;
+}
+#participants, #transcripts {
+
+    overflow-x: clip;
+}
+.search-matrix {
+    padding-top: 15px;
+}
+@media all and (min-width: 640px) {
+    .search-matrix { 
+        display: flex;
+        flex-direction: column; 
+        align-items: center;
+    }
+    #participant-chooser, #transcript-chooser, #transcript-chooser-disabled {
+        display: flex;
+    }
+    .file-chooser {
+        padding-left: 10px;
+        flex-grow: 1;
+    }
+}
+#participant-chooser lib-button,
+#transcript-chooser lib-button, 
+#transcript-chooser-disabled lib-button {
+    padding-bottom: 10px;
+}
+#transcript-chooser-disabled .file-chooser {
+    color: silver;
+}
+#transcript-chooser-disabled input {
+    color: silver;
+}
+#transcript-chooser-disabled summary {
+    pointer-events: none;
+}
+#nb-disabled {
+    font-style: italic;
+}
+.all {
+    font-style: italic;
+}
+.participant-list, .transcript-list {
+    padding-inline-start: 40px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.load-more {
+    margin-left: 40px;
+    padding-top: 5px;
 }
 .item label {
     display: inline-block;
 }
-div.search-matrix {
-    margin: auto;
-    width: fit-content;
+details > .advanced {
+    border: 1px solid silver;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding: 10px;
 }
-#file-chooser label {
+details > .advanced > ul {
+    padding-top: 5px;
+    padding-inline-start: 29px;
+}
+details > .advanced li ul {
+    padding-inline-start: 40px;
+}
+details[open] > div {
+    animation-name: roll-down;
+    animation-duration: 1s;
+}
+.file-chooser {
+    padding-bottom: 10px;
+}
+.file-chooser label {
     padding-right: 5px;
 }
-#file-chooser label:after {
+.file-chooser label:after {
     content: ':';
+}
+.list {
+    margin-top: 5px;
+}
+.list-label {
+    font-style: italic;
+    font-weight: bold;
+}
+@media all and (min-width: 640px) {
+    lib-layer-checkboxes {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+.search-button {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
 }

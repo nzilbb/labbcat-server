@@ -12,6 +12,8 @@ export class PaginationComponent implements OnInit {
     @Output() goToPage = new EventEmitter<number>();
     @Output() showAllPages = new EventEmitter<number>();
     showAllLinks = false;
+    /** Above this many pages, page links will move below the buttons */
+    maxForWide = 25;
     
     constructor() { }
     
@@ -22,7 +24,7 @@ export class PaginationComponent implements OnInit {
     go(page: number): boolean {
         this.goToPage.emit(page);
         this.currentPage = page;
-        if (page > 4) this.showAllLinks = true;
+        if (page > 3 && page < this.pageLinks.length) this.showAllLinks = true;
         return false;
     }
     
