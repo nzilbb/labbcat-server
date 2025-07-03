@@ -396,6 +396,21 @@
     }
     
     /**
+     * Changes the current user's password.
+     * @param {string} currentPassword The user's current password.
+     * @param {string} newPassword The new password.
+     * @param {resultCallback} onResult Invoked when the request has returned. 
+     */
+    changePassword(currentPassword, newPassword, onResult) {
+      if (exports.verbose) console.log("changePassword(...)");
+      this.createRequest(
+        "users", null, onResult, this.baseUrl+"api/password", "PUT")
+        .send(JSON.stringify({
+          currentPassword : currentPassword,
+          newPassword : newPassword}));
+    }
+    
+    /**
      * Gets the store's ID.
      * @param {resultCallback} onResult Invoked when the request has returned a
      * <var>result</var> which will be:  {string} The annotation store's ID.
@@ -4808,7 +4823,7 @@
      * @param {resultCallback} onResult Invoked when the request has returned. 
      */
     setPassword(user, password, resetPassword, onResult) {
-      if (exports.verbose) console.log("updateUsersetP("+user+", ****, "+resetPassword);
+      if (exports.verbose) console.log(`updateUsersetP(${user}, ****, ${resetPassword})`);
       this.createRequest(
         "users", null, onResult, this.baseUrl+"api/admin/password", "PUT")
         .send(JSON.stringify({

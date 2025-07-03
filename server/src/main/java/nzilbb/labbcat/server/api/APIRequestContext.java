@@ -21,6 +21,8 @@
 //
 package nzilbb.labbcat.server.api;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.util.ResourceBundle;
 import nzilbb.sql.ConnectionFactory;
 
@@ -102,8 +104,18 @@ public interface APIRequestContext {
   
   /**
    * Log a message.
-   * @param message
+   * @param message The message to add to the log.
    */
   public void servletLog(String message);
+  
+  /**
+   * Log an exception.
+   * @param exception The exception to add a stack-trace of to the log.
+   */
+  default public void servletLog(Throwable exception) {
+    StringWriter sw = new StringWriter();
+    exception.printStackTrace(new PrintWriter(sw));
+    servletLog(sw.toString());
+  }
   
 } // end of APIRequestContext

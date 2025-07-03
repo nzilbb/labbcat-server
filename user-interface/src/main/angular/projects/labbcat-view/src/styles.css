@@ -428,10 +428,10 @@ tbody tr:nth-child(even) {
     flex-direction: row;
     padding: 4px;
 }
-.attribute-list .attribute:nth-child(odd) {
+.attribute-list > .attribute:nth-child(odd) {
     background: #EEEEEE;
 }
-.attribute-list .attribute:nth-child(even) {
+.attribute-list > .attribute:nth-child(even) {
     background: #FFFFFF;
 }
 .attribute-list .attribute label {

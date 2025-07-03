@@ -51,6 +51,9 @@
   <servlet><servlet-name>doc.jsp</servlet-name><jsp-file>/jsp/doc.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>doc.jsp</servlet-name><url-pattern>/doc/*</url-pattern></servlet-mapping>
 
+  <servlet><servlet-name>password.jsp</servlet-name><jsp-file>/jsp/password.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>password.jsp</servlet-name><url-pattern>/api/password</url-pattern></servlet-mapping>
+
   <servlet><servlet-name>admin/password.jsp</servlet-name><jsp-file>/jsp/admin/password.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/password.jsp</servlet-name><url-pattern>/api/admin/password</url-pattern></servlet-mapping>
   

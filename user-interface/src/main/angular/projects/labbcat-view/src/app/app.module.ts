@@ -18,6 +18,7 @@ import { SearchMatrixComponent } from './search-matrix/search-matrix.component';
 import { AllUtterancesComponent } from './all-utterances/all-utterances.component';
 import { TranscriptComponent } from './transcript/transcript.component';
 import { LoginComponent } from './login/login.component';
+import { PasswordComponent } from './password/password.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { LoginComponent } from './login/login.component';
       SearchMatrixComponent,
       AllUtterancesComponent,
       TranscriptComponent,
-      LoginComponent
+      LoginComponent,
+      PasswordComponent
   ],
   imports: [
       BrowserModule,
@@ -40,6 +42,7 @@ import { LoginComponent } from './login/login.component';
       RouterModule.forRoot([
           { path: 'login', component: LoginComponent },
           { path: 'login-error', component: LoginComponent },
+          { path: 'password', component: PasswordComponent },
           { path: 'search', component: SearchComponent },
           { path: 'matches', component: MatchesComponent },
           { path: 'task', component: TaskComponent },
