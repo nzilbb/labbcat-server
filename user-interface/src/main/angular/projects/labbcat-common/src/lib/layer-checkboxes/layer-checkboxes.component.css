@@ -66,10 +66,10 @@ img.data-type, img.alignment, img.vertical-peers {
     margin-right: 0.2rem;
     cursor: help;
 }
-.layer-count:before {
+.layer-count span:before {
     content: ' (';
 }
-.layer-count:after {
+.layer-count span:after {
     content: ')';
 }
 .interpreted-selector {
