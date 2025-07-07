@@ -91,7 +91,7 @@ public class Password extends APIRequestHandler {
    * The handler for the request
    * <p> This set the user password as specified
    * @param requestBody Stream supplying the body of the request.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    * @return A JSON object as the request response.
    */
   public JsonObject put(InputStream requestBody, Consumer<Integer> httpStatus) {

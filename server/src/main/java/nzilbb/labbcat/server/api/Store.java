@@ -872,7 +872,7 @@ public class Store extends APIRequestHandler {
    * @param queryString The URL's query string.
    * @param parameters Request parameter map.
    * @param requestBody For access to the request body.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    * @param redirectUrl Receives a URL for the request to be redirected to.
    * @return JSON-encoded object representing the response
    */
@@ -923,7 +923,7 @@ public class Store extends APIRequestHandler {
    * @param queryString The URL's query string.
    * @param parameters Request parameter map.
    * @param requestBody For access to the request body.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    * @param redirectUrl Receives a URL for the request to be redirected to.
    * @return JSON-encoded object representing the response
    */

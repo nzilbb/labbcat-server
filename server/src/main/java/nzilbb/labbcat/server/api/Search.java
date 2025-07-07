@@ -109,7 +109,7 @@ public class Search extends APIRequestHandler {
   /**
    * The GET method for the servlet.
    * @param parameters Request parameter map.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    * @return A JSON object as the request response.
    */
   public JsonObject get(RequestParameters parameters, Consumer<Integer> httpStatus) {

@@ -90,7 +90,7 @@ public class Password extends APIRequestHandler {
    * The handler for the request
    * <p> This set the user password as specified
    * @param requestBody Stream supplying the body of the request.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    * @return A JSON object as the request response.
    */
   public JsonObject put(InputStream requestBody, Consumer<Integer> httpStatus) {
@@ -148,13 +148,13 @@ public class Password extends APIRequestHandler {
         connection.close();
       }
     } catch(SQLException exception) {
-      context.servletLog("Password.handleRequest: Database operation failed: " + exception);
+      context.servletLog("Password.put: Database operation failed: " + exception);
       context.servletLog(exception);
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       // for security, don't return the specific error to the client
       return failureResult("Unexpected error.");
     } catch(Exception exception) {
-      context.servletLog("Password.handleRequest: Failed: " + exception);
+      context.servletLog("Password.put: Failed: " + exception);
       context.servletLog(exception);
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       // for security, don't return the specific error to the client

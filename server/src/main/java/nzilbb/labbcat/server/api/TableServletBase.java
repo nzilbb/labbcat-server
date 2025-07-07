@@ -254,7 +254,7 @@ public class TableServletBase extends APIRequestHandler {
    * @param out Response body output stream.
    * @param contentTypeConsumer Receives the content type for specification in the response headers.
    * @param fileName Receives the filename for specification in the response headers.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void get(String pathInfo, RequestParameters parameters, UnaryOperator<String> requestHeaders, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     try {
@@ -590,7 +590,7 @@ public class TableServletBase extends APIRequestHandler {
    * @param requestHeaders Access to HTTP request headers.
    * @param out Response body output stream.
    * @param contentTypeConsumer Receives the content type for specification in the response headers.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void post(InputStream requestBody, UnaryOperator<String> requestHeaders, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<Integer> httpStatus) {
     try {
@@ -776,7 +776,7 @@ public class TableServletBase extends APIRequestHandler {
     * @param requestBody Stream supplying the body of the request.
     * @param out Stream for writing the response.
     * @param contentTypeConsumer Consumer for receiving the output content type..
-    * @param httpStatus Receives the response status code, in case or error.
+    * @param httpStatus Receives the response status code, in case of error.
     */
   public void put(InputStream requestBody, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<Integer> httpStatus) {
     try {
@@ -930,7 +930,7 @@ public class TableServletBase extends APIRequestHandler {
    * @param pathInfo The URL path.
    * @param out Response body output stream.
    * @param contentTypeConsumer Receives the content type for specification in the response headers.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void delete(String pathInfo, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<Integer> httpStatus) {
     try {

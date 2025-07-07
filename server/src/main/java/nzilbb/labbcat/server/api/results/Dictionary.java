@@ -106,7 +106,7 @@ public class Dictionary extends APIRequestHandler { // TODO unit test
    * @param parameters Request parameter map.
    * @param out Response body output stream.
    * @param fileName Receives the filename for specification in the response headers.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void get(RequestParameters parameters, OutputStream out, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     try {

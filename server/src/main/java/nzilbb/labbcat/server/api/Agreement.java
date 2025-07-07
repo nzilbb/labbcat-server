@@ -74,7 +74,7 @@ public class Agreement extends APIRequestHandler {
    * response headers. 
    * @param contentEncoding Receives content character encoding for specification in the
    * response headers. 
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void get(
     String pathInfo, Function<String,File> realPath,
@@ -130,7 +130,7 @@ public class Agreement extends APIRequestHandler {
    * @param contentType Consumer for receiving the output content type..
    * @param contentEncoding Receives content character encoding for specification in the
    * response headers. 
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void put(
     String pathInfo, Function<String,File> realPath,
@@ -179,7 +179,7 @@ public class Agreement extends APIRequestHandler {
    * @param out Response body output stream.
    * @param contentType Receives the content type for specification in the response headers.
    * @param contentEncoding Receives content character encoding for specification in the
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void delete(
     String pathInfo, Function<String,File> realPath,
@@ -231,7 +231,7 @@ public class Agreement extends APIRequestHandler {
    * @param contentType Consumer for receiving the output content type..
    * @param contentEncoding Receives content character encoding for specification in the
    * response headers. 
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   @SuppressWarnings("rawtypes")
   public void post(

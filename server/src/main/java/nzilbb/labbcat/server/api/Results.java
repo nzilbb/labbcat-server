@@ -178,7 +178,7 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param out Response body output stream.
    * @param contentTypeConsumer Receives the content type for specification in the response headers.
    * @param fileName Receives the filename for specification in the response headers.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void get(RequestParameters parameters, UnaryOperator<String> requestHeaders, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     

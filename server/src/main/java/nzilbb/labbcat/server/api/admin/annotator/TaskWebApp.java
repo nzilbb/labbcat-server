@@ -92,7 +92,7 @@ public class TaskWebApp extends APIRequestHandler {
    * @param out Response body output stream.
    * @param contentTypeConsumer Receives the content type for specification in the response headers.
    * @param contentEncoding Receives the character encoding of the recponse.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void get(
     String method, String requestURI, String pathInfo, String queryString,

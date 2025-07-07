@@ -102,7 +102,7 @@ public class SystemAttributes extends APIRequestHandler {
    * <p> The return is JSON encoded, unless the "Accept" request header, or the "Accept"
    * request parameter, is "text/csv", in which case CSV is returned.
    * @param jsonOut Generator for JSON response body.
-   * @param httpStatus Receives the response statsu code, in case or error.
+   * @param httpStatus Receives the response statsu code, in case of error.
    */
   public void get(JsonGenerator jsonOut, Consumer<Integer> httpStatus) {
     try {
@@ -195,7 +195,7 @@ public class SystemAttributes extends APIRequestHandler {
   /**
    * PUT handler - update an existing row.
    * @param requestBody Stream supplying the body of the request.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public JsonObject put(InputStream requestBody, Consumer<Integer> httpStatus) {
     try {

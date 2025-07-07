@@ -188,7 +188,7 @@ public class Upload extends APIRequestHandler {
   /**
    * The POST method for the servlet.
    * @param requestParameters Request parameter map.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    * @return JSON-encoded object representing the response
    */
   public JsonObject post(RequestParameters requestParameters, Consumer<Integer> httpStatus) {
@@ -324,7 +324,7 @@ public class Upload extends APIRequestHandler {
    * The PUT method for the servlet.
    * @param pathInfo The URL path from which the upload ID can be inferred.
    * @param requestParameters Request parameter map.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    * @param layerGenerator A function that will start a layer generation thread for the
    * given transcript, and return the thread ID.
    * @return JSON-encoded object representing the response
@@ -858,7 +858,7 @@ public class Upload extends APIRequestHandler {
   /**
    * The DELETE method for the servlet.
    * @param pathInfo The URL path from which the upload ID can be inferred.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    * @return JSON-encoded object representing the response
    */
   public JsonObject delete(

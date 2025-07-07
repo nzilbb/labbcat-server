@@ -182,7 +182,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
    * @param out Response body stream.
    * @param contentType Receives the content type for specification in the response headers.
    * @param fileName Receives the filename for specification in the response headers.
-   * @param httpStatus Receives the response status code, in case or error.
+   * @param httpStatus Receives the response status code, in case of error.
    */
   public void get(RequestParameters parameters, OutputStream out, Consumer<String> contentType, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     

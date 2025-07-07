@@ -52,7 +52,7 @@ import nzilbb.util.IO;
 /**
  * <tt>/api/user</tt> : information about the current user.
  *  <p> Allows access to information about the current user, returning a
- *  JSON-encoded objects with the following attributes:
+ *  JSON-encoded object with the following attributes:
  *   <dl>
  *    <dt> user </dt><dd> ID of the user. </dd>
  *    <dt> roles </dt><dd> An array of strings, which are the roles or groups the user
