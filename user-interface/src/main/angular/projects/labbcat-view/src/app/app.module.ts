@@ -19,6 +19,7 @@ import { AllUtterancesComponent } from './all-utterances/all-utterances.componen
 import { TranscriptComponent } from './transcript/transcript.component';
 import { LoginComponent } from './login/login.component';
 import { PasswordComponent } from './password/password.component';
+import { MenuExtractComponent } from './menu-extract/menu-extract.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { PasswordComponent } from './password/password.component';
       AllUtterancesComponent,
       TranscriptComponent,
       LoginComponent,
-      PasswordComponent
+      PasswordComponent,
+      MenuExtractComponent
   ],
   imports: [
       BrowserModule,
@@ -55,6 +57,7 @@ import { PasswordComponent } from './password/password.component';
           { path: 'all-utterances', component: AllUtterancesComponent },
           { path: 'transcript', component: TranscriptComponent },
           { path: 'text', component: TranscriptComponent },
+          { path: 'extract', component: MenuExtractComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

@@ -1,0 +1,29 @@
+<h1 i18n="extract menu page title">Extract</h1>
+<ul id="extract-menu">
+  <li id="extract-audio">
+    <a href="extractAudio"
+       i18n-title title="Extract audio between start and end times in a CSV search results file"
+       >Extract audio for time intervals</a></li>
+  <li id="export-fragments">
+    <a href="exportFragments"
+       i18n-title  title="Extract transcript fragments between start and end times"
+       >Extract transcripts for time intervals</a></li>
+  <li id="get-match-annotations">
+    <a href="api/getMatchAnnotations"
+       i18n-title title="Extract annotations using a CSV search results file"
+       >Extract annotations for search matches</a></li>
+  <li id="extract-intervals">
+    <a href="extractIntervals"
+       i18n-title title="Extract annotations between start and end times using a CSV search results file"
+       >Extract annotations for time intervals</a></li>
+  <li id="export-participants">
+    <a href="participantsExport"
+       i18n-title title="Export participant attributes to a CSV file"
+       >Export participant attributes</a></li>
+  <li id="process-with-prat"
+      *ngIf="processWithPraatEnabled">
+    <a [routerLink]="['..','praat']"
+       i18n-title title="Insert praat-processed data into a CSV search results file"
+       >Process with Praat</a></li>
+</ul>
+
