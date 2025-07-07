@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Inject } from '@angular/core';
 
 @Component({
@@ -7,6 +7,8 @@ import { Inject } from '@angular/core';
   styleUrls: ['./wait.component.css']
 })
 export class WaitComponent implements OnInit {
+    /** Display spinner inline instead of in a fixed position */
+    @Input() inSitu: boolean;
 
     imagesLocation : string;
     constructor(@Inject('environment') private environment) {

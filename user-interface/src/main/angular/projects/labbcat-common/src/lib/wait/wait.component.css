@@ -3,3 +3,6 @@ img {
     top: 10px;
     left: 10px;
 }
+img.in-situ {
+    position: revert;
+}
