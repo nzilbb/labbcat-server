@@ -66,13 +66,7 @@ export class AppComponent {
     }
 
     setPageTitle(pageTitle: string) {
-        if (this.title) {
-            this.titleService.setTitle(`${pageTitle} - ${this.title}`);
-        } else {
-            this.labbcatService.labbcat.getSystemAttribute("title", (attribute) => {
-                this.title = attribute.value;
-                this.titleService.setTitle(`${pageTitle} - ${this.title}`);
-            });
-        }
+        if (!this.title) this.title = this.labbcatService.title;
+        this.titleService.setTitle(`${pageTitle} - ${this.title}`);
     }
 }
