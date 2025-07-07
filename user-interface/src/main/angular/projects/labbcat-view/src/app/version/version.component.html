@@ -1,0 +1,73 @@
+<h1 i18n="page title">Versions</h1>
+<lib-wait *ngIf="!versions"></lib-wait>
+
+<div id="versions" *ngIf="versions">
+  <fieldset id="System"><legend i18n="versions section">System</legend>
+    <div class="attribute-list">
+      <div class="attribute"
+           *ngFor="let id of ids(versions['System'])">
+        <label>{{id}}</label>
+        <span class="value" id="System-{{id}}">{{versions['System'][id]}}</span>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset id="Formats"><legend i18n="versions section">Formats</legend>
+    <div class="attribute-list">
+      <div class="attribute"
+           *ngFor="let id of ids(versions['Formats'])">
+        <label>{{id}}</label>
+        <span class="value" id="Formats-{{id}}">{{versions['Formats'][id]}}</span>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset id="LayerManagers"><legend i18n="versions section">Layer Managers</legend>
+    <div class="attribute-list">
+      <div class="attribute"
+           *ngFor="let id of ids(versions['LayerManagers'])">
+        <label>{{id}}</label>
+        <span class="value" id="LayerManagers-{{id}}">{{versions['LayerManagers'][id]}}</span>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset id="Annotators"><legend i18n="versions section">Annotator modules</legend>
+    <div class="attribute-list">
+      <div class="attribute"
+           *ngFor="let id of ids(versions['Annotators'])">
+        <label>{{id}}</label>
+        <span class="value" id="Annotators-{{id}}">{{versions['Annotators'][id]}}</span>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset id="ThirdPartySoftware"><legend i18n="versions section">3rd Party Software</legend>
+    <div class="attribute-list">
+      <div class="attribute"
+           *ngFor="let id of ids(versions['ThirdPartySoftware'])">
+        <label>{{id}}</label>
+        <span class="value" id="ThirdPartySoftware-{{id}}">{{versions['ThirdPartySoftware'][id]}}</span>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset id="RDBMS"><legend i18n="versions section">RDBMS</legend>
+    <div class="attribute-list">
+      <div class="attribute"
+           *ngFor="let id of ids(versions['RDBMS'])">
+        <label>{{id}}</label>
+        <span class="value" id="RDBMS-{{id}}">{{versions['RDBMS'][id]}}</span>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset id="BrowserIntegration">
+    <legend i18n="versions section">Browser Integration</legend>
+    <lib-wait *ngIf="!praatExtensionVersion" [inSitu]="true"></lib-wait>
+    <div class="attribute-list" *ngIf="praatExtensionVersion">
+      <div class="attribute">
+        <label i18n>Praat Extension</label>
+        <span class="value" id="BrowserIntegration-praatExtension">{{praatExtensionVersion}}</span>
+      </div>
+      <div class="attribute">
+        <label i18n>Praat Native Messaging</label>
+        <span class="value" id="BrowserIntegration-praatNativeMessaging">{{praatService.nativeMessagingVersion}}</span>
+      </div>
+    </div>
+  </fieldset>
+</div>

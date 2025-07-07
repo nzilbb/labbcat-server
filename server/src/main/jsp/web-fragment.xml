@@ -8,6 +8,9 @@
   <servlet><servlet-name>file-upload-tomcat10.jsp</servlet-name><jsp-file>/jsp/file-upload-tomcat10.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>file-upload-tomcat10.jsp</servlet-name><url-pattern>/api/file-upload-tomcat10.jsp</url-pattern></servlet-mapping>
 
+  <servlet><servlet-name>versions.jsp</servlet-name><jsp-file>/jsp/versions.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>versions.jsp</servlet-name><url-pattern>/api/versions</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>user.jsp</servlet-name><jsp-file>/jsp/user.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>user.jsp</servlet-name><url-pattern>/api/user</url-pattern></servlet-mapping>
   

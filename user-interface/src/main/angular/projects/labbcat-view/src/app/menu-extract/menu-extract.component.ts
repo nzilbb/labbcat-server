@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { LabbcatService } from 'labbcat-common';
 
 @Component({
   selector: 'app-menu-extract',

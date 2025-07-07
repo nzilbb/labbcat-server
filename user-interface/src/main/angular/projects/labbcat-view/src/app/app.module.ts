@@ -20,6 +20,7 @@ import { TranscriptComponent } from './transcript/transcript.component';
 import { LoginComponent } from './login/login.component';
 import { PasswordComponent } from './password/password.component';
 import { MenuExtractComponent } from './menu-extract/menu-extract.component';
+import { VersionComponent } from './version/version.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { MenuExtractComponent } from './menu-extract/menu-extract.component';
       TranscriptComponent,
       LoginComponent,
       PasswordComponent,
-      MenuExtractComponent
+      MenuExtractComponent,
+      VersionComponent
   ],
   imports: [
       BrowserModule,
@@ -44,6 +46,7 @@ import { MenuExtractComponent } from './menu-extract/menu-extract.component';
       RouterModule.forRoot([
           { path: 'login', component: LoginComponent },
           { path: 'login-error', component: LoginComponent },
+          { path: 'version', component: VersionComponent },
           { path: 'password', component: PasswordComponent },
           { path: 'search', component: SearchComponent },
           { path: 'matches', component: MatchesComponent },

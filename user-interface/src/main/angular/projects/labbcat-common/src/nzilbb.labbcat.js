@@ -338,7 +338,7 @@
      * </ul>
      */
     versionInfo(onResult) {
-      this.createRequest("version", null, onResult, this.baseUrl+"version").send();
+      this.createRequest("version", null, onResult, this.baseUrl+"api/versions").send();
     }
     
     /**

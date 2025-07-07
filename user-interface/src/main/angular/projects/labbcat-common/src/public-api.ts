@@ -2,6 +2,7 @@
  * Public API Surface of labbcat-common
  */
 
+export * from './lib/version-info';
 export * from './lib/task';
 export * from './lib/response';
 export * from './lib/layer';
