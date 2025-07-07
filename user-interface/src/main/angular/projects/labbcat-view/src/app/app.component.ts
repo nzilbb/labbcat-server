@@ -66,7 +66,14 @@ export class AppComponent {
     }
 
     setPageTitle(pageTitle: string) {
-        if (!this.title) this.title = this.labbcatService.title;
-        this.titleService.setTitle(`${pageTitle} - ${this.title}`);
+        if (!this.title) {
+            setTimeout(()=>{ // wait for the corpus title to come in
+                if (!this.title) this.title = this.labbcatService.title;
+                // then try again
+                this.setPageTitle(pageTitle);
+            }, 100);
+        } else {
+            this.titleService.setTitle(`${pageTitle} - ${this.title}`);
+        }
     }
 }
