@@ -73,7 +73,11 @@ export class AppComponent {
                 this.setPageTitle(pageTitle);
             }, 100);
         } else {
-            this.titleService.setTitle(`${pageTitle} - ${this.title}`);
+            if (pageTitle != this.title) {
+                this.titleService.setTitle(`${pageTitle} - ${this.title}`);
+            } else { // home page
+                this.titleService.setTitle(`${pageTitle}`);
+            }
         }
     }
 }

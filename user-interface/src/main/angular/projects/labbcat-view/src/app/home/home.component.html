@@ -1,0 +1,74 @@
+<h1 id="title">{{title}}</h1>
+
+<div *ngIf="emptyDatabase">
+  <p i18n>You have no transcripts yet. For some guidance on setting up LaBB-CAT and uploading your first transcripts, click the link below:</p>
+  <p class="emphasis">
+    <a id="where-do-i-start"
+       i18n-title title="Click here for some initial guidance"
+       href="start.help"
+       (click)="help()"
+       i18n>Where do I start?</a>
+  </p>
+  <ol>
+    <li *ngIf="(user.roles && user.roles.includes('admin'))">
+      <a href="admin/corpora" i18n>define corpora</a></li>
+    <li *ngIf="(user.roles && user.roles.includes('admin'))">
+      <a href="admin/transcriptTypes" i18n>define transcript types</a></li>
+    <li *ngIf="(user.roles && user.roles.includes('edit'))">
+      <a href="edit/transcript/new" i18n>upload transcripts</a></li>
+  </ol>
+</div>
+
+<div id="dashboard">
+  <div id="link">
+    <ng-container *ngFor="let item of link">
+      <div class="item {{item.type}}"
+           id="item_{{item.item_id}}"
+           title="{{item.label}}">
+        <a href="{{baseUrl}}{{item.value}}"
+           [target]="item.value && item.value.endsWith('.help')?'help':null">
+          <img *ngIf="item.icon" src="{{baseUrl}}images/dashboard/{{item.icon}}" />
+          <span id="result_{{item.item_id}" class="dash-statistic">
+            <lib-wait [inSitu]="true" *ngIf="!item.value"></lib-wait>
+          </span>
+          <span class="dash-label">{{item.label}}</span>
+        </a>
+      </div>
+    </ng-container>
+  </div>
+  <div id="sql">
+    <ng-container *ngFor="let item of sql">
+      <div class="item {{item.type}}"
+           id="item_{{item.item_id}}"
+           title="{{item.label}}">
+        <img *ngIf="item.icon" src="{{baseUrl}}images/dashboard/{{item.icon}}" />
+        <span id="result_{{item.item_id}" class="dash-statistic">
+          <lib-wait [inSitu]="true" *ngIf="!item.value && !item.error"></lib-wait>
+          {{item.value}}
+          <span *ngIf="item.error" class="error">{{item.error}}</span>
+        </span>
+        <span class="dash-label">{{item.label}}</span>
+      </div>
+    </ng-container>
+  </div>
+  <div id="exec">
+    <ng-container *ngFor="let item of exec">
+      <div class="item {{item.type}}"
+           id="item_{{item.item_id}}"
+           title="{{item.label}}">
+        <img *ngIf="item.icon" src="{{baseUrl}}images/dashboard/{{item.icon}}" />
+        <span id="result_{{item.item_id}" class="dash-statistic">
+          <lib-wait [inSitu]="true" *ngIf="!item.value && !item.error"></lib-wait>
+          {{item.value}}
+          <span *ngIf="item.error" class="error">{{item.error}}</span>
+        </span>
+        <span class="dash-label">{{item.label}}</span>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<details id="info" *ngIf="info"><summary i18n>Further Information</summary>
+  <article id="doc" [innerHTML]="info"></article>    
+</details>
+<div id="info" *ngIf="infoLink"><a href="{{baseUrl}}doc/" id="docTitle">{{infoLink}}</a></div>

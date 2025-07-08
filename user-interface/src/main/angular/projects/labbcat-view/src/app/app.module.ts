@@ -23,6 +23,7 @@ import { MenuExtractComponent } from './menu-extract/menu-extract.component';
 import { VersionComponent } from './version/version.component';
 import { CreditsComponent } from './credits/credits.component';
 import { StatisticsComponent } from './statistics/statistics.component';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
@@ -42,12 +43,14 @@ import { StatisticsComponent } from './statistics/statistics.component';
       MenuExtractComponent,
       VersionComponent,
       CreditsComponent,
-      StatisticsComponent
+      StatisticsComponent,
+      HomeComponent
   ],
   imports: [
       BrowserModule,
       HttpClientModule,
       RouterModule.forRoot([
+          { path: '', component: HomeComponent },
           { path: 'login', component: LoginComponent },
           { path: 'login-error', component: LoginComponent },
           { path: 'version', component: VersionComponent },
