@@ -1,0 +1,51 @@
+<h1>{{title}} <span i18n="page subtitle|{corpus name} Statistics">Statistics</span></h1>
+
+
+<div id="dashboard">
+  <div id="link">
+    <ng-container *ngFor="let item of link">
+      <div class="item {{item.type}}"
+           id="item_{{item.item_id}}"
+           title="{{item.label}}">
+        <a href="{{baseUrl}}{{item.value}}"
+           [target]="item.value && item.value.endsWith('.help')?'help':null">
+          <img *ngIf="item.icon" src="{{baseUrl}}images/dashboard/{{item.icon}}" />
+          <span id="result_{{item.item_id}" class="dash-statistic">
+            <lib-wait [inSitu]="true" *ngIf="!item.value"></lib-wait>
+          </span>
+          <span class="dash-label">{{item.label}}</span>
+        </a>
+      </div>
+    </ng-container>
+  </div>
+  <div id="sql">
+    <ng-container *ngFor="let item of sql">
+      <div class="item {{item.type}}"
+           id="item_{{item.item_id}}"
+           title="{{item.label}}">
+        <img *ngIf="item.icon" src="{{baseUrl}}images/dashboard/{{item.icon}}" />
+        <span id="result_{{item.item_id}" class="dash-statistic">
+          <lib-wait [inSitu]="true" *ngIf="!item.value && !item.error"></lib-wait>
+          {{item.value}}
+          <span *ngIf="item.error" class="error">{{item.error}}</span>
+        </span>
+        <span class="dash-label">{{item.label}}</span>
+      </div>
+    </ng-container>
+  </div>
+  <div id="exec">
+    <ng-container *ngFor="let item of exec">
+      <div class="item {{item.type}}"
+           id="item_{{item.item_id}}"
+           title="{{item.label}}">
+        <img *ngIf="item.icon" src="{{baseUrl}}images/dashboard/{{item.icon}}" />
+        <span id="result_{{item.item_id}" class="dash-statistic">
+          <lib-wait [inSitu]="true" *ngIf="!item.value && !item.error"></lib-wait>
+          {{item.value}}
+          <span *ngIf="item.error" class="error">{{item.error}}</span>
+        </span>
+        <span class="dash-label">{{item.label}}</span>
+      </div>
+    </ng-container>
+  </div>
+</div>

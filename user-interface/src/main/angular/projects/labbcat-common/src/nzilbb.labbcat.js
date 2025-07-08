@@ -2076,6 +2076,47 @@
     }
 
     /**
+     * Lists configured items for the given dashboard.
+     * <p> These are generally single statistics about the corpus that are displayed
+     *   on the home page or the 'statistics' page, which are individually configurable.
+     *   However items can also be links, or the output of a command.
+     * @param {string} dashboard Which dashboard to get items for;
+     * "home", "statistics", or "express"
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be: an array of item objects, each with the
+     * following attributes:
+     * <ul>
+     *  <li> <q> item_id </q> : ID of the item. </li>
+     *  <li> <q> type </q> : The type of the item: "link", "sql", or "exec". </li>
+     *  <li> <q> label </q> : The item's text label. </li>
+     *  <li> <q> icon </q> : The item's icon. </li>
+     * </ul>
+     * The items are not evaluated by this function.
+     * To get item values, call {@link LabbcatView#getDashboardItem}.
+     */
+    getDashboardItems(dashboard, onResult) {
+      dashboard = dashboard||"home";
+      this.createRequest(
+        "dashboard", null, onResult,
+        this.baseUrl+"api/dashboard"+(dashboard=="home"?"":"/"+dashboard))
+        .send();
+    }
+
+    /**
+     * Gets information about the current user, including the roles or groups they are
+     * in.
+     * @param {number} id The item_id of the item, as returned by
+     * {@link LabbcatView#getDashboardItems}
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be a string representing the value of the item.
+     */
+    getDashboardItem(id, onResult) {
+      this.createRequest(
+        "dashboard/ite,", null, onResult,
+        this.baseUrl+"api/dashboard/item/"+id)
+        .send();
+    }
+    /**
      * For HTK dictionary-filling, this starts a task (returning it's threadId) that
      * traverses the given utterances, looking for missing word pronunciations
      * @param {string} seriesId search.search_id for identifying the utterances

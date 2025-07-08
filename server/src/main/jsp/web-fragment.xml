@@ -11,6 +11,15 @@
   <servlet><servlet-name>versions.jsp</servlet-name><jsp-file>/jsp/versions.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>versions.jsp</servlet-name><url-pattern>/api/versions</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>dashboard.jsp</servlet-name><jsp-file>/jsp/dashboard.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>dashboard.jsp</servlet-name><url-pattern>/api/dashboard</url-pattern></servlet-mapping>
+  <servlet><servlet-name>dashboard/statistics.jsp</servlet-name><jsp-file>/jsp/dashboard/statistics.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>dashboard/statistics.jsp</servlet-name><url-pattern>/api/dashboard/statistics</url-pattern></servlet-mapping>
+  <servlet><servlet-name>dashboard/express.jsp</servlet-name><jsp-file>/jsp/dashboard/express.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>dashboard/express.jsp</servlet-name><url-pattern>/api/dashboard/express</url-pattern></servlet-mapping>
+  <servlet><servlet-name>dashboard/item.jsp</servlet-name><jsp-file>/jsp/dashboard/item.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>dashboard/item.jsp</servlet-name><url-pattern>/api/dashboard/item/*</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>user.jsp</servlet-name><jsp-file>/jsp/user.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>user.jsp</servlet-name><url-pattern>/api/user</url-pattern></servlet-mapping>
   

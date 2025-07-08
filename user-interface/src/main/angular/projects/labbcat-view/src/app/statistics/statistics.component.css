@@ -1,0 +1,23 @@
+#dashboard {
+    width: 90vw;
+    text-align: center;
+}
+
+.item {
+    display: inline-block;
+    padding: 20px;
+}
+.item.link a, .item.link .dash-label {
+    height: 100%;
+    vertical-align: middle;
+    display: block;
+}
+
+.item.sql .dash-statistic, .item.sql .dash-label, .item.exec .dash-statistic, .item.exec .dash-label {
+    display: block;
+}
+
+img {
+    height: 40px;
+    width: 40px;
+}

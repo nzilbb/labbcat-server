@@ -1,4 +1,4 @@
-<%@ page info="User information" isErrorPage="true"
+<%@ page info="Version information" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
     import = "nzilbb.labbcat.server.api.Versions" 
     import = "javax.json.Json" 

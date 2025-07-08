@@ -22,6 +22,7 @@ import { PasswordComponent } from './password/password.component';
 import { MenuExtractComponent } from './menu-extract/menu-extract.component';
 import { VersionComponent } from './version/version.component';
 import { CreditsComponent } from './credits/credits.component';
+import { StatisticsComponent } from './statistics/statistics.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { CreditsComponent } from './credits/credits.component';
       PasswordComponent,
       MenuExtractComponent,
       VersionComponent,
-      CreditsComponent
+      CreditsComponent,
+      StatisticsComponent
   ],
   imports: [
       BrowserModule,
@@ -50,6 +52,7 @@ import { CreditsComponent } from './credits/credits.component';
           { path: 'login-error', component: LoginComponent },
           { path: 'version', component: VersionComponent },
           { path: 'credits', component: CreditsComponent },
+          { path: 'statistics', component: StatisticsComponent },
           { path: 'password', component: PasswordComponent },
           { path: 'search', component: SearchComponent },
           { path: 'matches', component: MatchesComponent },

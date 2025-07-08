@@ -25,7 +25,6 @@ export class LabbcatService {
         this.labbcat = new labbcat.LabbcatAdmin(this.environment.baseUrl); // TODO username/password
         labbcat.language = this.locale;
         this.labbcat.getSystemAttribute("title", (attribute: any) => {
-            console.log("attribute " + JSON.stringify(attribute));
             this.title = attribute.value;
         })
     }
