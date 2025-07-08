@@ -404,8 +404,8 @@ public class Doc extends APIRequestHandler {
       }
       // take the first file we find
       Optional anyFileValue = parameters.keySet().stream()
-        .map(key->parameters.get(key))
-        .filter(value->value instanceof File)
+        .map(key->parameters.getFile(key))
+        .filter(file->file != null)
         .findAny();
       if (!anyFileValue.isPresent()) { // file not being uploaded
         contentType.accept("application/json");
