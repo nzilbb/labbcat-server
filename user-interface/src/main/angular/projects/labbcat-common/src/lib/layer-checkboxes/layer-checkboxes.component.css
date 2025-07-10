@@ -1,11 +1,20 @@
 #layerSelector {
     margin-bottom: 6px;
 }
+#layerSelector > fieldset {
+    padding: 0px;
+}
 @media all and (min-width: 640px) {
     #layerSelector { 
         display: flex;
         flex-direction: row; 
         margin-bottom: 2px;
+        justify-content: space-between;
+    }
+    fieldset {
+        padding: 0px;
+        margin: 0px;
+        flex-grow: 1;
     }
 }
 .layers, .categories {

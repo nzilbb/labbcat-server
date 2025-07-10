@@ -46,7 +46,7 @@ span.attribute {
     position: absolute;
     overflow-x: hidden; 
     overflow-y: hidden;
-    max-height: 24px;
+    max-height: 30px;
     border: 1px solid silver;
     width: 162px;
 }
@@ -86,7 +86,7 @@ span.attribute {
 }
 .button-container {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 }
 .participant-filter {
     margin-left: auto;
