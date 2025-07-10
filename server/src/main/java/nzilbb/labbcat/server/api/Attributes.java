@@ -43,7 +43,7 @@ import org.apache.commons.csv.*;
  *     <dd><code>query</code> - AGQL expression to identify the graph IDs, if no
  *         <var>id</var> parameter is supplied.</dd>
  *     <dd><code>layer</code> - One or more layer IDs, representing transcript attribute
- *                              layers, or "transcript", "epsiode", or "corpus" .</dd>
+ *                              layers, or "transcript", "episode", or "corpus" .</dd>
  *     <dd><code>name</code> - Optional name of the file.</dd>
  *     <dd><code>csvFieldDelimiter</code> - Optional delimiter for CSV file (comma is used
  *                                          by default).</dd>
