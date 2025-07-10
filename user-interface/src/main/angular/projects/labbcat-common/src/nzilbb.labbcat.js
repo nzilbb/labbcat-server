@@ -2112,7 +2112,7 @@
      */
     getDashboardItem(id, onResult) {
       this.createRequest(
-        "dashboard/ite,", null, onResult,
+        "dashboard/item", null, onResult,
         this.baseUrl+"api/dashboard/item/"+id)
         .send();
     }
