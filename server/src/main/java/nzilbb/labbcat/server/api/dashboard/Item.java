@@ -214,6 +214,7 @@ public class Item extends Dashboard {
               httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
               return failureResult(error.toString());
             } else {
+              if (result.length() == 0) result = "?";
               return successResult(result, null);
             }
           } catch (Exception x) {
