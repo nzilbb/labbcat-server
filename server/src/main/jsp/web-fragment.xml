@@ -26,6 +26,9 @@
   <servlet><servlet-name>attributes.jsp</servlet-name><jsp-file>/jsp/attributes.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>attributes.jsp</servlet-name><url-pattern>/api/attributes</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>participant/attributes.jsp</servlet-name><jsp-file>/jsp/participant/attributes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>participant/attributes.jsp</servlet-name><url-pattern>/api/participant/attributes</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>search.jsp</servlet-name><jsp-file>/jsp/search.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>search.jsp</servlet-name><url-pattern>/api/search</url-pattern></servlet-mapping>
   

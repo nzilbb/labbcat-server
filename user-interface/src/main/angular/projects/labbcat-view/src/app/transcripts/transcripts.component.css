@@ -37,10 +37,8 @@ span.attribute {
 #attributesSelection {
     display: inline-block;
     width: 165px;
+    height: 1em;
 }
-#attributesSelection  {
-   height: 1em;
- }
 #attributesSelection  lib-layer-checkboxes {
     display: inline-block;
     position: absolute;

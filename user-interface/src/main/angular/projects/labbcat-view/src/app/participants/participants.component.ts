@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Inject } from '@angular/core';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 
 import { Response, Layer, User } from 'labbcat-common';
@@ -10,6 +10,7 @@ import { MessageService, LabbcatService } from 'labbcat-common';
   styleUrls: ['./participants.component.css']
 })
 export class ParticipantsComponent implements OnInit {
+    @ViewChild("form") form;
 
     schema: any;
     filterLayers: Layer[];
@@ -666,11 +667,23 @@ export class ParticipantsComponent implements OnInit {
             }).join("&");
     }
 
+    showAttributesSelection = false;
     /** Button action */
     exportAttributes(): void {
-        window.location.href = this.baseUrl
-            + "participantsExport?"
-            + this.selectedParticipantsQueryString("participantId");
+        if (!this.showAttributesSelection) { // show options
+            this.showAttributesSelection = true;
+        } else { // options selected, so go ahead and do it            
+            if (this.selectedIds.length == 0 && this.matchCount > 10) {
+                if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
+                    return;
+                }
+            }
+            this.form.nativeElement.action = this.baseUrl + "api/participant/attributes";
+            this.form.nativeElement.submit();
+        }
+    }
+    collapseExportAttributes(): void {
+        this.showAttributesSelection = false;
     }
 
     /** Button action */

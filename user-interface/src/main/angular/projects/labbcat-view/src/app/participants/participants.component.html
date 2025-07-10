@@ -1,7 +1,8 @@
 <h1 id="title" i18n>Participants</h1>
 <div id="spinner"><lib-wait *ngIf="loadingList || listParticipantsTimer >= 0"></lib-wait></div>
 <div class="participants">
-  
+  <form #form method="post">
+    <input type="hidden" name="query" value="{{query}}">
   <table>
     <caption *ngIf="matchCount >= 0">
       <span i18n="Match count: {n}">Match count:</span>&nbsp;<span id="matchCount">{{matchCount}}</span>
@@ -69,6 +70,20 @@
               img="csv.svg" icon=",a,"
               i18n-label label="Export Attributes"
               i18n-title title="Export attributes to CSV"
+              ></lib-button>
+            <span id="attributesSelection" *ngIf="showAttributesSelection">
+              <lib-layer-checkboxes
+                name="layer"
+                participant="{{true}}"
+                selected="{{[schema.participantLayerId]}}"
+                excludeMainParticipant="{{true}}"
+                ></lib-layer-checkboxes>
+            </span>
+            <lib-button
+              *ngIf="showAttributesSelection"
+              (press)="collapseExportAttributes()"
+              img="left-triangle.png" icon="🞀"
+              i18n-title title="Collapse 'Export Attributes' options"
               ></lib-button>
             <lib-button
               *ngIf="!nextPage && !transcriptQuery"
@@ -141,6 +156,7 @@
       </tr>
     </tbody>
   </table>
+  </form>
 </div>
 <lib-pagination
   i18n-title title="Page links"

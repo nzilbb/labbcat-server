@@ -48,3 +48,35 @@ span.attribute {
 #clear-filters {
     animation: fade-in 0.5s;
 }
+#attributesSelection {
+    display: inline-block;
+    width: 165px;
+    height: 1em;
+    animation: roll-out 1s ease;
+}
+#attributesSelection  lib-layer-checkboxes {
+    display: inline-block;
+    position: absolute;
+    overflow-x: hidden; 
+    overflow-y: hidden;
+    max-height: 30px;
+    border: 1px solid silver;
+    width: 162px;
+}
+#attributesSelection lib-layer-checkboxes:hover {
+    overflow-x: auto;
+    overflow-y: auto; 
+    max-height: 120px;
+    background: white;
+    width: 162px;
+}
+#attributesSelection > lib-layer-checkboxes::before {
+    position: absolute;
+    left: 90%;
+    top: 20%;
+    content: '▼';
+    opacity: 0.7;
+}
+#attributesSelection > lib-layer-checkboxes:hover::before {
+    content: '';
+}
