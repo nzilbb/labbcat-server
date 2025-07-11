@@ -39,6 +39,9 @@ export class MatchesComponent implements OnInit {
     showSerializationOptions = false;
     serializationLayers = [ "utterance", "word" ];
     showCsvOptions = false;
+    precheckedCsvOptions = [
+        "labbcat_title", "collection_name", "result_number", "line_time", "line_end_time",
+        "match", "word_url", "result_text"];
     selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "word", "segment" ];
@@ -111,10 +114,14 @@ export class MatchesComponent implements OnInit {
             this.searchedLayers = task.layers || [];
             this.selectedLayers = this.searchedLayers
                 .concat([ "word", "participant", "transcript" ]);
-            // if they searched the segment layer
-            if (this.searchedLayers.includes("segment")) {
+            if (this.searchedLayers.includes("segment")) { // they searched the segment layer
                 // include segments in serialization by default
                 this.serializationLayers.push("segment")
+            }
+            if (this.task.csv) { // these results are from a csv file
+                // don't pre-check columns, they're probably already there
+                this.precheckedCsvOptions = [];
+                this.selectedLayers = [];
             }
             
             this.readMatches();

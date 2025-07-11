@@ -21,8 +21,10 @@
 //
 package nzilbb.labbcat.server.db;
 
+import java.io.File;
 import java.sql.*;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.NoSuchElementException;
 import nzilbb.ag.Layer;
 import nzilbb.ag.StoreException;
@@ -85,6 +87,55 @@ public class SqlSearchResults implements SearchResults {
     }
     return this;
   }
+  
+  /**
+   * CSV source file of result set.
+   * @see #getCsvFile()
+   * @see #setCsvFile(String)
+   */
+  protected File csvFile;
+  /**
+   * SearchResults method: CSV source file of result set.
+   * @return CSV source file of result set if any.
+   */
+  public File getCsvFile() { return csvFile; }
+  /**
+   * Setter for {@link #csvFile}: CSV source file of result set.
+   * @param newCsvFile CSV source file of result set, or null.
+   */
+  public SqlSearchResults setCsvFile(File newCsvFile) {
+    csvFile = newCsvFile;
+    if (connection != null && id >= 0) {
+      try {
+        PreparedStatement sql = connection.prepareStatement(
+          "UPDATE search SET csv_file = ? WHERE search_id = ?");
+        sql.setString(1, csvFile.getPath());
+        sql.setLong(2, id);
+        sql.executeUpdate();
+        sql.close();
+      } catch(SQLException exception) {
+        System.err.println("SqlSearchResults.setCsvFile: " + exception);
+      }
+    }
+    return this;
+  }
+  
+  /**
+   * Columns available in csv source file, if any.
+   * @see #getCsvColumns()
+   * @see #setCsvColumns(List<String>)
+   */
+  protected List<String> csvColumns;
+  /**
+   * Getter for {@link #csvColumns}: Columns available in csv source file, if any.
+   * @return Columns available in csv source file, if any.
+   */
+  public List<String> getCsvColumns() { return csvColumns; }
+  /**
+   * Setter for {@link #csvColumns}: Columns available in csv source file, if any.
+   * @param newCsvColumns Columns available in csv source file, if any.
+   */
+  public SqlSearchResults setCsvColumns(List<String> newCsvColumns) { csvColumns = newCsvColumns; return this; }
   
   /**
    * SearchResults method: Resets the iterator to the beginning of the list.
@@ -267,6 +318,8 @@ public class SqlSearchResults implements SearchResults {
     this.connection = connection;
     this.id = results.id;
     this.name = results.name;
+    this.csvFile = results.csvFile;
+    this.csvColumns = results.csvColumns;
   }
 
   /**
@@ -281,6 +334,8 @@ public class SqlSearchResults implements SearchResults {
     this.graphId = graphId;
     this.id = results.id;
     this.name = results.name;
+    this.csvFile = results.csvFile;
+    this.csvColumns = results.csvColumns;
   }
   
   /**

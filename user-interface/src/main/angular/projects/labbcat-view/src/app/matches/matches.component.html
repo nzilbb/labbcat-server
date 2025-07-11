@@ -16,7 +16,8 @@
   <div id="check-all-top">
     
     <label i18n-title title="Select all results including those not shown here">
-      <input type="checkbox" [(checked)]="selectAll" (change)="all()">
+      <input type="checkbox" [(checked)]="selectAll" (change)="all()"
+             [disabled]="task.csv">
       <span i18n="select all results">Select all results</span>
       ({{matchCount}})
     </label>
@@ -88,7 +89,8 @@
     </div>
   <div id="check-all-bottom">
     <label i18n-title title="Select all results including those not shown here">
-      <input type="checkbox" [(checked)]="selectAll" (change)="all()">
+      <input type="checkbox" [(checked)]="selectAll" (change)="all()"             
+             [disabled]="task.csv">
       <span i18n="select all results">Select all results</span>
       ({{matchCount}})
     </label>
@@ -112,51 +114,81 @@
         <fieldset class="csv-options">
           <legend i18n="csv options title" class="header">Fields</legend>
           <label i18n-title title="Title of this LaBB-CAT database - always exported">
-            <input type="checkbox" name="csv_option" value="labbcat_title" checked disabled="disabled">
+            <input type="checkbox" name="csv_option"
+                   value="labbcat_title"
+                   [checked]="precheckedCsvOptions.includes('labbcat_title')"
+                   [disabled]="precheckedCsvOptions.includes('labbcat_title')">
             <input type="hidden" name="csv_option" value="labbcat_title" checked>
             <span i18n="csv options">Database title</span>
           </label>
           <label i18n-title title="This database's LaBB-CAT version">
-            <input type="checkbox" name="csv_option" value="labbcat_version">
+            <input type="checkbox" name="csv_option"
+                   value="labbcat_version"
+                   [checked]="precheckedCsvOptions.includes('labbcat_version')">
             <span i18n="csv options">LaBB-CAT version</span>
           </label>
           <label i18n-title title="Identifier for this search - always exported">
-            <input type="checkbox" name="csv_option" value="collection_name" checked disabled="disabled">
-            <input type="hidden" name="csv_option" value="collection_name" checked>
+            <input type="checkbox" name="csv_option"
+                   value="collection_name"
+                   [checked]="precheckedCsvOptions.includes('collection_name')"
+                   [disabled]="precheckedCsvOptions.includes('collection_name')">
+            <input type="hidden" name="csv_option"
+                   value="collection_name"
+                   *ngIf="precheckedCsvOptions.includes('collection_name')">
             <span i18n="csv options">Search name</span>
           </label>
           <label i18n-title title="Result number">
-            <input type="checkbox" name="csv_option" value="result_number" checked>
+            <input type="checkbox" name="csv_option"
+                   value="result_number"
+                   [checked]="precheckedCsvOptions.includes('result_number')">
             <span i18n="csv options">Result number</span>
           </label>
           <label i18n-title title="Start time of the transcript relative to the beginning of the whole episode">
-            <input type="checkbox" name="csv_option" value="series_offset">
+            <input type="checkbox" name="csv_option"
+                   value="series_offset"
+                   [checked]="precheckedCsvOptions.includes('series_offset')">
             <span i18n="csv options">Episode offset</span>
           </label>
           <label i18n-title title="End time of the transcript relative to the beginning of the whole episode">
-            <input type="checkbox" name="csv_option" value="series_length">
+            <input type="checkbox" name="csv_option"
+                   value="series_length"
+                   [checked]="precheckedCsvOptions.includes('series_length')">
             <span i18n="csv options">Episode length</span>
           </label>
           <label i18n-title title="Start time of the utterance relative to the beginning of the transcript">
-            <input type="checkbox" name="csv_option" value="line_time" checked>
+            <input type="checkbox" name="csv_option"
+                   value="line_time"
+                   [checked]="precheckedCsvOptions.includes('line_time')">
             <span i18n="csv options">Line start</span>
           </label>
           <label i18n-title title="End time of the utterance relative to the beginning of the transcript">
-            <input type="checkbox" name="csv_option" value="line_end_time" checked>
+            <input type="checkbox" name="csv_option" value="line_end_time"
+                   [checked]="precheckedCsvOptions.includes('line_end_time')">
             <span i18n="csv options">Line end</span>
           </label>
           <label i18n-title title="Unique identifier for the match - always exported">
-            <input type="checkbox" name="csv_option" value="match" checked disabled="disabled">
-            <input type="hidden" name="csv_option" value="match" checked>
+            <input type="checkbox" name="csv_option"
+                   value="match"
+                   [checked]="precheckedCsvOptions.includes('match')"
+                   [disabled]="precheckedCsvOptions.includes('match')">
+            <input type="hidden" name="csv_option" value="match"
+                   *ngIf="precheckedCsvOptions.includes('match')">
             <span i18n="csv options">Match ID</span>
           </label>
           <label i18n-title title="URL for the match - always exported">
-            <input type="checkbox" name="csv_option" value="word_url" checked disabled="disabled">
-            <input type="hidden" name="csv_option" value="word_url" checked>
+            <input type="checkbox" name="csv_option"
+                   value="word_url"
+                   [checked]="precheckedCsvOptions.includes('word_url')"
+                   [disabled]="precheckedCsvOptions.includes('word_url')">
+            <input type="hidden" name="csv_option"
+                   value="word_url"
+                   *ngIf="precheckedCsvOptions.includes('word_url')">
             <span i18n="csv options">URL</span>
           </label>
           <label i18n-title title="The transcription of the match and its surrounding context">
-            <input type="checkbox" name="csv_option" value="result_text" checked>
+            <input type="checkbox" name="csv_option"
+                   value="result_text"
+                   [checked]="precheckedCsvOptions.includes('result_text')">
             <span i18n="csv options">Text</span>
           </label>
         </fieldset>

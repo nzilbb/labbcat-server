@@ -11,5 +11,8 @@ export interface Task {
     refreshSeconds: number;
     lastException?: string;
     stackTrace?: string;
-    targetLayer?: string; // may be present for search threads
+    // may be present for search threads:
+    targetLayer?: string; 
+    csv?: string;
+    csvColumns?: string[];
 }

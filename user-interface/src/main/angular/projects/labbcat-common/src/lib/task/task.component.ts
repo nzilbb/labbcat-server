@@ -65,9 +65,11 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
                 // if still running, results haven't been opened
                 if (this.task.running) this.resultsOpened = false;
 
+                if (!this.task.running) {
+                    this.finished.emit(this.task);
+                }
                 // if finished and there's a result URL, open the results
                 if (!this.task.running && this.task.resultUrl) {
-                    this.finished.emit(this.task);
                     if (this.autoOpenResults) {
                         this.openResults();
                     }

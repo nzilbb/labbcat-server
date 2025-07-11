@@ -1297,6 +1297,124 @@
     }
     
     /**
+     * Upload a CSV results file to parse, for then processing as any other results.
+     * @param {file|string} results a CSV results file previously returned by
+     * <tt>/api/results</tt>. 
+     * @param targetColumn Optional column name that identifies each match.
+     * The default is "MatchId".
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute, "threadId",
+     * which identifies the resulting task, which can be passed to 
+     * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
+     * {@link LabbcatView#waitForTask}, etc.
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    resultsUpload(results, targetColumn, onResult, onProgress) {
+      if (typeof targetColumn === "function") { // (results, onResult, onProgress)
+        onProgress = onResult;
+        onResult = targetColumn;
+        targetColumn = null;
+      }
+      if (exports.verbose) {
+        console.log("resultsUpload(" + results + ", " + targetColumn + ")");
+      }
+      // create form
+      var fd = new FormData();
+      if (targetColumn) fd.append("targetColumn", targetColumn);
+      
+      if (!runningOnNode) {
+        
+	fd.append("results", results);
+        
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "resultsUpload";
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	
+	xhr.open("POST", this.baseUrl + "api/results/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var resultsName = results.replace(/.*\//g, "");
+        if (exports.verbose) console.log("resultsName: " + resultsName);
+
+	fd.append(
+          "results", 
+	  fs.createReadStream(results).on('error', function(){
+	    onResult(
+              null, ["Invalid results: " + resultsName], [], "resultsUpload", resultsName);
+	  }), resultsName);
+        
+	var urlParts = parseUrl(this.baseUrl + "api/results/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/edit/transcript/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "transcriptUpload", transcriptName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "transcriptUpload", transcriptName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // resultsUpload
+    
+    /**
      * Gets a list of tokens that were matched by {@link LabbcatView#search}.
      * <p>If the task is still running, then this function will wait for it to finish.
      * <p>This means calls can be stacked like this:

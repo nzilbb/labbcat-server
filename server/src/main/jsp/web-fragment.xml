@@ -50,6 +50,9 @@
   <servlet><servlet-name>results/dictionary.jsp</servlet-name><jsp-file>/jsp/results/dictionary.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>results/dictionary.jsp</servlet-name><url-pattern>/api/results/dictionary</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>results/upload.jsp</servlet-name><jsp-file>/jsp/results/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>results/upload.jsp</servlet-name><url-pattern>/api/results/upload</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>results.jsp</servlet-name><jsp-file>/jsp/results.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>results.jsp</servlet-name><url-pattern>/api/results</url-pattern></servlet-mapping>
   

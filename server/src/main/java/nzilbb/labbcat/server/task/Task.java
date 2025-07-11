@@ -324,7 +324,7 @@ public class Task extends Thread implements MonitorableTask {
   } // end of defaultThreadName()
   
   /**
-   * Allows the finished-and-waiting thread to exit.
+   * Release resources.
    */
   public void release() {
     // make sure it dies...

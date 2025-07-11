@@ -8,6 +8,7 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { LabbcatCommonModule, TaskComponent, GroupedCheckboxComponent, PendingChangesGuard, AboutComponent } from 'labbcat-common';
 import { MatchesComponent } from './matches/matches.component';
+import { MatchesUploadComponent } from './matches-upload/matches-upload.component';
 import { ParticipantsComponent } from './participants/participants.component';
 import { PraatComponent } from './praat/praat.component';
 import { TranscriptsComponent } from './transcripts/transcripts.component';
@@ -29,6 +30,7 @@ import { HomeComponent } from './home/home.component';
   declarations: [
       AppComponent,
       MatchesComponent,
+      MatchesUploadComponent,
       ParticipantsComponent,
       PraatComponent,
       TranscriptsComponent,
@@ -59,6 +61,7 @@ import { HomeComponent } from './home/home.component';
           { path: 'password', component: PasswordComponent },
           { path: 'search', component: SearchComponent },
           { path: 'matches', component: MatchesComponent },
+          { path: 'matches/upload', component: MatchesUploadComponent },
           { path: 'task', component: TaskComponent },
           { path: 'praat', component: PraatComponent },
           { path: 'participants', component: ParticipantsComponent },
