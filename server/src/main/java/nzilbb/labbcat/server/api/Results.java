@@ -63,6 +63,7 @@ import nzilbb.labbcat.server.db.SqlSearchResults;
 import nzilbb.labbcat.server.db.StoreCache;
 import nzilbb.labbcat.server.search.ArraySearchResults;
 import nzilbb.labbcat.server.search.Column;
+import nzilbb.labbcat.server.search.CsvSearchResults;
 import nzilbb.labbcat.server.search.Matrix;
 import nzilbb.labbcat.server.search.SearchResults;
 import nzilbb.labbcat.server.search.SearchTask;
@@ -407,11 +408,16 @@ public class Results extends APIRequestHandler { // TODO unit test
 
       try {
         Connection connection = store.getConnection();
-        final SearchResults results = utterances.length > 0?searchResults
+        if (searchResults instanceof SqlSearchResults) {
           // the original results object presumably has a dead connection
           // we want a new copy of our own
-          :new SqlSearchResults((SqlSearchResults)searchResults, connection);
-        if (utterances.length > 0 && search != null) { // both threadId and utterance specified
+          searchResults = new SqlSearchResults((SqlSearchResults)searchResults, connection);
+        } else if (searchResults instanceof CsvSearchResults) {
+          // copy object, so that iteration is thread safe
+          searchResults = new CsvSearchResults((CsvSearchResults)searchResults);
+        }
+        final SearchResults results = searchResults;
+        if (utterances.length > 0 && search != null) { // threadId and utterance specified
           // copy name
           ((ArraySearchResults)results).setName(search.getResults().getName());
         }

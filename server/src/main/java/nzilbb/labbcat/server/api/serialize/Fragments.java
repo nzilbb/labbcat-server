@@ -47,6 +47,8 @@ import nzilbb.labbcat.server.db.ResultSeries;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.db.SqlSearchResults;
 import nzilbb.labbcat.server.search.SearchTask;
+import nzilbb.labbcat.server.search.SearchResults;
+import nzilbb.labbcat.server.search.CsvSearchResults;
 import nzilbb.labbcat.server.task.SerializeFragmentsTask;
 import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
@@ -218,12 +220,14 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     
     long searchId = -1;
     String threadId = parameters.getString("threadId");
+    SearchResults results = null;
     if (threadId != null) {
       Task task = Task.findTask(Long.valueOf(threadId));
       if (task != null && task instanceof SearchTask) {
         SearchTask search = (SearchTask)task;
-        if (search.getResults() != null && search.getResults() instanceof SqlSearchResults) {
-          searchId = ((SqlSearchResults)search.getResults()).getId();
+        results = search.getResults();
+        if (results != null && results instanceof SqlSearchResults) {
+          searchId = ((SqlSearchResults)results).getId();
         }
       }
     }
@@ -273,7 +277,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     boolean tagTarget = parameters.getString("tag") != null;
     NumberFormat resultNumberFormatter = NumberFormat.getInstance();
     resultNumberFormatter.setGroupingUsed(false);
-    if (id != null) {
+    if (id != null && id.length > 0) {
       resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
     } // TODO minimum integer digits for utterance/threadId cases
     
@@ -289,7 +293,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         Vector<String> vUtterances = new Vector<String>();
         if (utterance.length > 0) {
           for (String matchId : utterance) vUtterances.add(matchId);
-        } else if (id != null) {
+        } else if (id != null && id.length > 0) {
           if (filter == null || filter.length == 0) { // not filtering by turn etc.
             for (int f = 0; f < id.length; f++) {
               vUtterances.add(
@@ -337,7 +341,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         Vector<String> vUtterances = new Vector<String>();
         if (utterance.length > 0) {
           for (String matchId : utterance) vUtterances.add(matchId);
-        } else if (id != null) {
+        } else if (id != null && id.length > 0) {
           if (filter == null || filter.length == 0) { // not filtering by turn etc.
             for (int f = 0; f < id.length; f++) {
               vUtterances.add(
@@ -350,6 +354,12 @@ public class Fragments extends APIRequestHandler { // TODO unit test
                 id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
                 +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
             }
+          }
+        } else if (results != null && results instanceof CsvSearchResults) {
+          // copy the results to ensure enumeration is thread-safe
+          CsvSearchResults csvResults = new CsvSearchResults((CsvSearchResults)results);
+          while (csvResults.hasNext()) {
+            vUtterances.add(csvResults.next());
           }
         }
         
