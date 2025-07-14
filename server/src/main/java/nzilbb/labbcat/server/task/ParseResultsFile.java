@@ -113,7 +113,7 @@ public class ParseResultsFile extends SearchTask {
   protected void search() throws Exception {
     
     iPercentComplete = 1;
-    setDescription(IO.WithoutExtension(csvFile));
+    setDescription(IO.WithoutExtension(csvFile).replaceAll("^results_",""));
     setStatus("Parsing " + csvFile.getName());
     
     // create results
@@ -123,6 +123,8 @@ public class ParseResultsFile extends SearchTask {
       // pass thruogh explicitly specified delimiter instead of inferring from first line
       ((CsvSearchResults)results).setCsvFieldDelimiter(csvFieldDelimiter);
     }
+    // load csvColumns etc.
+    ((CsvSearchResults)results).reset();
     setStatus("Ready: " + csvFile.getName());
     
     iPercentComplete = 100;    

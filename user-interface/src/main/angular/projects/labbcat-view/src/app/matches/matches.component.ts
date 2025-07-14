@@ -63,6 +63,10 @@ export class MatchesComponent implements OnInit {
     readingMatches = false;
     alreadySelected: boolean[]; // just for onChangeWordsContext()
 
+    // for audio extraction
+    startOffsetColumn: string;
+    endOffsetColumn: string;
+
     // for HTK/layer generation
     generateLayerId: string;
     tokenLayerId: string;
@@ -122,6 +126,19 @@ export class MatchesComponent implements OnInit {
                 // don't pre-check columns, they're probably already there
                 this.precheckedCsvOptions = [];
                 this.selectedLayers = [];
+                if (this.task.csvColumns) { // there are selectable columns
+                    // select utterance columns by default
+                    if (this.task.csvColumns.includes("Line")) {
+                        this.startOffsetColumn = "Line";
+                    } else if (this.task.csvColumns.includes("Target word start")) {
+                        this.startOffsetColumn = "Target word start";
+                    }
+                    if (this.task.csvColumns.includes("LineEnd")) {
+                        this.endOffsetColumn = "LineEnd";
+                    } else if (this.task.csvColumns.includes("Target word end")) {
+                        this.endOffsetColumn = "Target word end";
+                    }
+                }
             }
             
             this.readMatches();
@@ -281,7 +298,7 @@ export class MatchesComponent implements OnInit {
 
     serialize(): void {
         this.todo.nativeElement.value = "convert";
-        this.form.nativeElement.action = this.baseUrl + "api/serialize/fragment";
+        this.form.nativeElement.action = this.baseUrl + "api/serialize/fragments";
         this.form.nativeElement.submit();
     }
 

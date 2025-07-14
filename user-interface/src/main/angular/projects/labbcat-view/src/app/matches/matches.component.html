@@ -97,10 +97,16 @@
   </div>
   <div id="csv-export" class="controls">
     <lib-button (press)="exportCsv();" id="csv-export-btn"
+
+                [disabled]="task.csv"
+                
                 img="csv.svg" icon=",a,"
                 i18n-title title="Export results to CSV"
                 i18n-label label="CSV Export"></lib-button>
     <lib-button (press)="csvOptions();"
+
+                [disabled]="task.csv"
+                
                 img="down-triangle.png"
                 [icon]="showCsvOptions ? '▲' : '▼'"
                 [imgStyle]="showCsvOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
@@ -225,9 +231,15 @@
   </div>
   <div id="dictionary" class="controls">
     <lib-button (press)="dictionary();"
+
+                [disabled]="task.csv"
+                
                 img="book.svg" icon="📕"
                 i18n-label label="Dictionary Export"></lib-button>
     <lib-button (press)="dictionaryOptions();"
+
+                [disabled]="task.csv"
+                
                 img="down-triangle.png"
                 [icon]="showDictionaryOptions ? '▲' : '▼'"
                 [imgStyle]="showDictionaryOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
@@ -300,11 +312,28 @@
         <span i18n>Prefix names</span>
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
     </label></div>
+    <div *ngIf="task.csvColumns"
+         i18n-title title="Column identifying the start time of the fragment"><label>
+        <span i18n>Start time column</span>
+        <select name="startOffsetColumn" [(ngModel)]="startOffsetColumn">
+          <option *ngFor="let column of task.csvColumns">{{column}}</option>
+        </select>
+    </label></div>
+    <div *ngIf="task.csvColumns"
+         i18n-title title="Column identifying the end time of the fragment"><label>
+        <span i18n>End time column</span>
+        <select name="endOffsetColumn" [(ngModel)]="endOffsetColumn">
+          <option *ngFor="let column of task.csvColumns">{{column}}</option>
+        </select>
+    </label></div>
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && generableLayers.length">
     <input #generate_layer type="hidden" name="generate_layer" value="">
     <div *ngFor="let layerId of generableLayers">
       <lib-button (press)="runAnnotator(layerId);"
+
+                [disabled]="task.csv"
+                
                   img="cog.svg" icon="⚙"
                   i18n-title title="Generate"
                   label="{{layerId}}"></lib-button>

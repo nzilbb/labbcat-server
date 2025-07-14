@@ -168,6 +168,17 @@ public class CsvSearchResults implements SearchResults {
   public String getLastMatchId() { return lastMatchId; }
   
   /**
+   * The last CSV record parsed, if any.
+   * @see #getLastRecord()
+   */
+  protected CSVRecord lastRecord;
+  /**
+   * Getter for {@link #lastRecord}: The last CSV record parsed, if any.
+   * @return The last CSV record parsed, if any.
+   */
+  public CSVRecord getLastRecord() { return lastRecord; }
+  
+  /**
    * Constructor from CSV File.
    * @param csvFile The results file to parse.
    */
@@ -309,6 +320,7 @@ public class CsvSearchResults implements SearchResults {
       // now re-open the parser
       parser = new CSVParser(new FileReader(csvFile), format);
       nextCount = 0;
+      lastRecord = null;
       
     } catch(IOException exception) {
       System.err.println("CsvSearchResults.reset: " + exception);
@@ -363,10 +375,10 @@ public class CsvSearchResults implements SearchResults {
    */
   public String next() {
     checkParser();
-    CSVRecord row = parser.iterator().next();
+    lastRecord = parser.iterator().next();
     nextCount++;
     // TODO convert into a MatchId if necessary
-    lastMatchId = row.get(targetColumn);
+    lastMatchId = lastRecord.get(targetColumn);
     return lastMatchId;
   } // end of next()
   

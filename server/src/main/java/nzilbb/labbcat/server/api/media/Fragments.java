@@ -62,6 +62,7 @@ import nzilbb.labbcat.server.task.SerializeFragmentsTask;
 import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
 import nzilbb.util.MonitorableSeries;
+import org.apache.commons.csv.CSVRecord;
 
 /**
  * <tt>/api/media/fragments</tt>
@@ -81,13 +82,23 @@ import nzilbb.util.MonitorableSeries;
  *  <li><i>start</i> - one or more start times (in seconds).</li>
  *  <li><i>end</i> - one or more end times (in seconds).</li>
  *  <li><i>threadId</i> - (optional) The search task ID returned by a previous call to
- *      <tt>/api/search</tt>.</li>
+ *      <tt>/api/search</tt> or <tt>/api/results/upload</tt>.</li>
  *  <li><i>utterance</i> - (optional) MatchIds for the selected results to return, if only
  *      a subset is required. This can be specifed instead of id/start/end parameters.
  *      This parameter is specified multiple times for multiple values.</li> 
  *  <li><i>sampleRate</i> - (optional) sample rate (Hz) to encode the mono WAV files with.</li>
  *  <li><i>name</i> or <i>collection_name</i> - (optional) name of the collection.</li>
  *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
+ *  <li><i>startOffsetColumn</i> - (optional) if threadId identifies a
+ *      CSV results upload task, this can be used to specify the CSV
+ *      column that identifies the start time of each fragment. If not
+ *      specified, the utterance start time is used. 
+ *      Must be specified with endOffsetColumn. </li>
+ *  <li><i>endOffsetColumn</i> - (optional) if threadId identifies a
+ *      CSV results upload task, this can be used to specify the CSV
+ *      column that identifies the end time of each fragment. If not
+ *      specified, the utterance end time is used. 
+ *      Must be specified with startOffsetColumn. </li>
  * </ul>
  * <p><b>Output</b>: A wav file for each of the sound fragments
  * specified by the input parameters.  If there is only one, the
@@ -176,7 +187,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       } catch(IOException exception) {}
       return;
     }
-    
+
     final boolean prefixNames = parameters.getString("prefix") != null;
     NumberFormat resultNumberFormatter = NumberFormat.getInstance();
     resultNumberFormatter.setGroupingUsed(false);
@@ -199,6 +210,16 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     }
     final String extension = "."+MediaFile.MimeTypeToSuffix().get(mimeType);
     
+    // for CsvSearchResults only:
+    String startOffsetColumn = null;
+    String endOffsetColumn = null;
+    if (searchResults instanceof CsvSearchResults) {
+      startOffsetColumn = parameters.getString("startOffsetColumn");
+      endOffsetColumn = parameters.getString("endOffsetColumn");
+    }    
+    final String finalStartOffsetColumn = startOffsetColumn;
+    final String finalEndOffsetColumn = endOffsetColumn;
+    
     try {
       final SqlGraphStoreAdministration store = getStore();
       // unset baseUrl so getMedia gives us file: URLs
@@ -213,15 +234,26 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           // copy object, so that iteration is thread safe
           searchResults = new CsvSearchResults((CsvSearchResults)searchResults);
         }
-        searchResults.forEachRemaining(matchId -> {
-            search.keepAlive(); // prevent the task from dying while we're still interested
+        final SearchResults results = searchResults;
+        results.forEachRemaining(matchId -> {
+            // prevent the task from dying while we're still interested
+            if (search != null) search.keepAlive();
+            
             try {
               IdMatch result = new IdMatch(matchId);
-              String[] anchorIds = {
-                "n_"+result.getStartAnchorId(), "n_"+result.getEndAnchorId() };
-              Anchor[] anchors = store.getAnchors(result.getTranscriptId(), anchorIds);
-              result.setStartOffset(anchors[0].getOffset());
-              result.setEndOffset(anchors[1].getOffset());
+              if (finalStartOffsetColumn != null) {
+                CSVRecord lastRow = ((CsvSearchResults)results).getLastRecord();
+                String startString = lastRow.get(finalStartOffsetColumn);
+                String endString = lastRow.get(finalEndOffsetColumn);
+                result.setStartOffset(Double.valueOf(startString));
+                result.setEndOffset(Double.valueOf(endString));
+              } else { // use utterance boundaries
+                String[] anchorIds = {
+                  "n_"+result.getStartAnchorId(), "n_"+result.getEndAnchorId() };
+                Anchor[] anchors = store.getAnchors(result.getTranscriptId(), anchorIds);
+                result.setStartOffset(anchors[0].getOffset());
+                result.setEndOffset(anchors[1].getOffset());
+              }
               fragments.add(result);
             } catch(Exception x) {
               context.servletLog("ERROR Results-consumer: " + x);
