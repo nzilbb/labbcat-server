@@ -428,7 +428,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           httpStatus.accept(SC_NOT_FOUND);
           out.write(localize("No files were generated.").getBytes()); // TODO i18n
         } else if (files.size() == 1) { // one file only
-            // don't zip a single file, just return the file
+          // don't zip a single file, just return the file
           contentType.accept(mimeType);
           NamedStream stream = files.firstElement();
           fileName.accept(stream.getName());               

@@ -275,7 +275,7 @@ export class MatchesComponent implements OnInit {
     }
 
     exportAudio(): void {
-        this.form.nativeElement.action = this.baseUrl + "soundfragment";
+        this.form.nativeElement.action = this.baseUrl + "api/media/fragments";
         this.form.nativeElement.submit();
     }
 

@@ -30,7 +30,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import nzilbb.labbcat.server.db.SqlSearchResults;
+import nzilbb.labbcat.server.search.CsvSearchResults;
 import nzilbb.labbcat.server.search.SearchTask;
 import nzilbb.util.IO;
 import org.apache.commons.csv.*;
@@ -58,7 +58,7 @@ public class ParseResultsFile extends SearchTask {
    * @see #getCsvFieldDelimiter()
    * @see #setCsvFieldDelimiter(char)
    */
-  protected char csvFieldDelimiter = ',';
+  protected char csvFieldDelimiter = '\0';
   /**
    * Getter for {@link #csvFieldDelimiter}: Field delimiter to use when reading the file.
    * @return Field delimiter to use when reading the file.
@@ -113,92 +113,17 @@ public class ParseResultsFile extends SearchTask {
   protected void search() throws Exception {
     
     iPercentComplete = 1;
-    Connection connection = getStore().getConnection();
     setDescription(IO.WithoutExtension(csvFile));
     setStatus("Parsing " + csvFile.getName());
     
-    // count rows so we can report progress
-    long resultCount = -1; // dis-count header row
-    try (BufferedReader r =  new BufferedReader(new FileReader(csvFile))) {
-      while (r.readLine() != null) resultCount++;
-    } // reader
-    
     // create results
-    results = new SqlSearchResults(this);
-    
-    CSVFormat format = CSVFormat.EXCEL
-      .withDelimiter(csvFieldDelimiter)
-      .withHeader();
-
-    try(
-      CSVParser parser = new CSVParser(new FileReader(csvFile), format);
-      PreparedStatement sql = connection.prepareStatement(
-        "INSERT INTO result"
-        +" (search_id,ag_id,speaker_number,"
-        +" start_anchor_id,end_anchor_id,defining_annotation_id,"
-        +" segment_annotation_id,target_annotation_id,first_matched_word_annotation_id,"
-        +" last_matched_word_annotation_id,complete,target_annotation_uid)"
-        +" VALUES (?,?,?,?,?,?,?,?,?,?,0,?)")
-      ) {
-      
-      ((SqlSearchResults)results).setCsvFile(csvFile);
-      ((SqlSearchResults)results).setCsvColumns(parser.getHeaderNames());
-      
-      sql.setLong(1, ((SqlSearchResults)results).getId());
-      
-      Iterator<CSVRecord> records = parser.iterator();
-      Pattern matchIdPattern = Pattern.compile(
-        "g_(\\d+);em_12_(\\d+);n_(\\d+)-n_(\\d+);p_(\\d+);#=e(.?)_(\\d+)_(\\d+);.*\\[0\\]=ew_0_(\\d+)($|;.*)");
-      Integer ag_id_group = 1;
-      Integer utterance_annotation_id_group = 2;
-      Integer start_anchor_id_group = 3;
-      Integer end_anchor_id_group = 4;
-      Integer participant_speaker_number_group = 5;
-      Integer target_scope_group = 6;
-      Integer target_layer_id_group = 7;
-      Integer target_annotation_id_group = 8;
-      Integer first_word_annotation_id_group = 9;
-      long r = 0;
-      while (records.hasNext() && !bCancelling) {
-        CSVRecord row = records.next();
-        String targetId = row.get(targetColumn);
-        Matcher idMatcher = matchIdPattern.matcher(targetId);
-        // TODO include URL options from SqlGraphStore#getMatchAnnotations
-        if (idMatcher.matches()) {
-          sql.setString(2, idMatcher.group(ag_id_group));
-          sql.setString(3, idMatcher.group(participant_speaker_number_group));
-          sql.setString(4, idMatcher.group(start_anchor_id_group));
-          sql.setString(5, idMatcher.group(end_anchor_id_group));
-          sql.setString(6, idMatcher.group(utterance_annotation_id_group));
-          if ("1".equals(idMatcher.group(target_layer_id_group))) { // segment target
-            sql.setString(7, idMatcher.group(target_annotation_id_group)); //segment
-          } else { // not a segment target
-            sql.setNull(7, java.sql.Types.DOUBLE); // segment
-          }
-          sql.setString(8, idMatcher.group(target_annotation_id_group));
-          sql.setString(9, idMatcher.group(first_word_annotation_id_group));
-          sql.setString(10, idMatcher.group(first_word_annotation_id_group)); // last
-          sql.setString(
-            11, "e"+idMatcher.group(target_scope_group)
-            +"_"+idMatcher.group(target_layer_id_group)+"_"
-            +idMatcher.group(target_annotation_id_group));
-          sql.executeUpdate();
-          iPercentComplete = (int)((++r*100)/resultCount);
-        }
-      } // next match
-      setStatus("Finished " + csvFile.getName());
-
-    } catch (Exception x) {
-      if (bCancelling) {
-        setStatus("Cancelled.");
-      } else {
-        throw x;
-      }
+    results = new CsvSearchResults(csvFile)
+      .setTargetColumn(targetColumn);
+    if (csvFieldDelimiter != '\0') {
+      // pass thruogh explicitly specified delimiter instead of inferring from first line
+      ((CsvSearchResults)results).setCsvFieldDelimiter(csvFieldDelimiter);
     }
-
-    // force it to recheck the database to get size etc.
-    results.reset();    
-    results.hasNext();
+    setStatus("Ready: " + csvFile.getName());
     
     iPercentComplete = 100;    
   }

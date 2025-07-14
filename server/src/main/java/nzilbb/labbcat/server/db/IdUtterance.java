@@ -94,6 +94,30 @@ public class IdUtterance {
    */
   public IdUtterance setGraphId(Integer newGraphId) { graphId = newGraphId; return this; }
 
+  
+  /**
+   * An ID that can be used to identify the transcript, i.e. the name of the transcript, or "g_" followed by the {@link #graphId}.
+   * @see #getTranscriptId()
+   * @see #setTranscriptId(String)
+   */
+  protected String transcriptId;
+  /**
+   * Getter for {@link #transcriptId}: An ID that can be used to
+   * identify the transcript, i.e. the name of the transcript, or "g_"
+   * followed by the {@link #graphId}. 
+   * @return An ID that can be used to identify the transcript.
+    */
+   public String getTranscriptId() {
+     if (transcriptId != null && transcriptId.length() > 0) return transcriptId;
+     return "g_"+graphId;
+   }
+   /**
+    * Setter for {@link #transcriptId}: the name of the transcript.
+    * @param newTranscriptId The name of the transcript.
+    */
+   public IdUtterance setTranscriptId(String newTranscriptId) { transcriptId = newTranscriptId; return this; }
+
+
   /**
    * anchor_id of the anchor that is the start of the utterance.
    * @see #getStartAnchorId()
