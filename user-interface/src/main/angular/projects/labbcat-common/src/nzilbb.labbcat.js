@@ -1718,7 +1718,7 @@
       
       // get fragments individually to ensure elements in result map 1:1 to element
       // in transcriptIds
-      const url = this.baseUrl + "soundfragment";
+      const url = this.baseUrl + "api/media/fragments";
       const lc = this;
       const nextFragment = function(i) {
         if (i < transcriptIds.length) { // next file
