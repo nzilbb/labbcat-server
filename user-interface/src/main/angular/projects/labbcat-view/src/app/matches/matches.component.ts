@@ -358,7 +358,7 @@ export class MatchesComponent implements OnInit {
 
     runAnnotator(layerId: string): void {
         const layer = this.schema.layers[layerId] as Layer;
-        let formAction = this.baseUrl + "generateLayerUtterances";
+        let formAction = this.baseUrl + "edit/generateLayerUtterances";
         let formMethod = "POST";
         let formTarget = "_blank";
         if (this.dictionaryDependentLayers.includes(layerId)) {
