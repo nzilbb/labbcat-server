@@ -63,6 +63,10 @@ export class MatchesComponent implements OnInit {
     readingMatches = false;
     alreadySelected: boolean[]; // just for onChangeWordsContext()
 
+    // for csv extraction
+    targetOffset = 0;
+    offsetThreshold = "50"; // at least automatically aligned
+
     // for audio extraction
     startOffsetColumn: string;
     endOffsetColumn: string;

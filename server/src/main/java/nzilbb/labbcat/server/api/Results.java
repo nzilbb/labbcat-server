@@ -120,9 +120,18 @@ import org.apache.commons.csv.CSVRecord;
  *      </ul>
  *  </li>
  *  <li><i>offsetThreshold</i> - the minimum anchor confidence for returning anchor
- *      offsets. The default is 50, which means that offsets that are at least
- *      automatically aligned will be returned. Use 100 for manually-aligned offsets only,
- *      and 0 to return all offsets regardless of confidence.</li>
+ *      offsets. If the parameter is not specified, the default is 50, which means
+ *      that offsets that are at least automatically aligned will be returned.
+ *      Use 100 for manually-aligned offsets only, and 0 to return all offsets regardless
+ *      of confidence. <br>
+ *      If no offsets should be returned at all, specify a value of "none".</li>
+ *  <li><i>targetOffset</i> - The distance from the original target of the match, e.g.
+ *   <ul>
+ *    <li><q>0</q> - find annotations of the match target itself (the default if absent)</li>
+ *    <li><q>1</q> - find annotations of the token immediately <em>after</em> match target</li>
+ *    <li><q>-1</q> - find annotations of the token immediately <em>before</em> match target</li>
+ *   </ul>
+ *  </li>
  *  <li><i>todo</i> - (Optional) A legacy parameter whose value can be <q>csv</q> to
  *      specify that the content-type of the result be <q>text/csv</q></li>
  * </ul>
@@ -250,22 +259,57 @@ public class Results extends APIRequestHandler { // TODO unit test
         }
       }
       Integer offsetThreshold = Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC);
-      if (parameters.getString("offsetThreshold") != null) {
+      String threshold = parameters.getString("offsetThreshold");
+      if (threshold != null) {        
         try {
-          offsetThreshold = Integer.valueOf(parameters.getString("offsetThreshold"));
+          offsetThreshold = Integer.valueOf(threshold);
         } catch(NumberFormatException x) {
-          contentTypeConsumer.accept("application/json;charset=UTF-8");
-          httpStatus.accept(SC_BAD_REQUEST);
-          JsonWriter writer = Json.createWriter(out);
-          writer.writeObject(failureResult(
-                               "Invalid offsetThreshold: {0}",
-                               parameters.getString("offsetThreshold")));
-          writer.close();
-          return;
+          if (threshold.equalsIgnoreCase("none")) {
+            offsetThreshold = 101; // nno offsets to be returned
+          } else {
+            contentTypeConsumer.accept("application/json;charset=UTF-8");
+            httpStatus.accept(SC_BAD_REQUEST);
+            JsonWriter writer = Json.createWriter(out);
+            writer.writeObject(
+              failureResult("Invalid offsetThreshold: {0}",
+                            parameters.getString("offsetThreshold")));
+            writer.close();
+            return;
+          }
         }
       }
       final int finalOffsetThreshold = offsetThreshold;
-
+      final boolean offsetsIncluded = finalOffsetThreshold <= Constants.CONFIDENCE_MANUAL;
+      
+      int targetOffset = 0;
+      if (parameters.containsKey("targetOffset")) {
+        String offsetParameter = parameters.getString("targetOffset").trim();
+        if (offsetParameter.length() > 0) {
+          try {
+            targetOffset = Integer.parseInt(offsetParameter);
+          } catch(NumberFormatException exception) {
+            httpStatus.accept(SC_BAD_REQUEST);
+            JsonWriter writer = Json.createWriter(out);
+            writer.writeObject(
+              failureResult("Invalid offset: {0}", offsetParameter));
+            writer.close();
+            return;
+          }
+        }        
+      }
+      String csvHeaderPrefix = "Target ";
+      if (targetOffset > 0) {
+        // Offset columns are labelled like "Token+1 phonemes" and "Token-1 phonemes"
+        // But some consumers (I'm looking at you, R) mutate non-alphanumerics,
+        // converting these into indistinguishable "Token.1.phonemes" and "Token.1.phonemes"
+        // So the following parameters allow substitutes for "+" and "-" in column names
+        String plus = Optional.ofNullable(parameters.getString("plus")).orElse("Token+");
+        csvHeaderPrefix = plus+targetOffset+" ";
+      } else if (targetOffset < 0) {
+        String minus = Optional.ofNullable(parameters.getString("minus")).orElse("Token-");
+        csvHeaderPrefix = minus+Math.abs(targetOffset)+" ";
+      }
+      
       String contentType = parameters.getString("todo");
       if (contentType == null) {
         contentType = parameters.getString("content-type");
@@ -281,15 +325,6 @@ public class Results extends APIRequestHandler { // TODO unit test
         contentType = "application/json;charset=UTF-8";
       }
       contentTypeConsumer.accept(contentType);
-      // output will be either CSV or JSON - define an appropriate output streamer
-      final CSVPrinter csvOut = contentType.startsWith("text/csv")?
-        new CSVPrinter(new PrintWriter(new OutputStreamWriter(out, "UTF-8")),
-                       CSVFormat.EXCEL.withDelimiter( 
-                         // guess the best delimiter - comma if English speaking user, tab otherwise
-                         language.contains("en")?',':'\t')):null;
-      final JsonGenerator jsonOut = !contentType.startsWith("text/csv")?
-        Json.createGenerator(new PrintWriter(new OutputStreamWriter(out, "UTF-8"))):null;
-      
       Task task = threadId==null?null:Task.findTask(Long.valueOf(threadId));
       if (threadId != null && task == null && utterances.length == 0) {
         httpStatus.accept(SC_BAD_REQUEST);
@@ -313,6 +348,21 @@ public class Results extends APIRequestHandler { // TODO unit test
         :search.getResults(); // all results from database
       final boolean includeCsvPreamble = searchResults instanceof CsvResults;
 
+      // guess the best delimiter - comma if English speaking user, tab otherwise
+      char csvFieldDelimiter = language.contains("en")?',':'\t';
+      if (searchResults instanceof CsvResults) { // but if we were given a CSV file
+        // use the same delimiter
+        csvFieldDelimiter = ((CsvResults)searchResults).getCsvFieldDelimiter();
+        context.servletLog("CSV delimiter \""+csvFieldDelimiter+"\"");
+      }
+    
+      // output will be either CSV or JSON - define an appropriate output streamer
+      final CSVPrinter csvOut = contentType.startsWith("text/csv")?
+        new CSVPrinter(new PrintWriter(new OutputStreamWriter(out, "UTF-8")),
+                       CSVFormat.EXCEL.withDelimiter(csvFieldDelimiter)):null;
+      final JsonGenerator jsonOut = !contentType.startsWith("text/csv")?
+        Json.createGenerator(new PrintWriter(new OutputStreamWriter(out, "UTF-8"))):null;
+      
       String[] csv_option = parameters.getStrings("csv_option");
       final LinkedHashSet<String> options = new LinkedHashSet<String>();
       for (String o : csv_option) options.add(o);
@@ -415,8 +465,8 @@ public class Results extends APIRequestHandler { // TODO unit test
                 id, Integer.valueOf(
                   Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
             });
-      }    
-      
+      }
+     
       try {
         Connection connection = store.getConnection();
         if (searchResults instanceof SqlSearchResults) {
@@ -482,13 +532,21 @@ public class Results extends APIRequestHandler { // TODO unit test
           final String finalSearchName = searchName;
           
           if (contentType.startsWith("text/csv")) {
-            String name = IO.SafeFileNameUrl(searchName);
-            if (name.length() > 150) name = name.substring(0, 150);
-            name = "results_" + name + ".csv";
+            StringBuilder name = new StringBuilder(IO.SafeFileNameUrl(searchName));
+            if (name.length() > 150) name.setLength(150);
             if (includeCsvPreamble) { // reloaded CSV results
-              name = "reloaded_" + name;
+              if (targetOffset < 0) {
+                name.append("_minus_").append(Math.abs(targetOffset));
+              } else if (targetOffset > 0) {
+                name = name.append("_plus_").append(targetOffset);
+              }
+              for (String id : layers) {
+                if (name.length() > 150) break;
+                name.append("_");
+                name.append(IO.SafeFileNameUrl(id));         
+              }
             }
-            fileName.accept(name);
+            fileName.accept("results_" + name + ".csv");
           }
           List<String> preambleHeaders = null;
           if (includeCsvPreamble) {
@@ -497,7 +555,8 @@ public class Results extends APIRequestHandler { // TODO unit test
           final String labbcatTitle = store.getSystemAttribute("title");
           outputStart(
             jsonOut, csvOut, searchName, preambleHeaders, results.size(), multiWordMatches,
-            options, layers, csvLayers, labbcatTitle, schema, targetLayer);
+            options, layers, csvLayers, csvHeaderPrefix, offsetsIncluded,
+            labbcatTitle, schema, targetLayer);
           try {
             if (pageLength == null) pageLength = results.size();
             if (pageNumber == null) pageNumber = Integer.valueOf(0);
@@ -519,7 +578,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                 final String finalTargetLayer = targetLayer;
                 // process the data rows
                 store.getMatchAnnotations(
-                  results, csvLayers, anchorStartLayers, anchorEndLayers, 0,
+                  results, csvLayers, anchorStartLayers, anchorEndLayers, targetOffset,
                   annotations -> {
                     search.keepAlive(); // prevent the task from dying while we're still interested
                     try {
@@ -557,28 +616,31 @@ public class Results extends APIRequestHandler { // TODO unit test
                         // now output this annotation
                         if (annotation == null) {
                           csvOut.print("");
-                          switch (layer.getAlignment()) { // offsets
-                            case Constants.ALIGNMENT_INTERVAL:
-                              csvOut.print(""); // start
-                              csvOut.print(""); // end
-                              break;
-                            case Constants.ALIGNMENT_INSTANT:
-                              csvOut.print(""); // time
-                              break;
-                            default: 
-                              if (layer.getId().equals(finalTargetLayer)) {
-                                // always output alignments of target layer
+                          if (offsetsIncluded) {
+                            switch (layer.getAlignment()) { // offsets
+                              case Constants.ALIGNMENT_INTERVAL:
                                 csvOut.print(""); // start
                                 csvOut.print(""); // end
-                              }
+                                break;
+                              case Constants.ALIGNMENT_INSTANT:
+                                csvOut.print(""); // time
+                                break;
+                              default: 
+                                if (layer.getId().equals(finalTargetLayer)) {
+                                  // always output alignments of target layer
+                                  csvOut.print(""); // start
+                                  csvOut.print(""); // end
+                                }
+                            }
                           }
                         } else {
                           assert layer.getId().equals(annotation.getLayerId())
                             : "layer.getId().equals(annotation.getLayerId()) - "
                             + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
                           csvOut.print(annotation.getLabel());
-                          if (layer.getAlignment() != Constants.ALIGNMENT_NONE
-                              || layer.getId().equals(finalTargetLayer)) { // offsets
+                          if (offsetsIncluded
+                              && (layer.getAlignment() != Constants.ALIGNMENT_NONE
+                                  || layer.getId().equals(finalTargetLayer))) { // offsets
                             String[] anchorIds = {
                               annotation.getStartId(), annotation.getEndId() };
                             Anchor[] anchors = store.getAnchors(null, anchorIds);
@@ -664,6 +726,8 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param multiWordMatches Whether matches span multiple tokens (or just one token)
    * @param layers The layers to output.
    * @param csvLayers Map from temporal layers to their alignments.
+   * @param csvHeaderPrefix Prefix for temporal layer headers, e.g "Target ", "Token+1 "...
+   * @param offsetsIncluded Whether to include headers for annotation offsets. 
    * @param labbcatTitle The title of the LaBB-CAT instance.
    * @param schema The layer schema.
    * @param targetLayer The target layer.
@@ -672,7 +736,8 @@ public class Results extends APIRequestHandler { // TODO unit test
     JsonGenerator jsonOut, CSVPrinter csvOut, String searchName,
     List<String> preambleHeaders, long matchCount, boolean multiWordMatches,
     LinkedHashSet<String> options, LinkedHashSet<String> layers,
-    LinkedHashMap<String,Integer> csvLayers, String labbcatTitle, Schema schema, String targetLayer)
+    LinkedHashMap<String,Integer> csvLayers, String csvHeaderPrefix,
+    boolean offsetsIncluded, String labbcatTitle, Schema schema, String targetLayer)
     throws IOException {
     if (csvOut != null) {
       // Send column headers
@@ -707,25 +772,33 @@ public class Results extends APIRequestHandler { // TODO unit test
             switch (layer.getAlignment()) {
               case Constants.ALIGNMENT_INTERVAL:
                 if (csvLayers.get(id) == 1) {
-                  csvOut.print("Target " + id);
-                  csvOut.print("Target " + id + " start");
-                  csvOut.print("Target " + id + " end");
+                  csvOut.print(csvHeaderPrefix + id);
+                  if (offsetsIncluded) {
+                    csvOut.print(csvHeaderPrefix + id + " start");
+                    csvOut.print(csvHeaderPrefix + id + " end");
+                  }
                 } else {
                   for (int i = 1; i <= csvLayers.get(id) ; i++) {
-                    csvOut.print("Target " + id + " " + i);
-                    csvOut.print("Target " + id + " " + i + " start");
-                    csvOut.print("Target " + id + " " + i + " end");
+                    csvOut.print(csvHeaderPrefix + id + " " + i);
+                    if (offsetsIncluded) {
+                      csvOut.print(csvHeaderPrefix + id + " " + i + " start");
+                      csvOut.print(csvHeaderPrefix + id + " " + i + " end");
+                    }
                   }
                 }
                 break;
               case Constants.ALIGNMENT_INSTANT:
                 if (csvLayers.get(id) == 1) {
-                  csvOut.print("Target " + id);
-                  csvOut.print("Target " + id + " offset");
+                  csvOut.print(csvHeaderPrefix + id);
+                  if (offsetsIncluded) {
+                    csvOut.print(csvHeaderPrefix + id + " offset");
+                  }
                 } else {
                   for (int i = 1; i <= csvLayers.get(id) ; i++) {
-                    csvOut.print("Target " + id + " " + i);
-                    csvOut.print("Target " + id + " " + i + " offset");
+                    csvOut.print(csvHeaderPrefix + id + " " + i);
+                    if (offsetsIncluded) {
+                      csvOut.print(csvHeaderPrefix + id + " " + i + " offset");
+                    }
                   }
                 }
                 break;
@@ -742,19 +815,19 @@ public class Results extends APIRequestHandler { // TODO unit test
                   }
                 } else { // tag
                   if (csvLayers.get(id) == 1) {
-                    csvOut.print("Target " + id);
-                    if (id.equals(targetLayer)) {
+                    csvOut.print(csvHeaderPrefix + id);
+                    if (id.equals(targetLayer) && offsetsIncluded) {
                       // always output alignments of target layer
-                      csvOut.print("Target " + id + " start");
-                      csvOut.print("Target " + id + " end");
+                      csvOut.print(csvHeaderPrefix + id + " start");
+                      csvOut.print(csvHeaderPrefix + id + " end");
                     }
                   } else {
                     for (int i = 1; i <= csvLayers.get(id) ; i++) {
-                      csvOut.print("Target " + id + " " + i);
-                      if (id.equals(targetLayer)) {
+                      csvOut.print(csvHeaderPrefix + id + " " + i);
+                      if (id.equals(targetLayer) && offsetsIncluded) {
                         // always output alignments of target layer
-                        csvOut.print("Target " + id + " " + i + " start");
-                        csvOut.print("Target " + id + " " + i + " end");
+                        csvOut.print(csvHeaderPrefix + id + " " + i + " start");
+                        csvOut.print(csvHeaderPrefix + id + " " + i + " end");
                       }
                     }
                   }

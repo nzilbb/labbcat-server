@@ -12,6 +12,7 @@
   <input type="hidden" name="collection_name" value="{{name}}">
   <input type="hidden" name="seriesId" value="{{task.seriesId}}">
   <input type="hidden" name="zeropad" value="{{zeroPad}}">
+  <input type="hidden" name="targetOffset" value="{{targetOffset}}">
   <input #todo type="hidden" name="todo" value="">
   <div id="check-all-top">
     
@@ -108,6 +109,24 @@
                 ></lib-button>
   </div>
   <div id="csv-export-options" class="{{showCsvOptions?'unhidden-panel':'hidden-panel'}}">
+    <div *ngIf="task.csv"
+         i18n-title title="Whether to extract annotations about the target token, or surrounding tokens"><label>
+      <span i18n="targetOffset label">Extract data for:</span>
+      <select id="targetOffset" name="targetOffset" [(ngModel)]="targetOffset">
+        <option value="-1" i18n="targetOffset option">previous token</option>
+        <option value="0" i18n="targetOffset option">target token</option>
+        <option value="1" i18n="targetOffset option">next token</option>
+      </select>
+    </label></div>
+    <div i18n-title title="Which start/end times to include"><label>
+      <span i18n="offsetThreshold label">Start/end offsets:</span>
+      <select id="offsetThreshold" name="offsetThreshold" [(ngModel)]="offsetThreshold">
+        <option value="none" i18n="offsetThreshold option">not included</option>
+        <option value="100" i18n="offsetThreshold option">included only manually aligned</option>
+        <option value="50" i18n="offsetThreshold option">included when at least automatically aligned</option>
+        <option value="0" i18n="offsetThreshold option">always included</option>
+      </select>
+    </label></div>
     <fieldset>
       <legend i18n>CSV columns</legend>
       <div class="csv-checkboxes">
