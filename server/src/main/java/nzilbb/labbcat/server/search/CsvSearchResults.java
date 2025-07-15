@@ -25,11 +25,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
+import nzilbb.labbcat.server.db.IdMatch;
 import org.apache.commons.csv.*;
 
 /**
@@ -179,11 +187,57 @@ public class CsvSearchResults implements SearchResults {
   public CSVRecord getLastRecord() { return lastRecord; }
   
   /**
+   * Database connection.
+   * @see #getConnection()
+   * @see #setConnection(Connection)
+   */
+  protected Connection connection;
+  /**
+   * Getter for {@link #connection}: Database connection.
+   * @return Database connection.
+   * @throws SQLException If a new connection is required, but can't be created.
+   */
+  public Connection getConnection() throws SQLException {
+    if (connection == null && db != null) {
+      connection = db.newConnection();
+    }
+    return connection;
+  }
+  /**
+   * Setter for {@link #connection}: Database connection.
+   * @param newConnection Database connection.
+   */
+  public CsvSearchResults setConnection(Connection newConnection) {
+    connection = newConnection; return this;
+  }
+   
+  /**
+   * Factory for generating connections to the database.
+   * @see #getDb()
+   * @see #setDb(ConnectionFactory)
+   */
+  protected ConnectionFactory db;
+  /**
+   * Getter for {@link #db}: Factory for generating connections to the database.
+   * @return Factory for generating connections to the database.
+   */
+  public ConnectionFactory getDb() { return db; }
+  /**
+   * Setter for {@link #db}: Factory for generating connections to the database.
+   * @param newDb Factory for generating connections to the database.
+   */
+  public CsvSearchResults setDb(ConnectionFactory newDb) {
+    db = newDb;
+    return this;
+  }
+  
+  /**
    * Constructor from CSV File.
    * @param csvFile The results file to parse.
    */
-  public CsvSearchResults(File csvFile) throws IOException {
+  public CsvSearchResults(File csvFile, ConnectionFactory db) throws IOException {
     this.csvFile = csvFile;
+    setDb(db);
     setName(IO.WithoutExtension(csvFile).replaceAll("^results_",""));
     if (name.length() == 0) setName("csv_results");
     // infer the field delimiter from the header line
@@ -215,6 +269,7 @@ public class CsvSearchResults implements SearchResults {
     this.csvFieldDelimiter = other.csvFieldDelimiter;
     this.targetColumn = other.targetColumn;
     this.pageLength = other.pageLength;
+    this.setDb(other.getDb());
   } // end of constructor
   
   /**
@@ -244,7 +299,10 @@ public class CsvSearchResults implements SearchResults {
       target_layer_id_group = 7;
       target_annotation_id_group = 8;
       first_word_annotation_id_group = 9;
-      if (!idMatcher.matches()) {
+      if (idMatcher.matches()) { // the column contains MatchIds
+        // so we don't actually need the pattern to parse IDs
+        matchIdPattern = null;
+      } else {
         // not IdMatch - maybe they've passed in the URL
         // something like:
         // http://localhost:8080/labbcat/transcript?ag_id=6#ew_0_16783
@@ -298,19 +356,8 @@ public class CsvSearchResults implements SearchResults {
               first_word_annotation_id_group = 3; // might not be word
             } else {
               System.err.println("CsvSearchResults.reset: Malformed ID: " + targetId);
-              // fall back to a classing MatchId, maybe it will work with later records
-              matchIdPattern = Pattern.compile(
-                "g_(\\d+);em_12_(\\d+);n_(\\d+)-n_(\\d+);p_(\\d+);#=e(.?)_(\\d+)_(\\d+);.*\\[0\\]=ew_0_(\\d+)($|;.*)");
-              ag_id_group = 1;
-              transcript_id_group = null;
-              utterance_annotation_id_group = 2;
-              start_anchor_id_group = 3;
-              end_anchor_id_group = 4;
-              participant_speaker_number_group = 5;
-              target_scope_group = 6;
-              target_layer_id_group = 7;
-              target_annotation_id_group = 8;
-              first_word_annotation_id_group = 9;
+              // fall back to no parsing
+              matchIdPattern = null;
             } // not a UID
           } // not a transcript URL
         } // not an ag_id URL
@@ -369,6 +416,11 @@ public class CsvSearchResults implements SearchResults {
   } // end of hasNext()
 
   int nextCount = 0;
+  HashMap<String,Integer> transcriptIdToAgId = new HashMap<String,Integer>();
+  PreparedStatement sqlTranscriptIdToAgId;
+  PreparedStatement sqlWordIdToSpeakerNumber;
+  PreparedStatement sqlWordIdToUtteranceId;
+  NumberFormat resultNumberFormatter;
   /**
    * Iterator method: Returns the next result ID.
    * @return The next result ID.
@@ -377,8 +429,125 @@ public class CsvSearchResults implements SearchResults {
     checkParser();
     lastRecord = parser.iterator().next();
     nextCount++;
-    // TODO convert into a MatchId if necessary
     lastMatchId = lastRecord.get(targetColumn);
+    // parse the ID into a MatchId if necessary
+    if (matchIdPattern != null) {
+      Matcher idMatcher = matchIdPattern.matcher(lastMatchId);
+      if (idMatcher.matches()) {
+        IdMatch match = new IdMatch();
+        if (resultNumberFormatter == null) {
+          resultNumberFormatter = NumberFormat.getInstance();
+          resultNumberFormatter.setGroupingUsed(false);
+          resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(recordCount)) + 1);
+        }
+        match.getAttributes().put(
+          "prefix", resultNumberFormatter.format(parser.getRecordNumber()) + "-");
+        if (ag_id_group != null) {
+          match.setGraphId(Integer.valueOf(idMatcher.group(ag_id_group)));
+        }
+        if (transcript_id_group != null) {
+          match.setTranscriptId(idMatcher.group(transcript_id_group));
+          if (match.getGraphId() == null) {
+            if (!transcriptIdToAgId.containsKey(match.getTranscriptId())) {
+              // look up the ag_id in the database
+              try {
+                if (sqlTranscriptIdToAgId == null) {
+                  sqlTranscriptIdToAgId = getConnection().prepareStatement(
+                    "SELECT ag_id FROM transcript WHERE transcript_id = ?");
+                }
+                sqlTranscriptIdToAgId.setString(1, match.getTranscriptId());
+                ResultSet rs = sqlTranscriptIdToAgId.executeQuery();
+                if (rs.next()) {
+                  transcriptIdToAgId.put(match.getTranscriptId(), rs.getInt(1));
+                }
+              } catch(SQLException exception) {
+                System.err.println("CsvSearchResults.next: " + exception);
+              }
+            } // database ag_id lookup
+            // lookup transcript ID from our cache
+            match.setGraphId(transcriptIdToAgId.get(match.getTranscriptId()));
+          }
+        }
+        if (utterance_annotation_id_group != null) {
+          match.setDefiningAnnotationUid(
+            "em_12_"+idMatcher.group(utterance_annotation_id_group));
+        }
+        if (start_anchor_id_group != null) {
+          match.setStartAnchorId(
+            Long.valueOf(idMatcher.group(start_anchor_id_group)));
+        }
+        if (end_anchor_id_group != null) {
+          match.setEndAnchorId(
+            Long.valueOf(idMatcher.group(end_anchor_id_group)));
+        }
+        if (participant_speaker_number_group != null) {
+          match.setSpeakerNumber(
+            Integer.valueOf(idMatcher.group(participant_speaker_number_group)));
+        }
+        if (target_scope_group != null
+            && target_layer_id_group != null
+            && target_annotation_id_group != null) {
+          match.setTargetAnnotationUid(
+            "e"+idMatcher.group(target_scope_group)
+            +"_"+idMatcher.group(target_layer_id_group)
+            +"_"+idMatcher.group(target_annotation_id_group));
+        }
+        if (first_word_annotation_id_group != null) {
+          
+          match.getMatchAnnotationUids().put(
+            "0", "ew_0_"+idMatcher.group(first_word_annotation_id_group));
+          
+          if (match.getSpeakerNumber() == null) {
+            // lookup speaker_number in database
+            try {
+              if (sqlWordIdToSpeakerNumber == null) {
+                sqlWordIdToSpeakerNumber = getConnection().prepareStatement(
+                  "SELECT turn.label FROM annotation_layer_11 turn"
+                  +" INNER JOIN annotation_layer_0 word"
+                  +" ON word.turn_annotation_id = turn.annotation_id"
+                  +" WHERE word.annotation_id = ?");
+              }                
+              sqlWordIdToSpeakerNumber.setString(
+                1, idMatcher.group(first_word_annotation_id_group));
+              ResultSet rs = sqlWordIdToSpeakerNumber.executeQuery();
+              if (rs.next()) {
+                match.setSpeakerNumber(rs.getInt(1));
+              }
+            } catch(SQLException exception) {
+              System.err.println("CsvSearchResults.next: " + exception);
+            }
+          }
+          
+          if (match.getDefiningAnnotationUid() == null) {
+            // lookup utterance ID (and anchors) in database
+            try {
+              if (sqlWordIdToUtteranceId == null) {
+                sqlWordIdToUtteranceId = getConnection().prepareStatement(
+                  "SELECT utterance.annotation_id,"
+                  +" utterance.start_anchor_id, utterance.end_anchor_id"
+                  +" FROM annotation_layer_12 utterance"
+                  +" INNER JOIN annotation_layer_0 word"
+                  +" ON word.utterance_annotation_id = utterance.annotation_id"
+                  +" WHERE word.annotation_id = ?");
+              }                
+              sqlWordIdToUtteranceId.setString(
+                1, idMatcher.group(first_word_annotation_id_group));
+              ResultSet rs = sqlWordIdToUtteranceId.executeQuery();
+              if (rs.next()) {
+                match.setDefiningAnnotationUid("em_12_"+rs.getInt(1));
+                if (match.getStartAnchorId() == null) match.setStartAnchorId(rs.getLong(2));
+                if (match.getEndAnchorId() == null) match.setEndAnchorId(rs.getLong(3));
+              }
+            } catch(SQLException exception) {
+              System.err.println("CsvSearchResults.next: " + exception);
+            }
+          }
+          
+        }
+        System.err.println("Parsed " + lastMatchId + " as " + match.getId());
+        lastMatchId = match.getId();
+      }
+    }
     return lastMatchId;
   } // end of next()
   
@@ -389,6 +558,22 @@ public class CsvSearchResults implements SearchResults {
     if (parser != null) {
       try { parser.close(); } catch(IOException exception) {}
       parser = null;
+    }
+    if (sqlTranscriptIdToAgId != null) {
+      try { sqlTranscriptIdToAgId.close(); } catch(Exception exception) {}
+      sqlTranscriptIdToAgId = null;
+    }
+    if (sqlWordIdToSpeakerNumber != null) {
+      try { sqlWordIdToSpeakerNumber.close(); } catch(Exception exception) {}
+      sqlWordIdToSpeakerNumber = null;
+    }
+    if (sqlWordIdToUtteranceId != null) {
+      try { sqlWordIdToUtteranceId.close(); } catch(Exception exception) {}
+      sqlWordIdToSpeakerNumber = null;
+    }
+    if (connection != null) {
+      try { connection.close(); } catch(Exception exception) {}
+      connection = null;
     }
   } // end of close()
 } // end of class CsvSearchResults

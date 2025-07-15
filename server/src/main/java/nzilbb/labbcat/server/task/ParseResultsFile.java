@@ -117,7 +117,7 @@ public class ParseResultsFile extends SearchTask {
     setStatus("Parsing " + csvFile.getName());
     
     // create results
-    results = new CsvSearchResults(csvFile)
+    results = new CsvSearchResults(csvFile, getStore().getDb())
       .setTargetColumn(targetColumn);
     if (csvFieldDelimiter != '\0') {
       // pass thruogh explicitly specified delimiter instead of inferring from first line
