@@ -381,7 +381,7 @@ public class SqlGraphStore implements GraphStore {
   } // end of constructor
 
   /**
-   * Constructor with connection.
+   * Constructor with connection factory.
    * @param baseUrl URL prefix for file access.
    * @param db A database connection factory.
    * @param user ID of the user
@@ -396,7 +396,7 @@ public class SqlGraphStore implements GraphStore {
   } // end of constructor
 
   /**
-   * Constructor with connection.
+   * Constructor with connection factory.
    * @param baseUrl URL prefix for file access.
    * @param files Root directory for file structure.
    * @param db A database connection factory.
