@@ -97,16 +97,10 @@
   </div>
   <div id="csv-export" class="controls">
     <lib-button (press)="exportCsv();" id="csv-export-btn"
-
-                [disabled]="task.csv"
-                
                 img="csv.svg" icon=",a,"
                 i18n-title title="Export results to CSV"
                 i18n-label label="CSV Export"></lib-button>
     <lib-button (press)="csvOptions();"
-
-                [disabled]="task.csv"
-                
                 img="down-triangle.png"
                 [icon]="showCsvOptions ? '▲' : '▼'"
                 [imgStyle]="showCsvOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
@@ -124,7 +118,8 @@
                    value="labbcat_title"
                    [checked]="precheckedCsvOptions.includes('labbcat_title')"
                    [disabled]="precheckedCsvOptions.includes('labbcat_title')">
-            <input type="hidden" name="csv_option" value="labbcat_title" checked>
+            <input type="hidden" name="csv_option" value="labbcat_title"
+                   *ngIf="precheckedCsvOptions.includes('labbcat_title')">
             <span i18n="csv options">Database title</span>
           </label>
           <label i18n-title title="This database's LaBB-CAT version">

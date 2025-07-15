@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
@@ -71,6 +72,7 @@ import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 
 /**
  * <tt>/api/results</tt>
@@ -181,7 +183,10 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case of error.
    */
-  public void get(RequestParameters parameters, UnaryOperator<String> requestHeaders, OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> fileName, Consumer<Integer> httpStatus) {
+  public void get(
+    RequestParameters parameters, UnaryOperator<String> requestHeaders,
+    OutputStream out, Consumer<String> contentTypeConsumer, Consumer<String> fileName,
+    Consumer<Integer> httpStatus) {
     
     try {
       final SqlGraphStoreAdministration store = getStore();
@@ -261,30 +266,82 @@ public class Results extends APIRequestHandler { // TODO unit test
       }
       final int finalOffsetThreshold = offsetThreshold;
 
+      String contentType = parameters.getString("todo");
+      if (contentType == null) {
+        contentType = parameters.getString("content-type");
+        if (contentType == null) {
+          contentType = requestHeaders.apply("Accept");
+        }
+      }
+      String language = Optional.ofNullable(requestHeaders.apply("Accept-Language")).orElse("en");
+      if ("csv".equalsIgnoreCase(contentType)
+          || "text/csv".equalsIgnoreCase(contentType)) {
+        contentType = "text/csv;charset=UTF-8";
+      } else {
+        contentType = "application/json;charset=UTF-8";
+      }
+      contentTypeConsumer.accept(contentType);
+      // output will be either CSV or JSON - define an appropriate output streamer
+      final CSVPrinter csvOut = contentType.startsWith("text/csv")?
+        new CSVPrinter(new PrintWriter(new OutputStreamWriter(out, "UTF-8")),
+                       CSVFormat.EXCEL.withDelimiter( 
+                         // guess the best delimiter - comma if English speaking user, tab otherwise
+                         language.contains("en")?',':'\t')):null;
+      final JsonGenerator jsonOut = !contentType.startsWith("text/csv")?
+        Json.createGenerator(new PrintWriter(new OutputStreamWriter(out, "UTF-8"))):null;
+      
+      Task task = threadId==null?null:Task.findTask(Long.valueOf(threadId));
+      if (threadId != null && task == null && utterances.length == 0) {
+        httpStatus.accept(SC_BAD_REQUEST);
+        JsonWriter writer = Json.createWriter(out);
+        writer.writeObject(failureResult("Invalid task ID: {0}", "\""+threadId+"\""));
+        writer.close();
+        return;
+      } else if (task != null && !(task instanceof SearchTask)) {
+        httpStatus.accept(SC_BAD_REQUEST);
+        JsonWriter writer = Json.createWriter(out);
+        writer.writeObject(failureResult("Invalid task ID: {0}", task.getClass().getName()));
+        writer.close();
+        return;
+      }
+      SearchTask search = (SearchTask)task;
+      if (search != null) {
+        search.keepAlive(); // prevent the task from dying while we're still interested
+      }
+      SearchResults searchResults = utterances.length > 0?
+        new ArraySearchResults(utterances) // explicit selection only
+        :search.getResults(); // all results from database
+      final boolean includeCsvPreamble = searchResults instanceof CsvResults;
+
       String[] csv_option = parameters.getStrings("csv_option");
       final LinkedHashSet<String> options = new LinkedHashSet<String>();
       for (String o : csv_option) options.add(o);
-      if (options.size() == 0) { // default options
-        options.add("labbcat_title");
-        options.add("labbcat_version");
-        options.add("collection_name");
-        options.add("result_number");
-        options.add("line_time");
-        options.add("line_end_time");
-        options.add("match");
-        options.add("word_url");
-        options.add("result_text");
-      }
 
       String[] csv_layer = parameters.getStrings("csv_layer");
       final LinkedHashSet<String> layers = new LinkedHashSet<String>();
       for (String l : csv_layer) layers.add(l);
-      if (layers.size() == 0) { // default layers
-        layers.add(schema.getRoot().getId());
-        layers.add(schema.getParticipantLayerId());
-        layers.add(schema.getCorpusLayerId());
-        layers.add(schema.getWordLayerId());
+
+      if (csvOut == null || !includeCsvPreamble) { // not adding to old CSV results
+        // set default options where none were specified
+        if (options.size() == 0) { // default options
+          options.add("labbcat_title");
+          options.add("labbcat_version");
+          options.add("collection_name");
+          options.add("result_number");
+          options.add("line_time");
+          options.add("line_end_time");
+          options.add("match");
+          options.add("word_url");
+          options.add("result_text");
+        }
+        if (layers.size() == 0) { // default layers
+          layers.add(schema.getRoot().getId());
+          layers.add(schema.getParticipantLayerId());
+          layers.add(schema.getCorpusLayerId());
+          layers.add(schema.getWordLayerId());
+        }
       }
+
       // selected layers ordered hierarchically for CSV output
       final LinkedHashMap<String,Integer> csvLayers = new LinkedHashMap<String,Integer>();
       // participant attributes
@@ -360,52 +417,6 @@ public class Results extends APIRequestHandler { // TODO unit test
             });
       }    
       
-      String contentType = parameters.getString("todo");
-      if (contentType == null) {
-        contentType = parameters.getString("content-type");
-        if (contentType == null) {
-          contentType = requestHeaders.apply("Accept");
-        }
-      }
-      String language = Optional.ofNullable(requestHeaders.apply("Accept-Language")).orElse("en");
-      if ("csv".equalsIgnoreCase(contentType)
-          || "text/csv".equalsIgnoreCase(contentType)) {
-        contentType = "text/csv;charset=UTF-8";
-      } else {
-        contentType = "application/json;charset=UTF-8";
-      }
-      contentTypeConsumer.accept(contentType);
-      // output will be either CSV or JSON - define an appropriate output streamer
-      final CSVPrinter csvOut = contentType.startsWith("text/csv")?
-        new CSVPrinter(new PrintWriter(new OutputStreamWriter(out, "UTF-8")),
-                       CSVFormat.EXCEL.withDelimiter( 
-                         // guess the best delimiter - comma if English speaking user, tab otherwise
-                         language.contains("en")?',':'\t')):null;
-      final JsonGenerator jsonOut = !contentType.startsWith("text/csv")?
-        Json.createGenerator(new PrintWriter(new OutputStreamWriter(out, "UTF-8"))):null;
-      
-      Task task = threadId==null?null:Task.findTask(Long.valueOf(threadId));
-      if (threadId != null && task == null && utterances.length == 0) {
-        httpStatus.accept(SC_BAD_REQUEST);
-        JsonWriter writer = Json.createWriter(out);
-        writer.writeObject(failureResult("Invalid task ID: {0}", "\""+threadId+"\""));
-        writer.close();
-        return;
-      } else if (task != null && !(task instanceof SearchTask)) {
-        httpStatus.accept(SC_BAD_REQUEST);
-        JsonWriter writer = Json.createWriter(out);
-        writer.writeObject(failureResult("Invalid task ID: {0}", task.getClass().getName()));
-        writer.close();
-        return;
-      }
-      SearchTask search = (SearchTask)task;
-      if (search != null) {
-        search.keepAlive(); // prevent the task from dying while we're still interested
-      }
-      SearchResults searchResults = utterances.length > 0?
-        new ArraySearchResults(utterances) // explicit selection only
-        :search.getResults(); // all results from database
-
       try {
         Connection connection = store.getConnection();
         if (searchResults instanceof SqlSearchResults) {
@@ -474,12 +485,19 @@ public class Results extends APIRequestHandler { // TODO unit test
             String name = IO.SafeFileNameUrl(searchName);
             if (name.length() > 150) name = name.substring(0, 150);
             name = "results_" + name + ".csv";
+            if (includeCsvPreamble) { // reloaded CSV results
+              name = "reloaded_" + name;
+            }
             fileName.accept(name);
           }
-          
+          List<String> preambleHeaders = null;
+          if (includeCsvPreamble) {
+            preambleHeaders = ((CsvResults)results).getCsvColumns();
+          }
+          final String labbcatTitle = store.getSystemAttribute("title");
           outputStart(
-            jsonOut, csvOut, searchName, results.size(), multiWordMatches, options, layers,
-            csvLayers, schema, targetLayer);
+            jsonOut, csvOut, searchName, preambleHeaders, results.size(), multiWordMatches,
+            options, layers, csvLayers, labbcatTitle, schema, targetLayer);
           try {
             if (pageLength == null) pageLength = results.size();
             if (pageNumber == null) pageNumber = Integer.valueOf(0);
@@ -508,9 +526,14 @@ public class Results extends APIRequestHandler { // TODO unit test
                       // write the initial non-layer fields
                       String matchId = results.getLastMatchId();
                       IdMatch result = new IdMatch(matchId);
+                      CSVRecord preamble = null;
+                      if (includeCsvPreamble) {
+                        preamble = ((CsvResults)results).getLastRecord();
+                      }
                       outputMatchStart(
-                        jsonOut, csvOut, finalSearchName, result, agIdToGraph, speakerNumberToName,
-                        store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
+                        jsonOut, csvOut, finalSearchName, preamble, result, agIdToGraph,
+                        speakerNumberToName, labbcatTitle, store, schema,
+                        sqlMatchTranscriptContext, wordsContext, options, layers);
                       
                       // write the annotations
                       Iterator<String> layerIds = csvLayers.keySet().stream()
@@ -590,8 +613,9 @@ public class Results extends APIRequestHandler { // TODO unit test
                     try {
                       IdMatch result = new IdMatch(matchId);                
                       outputMatchStart(
-                        jsonOut, csvOut, finalSearchName, result, agIdToGraph, speakerNumberToName,
-                        store, schema, sqlMatchTranscriptContext, wordsContext, options, layers);
+                        jsonOut, csvOut, finalSearchName, null, result, agIdToGraph,
+                        speakerNumberToName, labbcatTitle, store, schema, sqlMatchTranscriptContext,
+                        wordsContext, options, layers);
                     } catch(Exception x) {
                       context.servletLog("ERROR Results-consumer: " + x);
                       x.printStackTrace(System.err);
@@ -634,18 +658,29 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param jsonOut Generator for JSON output, or null for CSV output.
    * @param csvOut Printer for CSV output, or null for JSON output.
    * @param searchName The name search that produced the results.
+   * @param preambleHeaders List of passed through CSV headers to output before new headers,
+   * or null.
    * @param matchCount The number of matches.
    * @param multiWordMatches Whether matches span multiple tokens (or just one token)
    * @param layers The layers to output.
-   * @param options The additional fields to output.
+   * @param csvLayers Map from temporal layers to their alignments.
+   * @param labbcatTitle The title of the LaBB-CAT instance.
+   * @param schema The layer schema.
+   * @param targetLayer The target layer.
    */
   void outputStart(
-    JsonGenerator jsonOut, CSVPrinter csvOut, String searchName, long matchCount,
-    boolean multiWordMatches, LinkedHashSet<String> options, LinkedHashSet<String> layers,
-    LinkedHashMap<String,Integer> csvLayers, Schema schema, String targetLayer)
+    JsonGenerator jsonOut, CSVPrinter csvOut, String searchName,
+    List<String> preambleHeaders, long matchCount, boolean multiWordMatches,
+    LinkedHashSet<String> options, LinkedHashSet<String> layers,
+    LinkedHashMap<String,Integer> csvLayers, String labbcatTitle, Schema schema, String targetLayer)
     throws IOException {
     if (csvOut != null) {
       // Send column headers
+      if (preambleHeaders != null) { // there are pre-existing headers to pass through
+        for (String header : preambleHeaders) {
+          csvOut.print(header);
+        }
+      }
       if (options.contains("labbcat_title")) csvOut.print("Title");
       if (options.contains("labbcat_version")) csvOut.print("Version");
       if (options.contains("collection_name")) csvOut.print("SearchName");
@@ -743,7 +778,7 @@ public class Results extends APIRequestHandler { // TODO unit test
       // set initial structure of model
       jsonOut.write("name", searchName);
       jsonOut.write("matchCount", matchCount);
-      if (options.contains("labbcat_title")) jsonOut.write("labbcatTitle", context.getTitle());
+      if (options.contains("labbcat_title")) jsonOut.write("labbcatTitle", labbcatTitle);
       if (options.contains("labbcat_version")) jsonOut.write("labbcatVersion", context.getVersion());
       jsonOut.writeStartArray("matches");      
     }
@@ -755,9 +790,11 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param jsonOut Generator for JSON output, or null for CSV output.
    * @param csvOut Printer for CSV output, or null for JSON output.
    * @param searchName The name of the search that produced the results.
+   * @param preamble Passed through fields to be output before new data, or null.
    * @param result The match result that is being started.
    * @param agIdToGraph Cache mapping ag_ids to transcript annotation graphs.
    * @param speakerNumberToName Cache mapping speaker_numbers to participant IDs.
+   * @param labbcatTitle The title of the LaBB-CAT instance.
    * @param store The graph store.
    * @param sqlMatchTranscriptContext Query for retrieving context transcript.
    * @param wordsContext Number of words context to include.
@@ -765,15 +802,22 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param options Additional fields to include in the output.
    */
   void outputMatchStart(
-    JsonGenerator jsonOut, CSVPrinter csvOut, String searchName, IdMatch result,
-    HashMap<Integer,Graph> agIdToGraph, HashMap<Integer,String> speakerNumberToName,
-    SqlGraphStoreAdministration store, Schema schema, PreparedStatement sqlMatchTranscriptContext,
-    int wordsContext, LinkedHashSet<String> options, LinkedHashSet<String> layers)
+    JsonGenerator jsonOut, CSVPrinter csvOut, String searchName, CSVRecord preamble,
+    IdMatch result, HashMap<Integer,Graph> agIdToGraph,
+    HashMap<Integer,String> speakerNumberToName, String labbcatTitle,
+    SqlGraphStoreAdministration store, Schema schema,
+    PreparedStatement sqlMatchTranscriptContext, int wordsContext,
+    LinkedHashSet<String> options, LinkedHashSet<String> layers)
     throws Exception {
     if (csvOut != null) {
       // start new record
       csvOut.println();
-      if (options.contains("labbcat_title")) csvOut.print(context.getTitle());
+      if (preamble != null) {
+        for (String value : preamble) {
+          csvOut.print(value);
+        } // next field to pass through
+      } // adding to CSV results
+      if (options.contains("labbcat_title")) csvOut.print(labbcatTitle);
       if (options.contains("labbcat_version")) csvOut.print(context.getVersion());
       if (options.contains("collection_name")) csvOut.print(searchName);
       if (options.contains("result_number")) {
