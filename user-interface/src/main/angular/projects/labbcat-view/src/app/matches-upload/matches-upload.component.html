@@ -3,8 +3,28 @@
 <div id="file-chooser">
   <label for="csv" i18n>Upload search results from file</label>
   <input type="file" id="csv" (change)="selectFile($event.target.files)" autofocus>
+  <span *ngIf="rowCount" id="rowCount" i18n>{{rowCount}} rows</span>
+  <details *ngIf="!headers">
+    <summary i18n>What should the file look like?</summary>
+    <div class="advanced">
+      <span i18n>Comma-separated values (.csv) file exported from results of a search, with one column that unambiguously identifies the matched token (ideally the original MatchId column, but the token URL can also be used).</span>
+    </div>
+  </details>
 </div>
-<div *ngIf="csv">
+<div id="settings-form" *ngIf="headers">
+  <div class="header" i18n="CSV column selector">Columns</div>
+  <div class="item" id="targetColumn"
+       i18n-title title="Which field identifies the match">
+    <label for="targetColumn" i18n>Match ID</label>
+    <span>
+      <select id="targetColumn" [(ngModel)]="targetColumn">
+        <ng-container *ngFor="let field of headers">
+          <option>{{field}}</option></ng-container>
+      </select>
+    </span>
+  </div>
+</div>
+<div *ngIf="csv" class="controls">
   <lib-button img="cog.svg" icon="⚙"
               (press)="process()"
               [processing]="processing"
