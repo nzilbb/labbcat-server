@@ -30,7 +30,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import nzilbb.labbcat.server.search.CsvSearchResults;
+import nzilbb.labbcat.server.search.CsvResults;
 import nzilbb.labbcat.server.search.SearchTask;
 import nzilbb.util.IO;
 import org.apache.commons.csv.*;
@@ -117,14 +117,14 @@ public class ParseResultsFile extends SearchTask {
     setStatus("Parsing " + csvFile.getName());
     
     // create results
-    results = new CsvSearchResults(csvFile, getStore().getDb())
+    results = new CsvResults(csvFile, getStore().getDb())
       .setTargetColumn(targetColumn);
     if (csvFieldDelimiter != '\0') {
       // pass thruogh explicitly specified delimiter instead of inferring from first line
-      ((CsvSearchResults)results).setCsvFieldDelimiter(csvFieldDelimiter);
+      ((CsvResults)results).setCsvFieldDelimiter(csvFieldDelimiter);
     }
     // load csvColumns etc.
-    ((CsvSearchResults)results).reset();
+    ((CsvResults)results).reset();
     setStatus("Ready: " + csvFile.getName());
     
     iPercentComplete = 100;    

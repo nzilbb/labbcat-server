@@ -44,7 +44,7 @@ import org.apache.commons.csv.*;
  * Search results constructed from a CSV file.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class CsvSearchResults implements SearchResults {
+public class CsvResults implements SearchResults {
 
   int recordCount = 0;
   CSVParser parser;
@@ -100,7 +100,7 @@ public class CsvSearchResults implements SearchResults {
    * Setter for {@link #csvFieldDelimiter}: Field delimiter to use when reading the file.
    * @param newCsvFieldDelimiter Field delimiter to use when reading the file.
    */
-  public CsvSearchResults setCsvFieldDelimiter(char newCsvFieldDelimiter) { csvFieldDelimiter = newCsvFieldDelimiter; return this; }
+  public CsvResults setCsvFieldDelimiter(char newCsvFieldDelimiter) { csvFieldDelimiter = newCsvFieldDelimiter; return this; }
   
   /**
    * Name of the column that identifies each match (default "MatchId").
@@ -120,7 +120,7 @@ public class CsvSearchResults implements SearchResults {
    * @param newTargetColumn Name of the column that identifies each
    * match (default "MatchId"). 
    */
-  public CsvSearchResults setTargetColumn(String newTargetColumn) { targetColumn = newTargetColumn; return this; }
+  public CsvResults setTargetColumn(String newTargetColumn) { targetColumn = newTargetColumn; return this; }
 
   
   /**
@@ -138,7 +138,7 @@ public class CsvSearchResults implements SearchResults {
    * Setter for {@link #name}: Name of result set.
    * @param newName Name of result set.
    */
-  public CsvSearchResults setName(String newName) {
+  public CsvResults setName(String newName) {
     name = newName;
     return this;
   }
@@ -207,7 +207,7 @@ public class CsvSearchResults implements SearchResults {
    * Setter for {@link #connection}: Database connection.
    * @param newConnection Database connection.
    */
-  public CsvSearchResults setConnection(Connection newConnection) {
+  public CsvResults setConnection(Connection newConnection) {
     connection = newConnection; return this;
   }
    
@@ -226,7 +226,7 @@ public class CsvSearchResults implements SearchResults {
    * Setter for {@link #db}: Factory for generating connections to the database.
    * @param newDb Factory for generating connections to the database.
    */
-  public CsvSearchResults setDb(ConnectionFactory newDb) {
+  public CsvResults setDb(ConnectionFactory newDb) {
     db = newDb;
     return this;
   }
@@ -235,7 +235,7 @@ public class CsvSearchResults implements SearchResults {
    * Constructor from CSV File.
    * @param csvFile The results file to parse.
    */
-  public CsvSearchResults(File csvFile, ConnectionFactory db) throws IOException {
+  public CsvResults(File csvFile, ConnectionFactory db) throws IOException {
     this.csvFile = csvFile;
     setDb(db);
     setName(IO.WithoutExtension(csvFile).replaceAll("^results_",""));
@@ -261,7 +261,7 @@ public class CsvSearchResults implements SearchResults {
    * Copy constructor.
    * @param other The other results object.
    */
-  public CsvSearchResults(CsvSearchResults other) throws IOException {
+  public CsvResults(CsvResults other) throws IOException {
     this.csvFile = other.csvFile;
     this.csvColumns = other.csvColumns;
     this.recordCount = other.recordCount;
@@ -355,7 +355,7 @@ public class CsvSearchResults implements SearchResults {
               target_annotation_id_group = 3;
               first_word_annotation_id_group = 3; // might not be word
             } else {
-              System.err.println("CsvSearchResults.reset: Malformed ID: " + targetId);
+              System.err.println("CsvResults.reset: Malformed ID: " + targetId);
               // fall back to no parsing
               matchIdPattern = null;
             } // not a UID
@@ -370,7 +370,7 @@ public class CsvSearchResults implements SearchResults {
       lastRecord = null;
       
     } catch(IOException exception) {
-      System.err.println("CsvSearchResults.reset: " + exception);
+      System.err.println("CsvResults.reset: " + exception);
     }
   }
   /**
@@ -461,7 +461,7 @@ public class CsvSearchResults implements SearchResults {
                   transcriptIdToAgId.put(match.getTranscriptId(), rs.getInt(1));
                 }
               } catch(SQLException exception) {
-                System.err.println("CsvSearchResults.next: " + exception);
+                System.err.println("CsvResults.next: " + exception);
               }
             } // database ag_id lookup
             // lookup transcript ID from our cache
@@ -514,7 +514,7 @@ public class CsvSearchResults implements SearchResults {
                 match.setSpeakerNumber(rs.getInt(1));
               }
             } catch(SQLException exception) {
-              System.err.println("CsvSearchResults.next: " + exception);
+              System.err.println("CsvResults.next: " + exception);
             }
           }
           
@@ -539,12 +539,11 @@ public class CsvSearchResults implements SearchResults {
                 if (match.getEndAnchorId() == null) match.setEndAnchorId(rs.getLong(3));
               }
             } catch(SQLException exception) {
-              System.err.println("CsvSearchResults.next: " + exception);
+              System.err.println("CsvResults.next: " + exception);
             }
           }
           
         }
-        System.err.println("Parsed " + lastMatchId + " as " + match.getId());
         lastMatchId = match.getId();
       }
     }
@@ -576,4 +575,4 @@ public class CsvSearchResults implements SearchResults {
       connection = null;
     }
   } // end of close()
-} // end of class CsvSearchResults
+} // end of class CsvResults

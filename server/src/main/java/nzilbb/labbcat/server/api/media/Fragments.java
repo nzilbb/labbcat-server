@@ -55,7 +55,7 @@ import nzilbb.labbcat.server.db.ResultSeries;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.db.SqlSearchResults;
 import nzilbb.labbcat.server.search.ArraySearchResults;
-import nzilbb.labbcat.server.search.CsvSearchResults;
+import nzilbb.labbcat.server.search.CsvResults;
 import nzilbb.labbcat.server.search.SearchResults;
 import nzilbb.labbcat.server.search.SearchTask;
 import nzilbb.labbcat.server.task.SerializeFragmentsTask;
@@ -210,10 +210,10 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     }
     final String extension = "."+MediaFile.MimeTypeToSuffix().get(mimeType);
     
-    // for CsvSearchResults only:
+    // for CsvResults only:
     String startOffsetColumn = null;
     String endOffsetColumn = null;
-    if (searchResults instanceof CsvSearchResults) {
+    if (searchResults instanceof CsvResults) {
       startOffsetColumn = parameters.getString("startOffsetColumn");
       endOffsetColumn = parameters.getString("endOffsetColumn");
     }    
@@ -230,9 +230,9 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           // the original results object presumably has a dead connection
           // we want a new copy of our own
           searchResults = new SqlSearchResults((SqlSearchResults)searchResults, store.getConnection());
-        } else if (searchResults instanceof CsvSearchResults) {
+        } else if (searchResults instanceof CsvResults) {
           // copy object, so that iteration is thread safe
-          searchResults = new CsvSearchResults((CsvSearchResults)searchResults);
+          searchResults = new CsvResults((CsvResults)searchResults);
         }
         final SearchResults results = searchResults;
         results.forEachRemaining(matchId -> {
@@ -242,7 +242,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
             try {
               IdMatch result = new IdMatch(matchId);
               if (finalStartOffsetColumn != null) {
-                CSVRecord lastRow = ((CsvSearchResults)results).getLastRecord();
+                CSVRecord lastRow = ((CsvResults)results).getLastRecord();
                 String startString = lastRow.get(finalStartOffsetColumn);
                 String endString = lastRow.get(finalEndOffsetColumn);
                 result.setStartOffset(Double.valueOf(startString));

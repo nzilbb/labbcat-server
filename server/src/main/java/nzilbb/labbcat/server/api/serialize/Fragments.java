@@ -48,7 +48,7 @@ import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.labbcat.server.db.SqlSearchResults;
 import nzilbb.labbcat.server.search.SearchTask;
 import nzilbb.labbcat.server.search.SearchResults;
-import nzilbb.labbcat.server.search.CsvSearchResults;
+import nzilbb.labbcat.server.search.CsvResults;
 import nzilbb.labbcat.server.task.SerializeFragmentsTask;
 import nzilbb.labbcat.server.task.Task;
 import nzilbb.util.IO;
@@ -355,9 +355,9 @@ public class Fragments extends APIRequestHandler { // TODO unit test
                 +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
             }
           }
-        } else if (results != null && results instanceof CsvSearchResults) {
+        } else if (results != null && results instanceof CsvResults) {
           // copy the results to ensure enumeration is thread-safe
-          CsvSearchResults csvResults = new CsvSearchResults((CsvSearchResults)results);
+          CsvResults csvResults = new CsvResults((CsvResults)results);
           while (csvResults.hasNext()) {
             vUtterances.add(csvResults.next());
           }
