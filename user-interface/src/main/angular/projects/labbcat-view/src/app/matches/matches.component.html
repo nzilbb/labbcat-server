@@ -231,15 +231,11 @@
   </div>
   <div id="dictionary" class="controls">
     <lib-button (press)="dictionary();"
-
-                [disabled]="task.csv"
-                
+                [disabled]="task.csv"                
                 img="book.svg" icon="📕"
                 i18n-label label="Dictionary Export"></lib-button>
     <lib-button (press)="dictionaryOptions();"
-
-                [disabled]="task.csv"
-                
+                [disabled]="task.csv"                
                 img="down-triangle.png"
                 [icon]="showDictionaryOptions ? '▲' : '▼'"
                 [imgStyle]="showDictionaryOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
@@ -331,9 +327,6 @@
     <input #generate_layer type="hidden" name="generate_layer" value="">
     <div *ngFor="let layerId of generableLayers">
       <lib-button (press)="runAnnotator(layerId);"
-
-                [disabled]="task.csv"
-                
                   img="cog.svg" icon="⚙"
                   i18n-title title="Generate"
                   label="{{layerId}}"></lib-button>
