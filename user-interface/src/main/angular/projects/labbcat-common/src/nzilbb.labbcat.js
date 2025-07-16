@@ -1533,29 +1533,46 @@
       targetOffset = targetOffset || 0;
       annotationsPerLayer = annotationsPerLayer || 1;
 
-      // create form
-      var fd = new FormData();
-      fd.append("targetOffset", targetOffset);
-      fd.append("annotationsPerLayer", annotationsPerLayer);
-      fd.append("csvFieldDelimiter", ",");
-      fd.append("targetColumn", "0");
-      fd.append("copyColumns", "false");
-      for (let layerId of layerIds ) fd.append("layer", layerId);
-
-      // getMatchAnnotations expects an uploaded CSV file for MatchIds, 
+      // create forms
+      var fdUpload = new FormData();
+      fdUpload.append("csvFieldDelimiter", ",");
+      fdUpload.append("targetColumn", "MatchId");
+      // api/results/upload expects an uploaded CSV file for MatchIds, 
       const uploadfile = "MatchId\n"+matchIds.join("\n");
-      fd.append("uploadfile", uploadfile, {
+      fdUpload.append("results", uploadfile, {
         filename: 'uploadfile.csv',
         contentType: 'text/csv',
         knownLength: uploadfile.length
       });
-
+      
+      var downloadResults = (threadId) => {
+        this.createRequest(
+          "getMatchAnnotations", {
+            threadId: threadId,
+            targetOffset: targetOffset,
+            annotationsPerLayer: annotationsPerLayer,
+            csvFieldDelimiter: ",",
+            csv_layer: layerIds
+          }, (result, errors, messages, call, id) => {
+            this.releaseTask(threadId, ()=>{});
+            if (onResult) onResult(result.matches, errors, messages, call, id);
+          },
+          this.baseUrl+"api/results")
+          .send();
+      };
+      
       if (!runningOnNode) {	
 	// create HTTP request
 	var xhr = new XMLHttpRequest();
 	xhr.call = "getMatchAnnotations";
 	xhr.id = transcript.name;
-	xhr.onResult = onResult;
+	xhr.onResult = (result, errors, messages, call, id) => {
+          if (result && result.threadId) {
+            downloadResults(result.threadId);
+          } else {
+	    onResult(result, errors, messages, "getMatchAnnotations");
+          }
+        };
 	xhr.addEventListener("load", callComplete, false);
 	xhr.addEventListener("error", callFailed, false);
 	xhr.addEventListener("abort", callCancelled, false);	        
@@ -1564,13 +1581,13 @@
 	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
 	}
 	xhr.setRequestHeader("Accept", "application/json");
-	xhr.send(fd);
+	xhr.send(fdUpload);
       } else { // runningOnNode
-	var urlParts = parseUrl(this.baseUrl + "api/getMatchAnnotations");
+	var urlParts = parseUrl(this.baseUrl + "api/results/upload");
 	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
 	var labbcat = this;
         var password = this._password;
-	fd.getLength(function(something, contentLength) {
+	fdUpload.getLength(function(something, contentLength) {
 	  var requestParameters = {
 	    port: urlParts.port,
 	    path: urlParts.pathname,
@@ -1578,7 +1595,7 @@
 	    headers: {
 	      "Accept" : "application/json",
 	      "content-length" : contentLength,
-	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	      "Content-Type" : "multipart/form-data; boundary=" + fdUpload.getBoundary()
 	    }
 	  };
 	  if (labbcat.username && password) {
@@ -1590,7 +1607,7 @@
           if (exports.verbose) {
             console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
           }
-	  fd.submit(requestParameters, function(err, res) {
+	  fdUpload.submit(requestParameters, function(err, res) {
 	    var responseText = "";
 	    if (!err) {
 	      res.on('data',function(buffer) {
@@ -1614,7 +1631,11 @@
                   errors = ["" +exception+ ": " + labbcat.responseText];
                   messages = [];
 		}
-		onResult(result, errors, messages, "getMatchAnnotations");
+                if (result && result.threadId) {
+                  downloadResults(result.threadId);
+                } else {
+		  onResult(result, errors, messages, "getMatchAnnotations");
+                }
 	      });
 	    } else {
 	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "getMatchAnnotations");
@@ -1624,6 +1645,98 @@
 	  });
 	}); // got length
       } // runningOnNode
+      // old API
+      // // create form
+      // var fd = new FormData();
+      // fd.append("targetOffset", targetOffset);
+      // fd.append("annotationsPerLayer", annotationsPerLayer);
+      // fd.append("csvFieldDelimiter", ",");
+      // fd.append("targetColumn", "0");
+      // fd.append("copyColumns", "false");
+      // for (let layerId of layerIds ) fd.append("layer", layerId);
+
+      // // getMatchAnnotations expects an uploaded CSV file for MatchIds, 
+      // const uploadfile = "MatchId\n"+matchIds.join("\n");
+      // fd.append("uploadfile", uploadfile, {
+      //   filename: 'uploadfile.csv',
+      //   contentType: 'text/csv',
+      //   knownLength: uploadfile.length
+      // });
+
+      // if (!runningOnNode) {	
+      //   // create HTTP request
+      //   var xhr = new XMLHttpRequest();
+      //   xhr.call = "getMatchAnnotations";
+      //   xhr.id = transcript.name;
+      //   xhr.onResult = onResult;
+      //   xhr.addEventListener("load", callComplete, false);
+      //   xhr.addEventListener("error", callFailed, false);
+      //   xhr.addEventListener("abort", callCancelled, false);	        
+      //   xhr.open("POST", this.baseUrl + "api/getMatchAnnotations");
+      //   if (this.username) {
+      //     xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+      //   }
+      //   xhr.setRequestHeader("Accept", "application/json");
+      //   xhr.send(fd);
+      // } else { // runningOnNode
+      //   var urlParts = parseUrl(this.baseUrl + "api/getMatchAnnotations");
+      //   // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+      //   var labbcat = this;
+      //   var password = this._password;
+      //   fd.getLength(function(something, contentLength) {
+      //     var requestParameters = {
+      //       port: urlParts.port,
+      //       path: urlParts.pathname,
+      //       host: urlParts.hostname,
+      //       headers: {
+      //         "Accept" : "application/json",
+      //         "content-length" : contentLength,
+      //         "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+      //       }
+      //     };
+      //     if (labbcat.username && password) {
+      //       requestParameters.auth = labbcat.username+':'+password;
+      //     }
+      //     if (/^https.*/.test(labbcat.baseUrl)) {
+      //       requestParameters.protocol = "https:";
+      //     }
+      //     if (exports.verbose) {
+      //       console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+      //     }
+      //     fd.submit(requestParameters, function(err, res) {
+      //       var responseText = "";
+      //       if (!err) {
+      //         res.on('data',function(buffer) {
+      // 	  //console.log('data ' + buffer);
+      // 	  responseText += buffer;
+      //         });
+      //         res.on('end',function(){
+      //           if (exports.verbose) console.log("response: " + responseText);
+      //           var result = null;
+      //           var errors = null;
+      //           var messages = null;
+      // 	  try {
+      // 	    var response = JSON.parse(responseText);
+      // 	    result = response.model.result || response.model;
+      // 	    errors = response.errors;
+      // 	    if (errors && errors.length == 0) errors = null
+      // 	    messages = response.messages;
+      // 	    if (messages && messages.length == 0) messages = null
+      // 	  } catch(exception) {
+      // 	    result = null
+      //             errors = ["" +exception+ ": " + labbcat.responseText];
+      //             messages = [];
+      // 	  }
+      // 	  onResult(result, errors, messages, "getMatchAnnotations");
+      //         });
+      //       } else {
+      //         onResult(null, ["" +err+ ": " + labbcat.responseText], [], "getMatchAnnotations");
+      //       }
+      
+      //       if (res) res.resume();
+      //     });
+      //   }); // got length
+      // } // runningOnNode
     }
     
     /**
