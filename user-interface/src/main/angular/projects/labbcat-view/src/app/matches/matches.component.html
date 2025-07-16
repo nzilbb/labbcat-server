@@ -147,6 +147,15 @@
                    [checked]="precheckedCsvOptions.includes('labbcat_version')">
             <span i18n="csv options">LaBB-CAT version</span>
           </label>
+          <label i18n-title title="Version of the corpus data - always exported">
+            <input type="checkbox" name="csv_option"
+                   value="data_version"
+                   [checked]="precheckedCsvOptions.includes('data_version')"
+                   [disabled]="precheckedCsvOptions.includes('data_version')">
+            <input type="hidden" name="csv_option" value="data_version"
+                   *ngIf="precheckedCsvOptions.includes('data_version')">
+            <span i18n="csv options">Data version</span>
+          </label>
           <label i18n-title title="Identifier for this search - always exported">
             <input type="checkbox" name="csv_option"
                    value="collection_name"

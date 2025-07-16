@@ -40,8 +40,8 @@ export class MatchesComponent implements OnInit {
     serializationLayers = [ "utterance", "word" ];
     showCsvOptions = false;
     precheckedCsvOptions = [
-        "labbcat_title", "collection_name", "result_number", "line_time", "line_end_time",
-        "match", "word_url", "result_text"];
+        "labbcat_title", "data_version", "collection_name", "result_number",
+        "line_time", "line_end_time", "match", "word_url", "result_text"];
     selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "word", "segment" ];

@@ -31,8 +31,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -104,6 +106,8 @@ import org.apache.commons.csv.CSVRecord;
  *      <ul>
  *       <li><q>labbcat_title</q> - the title of this LaBB-CAT instance </li>
  *       <li><q>labbcat_version</q> - the current version of this LaBB-CAT instance </li>
+ *       <li><q>data_version</q> - the version of the data, which is the value
+ *           of the dataVerson system attribute, or if that is unset, the current time.</li>
  *       <li><q>collection_name</q> - the name/description of the search </li>
  *       <li><q>result_number</q> - the ordinal of each result/match </li>
  *       <li><q>series_offset</q> - how far through the episode, in seconds, this
@@ -376,6 +380,7 @@ public class Results extends APIRequestHandler { // TODO unit test
         if (options.size() == 0) { // default options
           options.add("labbcat_title");
           options.add("labbcat_version");
+          options.add("data_version");
           options.add("collection_name");
           options.add("result_number");
           options.add("line_time");
@@ -553,10 +558,16 @@ public class Results extends APIRequestHandler { // TODO unit test
             preambleHeaders = ((CsvResults)results).getCsvColumns();
           }
           final String labbcatTitle = store.getSystemAttribute("title");
+          String dataVersion = store.getSystemAttribute("dataVersion");
+          if (dataVersion == null || dataVersion.length() == 0) {
+            SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+            dataVersion = iso.format(new Date());
+          }
+          final String finalDataVersion = dataVersion;
           outputStart(
             jsonOut, csvOut, searchName, preambleHeaders, results.size(), multiWordMatches,
             options, layers, csvLayers, csvHeaderPrefix, offsetsIncluded,
-            labbcatTitle, schema, targetLayer);
+            labbcatTitle, dataVersion, schema, targetLayer);
           try {
             if (pageLength == null) pageLength = results.size();
             if (pageNumber == null) pageNumber = Integer.valueOf(0);
@@ -591,7 +602,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                       }
                       outputMatchStart(
                         jsonOut, csvOut, finalSearchName, preamble, result, agIdToGraph,
-                        speakerNumberToName, labbcatTitle, store, schema,
+                        speakerNumberToName, labbcatTitle, finalDataVersion, store, schema,
                         sqlMatchTranscriptContext, wordsContext, options, layers);
                       
                       // write the annotations
@@ -676,8 +687,8 @@ public class Results extends APIRequestHandler { // TODO unit test
                       IdMatch result = new IdMatch(matchId);                
                       outputMatchStart(
                         jsonOut, csvOut, finalSearchName, null, result, agIdToGraph,
-                        speakerNumberToName, labbcatTitle, store, schema, sqlMatchTranscriptContext,
-                        wordsContext, options, layers);
+                        speakerNumberToName, labbcatTitle, finalDataVersion, store, schema,
+                        sqlMatchTranscriptContext, wordsContext, options, layers);
                     } catch(Exception x) {
                       context.servletLog("ERROR Results-consumer: " + x);
                       x.printStackTrace(System.err);
@@ -737,7 +748,8 @@ public class Results extends APIRequestHandler { // TODO unit test
     List<String> preambleHeaders, long matchCount, boolean multiWordMatches,
     LinkedHashSet<String> options, LinkedHashSet<String> layers,
     LinkedHashMap<String,Integer> csvLayers, String csvHeaderPrefix,
-    boolean offsetsIncluded, String labbcatTitle, Schema schema, String targetLayer)
+    boolean offsetsIncluded, String labbcatTitle, String dataVersion, Schema schema,
+    String targetLayer)
     throws IOException {
     if (csvOut != null) {
       // Send column headers
@@ -748,6 +760,7 @@ public class Results extends APIRequestHandler { // TODO unit test
       }
       if (options.contains("labbcat_title")) csvOut.print("Title");
       if (options.contains("labbcat_version")) csvOut.print("Version");
+      if (options.contains("data_version")) csvOut.print("DataVersion");
       if (options.contains("collection_name")) csvOut.print("SearchName");
       if (options.contains("result_number")) csvOut.print("Number");
       if (layers.contains(schema.getRoot().getId())) csvOut.print("Transcript");
@@ -851,8 +864,15 @@ public class Results extends APIRequestHandler { // TODO unit test
       // set initial structure of model
       jsonOut.write("name", searchName);
       jsonOut.write("matchCount", matchCount);
-      if (options.contains("labbcat_title")) jsonOut.write("labbcatTitle", labbcatTitle);
-      if (options.contains("labbcat_version")) jsonOut.write("labbcatVersion", context.getVersion());
+      if (options.contains("labbcat_title")) {
+        jsonOut.write("labbcatTitle", labbcatTitle);
+      }
+      if (options.contains("data_version")) {
+        jsonOut.write("dataVersion", dataVersion);
+      }
+      if (options.contains("labbcat_version")) {
+        jsonOut.write("labbcatVersion", context.getVersion());
+      }
       jsonOut.writeStartArray("matches");      
     }
   } // end of startResults()
@@ -868,6 +888,7 @@ public class Results extends APIRequestHandler { // TODO unit test
    * @param agIdToGraph Cache mapping ag_ids to transcript annotation graphs.
    * @param speakerNumberToName Cache mapping speaker_numbers to participant IDs.
    * @param labbcatTitle The title of the LaBB-CAT instance.
+   * @param dataVersion The version of the corpus data.
    * @param store The graph store.
    * @param sqlMatchTranscriptContext Query for retrieving context transcript.
    * @param wordsContext Number of words context to include.
@@ -877,7 +898,7 @@ public class Results extends APIRequestHandler { // TODO unit test
   void outputMatchStart(
     JsonGenerator jsonOut, CSVPrinter csvOut, String searchName, CSVRecord preamble,
     IdMatch result, HashMap<Integer,Graph> agIdToGraph,
-    HashMap<Integer,String> speakerNumberToName, String labbcatTitle,
+    HashMap<Integer,String> speakerNumberToName, String labbcatTitle, String dataVersion,
     SqlGraphStoreAdministration store, Schema schema,
     PreparedStatement sqlMatchTranscriptContext, int wordsContext,
     LinkedHashSet<String> options, LinkedHashSet<String> layers)
@@ -892,6 +913,7 @@ public class Results extends APIRequestHandler { // TODO unit test
       } // adding to CSV results
       if (options.contains("labbcat_title")) csvOut.print(labbcatTitle);
       if (options.contains("labbcat_version")) csvOut.print(context.getVersion());
+      if (options.contains("data_version")) csvOut.print(dataVersion);
       if (options.contains("collection_name")) csvOut.print(searchName);
       if (options.contains("result_number")) {
         csvOut.print(
