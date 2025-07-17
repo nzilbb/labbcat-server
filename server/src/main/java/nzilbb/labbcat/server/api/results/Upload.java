@@ -94,7 +94,6 @@ public class Upload extends APIRequestHandler {
    * @return JSON-encoded object representing the response
    */
   public JsonObject post(RequestParameters requestParameters, Consumer<Integer> httpStatus) {
-    context.servletLog("POST post " + requestParameters.getFile("results").getPath());
     File dir = null;
     try {
       final SqlGraphStoreAdministration store = getStore();
