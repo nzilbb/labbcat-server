@@ -11,6 +11,7 @@ import { MatchesComponent } from './matches/matches.component';
 import { MatchesUploadComponent } from './matches-upload/matches-upload.component';
 import { ParticipantsComponent } from './participants/participants.component';
 import { PraatComponent } from './praat/praat.component';
+import { AnnotationIntervalsComponent } from './annotation-intervals/annotation-intervals.component';
 import { TranscriptsComponent } from './transcripts/transcripts.component';
 import { ParticipantComponent } from './participant/participant.component';
 import { TranscriptAttributesComponent } from './transcript-attributes/transcript-attributes.component';
@@ -33,6 +34,7 @@ import { HomeComponent } from './home/home.component';
       MatchesUploadComponent,
       ParticipantsComponent,
       PraatComponent,
+      AnnotationIntervalsComponent,
       TranscriptsComponent,
       ParticipantComponent,
       TranscriptAttributesComponent,
@@ -64,6 +66,7 @@ import { HomeComponent } from './home/home.component';
           { path: 'matches/upload', component: MatchesUploadComponent },
           { path: 'task', component: TaskComponent },
           { path: 'praat', component: PraatComponent },
+          { path: 'annotation/intervals', component: AnnotationIntervalsComponent },
           { path: 'participants', component: ParticipantsComponent },
           { path: 'participant', component: ParticipantComponent },
           { path: 'transcripts', component: TranscriptsComponent },

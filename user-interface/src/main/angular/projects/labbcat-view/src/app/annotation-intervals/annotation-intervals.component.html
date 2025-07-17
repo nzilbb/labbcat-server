@@ -1,0 +1,119 @@
+<h1 id="title" i18n>Annotations in Intervals</h1>
+
+<div id="file-chooser">
+  <label for="csv" i18n>Upload search results from file</label>
+  <input type="file" id="csv" (change)="selectFile($event.target.files)" autofocus>
+  <span *ngIf="rowCount" id="rowCount" i18n>{{rowCount}} rows</span>
+  <details *ngIf="!headers">
+    <summary i18n>What should the file look like?</summary>
+    <div class="advanced">
+      <span i18n>Comma-separated values (.csv) file exported from results of a search, with</span>
+      <ul>
+        <li i18n>One row per token you want to measure (word, segment, etc.)</li>
+        <li><span i18n="Columns">Columns</span>
+          <ul>
+            <li i18n>Transcript name</li>
+            <li i18n>Participant name</li>
+            <li i18n>Start time for the token you want to measure</li>
+            <li i18n>End time for the token you want to measure</li>
+            <li i18n>(All other columns will be included in the output)</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div id="settings-form" *ngIf="headers">
+  <div class="header" i18n="CSV column selector">Columns</div>
+  <div class="item" id="transcript"
+       i18n-title title="Which field identifies the name of the transcript">
+    <label for="transcriptColumn" i18n>Transcript name</label>
+    <span>
+      <select id="transcriptColumn" [(ngModel)]="transcriptColumn">
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+  </div>
+  <div class="item" id="participant"
+       i18n-title title="Which field identifies the name of the participant speaking">
+    <label for="participantColumn" i18n>Participant name</label>
+    <span>
+      <select id="participantColumn" [(ngModel)]="participantColumn">
+        <option value="" i18n="Select no participant column">(none)</option>
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+  </div>
+  <div id="containment">
+    <span i18n="containment: Annotations (...entirely/partially between)">Annotations</span>
+    <select [(ngModel)]="containment">
+      <option value="entire"
+              i18n="containment: (Annotations...) entirely (...between)">entirely</option>
+      <option value="partial"
+              i18n="containment: (Annotations...) partially (...between)">at least partially</option>
+    </select>
+    <span i18n="containment: (Annotations entirely/partially...) between">between</span>
+  </div>
+  <div class="item" id="start-time"
+       i18n-title title="Which field identifies the start time of the token">
+    <label for="startTimeColumn" i18n>Start time</label>
+    <span>
+      <select id="startTimeColumn" [(ngModel)]="startTimeColumn">
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+  </div>
+  <div class="item" id="end-time"
+       i18n-title title="Which field identifies the end time of the token">
+    <label for="endTimeColumn" i18n>End time</label>
+    <span>
+      <select id="endTimeColumn" [(ngModel)]="endTimeColumn">
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+  </div>
+  <div id="layers">
+    <lib-layer-checkboxes
+      name="layerId"
+      [span]="true" [phrase]="true" [word]="true" [segment]="true"
+      [excludeMainParticipant]="true" [excludeTurn]="true" [excludeUtterance]="true"
+      [(selected)]="layerIds"></lib-layer-checkboxes>
+  </div>
+  <div class="item" id="label-delimiter"
+       i18n-title title="If there's more than one annotation, what should separate the labels?">
+    <label for="labelDelimiter" i18n>Label delimiter</label>
+    <span>
+      <input type="text" [(ngModel)]="labelDelimiter">
+      <label [class.selected]="labelDelimiter == ' '"
+             (click)="labelDelimiter = ' '"
+             i18n-title title="Include a space between labels"
+             i18n="labelDelimiter option">space</label>
+      <label [class.selected]="labelDelimiter == '\t'"
+             (click)="labelDelimiter = '\t'"
+             i18n-title title="Include a tab between labels"
+             i18n="labelDelimiter option">tab</label>
+      <label [class.selected]="labelDelimiter == '\n'"
+             (click)="labelDelimiter = '\n'"
+             i18n-title title="Put each label on its own line"
+             i18n="labelDelimiter option">line break</label>
+    </span>
+  </div>
+  <div class="controls">
+    <lib-button [disabled]="!layerIds || layerIds.length == 0"
+                (press)="process()"
+                [processing]="processing"
+                [error]="processingError"
+                img="cog.svg" icon="⚙"
+                i18n-title title="Start annotation extraction"
+                i18n-label label="Extract Annotations"
+                ></lib-button>
+    <span *ngIf="!layerIds || layerIds.length == 0"
+          class="validation-hint" i18n>Please select at least one layer</span>
+  </div>
+  <lib-task *ngIf="threadId" threadId="{{threadId}}" (finished)="finished($event)"></lib-task>
+</div>

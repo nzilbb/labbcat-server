@@ -5,18 +5,18 @@
        i18n-title title="Extract audio between start and end times in a CSV search results file"
        >Extract audio for time intervals</a></li>
   <li id="export-fragments">
-    <a  [routerLink]="['..','matches','upload']"
+    <a [routerLink]="['..','matches','upload']"
        i18n-title  title="Extract transcript fragments between start and end times"
        >Extract transcripts for time intervals</a></li>
   <li id="get-match-annotations">
-    <a  [routerLink]="['..','matches','upload']"
+    <a [routerLink]="['..','matches','upload']"
        i18n-title title="Extract annotations using a CSV search results file"
        >Extract annotations for search matches</a></li>
   <li id="extract-intervals">
-    <a href="extractIntervals"
+    <a [routerLink]="['..','annotation','intervals']"
        i18n-title title="Extract annotations between start and end times using a CSV search results file"
        >Extract annotations for time intervals</a></li>
-  <li id="process-with-prat"
+  <li id="process-with-praat"
       *ngIf="processWithPraatEnabled">
     <a [routerLink]="['..','praat']"
        i18n-title title="Insert praat-processed data into a CSV search results file"

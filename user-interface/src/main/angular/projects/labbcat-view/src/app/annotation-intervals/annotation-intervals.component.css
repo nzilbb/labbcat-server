@@ -1,0 +1,67 @@
+#file-chooser {
+    min-width: 80vw;
+}
+#file-chooser label {
+    padding-right: 5px;
+}
+#file-chooser label:after {
+    content: ":";
+}
+#file-chooser details {
+    padding-top: 5px;
+}
+details > .advanced {
+    border: 1px solid silver;
+    border-radius: 8px;
+    padding: 10px;
+}
+details > .advanced > ul {
+    padding-top: 5px;
+    padding-inline-start: 29px;
+}
+details > .advanced li ul {
+    padding-inline-start: 40px;
+}
+.header {
+    padding-top: 10px;
+    font-weight: bold;
+}
+#settings-form {
+    margin: auto;
+    width: fit-content;
+}
+#containment > span {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+details[open] > div {
+    animation-name: roll-down;
+    animation-duration: 1s;
+}
+#label-delimiter input {
+    width: 20px;
+}
+#label-delimiter > span {
+    white-space: nowrap;
+}
+#label-delimiter > span > label {
+    color: silver;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+#label-delimiter > span > label::before { content: '('; }
+#label-delimiter > span > label::after { content: ')'; }
+#label-delimiter > span > label.selected {
+    border: 1px solid var(--theme-text-color);
+    color: var(--theme-text-color);
+}
+.item > * {
+    width: 50%;
+    display: inline-block;
+    vertical-align: top;
+}
+.validation-hint {
+    padding-left: 10px;
+    text-decoration: italic;
+    color: var(--theme-warning-color);
+}

@@ -38,6 +38,9 @@
   <servlet><servlet-name>annotation/data.jsp</servlet-name><jsp-file>/jsp/annotation/data.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>annotation/data.jsp</servlet-name><url-pattern>/api/annotation/data</url-pattern></servlet-mapping>
 
+  <servlet><servlet-name>annotation/intervals.jsp</servlet-name><jsp-file>/jsp/annotation/intervals.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>annotation/intervals.jsp</servlet-name><url-pattern>/api/annotation/intervals</url-pattern></servlet-mapping>
+
   <servlet><servlet-name>serialize/fragments.jsp</servlet-name><jsp-file>/jsp/serialize/fragments.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>serialize/fragments.jsp</servlet-name><url-pattern>/api/serialize/fragments</url-pattern></servlet-mapping>
   <servlet-mapping><servlet-name>serialize/fragments.jsp</servlet-name><url-pattern>/api/serialize/fragment</url-pattern></servlet-mapping>

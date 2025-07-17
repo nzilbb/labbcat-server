@@ -1551,6 +1551,7 @@
             threadId: threadId,
             targetOffset: targetOffset,
             annotationsPerLayer: annotationsPerLayer,
+            offsetThreshold: 0, // return all anchors
             csvFieldDelimiter: ",",
             csv_layer: layerIds
           }, (result, errors, messages, call, id) => {
@@ -2688,6 +2689,144 @@
                   messages = [];
 		}
 		onResult(result, errors, messages, "getMatchAnnotations");
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "praat");
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    }
+    
+    /**
+     * Concatenates annotation labels for given labels contained in given time intervals.
+     * @param {file|string} csv The results file to upload. In a browser, this
+     * must be a file object, and in Node, it must be the full path to the file. 
+     * @param {int} transcriptColumn CSV column index of the transcript name. 
+     * @param {int} participantColumn CSV column index of the participant name. 
+     * @param {int} startTimeColumn CSV column index of the start time. 
+     * @param {int} endTimeColumn CSV column index of the end time name.
+     * @param {string[]} layerId IDs of layers to extract.
+     * @param {boolean} passThroughData Whether to include all CSV
+     * columns from the input file in the output file. 
+     * @param {string} labelDelimiter Delimiter to use between
+     * labels. Defaults to a space " ". 
+     * @param {string} containment "entire" if the annotations must be
+     * entirely between the start and end times, "partial" if they can
+     * extend before the start or after the end.  
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute,
+     * <var>threadId</var>. 
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    intervalAnnotations(
+      csv, transcriptColumn, participantColumn, startTimeColumn, endTimeColumn, layerId,
+      passThroughData, labelDelimiter, containment,
+      onResult, onProgress) {
+      if (typeof passThroughData === "function") {
+        // (csv, transcriptColumn, participantColumn, startTimeColumn,
+        // endTimeColumn, layerId, onResult, onProgress)
+        onResult = passThroughData;
+        onProgress = labelDelimiter;
+        passThroughData = false;
+        labelDelimiter = " ";
+        containment = "entire";
+      }
+      
+      if (exports.verbose) {
+        console.log(
+          "intervalAnnotations("
+            +csv+", "+transcriptColumn+", "+participantColumn+", "
+            +startTimeColumn+", "+endTimeColumn+", "+JSON.stringif(layerIds)+", "
+            +passThroughData+", "+labelDelimiter+", "+containment+")");
+      }
+
+      // create form
+      var fd = new FormData();
+      fd.append("transcriptColumn", transcriptColumn);
+      fd.append("participantColumn", participantColumn);
+      fd.append("startTimeColumn", startTimeColumn);
+      fd.append("endTimeColumn", endTimeColumn);
+      for (let l of layerId) fd.append("layerId", l);
+      fd.append("passThroughData", passThroughData);
+      fd.append("labelDelimiter", labelDelimiter);
+      fd.append("containment", containment);
+
+      if (!runningOnNode) {	
+	fd.append("csv", csv);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "intervalAnnotations";
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);	        
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.open("POST", this.baseUrl + "api/annotation/intervals");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+        var csvName = csv.replace(/.*\//g, "");
+        if (exports.verbose) console.log("csvName: " + csvName);
+	fd.append("csv", 
+		  fs.createReadStream(csv).on('error', function(){
+		    onResult(null, ["Invalid file: " + csvName], [], "praat", csvName);
+		  }), csvName);
+
+	var urlParts = parseUrl(this.baseUrl + "api/praat");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/annotation/intervals");
+          }
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		//console.log('data ' + buffer);
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+                if (exports.verbose) console.log("response: " + responseText);
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "intervalAnnotations");
 	      });
 	    } else {
 	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "praat");
