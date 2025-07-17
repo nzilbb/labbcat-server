@@ -96,11 +96,16 @@ import org.apache.commons.csv.CSVRecord;
  *      <q>application/json</q> </li>
  *  <li><i>csv_layer</i> - (Optional) IDs of which layers to include in the CSV output. This
  *      parameter is specified multiple times for multiple values. </li>
+ *  <li><i>csv_layers</i> - (Optional) Alternative to <i>csv_layer</i> which is a single
+ *      value for all IDs, where the IDs are delimited by a newline character. </li>
  *  <li><i>include_count_...</i> - (Optional) Parameters that specify the number of
  *      annotations on a given layer to return. The name of the paramater is
  *      "include_count_" followed by the layer ID, and the value must be an
  *      integer. Layers for which no include_count_ parameter is specified will include
  *      one annotation in the output (i.e. the first one, if any).</li>
+ *  <li><i>annotationsPerLayer</i> - (Optional) Alternative to <i>include_count_...</i>
+ *      which specifies the number of annotations on all layers to return.
+ *      The value must be an integer. </li>
  *  <li><i>csv_option</i> - (Optional) Additional fields to include in the output. This
  *      parameter is specified multiple times for multiple values, which can include:
  *      <ul>
@@ -129,13 +134,25 @@ import org.apache.commons.csv.CSVRecord;
  *      Use 100 for manually-aligned offsets only, and 0 to return all offsets regardless
  *      of confidence. <br>
  *      If no offsets should be returned at all, specify a value of "none".</li>
- *  <li><i>targetOffset</i> - The distance from the original target of the match, e.g.
+ *  <li><i>targetOffset</i> - (Optional) The distance from the original target of the match, e.g.
  *   <ul>
  *    <li><q>0</q> - find annotations of the match target itself (the default if absent)</li>
  *    <li><q>1</q> - find annotations of the token immediately <em>after</em> match target</li>
  *    <li><q>-1</q> - find annotations of the token immediately <em>before</em> match target</li>
  *   </ul>
  *  </li>
+ *  <li><i>plus</i> - (Optional) When <i>targetOffset</i> is a positive value,
+ *      offset columns are labelled like "Token+1 phonemes" etc.
+ *      But some consumers (I'm looking at you, R) mutate non-alphanumerics,
+ *      converting these into "Token.1.phonemes", removing the sign so positive and
+ *      negative values are indistinguishable.
+ *      So this parameter allows substitutes for "Token+", e.g. Token.plus." </li>
+ *  <li><i>minus</i> - (Optional) When <i>targetOffset</i> is a negative value,
+ *      offset columns are labelled like "Token-1 phonemes" etc.
+ *      But some consumers (I'm looking at you, R) mutate non-alphanumerics,
+ *      converting these into "Token.1.phonemes", removing the sign so positive and
+ *      negative values are indistinguishable.
+ *      So this parameter allows substitutes for "Token-", e.g. Token.minus." </li>
  *  <li><i>todo</i> - (Optional) A legacy parameter whose value can be <q>csv</q> to
  *      specify that the content-type of the result be <q>text/csv</q></li>
  * </ul>
@@ -263,20 +280,19 @@ public class Results extends APIRequestHandler { // TODO unit test
         }
       }
       Integer offsetThreshold = Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC);
-      String threshold = parameters.getString("offsetThreshold");
-      if (threshold != null) {        
+      final String thresholdParameter = parameters.getString("offsetThreshold");
+      if (thresholdParameter != null) {        
         try {
-          offsetThreshold = Integer.valueOf(threshold);
+          offsetThreshold = Integer.valueOf(thresholdParameter);
         } catch(NumberFormatException x) {
-          if (threshold.equalsIgnoreCase("none")) {
-            offsetThreshold = 101; // nno offsets to be returned
+          if (thresholdParameter.equalsIgnoreCase("none")) {
+            offsetThreshold = 101; // no offsets to be returned
           } else {
             contentTypeConsumer.accept("application/json;charset=UTF-8");
             httpStatus.accept(SC_BAD_REQUEST);
             JsonWriter writer = Json.createWriter(out);
             writer.writeObject(
-              failureResult("Invalid offsetThreshold: {0}",
-                            parameters.getString("offsetThreshold")));
+              failureResult("Invalid offsetThreshold: {0}", thresholdParameter));
             writer.close();
             return;
           }
@@ -372,10 +388,28 @@ public class Results extends APIRequestHandler { // TODO unit test
       for (String o : csv_option) options.add(o);
 
       String[] csv_layer = parameters.getStrings("csv_layer");
+      if (csv_layer == null || csv_layer.length == 0) {
+        // csv_layers allows clients that can't send multiple parameters with the same
+        // name (e.g. R's httr) to specify multiple values
+        String csv_layers = parameters.getString("csv_layers");
+        if (csv_layers != null) {
+          csv_layer = csv_layers.split("\n");
+        }
+      }
       final LinkedHashSet<String> layers = new LinkedHashSet<String>();
-      for (String l : csv_layer) layers.add(l);
+      for (String l : csv_layer) {
+        if (schema.getLayer(l) == null) {
+          httpStatus.accept(SC_BAD_REQUEST);
+          JsonWriter writer = Json.createWriter(out);
+          writer.writeObject(
+            failureResult("Invalid layer ID: {0}", l));
+          writer.close();
+          return;
+        }
+        layers.add(l);
+      }
 
-      if (csvOut == null || !includeCsvPreamble) { // not adding to old CSV results
+      if (csvOut == null && !includeCsvPreamble) { // not adding to old CSV results
         // set default options where none were specified
         if (options.size() == 0) { // default options
           options.add("labbcat_title");
@@ -397,6 +431,9 @@ public class Results extends APIRequestHandler { // TODO unit test
         }
       }
 
+      final String annotationsPerLayer = Optional.ofNullable(
+        parameters.getString("annotationsPerLayer")).orElse("1");
+
       // selected layers ordered hierarchically for CSV output
       final LinkedHashMap<String,Integer> csvLayers = new LinkedHashMap<String,Integer>();
       // participant attributes
@@ -407,7 +444,8 @@ public class Results extends APIRequestHandler { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id))
+                .orElse(annotationsPerLayer)));
           });
       // transcript attributes
       schema.getRoot().getChildren().values().stream()
@@ -420,7 +458,8 @@ public class Results extends APIRequestHandler { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id))
+                .orElse(annotationsPerLayer)));
           });
       // span layers
       schema.getRoot().getChildren().values().stream()
@@ -430,7 +469,8 @@ public class Results extends APIRequestHandler { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id))
+                .orElse(annotationsPerLayer)));
           });
       // phrase layers
       schema.getTurnLayer().getChildren().values().stream()
@@ -440,7 +480,8 @@ public class Results extends APIRequestHandler { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id))
+                .orElse(annotationsPerLayer)));
           });
       // word layers
       if (layers.contains(schema.getWordLayerId())) {
@@ -453,14 +494,16 @@ public class Results extends APIRequestHandler { // TODO unit test
         .forEach(id -> {
             csvLayers.put(
               id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
+                Optional.ofNullable(parameters.getString("include_count_"+id))
+                .orElse(annotationsPerLayer)));
           });
       // segment layers
       if (schema.getLayers().containsKey("segment")) {
         if (layers.contains("segment")) {
           csvLayers.put(
             "segment", Integer.valueOf(
-              Optional.ofNullable(parameters.getString("include_count_segment")).orElse("1")));
+              Optional.ofNullable(parameters.getString("include_count_segment"))
+              .orElse(annotationsPerLayer)));
         }
         schema.getLayer("segment").getChildren().values().stream()
           .map(l -> l.getId())
@@ -468,7 +511,8 @@ public class Results extends APIRequestHandler { // TODO unit test
           .forEach(id -> {
               csvLayers.put(
                 id, Integer.valueOf(
-                  Optional.ofNullable(parameters.getString("include_count_"+id)).orElse("1")));
+                  Optional.ofNullable(parameters.getString("include_count_"+id))
+                  .orElse(annotationsPerLayer)));
             });
       }
      
@@ -583,9 +627,9 @@ public class Results extends APIRequestHandler { // TODO unit test
             final Set<String> anchorEndLayers = csvLayers.keySet().stream()
               .filter(layerId -> parameters.getString("share_end_"+layerId) != null)
               .collect(Collectors.toSet());
-            for (String layerId : csvLayers.keySet())
+            for (String layerId : csvLayers.keySet()) {
               
-              if (contentType.startsWith("text/csv")) {
+              // if (contentType.startsWith("text/csv")) {
                 final String finalTargetLayer = targetLayer;
                 // process the data rows
                 store.getMatchAnnotations(
@@ -604,91 +648,116 @@ public class Results extends APIRequestHandler { // TODO unit test
                         jsonOut, csvOut, finalSearchName, preamble, result, agIdToGraph,
                         speakerNumberToName, labbcatTitle, finalDataVersion, store, schema,
                         sqlMatchTranscriptContext, wordsContext, options, layers);
+
+                      // don't output annotations if getting JSON results for new matches
+                      if (csvOut != null || includeCsvPreamble) {
                       
-                      // write the annotations
-                      Iterator<String> layerIds = csvLayers.keySet().stream()
-                        .map(id -> {
-                            Vector<String> reps = new Vector<String>();
-                            for (int i = 0; i < csvLayers.get(id); i++) reps.add(id);
-                            return reps.stream();
-                          })
-                        .flatMap(i -> i)
-                        .iterator();
-                      Layer lastLayer = schema.getWordLayer();
-                      for (Annotation annotation : annotations) {
-                        Layer layer = schema.getLayer(layerIds.next());
+                        // write the annotations
+                        Iterator<String> layerIds = csvLayers.keySet().stream()
+                          .map(id -> {
+                              Vector<String> reps = new Vector<String>();
+                              for (int i = 0; i < csvLayers.get(id); i++) reps.add(id);
+                              return reps.stream();
+                            })
+                          .flatMap(i -> i)
+                          .iterator();
+                        Layer lastLayer = null;
+                        boolean firstLayer = true;
+                        for (Annotation annotation : annotations) {
+                          Layer layer = schema.getLayer(layerIds.next());
                         
-                        // if we've changed layer, finish off the last layer...
-                        if (lastLayer != null && !lastLayer.getId().equals(layer.getId())) {
-                          outputMatchLayerLabels(
-                            csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result, lastLayer);
-                        } // layer changed
-                        
-                        // now output this annotation
-                        if (annotation == null) {
-                          csvOut.print("");
-                          if (offsetsIncluded) {
-                            switch (layer.getAlignment()) { // offsets
-                              case Constants.ALIGNMENT_INTERVAL:
-                                csvOut.print(""); // start
-                                csvOut.print(""); // end
-                                break;
-                              case Constants.ALIGNMENT_INSTANT:
-                                csvOut.print(""); // time
-                                break;
-                              default: 
-                                if (layer.getId().equals(finalTargetLayer)) {
-                                  // always output alignments of target layer
-                                  csvOut.print(""); // start
-                                  csvOut.print(""); // end
-                                }
+                          // if we've changed layer...
+                          if (lastLayer == null
+                              || !lastLayer.getId().equals(layer.getId())) {
+                            if (lastLayer != null) { // finish off the last layer...
+                              if (csvOut != null) {
+                                outputMatchLayerLabels(
+                                  csvOut, schema, sqlMatchLayerLabels, multiWordMatches,
+                                  result, lastLayer);
+                              }
+                              if (jsonOut != null) jsonOut.writeEnd(); // layer
+                            } // there was a previous layer
+                            if (jsonOut != null) { // start new layer
+                              jsonOut.writeStartArray(layer.getId());
                             }
+                          } // layer changed
+                        
+                          // now output this annotation
+                          if (annotation == null) {
+                            if (jsonOut != null) jsonOut.writeNull();
+                            if (csvOut != null) {
+                              csvOut.print("");
+                              if (offsetsIncluded) {
+                                switch (layer.getAlignment()) { // offsets
+                                  case Constants.ALIGNMENT_INTERVAL:
+                                    csvOut.print(""); // start
+                                    csvOut.print(""); // end
+                                    break;
+                                  case Constants.ALIGNMENT_INSTANT:
+                                    csvOut.print(""); // time
+                                    break;
+                                  default: 
+                                    if (layer.getId().equals(finalTargetLayer)) {
+                                      // always output alignments of target layer
+                                      csvOut.print(""); // start
+                                      csvOut.print(""); // end
+                                    }
+                                }
+                              }
+                            } // csvOut
+                          } else {
+                            if (jsonOut != null) {
+                              if (thresholdParameter != null
+                                  && !thresholdParameter.equals("none")) { // include anchors
+                                String[] anchorIds = {
+                                  annotation.getStartId(), annotation.getEndId() };
+                                Anchor[] anchors = store.getAnchors(null, anchorIds);
+                                if (anchors[0].getConfidence() >= finalOffsetThreshold) {
+                                  annotation.put("start", anchors[0].toJson());
+                                }
+                                if (anchors[1].getConfidence() >= finalOffsetThreshold) {
+                                  annotation.put("end", anchors[1].toJson());
+                                }
+                              }
+                              jsonOut.write(annotation.toJson());
+                            } // json
+                            if (csvOut != null) {
+                              assert layer.getId().equals(annotation.getLayerId())
+                                : "layer.getId().equals(annotation.getLayerId()) - "
+                                + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
+                              csvOut.print(annotation.getLabel());
+                              if (offsetsIncluded
+                                  && (layer.getAlignment() != Constants.ALIGNMENT_NONE
+                                      || layer.getId().equals(finalTargetLayer))) { // offsets
+                                String[] anchorIds = {
+                                  annotation.getStartId(), annotation.getEndId() };
+                                Anchor[] anchors = store.getAnchors(null, anchorIds);
+                                for (Anchor anchor : anchors) {
+                                  if (anchor != null && anchor.getOffset() != null
+                                      && anchor.getConfidence() >= finalOffsetThreshold) {
+                                    csvOut.print(anchor.getOffset().toString());
+                                  } else { // no anchor offset available, or not confident enough
+                                    csvOut.print("");
+                                  }
+                                  if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
+                                    // only one offset
+                                    break;
+                                  }
+                                } // next anchor
+                              } // offsets
+                            } // csvOut
+                          } // annotation present
+                          lastLayer = layer;
+                        } // next annotation
+                        if (lastLayer != null) {
+                          if (jsonOut != null) jsonOut.writeEnd(); // layer
+                          if (csvOut != null) {
+                            outputMatchLayerLabels(
+                              csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result,
+                              lastLayer);
                           }
-                        } else {
-                          assert layer.getId().equals(annotation.getLayerId())
-                            : "layer.getId().equals(annotation.getLayerId()) - "
-                            + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
-                          csvOut.print(annotation.getLabel());
-                          if (offsetsIncluded
-                              && (layer.getAlignment() != Constants.ALIGNMENT_NONE
-                                  || layer.getId().equals(finalTargetLayer))) { // offsets
-                            String[] anchorIds = {
-                              annotation.getStartId(), annotation.getEndId() };
-                            Anchor[] anchors = store.getAnchors(null, anchorIds);
-                            for (Anchor anchor : anchors) {
-                              if (anchor != null && anchor.getOffset() != null
-                                  && anchor.getConfidence() >= finalOffsetThreshold) {
-                                csvOut.print(anchor.getOffset().toString());
-                              } else { // no anchor offset available, or not confident enough
-                                csvOut.print("");
-                              }
-                              if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT) {
-                                // only one offset
-                                break;
-                              }
-                            } // next anchor
-                          } // offsets
-                        } // annotation present
-                        lastLayer = layer;
-                      } // next annotation
-                      if (lastLayer != null) {
-                        outputMatchLayerLabels(
-                          csvOut, schema, sqlMatchLayerLabels, multiWordMatches, result, lastLayer);
-                      } // layer changed
-                    } catch(Exception x) {
-                      context.servletLog("ERROR Results-consumer: " + x);
-                      x.printStackTrace(System.err);
-                    }
-                  });
-              } else { // JSON output
-                results.forEachRemaining(matchId -> {
-                    search.keepAlive(); // prevent the task from dying while we're still interested
-                    try {
-                      IdMatch result = new IdMatch(matchId);                
-                      outputMatchStart(
-                        jsonOut, csvOut, finalSearchName, null, result, agIdToGraph,
-                        speakerNumberToName, labbcatTitle, finalDataVersion, store, schema,
-                        sqlMatchTranscriptContext, wordsContext, options, layers);
+                        } // lastLayer not finished yet
+                      } // csv output, or reloaded matches
                     } catch(Exception x) {
                       context.servletLog("ERROR Results-consumer: " + x);
                       x.printStackTrace(System.err);
@@ -696,7 +765,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                       outputMatchEnd(jsonOut, csvOut); // end this match
                     }
                   });
-              } // JSON output
+            }
           } finally {
             outputMatchesEnd(jsonOut, csvOut); // end all matches
             sqlMatchTranscriptContext.close();
