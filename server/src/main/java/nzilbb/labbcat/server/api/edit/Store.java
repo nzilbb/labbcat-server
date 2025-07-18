@@ -513,7 +513,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
     if (errors.size() > 0) return failureResult(errors);
     return successResult(
       store.createAnnotation(id, fromId, toId, layerId, label, confidence, parentId),
-      "Annotation created: {0}", id);
+      "Annotation created: {0}", label);
   }      
    
   /**
@@ -544,7 +544,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
     }
     if (errors.size() > 0) return failureResult(errors);
     store.updateAnnotationLabel(id, annotationId, label, confidence);
-    return successResult(null, "Annotation saved: {0}", id);
+    return successResult(null, "Annotation saved: {0}", label);
   }      
    
   /**
