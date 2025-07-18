@@ -1261,15 +1261,6 @@ export class TranscriptComponent implements OnInit {
         return layer.alignment == 0 && !layer.layer_manager_id;
     }
     
-    editWord(word : Annotation) : boolean {
-        const url = `${this.baseUrl}edit/annotation?annotation_uid=${word.id}`;
-        window.open(
-            url, "word",
-            "height=300,width=400,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
-        ).focus();
-        return false;
-    }
-
     newTag(word : Annotation, layerId : string) : void {
         const tag = word.createTag(layerId, "");
         tag._editing = true;
