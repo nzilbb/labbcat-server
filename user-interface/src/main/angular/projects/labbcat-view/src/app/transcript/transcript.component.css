@@ -204,10 +204,40 @@ nav, nav > div {
 .layer.span .annotation.empty {
     border-top: 1px solid transparent;
 }
-.alignment-0 .annotation:not(:first-child) {
-    position: fixed;
-    opacity: 0;
+.token .layer.alignment-0 {
+    height: 16pt;
+    flex-direction: column-reverse; /* alternatives are listed upwards */
 }
+.alignment-0 .annotation:not(:first-child) {
+    opacity: 0;
+    /* ensure surround annotations don't move when hovering: */
+    border-left: 1px solid var(--theme-background-color);
+    border-right: 1px solid var(--theme-background-color);
+}
+@keyframes fade-tag-up {
+    from {
+        opacity: 0;
+        position: relative;
+        bottom: -50%;
+    }
+    to {
+        end: 0.9;
+        position: relative;
+        bottom: 0%;
+    }
+}
+.alignment-0:hover .annotation:not(:first-child) {
+    opacity: 0.9;
+    background: var(--theme-background-color);
+    animation-name: fade-tag-up;
+    animation-duration: 500ms;
+    border-left: 1px solid;
+    border-top-left-radius: 5px;
+    border-top: 1px solid;
+    border-top-right-radius: 5px;
+    border-right: 1px solid;
+}
+
 .layer.span .annotation label.continued {
     margin-left: 10px;
 }
