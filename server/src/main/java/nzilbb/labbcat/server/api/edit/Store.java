@@ -114,6 +114,22 @@ import org.xml.sax.*;
  </dl>
  </li>
  </ul>
+ <a id="createAnnotation(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Integer,java.lang.String)">
+ <!--   -->
+ </a>
+ <ul class="blockList">
+ <li class="blockList">
+ <h4>/api/edit/store/updateAnnotationLabel</h4>
+ <div class="block">Updates the label of the given annotation.</div>
+ <dl>
+ <dt><span class="paramLabel">Parameters:</span></dt>
+ <dd><code>id</code> - The ID of the transcript.</dd>
+ <dd><code>annotationId</code> - The annotation's ID.</dd>
+ <dd><code>label</code> - The label of the resulting annotation.</dd>
+ <dd><code>confidence</code> - The confidence rating.</dd>
+ </dl>
+ </li>
+ </ul>
  <a id="destroyAnnotation(java.lang.String,java.lang.String)">
  <!--   -->
  </a>
@@ -349,6 +365,8 @@ public class Store extends nzilbb.labbcat.server.api.Store {
          
       if (pathInfo.endsWith("createannotation")) {
         return createAnnotation(parameters, store);
+      } else if (pathInfo.endsWith("updateannotationlabel")) {
+        return updateAnnotationLabel(parameters, store);
       } else if (pathInfo.endsWith("destroyannotation")) {
         return destroyAnnotation(parameters, store);
       } else if (pathInfo.endsWith("saveparticipant")) {
@@ -494,7 +512,39 @@ public class Store extends nzilbb.labbcat.server.api.Store {
     if (parentId == null) errors.add(localize("No parent ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     return successResult(
-      store.createAnnotation(id, fromId, toId, layerId, label, confidence, parentId), null);
+      store.createAnnotation(id, fromId, toId, layerId, label, confidence, parentId),
+      "Annotation created: {0}", id);
+  }      
+   
+  /**
+   * Implementation of {@link nzilbb.labbcat.server.db.SqlGraphStore#updateAnnotationLabel(String,String,String,Integer)}
+   * @param parameters Request parameter map.
+   * @param store A graph store object.
+   * @return A JSON response for returning to the caller.
+   */
+  protected JsonObject updateAnnotationLabel(
+    RequestParameters parameters, SqlGraphStoreAdministration store)
+    throws IOException, StoreException, PermissionException, GraphNotFoundException {
+    Vector<String> errors = new Vector<String>();
+    String id = parameters.getString("id");
+    if (id == null) errors.add(localize("No ID specified."));
+    String annotationId = parameters.getString("annotationId");
+    if (annotationId == null) errors.add(localize("No annotation ID specified."));
+    String label = parameters.getString("label");
+    if (label == null) errors.add(localize("No label specified."));
+    Integer confidence = null;
+    if (parameters.getString("confidence") == null) {
+      errors.add(localize("No confidence specified."));
+    } else {
+      try {
+        confidence = Integer.valueOf(parameters.getString("confidence"));
+      } catch(NumberFormatException x) {
+        errors.add(localize("Invalid confidence: {0}", x.getMessage()));
+      }
+    }
+    if (errors.size() > 0) return failureResult(errors);
+    store.updateAnnotationLabel(id, annotationId, label, confidence);
+    return successResult(null, "Annotation saved: {0}", id);
   }      
    
   /**
@@ -513,7 +563,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
     if (annotationId == null) errors.add(localize("No annotation ID specified."));
     if (errors.size() > 0) return failureResult(errors);
     store.destroyAnnotation(id, annotationId);
-    return successResult(null, "Annotation deleted: {0}", id);
+    return successResult(null, "Annotation deleted: {0}", annotationId);
   }
   
   /**

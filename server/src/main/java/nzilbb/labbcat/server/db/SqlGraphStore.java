@@ -8073,6 +8073,59 @@ public class SqlGraphStore implements GraphStore {
   }
 
   /**
+   * Updates the label of the given annotation.
+   * @param id The ID of the transcript.
+   * @param annotationId The annotation's ID.
+   * @param label The new label.
+   * @param confidence The confidence rating.
+   */
+  public void updateAnnotationLabel(
+    String id, String annotationId, String label, Integer confidence)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    requireEdit();
+    
+    String scope = null;
+    Integer layer_id = null;
+    Long annotation_id = null;
+    try { // most likely a spanning annotation like 'utterance'
+      Object[] o = fmtAnnotationId.parse(annotationId);
+      scope = o[0].toString();
+      layer_id = ((Long)o[1]).intValue();
+      annotation_id = (Long)o[2];
+    } catch(ParseException exception) {
+      throw new StoreException("Invalid annotation ID: " + annotationId);
+    }
+    if (label == null || label.length() == 0)
+      throw new StoreException("Label cannot be blank.");
+    Annotation[] annotations = getMatchingAnnotations("id = '"+annotationId+"'");
+    if (annotations.length < 1)
+      throw new StoreException("Invalid annotation ID: " + annotationId);
+    Annotation annotation = annotations[0];
+    Layer layer = getLayer(annotation.getLayerId());
+    // only word tag layers for now
+    if (!"word".equals(layer.getParentId()) || layer.getAlignment() != 0) 
+      throw new StoreException("Only word tag layers are supported: " + layer.getId());
+    try {
+      String sql = "UPDATE annotation_layer_?"
+        +" SET label = ?, label_status = ?, annotated_by = ?, annotated_when = Now()"
+        +" WHERE annotation_id = ?";
+      PreparedStatement sqlUpdateAnnotation = getConnection().prepareStatement(sql);
+      int p = 1;
+      sqlUpdateAnnotation.setInt(p++, layer_id.intValue());
+      sqlUpdateAnnotation.setString(p++, label);
+      sqlUpdateAnnotation.setInt(p++, confidence);
+      sqlUpdateAnnotation.setString(p++, getUser());
+      sqlUpdateAnnotation.setLong(p++, annotation_id);
+      sqlUpdateAnnotation.executeUpdate();
+      sqlUpdateAnnotation.close();
+    } catch(SQLException exception) {
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
+    }
+  }
+
+  /**
    * Destroys the annotation with the given ID.
    * @param id The ID of the transcript.
    * @param annotationId The annotation's ID.

@@ -41,6 +41,7 @@ export interface Annotation {
     all : (layerId: string) => Annotation[];
     createTag : (layerId, label) => Annotation;
     
+    _editing: boolean;
     _changed: boolean;
     // for spanning annotations that might overlap, how 'deep' (low) is their visualization:
     _depth: number;

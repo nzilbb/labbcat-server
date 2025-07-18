@@ -652,9 +652,42 @@
                   <span *ngFor="let annotation of word.all(l)"
                         id="{{annotation.id}}"
                         [class.highlight]="annotation.id == highlitId"
-                        class="annotation">{{renderLabel(annotation)}}&nbsp;</span>
+                        class="annotation">
+                    <ng-container *ngIf="!annotation._editing">
+                      {{renderLabel(annotation)}}</ng-container>
+                    <ng-container *ngIf="!(editableTagLayer(l) && annotation.ordinal == 1)">&nbsp;</ng-container>
+                    <ng-container *ngIf="editableTagLayer(l) && annotation.ordinal == 1">
+                      <input *ngIf="annotation._editing"
+                             type="text"
+                             i18n-title title="Tag label, or blank to delete"
+                             i18n-placeholder placeholder="Label"
+                             [(ngModel)]="annotation.label"
+                             (keyup)="annotation._changed = true"
+                             (keyup.Enter)="saveTag(annotation)"
+                             [appAutofocus]="true">
+                      <img *ngIf="annotation._editing"
+                           [class.disabled]="!annotation._changed"
+                           class="button save"
+                           (click)="saveTag(annotation)"
+                           i18n-title title="Save changes to tag"
+                           [src]="imagesLocation+(annotation.label?'/save.svg':'/delete.svg')"
+                           [alt]="annotation.label?'💾':'➖'">
+                      <img *ngIf="!annotation._editing"
+                           class="button edit"
+                           (click)="editTag(annotation)"
+                           i18n-title title="Edit tag"
+                           src="{{imagesLocation}}/edit.svg" alt="✏️">
+                    </ng-container>                    
+                  </span>
                   <span *ngIf="word.all(l).length == 0"
-                        class="annotation">&nbsp;</span>
+                        class="annotation">
+                    <ng-container *ngIf="!editableTagLayer(l)">&nbsp;</ng-container>
+                    <img *ngIf="editableTagLayer(l)"
+                         class="button new"
+                         (click)="newTag(word, l)"
+                         i18n-title title="Add new tag"
+                         src="{{imagesLocation}}/add.svg" alt="➕">                    
+                  </span>
                 </span>
               </ng-container>
               <!-- word token -->
@@ -741,15 +774,6 @@
                      i18n-title title="Permalink to word"
                      href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{word.id}}"
                      i18n>Word</a>
-                </div>
-                <div *ngIf="user && user.roles.includes('edit')"
-                     class="item" id="edit-word-option">
-                  <lib-menu-option        
-                    (press)="editWord(word);"
-                    img="edit.svg" icon="✎"
-                    i18n-label label="Edit"
-                    i18n-title title="Edit word token layers"
-                    ></lib-menu-option>
                 </div>
               </div>
               <!-- segment layers -->

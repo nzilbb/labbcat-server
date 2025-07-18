@@ -3947,6 +3947,70 @@
         }, onResult, this.baseUrl+"api/edit/dictionary/add").send();
     }
 
+    /**
+     * Creates an annotation starting at <var>fromId</var> and ending at <var>toId</var>.
+     * @param {string} id The ID of the transcript.
+     * @param {string} fromId The start anchor's ID, which can be null if the layer is a tag layer.
+     * @param {string} toId The end anchor's ID, which can be null if the layer is a tag layer.
+     * @param {string} layerId The layer ID of the resulting annotation.
+     * @param {string} label The label of the resulting annotation.
+     * @param {number} confidence The confidence rating.
+     * @param {string} parentId The new annotation's parent's ID.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which is the new annotation's ID.
+     */
+    createAnnotation(id, fromId, toId, layerId, label, confidence, parentId, onResult) {
+      this.createRequest(
+        "createAnnotation", null, onResult, null, "POST",
+        this.storeEditUrl, "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          id : id,
+          fromId : fromId,
+          toId : toId,
+          layerId : layerId,
+          label : label,
+          confidence : confidence,
+          parentId : parentId
+        }));
+    }
+    
+    /**
+     * Updates the label of the given annotation.
+     * @param {string} id The ID of the transcript.
+     * @param {string} annotationId The annotation's ID.
+     * @param {string} label The new label.
+     * @param {number} confidence The confidence rating.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * null <var>result</var> on success.
+     */
+    updateAnnotationLabel(id, annotationId, label, confidence, onResult) {
+      this.createRequest(
+        "updateAnnotationLabel", null, onResult, null, "POST",
+        this.storeEditUrl, "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          id : id,
+          annotationId : annotationId,
+          label : label,
+          confidence : confidence
+        }));
+    }
+
+    /**
+     * Destroys the annotation with the given ID.
+     * @param {string} id The ID of the transcript.
+     * @param {string} annotationId The annotation's ID.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * null <var>result</var> on success.
+     */
+    destroyAnnotation(id, annotationId, onResult) {
+      this.createRequest(
+        "destroyAnnotation", null, onResult, null, "POST",
+        this.storeEditUrl, "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          id : id,
+          annotationId : annotationId
+        }));
+    }
   } // class LabbcatEdit
   
   // LabbcatAdmin class - read/write "admin" access

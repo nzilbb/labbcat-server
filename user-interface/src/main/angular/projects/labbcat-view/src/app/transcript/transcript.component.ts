@@ -1253,6 +1253,13 @@ export class TranscriptComponent implements OnInit {
         ).focus();
         return false;
     }
+
+    editableTagLayer(layerId : string) : boolean {
+        if (!this.user || !this.user.roles.includes('edit')) return false;
+        const layer = this.transcript.schema.layers[layerId];
+        if (!layer) return false;
+        return layer.alignment == 0 && !layer.layer_manager_id;
+    }
     
     editWord(word : Annotation) : boolean {
         const url = `${this.baseUrl}edit/annotation?annotation_uid=${word.id}`;
@@ -1261,6 +1268,65 @@ export class TranscriptComponent implements OnInit {
             "height=300,width=400,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
         ).focus();
         return false;
+    }
+
+    newTag(word : Annotation, layerId : string) : void {
+        const tag = word.createTag(layerId, "");
+        tag._editing = true;
+    }
+    
+    editTag(tag : Annotation) : void {
+        tag._editing = true;
+    }
+    saveTag(tag : Annotation) : void {
+        if (!tag.id || tag.id.startsWith("+")) {
+            if (!tag.label) { // delete without first saving
+                tag._editing = false;
+                const annotation = tag as any;
+                // remove the annotation from the graph
+                annotation.parent[tag.layerId]
+                    = annotation.parent[tag.layerId].filter(a=>a != tag)
+                annotation.layer.annotations
+                    = annotation.layer.annotations.filter(a=>a != tag);
+            } else if (confirm("Are you sure you want to create this tag?")) { // TODO i18n
+                this.labbcatService.labbcat.createAnnotation(
+                    this.transcript.id, tag.startId, tag.endId, tag.layerId, tag.label, 100,
+                    tag.parentId, (annotationId, errors, messages) => {
+                        if (errors) errors.forEach(m => this.messageService.error(m));
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        if (annotationId) {
+                            tag.id = annotationId;
+                            tag._editing = false;
+                        }
+                    });
+            }
+        } else if (!tag.label) {
+            if (confirm("Are you sure you want to delete this tag?")) { // TODO i18n
+                this.labbcatService.labbcat.destroyAnnotation(
+                    this.transcript.id, tag.id, (r, errors, messages) => {
+                        if (errors) errors.forEach(m => this.messageService.error(m));
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        if (!errors || !errors.length) {
+                            tag._editing = false;
+                            const annotation = tag as any;
+                            // remove the annotation from the graph
+                            annotation.parent[tag.layerId]
+                                = annotation.parent[tag.layerId].filter(a=>a != tag)
+                            annotation.layer.annotations
+                                = annotation.layer.annotations.filter(a=>a != tag);
+                        }
+                    });
+            }
+        } else {
+            if (confirm("Are you sure you want to save this tag?")) { // TODO i18n
+                this.labbcatService.labbcat.updateAnnotationLabel(
+                    this.transcript.id, tag.id, tag.label, 100, (r, errors, messages) => {
+                        if (errors) errors.forEach(m => this.messageService.error(m));
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        if (!errors) tag._editing = false;
+                    });
+            }
+        }
     }
     
     showGenerateLayerSelection = false;
