@@ -1,4 +1,7 @@
 <lib-wait *ngIf="loading"></lib-wait>
+<lib-task *ngIf="generationThreadId"
+          [threadId]="generationThreadId"
+          (finished)="generationFinished()"></lib-task>
 
 <h1 id="title">{{id}}</h1>
 
@@ -483,7 +486,7 @@
                     img="save.svg" icon="✅"
                     i18n-label label="Import Changes"
                     i18n-title title="Import changes made to TextGrid into LaBB-CAT"
-                    ></lib-button>        
+                    ></lib-button>
           <!-- phrase/span layers starting and ending with this utterance  -->
           <ng-container *ngFor="let l of selectedLayerIds">
             <span *ngIf="isSpanningLayer(transcript.schema.layers[l]) && !isEmpty(transcript.schema.layers[l])"
@@ -528,7 +531,27 @@
               </ng-container>
             </span>
           </ng-container>
-        <div class="words">
+          <div *ngIf="utterance.id == editingUtteranceId"
+               class="utterance-editor"
+               i18n-title title="Edit the transcript of this utterance">
+            <input type="text"
+                   i18n-placeholder placeholder="Utterance transcript cannot be blank"
+                   [(ngModel)]="editingUtteranceText"
+                   (keyup.Enter)="saveUtterance()"
+                   [appAutofocus]="true">
+            <img *ngIf="editingUtteranceText == editingUtteranceTextOriginal"
+                 class="button save"
+                 (click)="saveUtterance()"
+                 i18n-title title="Cancel editing transcript"
+                 src="{{imagesLocation}}/cross-mark.svg" alt="×">
+            <img *ngIf="editingUtteranceText != editingUtteranceTextOriginal"
+                 class="button save"
+                 (click)="saveUtterance()"
+                 i18n-title title="Save changes to transcript"
+                 src="{{imagesLocation}}/save.svg" alt="💾">
+          </div>
+        <div *ngIf="utterance.id != editingUtteranceId"
+             class="words">
           <span *ngIf="utterance.prependDummyToken" class="token dummy">
             <!-- phrase/span layers starting with this utterance and ending with the first word  -->
             <ng-container *ngFor="let l of selectedLayerIds">
@@ -660,7 +683,7 @@
                       <input *ngIf="annotation._editing"
                              type="text"
                              i18n-title title="Tag label, or blank to delete"
-                             i18n-placeholder placeholder="Label"
+                             placeholder="{{l}}"
                              [(ngModel)]="annotation.label"
                              (keyup)="annotation._changed = true"
                              (keyup.Enter)="saveTag(annotation)"

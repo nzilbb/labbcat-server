@@ -527,8 +527,8 @@ export class TranscriptComponent implements OnInit {
         // correctionEnabled if they're not an edit user
         // and requests to the corrections URL return 200 status (not 400 error)
         if (!this.user.roles.includes("edit")) {
-            this.labbcatService.labbcat.createRequest(
-                "correction", null, (r, errors, messages) => {
+            this.labbcatService.labbcat.utteranceSuggestion(
+                null, null, null, (r, errors, messages) => {
                     if (!errors) {
                         this.correctionEnabled = true;
                     }
@@ -1229,28 +1229,111 @@ export class TranscriptComponent implements OnInit {
         ).focus();
         return false;
     }
-    
+
+    generationThreadId : string;
+    editingUtteranceId : string;
+    editingUtteranceTextOriginal : string;
+    editingUtteranceText : string;
+    /** Edit Utterance menu option handler */
     editUtterance(utterance : Annotation) : boolean {
-        const url = this.baseUrl
-            +"edit/correction"
-            +"?id="+encodeURIComponent(this.transcript.id)
-            +"&annotation_uid="+utterance.id;
-        window.open(
-            url, "correction",
-            "height=350,width=600,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
-        ).focus();
+        this.loading = true;
+        if (!this.user.roles.includes("edit")) { // suggestion
+            this.labbcatService.labbcat.utteranceForSuggestion(
+                this.transcript.id, utterance.id, (result, errors, messages) => {
+                    this.loading = false;
+                    if (errors) errors.forEach(m => 
+                        this.messageService.error(`Load anchors: ${m}`));
+                    if (messages) messages.forEach(m =>
+                        this.messageService.info(`Load anchors: ${m}`));
+                    if (result.text) {
+                        this.editingUtteranceId = utterance.id;
+                        this.editingUtteranceTextOriginal = result.text;
+                        this.editingUtteranceText = this.editingUtteranceTextOriginal;
+                    }
+                });
+        } else { // correction
+            this.labbcatService.labbcat.utteranceForCorrection(
+                this.transcript.id, utterance.id, (result, errors, messages) => {
+                    this.loading = false;
+                    if (errors) errors.forEach(m => 
+                        this.messageService.error(`Load anchors: ${m}`));
+                    if (messages) messages.forEach(m =>
+                        this.messageService.info(`Load anchors: ${m}`));
+                    if (result.text) {
+                        this.editingUtteranceId = utterance.id;
+                        this.editingUtteranceTextOriginal = result.text;
+                        this.editingUtteranceText = this.editingUtteranceTextOriginal;
+                    }
+                });
+        }
         return false;
     }
     
+    /** Utterance save button handler */
+    saveUtterance() : void {
+        if (this.editingUtteranceText == this.editingUtteranceTextOriginal) {
+            // no changes, stop editing
+            this.editingUtteranceId
+                = this.editingUtteranceText = this.editingUtteranceTextOriginal = null;
+        } else { // there are changes to save
+            if (!this.user.roles.includes("edit")) { // suggest
+                this.loading = true;
+                this.labbcatService.labbcat.utteranceSuggestion(
+                    this.transcript.id, this.editingUtteranceId, this.editingUtteranceText,
+                    (result, errors, messages) => {
+                        this.loading = false;
+                        if (errors) errors.forEach(m => 
+                            this.messageService.error(m));
+                        if (messages) messages.forEach(m =>
+                            this.messageService.info(m));
+                        this.editingUtteranceId
+                            = this.editingUtteranceText
+                            = this.editingUtteranceTextOriginal = null;
+                    });
+            } else { // save
+                this.loading = true;
+                this.labbcatService.labbcat.utteranceCorrection(
+                    this.transcript.id, this.editingUtteranceId, this.editingUtteranceText,
+                    (result, errors, messages) => {
+                        this.loading = false;
+                        if (errors) errors.forEach(m => 
+                            this.messageService.error(m));
+                        if (messages) messages.forEach(m =>
+                            this.messageService.info(m));
+                        this.editingUtteranceId
+                            = this.editingUtteranceText
+                            = this.editingUtteranceTextOriginal = null;
+                        this.generationThreadId = result.threadId;
+                    });
+            }
+        } // there are changes to save
+    }
+    
+    /** Layer generation finished handler */
+    generationFinished() : void {
+        this.messageService.info("Layer generation finished"); // TODO i18n
+        setTimeout(()=>{
+            this.generationThreadId = "";
+            setTimeout(()=>{
+                document.location.reload();
+            }, 1000);
+        }, 1000);
+    }
+    
     suggestCorrection(utterance : Annotation) : boolean {
-        const url = this.baseUrl
-            +"correction"
-            +"?id="+encodeURIComponent(this.transcript.id)
-            +"&annotation_uid="+utterance.id;
-        window.open(
-            url, "correction",
-            "height=350,width=600,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
-        ).focus();
+        this.labbcatService.labbcat.readUtteranceTranscript(
+            this.transcript.id, utterance.id, (result, errors, messages) => {
+                this.loading = false;
+                if (errors) errors.forEach(m => 
+                    this.messageService.error(`Load anchors: ${m}`));
+                if (messages) messages.forEach(m =>
+                    this.messageService.info(`Load anchors: ${m}`));
+                if (result.text) {
+                    this.editingUtteranceId = utterance.id;
+                    this.editingUtteranceTextOriginal = result.text;
+                    this.editingUtteranceText = this.editingUtteranceTextOriginal;
+                }
+            });
         return false;
     }
 
@@ -1262,14 +1345,17 @@ export class TranscriptComponent implements OnInit {
     }
     
     newTag(word : Annotation, layerId : string) : void {
+        if (!this.user.roles.includes("edit")) return;
         const tag = word.createTag(layerId, "");
         tag._editing = true;
     }
     
     editTag(tag : Annotation) : void {
+        if (!this.user.roles.includes("edit")) return;
         tag._editing = true;
     }
     saveTag(tag : Annotation) : void {
+        if (!this.user.roles.includes("edit")) return;
         if (!tag.id || tag.id.startsWith("+")) {
             if (!tag.label) { // delete without first saving
                 tag._editing = false;
@@ -1280,9 +1366,11 @@ export class TranscriptComponent implements OnInit {
                 annotation.layer.annotations
                     = annotation.layer.annotations.filter(a=>a != tag);
             } else if (confirm("Are you sure you want to create this tag?")) { // TODO i18n
+                this.loading = true;
                 this.labbcatService.labbcat.createAnnotation(
                     this.transcript.id, tag.startId, tag.endId, tag.layerId, tag.label, 100,
                     tag.parentId, (annotationId, errors, messages) => {
+                        this.loading = false;
                         if (errors) errors.forEach(m => this.messageService.error(m));
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         if (annotationId) {
@@ -1293,8 +1381,10 @@ export class TranscriptComponent implements OnInit {
             }
         } else if (!tag.label) {
             if (confirm("Are you sure you want to delete this tag?")) { // TODO i18n
+                this.loading = true;
                 this.labbcatService.labbcat.destroyAnnotation(
                     this.transcript.id, tag.id, (r, errors, messages) => {
+                        this.loading = false;
                         if (errors) errors.forEach(m => this.messageService.error(m));
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         if (!errors || !errors.length) {
@@ -1310,8 +1400,10 @@ export class TranscriptComponent implements OnInit {
             }
         } else {
             if (confirm("Are you sure you want to save this tag?")) { // TODO i18n
+                this.loading = true;
                 this.labbcatService.labbcat.updateAnnotationLabel(
                     this.transcript.id, tag.id, tag.label, 100, (r, errors, messages) => {
+                        this.loading = false;
                         if (errors) errors.forEach(m => this.messageService.error(m));
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         if (!errors) tag._editing = false;

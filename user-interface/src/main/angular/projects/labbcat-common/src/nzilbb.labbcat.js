@@ -2911,6 +2911,47 @@
         .send();
     }
     
+    /**
+     * Gets the transcript of a given utterance, for possible correction suggestion using
+     * {@link #utteranceSuggestion}.
+     * @param {string} transcriptId The ID of the transcript.
+     * @param {string} utteranceId The utterance's ID.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> with a "text" attribute, which is the plain-text
+     * representation of the utterance, including word annotations and possibly
+     * noise, comment, pronunciation etc. annotations using the configured transcript
+     * conventions.
+     */
+    utteranceForSuggestion(transcriptId, utteranceId, onResult) {
+      this.createRequest(
+        "utteranceForSuggestion", {
+          transcriptId : transcriptId,
+          utteranceId : utteranceId
+        }, onResult, this.baseUrl+"api/utterance/correction").send();
+    }
+    
+    /**
+     * Submits a suggestion for correction of the transcript of a given utterance.
+     * @param {string} transcriptId The ID of the transcript.
+     * @param {string} utteranceId The utterance's ID.
+     * @param {string} text The corrected version of the transcript for the utterance.
+     * This may include noise, comment, pronunciation etc. annotations using the
+     * configured transcript conventions.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> with a "threadId" attribute, which is the ID of the task
+     * regenerating layers based on the new transcript.
+     */
+    utteranceSuggestion(transcriptId, utteranceId, text, onResult) {
+      this.createRequest(
+        "utterance/correction", null, onResult, null, "POST", // TODO should be PUT
+        this.baseUrl+"api/", "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          transcriptId : transcriptId,
+          utteranceId : utteranceId,
+          text : text
+        }));
+    }
+    
   } // class LabbcatView
 
   // LabbcatEdit class - read/write "edit" access
@@ -4009,6 +4050,55 @@
         .send(this.parametersToQueryString({
           id : id,
           annotationId : annotationId
+        }));
+    }
+    
+    /**
+     * Gets the transcript of a given utterance, for possible correction using
+     * {@link #utteranceCorrection}.
+     * @param {string} transcriptId The ID of the transcript.
+     * @param {string} utteranceId The utterance's ID.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> with a "text" attribute, which is the plain-text
+     * representation of the utterance, including word annotations and possibly
+     * noise, comment, pronunciation etc. annotations using the configured transcript
+     * conventions.
+     */
+    utteranceForCorrection(transcriptId, utteranceId, onResult) {
+      this.createRequest(
+        "readUtteranceTranscript", {
+          transcriptId : transcriptId,
+          utteranceId : utteranceId
+        }, onResult, this.baseUrl+"api/edit/utterance/correction").send();
+    }
+    
+    /**
+     * Corrects the transcript of a given utterance.
+     * @param {string} transcriptId The ID of the transcript.
+     * @param {string} utteranceId The utterance's ID.
+     * @param {string} text The corrected version of the transcript for the utterance.
+     * This may include noise, comment, pronunciation etc. annotations using the
+     * configured transcript conventions.
+     * @param {boolean} suppressGeneration (optional) false (the default) to run
+     * automatic layer generation, true to suppress automatic layer generation.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> with a "threadId" attribute, which is the ID of the task
+     * regenerating layers based on the new transcript.
+     */
+    utteranceCorrection(transcriptId, utteranceId, text, suppressGeneration, onResult) {
+      if (typeof suppressGeneration === "function") {
+        // utteranceCorrection(transcriptId, utteranceId, text, onResult)
+        onResult = suppressGeneration;
+        suppressGeneration = false
+      }
+      this.createRequest(
+        "utterance/correction", null, onResult, null, "POST", // TODO should be PUT
+        this.baseUrl+"api/edit/", "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          transcriptId : transcriptId,
+          utteranceId : utteranceId,
+          text : text,
+          suppressGeneration : suppressGeneration
         }));
     }
   } // class LabbcatEdit

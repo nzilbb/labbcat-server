@@ -210,6 +210,8 @@ nav, nav > div {
 }
 .alignment-0 .annotation:not(:first-child) {
     opacity: 0;
+    /* ensure that hovering *above* the visible tag doesn't make invisible ones appear */
+    height: 0px; 
     /* ensure surround annotations don't move when hovering: */
     border-left: 1px solid var(--theme-background-color);
     border-right: 1px solid var(--theme-background-color);
@@ -245,23 +247,47 @@ img.button.save.disabled {
     animation-duration: 500ms;
 }
 
+.utterance-editor {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    animation-name: fade-in;
+    animation-duration: 2s;
+}
+.utterance-editor input {
+    text-align: center;
+    flex-grow: 1;
+}
+.utterance-editor img.button.save {
+    align-self: flex-end;
+}
+
 @keyframes fade-tag-up {
-    from {
+    0% { /* 0-50% no change, so that there's a short delay before anything happens,
+            otherwise it's alarming when you're just moving the mouse around */
+        opacity: 0;
+        height: 0px;
+        position: relative;
+        bottom: -50%;
+    }
+    50% {
         opacity: 0;
         position: relative;
         bottom: -50%;
     }
-    to {
+    100% {
         end: 0.9;
         position: relative;
         bottom: 0%;
     }
 }
 .alignment-0:hover .annotation:not(:first-child) {
+    /* undo height: 0px */
+    height: revert;
     opacity: 0.9;
     background: var(--theme-background-color);
     animation-name: fade-tag-up;
-    animation-duration: 500ms;
+    animation-duration: 1s;
     border-left: 1px solid;
     border-top-left-radius: 5px;
     border-top: 1px solid;
