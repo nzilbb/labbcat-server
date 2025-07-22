@@ -31,6 +31,13 @@
           </select>
         </span>
       </div>
+      <div class="item" id="first-only"
+           i18n-title title="If the word has multiple entries in the dictionary, include only the first one.">
+        <label for="firstOnly" i18n>First entry only</label>
+        <span>
+          <input id="firstOnly" name="firstOnly" type="checkbox">
+        </span>
+      </div>
     </div>
     <div class="controls">
       <lib-button (press)="lookup()"
