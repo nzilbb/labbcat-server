@@ -1,0 +1,46 @@
+<p *ngIf="!managerId" class="error" i18n>No layer manager specified</p>
+<p *ngIf="!dictionaryId" class="error" i18n>No dictionary specified</p>
+<div id="dictionary" *ngIf="managerId && dictionaryId">
+  <h1 id="title"><span i18n="Lookup Dictionary: {dictionary}">Lookup Dictionary:</span> {{managerId}} - {{dictionaryId}}</h1>
+  
+  <form #form method="POST" id="frm"
+        enctype="multipart/form-data"
+        action="{{baseUrl}}api/dictionary">
+    <input name="managerId" type="hidden" value="{{managerId}}">
+    <input name="dictionaryId" type="hidden" value="{{dictionaryId}}">
+    <div id="file-chooser">
+      <label for="uploadfile" i18n>Upload word list from file</label>
+      <input type="file" id="uploadfile" name="uploadfile"
+             (change)="selectFile($event.target.files)" autofocus>
+      <span *ngIf="rowCount" id="rowCount" i18n>{{rowCount}} rows</span>
+      <details *ngIf="!headers">
+        <summary i18n>What should the file look like?</summary>
+        <div class="advanced">
+          <span i18n>Comma-separated values (.csv) file a column containing word you want to look up in the dictionary.</span>
+        </div>
+      </details>
+    </div>
+    <div id="settings-form" *ngIf="headers">
+      <div class="item" id="word"
+           i18n-title title="Which field identifies the word to look up">
+        <label for="wordColumn" i18n>Word column</label>
+        <span>
+          <select id="wordColumn" name="wordColumn" [(ngModel)]="wordColumn">
+            <ng-container *ngFor="let field of headers; let f = index">
+              <option value="{{f}}">{{field}}</option></ng-container>
+          </select>
+        </span>
+      </div>
+    </div>
+    <div class="controls">
+      <lib-button (press)="lookup()"
+                  [disabled]="!csv"
+                  img="book.svg" icon="📗"
+                  i18n-title title="Lookup words"
+                  i18n-label label="Lookup"
+                  ></lib-button>
+      <span *ngIf="!csv"
+            class="validation-hint" i18n>Please select a word list file.</span>
+    </div>
+  </form>
+</div>

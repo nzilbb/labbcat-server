@@ -26,6 +26,8 @@ import { VersionComponent } from './version/version.component';
 import { CreditsComponent } from './credits/credits.component';
 import { StatisticsComponent } from './statistics/statistics.component';
 import { HomeComponent } from './home/home.component';
+import { DictionariesComponent } from './dictionaries/dictionaries.component';
+import { DictionaryComponent } from './dictionary/dictionary.component';
 
 @NgModule({
   declarations: [
@@ -48,7 +50,9 @@ import { HomeComponent } from './home/home.component';
       VersionComponent,
       CreditsComponent,
       StatisticsComponent,
-      HomeComponent
+      HomeComponent,
+      DictionariesComponent,
+      DictionaryComponent
   ],
   imports: [
       BrowserModule,
@@ -76,6 +80,8 @@ import { HomeComponent } from './home/home.component';
           { path: 'transcript', component: TranscriptComponent },
           { path: 'text', component: TranscriptComponent },
           { path: 'extract', component: MenuExtractComponent },
+          { path: 'dictionaries', component: DictionariesComponent },
+          { path: 'dictionary', component: DictionaryComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

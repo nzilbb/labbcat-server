@@ -2378,6 +2378,17 @@
     }
 
     /**
+     * Lists generic dictionaries published by layer managers.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be an object whose keys are layer manager IDs, with
+     * each value being an array of generic dictionary IDs for that layer manager.
+     */
+    getDictionaries(onResult) {
+      this.createRequest(
+        "getDictionaries", null, onResult, this.baseUrl+"api/dictionaries").send();
+    }
+
+    /**
      * For HTK dictionary-filling, this looks up some given words to get their entries.
      * @param {string} layerId The dictionary of this layer will be used.
      * @param {string} labels Space-separated list of words to look up.

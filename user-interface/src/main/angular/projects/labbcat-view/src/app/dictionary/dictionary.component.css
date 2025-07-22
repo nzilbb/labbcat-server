@@ -1,3 +1,7 @@
+#dictionary {
+    margin: auto;
+    width: 75vw;
+}
 #file-chooser {
     min-width: 80vw;
 }
@@ -27,33 +31,14 @@ details > .advanced li ul {
     font-weight: bold;
 }
 #settings-form {
-    margin: auto;
     width: fit-content;
 }
-#containment > span {
-    padding-left: 5px;
-    padding-right: 5px;
+#rowCount {
+    padding-left: 1ch;
 }
 details[open] > div {
     animation-name: roll-down;
     animation-duration: 1s;
-}
-#label-delimiter input {
-    width: 20px;
-}
-#label-delimiter > span {
-    white-space: nowrap;
-}
-#label-delimiter > span > label {
-    color: silver;
-    margin-left: 5px;
-    margin-right: 5px;
-}
-#label-delimiter > span > label::before { content: '('; }
-#label-delimiter > span > label::after { content: ')'; }
-#label-delimiter > span > label.selected {
-    border: 1px solid var(--theme-text-color);
-    color: var(--theme-text-color);
 }
 .item > * {
     width: 50%;
@@ -65,7 +50,3 @@ details[open] > div {
     text-decoration: italic;
     color: var(--theme-warning-color);
 }
-#rowCount {
-    padding-left: 1ch;
-}
-

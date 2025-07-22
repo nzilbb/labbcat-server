@@ -1,0 +1,19 @@
+<h1 id="title" i18n>Dictionaries</h1>
+
+<div id="dictionaries">
+  <div *ngIf="managerIds.length == 0" i18n>There are currently no dictionaries.</div>
+  <dl *ngFor="let managerId of managerIds">
+    <dt>{{managerId}}</dt>
+    <dd>
+      <ul>
+        <li *ngFor="let dictionaryId of dictionaries[managerId]">
+          <a [routerLink]="['..','dictionary']"
+             [queryParams]="{managerId: managerId, dictionaryId: dictionaryId}"
+             i18n-title title="Lookup entries in this dictionary">
+            {{dictionaryId}}
+          </a>
+        </li>
+      </ul>
+    </dd>
+  </dl>
+</div>
