@@ -23,6 +23,9 @@
   <servlet><servlet-name>user.jsp</servlet-name><jsp-file>/jsp/user.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>user.jsp</servlet-name><url-pattern>/api/user</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>corpus.jsp</servlet-name><jsp-file>/jsp/corpus.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>corpus.jsp</servlet-name><url-pattern>/api/corpus/*</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>attributes.jsp</servlet-name><jsp-file>/jsp/attributes.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>attributes.jsp</servlet-name><url-pattern>/api/attributes</url-pattern></servlet-mapping>
   

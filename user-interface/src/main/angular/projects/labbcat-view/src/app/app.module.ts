@@ -28,6 +28,7 @@ import { StatisticsComponent } from './statistics/statistics.component';
 import { HomeComponent } from './home/home.component';
 import { DictionariesComponent } from './dictionaries/dictionaries.component';
 import { DictionaryComponent } from './dictionary/dictionary.component';
+import { CorpusComponent } from './corpus/corpus.component';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,8 @@ import { DictionaryComponent } from './dictionary/dictionary.component';
       StatisticsComponent,
       HomeComponent,
       DictionariesComponent,
-      DictionaryComponent
+      DictionaryComponent,
+      CorpusComponent
   ],
   imports: [
       BrowserModule,
@@ -82,6 +84,8 @@ import { DictionaryComponent } from './dictionary/dictionary.component';
           { path: 'extract', component: MenuExtractComponent },
           { path: 'dictionaries', component: DictionariesComponent },
           { path: 'dictionary', component: DictionaryComponent },
+          { path: 'corpus', component: CorpusComponent },
+          { path: 'corpus/:id', component: CorpusComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

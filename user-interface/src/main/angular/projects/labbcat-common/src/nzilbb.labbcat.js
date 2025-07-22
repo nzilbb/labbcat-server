@@ -494,6 +494,17 @@
     }
     
     /**
+     * Gets statistics about a given corpus.
+     * @param {string} id ID of the corpus.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be:  {string[]} A list of corpus IDs.
+     */
+    getCorpusInfo(id, onResult) {
+      this.createRequest("getCorpusInfo", null, onResult, `${this.baseUrl}api/corpus/${id}`)
+        .send();
+    }
+    
+    /**
      * Gets a list of participant IDs.
      * @param {resultCallback} onResult Invoked when the request has returned a
      * <var>result</var> which will be: {string[]} A list of participant IDs.

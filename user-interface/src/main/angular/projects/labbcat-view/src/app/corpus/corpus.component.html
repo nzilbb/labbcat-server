@@ -1,0 +1,8 @@
+<h1 id="title">{{id}}</h1>
+
+<div *ngIf="fields" id="corpus-info" class="list">
+  <div *ngFor="let stat of fields" class="item">
+    <span class="label">{{stat}}</span>
+    <span class="value">{{info[stat]}}</span>
+  </div>
+</div>

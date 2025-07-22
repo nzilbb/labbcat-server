@@ -12,6 +12,9 @@ import { AdminComponent } from '../admin-component';
 export class AdminCorporaComponent extends AdminComponent implements OnInit {
     languages: any[];
     rows: Corpus[];
+    corpusInfoId: string;
+    corpusInfoFields: string[];
+    corpusInfo: { [stat: string]: string };
     
     constructor(
         labbcatService: LabbcatService,
@@ -116,5 +119,16 @@ export class AdminCorporaComponent extends AdminComponent implements OnInit {
                 break; // only need to find one
             }
         } // next row
+    }
+
+    info(corpus: Corpus) : void {
+        this.labbcatService.labbcat.getCorpusInfo(
+            corpus.corpus_name, (info, errors, messages) => {
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
+                this.corpusInfoFields = Object.keys(info);
+                this.corpusInfo = info;
+                this.corpusInfoId = corpus.corpus_name;
+            });
     }
 }
