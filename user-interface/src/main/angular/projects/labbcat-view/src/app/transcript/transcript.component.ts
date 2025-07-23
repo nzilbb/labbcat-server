@@ -43,6 +43,7 @@ export class TranscriptComponent implements OnInit {
     displayLayerIds: boolean;
     displayAttributePrefixes: boolean;
 
+    defaultLayerIds = ["noise","comment"];
     selectedLayerIds : string[];
     interpretedRaw: { [key: string] : boolean };
 
@@ -127,7 +128,7 @@ export class TranscriptComponent implements OnInit {
                     if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
                         layerIds = [...new Set(JSON.parse(sessionStorage.getItem("selectedLayerIds")))];
                     }
-                    if (!layerIds) layerIds = ["noise","comment"]; // noise and comment by default
+                    if (!layerIds) layerIds = this.defaultLayerIds;
                     if (layerIds) {
                         if (Array.isArray(layerIds)) {
                             this.layersChanged(layerIds);
@@ -652,7 +653,12 @@ export class TranscriptComponent implements OnInit {
                             if (errors) errors.forEach(m => 
                                 this.messageService.error(`${layerId}: ${m}`));
                             if (messages) {
-                                messages.forEach(m => this.messageService.info(`${layerId}: ${m}`));
+                                messages.forEach(m => {
+                                    // hide 'no annotations' messages for default layers
+                                    if (!this.defaultLayerIds.includes(layerId)) {
+                                        this.messageService.info(`${layerId}: ${m}`);
+                                    }
+                                });
                                 if (messages.includes("There are no annotations.")) {
                                     this.layerStyles[layerId] = { color: "silver" };
                                 }
