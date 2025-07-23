@@ -69,7 +69,7 @@ public class Corpus extends APIRequestHandler {
   
   /**
    * Generate the response to a request.
-   * <p> This returns information about the current user - their ID and the roles they have.
+   * <p> This returns statistical information about the given corpus.
    * @param pathInfo The URL path from which the upload ID can be inferred.
    * @param httpStatus Receives the response status code, in case of error.
    * @return JSON-encoded object representing the response

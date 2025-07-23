@@ -33,9 +33,23 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     ) { }
     
     ngOnInit(): void {
+        if (!this.threadId) { // not thread ID given, might come from URL
+            this.getIdFromUrl();
+        }
         window.setTimeout(()=>{
             if (this.progressBar) this.progressBar.nativeElement.scrollIntoView();
         }, 500);
+    }
+    getIdFromUrl() : void {
+        this.threadId = this.route.snapshot.paramMap.get('threadId');
+        if (this.threadId) {
+            this.readTaskStatus();
+        } else {
+            this.route.queryParams.subscribe((params) => {
+                this.threadId = params["threadId"];
+                this.readTaskStatus();
+            });
+        }
     }
     ngOnChanges(changes: SimpleChanges): void {
         if (!this.threadId) {

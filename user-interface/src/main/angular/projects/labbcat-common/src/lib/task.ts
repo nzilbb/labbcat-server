@@ -1,9 +1,10 @@
 export interface Task {
     threadId: string;
     threadName: string;
+    who: string;
+    creationTime: string;
     resultUrl?: string;
     resultText?: string;
-    seriesId: string;
     running: boolean;
     duration: number;
     percentComplete: number;
@@ -12,6 +13,9 @@ export interface Task {
     lastException?: string;
     stackTrace?: string;
     // may be present for search threads:
+    size: number;
+    seriesId?: string;
+    layers?: string[];
     targetLayer?: string; 
     csv?: string;
     csvColumns?: string[];

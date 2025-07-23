@@ -29,6 +29,7 @@ import { HomeComponent } from './home/home.component';
 import { DictionariesComponent } from './dictionaries/dictionaries.component';
 import { DictionaryComponent } from './dictionary/dictionary.component';
 import { CorpusComponent } from './corpus/corpus.component';
+import { TasksComponent } from './tasks/tasks.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import { CorpusComponent } from './corpus/corpus.component';
       HomeComponent,
       DictionariesComponent,
       DictionaryComponent,
-      CorpusComponent
+      CorpusComponent,
+      TasksComponent
   ],
   imports: [
       BrowserModule,
@@ -70,7 +72,6 @@ import { CorpusComponent } from './corpus/corpus.component';
           { path: 'search', component: SearchComponent },
           { path: 'matches', component: MatchesComponent },
           { path: 'matches/upload', component: MatchesUploadComponent },
-          { path: 'task', component: TaskComponent },
           { path: 'praat', component: PraatComponent },
           { path: 'annotation/intervals', component: AnnotationIntervalsComponent },
           { path: 'participants', component: ParticipantsComponent },
@@ -86,6 +87,9 @@ import { CorpusComponent } from './corpus/corpus.component';
           { path: 'dictionary', component: DictionaryComponent },
           { path: 'corpus', component: CorpusComponent },
           { path: 'corpus/:id', component: CorpusComponent },
+          { path: 'tasks', component: TasksComponent },
+          { path: 'task', component: TaskComponent },
+          { path: 'task/:threadId', component: TaskComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

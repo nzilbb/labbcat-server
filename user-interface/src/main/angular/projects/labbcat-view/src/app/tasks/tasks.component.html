@@ -1,0 +1,79 @@
+<div id="task-list">
+  <h1 id="title" i18n="Page title">Tasks</h1>
+
+  <table id="tasks" class="list">
+    <caption *ngIf="tasks.length == 0" i18n>There are currently no tasks</caption>
+    <thead>
+      <tr *ngIf="tasks.length > 0" class="header">
+        <th class="creation-time" i18n="Tasks header">Started</th>
+        <th class="who" i18n="Tasks header">By</th>
+        <th class="duration" i18n="Tasks header">Duration</th>
+        <th class="name" i18n="Tasks header">Task</th>
+        <th class="status" i18n="Tasks header">Status</th>
+        <th class="progress-description" i18n="Tasks header"></th>
+        <th class="progress" i18n="Tasks header">Progress</th>
+        <th class="controls">&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let task of tasks">
+        <tr class="item" [class.error]="task.lastException" [class.gone]="!task.threadId">
+          <td class="creation-time">{{task.creationTime | date:'medium'}}</td>
+          <td class="who">{{task.who}}</td>
+          <td class="duration">{{task.duration | duration}}</td>
+          <td class="name">{{task.threadName}}</td>
+          <td class="status">{{task.status}}</td>
+          <td class="progress-description">
+            <ng-container *ngIf="task.resultUrl">
+              <a href="{{task.resultUrl}}" target="{{task.resultTarget}}">
+                <span *ngIf="task.resultText">{{task.resultText}}</span>
+                <span *ngIf="!task.resultText" i18n="Default task result text">Open Results</span>
+              </a>
+            </ng-container>
+            <ng-container *ngIf="!task.resultUrl">
+              <span *ngIf="task.running" i18n="task progress description">Running</span>
+              <span *ngIf="!task.running && task.percentComplete==100 && !task.resultText"
+                    i18n="task progress description">Complete</span>
+              <span *ngIf="task.resultText">{{task.resultText}}</span>
+            </ng-container>
+            <span *ngIf="task.lastException"
+                  i18n="task progress description">Error</span>
+          </td>
+          <td class="progress">
+            <progress value="{{task.percentComplete}}" max="100"
+                      title="{{task.percentComplete + '% ' + task.status}}">
+              <div class="progress-container">
+                <div class="progress"
+                     title="{{task.percentComplete + '% ' + task.status}}"
+                     [style.width]="task.percentComplete + '%'">&nbsp;</div>
+              </div>
+            </progress>
+          </td>
+          <td class="controls">
+            <lib-button *ngIf="task.running && task.threadId"
+                        (press)="cancelTask(task)"
+                        i18n-title title="Cancel task"
+                        img="cross-mark.svg" icon="×"
+                        ></lib-button>
+            <lib-button *ngIf="!task.running && task.threadId"
+                        (press)="releaseTask(task)"
+                        i18n-title title="Release task"
+                        img="cross-mark.svg" icon="×"
+                        ></lib-button>
+            <lib-button *ngIf="task.threadId"
+                        (press)="log(task)"
+                        i18n-title title="Show task log"
+                        img="document.svg" icon="×"
+                        ></lib-button>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>
+<div id="log" *ngIf="logName">
+  <h2>{{logName}}</h2>
+  <pre>{{threadLog}}</pre>
+  <h3 *ngIf="threadException" class="error">{{threadException}}</h3>
+  <pre *ngIf="threadStackTrace" class="error">{{threadStackTrace}}</pre>
+</div>

@@ -949,20 +949,33 @@
     /**
      * Gets list of tasks.
      * @param {resultCallback} onResult Invoked when the request has returned a
-     * result, which is an map of task IDs to statuses.
+     * result, which is an array of task IDs.
      */
     getTasks(onResult) {
       if (exports.verbose) console.log("getTasks()");
-      this.createRequest("getTasks", null, onResult, this.baseUrl + "threads").send();
+      this.createRequest("getTasks", null, onResult, `${this.baseUrl}api/task/`).send();
     }
     
     /**
      * Gets the status of a task.
      * @param {string} id ID of the task.
+     * @param {object} options An object with boolean settings, e.g. {log:true}
+     * Current supported options are:
+     * <ul>
+     *  <li>log: whether to return the tasks log (default is false)</li>
+     *  <li>keepalive: whether to keep the thread alive (default is true)</li>
+     * </ul>
+     * "log": whether to return the tasks log,
      * @param {resultCallback} onResult Invoked when the request has returned a result.
      */
-    taskStatus(id, onResult) {
-      this.createRequest("taskStatus", { id : id, threadId : id }, onResult, this.baseUrl+"thread").send();
+    taskStatus(id, options, onResult) {
+      if (typeof options === "function") { // (id, onResult)
+        onResult = options;
+        options = null;
+      }
+      options = Object.assign({log:false, keepalive:true}, options);
+      this.createRequest(
+        "taskStatus", options, onResult, `${this.baseUrl}api/task/${id}`).send();
     }
 
     /**
@@ -999,22 +1012,20 @@
     releaseTask(id, onResult) {
       if (exports.verbose) console.log("releaseTask("+id+")");
       this.createRequest("releaseTask", {
-        threadId : id,
-        command : "release"
-      }, onResult, this.baseUrl+"threads").send();
+        release : true
+      }, onResult, `${this.baseUrl}api/task/${id}`, "DELETE").send();
     }
     
     /**
      * Cancels a running task.
-     * @param threadId The ID of the task.
+     * @param id The ID of the task.
      * @param {resultCallback} onResult Invoked when the request has completed.
      */
-    cancelTask(threadId, onResult) {
+    cancelTask(id, onResult) {
       if (exports.verbose) console.log("cancelTask("+threadId+")");
       this.createRequest("cancelTask", {
-        threadId : threadId,
-        command : "cancel"
-      }, onResult, this.baseUrl+"threads").send();
+        cancel : true
+      }, onResult, `${this.baseUrl}api/task/${id}`, "DELETE").send();
     }
     
     /**

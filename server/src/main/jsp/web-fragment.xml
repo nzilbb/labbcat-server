@@ -26,6 +26,9 @@
   <servlet><servlet-name>corpus.jsp</servlet-name><jsp-file>/jsp/corpus.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>corpus.jsp</servlet-name><url-pattern>/api/corpus/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>task.jsp</servlet-name><jsp-file>/jsp/task.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>task.jsp</servlet-name><url-pattern>/api/task/*</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>attributes.jsp</servlet-name><jsp-file>/jsp/attributes.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>attributes.jsp</servlet-name><url-pattern>/api/attributes</url-pattern></servlet-mapping>
   

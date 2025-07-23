@@ -1,0 +1,22 @@
+#task-list {
+    width: 97vw;
+}
+#tasks {
+    margin: auto;
+    width: fit-content;
+    max-width: 97vw;
+}
+
+td, th {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+.progress-description > span {
+    padding-left: 3px;
+}
+.controls {
+    text-align: right;
+}
+.gone {
+    color: silver;
+}
