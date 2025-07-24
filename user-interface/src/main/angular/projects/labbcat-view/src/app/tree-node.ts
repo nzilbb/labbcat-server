@@ -6,6 +6,7 @@ export class TreeNode {
     label: string;
     parent?: TreeNode;
     children: TreeNode[];
+    depth?: number;
     
     constructor(
         parent: TreeNode,
@@ -34,6 +35,21 @@ export class TreeNode {
 	return child;
     }
 
+    setDepths(depth: number) {
+        this.depth = depth;
+	for (let child of this.children) {
+	    child.setDepths(depth + 1);
+	}  // next child
+    }
+
+    traverse(): TreeNode[] {
+	let nodes: TreeNode[] = [ this ];
+	for (let child of this.children) {
+	    nodes = nodes.concat(child.traverse());
+	}  // next child
+	return nodes;
+    }
+    
     toString(): string {
 	let s = "";
 	if (this.annotation != null) {
