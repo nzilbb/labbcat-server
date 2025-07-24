@@ -5,7 +5,7 @@
     --progress-size: 22px;
     --theme-block-color: #96A339; /* from NZILBB logo*/
     --theme-text-color: #78832E;  /* darkened for legibility */
-    --theme-background-color: #FCFCFC;; /* for elements that can't be transparent */
+    --theme-background-color: #FCFCFC; /* for elements that can't be transparent */
     --theme-error-color: red;
     --theme-warning-color: orange;
 }
@@ -15,6 +15,12 @@
     0%   { opacity: 0; left: 10%; }
     10%  { opacity: 1; left: 0%; }
     90%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+@keyframes sidle-fade-semitrans {
+    0%   { opacity: 0; left: 5%; }
+    5%   { opacity: 0.92; left: 0%; }
+    95%  { opacity: 0.92; }
     100% { opacity: 0; }
 }
 @keyframes fade-in {
@@ -85,7 +91,7 @@
 }
 
 /* general look and feel */
-h1 { font-size: 17pt; color: black; }
+h1 { font-size: 17pt; color: black; text-align: center; }
 h2 { font-size: 16pt; color: black; }
 h3 { font-size: 15pt; color: var(--theme-text-color); font-style:italic; }
 h4 { font-size: 14pt; color: var(--theme-text-color); }
@@ -128,8 +134,12 @@ app-root footer {
     font-size: 10pt;
 }
 
-div.messages div.error { color: red; font-weight: bold; }
+div.messages {
+    width: fit-content; /* ensure it's no wider than necessary, so it doesn't cover menu options */
+}
+div.messages div.error { color: var(--theme-error-color); font-weight: bold; }
 .message { color: black; }
+.error { color: var(--theme-error-color); }
 
 lib-wait {
     display: block;
@@ -139,7 +149,7 @@ lib-wait {
 
 /* lists of things */
 
-div.list {
+.list {
     width: 100%;
 }
 
@@ -417,7 +427,8 @@ app-missing-annotations {
         display: table-row;
         padding-bottom: 0px;
     }
-    .list > .item:nth-child(even) { background: #FAFAFA; }
+    .list > .item:nth-of-type(odd) { background: #FAFAFA; }
+    .list > .item:nth-of-type(even) { background: #FFFFFF; }
     .list > .item > span { display: table-cell; }
     .list > .item > span.header-only { display: table-cell; }
     .list > .item > span > legend { display: none; }
