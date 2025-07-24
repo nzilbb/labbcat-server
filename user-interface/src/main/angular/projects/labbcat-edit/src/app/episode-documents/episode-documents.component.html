@@ -1,0 +1,30 @@
+<lib-wait *ngIf="loading"></lib-wait>
+<h1 id="title">
+  <span i18n="Episode Documents: {transcript name}">Episode Documents</span>
+  <a *ngIf="id"
+           [routerLink]="['..','..','transcript']"
+           [queryParams]="{id:id}">{{id}}</a>
+</h1>
+<div *ngIf="documents" id="episode-documents">
+  <lib-button *ngIf="trackUpload != 'show'"
+              img="add.svg" icon="➕"
+              i18n-title title="Upload document"
+              [processing]="trackUpload == 'uploading'"
+              (press)="trackUpload = 'show'"></lib-button>
+  <input *ngIf="trackUpload == 'show'"
+         type="file"
+         (change)="upload($event.target.files[0])">
+  <ul>
+    <li *ngFor="let doc of documents"
+        id="{{doc.name}}"
+        title="{{doc.description}}"
+        class="{{doc.type}} lnk">
+      <img src="{{imagesLocation}}/{{doc.type}}.svg" alt="{{doc.type=='audio'?'🔊':doc.type=='video'?'🎥':doc.type=='image'?'📷':'📄'}}">
+      <a href="{{doc.url}}" target="{{doc.name}}">{{doc.name}}</a>
+      <lib-button img="trash.svg" icon="➖"
+                  i18n-title title="Delete document"
+                  [processing]="fileDeleting[doc.name]"
+                  (press)="deleteFile(doc.name)"></lib-button>
+    </li>
+  </ul>
+</div>

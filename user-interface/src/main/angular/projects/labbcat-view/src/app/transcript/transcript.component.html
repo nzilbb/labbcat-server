@@ -372,7 +372,7 @@
         <lib-link *ngIf="transcript.first('episode')"
                   id="episode-documents-link"
                   class="buttons"
-                  href="{{baseUrl}}seriesFiles?family_id={{transcript.first('episode').id.replace('m_-50_','')}}"
+                  href="{{baseUrl}}{{user.roles.includes('edit')?'edit/':''}}episode/documents?id={{transcript.id}}"
                   img="folder.svg" icon="📁"
                   i18n-label label="Episode Documents"
                   i18n-title title="Documents for this episode"

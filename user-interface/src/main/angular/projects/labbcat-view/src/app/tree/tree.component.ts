@@ -49,6 +49,7 @@ export class TreeComponent implements OnInit {
 
     loadFragment(): Promise<void> {
         return new Promise((resolve, reject) => {
+            this.loading = true;
             this.labbcatService.labbcat.getFragment(
                 this.id, this.annotationId, [this.layerId],
                 (fragment, errors, messages) => {

@@ -1,0 +1,18 @@
+<lib-wait *ngIf="loading"></lib-wait>
+<h1 id="title">
+  <span i18n="Episode Documents: {transcript name}">Episode Documents</span>
+  <a *ngIf="id"
+           [routerLink]="['..','..','transcript']"
+           [queryParams]="{id:id}">{{id}}</a>
+</h1>
+<div *ngIf="documents" id="episode-documents">
+  <ul>
+    <li *ngFor="let doc of documents"
+        id="{{doc.name}}"
+        title="{{doc.description}}"
+        class="{{doc.type}} lnk">
+      <img src="{{imagesLocation}}/{{doc.type}}.svg" alt="{{doc.type=='audio'?'🔊':doc.type=='video'?'🎥':doc.type=='image'?'📷':'📄'}}">
+      <a href="{{doc.url}}" target="{{doc.name}}">{{doc.name}}</a>
+    </li>
+  </ul>
+</div>

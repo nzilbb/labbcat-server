@@ -31,6 +31,7 @@ import { DictionaryComponent } from './dictionary/dictionary.component';
 import { CorpusComponent } from './corpus/corpus.component';
 import { TasksComponent } from './tasks/tasks.component';
 import { TreeComponent } from './tree/tree.component';
+import { EpisodeDocumentsComponent } from './episode-documents/episode-documents.component';
 
 @NgModule({
   declarations: [
@@ -58,7 +59,8 @@ import { TreeComponent } from './tree/tree.component';
       DictionaryComponent,
       CorpusComponent,
       TasksComponent,
-      TreeComponent
+      TreeComponent,
+      EpisodeDocumentsComponent
   ],
   imports: [
       BrowserModule,
@@ -93,6 +95,7 @@ import { TreeComponent } from './tree/tree.component';
           { path: 'task', component: TaskComponent },
           { path: 'task/:threadId', component: TaskComponent },
           { path: 'tree', component: TreeComponent },
+          { path: 'episode/documents', component: EpisodeDocumentsComponent },
       ]), // TODO add { path: '**', component: PageNotFoundComponent }
       FormsModule,
       LabbcatCommonModule.forRoot(environment)

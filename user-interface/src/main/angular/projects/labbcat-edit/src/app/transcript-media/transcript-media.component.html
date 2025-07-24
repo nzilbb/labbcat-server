@@ -17,7 +17,7 @@
       <dd><ul>
         <li *ngFor="let mediaFile of mediaFilesByTrack[track.suffix]"
             id="{{mediaFile.name}}"
-             title="{{track.description}} - {{mediaFile.type}}"
+            title="{{track.description}} - {{mediaFile.type}}"
             class="{{mediaFile.type}} lnk">
           <img src="{{imagesLocation}}/{{mediaFile.type}}.svg" alt="{{mediaFile.type=='audio'?'🔊':mediaFile.type=='video'?'🎥':mediaFile.type=='image'?'📷':'📄'}}">
           <a href="{{mediaFile.url}}" target="{{mediaFile.name}}">{{mediaFile.name}}</a>

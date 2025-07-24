@@ -1,0 +1,19 @@
+h1 > span::after {
+    content: ': ';
+}
+#episode-documents {
+    margin: auto;
+    width: fit-content;
+}
+ul {
+    list-style: none;
+}
+li a {
+    display: inline-block;
+    min-width: 250px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+input {
+    width: 100%;
+}
