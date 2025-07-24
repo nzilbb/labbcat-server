@@ -63,8 +63,26 @@ export class TreeComponent implements OnInit {
                         this.fragment = fragment;
                         this.nodes = [];
                         // build a tree
+                        const annotations = fragment.all(this.layerId);
+                        // sort annotations by start, then by reversed end, then by reversed ID
+                        annotations.sort((a,b)=>{
+                            if (a.start.offset != b.start.offset) {
+                                // by start ascending
+                                return a.start.offset - b.start.offset;
+                            } else if (a.end.offset != b.end.offset) {
+                                // be end descending
+                                return b.end.offset - a.end.offset;
+                            } else if (a.label != b.label) {
+                                // by annotation ID descending - ID is formatted eM_NN_II
+                                let aID = Number(a.label.replace(/^e.?_[0-9]+_/,""));
+                                let bID = Number(b.label.replace(/^e.?_[0-9]+_/,""));
+                                return bID - aID;
+                            } else {
+                                return 0;
+                            }
+                        });
                         let currentNode: TreeNode = null;
-                        for (let annotation of fragment.all(this.layerId)) {
+                        for (let annotation of annotations) {
                             this.nodes.push(annotation);
                             if (!this.root) {
                                 this.root = new TreeNode(null, annotation);
@@ -89,10 +107,9 @@ export class TreeComponent implements OnInit {
         let index = 0; // character in the string
         let currentNode: Node = null;
         let currentDepth = 0; // track the depth of the tree
-        let maxDepth = 0;
 
         // construct a vis graph from the parse tree
-        this.root.setDepths(0);
+        let maxDepth = this.root.setDepths(0);
         for (let treeNode of this.root.traverse()) {
 	    const node: Node = {
                 id: treeNode.annotation.id,
@@ -100,8 +117,11 @@ export class TreeComponent implements OnInit {
                 shape: "box",
                 color: { background : "white" },
                 borderWidth: 0,
-                level : treeNode.depth,
+                level : treeNode.children.length?treeNode.depth
+                // leaf nodes are at maxDepth:
+                    :maxDepth
             };
+            maxDepth = Math.max(maxDepth, treeNode.depth);
 	    nodeArray.push(node);
             if (treeNode.parent) {
 		edgeArray.push({
@@ -110,7 +130,7 @@ export class TreeComponent implements OnInit {
                     color: "black" } as Edge);
             }
         } // next tree node
-    
+
         // create a network
         const container = document.getElementById(`tree-${this.id}`);
         

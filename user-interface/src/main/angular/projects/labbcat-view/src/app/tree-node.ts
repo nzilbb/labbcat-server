@@ -3,7 +3,6 @@ import { Annotation, Anchor } from 'labbcat-common';
 /** Simple implementation of an annotation tree */
 export class TreeNode {
     annotation: Annotation;
-    label: string;
     parent?: TreeNode;
     children: TreeNode[];
     depth?: number;
@@ -13,7 +12,6 @@ export class TreeNode {
         annotation: Annotation
     ) {
         this.annotation = annotation;
-        this.label = annotation.label;
         this.parent = parent;
         this.children = [];
     }
@@ -35,11 +33,15 @@ export class TreeNode {
 	return child;
     }
 
-    setDepths(depth: number) {
+    setDepths(depth: number) : number {
         this.depth = depth;
+        let maxDepth = depth;
 	for (let child of this.children) {
-	    child.setDepths(depth + 1);
+	    maxDepth = Math.max(
+                maxDepth,
+                child.setDepths(depth + 1));                                
 	}  // next child
+        return maxDepth;
     }
 
     traverse(): TreeNode[] {
@@ -55,8 +57,6 @@ export class TreeNode {
 	if (this.annotation != null) {
 	    s += this.annotation.label
 	        .replaceAll("\\(","\\(").replaceAll("\\)","\\)");
-	} else if (this.label != null) {
-	    s += this.label.replaceAll("\\(","\\(").replaceAll("\\)","\\)");
 	} else {
 	    s += "?";
 	}
