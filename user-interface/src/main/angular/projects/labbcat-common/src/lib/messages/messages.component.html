@@ -2,15 +2,15 @@
   <div *ngFor="let message of messageService.errors" class="error message">{{message}}
     <span
       class="closebtn"
-      title="Close message"
-      onclick="this.parentElement.style.display='none';"
+      i18n-title title="Close message"
+      (click)="removeError(message)"
     >&times;</span>
   </div>
   <div *ngFor="let message of messageService.messages" class="info message">{{message}}
     <span
       class="closebtn"
-      title="Close message"
-      onclick="this.parentElement.style.display='none';"
+      i18n-title title="Close message"
+      (click)="removeMessage(message)"
     >&times;</span>
   </div>
 </div>
