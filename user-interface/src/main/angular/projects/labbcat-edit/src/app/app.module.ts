@@ -12,6 +12,7 @@ import { ParticipantComponent } from './participant/participant.component';
 import { TranscriptAttributesComponent } from './transcript-attributes/transcript-attributes.component';
 import { TranscriptMediaComponent } from './transcript-media/transcript-media.component';
 import { TranscriptUploadComponent } from './transcript-upload/transcript-upload.component';
+import { EpisodeDocumentsComponent } from './episode-documents/episode-documents.component';
 
 @NgModule({
     declarations: [
@@ -20,7 +21,8 @@ import { TranscriptUploadComponent } from './transcript-upload/transcript-upload
         ParticipantComponent,
         TranscriptAttributesComponent,
         TranscriptMediaComponent,
-        TranscriptUploadComponent
+        TranscriptUploadComponent,
+        EpisodeDocumentsComponent
     ],
     imports: [
         BrowserModule,
@@ -35,7 +37,9 @@ import { TranscriptUploadComponent } from './transcript-upload/transcript-upload
             { path: 'edit/transcript/media', component: TranscriptMediaComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'edit/transcript/upload', component: TranscriptUploadComponent,
-              canDeactivate: [PendingChangesGuard]}
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'edit/episode/documents', component: EpisodeDocumentsComponent,
+              canDeactivate: [PendingChangesGuard]},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)
