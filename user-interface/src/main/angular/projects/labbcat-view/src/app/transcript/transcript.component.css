@@ -508,3 +508,22 @@ img.preview {
     list-style-type: none;
     font-style: italic;
 }
+
+a.tree {
+    text-decoration: none;
+    color: var(--theme-text-color);
+    cursor: zoom-in; 
+}
+#tree {
+    z-index: 15;
+    position: fixed;
+    background: rgba(252,252,252, 0.98);
+    height: 80%;
+    width: 80%;
+    left: 10vw;
+    top: 10vh;
+    border: 1px solid var(--theme-text-color);
+}
+#tree lib-button {
+    float: right;
+}

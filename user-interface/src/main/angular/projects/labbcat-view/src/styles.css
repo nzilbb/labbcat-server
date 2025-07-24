@@ -5,7 +5,7 @@
     --progress-size: 22px;
     --theme-block-color: #96A339; /* from NZILBB logo */
     --theme-text-color: #78832E;  /* darkened for legibility */
-    --theme-background-color: #FCFCFC;; /* for elements that can't be transparent */
+    --theme-background-color: #FCFCFC; /* for elements that can't be transparent */
     --theme-error-color: red;
     --theme-warning-color: orange;
 }

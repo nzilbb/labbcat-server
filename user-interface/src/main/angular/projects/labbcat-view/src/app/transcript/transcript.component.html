@@ -1,13 +1,15 @@
 <lib-wait *ngIf="loading"></lib-wait>
-<lib-task *ngIf="generationThreadId"
-          [threadId]="generationThreadId"
-          (finished)="generationFinished()"></lib-task>
+<lib-task
+  *ngIf="generationThreadId"
+  id="generatation-thread"
+  [threadId]="generationThreadId"
+  (finished)="generationFinished()"></lib-task>
 
 <h1 id="title">{{id}}</h1>
 
 <div *ngIf="transcript" id="transcript"
      [ngClass]="{'video-zoomed': videoZoomed}"
-     (click)="hideWordMenu();">
+     (click)="hidePopups();">
 
   <!-- previous/next transcript -->
   <nav>
@@ -502,7 +504,7 @@
                     <ng-container [ngSwitch]="true">
                       <a *ngSwitchCase="annotation.layer.type == 'tree'"
                          class="tree" href="#{{annotation.id}}"
-                         (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
+                         (click)="showTree(annotation, $event);">{{renderLabel(annotation)}}</a>
                       <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
                          class="image" href="#{{annotation.id}}"
                          href="{{annotation.dataUrl}}&show"
@@ -569,7 +571,7 @@
                       <ng-container [ngSwitch]="true">
                         <a *ngSwitchCase="annotation.layer.type == 'tree'"
                            class="tree" href="#{{annotation.id}}"
-                           (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
+                           (click)="showTree(annotation, $event);">{{renderLabel(annotation)}}</a>
                         <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
                            class="image" href="#{{annotation.id}}"
                            href="{{annotation.dataUrl}}&show"
@@ -637,7 +639,7 @@
                         <ng-container [ngSwitch]="true">
                           <a *ngSwitchCase="annotation.layer.type == 'tree'"
                              class="tree" href="#{{annotation.id}}"
-                             (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
+                             (click)="showTree(annotation, $event);">{{renderLabel(annotation)}}</a>
                           <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
                              class="image" href="#{{annotation.id}}"
                              href="{{annotation.dataUrl}}&show"
@@ -832,7 +834,7 @@
                       <ng-container [ngSwitch]="true">
                         <a *ngSwitchCase="annotation.layer.type == 'tree'"
                            class="tree" href="#{{annotation.id}}"
-                           (click)="showTree(annotation);">{{renderLabel(annotation)}}</a>
+                           (click)="showTree(annotation, $event);">{{renderLabel(annotation)}}</a>
                         <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
                            class="image" href="#{{annotation.id}}"
                            href="{{annotation.dataUrl}}&show"
@@ -885,3 +887,16 @@
     </div>
   </div>
 </div>
+<div *ngIf="treeRoot" id="tree">
+  <lib-button
+    (press)="treeRoot = null"
+    img="cross-mark.svg" icon="×"
+    i18n-title title="Close tree visualization"
+    ></lib-button>
+  <app-tree
+    [id]="id"
+    [annotationId]="treeRoot.id"
+    [layerId]="treeRoot.layerId"
+    ></app-tree>
+</div>
+

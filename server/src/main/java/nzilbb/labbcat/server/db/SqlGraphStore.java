@@ -4732,7 +4732,7 @@ public class SqlGraphStore implements GraphStore {
       rsLayer.close();
       sqlLayer.close();
       fragment.addLayer(definingLayer);
-      loadedLayers.add(definingLayer.getId());
+      //loadedLayers.add(definingLayer.getId());
 	 
       // get the defining annotation and its anchors
       PreparedStatement sqlAnnotation = getConnection().prepareStatement(
@@ -4901,6 +4901,25 @@ public class SqlGraphStore implements GraphStore {
           + " AND start.offset >= ? AND end.offset <= ?"
           +" ORDER BY start.offset, end.offset DESC, annotation_id");
         sqlAnnotationsByOffset.setInt(2, ag_id);
+        sqlAnnotationsByOffset.setDouble(4, definingStart.getOffset());
+        sqlAnnotationsByOffset.setDouble(5, definingEnd.getOffset());
+        // and a version of this that orders earlier annotation_ids later, so that
+        // parse trees come out with leaf nodes last on branches
+        final PreparedStatement sqlAnnotationsTreeOrder = getConnection().prepareStatement(
+          "SELECT layer.*,"
+          +" start.offset AS start_offset, start.alignment_status AS start_alignment_status,"
+          +" start.annotated_by AS start_annotated_by, start.annotated_when AS start_annotated_when,"
+          +" end.offset AS end_offset, end.alignment_status AS end_alignment_status,"
+          +" end.annotated_by AS end_annotated_by, end.annotated_when AS end_annotated_when"
+          +" FROM annotation_layer_? layer"
+          +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
+          +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
+          +" WHERE layer.ag_id = ? AND parent_id = ?"
+          + " AND start.offset >= ? AND end.offset <= ?"
+          +" ORDER BY start.offset, end.offset DESC, annotation_id DESC");
+        sqlAnnotationsTreeOrder.setInt(2, ag_id);
+        sqlAnnotationsTreeOrder.setDouble(4, definingStart.getOffset());
+        sqlAnnotationsTreeOrder.setDouble(5, definingEnd.getOffset());
 
         final PreparedStatement sqlTranscriptAttribute = getConnection().prepareStatement(
           "SELECT * FROM annotation_transcript WHERE ag_id = ? AND layer = ?");
@@ -4918,11 +4937,11 @@ public class SqlGraphStore implements GraphStore {
               try {
                 if (layer.get("layer_id") != null) {
                   PreparedStatement sql = sqlAnnotationsByParent;
-                  if (!layer.getAncestors().contains(definingLayer)) { // not a descendant of defining annotation
+                  if (!layer.getAncestors().contains(definingLayer)) {
+                    // not a descendant of defining annotation
                     // has to be t-included as well
-                    sql = sqlAnnotationsByOffset;
-                    sql.setDouble(4, definingStart.getOffset());
-                    sql.setDouble(5, definingEnd.getOffset());
+                    sql = layer.getType() == Constants.TYPE_TREE?
+                      sqlAnnotationsTreeOrder:sqlAnnotationsByOffset;
                   } // not a descendant of defining annotation
                   // load all annotations on this layer that are children of known annotations
                   Integer layer_id = (Integer)layer.get("layer_id");

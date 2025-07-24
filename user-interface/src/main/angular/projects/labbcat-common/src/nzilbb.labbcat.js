@@ -880,18 +880,17 @@
     
     /**
      * Gets a transcript given its ID, containing only the given layers.
-     * @param {string} id The given transcript ID.
-     * @param {number} start The start offset.
-     * @param {number} end The end offset.
-     * @param {string} id The given transcript ID.
+     * @param {string} transcriptId The given transcript ID.
+     * @param {string} annotationId The ID of an annotation that
+     * defines the bounds of the fragment. 
      * @param {string[]} layerIds The IDs of the layers to load, or null for all
      * layers. If only transcript data is required, set this to ["graph"]. 
      * @param {resultCallback} onResult Invoked when the request has returned a
      * <var>result</var> which will be:  The identified transcript.
      */
-    getFragment(id, start, end, layerIds, onResult) {
+    getFragment(id, annotationId, layerIds, onResult) {
       this.createRequest("getFragment", {
-        id : id, start: start, end: end, layerIds : layerIds
+        id : id, annotationId: annotationId, layerIds : layerIds
       }, onResult).send();
     }
     

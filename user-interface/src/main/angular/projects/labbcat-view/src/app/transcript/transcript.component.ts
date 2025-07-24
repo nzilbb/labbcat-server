@@ -25,6 +25,7 @@ export class TranscriptComponent implements OnInit {
     loading = true;
     transcript : any;
     correctionEnabled = false;
+    treeRoot? : Annotation;
 
     // temporal annotations
     anchors : { [key: string] : Anchor };
@@ -1225,14 +1226,9 @@ export class TranscriptComponent implements OnInit {
     }
     
     /** Visualize a given tree */
-    showTree(annotation : Annotation) : boolean {
-        const turn = annotation.first(this.schema.turnLayerId);
-        const turn_id = turn.id.replace("em_11_","");
-        window.open(
-            `${this.baseUrl}tree?layer_id=${this.schema.layers[annotation.layerId].layer_id}&start_uid=${annotation.start.id}&end_uid=${annotation.end.id}&turn=${turn_id}`, 
-            "tree",
-            "height=600,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=yes"
-        ).focus();
+    showTree(annotation : Annotation, e : Event) : boolean {
+        e.stopPropagation();
+        this.treeRoot = annotation;
         return false;
     }
 
@@ -1778,7 +1774,8 @@ export class TranscriptComponent implements OnInit {
         return id.replace(/^transcript_/,"");
     }
 
-    hideWordMenu(): void {
+    hidePopups(): void {
         this.menuId = null;
+        this.treeRoot = null;
     }
 }
