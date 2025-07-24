@@ -5114,10 +5114,27 @@ public class SqlGraphStore implements GraphStore {
         +" WHERE layer.ag_id = ?"
         + " AND start.offset >= ? AND end.offset <= ?"
         +" ORDER BY start.offset, end.offset DESC, annotation_id");
+      // and a version of this that orders earlier annotation_ids later, so that
+      // parse trees come out with leaf nodes last on branches
+      final PreparedStatement sqlAnnotationsTreeOrder = getConnection().prepareStatement(
+        "SELECT layer.*,"
+        +" start.offset AS start_offset, start.alignment_status AS start_alignment_status,"
+        +" start.annotated_by AS start_annotated_by, start.annotated_when AS start_annotated_when,"
+        +" end.offset AS end_offset, end.alignment_status AS end_alignment_status,"
+        +" end.annotated_by AS end_annotated_by, end.annotated_when AS end_annotated_when"
+        +" FROM annotation_layer_? layer"
+        +" INNER JOIN anchor start ON layer.start_anchor_id = start.anchor_id"
+        +" INNER JOIN anchor end ON layer.end_anchor_id = end.anchor_id"
+        +" WHERE layer.ag_id = ?"
+        + " AND start.offset >= ? AND end.offset <= ?"
+        +" ORDER BY start.offset, end.offset DESC, annotation_id DESC");
       double granularity = Constants.GRANULARITY_MILLISECONDS / 2; // TODO this should be a parameter
       sqlAnnotationsByOffset.setInt(2, ag_id);
       sqlAnnotationsByOffset.setDouble(3, start - granularity);
       sqlAnnotationsByOffset.setDouble(4, end + granularity);
+      sqlAnnotationsTreeOrder.setInt(2, ag_id);
+      sqlAnnotationsTreeOrder.setDouble(3, start - granularity);
+      sqlAnnotationsTreeOrder.setDouble(4, end + granularity);
       
       final PreparedStatement sqlTranscriptAttribute = getConnection().prepareStatement(
         "SELECT * FROM annotation_transcript WHERE ag_id = ? AND layer = ?");
@@ -5155,8 +5172,11 @@ public class SqlGraphStore implements GraphStore {
               if (layer_id != null && layer_id >= 0) { // a temporal layer
                 fragment.addLayer((Layer)layer.clone());
                 getResult().add(layer.getId());
-                sqlAnnotationsByOffset.setInt(1, layer_id);
-                ResultSet rs = sqlAnnotationsByOffset.executeQuery();
+                PreparedStatement sql
+                  = layer.getType() == Constants.TYPE_TREE?
+                  sqlAnnotationsTreeOrder:sqlAnnotationsByOffset;
+                sql.setInt(1, layer_id);
+                ResultSet rs = sql.executeQuery();
                 boolean setOrdinalMinimum = true;
                 while (rs.next()) {
                   Annotation annotation = annotationFromResult(rs, layer, fragment);
@@ -5266,6 +5286,7 @@ public class SqlGraphStore implements GraphStore {
       sqlTranscriptAttribute.close();
       sqlCorpusLanguage.close();
       sqlAnnotationsByOffset.close();
+      sqlAnnotationsTreeOrder.close();
 
       // now load all missing ancestors...
 
