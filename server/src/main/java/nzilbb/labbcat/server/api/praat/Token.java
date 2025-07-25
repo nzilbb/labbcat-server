@@ -58,6 +58,17 @@ public class Token extends APIRequestHandler {
   public JsonObject get(
     UnaryOperator<String> requestHeaders, Function<String,File> realPath,
     Function<String,String> cookie) {
+    
+    // Praat integration uses an external program that does not have
+    // access to the browser's Authorization header or session cookies.
+    // The only way to give that program the access to URLs that the client
+    // has is to pass an Authorization token to it.
+    
+    // We only reveal the token if the client knows the nonce,
+    // which is derived from the server's user-interface/en/main-....js
+    // script file name - i.e. the UI was compiled for this server -
+    // and the referring page is also from this server
+    
     String token = null;
     // load UI index.html
     File index = realPath.apply("/user-interface/en/index.html");
