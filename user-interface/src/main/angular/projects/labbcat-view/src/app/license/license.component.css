@@ -1,0 +1,11 @@
+#license {
+    width: fit-content;
+    margin: auto;
+}
+#agree {
+    text-align: center;
+}
+#edit {
+    position: fixed;
+    right: 10px;
+}

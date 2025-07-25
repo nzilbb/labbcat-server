@@ -32,6 +32,7 @@ import { CorpusComponent } from './corpus/corpus.component';
 import { TasksComponent } from './tasks/tasks.component';
 import { TreeComponent } from './tree/tree.component';
 import { EpisodeDocumentsComponent } from './episode-documents/episode-documents.component';
+import { LicenseComponent } from './license/license.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { EpisodeDocumentsComponent } from './episode-documents/episode-documents
       CorpusComponent,
       TasksComponent,
       TreeComponent,
-      EpisodeDocumentsComponent
+      EpisodeDocumentsComponent,
+      LicenseComponent
   ],
   imports: [
       BrowserModule,
@@ -69,6 +71,7 @@ import { EpisodeDocumentsComponent } from './episode-documents/episode-documents
           { path: '', component: HomeComponent },
           { path: 'login', component: LoginComponent },
           { path: 'login-error', component: LoginComponent },
+          { path: 'license', component: LicenseComponent },
           { path: 'version', component: VersionComponent },
           { path: 'credits', component: CreditsComponent },
           { path: 'statistics', component: StatisticsComponent },

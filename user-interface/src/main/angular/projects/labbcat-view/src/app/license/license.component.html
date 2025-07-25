@@ -1,0 +1,18 @@
+<h1 id="title">{{title}}</h1>
+<div *ngIf="!next && user && user.roles.includes('admin')" id="edit">
+  <lib-button i18n-label label="Edit"
+              i18n-title title="Edit Agreement"
+              img="wrench.svg" icon="🔧"            
+              (click)="edit()"></lib-button>
+</div>
+<div id="license"[innerHTML]="agreementHtml"></div>
+<div *ngIf="next" id="agree">
+  <form #form id="frmLicense" method="POST">
+    <input type="hidden" name="btnLicense" value="I agree">
+    <input *ngIf="next" type="hidden" name="next" value="{{next}}">
+    <lib-button
+      i18n-label label="I agree"
+      img="check-mark.svg" icon="✓"
+      (click)="agree()"></lib-button>
+  </form>
+</div>
