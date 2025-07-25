@@ -497,7 +497,8 @@
      * Gets statistics about a given corpus.
      * @param {string} id ID of the corpus.
      * @param {resultCallback} onResult Invoked when the request has returned a
-     * <var>result</var> which will be:  {string[]} A list of corpus IDs.
+     * <var>result</var> which will be:  An object, where each key is the name of
+     * a statistic and the value is the statistic's value.
      */
     getCorpusInfo(id, onResult) {
       this.createRequest("getCorpusInfo", null, onResult, `${this.baseUrl}api/corpus/${id}`)
@@ -2373,8 +2374,7 @@
     }
 
     /**
-     * Gets information about the current user, including the roles or groups they are
-     * in.
+     * Gets the value of one dashboard item.
      * @param {number} id The item_id of the item, as returned by
      * {@link LabbcatView#getDashboardItems}
      * @param {resultCallback} onResult Invoked when the request has returned a
