@@ -20,3 +20,6 @@ td, th {
 .gone {
     color: silver;
 }
+#tasks caption {
+    white-space: nowrap;
+}
