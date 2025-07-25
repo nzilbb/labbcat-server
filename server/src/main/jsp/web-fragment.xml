@@ -22,7 +22,10 @@
   
   <servlet><servlet-name>user.jsp</servlet-name><jsp-file>/jsp/user.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>user.jsp</servlet-name><url-pattern>/api/user</url-pattern></servlet-mapping>
-  
+
+  <servlet><servlet-name>a.jsp</servlet-name><jsp-file>/jsp/a.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>a.jsp</servlet-name><url-pattern>/a</url-pattern></servlet-mapping>
+
   <servlet><servlet-name>corpus.jsp</servlet-name><jsp-file>/jsp/corpus.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>corpus.jsp</servlet-name><url-pattern>/api/corpus/*</url-pattern></servlet-mapping>
   
