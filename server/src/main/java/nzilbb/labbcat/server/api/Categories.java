@@ -40,9 +40,6 @@ import javax.servlet.http.HttpServletRequest;
  *    <dt> category </dt><dd> The name of the category. </dd>
  *    <dt> description </dt><dd> The description of t/he category. </dd>
  *    <dt> display_order </dt><dd> The order in which the category appears amongst others. </dd>
- *    <dt> _cantDelete </dt><dd> This is not a database field, but rather is present in
- *         records returned from the server that can not currently be deleted; 
- *         a string representing the reason the record can't be deleted. </dd>
  *   </dl>
  *  <p> The following operation, specified by the HTTP method, is supported:
  *    <dt> GET </dt><dd> Read the records. 
