@@ -54,11 +54,9 @@ public class KeepAlive extends APIRequestHandler {
   } // end of constructor
   
   /**
-   * Returns information about current tasks, or the given
-   * task if an ID is specified.
+   * Keeps session/task alive.
    * @param parameters Request parameter map.
    * @param refreshHeader Receives the value for the Refresh header.
-   * @return JSON-encoded object representing the response.
    */
   public void get(RequestParameters parameters, Consumer<Integer> refreshHeader) {
     int refreshSeconds = 300; // refresh every 50 minutes
