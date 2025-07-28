@@ -144,22 +144,24 @@ public class Attributes extends APIRequestHandler { // TODO unit test
         for (String participantId : id) {
           try {
             Annotation participant = store.getParticipant(participantId, selectedAttributes);
-            for (String layer : selectedAttributes) {
-              try {
-                StringBuffer value = new StringBuffer();
-                if ("participant".equals(layer)) {
-                  value.append(participant.getLabel());
-                } else {
-                  for (Annotation attribute : participant.getAnnotations(layer)) {
-                    if (value.length() > 0) value.append("\n");
-                    value.append(attribute.getLabel());
+            if (participant != null) {
+              for (String layer : selectedAttributes) {
+                try {
+                  StringBuffer value = new StringBuffer();
+                  if ("participant".equals(layer)) {
+                    value.append(participant.getLabel());
+                  } else {
+                    for (Annotation attribute : participant.getAnnotations(layer)) {
+                      if (value.length() > 0) value.append("\n");
+                      value.append(attribute.getLabel());
+                    }
                   }
+                  csvOut.print(value);
+                } catch(NullPointerException exception) {
+                  csvOut.print("");
                 }
-                csvOut.print(value);
-              } catch(NullPointerException exception) {
-                csvOut.print("");
-              }
-            } // next layer
+              } // next layer
+            } // participant was found
             csvOut.println();
           } catch(Exception x) {
             context.servletLog("Attributes: Cannot get participant " + participantId + ": " + x);
