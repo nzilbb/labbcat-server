@@ -160,7 +160,7 @@ public class Task extends APIRequestHandler {
         nzilbb.labbcat.server.task.Task.getTaskThreadGroup().activeCount()];
       nzilbb.labbcat.server.task.Task.getTaskThreadGroup().enumerate(threads);
       JsonArrayBuilder tasks = Json.createArrayBuilder();
-      for (Thread thread : threads) tasks.add(thread.getId());
+      for (Thread thread : threads) tasks.add(""+thread.getId());
       return successResult(tasks.build(), null);  
     }
     String id = pathInfo.substring(pathInfo.lastIndexOf('/') + 1);
