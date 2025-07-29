@@ -3,9 +3,9 @@ FROM tomcat:9.0.102
 # install Praat
 RUN mkdir /opt/praat
 WORKDIR /opt/praat
-RUN wget https://www.fon.hum.uva.nl/praat/praat6430_linux-intel64-barren.tar.gz
-RUN tar xvf praat6430_linux-intel64-barren.tar.gz
-RUN rm praat6430_linux-intel64-barren.tar.gz
+RUN wget https://www.fon.hum.uva.nl/praat/praat6439_linux-intel64-barren.tar.gz
+RUN tar xvf praat6439_linux-intel64-barren.tar.gz
+RUN rm praat6439_linux-intel64-barren.tar.gz
 RUN cp praat_barren /usr/bin/praat
 
 # HTK cannot be distributed, but with a registers username/password, the source code can be
@@ -34,6 +34,9 @@ RUN sed -i "s/'localhost'/'%'/" WEB-INF/install.jsp
 # password-protect the webapp
 RUN cp WEB-INF/lib/mysql-connector-java-latest.jar /usr/local/tomcat/lib/
 RUN sed -i '/USER-SECURITY/d' WEB-INF/web_install.xml
+# use form-based auth
+RUN sed -i '/BASIC-AUTH/d' WEB-INF/web_install.xml
+RUN sed -i '/FORM-AUTH/d' WEB-INF/web_install.xml
 
 # Tomcat runs on port 8080
 EXPOSE 8080
