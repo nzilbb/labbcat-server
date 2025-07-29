@@ -3,10 +3,14 @@ nzilbb.labbcat.server.api.admin
 nzilbb.labbcat.server.api.admin.annotator
 nzilbb.labbcat.server.api.admin.roles
 nzilbb.labbcat.server.api.annotation
+nzilbb.labbcat.server.api.dashboard
 nzilbb.labbcat.server.api.edit
 nzilbb.labbcat.server.api.edit.annotator
 nzilbb.labbcat.server.api.edit.transcript
 nzilbb.labbcat.server.api.layers
+nzilbb.labbcat.server.api.media
+nzilbb.labbcat.server.api.participant
+nzilbb.labbcat.server.api.praat
 nzilbb.labbcat.server.api.results
 nzilbb.labbcat.server.api.serialize
 nzilbb.labbcat.server.db

@@ -1,7 +1,7 @@
 # Script for building the client-side user interface files,
 # and deploying them to a local instance of LaBB-CAT,
 # which is install in the location specified by the first parameter, or:
-LOCAL_LABBCAT=${1:-/var/lib/tomcat9/webapps/labbcat}
+LOCAL_LABBCAT=${1:-/opt/tomcat/webapps/labbcat}
 
 if (mvn clean package -pl :nzilbb.labbcat.user-interface)
 then

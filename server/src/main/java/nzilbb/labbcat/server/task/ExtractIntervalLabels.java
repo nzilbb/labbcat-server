@@ -126,7 +126,7 @@ public class ExtractIntervalLabels extends Task {
   public int getStartTimeColumn() { return startTimeColumn; }
   /**
    * Setter for {@link #startTimeColumn}: Column that identifies the time, or start time if a
-   * {@link #markEndColumn} is specified, at which the formant should be evaluated. 
+   * {@link #endTimeColumn} is specified, at which the formant should be evaluated. 
    * @param iNewStartTimeColumn Column that identifies the time, or start time if an end column
    * is specified, at which the formant should be evaluated. 
    */
@@ -144,22 +144,22 @@ public class ExtractIntervalLabels extends Task {
   /**
    * Getter for {@link #endTimeColumn}: Column that identifies the end time of the span
    * for which formants should be evaluated. null if MarkColumn is the target time, or
-   * non-null if {@link #markColumn} and EndTimeColumn should be used to define a
+   * non-null if {@link #startTimeColumn} and EndTimeColumn should be used to define a
    * mid-point at which the formants should be extracted. 
    * @return Column that identifies the end time of the span for which formants should be
-   * evaluated. null if {@link #markColumn} is the target time, or non-null if 
-   * {@link #markColumn} and MarkEndColum n should be used to define a mid-point at which the
+   * evaluated. null if {@link #startTimeColumn} is the target time, or non-null if 
+   * {@link #startTimeColumn} and MarkEndColum n should be used to define a mid-point at which the
    * formants should be extracted. 
    */
   public Integer getEndTimeColumn() { return endTimeColumn; }
   /**
    * Setter for {@link #endTimeColumn}: Column that identifies the end time of the span
-   * for which formants should be evaluated. null if {@link #markColumn} is the target
-   * time, or non-null if {@link #markColumn} and EndTimeColumn should be used to define
+   * for which formants should be evaluated. null if {@link #startTimeColumn} is the target
+   * time, or non-null if {@link #startTimeColumn} and EndTimeColumn should be used to define
    * a mid-point at which the formants should be extracted. 
    * @param iNewEndTimeColumn Column that identifies the end time of the span for which
-   * formants should be evaluated. null if {@link #markColumn} is the target time, or
-   * non-null if {@link #markColumn} and EndTimeColumn should be used to define a
+   * formants should be evaluated. null if {@link #startTimeColumn} is the target time, or
+   * non-null if {@link #startTimeColumn} and EndTimeColumn should be used to define a
    * mid-point at which the formants should be extracted. 
    */
   public ExtractIntervalLabels setEndTimeColumn(Integer iNewEndTimeColumn) { endTimeColumn = iNewEndTimeColumn; return this; }
