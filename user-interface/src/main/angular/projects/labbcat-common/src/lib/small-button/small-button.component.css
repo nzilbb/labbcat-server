@@ -1,0 +1,20 @@
+img {
+    background: #CCCCCC;
+    margin-left: 5px;
+    padding: 3px;
+    width: 12px;
+    height: 12px;
+    vertical-align: bottom;
+}
+img:hover {
+    background: #BBBBBB;
+}
+img.disabled {
+    opacity: 0.5;
+}
+img.selected {
+    border: 2px solid var(--theme-block-color);
+}
+img.deselected {
+    border: 2px solid var(--theme-background-color)
+}

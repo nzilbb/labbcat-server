@@ -1,0 +1,8 @@
+<img src="{{img.startsWith('http')?img:imagesLocation+'/'+img}}"     
+     alt="{{icon}}"
+     title="{{title}}"
+     class="{{classes}}"
+     [class.disabled]="disabled"
+     [class.selected]="selected"
+     [class.deselected]="!selected"
+     (click)="handlePress($event)">

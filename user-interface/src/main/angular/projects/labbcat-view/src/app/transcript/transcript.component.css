@@ -216,30 +216,17 @@ nav, nav > div {
     border-left: 1px solid var(--theme-background-color);
     border-right: 1px solid var(--theme-background-color);
 }
-img.button {
-    background: #CCCCCC;
-    margin-left: 5px;
-    padding: 3px;
-    width: 10px;
-    height: 10px;
-    vertical-align: bottom;
+.annotation lib-small-button.create, .annotation lib-small-button.edit {
     opacity: 0;
 }
-img.button.save {
+.annotation:hover lib-small-button.create, .annotation:hover lib-small-button.edit {
     opacity: 1;
-}
-img.button:hover {
-    background: #BBBBBB;
-}
-img.button.save.disabled {
-    opacity: 0.5;
+    animation-name: fade-in;
+    animation-duration: 500ms;
 }
 
 .annotation input {
     width: 50px;
-}
-.annotation:hover img.button {
-    opacity: 1;
 }
 .annotation:hover img.edit, .annotation:hover img.new {
     opacity: 1;
@@ -258,7 +245,7 @@ img.button.save.disabled {
     text-align: center;
     flex-grow: 1;
 }
-.utterance-editor img.button.save {
+.utterance-editor lib-small-button.save {
     align-self: flex-end;
 }
 
@@ -487,8 +474,6 @@ lib-layer-checkboxes {  /* layer selection on top of media */
     z-index: 5;
 }
 
-.annotation img.icon {
-}
 img.preview {
     max-width: 200px;
     position: absolute;

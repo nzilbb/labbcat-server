@@ -541,16 +541,15 @@
                    [(ngModel)]="editingUtteranceText"
                    (keyup.Enter)="saveUtterance()"
                    [appAutofocus]="true">
-            <img *ngIf="editingUtteranceText == editingUtteranceTextOriginal"
-                 class="button save"
-                 (click)="saveUtterance()"
-                 i18n-title title="Cancel editing transcript"
-                 src="{{imagesLocation}}/cross-mark.svg" alt="×">
-            <img *ngIf="editingUtteranceText != editingUtteranceTextOriginal"
-                 class="button save"
-                 (click)="saveUtterance()"
-                 i18n-title title="Save changes to transcript"
-                 src="{{imagesLocation}}/save.svg" alt="💾">
+            <lib-small-button *ngIf="editingUtteranceText == editingUtteranceTextOriginal"
+                              i18n-title title="Cancel editing transcript"
+                              class="save"
+                              img="cross-mark.svg" icon="×"
+                              (press)="saveUtterance()"></lib-small-button>
+            <lib-small-button *ngIf="editingUtteranceText != editingUtteranceTextOriginal"
+                              i18n-title title="Save changes to transcript"
+                              class="save" action="save"
+                              (press)="saveUtterance()"></lib-small-button>
           </div>
         <div *ngIf="utterance.id != editingUtteranceId"
              class="words">
@@ -690,28 +689,26 @@
                              (keyup)="annotation._changed = true"
                              (keyup.Enter)="saveTag(annotation)"
                              [appAutofocus]="true">
-                      <img *ngIf="annotation._editing"
-                           [class.disabled]="!annotation._changed"
-                           class="button save"
-                           (click)="saveTag(annotation)"
-                           i18n-title title="Save changes to tag"
-                           [src]="imagesLocation+(annotation.label?'/save.svg':'/delete.svg')"
-                           [alt]="annotation.label?'💾':'➖'">
-                      <img *ngIf="!annotation._editing"
-                           class="button edit"
-                           (click)="editTag(annotation)"
-                           i18n-title title="Edit tag"
-                           src="{{imagesLocation}}/edit.svg" alt="✏️">
+                      <lib-small-button *ngIf="annotation._editing"
+                                        i18n-title title="Save changes to tag"
+                                        class="save"
+                                        [img]="annotation.label?'save.svg':'delete.svg'"
+                                        [icon]="annotation.label?'💾':'➖'"
+                                        (press)="saveTag(annotation)"></lib-small-button>
+                      <lib-small-button *ngIf="!annotation._editing"
+                                        action="edit"
+                                        i18n-title title="Edit tag"
+                                        class="edit"
+                                        (press)="editTag(annotation)"></lib-small-button>
                     </ng-container>                    
                   </span>
                   <span *ngIf="word.all(l).length == 0"
                         class="annotation">
                     <ng-container *ngIf="!editableTagLayer(l)">&nbsp;</ng-container>
-                    <img *ngIf="editableTagLayer(l)"
-                         class="button new"
-                         (click)="newTag(word, l)"
-                         i18n-title title="Add new tag"
-                         src="{{imagesLocation}}/add.svg" alt="➕">                    
+                    <lib-small-button action="create"
+                                      class="create"
+                                      i18n-title title="Add new tag"
+                                      (press)="newTag(word, l)"></lib-small-button>
                   </span>
                 </span>
               </ng-container>

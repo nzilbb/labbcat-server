@@ -54,11 +54,15 @@
               <span *ngIf="annotationCounts[layer.id] > -1">{{annotationCounts[layer.id]}}</span>
             </td>
             <td class="interpretation">
-              <img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
-                   i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-                   [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
-                   [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-                   (click)="!this.disabled.includes(layer.id) ? handleInterpretedRaw(layer.id) : ''">
+              <lib-small-button
+                *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
+                i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+                img="interpreted.svg" icon="🏷"
+                [disabled]="this.disabled.includes(layer.id)"
+                [selected]="interpretedRaw[layer.id]"
+                class="interpreted-selector"
+                (press)="handleInterpretedRaw(layer.id)"
+                ></lib-small-button>
             </td>
           </tr>
         </ng-container>
@@ -101,11 +105,16 @@
               <span *ngIf="annotationCounts[layer.id] > -1">{{annotationCounts[layer.id]}}</span>
             </td>
             <td class="interpretation">
-              <img *ngIf="interpretedRaw.hasOwnProperty(layer.id)"
-                   i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-                   [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
-                   [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-                   (click)="!this.disabled.includes(layer.id) ? handleInterpretedRaw(layer.id) : ''"></td>
+              <lib-small-button
+                *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
+                i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+                img="interpreted.svg" icon="🏷"
+                [disabled]="this.disabled.includes(layer.id)"
+                [selected]="interpretedRaw[layer.id]"
+                class="interpreted-selector"
+                (press)="handleInterpretedRaw(layer.id)"
+                ></lib-small-button>
+            </td>
           </tr>
         </ng-container>
     </tbody></table>
@@ -164,11 +173,16 @@ s                   i18n-title="Layer vertical-peers descriptions"
               <span *ngIf="annotationCounts[layer.id] > -1">{{annotationCounts[layer.id]}}</span>
             </td>
             <td class="interpretation">
-              <img *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
-                   i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-                   [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
-                   [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-                   (click)="handleInterpretedRaw(layer.id)"></td>
+              <lib-small-button
+                *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
+                i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+                img="interpreted.svg" icon="🏷"
+                [disabled]="this.disabled.includes(layer.id)"
+                [selected]="interpretedRaw[layer.id]"
+                class="interpreted-selector"
+                (press)="handleInterpretedRaw(layer.id)"
+                ></lib-small-button>
+            </td>
           </tr>
         </ng-container>
     </tbody></table>
@@ -250,11 +264,15 @@ s                   i18n-title="Layer vertical-peers descriptions"
               <span *ngIf="annotationCounts[layer.id] > -1">{{annotationCounts[layer.id]}}</span>
             </td>
             <td class="interpretation">
-              <img *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
-                   i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-                   [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
-                   [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-                   (click)="handleInterpretedRaw(layer.id)">
+              <lib-small-button
+                *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
+                i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+                img="interpreted.svg" icon="🏷"
+                [disabled]="this.disabled.includes(layer.id)"
+                [selected]="interpretedRaw[layer.id]"
+                class="interpreted-selector"
+                (press)="handleInterpretedRaw(layer.id)"
+                ></lib-small-button>
             </td>
           </tr>
         </ng-container>
@@ -340,11 +358,16 @@ s                   i18n-title="Layer vertical-peers descriptions"
               <span *ngIf="annotationCounts[layer.id] > -1">{{annotationCounts[layer.id]}}</span>
             </td>
             <td class="interpretation">
-              <img *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
-                   i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-                   [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
-                   [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-                   (click)="handleInterpretedRaw(layer.id)"></td>
+              <lib-small-button
+                *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
+                i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+                img="interpreted.svg" icon="🏷"
+                [disabled]="this.disabled.includes(layer.id)"
+                [selected]="interpretedRaw[layer.id]"
+                class="interpreted-selector"
+                (press)="handleInterpretedRaw(layer.id)"
+                ></lib-small-button>
+            </td>            
           </tr>
         </ng-container>
     </tbody></table>
@@ -424,11 +447,15 @@ s                   i18n-title="Layer vertical-peers descriptions"
               <span *ngIf="annotationCounts[layer.id] > -1">{{annotationCounts[layer.id]}}</span>
             </td>
             <td class="interpretation">
-              <img *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
-                   i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
-                   [src]="imagesLocation+'/interpreted'+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'" alt="[🏷]"
-                   [ngClass]="{'interpreted-selector':true, 'deselected':!interpretedRaw[layer.id]}"
-                   (click)="handleInterpretedRaw(layer.id)">
+              <lib-small-button
+                *ngIf="displayIcons && interpretedRaw.hasOwnProperty(layer.id)"
+                i18n-title title="Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)"
+                img="interpreted.svg" icon="🏷"
+                [disabled]="this.disabled.includes(layer.id)"
+                [selected]="interpretedRaw[layer.id]"
+                class="interpreted-selector"
+                (press)="handleInterpretedRaw(layer.id)"
+                ></lib-small-button>
             </td>
           </tr>
         </ng-container>

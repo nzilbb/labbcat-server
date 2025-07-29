@@ -18,6 +18,7 @@ export * from './lib/duration.pipe';
 export * from './lib/messages/messages.component';
 export * from './lib/keep-alive/keep-alive.component';
 export * from './lib/button/button.component';
+export * from './lib/small-button/small-button.component';
 export * from './lib/menu-option/menu-option.component';
 export * from './lib/task/task.component';
 export * from './lib/wait/wait.component';

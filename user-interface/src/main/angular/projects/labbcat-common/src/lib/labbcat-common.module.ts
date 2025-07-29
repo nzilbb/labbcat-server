@@ -6,6 +6,7 @@ import { UrlEncodePipe } from './url-encode.pipe';
 import { MessagesComponent } from './messages/messages.component';
 import { KeepAliveComponent } from './keep-alive/keep-alive.component';
 import { ButtonComponent } from './button/button.component';
+import { SmallButtonComponent } from './small-button/small-button.component';
 import { MenuOptionComponent } from './menu-option/menu-option.component';
 import { TaskComponent } from './task/task.component';
 import { WaitComponent } from './wait/wait.component';
@@ -28,6 +29,7 @@ import { InputRegexpComponent } from './input-regexp/input-regexp.component';
         UrlEncodePipe,
         MessagesComponent,
         ButtonComponent,
+        SmallButtonComponent,
         MenuOptionComponent,
         KeepAliveComponent,
         WaitComponent,
@@ -53,6 +55,7 @@ import { InputRegexpComponent } from './input-regexp/input-regexp.component';
         UrlEncodePipe,
         MessagesComponent,
         ButtonComponent,
+        SmallButtonComponent,
         MenuOptionComponent,
         KeepAliveComponent,
         WaitComponent,
