@@ -16,5 +16,5 @@ img.selected {
     border: 2px solid var(--theme-block-color);
 }
 img.deselected {
-    border: 2px solid var(--theme-background-color)
+    border: 2px solid transparent;
 }
