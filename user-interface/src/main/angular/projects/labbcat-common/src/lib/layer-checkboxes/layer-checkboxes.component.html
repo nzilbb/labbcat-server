@@ -229,8 +229,8 @@ s                   i18n-title="Layer vertical-peers descriptions"
                        title-i18n title="How many linked annotations to include">
                 <ng-container *ngIf="IsAnchorable(layer)">
                   <input *ngIf="IsAnchorable(layer)"
-                         type="checkbox no-display" value="1" name="share_end_{{layer.id}}"
-                         class="share-end"
+                         type="checkbox" value="1" name="share_end_{{layer.id}}"
+                         class="share-end no-display"
                          [id]="name+'-'+layer.id+'-end'">
                   <label [for]="name+'-'+layer.id+'-end'"
                          *ngIf="IsAnchorable(layer)"
