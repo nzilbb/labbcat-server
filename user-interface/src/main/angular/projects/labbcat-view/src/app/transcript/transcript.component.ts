@@ -975,7 +975,9 @@ export class TranscriptComponent implements OnInit {
     /** Highlight the annotation with the given ID */
     highlitId: string;
     highlight(id: string): void {
-        this.highlitId = id;
+        if (window.location.hash.substring(1) != this.editingUtteranceId) {
+            this.highlitId = id;
+        }
         try {
             document.getElementById(id).scrollIntoView({
                 behavior: "smooth",
@@ -1250,6 +1252,7 @@ export class TranscriptComponent implements OnInit {
                         this.messageService.info(`Load anchors: ${m}`));
                     if (result.text) {
                         this.editingUtteranceId = utterance.id;
+                        document.location.hash = utterance.id;
                         this.editingUtteranceTextOriginal = result.text;
                         this.editingUtteranceText = this.editingUtteranceTextOriginal;
                     }
@@ -1264,6 +1267,7 @@ export class TranscriptComponent implements OnInit {
                         this.messageService.info(`Load anchors: ${m}`));
                     if (result.text) {
                         this.editingUtteranceId = utterance.id;
+                        document.location.hash = utterance.id;
                         this.editingUtteranceTextOriginal = result.text;
                         this.editingUtteranceText = this.editingUtteranceTextOriginal;
                     }
@@ -1319,7 +1323,7 @@ export class TranscriptComponent implements OnInit {
             this.generationThreadId = "";
             setTimeout(()=>{
                 document.location.reload();
-            }, 1000);
+                }, 1000);
         }, 1000);
     }
     
