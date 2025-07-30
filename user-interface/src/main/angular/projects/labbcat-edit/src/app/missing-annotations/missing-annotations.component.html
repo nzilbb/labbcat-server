@@ -81,8 +81,8 @@
                   (press)="addNextEntry();"
                   *ngIf="changed"
                   i18n-title title="Save all pronunciations"></lib-button>
-      <form #form action="{{baseUrl}}generateLayerUtterances" method="POST">
-        <input type="hidden" name="generate_layer_id" value="{{generateLayer.layer_id}}">
+      <form #form action="{{baseUrl}}edit/generateLayerUtterances" method="POST">
+        <input type="hidden" name="generate_layer" value="{{generateLayer.id}}">
         <input type="hidden" name="threadId" value="{{sourceThreadId}}">
         <ng-container *ngFor="let utterance of utterances">
           <input type="hidden" name="utterance" value="{{utterance}}">
