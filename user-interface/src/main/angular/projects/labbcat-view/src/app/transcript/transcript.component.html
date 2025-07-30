@@ -1,7 +1,9 @@
 <lib-wait *ngIf="loading"></lib-wait>
 <lib-task
   *ngIf="generationThreadId"
-  id="generatation-thread"
+  id="generation-thread"
+  [showName]="false"
+  [showStatus]="false"
   [threadId]="generationThreadId"
   (finished)="generationFinished()"></lib-task>
 

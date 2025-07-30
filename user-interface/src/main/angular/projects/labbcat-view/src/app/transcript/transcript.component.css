@@ -299,6 +299,13 @@ nav, nav > div {
     align-items: center;
 }
 
+#generation-thread {
+    position: fixed;
+    bottom: 0px;
+    width: 100vw;
+    background: var(--theme-background-color);
+}
+
 /* Meta-data */
 
 .tab-labels.video {
