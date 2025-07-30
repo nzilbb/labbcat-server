@@ -705,7 +705,8 @@
                   <span *ngIf="word.all(l).length == 0"
                         class="annotation">
                     <ng-container *ngIf="!editableTagLayer(l)">&nbsp;</ng-container>
-                    <lib-small-button action="create"
+                    <lib-small-button *ngIf="editableTagLayer(l)"
+                                       action="create"
                                       class="create"
                                       i18n-title title="Add new tag"
                                       (press)="newTag(word, l)"></lib-small-button>
