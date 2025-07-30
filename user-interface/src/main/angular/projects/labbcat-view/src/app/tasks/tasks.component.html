@@ -50,21 +50,21 @@
             </progress>
           </td>
           <td class="controls">
-            <lib-button *ngIf="task.running && task.threadId"
+            <lib-small-button *ngIf="task.running && task.threadId"
                         (press)="cancelTask(task)"
                         i18n-title title="Cancel task"
                         img="cross-mark.svg" icon="×"
-                        ></lib-button>
-            <lib-button *ngIf="!task.running && task.threadId"
+                        ></lib-small-button>
+            <lib-small-button *ngIf="!task.running && task.threadId"
                         (press)="releaseTask(task)"
                         i18n-title title="Release task"
                         img="cross-mark.svg" icon="×"
-                        ></lib-button>
-            <lib-button *ngIf="task.threadId"
+                        ></lib-small-button>
+            <lib-small-button *ngIf="task.threadId"
                         (press)="log(task)"
                         i18n-title title="Show task log"
                         img="document.svg" icon="×"
-                        ></lib-button>
+                        ></lib-small-button>
           </td>
         </tr>
       </ng-container>
