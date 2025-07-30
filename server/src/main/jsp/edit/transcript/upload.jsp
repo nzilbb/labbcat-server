@@ -43,7 +43,7 @@
             }
 
             // ensure threads don't hang around too long, as they might be uploading a huge batch
-            generator.setWaitToDieMilliseconds(5000);
+            generator.setWaitToDieMilliseconds(10000);
             
             generator.setName(graph.getId());
             generator.runGenerateTranscript(-1, null, (Integer)graph.get("@ag_id"));
