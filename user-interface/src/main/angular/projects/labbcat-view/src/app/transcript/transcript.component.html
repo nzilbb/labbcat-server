@@ -262,8 +262,9 @@
          [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
       <!-- layers tab -->
       <div *ngIf="currentCategory == 'Layers'" id="layers">
+        <lib-wait *ngIf="!layerSelectionEnabled" [inSitu]="true"></lib-wait>
         <lib-layer-checkboxes
-          *ngIf="currentCategory == 'Layers'"
+          *ngIf="currentCategory == 'Layers' && layerSelectionEnabled"
           [class.loading]="loading"
           [schema]="schema"
           name="layer" includeAlignment="true" spoofAlignment="true"

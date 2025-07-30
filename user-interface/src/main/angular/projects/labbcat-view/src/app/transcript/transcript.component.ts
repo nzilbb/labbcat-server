@@ -45,6 +45,7 @@ export class TranscriptComponent implements OnInit {
     displayAttributePrefixes: boolean;
 
     defaultLayerIds = ["noise","comment"];
+    layerSelectionEnabled = false;
     selectedLayerIds : string[];
     interpretedRaw: { [key: string] : boolean };
 
@@ -129,12 +130,11 @@ export class TranscriptComponent implements OnInit {
                     if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
                         layerIds = [...new Set(JSON.parse(sessionStorage.getItem("selectedLayerIds")))];
                     }
-                    if (!layerIds) layerIds = this.defaultLayerIds;
                     if (layerIds) {
                         if (Array.isArray(layerIds)) {
-                            this.layersChanged(layerIds);
+                            this.defaultLayerIds = layerIds;
                         } else {
-                            this.layersChanged([ layerIds ]);
+                            this.defaultLayerIds = [ layerIds ];
                         }
                     }
                     if (this.threadId) this.loadThread();
@@ -290,13 +290,15 @@ export class TranscriptComponent implements OnInit {
             "main_participant",
             this.schema.turnLayerId,
             this.schema.utteranceLayerId,
-            this.schema.wordLayerId,
-            // unnofficial layers:
+            // getTranscript is *a lot* faster if words aren't loaded, so
+            // load words in pages later instead of here: this.schema.wordLayerId,
+            // unofficial layers:
             "previous-transcript", "next-transcript", // link to neighbors
             "audio_prompt", // 'Insert CD99' or whatever
             "divergent" // has the transcript changed since upload?
         ];
         return new Promise((resolve, reject) => {
+            this.loading = true;
             this.labbcatService.labbcat.getTranscript(
                 this.id, structuralLayerIds.concat(this.attributes),
                 (transcript, errors, messages) => {
@@ -312,34 +314,6 @@ export class TranscriptComponent implements OnInit {
                         // id might have been ag_id or something else non-canonical, correct it:
                         this.id = this.transcript.id;
                         this.parseTranscript();
-                        
-                        // grey out empty layers
-                        for (let l in this.schema.layers) {
-                            const layer = this.schema.layers[l];
-                            if (layer.parentId == this.schema.root.id
-                                && layer.alignment == 0) continue;
-                            if (layer.parentId == this.schema.participantLayerId) continue;
-                            if (layer.id == this.schema.root.id) continue;
-                            if (layer.id == this.schema.corpusLayerId) continue;
-                            if (layer.id == this.schema.episodeLayerId) continue;
-                            if (layer.id == this.schema.participantLayerId) continue;
-                            // a temporal layer
-                            this.layerStyles[l] = { color: "silver" };
-                            this.labbcatService.labbcat.countAnnotations(
-                                this.transcript.id, l, (count, errors, messages) => {
-                                    this.layerCounts[l] = count;
-                                    if (count) { // annotations in this layer
-                                        if (count == 1) {
-                                            this.schema.layers[l].description += ` (${count} annotation)`; // TODO i18n
-                                        } else {
-                                            this.schema.layers[l].description += ` (${count} annotations)`; // TODO i18n
-                                        }
-                                        this.layerStyles[l] = {};
-                                    } else {
-                                        this.schema.layers[l].description += ' (0 annotations)'; // TODO i18n
-                                    }
-                                });
-                        } // next temporal layer
                         resolve();
                     } // valid transcript
                 });
@@ -380,23 +354,6 @@ export class TranscriptComponent implements OnInit {
                     
                 } // next utterance
 
-                // parse words and distribute them into utterances
-                let u = 0;
-                const utterances = turn.all(utteranceLayerId) as Annotation[];
-                // for each word
-                for (let word of turn.all(wordLayerId)) {
-                    this.annotations[word.id] = word as Annotation;                    
-                    this.words.push(word as Annotation);
-
-                    // add to the current utterance
-                    // if the words starts after utterance u ends, increment
-                    while (utterances[u].end && utterances[u].end.offset // (tolerate nulls)
-                        && word.start.offset >= utterances[u].end.offset
-                        && u < utterances.length-1) {
-                        u++;
-                    }
-                    utterances[u][wordLayerId].push(word);
-                } // next word
             } // next turn
         } // next participant
 
@@ -452,14 +409,163 @@ export class TranscriptComponent implements OnInit {
             }
         } // there are utterances
 
-        if (window.location.hash) {
-            window.setTimeout(()=>{ // give time for the page to render
-                this.highlight(window.location.hash.substring(1));
-            }, 500);
-        }
         this.showMediaPrompt();
-    }
+        
+        // instead of distributing all words now: this.distributeWords(words);
+        // ...paginate loading of words, so that the top of the transcript is almost
+        // immediately visible, even if the transcript is long
+        this.loadWordsIncrementally(0).then(()=>{
+            if (window.location.hash // there's a hash and it' not already centred
+                && this.highlitId != window.location.hash.substring(1)) {
+                window.setTimeout(()=>{ // give time for the page to render
+                    this.highlight(window.location.hash.substring(1));
+                }, 500);
+            }
+            
+            this.layerSelectionEnabled = true;
 
+            // load preselected layers
+            if (this.defaultLayerIds) this.layersChanged(this.defaultLayerIds);
+           
+            // grey out empty layers
+            for (let l in this.schema.layers) {
+                const layer = this.schema.layers[l];
+                if (layer.parentId == this.schema.root.id
+                    && layer.alignment == 0) continue;
+                if (layer.parentId == this.schema.participantLayerId) continue;
+                if (layer.id == this.schema.root.id) continue;
+                if (layer.id == this.schema.corpusLayerId) continue;
+                if (layer.id == this.schema.episodeLayerId) continue;
+                if (layer.id == this.schema.participantLayerId) continue;
+                // a temporal layer
+                this.layerStyles[l] = { color: "silver" };
+                this.labbcatService.labbcat.countAnnotations(
+                    this.transcript.id, l, (count, errors, messages) => {
+                        this.layerCounts[l] = count;
+                        if (count) { // annotations in this layer
+                            if (count == 1) {
+                                this.schema.layers[l].description += ` (${count} annotation)`; // TODO i18n
+                            } else {
+                                this.schema.layers[l].description += ` (${count} annotations)`; // TODO i18n
+                            }
+                            this.layerStyles[l] = {};
+                        } else {
+                            this.schema.layers[l].description += ' (0 annotations)'; // TODO i18n
+                        }
+                    });
+            } // next temporal layer
+        });
+    }
+    
+    /** Load the given (zero-based) page of words.
+     * The promise is resolved once annotations and anchors on the given page and all subsequent
+     * pages have been added to the annotation graph. */
+    loadWordsIncrementally(page: number) : Promise<string> {
+        const wordLayerId = this.schema.wordLayerId;
+        return new Promise((resolve, reject) => {
+            const layer = this.schema.layers[wordLayerId];
+            this.transcript.schema.layers[wordLayerId] = layer;
+            layer.parent = this.transcript.schema.layers[layer.parentId];
+            
+            // load annotations
+            this.loading = true;
+            this.labbcatService.labbcat.getAnnotations(
+                this.transcript.id, wordLayerId, 500, page, (annotations, errors, messages) => {
+                    this.loading = false;
+                    if (annotations.length) {
+                        const unknownAnchorIds = new Set<string>();
+                        for (let a of annotations) {
+                            if (!this.transcript.anchors[a.startId]) {
+                                unknownAnchorIds.add(a.startId);
+                            }
+                            if (!this.transcript.anchors[a.endId]) {
+                                unknownAnchorIds.add(a.endId);
+                            }
+                        } // next annotation
+                        
+                        if (unknownAnchorIds.size) {
+                            // there might be a lot of anchors to load,
+                            // making one request too large
+                            // so we break the anchor list into chunks
+                            this.loadAnchorsIncrementally(unknownAnchorIds).then(()=>{
+                                // add annotations to graph once we've got all the anchors
+                                const words : Annotation[] = [];
+                                for (let a of annotations) {
+                                    const annotation = new this.labbcatService.ag.Annotation(
+                                        wordLayerId, a.label, this.transcript,
+                                        a.startId, a.endId,
+                                        a.id, a.parentId);
+                                    if (a.dataUrl) annotation.dataUrl = a.dataUrl;
+                                    this.transcript.addAnnotation(annotation);
+                                    words.push(annotation);
+                                }
+
+                                // show these words immediately
+                                this.distributeWords(words);
+                                
+                                // next page
+                                this.loadWordsIncrementally(page + 1).then(()=>{
+                                    resolve(`${page}:${wordLayerId}`);
+                                });
+                            });
+                        } else { // all anchors are already loaded
+                            // we've got all the anchors, so add the annotations to the graph
+                            const words : Annotation[] = [];
+                            for (let a of annotations) {
+                                const annotation = new this.labbcatService.ag.Annotation(
+                                    wordLayerId, a.label, this.transcript, a.startId, a.endId,
+                                    a.id, a.parentId);
+                                if (a.dataUrl) annotation.dataUrl = a.dataUrl;
+                                this.transcript.addAnnotation(annotation);
+                            }
+                            
+                            // show these words immediately
+                            this.distributeWords(words);
+                            
+                            // next page
+                            this.loadWordsIncrementally(page + 1).then(()=>{
+                                resolve(`${page}:${wordLayerId}`);
+                            });
+                        } // all anchors are aalready loaded
+                    } else { // there were no more annotations
+                        resolve(`${page}:${wordLayerId}`);
+                    }
+                });
+        });
+    }
+    
+    distributeWords(words: Annotation[]): void {
+        const participantLayerId = this.schema.participantLayerId;
+        const turnLayerId = this.schema.turnLayerId;
+        const utteranceLayerId = this.schema.utteranceLayerId;
+        const wordLayerId = this.schema.wordLayerId;
+        
+        // for each word
+        for (let word of words) {
+            this.annotations[word.id] = word as Annotation;                    
+            this.words.push(word as Annotation);
+            
+            const turn = this.transcript.annotations[word.parentId] as Annotation;
+            const utterances = turn.all(utteranceLayerId) as Annotation[];
+            let u = 0;
+            // add to the current utterance
+            // if the words starts after utterance u ends, increment
+            while (utterances[u].end && utterances[u].end.offset // (tolerate nulls)
+                && word.start.offset >= utterances[u].end.offset
+                && u < utterances.length-1) {
+                u++;
+            }
+            utterances[u][wordLayerId].push(word);
+
+            if (window.location.hash && window.location.hash.substring(1) == word.id) {
+                window.setTimeout(()=>{ // give time for the page to render
+                    this.highlight(window.location.hash.substring(1));
+                }, 500);
+            }
+
+        } // next word
+    }
+    
     loadThread(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
             if (errors) errors.forEach(m => this.messageService.error(m));
@@ -728,7 +834,7 @@ export class TranscriptComponent implements OnInit {
 
     /** recursive anchor loading, to prevent requests from becoming too large */
     loadAnchorsIncrementally(unknownAnchorIds : Set<string>) : Promise<void> {
-        const maxIds = 150;
+        const maxIds = 300;
         return new Promise<void>((resolve, reject) => {
             let idsToLoadNow = new Set<string>(Array.from(unknownAnchorIds).slice(0, maxIds));
             let idsToLoadLater = new Set<string>(Array.from(unknownAnchorIds).slice(maxIds));
