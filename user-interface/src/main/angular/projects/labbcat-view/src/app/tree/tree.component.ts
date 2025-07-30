@@ -74,10 +74,23 @@ export class TreeComponent implements OnInit {
                                 // be end descending
                                 return b.end.offset - a.end.offset;
                             } else if (a.label != b.label) {
-                                // by annotation ID descending - ID is formatted eM_NN_II
-                                let aID = Number(a.label.replace(/^e.?_[0-9]+_/,""));
-                                let bID = Number(b.label.replace(/^e.?_[0-9]+_/,""));
-                                return bID - aID;
+                                // same start and end
+                                
+                                // TODO use ordinal when we can trust it
+                                
+                                // usually branches are uppercase and leaves are lower
+                                const uppercaseA = a.label == a.label.toUpperCase();
+                                const uppercaseB = b.label == b.label.toUpperCase();
+                                if (uppercaseA && !uppercaseB) {
+                                    return -1;
+                                } else if (!uppercaseA && uppercaseB) {
+                                    return 1;
+                                } else {
+                                    // by annotation ID descending - ID is formatted eM_NN_II
+                                    let aID = Number(a.label.replace(/^e.?_[0-9]+_/,""));
+                                    let bID = Number(b.label.replace(/^e.?_[0-9]+_/,""));
+                                    return bID - aID;
+                                }
                             } else {
                                 return 0;
                             }
