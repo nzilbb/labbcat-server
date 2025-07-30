@@ -540,41 +540,41 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
             });
     }
     threadMonitor: number;
-    monitorThreads(): void { // TODO slow when there are hunders of uploads
+    monitorThreads(): void { // TODO slow when there are hundreds of uploads
         if (this.threadMonitor) return; // already monitoring
         this.threadMonitor = setInterval(()=>{
             // get all task statuses
-            this.labbcatService.labbcat.getTasks((tasks, errors, messages) => {
-                for (let entry of this.entries) {
-                    if (entry.transcriptThreads) {
-                        for (let transcriptId in entry.transcriptThreads) {
-                            const taskId = entry.transcriptThreads[transcriptId];
-                            const task = tasks[taskId];
-                            if (task) {
-                                entry.progress = 50 + (task.percentComplete/2);
-                                entry.status = task.status || entry.status;
-                            }
-                            if (!task // task is gone TODO this isn't working, polling continues
-                                || !task.running) { // or not running any more
-                                entry.exists = true;
-                                entry.transcriptThreads = null;
-                                // if all the uploads are complete
-                                if (!this.processing
-                                    && this.useDefaultParameterValues
-                                    && !this.entries.find(e=>e.transcriptThreads)) {
-                                    clearInterval(this.threadMonitor);
-                                    this.threadMonitor = null;
-                                    setTimeout(()=>{ // give the UI a chance to update
-                                        if (confirm("Do you want an upload report?")) { // TODO i18n
-                                            this.onReport();
-                                        }
-                                    }, 1000);
+            for (let entry of this.entries) {
+                if (entry.transcriptThreads) {
+                    for (let transcriptId in entry.transcriptThreads) {
+                        const taskId = entry.transcriptThreads[transcriptId];
+                        this.labbcatService.labbcat.taskStatus(
+                            taskId, (task, errors, messages) => {
+                                if (task) {
+                                    entry.progress = 50 + (task.percentComplete/2);
+                                    entry.status = task.status || entry.status;
                                 }
-                            } // task finished
-                        } // next thread
-                    } // there are threads
-                } // next entry
-            }); // getTasks
+                                if (!task // task is gone TODO this isn't working, polling continues
+                                    || !task.running) { // or not running any more
+                                    entry.exists = true;
+                                    entry.transcriptThreads = null;
+                                    // if all the uploads are complete
+                                    if (!this.processing
+                                        && this.useDefaultParameterValues
+                                        && !this.entries.find(e=>e.transcriptThreads)) {
+                                        clearInterval(this.threadMonitor);
+                                        this.threadMonitor = null;
+                                        setTimeout(()=>{ // give the UI a chance to update
+                                            if (confirm("Do you want an upload report?")) { // TODO i18n
+                                                this.onReport();
+                                            }
+                                        }, 1000);
+                                    }
+                                } // task finished
+                            }); // getTaskStatus
+                    } // next transcript
+                } // threads set
+            } // next entry
         }, 1000); // setInterval
     }
 
