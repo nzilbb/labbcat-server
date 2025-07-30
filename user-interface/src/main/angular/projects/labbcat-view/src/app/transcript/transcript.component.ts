@@ -838,8 +838,10 @@ export class TranscriptComponent implements OnInit {
         return new Promise<void>((resolve, reject) => {
             let idsToLoadNow = new Set<string>(Array.from(unknownAnchorIds).slice(0, maxIds));
             let idsToLoadLater = new Set<string>(Array.from(unknownAnchorIds).slice(maxIds));
+            this.loading = true;
             this.labbcatService.labbcat.getAnchors(
                 this.transcript.id, Array.from(idsToLoadNow), (anchors, errors, messages) => {
+                    this.loading = false;
                     if (errors) errors.forEach(m => 
                         this.messageService.error(`Load anchors: ${m}`));
                     if (messages) messages.forEach(m =>
