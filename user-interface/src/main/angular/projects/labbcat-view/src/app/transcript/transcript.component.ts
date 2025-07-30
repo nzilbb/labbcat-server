@@ -390,7 +390,8 @@ export class TranscriptComponent implements OnInit {
 
                     // add to the current utterance
                     // if the words starts after utterance u ends, increment
-                    while (word.start.offset >= utterances[u].end.offset
+                    while (utterances[u].end && utterances[u].end.offset // (tolerate nulls)
+                        && word.start.offset >= utterances[u].end.offset
                         && u < utterances.length-1) {
                         u++;
                     }
