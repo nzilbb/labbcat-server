@@ -103,26 +103,7 @@ export class TranscriptComponent implements OnInit {
             this.readSchema().then(() => {
                 this.readTranscript().then(()=>{ // some have to wait until transcript is loaded
                     this.readAvailableMedia().then(()=>{
-                        this.praatService.initialize().then((version: string)=>{
-                            console.log(`Praat integration version ${version}`);
-                            this.praatIntegration = version;
-                            this.praatProgress = {
-                                message: `Praat Integration ${this.praatIntegration}`,
-                                value: 0,
-                                maximum: 100
-                            };
-                            this.praatService.progressUpdates().subscribe((progress) => {
-                                this.praatProgress = progress;
-                            });
-                        }, (canInstall: boolean)=>{
-                            if (canInstall) {
-                                console.log("Praat integration not installed but it could be");
-                                this.praatIntegration = "";
-                            } else {
-                                console.log("Praat integration: Incompatible browser");
-                                this.praatIntegration = null;
-                            }
-                        });
+                        this.checkPraatIntegration();
                     });
                     
                     // preselect layers?
@@ -152,6 +133,42 @@ export class TranscriptComponent implements OnInit {
             this.highlight(window.location.hash.substring(1));
         });
         this.readCategories();
+    }
+
+    checkPraatIntegration(): void {
+        this.praatService.initialize().then((version: string)=>{
+            console.log(`Praat integration version ${version}`);
+            this.praatIntegration = version;
+            if (version < "3.2") { // version required for auth to work
+                const upgradeLink = navigator.userAgent.indexOf("Firefox") != -1?
+                    `${this.baseUrl}/utilities/jsendpraat.xpi?3.0`:
+                    "https://chrome.google.com/webstore/detail/praat-integration/hmmnebkieionilgpepijmfabdickmnig";
+                this.praatProgress = {
+                    message: `Update Praat Integration (${this.praatIntegration})`, // TODO i18n
+                    link: upgradeLink,
+                    linkTitle: "Please click to update your Praat Integration", // TODO i18n
+                    value: 0,
+                    maximum: 100
+                };
+            } else {
+                this.praatProgress = {
+                    message: `Praat Integration ${this.praatIntegration}`, // TODO i18n
+                    value: 0,
+                    maximum: 100
+                };
+            }
+            this.praatService.progressUpdates().subscribe((progress) => {
+                this.praatProgress = progress;
+            });
+        }, (canInstall: boolean)=>{
+            if (canInstall) {
+                console.log("Praat integration not installed but it could be");
+                this.praatIntegration = "";
+            } else {
+                console.log("Praat integration: Incompatible browser");
+                this.praatIntegration = null;
+            }
+        });
     }
     
     readSchema() : Promise<void> {

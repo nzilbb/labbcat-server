@@ -214,7 +214,15 @@
         <label
           id="praat-message"
           title="{{praatProgress.error}} {{praatProgress.message}}"
-          for="praat-progress">{{praatProgress.error}} {{praatProgress.message}}</label>
+          for="praat-progress">
+          <span *ngIf="!praatProgress.link">
+            {{praatProgress.error}} {{praatProgress.message}}</span>
+          <a *ngIf="praatProgress.link"
+             href="{{praatProgress.link}}" target="jsendpraat"
+             title="{{praatProgress.linkTitle}}"
+             class="warning">
+            {{praatProgress.error}} {{praatProgress.message}}</a>
+        </label>
         <progress id="praat-progress"
                   [max]="praatProgress.maximum"
                   [ngClass]="{error : praatProgress.error != null}"

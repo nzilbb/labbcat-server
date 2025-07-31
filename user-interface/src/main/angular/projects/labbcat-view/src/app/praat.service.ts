@@ -7,6 +7,7 @@ import { ProgressUpdate } from './progress-update';
 
 declare var nzilbb:  any; // nzilbb.jsendpraat.js
 
+/** Service that managed communication with the JSendPraat browser extension */
 @Injectable({
   providedIn: 'root'
 })
@@ -25,7 +26,7 @@ export class PraatService {
     }
 
     /** 
-     * Initializes communication with the JSendPraat extension, if it's intalled.
+     * Initializes communication with the JSendPraat extension, if it's installed.
      * The string returned by the promise is the version of the browser extension installed.
      * The promise is rejected if the extension is not installed; the argument of the reject
      * call is true if the browser is compatible with user installation, and false if the 
