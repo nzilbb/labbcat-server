@@ -152,10 +152,10 @@
                 </select>
               </span>
               <img *ngIf="displayIcons && includeDataType" class="data-type"
-                   [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
+                   [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : 'file')+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
                    i18n-title="Layer data types"
-                   [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='number' ? 'Numeric' : undefined)"
-                   [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined">
+                   [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='number' ? 'Numeric' : layer.type)"
+                   [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : '?'">
               <img *ngIf="displayIcons && includeAlignment" class="alignment"
                    [src]="imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
                    i18n-title="Layer alignment descriptions"
@@ -243,10 +243,10 @@ s                   i18n-title="Layer vertical-peers descriptions"
                 </ng-container>
               </span>
               <img *ngIf="displayIcons && includeDataType" class="data-type"
-                   [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='number' ? 'Numeric' : undefined)"
-                   [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
+                   [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='number' ? 'Numeric' : 'file')"
+                   [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : layer.type)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
                    i18n-title="Layer data types"
-                   [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined">
+                   [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : '?'">
               <img *ngIf="displayIcons && includeAlignment" class="alignment"
                    [src]="imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
                    i18n-title="Layer alignment descriptions"
@@ -337,10 +337,10 @@ s                   i18n-title="Layer vertical-peers descriptions"
                    Currently, layer.subtype can only be set to X by modifying the MySQL table
                 -->
               <img *ngIf="displayIcons && includeDataType" class="data-type"
-                   [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='number' ? 'Numeric' : undefined)"
-                   [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
+                   [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='number' ? 'Numeric' : 'file')"
+                   [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : layer.type)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
                    i18n-title="Layer data types"
-                   [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined">
+                   [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : '?'">
               <img *ngIf="displayIcons && includeAlignment" class="alignment"
                    [src]="imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
                    i18n-title="Layer alignment descriptions"
@@ -427,10 +427,10 @@ s                   i18n-title="Layer vertical-peers descriptions"
                 </ng-container>
               </span>
               <img *ngIf="displayIcons && includeDataType" class="data-type"
-                   [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='number' ? 'Numeric' : undefined)"
-                   [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : undefined)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
+                   [title]="'Data type: ' + (['turn','utterance'].includes(layer.id) ? 'Timing-only' : layer.subtype=='X' ? 'Tree' : layer.type=='ipa' ? 'Phonological' : layer.type=='string' ? 'Text' : layer.type=='number' ? 'Numeric' : 'file')"
+                   [src]="imagesLocation+'/data-type-'+(['turn','utterance'].includes(layer.id) ? 'timing-only' : layer.subtype=='X' ? 'tree' : layer.type=='ipa' ? 'phonological' : layer.type=='string' ? 'text' : layer.type=='number' ? 'numeric' : layer.type)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
                    i18n-title="Layer data types"
-                   [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : undefined">
+                   [alt]="['turn','utterance'].includes(layer.id) ? '⌚' : layer.subtype=='X' ? '🌲' : layer.type=='ipa' ? '/ʒ/' : layer.type=='string' ? 'ab' : layer.type=='number' ? '12' : '?'">
               <img *ngIf="displayIcons && includeAlignment" class="alignment"
                    [src]="imagesLocation+'/alignment-'+(['turn','word','segment'].includes(layer.id) && spoofAlignment ? 0 : layer.alignment)+(this.disabled.includes(layer.id) ? '-disabled' : '')+'.svg'"
                    i18n-title="Layer alignment descriptions"
