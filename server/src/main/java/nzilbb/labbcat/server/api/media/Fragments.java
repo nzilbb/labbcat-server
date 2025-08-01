@@ -196,7 +196,8 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     } // TODO minimum integer digits for utterance/threadId cases
     
     String mimeType = parameters.getString("mimeType");
-    /*TODO if (mimeType == null || mimeType.length() == 0)*/ mimeType = "audio/wav";
+    if (mimeType == null || mimeType.length() == 0) mimeType = "audio/wav";
+    final String extension = "."+MediaFile.MimeTypeToSuffix().get(mimeType);
     String sampleRate = parameters.getString("sampleRate");
     if (sampleRate != null) {
       try {
@@ -208,7 +209,6 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         } catch(IOException x) {}
       }
     }
-    final String extension = "."+MediaFile.MimeTypeToSuffix().get(mimeType);
     
     // for CsvResults only:
     String startOffsetColumn = null;
