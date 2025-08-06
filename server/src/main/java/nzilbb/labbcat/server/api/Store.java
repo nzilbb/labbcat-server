@@ -1532,6 +1532,7 @@ public class Store extends APIRequestHandler {
     String id = parameters.getString("id");
     if (id == null) errors.add(localize("No ID specified."));
     String[] layerIds = parameters.getStrings("layerIds");
+    if (layerIds.length == 0) layerIds = store.getLayerIds();
     String annotationId = parameters.getString("annotationId");
     String startParameter = parameters.getString("start");
     Double start = null;
