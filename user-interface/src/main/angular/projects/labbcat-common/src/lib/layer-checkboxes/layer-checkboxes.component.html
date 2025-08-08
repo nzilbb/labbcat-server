@@ -484,7 +484,7 @@ s                   i18n-title="Layer vertical-peers descriptions"
     *ngIf="includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}'"
     class="label-spacer">
     <label
-      i18n-title title="Hide icons that correspond to layer properties">
+      i18n-title title="Show icons that correspond to layer properties">
       <!-- Don't actually need grouped-checkbox, but without it the alignment doesn't match Projects above -->
       <lib-grouped-checkbox
         group="hideLayerIcons"
@@ -496,7 +496,7 @@ s                   i18n-title="Layer vertical-peers descriptions"
   </div>
   <div *ngIf="(annotationCounts | json) != '{}'" class="label-spacer">
     <label
-      i18n-title title="Hide the number of annotations in each layer">
+      i18n-title title="Show the number of annotations in each layer">
       <lib-grouped-checkbox
         group="hideLayerCounts"
         name="hideLayerCounts"
