@@ -37,7 +37,8 @@
                 (change)="handleCheckbox(layer.id);"
                 ></lib-grouped-checkbox>
             </td>
-            <td class="options">
+            <td class="layer-options"
+                (click)="handleCheckbox(layer.id)">
               <span class="layer-options"
                     *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
                 <input *ngIf="IsCountable(layer)"
@@ -89,7 +90,8 @@
                 (change)="handleCheckbox(layer.id);"
                 ></lib-grouped-checkbox>
             </td>
-            <td class="options">
+            <td class="layer-options"
+                (click)="handleCheckbox(layer.id)">
               <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
                 <input *ngIf="IsCountable(layer)"
                        type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
@@ -140,7 +142,8 @@
                 (change)="handleCheckbox(layer.id);"
                 ></lib-grouped-checkbox>
             </td>
-            <td class="layer-options">
+            <td class="layer-options"
+                (click)="handleCheckbox(layer.id)">
               <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
                 <input *ngIf="IsCountable(layer)"
                        type="number" min="1" step="1" value="1" name="include_count_{{layer.id}}"
@@ -208,7 +211,8 @@ s                   i18n-title="Layer vertical-peers descriptions"
                 (change)="handleCheckbox(layer.id);"
                 ></lib-grouped-checkbox>
             </td>
-            <td class="options">
+            <td class="layer-options"
+                (click)="handleCheckbox(layer.id)">
               <span class="layer-options"
                     *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
                 <ng-container *ngIf="IsAnchorable(layer)">
@@ -299,7 +303,8 @@ s                   i18n-title="Layer vertical-peers descriptions"
                 (change)="handleCheckbox(layer.id);"
                 ></lib-grouped-checkbox>
             </td>
-            <td class="layer-options">
+            <td class="layer-options"
+                (click)="handleCheckbox(layer.id)">
               <span *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
                 <ng-container *ngIf="IsAnchorable(layer)">
                   <input type="checkbox" value="1" name="share_start_{{layer.id}}"
@@ -383,7 +388,7 @@ s                   i18n-title="Layer vertical-peers descriptions"
               [title]="layer.description"
               class="layer-{{layer.id}}{{this.disabled.includes(layer.id) ? ' disabled-layer' : ''}}"
               [ngStyle]="styles[layer.id]">
-            <td class="layer-options">
+            <td class="checkbox">
               <lib-grouped-checkbox
                 [group]="name"
                 [name]="name"
@@ -393,7 +398,8 @@ s                   i18n-title="Layer vertical-peers descriptions"
                 (change)="handleCheckbox(layer.id);"
                 ></lib-grouped-checkbox>
             </td>
-            <td class="options">
+            <td class="layer-options"
+                (click)="handleCheckbox(layer.id)">
               <span class="layer-options" *ngIf="layer._selected && !this.excludeOptionsForLayerId.includes(layer.id)">
                 <ng-container *ngIf="IsAnchorable(layer)">
                   <input type="checkbox" value="1" name="share_start_{{layer.id}}"
