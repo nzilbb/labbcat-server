@@ -469,10 +469,10 @@ s                   i18n-title="Layer vertical-peers descriptions"
       <lib-grouped-checkbox
         group="hideAttributePrefixes"
         name="hideAttributePrefixes"
-        [checked]="!displayAttributePrefixes"
+        [checked]="displayAttributePrefixes"
         (change)="toggleAttributePrefixes()"
         ></lib-grouped-checkbox>
-      <span i18n>Hide attribute prefixes</span></label>
+      <span i18n>Show attribute prefixes</span></label>
   </div>
   <div
     *ngIf="includeDataType || includeAlignment || includeVerticalPeers || (interpretedRaw | json) != '{}'"
@@ -483,10 +483,10 @@ s                   i18n-title="Layer vertical-peers descriptions"
       <lib-grouped-checkbox
         group="hideLayerIcons"
         name="hideLayerIcons"
-        [checked]="!displayIcons"
+        [checked]="displayIcons"
         (change)="toggleLayerIcons()"
         ></lib-grouped-checkbox>
-      <span i18n>Hide layer icons</span></label>
+      <span i18n>Show layer icons</span></label>
   </div>
   <div *ngIf="(annotationCounts | json) != '{}'" class="label-spacer">
     <label
@@ -494,10 +494,10 @@ s                   i18n-title="Layer vertical-peers descriptions"
       <lib-grouped-checkbox
         group="hideLayerCounts"
         name="hideLayerCounts"
-        [checked]="!displayCounts"
+        [checked]="displayCounts"
         (change)="toggleLayerCounts()"
         ></lib-grouped-checkbox>
-      <span i18n>Hide annotation counts</span>
+      <span i18n>Show annotation counts</span>
     </label>
   </div>
 </fieldset>
