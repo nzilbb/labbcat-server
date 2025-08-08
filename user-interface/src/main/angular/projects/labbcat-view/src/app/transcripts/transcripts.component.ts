@@ -511,21 +511,46 @@ export class TranscriptsComponent implements OnInit {
                         this.pageLinks = [];
                         for (let pg = 1; pg <= this.pageCount; pg++) {
                             this.pageLinks.push(""+pg);
-                            if (this.pageCount < 1000) { // not too many pages, so get a hint
-                                const hintIndex = pg - 1;
-                                // the hint for the page is the first ID on that page
-	                        this.labbcatService.labbcat.getMatchingTranscriptIds(
-                                    queryExpression, 1, this.pageLength * (pg-1),
-                                    (pgIds, errors, messages) => {
-                                        this.pageLinks[hintIndex] = pgIds[0];
-	                            });
-                            } // small number of pages
                         } // next page link
+                        if (this.pageCount < 1000) { // not too many pages, so get hints
+                            this.retrievePageHints(queryExpression);
+                        }
 
                         // revert to 20 per page for next time (in case we listed all this time)
                         this.pageLength = 20;
                     });
             });
+    }
+
+    pageHintTimer: number;
+    nextHintPage: number;
+    hintQueryExpression: string;
+    /** start getting page hints, but not all at once, so other higher priority queries
+     * don't get tied up waiting */
+    retrievePageHints(queryExpression: string): void {
+        if (this.hintQueryExpression != queryExpression) { // query has changed
+            // ... so start again from the first page
+            this.nextHintPage = 1;
+            this.hintQueryExpression = queryExpression;
+            if (!this.pageHintTimer) {
+                this.pageHintTimer = setInterval(()=>this.nextPageHint(), 300);
+            }
+        }
+    }
+    /** called by timer to get hint for next page */
+    nextPageHint(): void {
+        if (this.nextHintPage > this.pageCount) { // no more pages
+            clearInterval(this.pageHintTimer);
+            this.pageHintTimer = null;
+        } else { // get the next page hint
+            const hintIndex = this.nextHintPage - 1;
+	    this.labbcatService.labbcat.getMatchingTranscriptIds(
+                this.hintQueryExpression, 1, this.pageLength * hintIndex,
+                (pgIds, errors, messages) => {
+                    this.pageLinks[hintIndex] = pgIds[0];
+	        });
+            this.nextHintPage++;
+        }
     }
 
     getAttributeValues(id: string): void {
