@@ -11,6 +11,7 @@ import { Task } from 'labbcat-common';
 export class TasksComponent implements OnInit {
 
     tasks: Task[] = [];
+    loading = true;
     refreshTimer: any;
     logName: string;
     threadLog: string;
@@ -24,11 +25,12 @@ export class TasksComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.readTasks();
-        
+        this.readTasks();        
     }
     readTasks(): void {
+        this.loading = true;
         this.labbcatService.labbcat.getTasks((ids, errors, messages) => {
+            this.loading = false;
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
             if (ids) {
@@ -67,7 +69,9 @@ export class TasksComponent implements OnInit {
             });
     }
     cancelTask(task: Task): void {
+        this.loading = true;
         this.labbcatService.labbcat.cancelTask(task.threadId, (cancelled, errors, messages) => {
+            this.loading = false;
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
             if (cancelled) {
@@ -80,7 +84,9 @@ export class TasksComponent implements OnInit {
         });
     }
     releaseTask(task: Task): void {
+        this.loading = true;
         this.labbcatService.labbcat.releaseTask(task.threadId, (released, errors, messages) => {
+            this.loading = false;
             if (errors) errors.forEach(m => this.messageService.error(m));
             if (messages) messages.forEach(m => this.messageService.info(m));
             if (released) {
@@ -94,8 +100,10 @@ export class TasksComponent implements OnInit {
     }
     log(task: Task): void {
         this.logName = task.threadName;
+        this.loading = true;
         this.labbcatService.labbcat.taskStatus(
             task.threadId, {log:true, keepalive:false}, (thread, errors, messages)=>{
+                this.loading = false;
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.threadLog = thread.log;

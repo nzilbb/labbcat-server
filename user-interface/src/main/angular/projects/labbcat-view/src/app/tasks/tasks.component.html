@@ -1,8 +1,9 @@
+<lib-wait *ngIf="loading"></lib-wait>
 <div id="task-list">
   <h1 id="title" i18n="Page title">Tasks</h1>
 
   <table id="tasks" class="list">
-    <caption *ngIf="tasks.length == 0" i18n>There are currently no tasks</caption>
+    <caption *ngIf="tasks.length == 0 && refreshTimer" i18n>There are currently no tasks</caption>
     <thead>
       <tr *ngIf="tasks.length > 0" class="header">
         <th class="creation-time" i18n="Tasks header">Started</th>
