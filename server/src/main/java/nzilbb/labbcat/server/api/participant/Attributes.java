@@ -42,7 +42,7 @@ import org.apache.commons.csv.*;
  * <p> The request method can be <b> GET </b> or <b> POST </b>
  *   <dl>
  *     <dt><span class="paramLabel">Parameters:</span></dt>
- *     <dd><code>id</code> - One or more graph IDs.</dd>
+ *     <dd><code>id</code> - One or more participant IDs.</dd>
  *     <dd><code>query</code> - AGQL expression to identify the graph IDs, if no
  *         <var>id</var> parameter is supplied.</dd>
  *     <dd><code>layer</code> - One or more layer IDs, representing participant attribute
