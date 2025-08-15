@@ -22,7 +22,14 @@
           <td class="creation-time">{{task.creationTime | date:'medium'}}</td>
           <td class="who">{{task.who}}</td>
           <td class="duration">{{task.duration | duration}}</td>
-          <td class="name">{{task.threadName}}</td>
+          <td class="name">
+            <ng-container *ngIf="task.running">
+              <a [routerLink]="['..','task']"
+                 [queryParams]="{threadId:task.threadId}"
+                 i18n-title title="Monitor this task">{{task.threadName}}</a>
+            </ng-container>
+            <ng-container *ngIf="!task.running">{{task.threadName}}</ng-container>
+          </td>
           <td class="status">{{task.status}}</td>
           <td class="progress-description">
             <ng-container *ngIf="task.resultUrl">
