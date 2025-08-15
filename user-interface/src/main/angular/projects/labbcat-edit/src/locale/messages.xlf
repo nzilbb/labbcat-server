@@ -63,21 +63,21 @@
         <source>{VAR_SELECT, select, New {New} Save {Save} Delete {Delete} other {<x id="INTERPOLATION"/>}}</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/button/button.component.html</context>
-          <context context-type="linenumber">8,10</context>
+          <context context-type="linenumber">9,11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4473506671411540349" datatype="html">
         <source>Layer Categories</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">3,5</context>
+          <context context-type="linenumber">4,6</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7091571651222742304" datatype="html">
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">5,7</context>
+          <context context-type="linenumber">6,8</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -85,14 +85,14 @@
         <source>Participant Attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">20,22</context>
+          <context context-type="linenumber">21,23</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1122787259445706401" datatype="html">
         <source>Participant</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">22,24</context>
+          <context context-type="linenumber">23,25</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -100,15 +100,11 @@
         <source>Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">45,47</context>
+          <context context-type="linenumber">60,62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">79,81</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">119,121</context>
+          <context context-type="linenumber">112,114</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
@@ -116,29 +112,33 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">243,245</context>
+          <context context-type="linenumber">273,275</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">305,307</context>
+          <context context-type="linenumber">368,370</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">458,460</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2090715847977118331" datatype="html">
         <source>Transcript Attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">54,56</context>
+          <context context-type="linenumber">74,76</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1000762815409704864" datatype="html">
         <source>Transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">56,58</context>
+          <context context-type="linenumber">76,78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">112,114</context>
+          <context context-type="linenumber">121,123</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -146,49 +146,29 @@
         <source>Span Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">88,90</context>
+          <context context-type="linenumber">126,128</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8990805719441989570" datatype="html">
         <source>Span</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">90,92</context>
+          <context context-type="linenumber">128,131</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
-      </trans-unit>
-      <trans-unit id="187187500641108332" datatype="html">
-        <source><x id="INTERPOLATION" equiv-text="{{layer.alignment==2? &apos;Labelled interval&apos; :layer.alignment==1? &apos;Labelled moment&apos; : &apos;Label&apos; }}"/></source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">115,116</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">177,178</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">239,240</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">301,302</context>
-        </context-group>
-        <note priority="1" from="description">Layer alignment descriptions</note>
       </trans-unit>
       <trans-unit id="3615069790782415854" datatype="html">
         <source>Phrase Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">128,130</context>
+          <context context-type="linenumber">195,197</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1448488911921670708" datatype="html">
         <source>Phrase</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">130,132</context>
+          <context context-type="linenumber">197,200</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -196,14 +176,14 @@
         <source>Word Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">190,192</context>
+          <context context-type="linenumber">287,289</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4283120042219249873" datatype="html">
         <source>Word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">192,194</context>
+          <context context-type="linenumber">289,292</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -211,16 +191,58 @@
         <source>Segment Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">252,254</context>
+          <context context-type="linenumber">382,384</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4495620181723937744" datatype="html">
         <source>Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">254,256</context>
+          <context context-type="linenumber">384,387</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+      <trans-unit id="401533290799762866" datatype="html">
+        <source>Show full names for participant/transcript attributes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">474,477</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5914843668595618981" datatype="html">
+        <source>Show attribute prefixes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">481,484</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4092353835228061492" datatype="html">
+        <source>Show icons that correspond to layer properties</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">487,488</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5398209608237180342" datatype="html">
+        <source>Show layer icons</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">495,497</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="629245355395015846" datatype="html">
+        <source>Show the number of annotations in each layer</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">499,502</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1008780503793524700" datatype="html">
+        <source>Show annotation counts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">506,510</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="4701377957895724261" datatype="html">
         <source>Regular Expression</source>
@@ -354,36 +376,51 @@
         </context-group>
         <note priority="1" from="description">button title</note>
       </trans-unit>
+      <trans-unit id="1208555649706712325" datatype="html">
+        <source>Close message</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/messages/messages.component.html</context>
+          <context context-type="linenumber">5,9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/messages/messages.component.html</context>
+          <context context-type="linenumber">12,16</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="3629960544875360046" datatype="html">
         <source>Previous page</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/pagination/pagination.component.html</context>
-          <context context-type="linenumber">4,6</context>
+          <context context-type="linenumber">6,8</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1268984018787491264" datatype="html">
         <source>Show all pages</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/pagination/pagination.component.html</context>
-          <context context-type="linenumber">10,12</context>
+          <context context-type="linenumber">12,14</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/pagination/pagination.component.html</context>
-          <context context-type="linenumber">22,25</context>
+          <context context-type="linenumber">25,27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3337301694210287595" datatype="html">
         <source>Next page</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/pagination/pagination.component.html</context>
-          <context context-type="linenumber">15,17</context>
+          <context context-type="linenumber">17,19</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5006906138496182819" datatype="html">
         <source>Current page</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/pagination/pagination.component.html</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">31,33</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/pagination/pagination.component.html</context>
+          <context context-type="linenumber">40,42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8683381590593396948" datatype="html">
@@ -417,7 +454,29 @@
         <source>Please wait...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/wait/wait.component.html</context>
-          <context context-type="linenumber">1,2</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2774049696124473355" datatype="html">
+        <source>Episode Documents</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/episode-documents/episode-documents.component.html</context>
+          <context context-type="linenumber">3,6</context>
+        </context-group>
+        <note priority="1" from="description">Episode Documents: {transcript name}</note>
+      </trans-unit>
+      <trans-unit id="5248278089369334044" datatype="html">
+        <source>Upload document</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/episode-documents/episode-documents.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="719892092227206532" datatype="html">
+        <source>Delete document</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/episode-documents/episode-documents.component.html</context>
+          <context context-type="linenumber">25,27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7738733953567775674" datatype="html">
@@ -627,6 +686,13 @@
           <context context-type="linenumber">220,224</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="4392302291671917038" datatype="html">
+        <source>transcript: Transcript file name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">4,6</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="7000097589771137011" datatype="html">
         <source>Episode</source>
         <context-group purpose="location">
@@ -635,7 +701,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">115,117</context>
+          <context context-type="linenumber">124,126</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1164567695833119232" datatype="html">
@@ -654,7 +720,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">114,116</context>
+          <context context-type="linenumber">123,125</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3481736869685494304" datatype="html">
@@ -756,9 +822,6 @@
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
           <context context-type="linenumber">40,42</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="8037742768511441650" datatype="html">
-        <source>Batch Mode</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
           <context context-type="linenumber">42,44</context>
@@ -768,11 +831,11 @@
         <source>Cancel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">53,54</context>
+          <context context-type="linenumber">54,55</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">177</context>
+          <context context-type="linenumber">187</context>
         </context-group>
         <note priority="1" from="description">Batch upload</note>
       </trans-unit>
@@ -780,14 +843,21 @@
         <source>Cancel current processing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">53,55</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4913436974014819414" datatype="html">
+        <source>Follow progress</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">59,61</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6932865105766151309" datatype="html">
         <source>Upload</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">58,59</context>
+          <context context-type="linenumber">67,68</context>
         </context-group>
         <note priority="1" from="description">Batch upload</note>
       </trans-unit>
@@ -795,14 +865,14 @@
         <source>Add all transcripts to LaBB-CAT</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">58,61</context>
+          <context context-type="linenumber">67,70</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7022070615528435141" datatype="html">
         <source>Delete</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">65,66</context>
+          <context context-type="linenumber">74,75</context>
         </context-group>
         <note priority="1" from="description">Batch upload</note>
       </trans-unit>
@@ -810,14 +880,14 @@
         <source>Delete all transcripts from LaBB-CAT</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">65,68</context>
+          <context context-type="linenumber">74,77</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6241314051833811894" datatype="html">
         <source>Clear Existing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">71,72</context>
+          <context context-type="linenumber">80,81</context>
         </context-group>
         <note priority="1" from="description">Batch upload</note>
       </trans-unit>
@@ -825,14 +895,14 @@
         <source>Remove all files from the queue that are already in LaBB-CAT</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">72,75</context>
+          <context context-type="linenumber">81,84</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7910680554145420703" datatype="html">
         <source>Clear New</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">77,78</context>
+          <context context-type="linenumber">86,87</context>
         </context-group>
         <note priority="1" from="description">Batch upload</note>
       </trans-unit>
@@ -840,14 +910,14 @@
         <source>Remove all files from the queue that are not already in LaBB-CAT</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">78,81</context>
+          <context context-type="linenumber">87,90</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8700121026680200191" datatype="html">
         <source>Clear</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">84,85</context>
+          <context context-type="linenumber">93,94</context>
         </context-group>
         <note priority="1" from="description">Batch upload</note>
       </trans-unit>
@@ -855,14 +925,14 @@
         <source>Remove all files from the queue</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">84,87</context>
+          <context context-type="linenumber">93,96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7008439939460403347" datatype="html">
         <source>Report</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">90,92</context>
+          <context context-type="linenumber">99,101</context>
         </context-group>
         <note priority="1" from="description">Batch upload</note>
       </trans-unit>
@@ -870,35 +940,42 @@
         <source>Report about uploads</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">90,93</context>
+          <context context-type="linenumber">99,102</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4187562861917781527" datatype="html">
         <source>Drop transcript and media files on to this area</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">97,99</context>
+          <context context-type="linenumber">106,108</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3508360408943276456" datatype="html">
         <source>Queue of transcripts to upload</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">103,105</context>
+          <context context-type="linenumber">112,114</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2728471020234722275" datatype="html">
         <source>Select files for upload</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">105,107</context>
+          <context context-type="linenumber">114,116</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5298365184726383687" datatype="html">
+        <source>Queue length</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">120,121</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3250391385569692601" datatype="html">
         <source>Media</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">113,115</context>
+          <context context-type="linenumber">122,124</context>
         </context-group>
         <note priority="1" from="description">Upload batch column</note>
       </trans-unit>
@@ -906,7 +983,7 @@
         <source>Type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">116,118</context>
+          <context context-type="linenumber">125,127</context>
         </context-group>
         <note priority="1" from="description">Upload batch column</note>
       </trans-unit>
@@ -914,7 +991,7 @@
         <source>Status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">117,119</context>
+          <context context-type="linenumber">126,128</context>
         </context-group>
         <note priority="1" from="description">Upload batch column</note>
       </trans-unit>
@@ -922,7 +999,7 @@
         <source>Progress</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">118,121</context>
+          <context context-type="linenumber">127,130</context>
         </context-group>
         <note priority="1" from="description">Upload batch column</note>
       </trans-unit>
@@ -930,28 +1007,43 @@
         <source>Show/hide parameters</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">126,127</context>
+          <context context-type="linenumber">136,137</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7083176320247907066" datatype="html">
         <source>[no transcript yet]</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">141,143</context>
+          <context context-type="linenumber">151,153</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5362126518639961906" datatype="html">
         <source>Remove this file from the queue</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">171,173</context>
+          <context context-type="linenumber">181,183</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4563965495368336177" datatype="html">
+        <source>Skip</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">227,228</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+      <trans-unit id="4015601168245383471" datatype="html">
+        <source>Skip this transcript and upload the next</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">227,229</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1183709727643833610" datatype="html">
         <source>Set the parameters for this transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">218,220</context>
+          <context context-type="linenumber">233,235</context>
         </context-group>
       </trans-unit>
     </body>

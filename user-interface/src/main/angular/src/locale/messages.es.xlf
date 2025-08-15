@@ -1794,7 +1794,7 @@
           <context context-type="linenumber">194</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2eedb92aa720bdb83d8ad61ed092cd64bfc45fdb" datatype="html">
+      <trans-unit id="8381340013739708725" datatype="html">
         <source>Tag Targets</source>
         <target state="translated">Etiquetar Blancos</target>
         <context-group purpose="location">
@@ -3037,7 +3037,7 @@
           <context context-type="linenumber">566</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="d04e0105a10e743b38515b50f6a7fabfa83e60ea" datatype="html">
+      <trans-unit id="2115710494957181461" datatype="html">
         <source>Pitch Ceiling</source>
         <target state="translated">Máximo del Tono</target>
         <context-group purpose="location">
@@ -3061,7 +3061,7 @@
           <context context-type="linenumber">577</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="8b6d43ab2be27111ac69da9d4e95b28fff3883b2" datatype="html">
+      <trans-unit id="5530918312588807271" datatype="html">
         <source>Voicing Threshold</source>
         <target state="translated">Umbral de Voz</target>
         <context-group purpose="location">
@@ -3097,7 +3097,7 @@
           <context context-type="linenumber">617</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="5a153a85786fb60099df3291beb51bf9bb49c9bd" datatype="html">
+      <trans-unit id="7177296959645190030" datatype="html">
         <source>Praat Intensity command</source>
         <target state="translated">Comando Praat de Intensidad</target>
         <context-group purpose="location">
@@ -3607,7 +3607,7 @@
           <context context-type="linenumber">54</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="02fa8a0a1e9fb890f61fde67a1296bfe37ffe1d3" datatype="html">
+      <trans-unit id="5023167267957510058" datatype="html">
         <source>Export Original</source>
         <target state="translated">Guardar Transcripciones</target>
         <context-group purpose="location">
@@ -3615,7 +3615,7 @@
           <context context-type="linenumber">60</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="7fc8880982c59ed788faadb3d72d2dfaa904cd78" datatype="html">
+      <trans-unit id="1081509610124614927" datatype="html">
         <source>Export original transcript of all selected transcripts</source>
         <target state="translated">Guardar las transcripciones originales de todas las transcripciones seleccionadas</target>
         <context-group purpose="location">
@@ -9227,6 +9227,886 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
           <context context-type="linenumber">59,61</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3482393725495654969" datatype="html">
+        <source>Whether to extract annotations about the target token, or surrounding tokens</source>
+        <target state="translated">Extraer datos del token identificado, o uno de los tokens cercanos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">113,115</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3059111293136797928" datatype="html">
+        <source>Which start/end times to include</source>
+        <target state="translated">Cuándo incluir el principio/final de la anotación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">121,122</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2178896023097730157" datatype="html">
+        <source>Title of this LaBB-CAT database - always exported</source>
+        <target state="translated">Título de este base de datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">135,137</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4989746609235057684" datatype="html">
+        <source>This database's LaBB-CAT version</source>
+        <target state="translated">Versión de LaBB-CAT</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">144,146</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5378123397719336393" datatype="html">
+        <source>Version of the corpus data - always exported</source>
+        <target state="translated">Versión de los datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">150,152</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5330363347168324872" datatype="html">
+        <source>Identifier for this search - always exported</source>
+        <target state="translated">Identificador de la búsqueda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">159,161</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="670232599922588421" datatype="html">
+        <source>Unique identifier for the match - always exported</source>
+        <target state="translated">Identificador único para cada resultado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">198,200</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4690220898978328334" datatype="html">
+        <source>URL for the match - always exported</source>
+        <target state="translated">URL para cada resultado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">207,209</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4123226314894989914" datatype="html">
+        <source>Dictionary Export</source>
+        <target state="translated">Exportar como Diccionario</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">259,261</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7560694701275255068" datatype="html">
+        <source>Dictionary options</source>
+        <target state="translated">Opciones del diccionario</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">265,268</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6031934504019197667" datatype="html">
+        <source>Audio Export options</source>
+        <target state="translated">Opciones de la exportación de audio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">326,329</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5778273580923405623" datatype="html">
+        <source>Column identifying the start time of the fragment</source>
+        <target state="translated">Columna que identifica el principio del fragmento</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">335,337</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6732517159614283898" datatype="html">
+        <source>Column identifying the end time of the fragment</source>
+        <target state="translated">Columna que identifica el final del fragmento</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">342,344</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2770551279900975487" datatype="html">
+        <source><x id="INTERPOLATION" equiv-text="{{min(pageLength, matchCount - matches.length)}}"/> More Matches</source>
+        <target state="translated"><x id="INTERPOLATION" equiv-text="{{min(pageLength, matchCount - matches.length)}}"/> Más Resultados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">79,80</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5967319966376128854" datatype="html">
+        <source><x id="INTERPOLATION" equiv-text="{{matchCount - matches.length}}"/> Remaining Matches</source>
+        <target state="translated"><x id="INTERPOLATION" equiv-text="{{matchCount - matches.length}}"/> Resultados Restantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">86,87</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3423713041305268092" datatype="html">
+        <source>up to 1 word</source>
+        <target state="translated">hasta 1 palabra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">32,34</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+<trans-unit id="5830736986680304813" datatype="html">
+        <source>up to 5 words</source>
+        <target state="translated">hasta 5 palabras</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">33,35</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+<trans-unit id="7475045570665488692" datatype="html">
+        <source>up to 10 words</source>
+        <target state="translated">hasta 10 palabras</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">34,36</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+<trans-unit id="1128741362082539607" datatype="html">
+        <source>up to 20 words</source>
+        <target state="translated">hasta 20 palabras</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+<trans-unit id="3991490118006886945" datatype="html">
+        <source>0 words</source>
+        <target state="translated">sin contexto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+<trans-unit id="4424118401463644348" datatype="html">
+        <source>the entire utterance</source>
+        <target state="translated">la locución entera</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">37,42</context>
+        </context-group>
+        <note priority="1" from="description">words context option</note>
+      </trans-unit>
+<trans-unit id="8433752958508180943" datatype="html">
+        <source>Start/end offsets:</source>
+        <target state="translated">Principios/finales</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">122,123</context>
+        </context-group>
+        <note priority="1" from="description">offsetThreshold label</note>
+      </trans-unit>
+<trans-unit id="51157887951893570" datatype="html">
+        <source>not included</source>
+        <target state="translated">no incluidos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">124,125</context>
+        </context-group>
+        <note priority="1" from="description">offsetThreshold option</note>
+      </trans-unit>
+<trans-unit id="2001199989000274702" datatype="html">
+        <source>included only manually aligned</source>
+        <target state="translated">incluidos solo los que fueron alineados manualmente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">125,126</context>
+        </context-group>
+        <note priority="1" from="description">offsetThreshold option</note>
+      </trans-unit>
+<trans-unit id="1345212222589364873" datatype="html">
+        <source>included when at least automatically aligned</source>
+        <target state="translated">incluidos solo los que fueron alineados por lo meno automaticamente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">126,128</context>
+        </context-group>
+        <note priority="1" from="description">offsetThreshold option</note>
+      </trans-unit>
+<trans-unit id="7376419259350714932" datatype="html">
+        <source>always included</source>
+        <target state="translated">incluidos siempre</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">127,131</context>
+        </context-group>
+        <note priority="1" from="description">offsetThreshold option</note>
+      </trans-unit>
+<trans-unit id="7037021932215452031" datatype="html">
+        <source>CSV columns</source>
+        <target state="translated">Columnas CSV</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">131,133</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="9033045811000879464" datatype="html">
+        <source>Fields</source>
+        <target state="translated">Campos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">134,135</context>
+        </context-group>
+        <note priority="1" from="description">csv options title</note>
+      </trans-unit>
+<trans-unit id="4333155246124125210" datatype="html">
+        <source>Database title</source>
+        <target state="translated">Título base de datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">142,144</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+<trans-unit id="2911275991779975850" datatype="html">
+        <source>Data version</source>
+        <target state="translated">Versión datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">157,159</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+<trans-unit id="7429664308605967472" datatype="html">
+        <source>Line start</source>
+        <target state="translated">Principio de la locución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">191,193</context>
+        </context-group>
+        <note priority="1" from="description">csv options</note>
+      </trans-unit>
+<trans-unit id="6059819531590504724" datatype="html">
+        <source>Layer for entries</source>
+        <target state="translated">Capas para entradas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">270,272</context>
+        </context-group>
+        <note priority="1" from="description">layer for dictionary entries</note>
+      </trans-unit>
+<trans-unit id="3923747283624182575" datatype="html">
+        <source>Prefix names</source>
+        <target state="translated">Prefijar nombres</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">304,305</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">331,332</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7515776139768239429" datatype="html">
+        <source>Extract data for:</source>
+        <target state="translated">Extraer datos para:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">114,116</context>
+        </context-group>
+        <note priority="1" from="description">targetOffset label</note>
+      </trans-unit>
+<trans-unit id="5548802366215564535" datatype="html">
+        <source>previous token</source>
+        <target state="translated">token anterior</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">116,118</context>
+        </context-group>
+        <note priority="1" from="description">targetOffset option</note>
+      </trans-unit>
+<trans-unit id="8213397750935965862" datatype="html">
+        <source>target token</source>
+        <target state="translated">el mismo token</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">117,119</context>
+        </context-group>
+        <note priority="1" from="description">targetOffset option</note>
+      </trans-unit>
+<trans-unit id="2106065490738181135" datatype="html">
+        <source>next token</source>
+        <target state="translated">token posterior</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">118,121</context>
+        </context-group>
+        <note priority="1" from="description">targetOffset option</note>
+      </trans-unit>
+<trans-unit id="6053291833291009391" datatype="html">
+        <source>Start time column</source>
+        <target state="translated">Columna de principio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">336,337</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8444682235461193836" datatype="html">
+        <source>End time column</source>
+        <target state="translated">Columna de final</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
+          <context context-type="linenumber">343,344</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4906241284047473344" datatype="html">
+        <source>Clear participant filters</source>
+        <target state="translated">Eliminar filtros de participante</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">36,39</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2722293800272465493" datatype="html">
+        <source>Collapse 'Export Attributes' options</source>
+        <target state="translated">Cerrar opciones de 'Exportar Atributos'</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">86,89</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">132,135</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3264165192467598415" datatype="html">
+        <source>List Transcripts</source>
+        <target state="translated">Enumerar Transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">93,94</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4869492382182446548" datatype="html">
+        <source>Clear transcript filter</source>
+        <target state="translated">Eliminar filtro de transcripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">111,112</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">134,137</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4010352343441342973" datatype="html">
+        <source>Clear filters relating to transcripts</source>
+        <target state="translated">Eliminar filtros relacionados con transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">112,116</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2821174753063408091" datatype="html">
+        <source>How much context, in seconds, to extract from the audio surrounding the token</source>
+        <target state="translated">Extraer cuánto contexto, en segundos, alrededor del token</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">87,90</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2786101973667338418" datatype="html">
+        <source>Settings for extracting formant measures</source>
+        <target state="translated">Opciones para extraer mediciones de formantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">105,107</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5418305989352248416" datatype="html">
+        <source>At which points in the duration of the token at which to take measurements</source>
+        <target state="translated">En que momentos durante el token hay que tomar mediciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">125,127</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2078773926129480770" datatype="html">
+        <source>Cite FastTrack</source>
+        <target state="translated">Citar FastTrack</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">242,245</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5584159975140814308" datatype="html">
+        <source>About FastTrack</source>
+        <target state="translated">Alrededor de FastTrack</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">250,254</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6233075149034386874" datatype="html">
+        <source>FastTrack lowest analysis frequency in Hertz</source>
+        <target state="translated">Frecuencia más baja para análisis en FastTrack (Hz)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">260,261</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6277330231625140275" datatype="html">
+        <source>Settings for extracting F0 (pitch) measures</source>
+        <target state="translated">Opciones para extraer mediciones de F0 (tono)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">521,523</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="324700539309383162" datatype="html">
+        <source>Settings for extracting intensity measures</source>
+        <target state="translated">Opciones para la extracción de mediciones de intensidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">655,657</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4930437675341831283" datatype="html">
+        <source>Settings for extracting center of gravity (COG) measures</source>
+        <target state="translated">Opciones para la extracción de mediciones de centro de gravedad (COG)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">743,746</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6267271395556968548" datatype="html">
+        <source>Write your own Praat script to execute for each token</source>
+        <target state="translated">Escribir su propio programa Praat para ejecutar con cada token</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">756,758</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8124382839688664174" datatype="html">
+        <source>Select at least one measurement to extract or specify a custom script</source>
+        <target state="translated">Elija por lo menos una medición para extraer o especifique un programa</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">836,838</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4462747006373924817" datatype="html">
+        <source>Sample points</source>
+        <target state="translated">Puntos de muestra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">126,127</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3071983597317417796" datatype="html">
+        <source>Praat formant command</source>
+        <target state="translated">Comando Praat para formantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">144,146</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2595210257862437475" datatype="html">
+        <source>Default settings</source>
+        <target state="translated">Opciones por defecto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">154,156</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">258,260</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">542,544</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">671,673</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1593064951672461559" datatype="html">
+        <source>Formant ceiling</source>
+        <target state="translated">Formante máximo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">157,159</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">198,200</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6710082849517932917" datatype="html">
+        <source>Include regression coefficients</source>
+        <target state="translated">Extraer coeficientes de regresión</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">235,239</context>
+        </context-group>
+        <note priority="1" from="description">Include (FastTrack) regression coefficients</note>
+      </trans-unit>
+<trans-unit id="2595210257862437475" datatype="html">
+        <source>Default settings</source>
+        <target state="translated">Opciones por defecto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">154,156</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">258,260</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">542,544</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">671,673</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="94930670403531694" datatype="html">
+        <source>Lowest ceiling</source>
+        <target state="translated">Máximo Más Bajo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">261,263</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">313,315</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3500546936861075866" datatype="html">
+        <source>Highest ceiling</source>
+        <target state="translated">Máximo Más Alto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">272,274</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">325,327</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="818928441988137779" datatype="html">
+        <source>Number of steps</source>
+        <target state="translated">Número de Pasos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">356,358</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8224611450473217586" datatype="html">
+        <source>Number of coefficients</source>
+        <target state="translated">Número de Coeficientes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">367,369</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7796925514478555399" datatype="html">
+        <source>Time step</source>
+        <target state="translated">Paso en Tiempo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">378,380</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8523207841741307901" datatype="html">
+        <source>Tracking method</source>
+        <target state="translated">Método de Rastreo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">389,391</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6246321227999391086" datatype="html">
+        <source>F3/F4 proximity</source>
+        <target state="translated">Proximidad F3/F4</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">510,513</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5698191851657739231" datatype="html">
+        <source>Praat pitch command</source>
+        <target state="translated">Comando Praat para Tono</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">537,538</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2592754414126926719" datatype="html">
+        <source>Pitch floor</source>
+        <target state="translated">Mínimo del tono</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">545,548</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">604,606</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">674,676</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">714,716</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8283709013509430118" datatype="html">
+        <source>Center of gravity</source>
+        <target state="translated">Centro de gravedad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">744,746</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3598461885357422255" datatype="html">
+        <source>Custom Praat script</source>
+        <target state="translated">Comandos a Medida</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">758,761</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1593064951672461559" datatype="html">
+        <source>Formant ceiling</source>
+        <target state="translated">Máximo de Formante</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">157,159</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">198,200</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4327148980468054681" datatype="html">
+        <source>Export media files of all selected transcripts</source>
+        <target state="translated">Guardar los archivos de medios de todas las transcripciones seleccionadas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">80,83</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2722293800272465493" datatype="html">
+        <source>Collapse 'Export Attributes' options</source>
+        <target state="translated">Cerrar opciones de 'Exportar Atributos'</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">86,89</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
+          <context context-type="linenumber">132,135</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5562229111610113754" datatype="html">
+        <source>Participant Attributes</source>
+        <target state="translated">Atributos de Participantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="7947829512294779554" datatype="html">
+        <source>Participant attributes</source>
+        <target state="translated">Atributos de Participantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">2,4</context>
+        </context-group>
+        <note priority="1" from="description">page header</note>
+      </trans-unit>
+<trans-unit id="848966552872413548" datatype="html">
+        <source>Hide attribute names</source>
+        <target state="translated">Omitir nombres de atributos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">39,42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">68,69</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">70,73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">453,454</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">455,458</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4562743922566364558" datatype="html">
+        <source>Hide full names for attributes</source>
+        <target state="translated">Omitir nombres enteros de atributos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">45,47</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">76,78</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1458226718043551250" datatype="html">
+        <source>Hide full names for participant/transcript attributes</source>
+        <target state="translated">Omitir nombres enteros de atributos de participantes/transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">461,463</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4343663230586238137" datatype="html">
+        <source>Hide attribute prefixes</source>
+        <target state="translated">Omitir prefijos de atributos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
+          <context context-type="linenumber">52,57</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">83,88</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">468,470</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8351028397482120874" datatype="html">
+        <source>Transcript attributes</source>
+        <target state="translated">Atributos de transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">2,5</context>
+        </context-group>
+        <note priority="1" from="description">page header</note>
+      </trans-unit>
+<trans-unit id="4869492382182446548" datatype="html">
+        <source>Clear transcript filter</source>
+        <target state="translated">Eliminar filtros de transcripciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
+          <context context-type="linenumber">111,112</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">134,137</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="8842543624980762072" datatype="html">
+        <source>Only include matches from the main participant in a transcript.</source>
+        <target state="translated">Solo incluir transcripciones con estos como participantes principales.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">243,246</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4051843752943322922" datatype="html">
+        <source>Close tree visualization</source>
+        <target state="translated">Cerrar visualización de arbol</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">904,908</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="3347186098273284113" datatype="html">
+        <source>Enter your current pass phrase</source>
+        <target state="translated">Ingrese su contraseña actual</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/password/password.component.html</context>
+          <context context-type="linenumber">3,5</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="5844915446429766506" datatype="html">
+        <source>Current Pass Phrase</source>
+        <target state="translated">Contraseña Actual</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/password/password.component.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/password/password.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/password/password.component.html</context>
+          <context context-type="linenumber">11,15</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="527656023687711622" datatype="html">
+        <source>Extract audio between start and end times in a CSV search results file</source>
+        <target state="translated">Extraer audio entre tiempos de principio y final en un archivo de resultados CSV</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/menu-extract/menu-extract.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6708297487929483609" datatype="html">
+        <source>Extract transcript fragments between start and end times</source>
+        <target state="translated">Extraer fragmentos de transcripciones entre tiempos de principio y final</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/menu-extract/menu-extract.component.html</context>
+          <context context-type="linenumber">9,11</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="1495699382889985466" datatype="html">
+        <source>Extract annotations using a CSV search results file</source>
+        <target state="translated">Extraer anotaciones a partir de un archivo de resultados CSV</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/menu-extract/menu-extract.component.html</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="4674186642962303268" datatype="html">
+        <source>Extract annotations between start and end times using a CSV search results file</source>
+        <target state="translated">Extraer anotaciones entre tiempos de principio y final en un archivo de resultados CSV</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/menu-extract/menu-extract.component.html</context>
+          <context context-type="linenumber">17,19</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6822346304481501479" datatype="html">
+        <source>Extract</source>
+        <target state="translated">Extraer</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/menu-extract/menu-extract.component.html</context>
+          <context context-type="linenumber">1,4</context>
+        </context-group>
+        <note priority="1" from="description">extract menu page title</note>
+      </trans-unit>
+<trans-unit id="8115875697217774033" datatype="html">
+        <source>Insert praat-processed data into a CSV search results file</source>
+        <target state="translated">Insertar en un archivo de resultados CSV datos computados por Praat</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/menu-extract/menu-extract.component.html</context>
+          <context context-type="linenumber">22,25</context>
         </context-group>
       </trans-unit>
     </body>

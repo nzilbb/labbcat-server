@@ -1,6 +1,6 @@
 <h1 id="title" i18n>All Utterances</h1>
 
-<p *ngIf="participantDescription && participantIds.length < participantCount" id="participantDescription" i18n>{{participantDescription}}</p>
+<p *ngIf="participantDescription && participantIds.length < participantCount" id="participantDescription">{{participantDescription}}</p>
 <div *ngIf="participantIds" class="list" id="participant-ids">
   <a *ngFor="let participantId of participantIds"
      [routerLink]="user.roles.includes('edit')?'../edit/participant':'../participant'"
