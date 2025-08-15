@@ -1444,6 +1444,7 @@ export class TranscriptComponent implements OnInit {
     /** Layer generation finished handler */
     generationFinished() : void {
         this.messageService.info("Layer generation finished"); // TODO i18n
+        this.generationThreadId = "";
         setTimeout(()=>{
             this.generationThreadId = "";
             setTimeout(()=>{
@@ -1551,8 +1552,18 @@ export class TranscriptComponent implements OnInit {
         if (!this.showGenerateLayerSelection) { // show options
             this.showGenerateLayerSelection = true;
         } else { // options selected, so go ahead and do it
-            const url = `${this.baseUrl}edit/layers/regenerate?id=${this.transcript.id}&layer_id=${this.generateLayerId}`;
-            document.location = url;
+            const regenerate = this.labbcatService.labbcat.createRequest(
+                "regenerate", {
+                    id: this.transcript.id,
+                    layer_id: this.generateLayerId
+                }, (task, errors, messages) => {
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    if (task) this.generationThreadId = task.threadId;
+                },
+                `${this.baseUrl}edit/layers/regenerate`);
+            regenerate.send();
+            this.showGenerateLayerSelection = false;
         }
     }
     
@@ -1570,7 +1581,7 @@ export class TranscriptComponent implements OnInit {
             // Firefox can get the extension directly from LaBB-CAT
             if (confirm("You need to install the 'Praat Integration' browser extension." // TODO i18n
                 +"\nWhen you are asked to install the extension, click 'Allow' and then 'Install'.")) {
-                this.downloadURI(`${this.baseUrl}/utilities/jsendpraat.xpi?3.0`);
+                this.downloadURI(`${this.baseUrl}/utilities/jsendpraat.xpi?3.1`);
                 window.setTimeout(function() { 
                     window.onfocus = function() {
                         // do this once only

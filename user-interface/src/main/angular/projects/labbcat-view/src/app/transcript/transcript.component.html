@@ -297,6 +297,7 @@
           </div>
           <lib-button
             (press)="generate()"
+            [processing]="generationThreadId"
             img="cog.svg" icon="⚙"
             i18n-label label="Generate"
             i18n-title title="Regenerate layers for this transcript"
