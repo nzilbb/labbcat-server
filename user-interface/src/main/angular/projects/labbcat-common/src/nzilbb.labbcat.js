@@ -342,7 +342,9 @@
     }
     
     /**
-     * Log in.
+     * Log in. This only works within a browser; in node, it's not possible to prevent
+     * request redirection or capture cookies set before redirects, so form-based login
+     * cannot be supported.
      * @param {string} username The user's login ID.
      * @param {string} password The user's password/phrase.
      * @param {resultCallback} onResult Invoked when the request has returned a
