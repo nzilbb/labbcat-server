@@ -409,7 +409,7 @@ public class Results extends APIRequestHandler { // TODO unit test
         layers.add(l);
       }
 
-      if (csvOut == null && !includeCsvPreamble) { // not adding to old CSV results
+      if (csvOut == null) { // not adding to old CSV results
         // set default options where none were specified
         if (options.size() == 0) { // default options
           options.add("labbcat_title");
