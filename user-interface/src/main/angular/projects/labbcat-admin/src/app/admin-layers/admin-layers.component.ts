@@ -35,15 +35,11 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
     
     ngOnInit(): void {
         this.readCategories();
-        this.readLayerManagers().then(()=>{
-            this.readRows();
-        });
         // need to subscribe to URL path changes, because the component will be re-used
         // from scope to scope
-        this.route.paramMap.pipe(
-            switchMap((params: ParamMap) => params.get('scope'))
-        ).subscribe(scope => {
+        this.route.paramMap.subscribe((params) => {
             this.readLayerManagers().then(()=>{
+                console.log(`subscribe: readRows`);
                 this.readRows();
             })
         });
