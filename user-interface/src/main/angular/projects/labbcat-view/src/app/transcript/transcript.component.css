@@ -6,6 +6,24 @@ lib-wait {
     cursor: progress; 
 }
 
+/* Before any words are loaded, the transcript looks blank which can be alarming
+   so the user sees a hopefully reassuring animation indicating that stuff is happening: */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+.words-loading {
+    color: var(--theme-text-color);
+    animation-name: pulse;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+.words-loading::before {
+    content: '. . .';
+}
+
 #transcript {
     max-width: 1000px;
     margin: auto;

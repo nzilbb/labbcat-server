@@ -565,6 +565,7 @@
           </div>
         <div *ngIf="utterance.id != editingUtteranceId"
              class="words">
+          <div *ngIf="words == null" class="words-loading">&nbsp;</div>
           <span *ngIf="utterance.prependDummyToken" class="token dummy">
             <!-- phrase/span layers starting with this utterance and ending with the first word  -->
             <ng-container *ngFor="let l of selectedLayerIds">

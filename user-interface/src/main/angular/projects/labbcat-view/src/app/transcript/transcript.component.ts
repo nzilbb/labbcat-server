@@ -355,7 +355,7 @@ export class TranscriptComponent implements OnInit {
         this.annotations = {};
         this.participants = [];
         this.utterances = [];
-        this.words = [];
+        this.words = null;  // signal that words are coming but not here yet
         // for each participant
         for (let participant of this.transcript.all(participantLayerId)) {
             this.annotations[participant.id] = participant as Annotation;
@@ -556,6 +556,7 @@ export class TranscriptComponent implements OnInit {
         const turnLayerId = this.schema.turnLayerId;
         const utteranceLayerId = this.schema.utteranceLayerId;
         const wordLayerId = this.schema.wordLayerId;
+        if (!this.words) this.words = [];
         
         // for each word
         for (let word of words) {
