@@ -100,10 +100,9 @@ export class TasksComponent implements OnInit {
     }
     log(task: Task): void {
         this.logName = task.threadName;
-        this.loading = true;
+        this.threadLog = null;
         this.labbcatService.labbcat.taskStatus(
             task.threadId, {log:true, keepalive:false}, (thread, errors, messages)=>{
-                this.loading = false;
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.threadLog = thread.log;

@@ -81,6 +81,7 @@
 </div>
 <div id="log" *ngIf="logName">
   <h2>{{logName}}</h2>
+  <lib-wait *ngIf="logName && threadLog == null" [inSitu]="true"></lib-wait>
   <pre>{{threadLog}}</pre>
   <h3 *ngIf="threadException" class="error">{{threadException}}</h3>
   <pre *ngIf="threadStackTrace" class="error">{{threadStackTrace}}</pre>
