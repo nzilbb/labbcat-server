@@ -50,11 +50,13 @@ export class TasksComponent implements OnInit {
                     this.loadTask(task.threadId);
                 } // not gone already
             }
-            if (!this.refreshTimer) {
-                this.refreshTimer = setInterval(()=>{
-                    this.readTasks();
-                }, 5000);
-            }
+            // readTasks might take more than 5 seconds to respond,
+            // so instead of setInterval to check regardless of whether the last
+            // check returned, we create use setTimeout each time around
+            // so that we're only ever waiting on one readTasks call at a time
+            this.refreshTimer = setTimeout(()=>{
+                this.readTasks();
+            }, 5000);
         });
     }
     loadTask(id: string) {
