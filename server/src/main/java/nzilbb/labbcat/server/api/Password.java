@@ -101,6 +101,10 @@ public class Password extends APIRequestHandler {
         httpStatus.accept(SC_FORBIDDEN);
         return failureResult("No user specified.");
       }
+      if (user.equals("demo")) { // 'demo' can't change their own password
+        httpStatus.accept(SC_FORBIDDEN);
+        return failureResult("Sorry, "+user+" can't change their own password.");
+      }
       
       try {
         // read the incoming object

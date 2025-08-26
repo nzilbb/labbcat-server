@@ -115,28 +115,33 @@ public class Password extends APIRequestHandler {
           return failureResult("No password specified.");
         } else {
           String user = json.getString("user");
+          if (user == null || user.length() == 0) {
+            httpStatus.accept(SC_BAD_REQUEST);
+            return failureResult("No user specified.");
+          }
           String password = json.getString("password");
           if (password == null || password.length() == 0) {
             httpStatus.accept(SC_BAD_REQUEST);
             return failureResult("No password specified.");
+          } 
+          boolean resetPassword = json.containsKey("resetPassword")
+            && json.getBoolean("resetPassword");
+          // "demo" can't change their own password, so don't ask them to
+          if ("demo".equals(user)) resetPassword = false;
+          String passwordDigest = context.getInitParameter("passwordDigest");
+          String passwordExpression = passwordDigest == null?"?":passwordDigest+"(?)";
+          PreparedStatement sql = connection.prepareStatement(
+            "UPDATE miner_user SET password = " + passwordExpression 
+            + ", reset_password = ?, expiry = NULL WHERE user_id = ?"); 
+          sql.setString(1, password);
+          sql.setInt(2, resetPassword?1:0);
+          sql.setString(3, user);
+          int rowCount = sql.executeUpdate();
+          if (rowCount != 1) { // it didn't work 
+            httpStatus.accept(SC_NOT_FOUND);
+            return failureResult("User not found: {0}", user);
           } else {
-            boolean resetPassword = json.containsKey("resetPassword")
-              && json.getBoolean("resetPassword");
-            String passwordDigest = context.getInitParameter("passwordDigest");
-            String passwordExpression = passwordDigest == null?"?":passwordDigest+"(?)";
-            PreparedStatement sql = connection.prepareStatement(
-              "UPDATE miner_user SET password = " + passwordExpression 
-              + ", reset_password = ?, expiry = NULL WHERE user_id = ?"); 
-            sql.setString(1, password);
-            sql.setInt(2, resetPassword?1:0);
-            sql.setString(3, user);
-            int rowCount = sql.executeUpdate();
-            if (rowCount != 1) { // it didn't work 
-              httpStatus.accept(SC_NOT_FOUND);
-              return failureResult("User not found: {0}", user);
-            } else {
-              return successResult(null, "Password changed.");
-            }
+            return successResult(null, "Password changed.");
           }
         }
       } finally {
