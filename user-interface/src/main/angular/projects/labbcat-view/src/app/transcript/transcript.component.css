@@ -321,6 +321,7 @@ nav, nav > div {
 #generation-thread {
     position: fixed;
     bottom: 0px;
+    left: 0px;
     width: 100vw;
     background: var(--theme-background-color);
 }
