@@ -107,18 +107,12 @@ export class TranscriptComponent implements OnInit {
                     });
                     
                     // preselect layers?
-                    let layerIds = params["layerId"]||params["l"]
-                    if (!layerIds && sessionStorage.getItem("selectedLayerIds")) {
-                        layerIds = [...new Set(JSON.parse(sessionStorage.getItem("selectedLayerIds")))];
+                    let paramLayerIds = params["layerId"]||params["l"]
+                    if (paramLayerIds && !Array.isArray(paramLayerIds)) {
+                        paramLayerIds = [ paramLayerIds ];
                     }
-                    if (layerIds) {
-                        if (Array.isArray(layerIds)) {
-                            this.defaultLayerIds = layerIds;
-                        } else {
-                            this.defaultLayerIds = [ layerIds ];
-                        }
-                    }
-                    if (this.threadId) this.loadThread();
+                    this.preselectLayers(paramLayerIds);
+                    
                     this.setOriginalFile();
                     this.displayLayerIds = JSON.parse(sessionStorage.getItem("displayLayerIds")) ??
                         (typeof this.displayLayerIds == "string" ? this.displayLayerIds === "true" : this.displayLayerIds) ??
@@ -133,6 +127,30 @@ export class TranscriptComponent implements OnInit {
             this.highlight(window.location.hash.substring(1));
         });
         this.readCategories();
+    }
+
+    preselectLayers(paramLayerIds: string[]) : Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.loadThread().then((searchedLayerIds) => {
+                if (paramLayerIds != null && paramLayerIds.length > 0) {
+                    this.defaultLayerIds = paramLayerIds;
+                } else if (sessionStorage.getItem("selectedLayerIds")) {
+                    const sessionLayerIds = [
+                        ...new Set(JSON.parse(sessionStorage.getItem("selectedLayerIds")))];
+                    if (sessionLayerIds && sessionLayerIds.length > 0) {
+                        this.defaultLayerIds = sessionLayerIds as string[];
+                    }
+                }
+                if (!this.defaultLayerIds) this.defaultLayerIds = [];
+                if (searchedLayerIds && searchedLayerIds.length > 0) {
+                    for (let l of searchedLayerIds) {
+                        if (!this.defaultLayerIds.includes(l)) {
+                            this.defaultLayerIds.push(l);
+                        }
+                    }
+                }
+            }); // loadThread ... then
+        }); // Promise
     }
 
     checkPraatIntegration(): void {
@@ -564,6 +582,10 @@ export class TranscriptComponent implements OnInit {
             this.words.push(word as Annotation);
             
             const turn = this.transcript.annotations[word.parentId] as Annotation;
+            if (!turn) {
+                console.log(`word  ${word.id} (${word.label}) - turn not found: ${word.parentId}`);
+                continue;
+            }
             const utterances = turn.all(utteranceLayerId) as Annotation[];
             let u = 0;
             // add to the current utterance
@@ -575,6 +597,7 @@ export class TranscriptComponent implements OnInit {
             }
             utterances[u][wordLayerId].push(word);
 
+            // is this the word targeted by the URL hash?
             if (window.location.hash && window.location.hash.substring(1) == word.id) {
                 window.setTimeout(()=>{ // give time for the page to render
                     this.highlight(window.location.hash.substring(1));
@@ -584,16 +607,29 @@ export class TranscriptComponent implements OnInit {
         } // next word
     }
     
-    loadThread(): void {
-        this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
-            if (errors) errors.forEach(m => this.messageService.error(m));
-            if (messages) messages.forEach(m => this.messageService.info(m));
-            if (task) {
-                let taskLayers = task.layers.filter(l=>l!="orthography");
-                if (task.layers) this.layersChanged(taskLayers);
-                this.highlightSearchResults(0);
-            }
-        });
+    loadThread(): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            if (!this.threadId) {
+                resolve(null);
+            } else {
+                this.labbcatService.labbcat.taskStatus(
+                    this.threadId, (task, errors, messages) => {
+                        if (errors) errors.forEach(m => this.messageService.error(m));
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        if (task) {
+                            let taskLayers = task.layers.filter(l=>l!="orthography");
+                            if (task.layers) {
+                                setTimeout(()=>{
+                                    this.highlightSearchResults(0);
+                                }, 500);
+                                resolve(task.layers);
+                                return;
+                            }
+                        }
+                        resolve(null);
+                    }); // taskStatus
+            } // there is a threadId
+        }); // Promise
     }
     
     highlightSearchResults(pageNumber: number) : void {
