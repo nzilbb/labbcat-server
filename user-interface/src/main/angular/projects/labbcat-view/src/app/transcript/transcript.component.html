@@ -288,6 +288,7 @@
         <div *ngIf="user && user.roles.includes('edit')" class="generate-layer">
           <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
             <select [(ngModel)]="generateLayerId"
+                    (change)="generate()"
                     i18n-title title="Which layer to generate">
               <option value="" i18n>All layers</option>
               <ng-container *ngFor="let layer of generableLayers">
