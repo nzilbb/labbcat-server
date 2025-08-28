@@ -39,7 +39,7 @@ export class TasksComponent implements OnInit {
                         // add new task to the list
                         this.labbcatService.labbcat.taskStatus(
                             id, {keepalive:false}, (task, errors, messages) => {
-                                if (task) this.tasks.push(task);
+                                if (task && task.threadId) this.tasks.push(task);
                             });
                     }
                 }
@@ -103,6 +103,8 @@ export class TasksComponent implements OnInit {
     log(task: Task): void {
         this.logName = task.threadName;
         this.threadLog = null;
+        this.threadException = null;
+        this.threadStackTrace = null;
         this.labbcatService.labbcat.taskStatus(
             task.threadId, {log:true, keepalive:false}, (thread, errors, messages)=>{
                 if (errors) errors.forEach(m => this.messageService.error(m));
