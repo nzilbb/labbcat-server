@@ -1,5 +1,5 @@
 <button (click)="handlePress($event)"
-        [disabled]="disabled"
+        [disabled]="disabled || processing"
         title="{{error || title}}"
         class="{{classes}}"
         [class.no-caps]="noCaps"
