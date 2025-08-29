@@ -605,7 +605,7 @@ export class TranscriptComponent implements OnInit {
             }
 
         } // next word
-    }
+    } // distributeWords
     
     loadThread(): Promise<string[]> {
         return new Promise((resolve, reject) => {
@@ -785,12 +785,21 @@ export class TranscriptComponent implements OnInit {
             sessionStorage.setItem("selectedLayerIds", JSON.stringify(this.selectedLayerIds));
 
             // if there's a highlight, make sure it scrolls back into view after the layer changes
-            if (this.highlitId) {
-                setTimeout(()=>{ // give the UI a chance to update
-                    this.highlight(this.highlitId);
-                }, 200);
-            }
+            this.deferredHighlight();
         });
+    }
+
+    rescrollTimeout: number;
+    /** Wait a short while, in case they're still selecting layers or whatever,
+     * then scroll to highlit token */
+    deferredHighlight() {
+        if (this.highlitId) {
+            if (this.rescrollTimeout) clearTimeout(this.rescrollTimeout);
+            this.rescrollTimeout = setTimeout(()=>{ // give the UI a chance to update
+                this.rescrollTimeout = null;
+                this.highlight(this.highlitId);
+            }, 3000); // 3 seconds for them to tick more layers
+        }
     }
 
     /** Load the given (zero-based) page of annotations on the given layer.
