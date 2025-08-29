@@ -618,11 +618,11 @@ export class TranscriptComponent implements OnInit {
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         if (task) {
                             let taskLayers = task.layers.filter(l=>l!="orthography");
-                            if (task.layers) {
+                            if (taskLayers.length) {
                                 setTimeout(()=>{
                                     this.highlightSearchResults(0);
                                 }, 500);
-                                resolve(task.layers);
+                                resolve(taskLayers);
                                 return;
                             }
                         }
