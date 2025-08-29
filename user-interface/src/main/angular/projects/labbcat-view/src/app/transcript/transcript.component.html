@@ -1,11 +1,11 @@
 <lib-wait *ngIf="loading"></lib-wait>
 <lib-task
-  *ngIf="generationThreadId"
+  *ngIf="generationThreadId && generationThreadId != 'requesting'"
   id="generation-thread"
   [showName]="false"
   [showStatus]="false"
   [threadId]="generationThreadId"
-  (finished)="generationFinished()"></lib-task>
+  (finished)="generationFinished($event)"></lib-task>
 
 <h1 id="title">{{id}}</h1>
 

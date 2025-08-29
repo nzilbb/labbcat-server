@@ -5,7 +5,7 @@ import { SerializationDescriptor } from '../serialization-descriptor';
 import { PraatService } from '../praat.service';
 import { ProgressUpdate } from '../progress-update';
 import { Response, Layer, User, Annotation, Anchor, MediaFile } from 'labbcat-common';
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { MessageService, LabbcatService, Task } from 'labbcat-common';
 
 @Component({
   selector: 'app-transcript',
@@ -617,11 +617,11 @@ export class TranscriptComponent implements OnInit {
                         if (errors) errors.forEach(m => this.messageService.error(m));
                         if (messages) messages.forEach(m => this.messageService.info(m));
                         if (task) {
+                            setTimeout(()=>{
+                                this.highlightSearchResults(0);
+                            }, 500);
                             let taskLayers = task.layers.filter(l=>l!="orthography");
                             if (taskLayers.length) {
-                                setTimeout(()=>{
-                                    this.highlightSearchResults(0);
-                                }, 500);
                                 resolve(taskLayers);
                                 return;
                             }
@@ -797,8 +797,10 @@ export class TranscriptComponent implements OnInit {
             if (this.rescrollTimeout) clearTimeout(this.rescrollTimeout);
             this.rescrollTimeout = setTimeout(()=>{ // give the UI a chance to update
                 this.rescrollTimeout = null;
-                this.highlight(this.highlitId);
-            }, 3000); // 3 seconds for them to tick more layers
+                if (!this.currentCategory) { // not currently selecting layers or whatever
+                    this.highlight(this.highlitId);
+                }
+            }, 1000);
         }
     }
 
@@ -1488,15 +1490,24 @@ export class TranscriptComponent implements OnInit {
     }
     
     /** Layer generation finished handler */
-    generationFinished() : void {
-        this.messageService.info("Layer generation finished"); // TODO i18n
+    generationFinished(task: Task) : void {
         this.generationThreadId = "";
-        setTimeout(()=>{
-            this.generationThreadId = "";
+        if (task && task.lastException) {
+            this.messageService.error(task.lastException);
+        } else {
+            if (task.status) {
+                this.messageService.info(task.status);
+            } else {
+                this.messageService.info("Layer generation finished"); // TODO i18n
+            }
+            this.loading = true; // going to reload...
             setTimeout(()=>{
-                document.location.reload();
+                this.generationThreadId = "";
+                setTimeout(()=>{
+                    document.location.reload();
                 }, 1000);
-        }, 1000);
+            }, 1000);
+        }
     }
     
     suggestCorrection(utterance : Annotation) : boolean {
@@ -1598,6 +1609,7 @@ export class TranscriptComponent implements OnInit {
         if (!this.showGenerateLayerSelection) { // show options
             this.showGenerateLayerSelection = true;
         } else { // options selected, so go ahead and do it
+            this.generationThreadId = "requesting"; // set button to processing immediately
             const regenerate = this.labbcatService.labbcat.createRequest(
                 "regenerate", {
                     id: this.transcript.id,
