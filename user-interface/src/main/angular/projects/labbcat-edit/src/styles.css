@@ -151,44 +151,58 @@ lib-wait {
 
 .list {
     width: 100%;
+    @media all and (min-width: 640px) { display: table; }
+    & .item {
+        display: flex;
+        @media all and (min-width: 640px) {
+            display: table-row;
+            padding-bottom: 0px;
+        }
+        flex-direction: column;
+        padding-bottom: 10px;
+        &:not(:first-child) {
+            border-top: 1px dashed silver;
+        }
+        @media all and (min-width: 640px) {
+            &:nth-of-type(odd) { background: #FAFAFA; }
+            &:nth-of-type(even) { background: #FFFFFF; }
+        }
+        & > span {
+            display: block;
+            @media all and (min-width: 640px) { display: table-cell; }
+            vertical-align: top;
+            padding-left: 10px;
+            white-space: nowrap;
+            &:first-child {
+                padding-left: 5px;
+            }
+            &.header-only {
+                display: none;
+                @media all and (min-width: 640px) { display: table-cell; }
+            }
+            &.number {
+                text-align: right;
+            }
+            &.center {
+                text-align: center;
+            }
+            & > legend {
+                font-size: 10pt;
+                @media all and (min-width: 640px) { display: none; }
+            }
+            & > input:not([type='checkbox']), & > select, .list > & > textarea {
+                width: 95%;
+            }
+        }
+        & > label {
+            display: none;
+            @media all and (min-width: 640px) { display: block; }
+        }
+    }
+    & .header {
+        font-weight: bold;
+    }
 }
-
-.list > .item {
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 10px;
-}
-.list > .header {
-    font-weight: bold;
-}
-.list > .item:not(:first-child) {
-    border-top: 1px dashed silver;
-}
-.list > .item > span {
-    display: block;
-    vertical-align: top;
-    padding-left: 10px;
-    white-space: nowrap;
-}
-.list > .item > span.header-only {
-    display: none;
-}
-.list > .item > span > legend {
-    font-size: 10pt;
-}
-.list > .item > span.number {
-    text-align: right;
-}
-.list > .item > span.center {
-    text-align: center;
-}
-.list > .item > span:first-child {
-    padding-left: 5px;
-}
-.list > .item > span > input:not([type='checkbox']), .list > .item > span > select, .list > .item > span > textarea {
-    width: 95%;
-}
-.list > .item > label { display: none; }
 
 .list > .attribute-item > label { font-weight:  bold; }
 
@@ -229,29 +243,26 @@ tbody tr:nth-child(odd) {
     width: fit-content;
     min-width: 50vw;
     margin: auto;
-}
-.attribute-list .attribute {
-    display: flex;
-    flex-direction: row;
-    padding: 4px;
-}
-.attribute-list .attribute:nth-child(odd) {
-    background: #EEEEEE;
-}
-.attribute-list .attribute > label, .attribute-list .attribute .values {
-    width: 50%
-}
-.attribute-list .attribute .values > .value > input,
-.attribute-list .attribute .values > .value > textarea,
-.attribute-list .attribute .values > .value > select {
-    width: 95%;
-}
-.attribute-list > .attribute > label:after {
-    content: ':';
-}
-.attribute-list .attribute .values {
-    display: flex;
-    flex-direction: column;
+    & .attribute {
+        display: flex;
+        flex-direction: row;
+        padding: 4px;
+        &:nth-child(odd) { background: #EEEEEE; }
+        & > label {
+            width: 50%;
+            &:after { content: ':'; }
+        }
+        & .values {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            & > .value {
+                & > input, > textarea, > select {
+                    width: 95%;
+                }
+            }
+        }
+    }
 }
 
 /* tabs UX */
@@ -260,40 +271,40 @@ tbody tr:nth-child(odd) {
     flex-direction: row;
     justify-content: space-between;
     align-content: stretch;
-}
-.tab-labels label.tab-label {
-    flex-grow: 1;
-    display: inline-block;
-    padding: 8px;
-    border: 1px var(--theme-text-color) solid;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    text-align: center;
-}
-label.tab-label.active {
-    border-bottom: 1px white solid;
+    & label.tab-label {
+        flex-grow: 1;
+        display: inline-block;
+        padding: 8px;
+        border: 1px var(--theme-text-color) solid;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        text-align: center;
+        &.active {
+            border-bottom: 1px white solid;
+        }
+    }
 }
 .tab-body {
     animation-name: roll-down;
     animation-duration: 1s;
-}
-.tab-body.inactive {
-    display: none;
-}
-.tab-body.attribute-list {
-    width: 100%;
+    &.inactive { display: none; }
+    &.attribute-list { width: 100%; }
 }
 
-.buttons a {
-    display: inline-block;
-    color: var(--theme-text-color);
-    text-decoration: none;
-    margin-left: 5px;
-    margin-right: 5px;
-    border: 1px var(--theme-text-color) solid;
-    padding: 4px;
-    height: 30px;
-    vertical-align: middle;
+.buttons {
+    text-align: right;
+    & a {
+        display: inline-block;
+        color: var(--theme-text-color);
+        text-decoration: none;
+        margin-left: 5px;
+        margin-right: 5px;
+        border: 1px var(--theme-text-color) solid;
+        padding: 4px;
+        vertical-align: middle;
+        height: 30px;
+        @media all and (min-width: 640px) { height: auto; }
+    }
 }
 
 /* Copied styles from legacy stylesheet - TODO revise these when migration complete */
@@ -313,12 +324,20 @@ button img {
     height: 16px;
     vertical-align: middle;
 }
-.lnk img, .lnk > span {
-    width: 16px;
-    height: 16px;
+.lnk {
     vertical-align: middle;
-    padding: 6px;
-    display: inline-block;
+    white-space: nowrap;
+    & img, & > span {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        padding: 6px;
+        display: inline-block;
+        @media all and (min-width: 640px) {
+            vertical-align: middle;
+            padding: unset;
+        }
+    }
 }
 button:disabled img {
     opacity: 0.5;
@@ -326,6 +345,10 @@ button:disabled img {
 button.icon-only {
     min-width: 45px;
     width: 45px;
+    @media all and (min-width: 640px) {
+        min-width: 32px;
+        width: 32px;
+    }
 }
 button.icon-only label {
     display: none;
@@ -355,16 +378,22 @@ progress::-moz-progress-bar { background: var(--theme-block-color); }
     width: 100%;
     min-width: 500px;
     background: #EEEEEE;
-}
-.progress-container .progress {
-    background: var(--theme-block-color);
+    & .progress {
+        background: var(--theme-block-color);
+    }
 }
 
 lib-button {
     display: inline-block;
-}
-lib-button button {
-    width: 100%;
+    & button {
+        width: 100%;
+        @media all and (min-width: 640px) {
+            &.icon-only {
+                min-width: 32px;
+                width: 32px;
+            }
+        }
+    }
 }
 
 /* task progress */
@@ -389,30 +418,12 @@ app-missing-annotations {
     width: max-content;
     display: block;
 }
-.buttons {
-    text-align: right;
-}
-.lnk {
-    vertical-align: middle;
-    white-space: nowrap;
-}
 
 @media all and (min-width: 640px) {
     button {
         height: unset;
         height: 32px;
         padding: 5px;
-    }
-    .buttons a {
-        height: auto;
-    }
-    button.icon-only, lib-button button.icon-only {
-        min-width: 32px;
-        width: 32px;
-    }
-    .lnk img, .lnk > span {
-        vertical-align: middle;
-        padding: unset;
     }
 }
 
@@ -422,15 +433,4 @@ app-missing-annotations {
     app-root nav { min-height: 100px; max-width: min-content; }
     app-root aside { max-width: min-content; }
     app-missing-annotations progress { min-width: 400px; }
-    .list { display: table; }
-    .list > .item {
-        display: table-row;
-        padding-bottom: 0px;
-    }
-    .list > .item:nth-of-type(odd) { background: #FAFAFA; }
-    .list > .item:nth-of-type(even) { background: #FFFFFF; }
-    .list > .item > span { display: table-cell; }
-    .list > .item > span.header-only { display: table-cell; }
-    .list > .item > span > legend { display: none; }
-    .list > .item > label { display: block; }
 }

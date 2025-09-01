@@ -119,16 +119,25 @@ article h1 {
     font-weight: normal;
 }
 
-app-admin-menu a { color: var(--theme-text-color); }
-app-admin-menu li {
-    border-bottom: 1px solid var(--theme-text-color);
-    border-right: 1px solid var(--theme-text-color);
-    white-space: nowrap;
+app-admin-menu {
+    & a { color: var(--theme-text-color); }
+    & li {
+        border-bottom: 1px solid var(--theme-text-color);
+        border-right: 1px solid var(--theme-text-color);
+        white-space: nowrap;
+        &:first-child { border-left: 1px solid var(--theme-text-color); }
+    }
+    /* Layout on wider screens */
+    @media all and (min-width: 640px) {
+        & li:first-child { border-top: 1px solid var(--theme-text-color); }
+        & li { border-left: 1px solid var(--theme-text-color); }
+    }
 }
-app-admin-menu li:first-child { border-left: 1px solid var(--theme-text-color); }
 
-app-root footer { color: var(--theme-text-color); }
-app-root footer a { color: var(--theme-text-color); text-decoration: none; }
+app-root footer {
+    color: var(--theme-text-color);
+    & a { color: var(--theme-text-color); text-decoration: none; }
+}
 
 /* Layout */
 app-root, #main { display: flex; flex-direction: column; }
@@ -176,59 +185,75 @@ lib-wait {
 
 .list {
     width: 100%;
+    @media all and (min-width: 640px) { display: table; }
+    & > .item {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 10px;
+        @media all and (min-width: 640px) {
+            display: table-row;
+            padding-bottom: 0px;
+            &:nth-child(even) { background: #FAFAFA; }
+        }
+        &:not(:first-child) {
+            border-top: 1px dashed silver;
+        }
+        & > span {
+            display: block;
+            vertical-align: top;
+            padding-left: 10px;
+            white-space: nowrap;
+            @media all and (min-width: 640px) {
+                display: table-cell;
+                & > legend { display: none; }
+            }
+            &.header-only {
+                display: none;
+                @media all and (min-width: 640px) { display: table-cell; }
+            }
+            & > input, & > select, & > textarea {
+                width: 95%;
+            }
+        }
+        &:first-child {
+            padding-left: 5px;
+        }
+        &.number {
+            text-align: right;
+        }
+        &.center {
+            text-align: center;
+        }
+        & > legend {
+            font-size: 10pt;
+        }
+        & > label {
+            display: none;
+            @media all and (min-width: 640px) { display: block; }
+        }
+    }
+    & > .header {
+        font-weight: bold;
+    }
+    & > .attribute-item > label { font-weight:  bold; } 
 }
-
-.list > .item {
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 10px;
-}
-.list > .header {
-    font-weight: bold;
-}
-.list > .item:not(:first-child) {
-    border-top: 1px dashed silver;
-}
-.list > .item > span {
-    display: block;
-    vertical-align: top;
-    padding-left: 10px;
-    white-space: nowrap;
-}
-.list > .item > span.header-only {
-    display: none;
-}
-.list > .item > span > legend {
-    font-size: 10pt;
-}
-.list > .item > span.number {
-    text-align: right;
-}
-.list > .item > span.center {
-    text-align: center;
-}
-.list > .item > span:first-child {
-    padding-left: 5px;
-}
-.list > .item > span > input, .list > .item > span > select, .list > .item > span > textarea {
-    width: 95%;
-}
-.list > .item > label { display: none; }
-
-.list > .attribute-item > label { font-weight:  bold; }
 
 .list + div.buttons { min-height: 30px; }
 
-.buttons a {
-    display: inline-block;
-    color: var(--theme-text-color);
-    text-decoration: none;
-    margin-left: 5px;
-    margin-right: 5px;
-    border: 1px var(--theme-text-color) solid;
-    padding: 4px;
-    height: 30px;
-    vertical-align: middle;
+.buttons {
+    text-align: right;
+    & a {
+        display: inline-block;
+        color: var(--theme-text-color);
+        text-decoration: none;
+        margin-left: 5px;
+        margin-right: 5px;
+        border: 1px var(--theme-text-color) solid;
+        padding: 4px;
+        vertical-align: middle;
+        height: 30px;
+        @media all and (min-width: 640px) { height: auto; }
+    }
 }
 
 /* Copied styles from legacy stylesheet - TODO revise these when migration complete */
@@ -242,28 +267,43 @@ button {
     font-family: Atkinson-Hyperlegible, sans-serif;
     font-size: 9pt;
     padding: 1px;
+    @media all and (min-width: 640px) {
+        height: unset;
+        height: 32px;
+        padding: 5px;
+    }
+    &.icon-only {
+        min-width: 45px;
+        width: 45px;
+        @media all and (min-width: 640px) {
+            min-width: 32px;
+            width: 32px;
+        }
+        & label { display: none; }
+    }
+    &:disabled img {
+        opacity: 0.5;
+    }
+    & img {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+    }
 }
-button img {
-    width: 16px;
-    height: 16px;
+.lnk {
     vertical-align: middle;
-}
-.lnk img, .lnk > span {
-    width: 16px;
-    height: 16px;
-    vertical-align: middle;
-    padding: 6px;
-    display: inline-block;
-}
-button:disabled img {
-    opacity: 0.5;
-}
-button.icon-only {
-    min-width: 45px;
-    width: 45px;
-}
-button.icon-only label {
-    display: none;
+    white-space: nowrap;
+    & img, & > span {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        padding: 6px;
+        @media all and (min-width: 640px) {
+            vertical-align: middle;
+            padding: unset;
+        }
+    }
 }
 progress, div.progress_container, div.progress {
     color: var(--theme-block-color);
@@ -272,9 +312,6 @@ progress, div.progress_container, div.progress {
     height: 20px;
     vertical-align: middle;
 }
-
-
-
 
 progress { -webkit-appearance: none; }
 progress::-webkit-progress-value { background: var(--theme-block-color); }
@@ -291,55 +328,35 @@ progress::-moz-progress-bar { background: var(--theme-block-color); }
 
 lib-button {
     display: inline-block;
-}
-lib-button button {
-    width: 100%;
+    & button {
+        width: 100%;
+        @media all and (min-width: 640px) {
+            &.icon-only {
+                min-width: 32px;
+                width: 32px;
+            }
+        }
+    }
 }
 
 /* task progress */
 lib-task lib-button {
     min-width: var(--progress-size);
-}
-lib-task lib-button button {
-    padding: 1px;
-    height: var(--progress-size);
-    width: var(--progress-size) !important;
-    min-width: auto !important;
-}
-lib-task lib-button img {    
-    height: 100%;
-}
-lib-task progress, lib-task .progress-container, lib-task .progress-container .progress  {    
-    height: var(--progress-size);
-}
-
-.buttons {
-    text-align: right;
-}
-.lnk {
-    vertical-align: middle;
-    white-space: nowrap;
-}
-
-@media all and (min-width: 640px) {
-    button {
-        height: unset;
-        height: 32px;
-        padding: 5px;
+    & button {
+        padding: 1px;
+        height: var(--progress-size);
+        width: var(--progress-size) !important;
+        min-width: auto !important;
     }
-    .buttons a {
-        height: auto;
-    }
-    button.icon-only, lib-button button.icon-only {
-        min-width: 32px;
-        width: 32px;
-    }
-    .lnk img, .lnk > span {
-        vertical-align: middle;
-        padding: unset;
+    & img {    
+        height: 100%;
     }
 }
-
+lib-task {
+    & progress, & .progress-container, & .progress-container .progress  {    
+        height: var(--progress-size);
+    }
+}
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
@@ -347,16 +364,6 @@ lib-task progress, lib-task .progress-container, lib-task .progress-container .p
     app-root aside { max-width: min-content; }
     app-admin-menu li:first-child { border-top: 1px solid var(--theme-text-color); }
     app-admin-menu li { border-left: 1px solid var(--theme-text-color); }
-    .list { display: table; }
-    .list > .item {
-        display: table-row;
-        padding-bottom: 0px;
-    }
-    .list > .item:nth-child(even) { background: #FAFAFA; }
-    .list > .item > span { display: table-cell; }
-    .list > .item > span.header-only { display: table-cell; }
-    .list > .item > span > legend { display: none; }
-    .list > .item > label { display: block; }
 }
 
 .hidden-panel {

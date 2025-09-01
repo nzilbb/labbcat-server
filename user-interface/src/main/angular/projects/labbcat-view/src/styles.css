@@ -158,59 +158,79 @@ input[type=number] {
 
 .list {
     width: 100%;
+    @media all and (min-width: 640px) {
+        display: table;
+    }
+    & > .item {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 10px;
+        @media all and (min-width: 640px) {
+            display: table-row;
+            padding-bottom: 0px;
+        }
+        &:not(:first-child) {
+            border-top: 1px dashed silver;
+        }
+        @media all and (min-width: 640px) {
+            &:nth-of-type(odd) { background: #FAFAFA; }
+            &:nth-of-type(even) { background: #FFFFFF; }
+        }
+        & > span {
+            display: block;
+            vertical-align: top;
+            padding-left: 10px;
+            white-space: nowrap;
+            @media all and (min-width: 640px) { display: table-cell; }
+            &:first-child {
+                padding-left: 5px;
+            }
+            &.header-only {
+                display: none;
+                @media all and (min-width: 640px) { display: table-cell; }
+            }
+            &.number {
+                text-align: right;
+            }
+            &.center {
+                text-align: center;
+            }
+            & > legend {
+                font-size: 10pt;
+            }
+            & > input, & select, & > textarea {
+                width: 95%;
+            }
+            & > label {
+                display: none;
+                @media all and (min-width: 640px) { display: block; }
+            }
+        }
+    }
+    & > .header {
+        font-weight: bold;
+    }
 }
 
-.list > .item {
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 10px;
-}
-.list > .header {
-    font-weight: bold;
-}
-.list > .item:not(:first-child) {
-    border-top: 1px dashed silver;
-}
-.list > .item > span {
-    display: block;
-    vertical-align: top;
-    padding-left: 10px;
-    white-space: nowrap;
-}
-.list > .item > span.header-only {
-    display: none;
-}
-.list > .item > span > legend {
-    font-size: 10pt;
-}
-.list > .item > span.number {
-    text-align: right;
-}
-.list > .item > span.center {
-    text-align: center;
-}
-.list > .item > span:first-child {
-    padding-left: 5px;
-}
-.list > .item > span > input, .list > .item > span > select, .list > .item > span > textarea {
-    width: 95%;
-}
-.list > .item > label { display: none; }
 
 .list > .attribute-item > label { font-weight:  bold; }
 
 .list + div.buttons { min-height: 30px; }
 
-.buttons a {
-    display: inline-block;
-    color: var(--theme-text-color);
-    text-decoration: none;
-    margin-left: 5px;
-    margin-right: 5px;
-    border: 1px var(--theme-text-color) solid;
-    padding: 4px;
-    height: 30px;
-    vertical-align: middle;
+.buttons {
+    text-align: right;
+    & a {
+        display: inline-block;
+        color: var(--theme-text-color);
+        text-decoration: none;
+        margin-left: 5px;
+        margin-right: 5px;
+        border: 1px var(--theme-text-color) solid;
+        padding: 4px;
+        vertical-align: middle;
+        height: 30px;
+        @media all and (min-width: 640px) { height: auto; }
+    }
 }
 
 .menu {
@@ -218,12 +238,10 @@ input[type=number] {
     width: max-content;
     border: 1px outset;
     padding: 2px;
-}
-.menu .item {
-    padding: 4px;
-}
-.menu .item:hover {
-    background: #DDDDDD;
+    & .item {
+        padding: 4px;
+        &:hover { background: #DDDDDD; }
+    }
 }
 
 /* For utterances in documentation pages */
@@ -385,31 +403,28 @@ progress::-moz-progress-bar { background: var(--theme-block-color); }
 
 lib-button {
     display: inline-block;
-}
-lib-button button {
-    width: 100%;
+    & button {
+        width: 100%;
+    }
 }
 
 /* task progress */
 lib-task lib-button {
     min-width: var(--progress-size);
-}
-lib-task lib-button button {
-    padding: 1px;
-    height: var(--progress-size);
-    width: var(--progress-size) !important;
-    min-width: auto !important;
-}
-lib-task lib-button img {    
-    height: 100%;
+    & button {
+        padding: 1px;
+        height: var(--progress-size);
+        width: var(--progress-size) !important;
+        min-width: auto !important;
+        & img {    
+            height: 100%;
+        }
+    }
 }
 lib-task progress, lib-task .progress-container, lib-task .progress-container .progress  {    
     height: var(--progress-size);
 }
 
-.buttons {
-    text-align: right;
-}
 .lnk {
     vertical-align: middle;
     white-space: nowrap;
@@ -422,9 +437,6 @@ lib-task progress, lib-task .progress-container, lib-task .progress-container .p
     }
     .small button {
         height: unset;
-    }
-    .buttons a {
-        height: auto;
     }
     button.icon-only, lib-button button.icon-only {
         min-width: 32px;
@@ -485,28 +497,22 @@ tbody tr:nth-child(even) {
     min-width: 50vw;
     margin: auto;
     background: #FFFFFF;
-}
-.attribute-list .attribute {
-    display: flex;
-    flex-direction: row;
-    padding: 4px;
-}
-.attribute-list > .attribute:nth-child(odd) {
-    background: #EEEEEE;
-}
-.attribute-list > .attribute:nth-child(even) {
-    background: #FFFFFF;
-}
-.attribute-list .attribute label {
-    width: 50%
-}
-.attribute-list .attribute > label:after {
-    content: ':';
-}
-.attribute-list .attribute .values {
-    display: flex;
-    flex-direction: column;
-    width: 50%;
+    & .attribute {
+        display: flex;
+        flex-direction: row;
+        padding: 4px;
+        &:nth-child(odd)  { background: #EEEEEE; }
+        &:nth-child(even) { background: #FFFFFF; }
+        & label {
+            width: 50%;
+            &:after { content: ':'; }
+        }
+        & .values {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+        }
+    }
 }
 
 /* tabs UX */
@@ -515,28 +521,28 @@ tbody tr:nth-child(even) {
     flex-direction: row;
     justify-content: space-between;
     align-content: stretch;
-}
-.tab-labels label.tab-label {
-    flex-grow: 1;
-    display: inline-block;
-    padding: 8px;
-    border: 1px var(--theme-text-color) solid;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    text-align: center;
-}
-label.tab-label.active {
-    border-bottom: 1px white solid;
+    & label.tab-label {
+        flex-grow: 1;
+        display: inline-block;
+        padding: 8px;
+        border: 1px var(--theme-text-color) solid;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        text-align: center;
+        &.active {
+            border-bottom: 1px white solid;
+        }
+    }
 }
 .tab-body {
     animation-name: roll-down;
     animation-duration: 1s;
-}
-.tab-body.inactive {
-    display: none;
-}
-.tab-body.attribute-list {
-    width: 100%;
+    &.inactive {
+        display: none;
+    }
+    &.attribute-list {
+        width: 100%;
+    }
 }
 
 lib-pagination {
@@ -555,17 +561,6 @@ lib-pagination .current {
 @media all and (min-width: 640px) {
     app-root nav { min-height: 100px; max-width: min-content; }
     app-root aside { max-width: min-content; }
-    .list { display: table; }
-    .list > .item {
-        display: table-row;
-        padding-bottom: 0px;
-    }
-    .list > .item:nth-of-type(odd) { background: #FAFAFA; }
-    .list > .item:nth-of-type(even) { background: #FFFFFF; }
-    .list > .item > span { display: table-cell; }
-    .list > .item > span.header-only { display: table-cell; }
-    .list > .item > span > legend { display: none; }
-    .list > .item > label { display: block; }
 
     /* Process with Praat background image URL here to ensure it works from the server */
     #settings-form .item > .viz {
