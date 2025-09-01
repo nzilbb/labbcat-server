@@ -572,8 +572,3 @@ lib-pagination .current {
         content: ' ' url('assets/link.svg') / '🔗';
     }
 }
-
-/* APLS */
-input[type='checkbox']:disabled {
-    cursor: not-allowed;
-}
