@@ -470,6 +470,30 @@ public class TestAnnotationAgqlToSql {
                  q.sql);
   }
 
+  /** Ensure `/.../test(first('main_participant').label)` generates the correct SQL. */
+  @Test public void mainParticipantLabelMatch() throws AGQLException {
+    AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
+    AnnotationAgqlToSql.Query q = transformer.sqlFor(
+      // only main-speaker tokens
+      "layer.id == 'orthography' && /.*/.test(first('main_participant').label)",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("main_speaker",
+                 "SELECT DISTINCT annotation.*, 'orthography' AS layer"
+                 +" FROM annotation_layer_2 annotation"
+                 +" WHERE 'orthography' = 'orthography'"
+                 +" AND (SELECT speaker.name"
+                 +" FROM speaker"
+                 +" INNER JOIN transcript_speaker"
+                 +" ON speaker.speaker_number = transcript_speaker.speaker_number"
+                 +" AND transcript_speaker.main_speaker <> 0"
+                 +" INNER JOIN annotation_layer_11 turn"
+                 +" ON transcript_speaker.speaker_number = turn.label"
+                 +" AND transcript_speaker.ag_id = turn.ag_id"
+                 +" WHERE turn.annotation_id = annotation.turn_annotation_id) REGEXP '.*'"
+                 +" ORDER BY ag_id, annotation.parent_id, annotation.ordinal, annotation.annotation_id",
+                 q.sql);
+  }
+
   @Test public void episodeLabel() throws AGQLException {
     AnnotationAgqlToSql transformer = new AnnotationAgqlToSql(getSchema());
     AnnotationAgqlToSql.Query q = transformer.sqlFor(

@@ -382,6 +382,42 @@ public class AnnotationAgqlToSql {
                     +" WHERE turn.annotation_id = annotation.turn_annotation_id"
                     +")");
                 } // turn based on turn_annotation_id
+              } else if (layerId.equals("main_participant")) { // main participant
+                if (layer.get("scope").toString().equalsIgnoreCase(SqlConstants.SCOPE_FREEFORM)) {
+                  // turn based on anchor offsets
+                  conditions.push(
+                    "(SELECT speaker.name"
+                    +" FROM transcript_speaker"
+                    +" INNER JOIN annotation_layer_11 turn"
+                    +" ON transcript_speaker.speaker_number = turn.label"
+                    +" AND transcript_speaker.ag_id = turn.ag_id"
+                    +" INNER JOIN anchor turn_start_anchor"
+                    +" ON turn.start_anchor_id = turn_start_anchor.id"
+                    +" INNER JOIN anchor turn_end_anchor"
+                    +" ON turn.end_anchor_id = turn_end_anchor.id"
+                    +" WHERE turn.ag_id = graph.ag_id"
+                    // any overlap with the turn
+                    +" AND turn_start_anchor.offset <= end.offset"
+                    +" AND start.offset <= turn_end_anchor.offset"
+                    +" ORDER BY turn_start_anchor.offset, turn_end_anchor.offset DESC"
+                    +((ctx != null)?" LIMIT 1":"")
+                    +")");
+                  flags.anchorsJoin = true;
+                } else { // turn based on turn_annotation_id
+                  // (no need to distinguish between first() and all() because there can be only one turn)
+                  conditions.push(
+                    "(SELECT speaker.name"
+                    +" FROM speaker"
+                    +" INNER JOIN transcript_speaker"
+                    +" ON speaker.speaker_number = transcript_speaker.speaker_number"
+                    +" AND transcript_speaker.main_speaker <> 0"
+                    +" INNER JOIN annotation_layer_11 turn"
+                    +" ON transcript_speaker.speaker_number = turn.label"
+                    +" AND transcript_speaker.ag_id = turn.ag_id"
+                    // match turn_annotation_id
+                    +" WHERE turn.annotation_id = annotation.turn_annotation_id"
+                    +")");
+                } // turn based on turn_annotation_id
               } else { // other layer
                 Layer operandLayer = getSchema().getLayer(layerId);
                 if (operandLayer == null) {
