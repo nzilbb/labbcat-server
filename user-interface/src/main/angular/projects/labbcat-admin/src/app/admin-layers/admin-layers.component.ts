@@ -38,6 +38,7 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
         // need to subscribe to URL path changes, because the component will be re-used
         // from scope to scope
         this.route.paramMap.subscribe((params) => {
+            this.scope = this.route.snapshot.paramMap.get('scope');
             this.readLayerManagers().then(()=>{
                 console.log(`subscribe: readRows`);
                 this.readRows();
@@ -78,7 +79,6 @@ export class AdminLayersComponent extends AdminComponent implements OnInit {
     
     readRows(): void {
         this.rows = null;
-        this.scope = this.route.snapshot.paramMap.get('scope');
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
             if (errors) errors.forEach(m => this.messageService.error(m));
