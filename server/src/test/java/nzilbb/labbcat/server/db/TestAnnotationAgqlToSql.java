@@ -872,9 +872,47 @@ public class TestAnnotationAgqlToSql {
                  +" WHERE otherLayer.ag_id = annotation.ag_id"
                  +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id"
                  +" AND otherLayer_start.offset <= end.offset"
-                 +" AND start.offset <= otherLayer_end.offset) > 100"
+                 +" AND start.offset < otherLayer_end.offset) > 100"
                  +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.ordinal, annotation.annotation_id",
                  q.sql);
+    
+    q = transformer.sqlFor(
+      "layerId = 'word' && all('language').length == 0",
+      "DISTINCT annotation.*", null, null);
+    assertEquals("Annotation - SQL",
+                 "SELECT DISTINCT annotation.*, 'word' AS layer, start.offset, end.offset"
+                 +" FROM annotation_layer_0 annotation"
+                 +" INNER JOIN anchor start ON annotation.start_anchor_id = start.anchor_id"
+                 +" INNER JOIN anchor end ON annotation.end_anchor_id = end.anchor_id"
+                 +" WHERE 'word' = 'word'"
+                 +" AND (SELECT COUNT(*) FROM annotation_layer_20 otherLayer"
+                 +" INNER JOIN anchor otherLayer_start"
+                 +" ON otherLayer.start_anchor_id = otherLayer_start.anchor_id"
+                 +" INNER JOIN anchor otherLayer_end"
+                 +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
+                 +" WHERE otherLayer.ag_id = annotation.ag_id"
+                 +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id"
+                 +" AND otherLayer_start.offset <= end.offset"
+                 +" AND start.offset < otherLayer_end.offset) = 0"
+                 +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.ordinal, annotation.annotation_id",
+                 q.sql);
+    
+    q = transformer.sqlFor(
+      "layerId = 'utterance' && all('main_participant').length == 0",
+      "DISTINCT annotation.*", null, null);
+    assertEquals(
+      "Main participant - SQL",
+      "SELECT DISTINCT annotation.*, 'utterance' AS layer"
+      +" FROM annotation_layer_12 annotation"
+      +" WHERE 'utterance' = 'utterance'"
+      +" AND (SELECT COUNT(*) FROM transcript_speaker"
+      +" INNER JOIN annotation_layer_11 turn"
+      +" ON transcript_speaker.speaker_number = turn.label"
+      +" AND transcript_speaker.main_speaker <> 0"
+      +" AND transcript_speaker.ag_id = turn.ag_id"
+      +" WHERE turn.annotation_id = annotation.turn_annotation_id) = 0"
+      +" ORDER BY ag_id, annotation.parent_id, annotation.ordinal, annotation.annotation_id",
+      q.sql);
   }
 
   @Test public void annotators() throws AGQLException {

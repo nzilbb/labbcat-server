@@ -719,6 +719,14 @@ public class AnnotationAgqlToSql {
                   +" FROM `annotation_layer_" + layer.get("layer_id") + "` annotation"
                   +" WHERE annotation.family_id = graph.family_id)");
                 flags.transcriptJoin = true;
+              } else if (operandLayer.getId().equals("main_participant")) { // main speaker
+                conditions.push(
+                  "(SELECT COUNT(*) FROM transcript_speaker"
+                  +" INNER JOIN annotation_layer_11 turn"
+                  +" ON transcript_speaker.speaker_number = turn.label"
+                  +" AND transcript_speaker.main_speaker <> 0"
+                  +" AND transcript_speaker.ag_id = turn.ag_id"
+                  +" WHERE turn.annotation_id = annotation.turn_annotation_id)");
               } else { // regular temporal layer
                 // join by the finest-grain compatible with both layers
                 String scope = ((String)layer.get("scope")).toLowerCase();
@@ -730,23 +738,24 @@ public class AnnotationAgqlToSql {
                   "word_annotation_id",
                   "segment_annotation_id" };
                 int joinFieldIndex = 3;
+                System.out.println("layer " + layer + " (" + scope + ") operand " + operandLayer + " ("+operandScope+")");
                 if (scope.equals(SqlConstants.SCOPE_WORD)) {
                   joinFieldIndex = Math.min(joinFieldIndex, 2);
                 }
                 if (operandScope.equals(SqlConstants.SCOPE_WORD) && joinFieldIndex > 2) {
-                  Math.min(joinFieldIndex, 2);
+                  joinFieldIndex = Math.min(joinFieldIndex, 2);
                 }
                 if (scope.equals(SqlConstants.SCOPE_META)) {
                   joinFieldIndex = Math.min(joinFieldIndex, 1);
                 }
                 if (operandScope.equals(SqlConstants.SCOPE_META) && joinFieldIndex > 1) {
-                  Math.min(joinFieldIndex, 1);
+                  joinFieldIndex = Math.min(joinFieldIndex, 1);
                 }
                 if (scope.equals(SqlConstants.SCOPE_FREEFORM)) {
                   joinFieldIndex = Math.min(joinFieldIndex, 0);
                 }
                 if (operandScope.equals(SqlConstants.SCOPE_FREEFORM) && joinFieldIndex > 0) {
-                  Math.min(joinFieldIndex, 0);
+                  joinFieldIndex = Math.min(joinFieldIndex, 0);
                 }
                 String joinField = joinFields[joinFieldIndex];
                 conditions.push(
@@ -761,7 +770,7 @@ public class AnnotationAgqlToSql {
                     :" AND otherLayer."+joinField+" = annotation."+joinField)
                   // any overlap
                   +" AND otherLayer_start.offset <= end.offset"
-                  +" AND start.offset <= otherLayer_end.offset"
+                  +" AND start.offset < otherLayer_end.offset"
                   +")");
                 flags.anchorsJoin = true;
               } // regular temporal layer
