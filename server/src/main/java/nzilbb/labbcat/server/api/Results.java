@@ -710,10 +710,10 @@ public class Results extends APIRequestHandler { // TODO unit test
                               annotation.getStartId(), annotation.getEndId() };
                             Anchor[] anchors = store.getAnchors(null, anchorIds);
                             if (anchors[0].getConfidence() >= finalOffsetThreshold) {
-                              annotation.put("start", anchors[0].toJson());
+                              annotation.put("start", anchors[0]);
                             }
                             if (anchors[1].getConfidence() >= finalOffsetThreshold) {
-                              annotation.put("end", anchors[1].toJson());
+                              annotation.put("end", anchors[1]);
                             }
                           }
                           jsonOut.write(annotation.toJson());

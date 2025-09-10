@@ -743,7 +743,8 @@
         layerId : layerId,
         maxOrdinal : maxOrdinal,
         pageLength : pageLength,
-        pageNumber : pageNumber
+        pageNumber : pageNumber,
+        includeAnchors : true
       }, onResult).send();
     }
     

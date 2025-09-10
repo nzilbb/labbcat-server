@@ -32,6 +32,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Vector;
 import java.util.function.Consumer;
 import javax.json.Json;
@@ -547,6 +549,7 @@ import org.xml.sax.*;
              counted, regardless of their ordinal.</dd>
             <dd><code>pageLength</code> (Optional) - The maximum number of IDs to return, or absent to return all.</dd>
             <dd><code>pageNumber</code> (Optional) - The zero-based page number to return, or absent to return the first page.</dd>
+            <dd><code>includeAnchors</code> (Optional) - Specify any value for this parameter to include start and end Anchor objects with each Annotation.</dd>
             <dt><span class="returnLabel">Returns:</span></dt>
             <dd>A (possibly empty) array of annotations.</dd>
           </dl>
@@ -1453,7 +1456,30 @@ public class Store extends APIRequestHandler {
       }
     }
     if (errors.size() > 0) return failureResult(errors);
-    Annotation[] annotations = store.getAnnotations(id, layerId, maxOrdinal, pageLength, pageNumber);
+    Annotation[] annotations = store.getAnnotations(
+      id, layerId, maxOrdinal, pageLength, pageNumber);
+    if (parameters.getString("includeAnchors") != null) {
+      // get a list of distinct achor IDs to fetch (annotations may share anchors)
+      HashSet<String> anchorIds = new HashSet<String>();
+      for (Annotation a : annotations) {
+        anchorIds.add(a.getStartId());
+        anchorIds.add(a.getEndId());
+      }
+      // fetch the anchors
+      Anchor[] anchors = store.getAnchors(id, anchorIds.toArray(new String[0]));
+      // index them by ID, and convert them for JSON serialization
+      HashMap<String,Anchor> idToAnchor = new HashMap<String,Anchor>();
+      for (Anchor a : anchors) {
+        if (a != null) idToAnchor.put(a.getId(), a);
+      }
+      // assign anchors to their annotations
+      for (Annotation annotation : annotations) {
+        if (idToAnchor.containsKey(annotation.getStartId()))
+          annotation.put("start", idToAnchor.get(annotation.getStartId()));
+        if (idToAnchor.containsKey(annotation.getEndId()))
+          annotation.put("end", idToAnchor.get(annotation.getEndId()));
+      }
+    }
     return successResult(annotations, annotations.length == 0?"There are no annotations.":null);
   }
 

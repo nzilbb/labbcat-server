@@ -506,62 +506,40 @@ export class TranscriptComponent implements OnInit {
             this.loading = true;
             this.labbcatService.labbcat.getAnnotations(
                 this.transcript.id, wordLayerId, 500, page, (annotations, errors, messages) => {
-                    this.loading = false;
+                    this.loading = false;                    
                     if (annotations.length) {
-                        const unknownAnchorIds = new Set<string>();
+                        // add the annotations to the graph
+                        const words : Annotation[] = [];
                         for (let a of annotations) {
-                            if (!this.transcript.anchors[a.startId]) {
-                                unknownAnchorIds.add(a.startId);
+                            // add anchors first
+                            if (a.start && !this.transcript.anchors[a.startId]) {
+                                const start = new this.labbcatService.ag.Anchor(
+                                    a.start.offset, this.transcript);
+                                Object.assign(start, a.start);
+                                this.transcript.addAnchor(start);
                             }
-                            if (!this.transcript.anchors[a.endId]) {
-                                unknownAnchorIds.add(a.endId);
+                            if (a.end && !this.transcript.anchors[a.endId]) {
+                                const end = new this.labbcatService.ag.Anchor(
+                                    a.end.offset, this.transcript);
+                                Object.assign(end, a.end);
+                                this.transcript.addAnchor(end);
                             }
-                        } // next annotation
+                            // now create/add annotation
+                            const annotation = new this.labbcatService.ag.Annotation(
+                                wordLayerId, a.label, this.transcript, a.startId, a.endId,
+                                a.id, a.parentId);
+                            if (a.dataUrl) annotation.dataUrl = a.dataUrl;
+                            this.transcript.addAnnotation(annotation);
+                            words.push(annotation);
+                        }
+                            
+                        // show these words immediately
+                        this.distributeWords(words);
                         
-                        if (unknownAnchorIds.size) {
-                            // there might be a lot of anchors to load,
-                            // making one request too large
-                            // so we break the anchor list into chunks
-                            this.loadAnchorsIncrementally(unknownAnchorIds).then(()=>{
-                                // add annotations to graph once we've got all the anchors
-                                const words : Annotation[] = [];
-                                for (let a of annotations) {
-                                    const annotation = new this.labbcatService.ag.Annotation(
-                                        wordLayerId, a.label, this.transcript,
-                                        a.startId, a.endId,
-                                        a.id, a.parentId);
-                                    if (a.dataUrl) annotation.dataUrl = a.dataUrl;
-                                    this.transcript.addAnnotation(annotation);
-                                    words.push(annotation);
-                                }
-
-                                // show these words immediately
-                                this.distributeWords(words);
-                                
-                                // next page
-                                this.loadWordsIncrementally(page + 1).then(()=>{
-                                    resolve(`${page}:${wordLayerId}`);
-                                });
-                            });
-                        } else { // all anchors are already loaded
-                            // we've got all the anchors, so add the annotations to the graph
-                            const words : Annotation[] = [];
-                            for (let a of annotations) {
-                                const annotation = new this.labbcatService.ag.Annotation(
-                                    wordLayerId, a.label, this.transcript, a.startId, a.endId,
-                                    a.id, a.parentId);
-                                if (a.dataUrl) annotation.dataUrl = a.dataUrl;
-                                this.transcript.addAnnotation(annotation);
-                            }
-                            
-                            // show these words immediately
-                            this.distributeWords(words);
-                            
-                            // next page
-                            this.loadWordsIncrementally(page + 1).then(()=>{
-                                resolve(`${page}:${wordLayerId}`);
-                            });
-                        } // all anchors are aalready loaded
+                        // next page
+                        this.loadWordsIncrementally(page + 1).then(()=>{
+                            resolve(`${page}:${wordLayerId}`);
+                        });
                     } else { // there were no more annotations
                         resolve(`${page}:${wordLayerId}`);
                     }
@@ -838,51 +816,34 @@ export class TranscriptComponent implements OnInit {
                             }
                         }
                         if (annotations.length) {
-                            const unknownAnchorIds = new Set<string>();
+                            // add the annotations to the graph
                             for (let a of annotations) {
-                                if (!this.transcript.anchors[a.startId]) {
-                                    unknownAnchorIds.add(a.startId);
+                                // add the anchors first, if they're not already there
+                                if (a.start && !this.transcript.anchors[a.startId]) {
+                                    const start = new this.labbcatService.ag.Anchor(
+                                        a.start.offset, this.transcript);
+                                    Object.assign(start, a.start);
+                                    this.transcript.addAnchor(start);
                                 }
-                                if (!this.transcript.anchors[a.endId]) {
-                                    unknownAnchorIds.add(a.endId);
+                                if (a.end && !this.transcript.anchors[a.endId]) {
+                                    const end = new this.labbcatService.ag.Anchor(
+                                        a.end.offset, this.transcript);
+                                    Object.assign(end, a.end);
+                                    this.transcript.addAnchor(end);
                                 }
-                            } // next annotation
-                            
-                            if (unknownAnchorIds.size) {
-                                // there might be a lot of anchors to load,
-                                // making one request too large
-                                // so we break the anchor list into chunks
-                                this.loadAnchorsIncrementally(unknownAnchorIds).then(()=>{
-                                    // add annotations to graph once we've got all the anchors
-                                    for (let a of annotations) {
-                                        const annotation = new this.labbcatService.ag.Annotation(
-                                            layerId, a.label, this.transcript,
-                                            a.startId, a.endId,
-                                            a.id, a.parentId);
-                                        if (a.dataUrl) annotation.dataUrl = a.dataUrl;
-                                        this.transcript.addAnnotation(annotation);
-                                    }
-                                    
-                                    // next page
-                                    this.loadLayerIncrementally(layerId, page + 1).then(()=>{
-                                        resolve(`${page}:${layerId}`);
-                                    });
-                                });
-                            } else { // all anchors are already loaded
-                                // we've got all the anchors, so add the annotations to the graph
-                                for (let a of annotations) {
-                                    const annotation = new this.labbcatService.ag.Annotation(
-                                        layerId, a.label, this.transcript, a.startId, a.endId,
-                                        a.id, a.parentId);
-                                    if (a.dataUrl) annotation.dataUrl = a.dataUrl;
-                                    this.transcript.addAnnotation(annotation);
-                                }
-                                
-                                // next page
-                                this.loadLayerIncrementally(layerId, page + 1).then(()=>{
-                                    resolve(`${page}:${layerId}`);
-                                });
+                                // now add annotation
+                                const annotation = new this.labbcatService.ag.Annotation(
+                                    layerId, a.label, this.transcript,
+                                    a.startId, a.endId,
+                                    a.id, a.parentId);
+                                if (a.dataUrl) annotation.dataUrl = a.dataUrl;
+                                this.transcript.addAnnotation(annotation);
                             }
+                                
+                            // next page
+                            this.loadLayerIncrementally(layerId, page + 1).then(()=>{
+                                resolve(`${page}:${layerId}`);
+                            });
                         } else { // there were no more annotations
                             // once phrase/span layers are fully loaded,
                             // index the token words they contain
@@ -897,35 +858,6 @@ export class TranscriptComponent implements OnInit {
         });
     }
 
-    /** recursive anchor loading, to prevent requests from becoming too large */
-    loadAnchorsIncrementally(unknownAnchorIds : Set<string>) : Promise<void> {
-        const maxIds = 300;
-        return new Promise<void>((resolve, reject) => {
-            let idsToLoadNow = new Set<string>(Array.from(unknownAnchorIds).slice(0, maxIds));
-            let idsToLoadLater = new Set<string>(Array.from(unknownAnchorIds).slice(maxIds));
-            this.loading = true;
-            this.labbcatService.labbcat.getAnchors(
-                this.transcript.id, Array.from(idsToLoadNow), (anchors, errors, messages) => {
-                    this.loading = false;
-                    if (errors) errors.forEach(m => 
-                        this.messageService.error(`Load anchors: ${m}`));
-                    if (messages) messages.forEach(m =>
-                        this.messageService.info(`Load anchors: ${m}`));
-                    for (let a of anchors) {
-                        const anchor = new this.labbcatService.ag.Anchor(
-                            a.offset, this.transcript);
-                        Object.assign(anchor, a);
-                        this.transcript.addAnchor(anchor);
-                    } // next anchor
-                    if (idsToLoadLater.size) {
-                        this.loadAnchorsIncrementally(idsToLoadLater).then(resolve);
-                    } else { // finished!
-                        resolve();
-                    }
-                });
-        });
-    }
-    
     indexTokensOnLayer(layer : Layer) : void {
         const wordLayerId = this.schema.wordLayerId;
         const utteranceLayerId = this.schema.utteranceLayerId;
