@@ -2915,9 +2915,35 @@ public class SqlGraphStore implements GraphStore {
    */
   public long countAnnotations(String id, String layerId, Integer maxOrdinal)
     throws StoreException, PermissionException, GraphNotFoundException {
-    return countMatchingAnnotations(
-      "graph.id = '" + QL.Esc(id) + "' AND layer.id = '" + QL.Esc(layerId) + "'"
-      +(maxOrdinal==null?"":" AND ordinal <= " + maxOrdinal));
+    // could use countMatchingAnnotations, but that loads the whole schema,
+    // which we don't need, so query directly if it's easy...
+    Layer layer = getLayer(layerId);
+    if (layer == null) throw new StoreException("Invalid layer: " + layerId);
+    Integer layer_id = (Integer)layer.get("layer_id");
+    if (layer_id != null || layer_id >= 0) {
+      String sSql = "SELECT COUNT(*)"
+        +" FROM annotation_layer_"+layer_id+" annotation"
+        +" INNER JOIN transcript ON annotation.ag_id = transcript.ag_id"
+        +" WHERE transcript.transcript_id = ?";
+      if (maxOrdinal != null) sSql += " AND annotation.ordinal <= ?";
+      try {
+        try (PreparedStatement sql = getConnection().prepareStatement(sSql)) {
+          sql.setString(1, id);
+          if (maxOrdinal != null) sql.setInt(2, maxOrdinal);
+          try (ResultSet rs = sql.executeQuery()) {
+            rs.next();
+            return rs.getLong(1);
+          } 
+        }
+      } catch (SQLException x) {
+        System.err.println("countAnnotations: SQL: " + x);
+        throw new StoreException("Invalid query."); // TODO i18n
+      }
+    } else {
+      return countMatchingAnnotations(
+        "graph.id = '" + QL.Esc(id) + "' AND layer.id = '" + QL.Esc(layerId) + "'"
+        +(maxOrdinal==null?"":" AND ordinal <= " + maxOrdinal));
+    }
   }
   /**
    * Gets the annotations on the given layer of the given transcript, but only those with
