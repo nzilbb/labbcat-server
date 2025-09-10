@@ -738,7 +738,6 @@ public class AnnotationAgqlToSql {
                   "word_annotation_id",
                   "segment_annotation_id" };
                 int joinFieldIndex = 3;
-                System.out.println("layer " + layer + " (" + scope + ") operand " + operandLayer + " ("+operandScope+")");
                 if (scope.equals(SqlConstants.SCOPE_WORD)) {
                   joinFieldIndex = Math.min(joinFieldIndex, 2);
                 }
@@ -769,7 +768,7 @@ public class AnnotationAgqlToSql {
                   +(joinField==null?""
                     :" AND otherLayer."+joinField+" = annotation."+joinField)
                   // any overlap
-                  +" AND otherLayer_start.offset <= end.offset"
+                  +" AND otherLayer_start.offset < end.offset"
                   +" AND start.offset < otherLayer_end.offset"
                   +")");
                 flags.anchorsJoin = true;
