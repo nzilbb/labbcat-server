@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Timer;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -73,12 +74,15 @@ import nzilbb.webapp.StandAloneWebApp;
 public class TaskWebApp extends APIRequestHandler {
    
   HashMap<String,HashMap<String,AnnotatorDescriptor>> activeAnnotators;
+  Timer annotatorDeactivator;
    
   /**
    * Constructor.
    */
-  public TaskWebApp(HashMap<String,HashMap<String,AnnotatorDescriptor>> activeAnnotators) {
+  public TaskWebApp(HashMap<String,HashMap<String,AnnotatorDescriptor>> activeAnnotators,
+                    Timer annotatorDeactivator) {
     this.activeAnnotators = activeAnnotators;
+    this.annotatorDeactivator = annotatorDeactivator;
   } // end of constructor
    
   /**
@@ -139,7 +143,7 @@ public class TaskWebApp extends APIRequestHandler {
         if (!activeAnnotators.containsKey(annotatorId)) {
           activeAnnotators.put(annotatorId, new HashMap<String,AnnotatorDescriptor>());
         }
-        AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
+        final AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
         AnnotatorDescriptor descriptor = activeAnnotators.get(annotatorId).get(taskId);
         if (descriptor == null // haven't got one of these yet
             || descriptor.getVersion() == null // this version has been uninstalled
@@ -156,6 +160,16 @@ public class TaskWebApp extends APIRequestHandler {
           activeAnnotators.get(annotatorId).put(taskId, descriptor);
           context.servletLog("new descriptor " + descriptor);
           descriptor.getInstance().getStatusObservers().add(s->context.servletLog(s));
+          // these objects shouldn't hang around forever in memory
+          // delete them after an hour, which should be long enough to configure a task
+          final String finalTaskId = taskId;
+          annotatorDeactivator.schedule(new java.util.TimerTask() { public void run() {
+            // if we haven't gotten rid of this annotator for this task yet
+            if (newDescriptor == activeAnnotators.get(annotatorId).get(finalTaskId)) {
+              // get rid of it now
+              activeAnnotators.get(annotatorId).remove(finalTaskId);
+            }
+          }}, 60*60*1000); // after an hour
 
         }
         if (descriptor == null) {

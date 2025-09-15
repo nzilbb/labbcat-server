@@ -2,17 +2,20 @@
     import = "nzilbb.labbcat.server.api.admin.annotator.ConfigWebApp" 
     import = "nzilbb.ag.automation.util.AnnotatorDescriptor"
     import = "java.util.HashMap"
+    import = "java.util.Timer"
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%!
-    HashMap<String,AnnotatorDescriptor> activeAnnotators = new HashMap<String,AnnotatorDescriptor>();
+HashMap<String,AnnotatorDescriptor> activeAnnotators = new HashMap<String,AnnotatorDescriptor>();
+// cached descriptors are removed after a while so they don't linger in memory
+Timer annotatorDeactivator = new Timer("admin/annotator/config");
 %><%@ include file="../../base.jsp" %><%{
     if ("GET".equals(request.getMethod())
         || "POST".equals(request.getMethod())
         || "PUT".equals(request.getMethod())
         || "DELETE".equals(request.getMethod())) { // GET/POST/PUT/DELETE
-      ConfigWebApp handler = new ConfigWebApp(activeAnnotators);
+      ConfigWebApp handler = new ConfigWebApp(activeAnnotators, annotatorDeactivator);
       initializeHandler(handler, request);
       handler.get(
         request.getMethod(),

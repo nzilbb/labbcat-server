@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -74,12 +75,15 @@ import nzilbb.webapp.StandAloneWebApp;
 public class ExtWebApp extends APIRequestHandler {
   
   HashMap<String,AnnotatorDescriptor> activeAnnotators;
+  Timer annotatorDeactivator;
   
   /**
    * Constructor.
    */
-  public ExtWebApp(HashMap<String,AnnotatorDescriptor> activeAnnotators) {
+  public ExtWebApp(HashMap<String,AnnotatorDescriptor> activeAnnotators,
+                   Timer annotatorDeactivator) {
     this.activeAnnotators = activeAnnotators;
+    this.annotatorDeactivator = annotatorDeactivator;
   } // end of constructor
   
   /**
@@ -136,6 +140,15 @@ public class ExtWebApp extends APIRequestHandler {
           descriptor = newDescriptor;
           activeAnnotators.put(annotatorId, descriptor);
           context.servletLog("new descriptor " + descriptor);
+          // these objects shouldn't hang around forever in memory
+          // delete them after an hour, which should be long enough to use the annotator
+          annotatorDeactivator.schedule(new java.util.TimerTask() { public void run() {
+            // if we haven't gotten rid of this annotator for this task yet
+            if (newDescriptor == activeAnnotators.get(annotatorId)) {
+              // get rid of it now
+              activeAnnotators.remove(annotatorId);
+            }
+          }}, 60*60*1000); // after an hour
         }
         if (descriptor == null) {
           httpStatus.accept(SC_NOT_FOUND);

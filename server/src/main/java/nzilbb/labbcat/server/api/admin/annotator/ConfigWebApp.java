@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -78,12 +79,15 @@ import nzilbb.webapp.StandAloneWebApp;
 public class ConfigWebApp extends APIRequestHandler {
   
   HashMap<String,AnnotatorDescriptor> activeAnnotators;
+  Timer annotatorDeactivator;
   
   /**
    * Constructor.
    */
-  public ConfigWebApp(HashMap<String,AnnotatorDescriptor> activeAnnotators) {
+  public ConfigWebApp(HashMap<String,AnnotatorDescriptor> activeAnnotators,
+                      Timer annotatorDeactivator) {
     this.activeAnnotators = activeAnnotators;
+    this.annotatorDeactivator = annotatorDeactivator;
   } // end of constructor
   
   /**
@@ -129,7 +133,7 @@ public class ConfigWebApp extends APIRequestHandler {
         context.servletLog("annotatorId " + annotatorId + " resource " + resource);
         
         // get annotator descriptor - the same instance as last time if possible
-        AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
+        final AnnotatorDescriptor newDescriptor = store.getAnnotatorDescriptor(annotatorId);
         AnnotatorDescriptor descriptor = activeAnnotators.get(annotatorId);
         context.servletLog("descriptor " + (descriptor==null?"null":descriptor.getVersion()));
         if (descriptor == null // haven't got one of these yet
@@ -142,6 +146,15 @@ public class ConfigWebApp extends APIRequestHandler {
           context.servletLog("new descriptor " + descriptor);
           descriptor.getInstance().getStatusObservers().add(
             status -> context.servletLog(annotatorId + ": " + status));
+          // these objects shouldn't hang around forever in memory
+          // delete them after an hour, which should be long enough to install/configure
+          annotatorDeactivator.schedule(new java.util.TimerTask() { public void run() {
+            // if we haven't gotten rid of this annotator for this task yet
+            if (newDescriptor == activeAnnotators.get(annotatorId)) {
+              // get rid of it now
+              activeAnnotators.remove(annotatorId);
+            }
+          }}, 60*60*1000); // after an hour
         }
         if (descriptor == null) {
           httpStatus.accept(SC_NOT_FOUND);
