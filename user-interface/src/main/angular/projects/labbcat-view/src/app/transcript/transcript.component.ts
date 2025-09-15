@@ -460,35 +460,39 @@ export class TranscriptComponent implements OnInit {
             this.layerSelectionEnabled = true;
 
             // load preselected layers
-            if (this.defaultLayerIds) this.layersChanged(this.defaultLayerIds);
+            this.layersChanged(this.defaultLayerIds).then(()=> {
            
-            // grey out empty layers
-            for (let l in this.schema.layers) {
-                const layer = this.schema.layers[l];
-                if (layer.parentId == this.schema.root.id
-                    && layer.alignment == 0) continue;
-                if (layer.parentId == this.schema.participantLayerId) continue;
-                if (layer.id == this.schema.root.id) continue;
-                if (layer.id == this.schema.corpusLayerId) continue;
-                if (layer.id == this.schema.episodeLayerId) continue;
-                if (layer.id == this.schema.participantLayerId) continue;
-                // a temporal layer
-                this.layerStyles[l] = { color: "silver" };
-                this.labbcatService.labbcat.countAnnotations(
-                    this.transcript.id, l, (count, errors, messages) => {
-                        this.layerCounts[l] = count;
-                        if (count) { // annotations in this layer
-                            if (count == 1) {
-                                this.schema.layers[l].description += ` (${count} annotation)`; // TODO i18n
+                // grey out empty layers
+                for (let l in this.schema.layers) {
+                    const layer = this.schema.layers[l];
+                    if (layer.parentId == this.schema.root.id
+                        && layer.alignment == 0) continue;
+                    if (layer.parentId == this.schema.participantLayerId) continue;
+                    if (layer.id == this.schema.root.id) continue;
+                    if (layer.id == this.schema.corpusLayerId) continue;
+                    if (layer.id == this.schema.episodeLayerId) continue;
+                    if (layer.id == this.schema.participantLayerId) continue;
+                    // a temporal layer
+                    this.layerStyles[l] = { color: "silver" };
+                    this.labbcatService.labbcat.countAnnotations(
+                        this.transcript.id, l, (count, errors, messages) => {
+                            this.layerCounts[l] = count;
+                            if (count) { // annotations in this layer
+                                if (count == 1) {
+                                    this.schema.layers[l].description
+                                        += ` (${count} annotation)`; // TODO i18n
+                                } else {
+                                    this.schema.layers[l].description
+                                        += ` (${count} annotations)`; // TODO i18n
+                                }
+                                this.layerStyles[l] = {};
                             } else {
-                                this.schema.layers[l].description += ` (${count} annotations)`; // TODO i18n
+                                this.schema.layers[l].description
+                                    += ' (0 annotations)'; // TODO i18n
                             }
-                            this.layerStyles[l] = {};
-                        } else {
-                            this.schema.layers[l].description += ' (0 annotations)'; // TODO i18n
-                        }
-                    });
-            } // next temporal layer
+                        });
+                } // next temporal layer
+            });
         });
     }
     
@@ -727,7 +731,8 @@ export class TranscriptComponent implements OnInit {
         });
     }
     
-    layersChanged(selectedLayerIds : string[]) : void {
+    layersChanged(selectedLayerIds : string[]) : Promise<void> {
+        if (!selectedLayerIds) selectedLayerIds = [];
         const addedLayerIds = selectedLayerIds.filter((x)=>this.selectedLayerIds.indexOf(x) < 0);
         const loadingLayers = [] as Promise<string>[];
         const deferredLayerIds = [] as string[]; // for deferred visualization
@@ -750,20 +755,25 @@ export class TranscriptComponent implements OnInit {
             }
         } // next newly selected layer
         
-        // once everything's finished loading
-        Promise.all(loadingLayers).then(()=>{
-            this.loading = false;
-
-            // visualize deferred layers
-            for (let layerId of deferredLayerIds) {
-                this.selectedLayerIds.push(layerId);
-            }
-            
-            // remember the selections for next time
-            sessionStorage.setItem("selectedLayerIds", JSON.stringify(this.selectedLayerIds));
-
-            // if there's a highlight, make sure it scrolls back into view after the layer changes
-            this.deferredHighlight();
+        return new Promise((resolve, reject) => {
+            // once everything's finished loading
+            Promise.all(loadingLayers).then(()=>{
+                this.loading = false;
+                
+                // visualize deferred layers
+                for (let layerId of deferredLayerIds) {
+                    this.selectedLayerIds.push(layerId);
+                }
+                
+                // remember the selections for next time
+                sessionStorage.setItem(
+                    "selectedLayerIds", JSON.stringify(this.selectedLayerIds));
+                
+                // if there's a highlight, make sure it scrolls back into view
+                // after the layer changes
+                this.deferredHighlight();
+                resolve();
+            });
         });
     }
 
