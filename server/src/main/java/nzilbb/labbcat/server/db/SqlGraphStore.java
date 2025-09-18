@@ -6286,7 +6286,7 @@ public class SqlGraphStore implements GraphStore {
       throw new StoreException("Invalid query."); // TODO i18n
     } catch(TransformationException invalid) {
       System.err.println("saveTranscript: " + invalid.toString());
-      throw new StoreException("Graph was not valid", invalid);
+      throw new StoreException("Graph was not valid: " + invalid.getMessage(), invalid);
     } catch(Throwable exception) {
       System.err.println("saveTranscript: " + exception.toString());
       exception.printStackTrace(System.err);
