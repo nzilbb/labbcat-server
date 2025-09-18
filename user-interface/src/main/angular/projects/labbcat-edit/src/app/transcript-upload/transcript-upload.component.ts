@@ -677,7 +677,8 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 +"\""+entry.status.replace(/"/g,"'")+"\","
                 +"\""+(entry.errors?entry.errors.join("\n"):"").replace(/"/g,"'")+"\"";
         } // next transcript
-        const encodedUri = encodeURI(csv);
+        const encodedUri = encodeURI(csv
+            .replace("#","%23")); // ensure #s aren't misinterpreted as URL hash
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
         const now = new Date();
