@@ -663,8 +663,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         if (!this.useDefaultParameterValues) this.processing = false;
     }
     onReport(): void {        
-        let csv = "data:text/csv;charset=utf-8,";
-        csv += "Transcript,Media,Corpus,Episode,Type,Parameters,Status,Errors";
+        let csv = "Transcript,Media,Corpus,Episode,Type,Parameters,Status,Errors";
         for (let entry of this.entries) {
             csv += "\n" + (entry.transcript?entry.transcript.name:"")+","
                 +"\""+entry.mediaFileNames().join("\n")+"\","
@@ -677,8 +676,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
                 +"\""+entry.status.replace(/"/g,"'")+"\","
                 +"\""+(entry.errors?entry.errors.join("\n"):"").replace(/"/g,"'")+"\"";
         } // next transcript
-        const encodedUri = encodeURI(csv
-            .replace("#","%23")); // ensure #s aren't misinterpreted as URL hash
+        const encodedUri = encodeURI("data:text/csv;charset=utf-8;base64,"+btoa(csv));
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
         const now = new Date();
