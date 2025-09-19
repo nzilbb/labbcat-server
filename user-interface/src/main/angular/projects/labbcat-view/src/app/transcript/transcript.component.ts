@@ -1569,7 +1569,8 @@ export class TranscriptComponent implements OnInit {
     
     /** Export utterance audio */
     utteranceAudio(utterance : Annotation) : boolean {
-        const url = `${this.baseUrl}soundfragment?id=${this.transcript.id}&start=${utterance.start.offset}&end=${utterance.end.offset}`;
+        const transcriptIdForUrl = encodeURIComponent(this.transcript.id);
+        const url = `${this.baseUrl}soundfragment?id=${transcriptIdForUrl}&start=${utterance.start.offset}&end=${utterance.end.offset}`;
         document.location = url;
         return false;
     }    
