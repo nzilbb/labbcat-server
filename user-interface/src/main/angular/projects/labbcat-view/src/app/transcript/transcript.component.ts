@@ -1686,7 +1686,7 @@ export class TranscriptComponent implements OnInit {
                 error: "Authorization error: "+errors.join(", ")
             }
         }).then((authorization: string)=>{ // getAuthorization...
-            const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
+            const transcriptIdForUrl = encodeURIComponent(this.transcript.id);
             const audioUrl = this.baseUrl+"soundfragment"
                 +"?id="+transcriptIdForUrl
                 +"&start="+utterance.start.offset
@@ -1773,7 +1773,7 @@ export class TranscriptComponent implements OnInit {
         this.getAuthorization().then((authorization: string)=>{
             const firstUtterance = utterance.previous||utterance;
             const lastUtterance = utterance.next||utterance;
-            const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
+            const transcriptIdForUrl = encodeURIComponent(this.transcript.id);
             this.praatUtteranceName = this.transcript.id
                 .replace(/\.[a-zA-Z][^.]*$/,"") // remove extension
                 .replace(/[^a-zA-Z0-9]+/g,"_") // Praat isn't inclusive about object names
