@@ -332,7 +332,7 @@ public class Upload extends APIRequestHandler {
   public JsonObject put(
     String pathInfo, RequestParameters requestParameters,Consumer<Integer> httpStatus,
     Function<Graph,String> layerGenerator) {
-    context.servletLog("PUT " + pathInfo + " " + requestParameters);
+    context.servletLog("PUT " + pathInfo);
     
     // get ID/directory of saved files
     if (pathInfo == null || pathInfo.equals("/") || pathInfo.indexOf('/') < 0) {
