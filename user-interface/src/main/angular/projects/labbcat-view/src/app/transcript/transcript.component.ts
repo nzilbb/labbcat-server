@@ -1716,7 +1716,7 @@ export class TranscriptComponent implements OnInit {
     /** Open utterance audio and TextGrid in Praat */
     praatUtteranceTextGrid(utterance: Annotation): void {
         this.getAuthorization().then((authorization: string)=>{
-            const transcriptIdForUrl = this.transcript.id.replace(/ /g, "%20");
+            const transcriptIdForUrl = encodeURIComponent(this.transcript.id);
             this.praatUtteranceName = this.transcript.id
                 .replace(/\.[a-zA-Z][^.]*$/,"") // remove extension
                 .replace(/[^a-zA-Z0-9]+/g,"_") // Praat isn't inclusive about object names
