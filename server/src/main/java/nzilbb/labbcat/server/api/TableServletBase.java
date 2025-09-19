@@ -346,7 +346,7 @@ public class TableServletBase extends APIRequestHandler {
               }
             } // page
             
-            context.servletLog("GET " + pathInfo + " : " + query.toString()); // TODO remove
+            // context.servletLog("GET " + pathInfo + " : " + query.toString()); // TODO remove
             PreparedStatement sql = connection.prepareStatement(query.toString());
             if (keyValues != null) {
               int c = 1;
@@ -646,7 +646,6 @@ public class TableServletBase extends APIRequestHandler {
             try {
             
               // insert the row
-              context.servletLog("POST " + query.toString()); // TODO remove
               PreparedStatement sql = connection.prepareStatement(query.toString());
               int c = 1;
               for (String column : dbKeys) {
@@ -819,7 +818,6 @@ public class TableServletBase extends APIRequestHandler {
              query.append(where);
              
              try {
-               context.servletLog("PUT " + query.toString()); // TODO remove
                PreparedStatement sql = connection.prepareStatement(query.toString());
                
                try {
@@ -874,7 +872,7 @@ public class TableServletBase extends APIRequestHandler {
                      } // next key
                      dbKeyQuery.append(" WHERE ");
                      dbKeyQuery.append(dbKeyWhere);
-                     context.servletLog("PUT key query: " + dbKeyQuery);
+                     // context.servletLog("PUT key query: " + dbKeyQuery);
                      PreparedStatement sqlKeys = connection.prepareStatement(dbKeyQuery.toString());
                      int k = 1;
                      for (String column : urlKeys) {
@@ -1079,7 +1077,6 @@ public class TableServletBase extends APIRequestHandler {
               } // deleteChecks
             } // need to check or update before deleting
             
-            context.servletLog("DELETE " + pathInfo + " : " + query.toString()); // TODO remove
             PreparedStatement sql = connection.prepareStatement(query.toString());
             try {
               int c = 1;
