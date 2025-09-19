@@ -8344,17 +8344,23 @@ public class SqlGraphStore implements GraphStore {
                   } else {
                     StringBuffer url = new StringBuffer(getBaseUrl());
                     url.append("/files/");
-                    url.append(graph.first("corpus").getLabel());
+                    url.append(URLEncoder.encode(graph.first("corpus").getLabel(), "UTF-8")
+                       .replace("+", "%20"));
                     url.append("/");
-                    url.append(graph.first("episode").getLabel());
+                    url.append(URLEncoder.encode(graph.first("episode").getLabel(), "UTF-8")
+                       .replace("+", "%20"));
                     url.append("/");
-                    url.append(mediaFile.getExtension());
+                    url.append(URLEncoder.encode(mediaFile.getExtension(), "UTF-8")
+                       .replace("+", "%20"));
                     url.append("/");
-                    url.append(f.getName());
+                    url.append(URLEncoder.encode(f.getName(), "UTF-8")
+                       .replace("+", "%20"));
                     mediaFile.setUrl(url.toString());
                   }
                   files.put(mediaFile.getName(), mediaFile);
                 } // user has access
+              } catch(UnsupportedEncodingException exception) {
+                throw new StoreException(exception);
               } catch (SQLException x) {
                 throw new StoreException(x);
               }
@@ -8391,17 +8397,25 @@ public class SqlGraphStore implements GraphStore {
                     } else {
                       StringBuffer url = new StringBuffer(getBaseUrl());
                       url.append("/files/");
-                      url.append(graph.first("corpus").getLabel());
+                      url.append(URLEncoder.encode(
+                                   graph.first("corpus").getLabel(), "UTF-8")
+                       .replace("+", "%20"));
                       url.append("/");
-                      url.append(graph.first("episode").getLabel());
+                      url.append(URLEncoder.encode(
+                                   graph.first("episode").getLabel(), "UTF-8")
+                       .replace("+", "%20"));
                       url.append("/");
-                      url.append(possibleFile.getExtension());
+                      url.append(URLEncoder.encode(possibleFile.getExtension(), "UTF-8")
+                                 .replace("+", "%20"));
                       url.append("/");
-                      url.append(possibleFile.getName());
+                      url.append(URLEncoder.encode(possibleFile.getName(), "UTF-8")
+                                 .replace("+", "%20"));
                       possibleFile.setUrl(url.toString());
                     }
                     files.put(possibleFile.getName(), possibleFile);
                   } // user has access
+                } catch(UnsupportedEncodingException exception) {
+                  throw new StoreException(exception);
                 } catch (SQLException x) {
                   throw new StoreException(x);
                 }
@@ -8521,7 +8535,11 @@ public class SqlGraphStore implements GraphStore {
         if (getBaseUrl() == null) // TODO check this isn't a security risk
         {
           FragmentExtractor extractor = new FragmentExtractor();
-          if (mimeTypeParameters.containsKey("samplerate")
+          if (mimeTypeParameters.containsKey("rate") // this seems to be a standard name
+              && mimeTypeParameters.get("rate") != null) {
+            extractor.setSampleRate(
+              Integer.parseInt(mimeTypeParameters.get("rate")));
+          } else if (mimeTypeParameters.containsKey("samplerate") // this is a legacy name
               && mimeTypeParameters.get("samplerate") != null) {
             extractor.setSampleRate(
               Integer.parseInt(mimeTypeParameters.get("samplerate")));
@@ -8803,13 +8821,17 @@ public class SqlGraphStore implements GraphStore {
       if (getBaseUrl() != null) {
         StringBuffer url = new StringBuffer(getBaseUrl());
         url.append("/files/");
-        url.append(corpusDir.getName());
+        url.append(URLEncoder.encode(corpusDir.getName(), "UTF-8")
+                   .replace("+", "%20"));
         url.append("/");
-        url.append(episodeDir.getName());
+        url.append(URLEncoder.encode(episodeDir.getName(), "UTF-8")
+                   .replace("+", "%20"));
         url.append("/");
-        url.append(resultingFile.getExtension());
+        url.append(URLEncoder.encode(resultingFile.getExtension(), "UTF-8")
+                   .replace("+", "%20"));
         url.append("/");
-        url.append(resultingFile.getName());
+        url.append(URLEncoder.encode(resultingFile.getName(), "UTF-8")
+                   .replace("+", "%20"));
         resultingFile.setUrl(url.toString());
       }
       return resultingFile;
@@ -8976,13 +8998,17 @@ public class SqlGraphStore implements GraphStore {
       if (getBaseUrl() != null) {
         StringBuffer docUrl = new StringBuffer(getBaseUrl());
         docUrl.append("/files/");
-        docUrl.append(corpusDir.getName());
+        docUrl.append(URLEncoder.encode(corpusDir.getName(), "UTF-8")
+                      .replace("+", "%20"));
         docUrl.append("/");
-        docUrl.append(episodeDir.getName());
+        docUrl.append(URLEncoder.encode(episodeDir.getName(), "UTF-8")
+                      .replace("+", "%20"));
         docUrl.append("/");
-        docUrl.append(resultingFile.getExtension());
+        docUrl.append(URLEncoder.encode(resultingFile.getExtension(), "UTF-8")
+                      .replace("+", "%20"));
         docUrl.append("/");
-        docUrl.append(resultingFile.getName());
+        docUrl.append(URLEncoder.encode(resultingFile.getName(), "UTF-8")
+                      .replace("+", "%20"));
         resultingFile.setUrl(docUrl.toString());
       }
       return resultingFile;
@@ -9019,12 +9045,15 @@ public class SqlGraphStore implements GraphStore {
             } else {
               StringBuffer url = new StringBuffer(getBaseUrl());
               url.append("/files/");
-              url.append(graph.first("corpus").getLabel());
+              url.append(URLEncoder.encode(graph.first("corpus").getLabel(), "UTF-8")
+                         .replace("+", "%20"));
               url.append("/");
-              url.append(graph.first("episode").getLabel());
+              url.append(URLEncoder.encode(graph.first("episode").getLabel(), "UTF-8")
+                         .replace("+", "%20"));
               url.append("/doc/");
               url.append(f.getName());
-              mediaFile.setUrl(url.toString());
+              mediaFile.setUrl(URLEncoder.encode(url.toString(), "UTF-8")
+                               .replace("+", "%20"));
             }
             files.add(mediaFile);
           }
