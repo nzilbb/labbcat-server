@@ -8410,6 +8410,10 @@ public class SqlGraphStore implements GraphStore {
                       url.append("/");
                       url.append(URLEncoder.encode(possibleFile.getName(), "UTF-8")
                                  .replace("+", "%20"));
+                      url.append("?from=");
+                      url.append(
+                        URLEncoder.encode(possibleFile.getGenerateFrom().getName(), "UTF-8")
+                        .replace("+", "%20"));
                       possibleFile.setUrl(url.toString());
                     }
                     files.put(possibleFile.getName(), possibleFile);
@@ -9057,6 +9061,8 @@ public class SqlGraphStore implements GraphStore {
             }
             files.add(mediaFile);
           }
+        } catch(UnsupportedEncodingException exception) {
+          throw new StoreException(exception);
         } catch (SQLException x) {
           throw new StoreException(x);
         }
