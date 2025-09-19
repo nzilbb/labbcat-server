@@ -698,4 +698,7 @@ export class TranscriptUploadComponent extends EditComponent implements OnInit {
         }
         this.updateTranscriptExistence();
     }
+    encodeURIComponent(s : string) : string {
+        return encodeURIComponent(s);
+    }
 }

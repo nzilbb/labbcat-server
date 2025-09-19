@@ -146,7 +146,7 @@
           <span *ngIf="entry.transcript && !entry.exists">{{entry.transcript.name}}</span>
           <a *ngIf="entry.transcript && entry.exists"
              target="{{entry.transcriptId}}"
-             href="{{baseUrl}}transcript?transcript={{entry.transcriptId}}"
+             [href]="baseUrl+'transcript?transcript='+encodeURIComponent(entry.transcriptId)"
              >{{entry.transcriptId||entry.transcript.name}}</a>
           <span *ngIf="!entry.transcript" i18n>[no transcript yet]</span>
         </span>
