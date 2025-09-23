@@ -236,9 +236,12 @@ public class TaskWebApp extends APIRequestHandler {
             // store task parameters in DB
             store.saveAnnotatorTaskParameters(taskId, parameters);
             
+            boolean editableOutputs
+              = annotator.getClass().isAnnotationPresent(AllowsManualAnnotations.class);
             // create/update any layers that are required
             for (String layerId : annotator.getOutputLayers()) {
               Layer newOutput = annotator.getSchema().getLayer(layerId);
+              if (editableOutputs) newOutput.put("extra", "editable");
               Layer existingOutput = store.getLayer(layerId);
               if (newOutput != null) {
                 if (existingOutput == null) { // output doesn't exist yet
@@ -254,7 +257,11 @@ public class TaskWebApp extends APIRequestHandler {
                       || newOutput.getParentIncludes() != existingOutput.getParentIncludes()
                       || newOutput.getSaturated() != existingOutput.getSaturated()
                       || !newOutput.getValidLabels().keySet().equals(
-                        existingOutput.getValidLabels().keySet())) {
+                        existingOutput.getValidLabels().keySet())
+                      // annotator creates editable layers but the layer wasn't editable
+                      || (newOutput.containsKey("extra") // TODO use a formal mechanism 
+                          && !newOutput.get("extra").equals(existingOutput.get("extra")))
+                    ) {
                     store.saveLayer(newOutput);
                     context.servletLog("Output layer " + newOutput + " updated");
                   } // output layer definition has changed

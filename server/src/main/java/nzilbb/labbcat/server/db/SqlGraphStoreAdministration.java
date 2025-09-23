@@ -484,6 +484,17 @@ public class SqlGraphStoreAdministration
               sql.executeUpdate();
               sql.close();
             }
+            
+            // extra
+            if (layer.containsKey("extra")
+                && !layer.get("extra").equals(oldVersion.get("extra"))) {
+              PreparedStatement sql = getConnection().prepareStatement(
+                "UPDATE layer SET extra = ? WHERE layer_id = ?");
+              sql.setString(1, layer.get("extra").toString());
+              sql.setInt(2, layer_id);
+              sql.executeUpdate();
+              sql.close();
+            }
           } // non-segment layer
                
         } // non-system layer

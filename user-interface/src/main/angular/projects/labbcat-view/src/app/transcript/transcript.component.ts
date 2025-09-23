@@ -1473,7 +1473,9 @@ export class TranscriptComponent implements OnInit {
         if (!this.user || !this.user.roles.includes('edit')) return false;
         const layer = this.transcript.schema.layers[layerId];
         if (!layer) return false;
-        return layer.alignment == 0 && !layer.layer_manager_id;
+        return layer.alignment == 0 // tag layer
+            && (!layer.layer_manager_id // or no layer manager/annotator
+                || layer.extra == "editable"); // or annotor AllowsManualAnnotations
     }
     
     newTag(word : Annotation, layerId : string) : void {
