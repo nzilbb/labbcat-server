@@ -26,7 +26,7 @@
            id="item_{{item.item_id}}"
            title="{{item.label}}">
         <a href="{{baseUrl}}{{item.value}}"
-           [target]="item.value && item.value.endsWith('.help')?'help':null">
+           [target]="item.value && item.value.endsWith('.help')?'help':'_self'">
           <img *ngIf="item.icon" src="{{baseUrl}}images/dashboard/{{item.icon}}" />
           <span id="result_{{item.item_id}" class="dash-statistic">
             <lib-wait [inSitu]="true" *ngIf="!item.value"></lib-wait>
