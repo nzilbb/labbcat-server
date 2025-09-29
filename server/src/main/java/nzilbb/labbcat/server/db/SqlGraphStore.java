@@ -5498,6 +5498,7 @@ public class SqlGraphStore implements GraphStore {
       // validate the graph before saving it
       // TODO ensure all layers are loaded before validation
       Validator v = new Validator();
+      v.setMaxGraphIdLength(200);
       v.setMaxLabelLength(247);
       if (graph.getChange() == Change.Operation.Create) {
         v.setFullValidation(true);
@@ -6281,16 +6282,22 @@ public class SqlGraphStore implements GraphStore {
         sqlDeleteParticipantCorpus.close();
       }
     } catch(SQLException exception) {
-      System.err.println("saveTranscript: " + exception.toString());
+      System.err.println("saveTranscript "+graph.getId()+": " + exception.toString());
       exception.printStackTrace(System.err);
-      throw new StoreException("Invalid query."); // TODO i18n
+      throw new StoreException("Invalid query while saving "+graph.getId()); // TODO i18n
     } catch(TransformationException invalid) {
-      System.err.println("saveTranscript: " + invalid.toString());
-      throw new StoreException("Graph was not valid: " + invalid.getMessage(), invalid);
+      System.err.println("saveTranscript "+graph.getId()+": " + invalid.toString());
+      throw new StoreException(
+        "Graph "+graph.getId()+" was not valid: " + invalid.getMessage(), invalid);
+    } catch(StoreException exception) {
+      throw exception;
+    } catch(GraphNotFoundException exception) {
+      throw exception;
     } catch(Throwable exception) {
-      System.err.println("saveTranscript: " + exception.toString());
+      System.err.println("saveTranscript "+graph.getId()+": " + exception.toString());
       exception.printStackTrace(System.err);
-      throw new StoreException(exception);
+      throw new StoreException(
+        "Unexpected error saving "+graph.getId() + ": "+exception, exception);
     }
     // System.err.println("saveGraph finished.");
     // timers.end("saveGraph");
