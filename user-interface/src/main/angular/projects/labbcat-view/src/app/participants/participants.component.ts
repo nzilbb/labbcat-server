@@ -33,6 +33,11 @@ export class ParticipantsComponent implements OnInit {
     transcriptQuery = ""; // AGQL query string for pre-matching transcripts
     transcriptDescription = ""; // Human readable description of transcript query
     defaultTranscriptFilter = "";
+    // hints for 'system layers'
+    participantLayerHint = "Participant";
+    corpusLayerHint = "Corpus";
+    episodeLayerHint = "Series of transcripts";
+    transcriptCountHint = "Number of transcripts the participant appears in";
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0;
@@ -77,11 +82,17 @@ export class ParticipantsComponent implements OnInit {
             this.participantAttributes = [];
             this.filterLayers = [];
             // allow filtering by participant ID, corpus, and episode
-            this.filterLayers.push(this.schema.layers[this.schema.participantLayerId]);
+            let participantLayer = this.schema.layers[this.schema.participantLayerId] as Layer;
+            let corpusLayer = this.schema.layers[this.schema.corpusLayerId] as Layer;
+            let episodeLayer = this.schema.layers[this.schema.episodeLayerId] as Layer;
+            participantLayer.hint = this.participantLayerHint;
+            corpusLayer.hint = this.corpusLayerHint;
+            episodeLayer.hint = this.episodeLayerHint;
+            this.filterLayers.push(participantLayer);
             this.filterValues[this.schema.participantLayerId] = [];
-            this.filterLayers.push(this.schema.layers[this.schema.corpusLayerId]);
+            this.filterLayers.push(corpusLayer);
             this.filterValues[this.schema.corpusLayerId] = [];
-            this.filterLayers.push(this.schema.layers[this.schema.episodeLayerId]);
+            this.filterLayers.push(episodeLayer);
             this.filterValues[this.schema.episodeLayerId] = [];
             // and transcript count - we use a dummy layer to fool the layer-filter
             this.schema.layers["--transcript-count"] = {
@@ -89,7 +100,8 @@ export class ParticipantsComponent implements OnInit {
                 parentId: this.schema.participantLayerId,                    
                 alignment: 0,
                 peers: false, peersOverlap: false, parentIncludes: true, saturated: true,
-                type: "number", subtype: "integer"
+                type: "number", subtype: "integer",
+                hint: this.transcriptCountHint
             }
             this.filterLayers.push(this.schema.layers["--transcript-count"]);
             this.filterValues["--transcript-count"] = [];

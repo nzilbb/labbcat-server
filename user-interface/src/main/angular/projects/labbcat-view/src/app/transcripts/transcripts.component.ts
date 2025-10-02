@@ -35,6 +35,11 @@ export class TranscriptsComponent implements OnInit {
     transcriptQuery = ""; // AGQL query string for pre-matching transcripts
     transcriptDescription = ""; // Human readable description of transcript query
     defaultParticipantFilter = "";
+    // hints for 'system layers'
+    transcriptLayerHint = "Transcript file name";
+    corpusLayerHint = "Corpus";
+    //TODO episodeLayerHint = "Series of transcripts";
+    transcriptTypeLayerHint = "Transcript type";
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0; 
@@ -87,13 +92,21 @@ export class TranscriptsComponent implements OnInit {
             this.filterLayers = [];
             this.generableLayers = [];
             // allow filtering by transcript ID, corpus, episode, and type
-            this.filterLayers.push(this.schema.root);
+            let transcriptLayer = this.schema.root as Layer;
+            let corpusLayer = this.schema.layers[this.schema.corpusLayerId] as Layer;
+            //TODO let episodeLayer = this.schema.layers[this.schema.episodeLayerId] as Layer;
+            let transcriptTypeLayer = this.schema.layers["transcript_type"] as Layer;
+            transcriptLayer.hint = this.transcriptLayerHint;
+            corpusLayer.hint = this.corpusLayerHint;
+            //TODO episodeLayer.hint = this.episodeLayerHint;
+            transcriptTypeLayer.hint = this.transcriptTypeLayerHint;
+            this.filterLayers.push(transcriptLayer);
             this.filterValues[this.schema.root.id] = [];
-            this.filterLayers.push(this.schema.layers[this.schema.corpusLayerId]);
+            this.filterLayers.push();
             this.filterValues[this.schema.corpusLayerId] = [];
-            //TODO this.filterLayers.push(this.schema.layers[this.schema.episodeLayerId]);
+            //TODO this.filterLayers.push(episodeLayer);
             //TODO this.filterValues[this.schema.episodeLayerId] = [];
-            this.filterLayers.push(this.schema.layers["transcript_type"]);
+            this.filterLayers.push(transcriptTypeLayer);
             this.filterValues["transcript_type"] = [];
             // and by selected transcript attributes
             for (let layerId in this.schema.layers) {
