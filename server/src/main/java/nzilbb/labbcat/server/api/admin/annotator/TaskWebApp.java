@@ -259,7 +259,7 @@ public class TaskWebApp extends APIRequestHandler {
                       || !newOutput.getValidLabels().keySet().equals(
                         existingOutput.getValidLabels().keySet())
                       // annotator creates editable layers but the layer wasn't editable
-                      || (newOutput.containsKey("extra") // TODO use a formal mechanism 
+                      || (newOutput.get("extra") != null // TODO use a formal mechanism 
                           && !newOutput.get("extra").equals(existingOutput.get("extra")))
                     ) {
                     store.saveLayer(newOutput);
