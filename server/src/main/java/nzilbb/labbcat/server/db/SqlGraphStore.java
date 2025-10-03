@@ -3766,8 +3766,10 @@ public class SqlGraphStore implements GraphStore {
                 +" NULL AS annotated_by, NULL AS annotated_when,"
                 +" -1 AS annotation_id,"
                 +" MIN(annotation.ordinal) AS ordinal,"
+                +(!layer.isAncestor("segment") && !layer.getId().equals("segment")?""
+                  :" MIN(annotation.segment_annotation_id) AS segment_annotation_id,"
+                  +" MIN(annotation.ordinal_in_word) AS ordinal_in_word,")
                 +" MIN(annotation.word_annotation_id) AS word_annotation_id,"
-                +" MIN(annotation.ordinal_in_word) AS ordinal_in_word,"
                 +" MIN(annotation.ordinal_in_turn) AS ordinal_in_turn,"
                 +" MIN(annotation.turn_annotation_id) AS turn_annotation_id,"
                 // TODO min(start_anchor_id) and max(end_anchor_id) aren't necessarily right
