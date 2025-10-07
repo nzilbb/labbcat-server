@@ -796,7 +796,7 @@ sampleName$ = &hellip; <span class="praat-comment"># the name of the extracted S
               >{{praatVariableName(layer.id)}}$ = "&hellip;"</span
               > <span class="praat-comment"
                 ># {{layer.description}}<span *ngIf="layerCategories.length > 1"
-                  >({{layer.category.remove("participant_")}})</span></span></ng-container></div></details>
+                  >({{layer.category.replace('participant_','')}})</span></span></ng-container></div></details>
 selectObject: "Sound " + sampleName$
 </pre>
       <div id="load-controls">
