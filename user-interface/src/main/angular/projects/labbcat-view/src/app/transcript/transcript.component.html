@@ -451,22 +451,21 @@
         </div>
         <div id="attr-controls">
           <div class="label-spacer">
-            <label id="toggleLayerIds" i18n-title title="Hide attribute names">
-              <input type="checkbox" name="toggleLayerIds" [checked]="!displayLayerIds" (change)="toggleLayerIds()">
-              <span i18n>Hide attribute names</span>
+            <label id="toggleLayerIds" i18n-title title="Show attribute names">
+              <input type="checkbox" name="toggleLayerIds" [checked]="displayLayerIds" (change)="toggleLayerIds()">
+              <span i18n> Show attribute names</span>
             </label>
           </div>
           <div class="label-spacer">
             <label
               [class.disabled]="!displayLayerIds"
-              i18n-title title="Hide full names for participant/transcript attributes">
-              <lib-grouped-checkbox
-                name="hideAttributePrefixes"
-                [checked]="!displayAttributePrefixes"
+              i18n-title title="Show full names for attributes">
+              <input
+                type="checkbox"
+                [checked]="displayAttributePrefixes"
                 [disabled]="!displayLayerIds"
-                (change)="toggleAttributePrefixes()"
-                ></lib-grouped-checkbox>
-              <span i18n>Hide attribute prefixes</span></label>
+                (change)="toggleAttributePrefixes()">
+              <span i18n> Show attribute prefixes</span></label>
           </div>
           <lib-link *ngIf="user && user.roles.includes('edit')"
                     class="buttons"
