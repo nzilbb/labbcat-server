@@ -255,12 +255,12 @@
           </div>
           <div class="item">
             <label i18n-title title="Exclude simultaneous speech">
-              <input type="checkbox"[(ngModel)]="excludeSimultaneousSpeech">
-              <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
+              <input type="checkbox" [(ngModel)]="excludeSimultaneousSpeech">
+              <span i18n="... [n]% overlap">Exclude utterances with more than </span></label>    
             <label i18n-title title="Define what counts as simultaneous speech">
               <input name="overlap_threshold" id="overlap_threshold"
-                     class="numeric" style="width: 35px;" type="number"
-                     value="5"
+                     class="numeric" type="number"
+                     [(ngModel)]="overlapThreshold"
                      [disabled]="!excludeSimultaneousSpeech">
               <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
           </div>
