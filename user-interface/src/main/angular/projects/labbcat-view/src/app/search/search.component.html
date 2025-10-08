@@ -269,8 +269,8 @@
           <span class="list-label" i18n>Display option</span>
           <div class="item">
             <label i18n-title title="Do not open a list of matches when search is complete">
-              <input type="checkbox" [(ngModel)]="suppressResults" id="suppressResults" >
-              <span i18n>No matches, only a summary of results</span></label>
+              <input type="checkbox" [(ngModel)]="!suppressResults" id="suppressResults" >
+              <span i18n>No matches, only a count of results.</span></label>
           </div>
         </div>
       </div>
