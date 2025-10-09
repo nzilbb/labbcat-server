@@ -372,10 +372,10 @@ public class TestOneQuerySearch {
       +" ON token_3.turn_annotation_id = token_0.turn_annotation_id"
       +" AND token_3.ordinal_in_turn = token_2.ordinal_in_turn + 1"
       +" WHERE token_0.label REGEXP ?"
-      +" AND CAST(token_1.label AS DECIMAL) >= ?"
-      +" AND CAST(token_2.label AS DECIMAL) < ?"
-      +" AND CAST(token_3.label AS DECIMAL) >= ?"
-      +" AND CAST(token_3.label AS DECIMAL) < ?"
+      +" AND CAST(token_1.label AS DECIMAL(20,10)) >= ?"
+      +" AND CAST(token_2.label AS DECIMAL(20,10)) < ?"
+      +" AND CAST(token_3.label AS DECIMAL(20,10)) >= ?"
+      +" AND CAST(token_3.label AS DECIMAL(20,10)) < ?"
       +" ORDER BY token_0.turn_annotation_id, token_0.ordinal_in_turn",
       sql);
     assertEquals("numeric comparisons - number of parameters" + parameters, 5, parameters.size());
@@ -462,8 +462,8 @@ public class TestOneQuerySearch {
       +" CONCAT('e_',30,'_', token.annotation_id) AS target_annotation_uid"
       +" FROM annotation_layer_30 token"
       +" INNER JOIN anchor start ON token.start_anchor_id = start.anchor_id"
-      +" WHERE CAST(token.label AS DECIMAL) >= ?"
-      +" AND CAST(token.label AS DECIMAL) < ?"
+      +" WHERE CAST(token.label AS DECIMAL(20,10)) >= ?"
+      +" AND CAST(token.label AS DECIMAL(20,10)) < ?"
       +" ORDER BY token.ag_id, start.offset",
       sql);
     assertEquals("number of parameters" + parameters, 2, parameters.size());
@@ -787,7 +787,7 @@ public class TestOneQuerySearch {
       +" /* extra joins */"
       +"  INNER JOIN annotation_layer_186 search_0_186"
       +"  ON search_0_186.turn_annotation_id = turn.annotation_id"
-      +"  AND CAST(search_0_186.label AS DECIMAL) >= ?"
+      +"  AND CAST(search_0_186.label AS DECIMAL(20,10)) >= ?"
       +" /* subsequent columns */"
       +"  WHERE 1=1"
       +" /* transcripts */"
@@ -833,7 +833,7 @@ public class TestOneQuerySearch {
       +" /* extra joins */"
       +"  INNER JOIN annotation_layer_186 search_0_186"
       +"  ON search_0_186.turn_annotation_id = turn.annotation_id"
-      +"  AND CAST(search_0_186.label AS DECIMAL) < ?"
+      +"  AND CAST(search_0_186.label AS DECIMAL(20,10)) < ?"
       +" /* subsequent columns */"
       +"  WHERE 1=1"
       +" /* transcripts */"
@@ -880,8 +880,8 @@ public class TestOneQuerySearch {
       +" /* extra joins */"
       +"  INNER JOIN annotation_layer_186 search_0_186"
       +"  ON search_0_186.turn_annotation_id = turn.annotation_id"
-      +"  AND CAST(search_0_186.label AS DECIMAL) >= ?"
-      +"  AND CAST(search_0_186.label AS DECIMAL) < ?"
+      +"  AND CAST(search_0_186.label AS DECIMAL(20,10)) >= ?"
+      +"  AND CAST(search_0_186.label AS DECIMAL(20,10)) < ?"
       +" /* subsequent columns */"
       +"  WHERE 1=1"
       +" /* transcripts */"

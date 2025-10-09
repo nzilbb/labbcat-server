@@ -1549,12 +1549,12 @@ public class OneQuerySearch extends SearchTask {
         parameters.add(match.getPattern());
       } else { // numeric
         if (match.getMin() != null) {
-          q.append("CAST(token_"+c+".label AS DECIMAL) >= ?");
+          q.append("CAST(token_"+c+".label AS DECIMAL(20,10)) >= ?");
           parameters.add(Double.valueOf(match.getMin()));
         }
         if (match.getMax() != null) {
           if (match.getMin() != null) q.append(" AND ");
-          q.append("CAST(token_"+c+".label AS DECIMAL) < ?");
+          q.append("CAST(token_"+c+".label AS DECIMAL(20,10)) < ?");
           parameters.add(Double.valueOf(match.getMax()));
         } else if (match.getMin() == null) { // no condition set at all
           throw new Exception("No orthography condition for column "+c); // TODO i18n
@@ -1640,12 +1640,12 @@ public class OneQuerySearch extends SearchTask {
         parameters.add(layerMatch.getPattern());
     } else { // numeric
       if (layerMatch.getMin() != null) {
-        q.append("CAST(token.label AS DECIMAL) >= ?");
+        q.append("CAST(token.label AS DECIMAL(20,10)) >= ?");
         parameters.add(layerMatch.getMin());
       }
       if (layerMatch.getMax() != null) {
         if (layerMatch.getMin() != null) q.append(" AND ");
-        q.append("CAST(token.label AS DECIMAL) < ?");
+        q.append("CAST(token.label AS DECIMAL(20,10)) < ?");
         parameters.add(layerMatch.getMax());
       } else if (layerMatch.getMin() == null) { // no condition set at all
         throw new Exception(
@@ -2857,7 +2857,7 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat START_ANCHORED_NUMERIC_MAX_JOIN = new MessageFormat(
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + " ON search{6}_{0}.start_anchor_id = word{6}.start_anchor_id"
-    + " AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
+    + " AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Query for matching end-anchor-sharing layer by numerical maximum - uses <code>DECIMAL</code>
@@ -2874,7 +2874,7 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat END_ANCHORED_NUMERIC_MAX_JOIN = new MessageFormat(
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + " ON search{6}_{0}.end_anchor_id = word{6}.end_anchor_id"
-    + " AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
+    + " AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Join for matching containing meta-layer by numerical maximum - uses <code>DECIMAL</code>
@@ -2899,7 +2899,7 @@ public class OneQuerySearch extends SearchTask {
     // meta bounds enclose word start time...
     + "  AND meta_start_{0}.offset < word_end.offset"
     + "  AND meta_end_{0}.offset > word_start.offset"
-    + "  AND CAST(search_{0}.label AS DECIMAL) < ? {4}");
+    + "  AND CAST(search_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Join for matching containing freeform-layer by numerical maximum - uses <code>DECIMAL</code>
@@ -2922,7 +2922,7 @@ public class OneQuerySearch extends SearchTask {
     // meta bounds enclose word start time...
     + "  AND meta_start_{0}.offset < word_end.offset"
     + "  AND meta_end_{0}.offset > word_start.offset"
-    + "  AND CAST(search_{0}.label AS DECIMAL) < ? {4}");
+    + "  AND CAST(search_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Join for matching containing meta-layer by numerical maximum - uses <code>DECIMAL</code>
@@ -2946,7 +2946,7 @@ public class OneQuerySearch extends SearchTask {
     // word bounds enclose word start time...
     + "  AND word{6}_start_{0}.offset <= segment{6}_start.offset"
     + "  AND word{6}_end_{0}.offset > segment{6}_start.offset"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Query for numerical maximum - uses <code>DECIMAL</code>
@@ -2959,7 +2959,7 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat NUMERIC_MAX_JOIN = new MessageFormat(
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + "  ON search{6}_{0}.word_annotation_id = word{6}.word_annotation_id"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) < ?");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ?");
   
   /**
    * Query for matching start-anchor-sharing layer by numerical minimum
@@ -2977,7 +2977,7 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat START_ANCHORED_NUMERIC_MIN_JOIN = new MessageFormat(
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + " ON search{6}_{0}.start_anchor_id = word{6}.start_anchor_id"
-    + " AND CAST(search{6}_{0}.label AS DECIMAL) >= ? {4}");
+    + " AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ? {4}");
   
   /**
    * Query for matching end-anchor-sharing layer by numerical minimum - uses <code>DECIMAL</code> 
@@ -2994,7 +2994,7 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat END_ANCHORED_NUMERIC_MIN_JOIN = new MessageFormat(
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + " ON search{6}_{0}.end_anchor_id = word{6}.end_anchor_id"
-    + " AND CAST(search{6}_{0}.label AS DECIMAL) >= ? {4}");
+    + " AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ? {4}");
   
   /**
    * Join for matching containing meta-layer by numerical minimum - uses <code>DECIMAL</code>
@@ -3020,7 +3020,7 @@ public class OneQuerySearch extends SearchTask {
     // meta bounds enclose word start time...
     + "  AND meta{6}_start_{0}.offset < word{6}_end.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ? {4}");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ? {4}");
   /**
    * Join for matching containing freeform-layer by numerical minimum - uses <code>DECIMAL</code>
    * <p> Arguments are:
@@ -3043,7 +3043,7 @@ public class OneQuerySearch extends SearchTask {
     // meta bounds enclose word start time...
     + "  AND meta{6}_start_{0}.offset < word{6}_end.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ? {4}");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ? {4}");
   
   /**
    * Join for matching containing meta-layer by numerical minimum - uses <code>DECIMAL</code>
@@ -3067,7 +3067,7 @@ public class OneQuerySearch extends SearchTask {
     // word bounds enclose word start time...
     + "  AND word{6}_start_{0}.offset <= segment{6}_start.offset"
     + "  AND word{6}_end_{0}.offset > segment{6}_start.offset"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ? {4}");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ? {4}");
   
   /**
    * Query for numerical minimum - uses <code>DECIMAL</code>
@@ -3080,7 +3080,7 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat NUMERIC_MIN_JOIN  = new MessageFormat(    
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + "  ON search{6}_{0}.word_annotation_id = word{6}.word_annotation_id"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ?");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ?");
   
   /**
    * Query for matching start-anchor-sharing layer by numerical range - uses <code>DECIMAL</code>
@@ -3097,8 +3097,8 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat START_ANCHORED_NUMERIC_RANGE_JOIN  = new MessageFormat(
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + " ON search{6}_{0}.start_anchor_id = word{6}.start_anchor_id"
-    + " AND CAST(search{6}_{0}.label AS DECIMAL) >= ?"
-    + " AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
+    + " AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ?"
+    + " AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Query for matching end-anchor-sharing layer by numerical range - uses <code>DECIMAL</code>
@@ -3115,8 +3115,8 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat END_ANCHORED_NUMERIC_RANGE_JOIN  = new MessageFormat(
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + " ON search{6}_{0}.end_anchor_id = word{6}.end_anchor_id"
-    + " AND CAST(search{6}_{0}.label AS DECIMAL) >= ?"
-    + " AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
+    + " AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ?"
+    + " AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Join for matching containing meta-layer by numerical range - uses <code>DECIMAL</code>
@@ -3138,8 +3138,8 @@ public class OneQuerySearch extends SearchTask {
     // meta bounds enclose word start time...
     + "  AND meta{6}_start_{0}.offset < word{6}_end.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ?"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ?"
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Join for matching containing freeform-layer by numerical range - uses <code>DECIMAL</code>
@@ -3159,8 +3159,8 @@ public class OneQuerySearch extends SearchTask {
     // meta bounds enclose word start time...
     + "  AND meta{6}_start_{0}.offset <= word{6}_start.offset"
     + "  AND meta{6}_end_{0}.offset > word{6}_start.offset"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ?"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ?"
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Join for matching containing meta-layer by numerical range - uses <code>DECIMAL</code>
@@ -3180,8 +3180,8 @@ public class OneQuerySearch extends SearchTask {
     // word bounds enclose segment start time...
     + "  AND word{6}_start_{0}.offset <= segment{6}_start.offset"
     + "  AND word{6}_end_{0}.offset > segment{6}_start.offset"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ?"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) < ? {4}");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ?"
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ? {4}");
   
   /**
    * Query for numerical range - uses <code>DECIMAL</code>
@@ -3194,8 +3194,8 @@ public class OneQuerySearch extends SearchTask {
   static final MessageFormat NUMERIC_RANGE_JOIN = new MessageFormat(    
     " INNER JOIN annotation_layer_{0} search{6}_{0}" 
     + "  ON search{6}_{0}.word_annotation_id = word{6}.word_annotation_id"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) >= ?"
-    + "  AND CAST(search{6}_{0}.label AS DECIMAL) < ?");
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) >= ?"
+    + "  AND CAST(search{6}_{0}.label AS DECIMAL(20,10)) < ?");
   
   /**
    * Query for matching a trailing (following the word) meta-layer label
