@@ -3411,7 +3411,9 @@ public class SqlGraphStore implements GraphStore {
           if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
             sql = sql.replace(
               "SELECT DISTINCT annotation.*",
-              "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+              "SELECT GROUP_CONCAT(annotation.label"
+              +" ORDER BY annotation.ordinal, annotation.annotation_id"
+              +" SEPARATOR ' ') AS label,"
               +" MIN(annotation.label_status) AS label_status,"
               +" NULL AS annotated_by, NULL AS annotated_when,"
               +" -1 AS annotation_id,"
@@ -3462,7 +3464,9 @@ public class SqlGraphStore implements GraphStore {
               if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
                 sql = sql.replace(
                   "SELECT DISTINCT annotation.*",
-                  "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+                  "SELECT GROUP_CONCAT(annotation.label"
+                  +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                  +" SEPARATOR ' ') AS label,"
                   +" MIN(annotation.label_status) AS label_status,"
                   +" NULL AS annotated_by, NULL AS annotated_when,"
                   +" -1 AS annotation_id,"
@@ -3499,7 +3503,9 @@ public class SqlGraphStore implements GraphStore {
               if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
                 sql = sql.replace(
                   "SELECT DISTINCT annotation.*",
-                  "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+                  "SELECT GROUP_CONCAT(annotation.label"
+                  +" ORDER BY annotation.ordinal DESC, annotation.annotation_id"
+                  +" SEPARATOR ' ') AS label,"
                   +" MIN(annotation.label_status) AS label_status,"
                   +" NULL AS annotated_by, NULL AS annotated_when,"
                   +" -1 AS annotation_id,"
@@ -3596,7 +3602,11 @@ public class SqlGraphStore implements GraphStore {
           if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
             sql = sql.replace(
               "SELECT DISTINCT annotation.*",
-              "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+              "SELECT GROUP_CONCAT(annotation.label"
+              +" ORDER BY annotation_start.offset," // earliest first
+              +" annotation_end.offset - annotation_start.offset," // then shortest first
+              +" annotation.annotation_id"
+              +" SEPARATOR ' ') AS label,"
               +" MIN(annotation.label_status) AS label_status,"
               +" NULL AS annotated_by, NULL AS annotated_when,"
               +" -1 AS annotation_id,"
@@ -3688,7 +3698,9 @@ public class SqlGraphStore implements GraphStore {
             if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
               sql = sql.replace(
                 "SELECT DISTINCT annotation.*",
-                "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+                "SELECT GROUP_CONCAT(annotation.label"
+                +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                +" SEPARATOR ' ') AS label,"
                 +" MIN(annotation.label_status) AS label_status,"
                 +" NULL AS annotated_by, NULL AS annotated_when,"
                 +" -1 AS annotation_id,"
@@ -3759,9 +3771,12 @@ public class SqlGraphStore implements GraphStore {
                 +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
             } // offset word
             if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
+              System.out.println(sql);
               sql = sql.replace(
                 "SELECT DISTINCT annotation.*",
-                "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+                "SELECT GROUP_CONCAT(annotation.label"
+                +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                +" SEPARATOR ' ') AS label,"
                 +" MIN(annotation.label_status) AS label_status,"
                 +" NULL AS annotated_by, NULL AS annotated_when,"
                 +" -1 AS annotation_id,"
@@ -3776,6 +3791,7 @@ public class SqlGraphStore implements GraphStore {
                 +" -1 AS start_anchor_id,"
                 +" -1 AS end_anchor_id"
                 ).replace(" LIMIT 0, 0","");
+              System.out.println(sql);
            }
             Object[] groups = { layer.getId(), target_annotation_id_group };
             queries.put(layerId, getConnection().prepareStatement(sql));
@@ -3805,7 +3821,9 @@ public class SqlGraphStore implements GraphStore {
             if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
               sql = sql.replace(
                 "SELECT DISTINCT annotation.*",
-                "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+                "SELECT GROUP_CONCAT(annotation.label"
+                +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                +" SEPARATOR ' ') AS label,"
                 +" MIN(annotation.label_status) AS label_status,"
                 +" NULL AS annotated_by, NULL AS annotated_when,"
                 +" -1 AS annotation_id,"
@@ -3845,7 +3863,9 @@ public class SqlGraphStore implements GraphStore {
             if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
               sql = sql.replace(
                 "SELECT DISTINCT annotation.*",
-                "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+                "SELECT GROUP_CONCAT(annotation.label"
+                +" ORDER BY start.offset, annotation.annotation_id"
+                +" SEPARATOR ' ') AS label,"
                 +" MIN(annotation.label_status) AS label_status,"
                 +" NULL AS annotated_by, NULL AS annotated_when,"
                 +" -1 AS annotation_id,"
@@ -4323,7 +4343,11 @@ public class SqlGraphStore implements GraphStore {
             if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
               sql = sql.replace(
                 "SELECT DISTINCT annotation.*",
-                "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+                "SELECT GROUP_CONCAT(annotation.label"
+                +" ORDER BY annotation_start.offset," // earliest first
+                +" annotation_end.offset - annotation_start.offset," // then shortest first
+                +" annotation.annotation_id"
+                +" SEPARATOR ' ') AS label,"
                 +" MIN(annotation.label_status) AS label_status,"
                 +" NULL AS annotated_by, NULL AS annotated_when,"
                 +" -1 AS annotation_id,"
@@ -4425,7 +4449,11 @@ public class SqlGraphStore implements GraphStore {
           if (sql.endsWith(" LIMIT 0, 0")) { // no annotations per layer means *all*
             sql = sql.replace(
               "SELECT DISTINCT annotation.*",
-              "SELECT GROUP_CONCAT(annotation.label SEPARATOR ' ') AS label,"
+              "SELECT GROUP_CONCAT(annotation.label"
+              +" ORDER BY annotation_start.offset," // earliest first
+              +" annotation_end.offset - annotation_start.offset," // then shortest first
+              +" annotation.annotation_id"
+              +" SEPARATOR ' ') AS label,"
               +" MIN(annotation.label_status) AS label_status,"
               +" NULL AS annotated_by, NULL AS annotated_when,"
               +" -1 AS annotation_id,"
