@@ -51,7 +51,7 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
     readCategories(): Promise<void> {
         this.categories = {};
         return new Promise((resolve, reject) => {
-            this.labbcatService.labbcat.readCategories(
+            this.labbcatService.labbcat.readOnlyCategories(
                 "transcript", (categories, errors, messages) => {
                     this.categoryLabels = [];
                     for (let category of categories) {

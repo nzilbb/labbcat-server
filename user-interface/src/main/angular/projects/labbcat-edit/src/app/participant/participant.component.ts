@@ -52,7 +52,7 @@ export class ParticipantComponent extends EditComponent implements OnInit {
     readCategories(): Promise<void> {
         this.categories = {};
         return new Promise((resolve, reject) => {
-            this.labbcatService.labbcat.readCategories(
+            this.labbcatService.labbcat.readOnlyCategories(
                 "participant", (categories, errors, messages) => {
                     for (let category of categories) {
                         this.categories["participant_"+category.category] = category;
