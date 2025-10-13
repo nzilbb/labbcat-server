@@ -7,7 +7,21 @@
   <details *ngIf="!headers">
     <summary i18n>What should the file look like?</summary>
     <div class="advanced">
-      <span i18n>Comma-separated values (.csv) file exported from results of a search, with one column that unambiguously identifies the matched token (ideally the original MatchId column, but the token URL can also be used).</span>
+      <span i18n>Comma-separated values (.csv) file exported from results of a search, with</span>
+      <ul>
+        <li i18n>One row per token you want to measure (word, segment, etc.)</li>
+        <li><span i18n="Columns">Columns</span>
+          <ul>
+            <li><span i18n="Unique identifier column">Unique identifier</span>
+              <ul>
+                <li i18n>Ideally the original MatchId column</li>
+                <li i18n>The token URL can also be used as a fallback</li>
+              </ul>
+            </li>
+            <li i18n>(All other columns will be included in the output)</li>
+          </ul>
+        </li>
+      </ul>
     </div>
   </details>
 </div>
