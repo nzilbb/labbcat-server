@@ -32,6 +32,7 @@ export class LoginComponent implements OnInit {
             })
             .catch((errors)=>{
                 errors.forEach(m => this.messageService.error(m));
+                this.error = true;
             });
     }
 }
