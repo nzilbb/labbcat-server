@@ -297,13 +297,15 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           if (filter == null || filter.length == 0) { // not filtering by turn etc.
             for (int f = 0; f < id.length; f++) {
               vUtterances.add(
-                id[f]+";"+start[f]+"-"+end[f]
+                id[f].replace(";","%3B") // if there are ';' in the name, encode them
+                +";"+start[f]+"-"+end[f]
                 +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
             }
           } else { // filtering by turn etc.
             for (int f = 0; f < id.length; f++) {
               vUtterances.add(
-                id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                id[f].replace(";","%3B") // if there are ';' in the name, encode them
+                +";"+start[f]+"-"+end[f]+";"+filter[f]
                 +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
             }
           }
@@ -345,13 +347,13 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           if (filter == null || filter.length == 0) { // not filtering by turn etc.
             for (int f = 0; f < id.length; f++) {
               vUtterances.add(
-                id[f]+";"+start[f]+"-"+end[f]
+                id[f].replace(";","%3B")+";"+start[f]+"-"+end[f]
                 +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
             }
           } else { // filtering by turn etc.
             for (int f = 0; f < id.length; f++) {
               vUtterances.add(
-                id[f]+";"+start[f]+"-"+end[f]+";"+filter[f]
+                id[f].replace(";","%3B")+";"+start[f]+"-"+end[f]+";"+filter[f]
                 +(prefixNames?";prefix="+resultNumberFormatter.format(f+1)+"-":""));
             }
           }
