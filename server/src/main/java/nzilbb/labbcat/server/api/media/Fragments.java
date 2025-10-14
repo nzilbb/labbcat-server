@@ -187,11 +187,12 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       } catch(IOException exception) {}
       return;
     }
+    String[] prefix = parameters.getStrings("prefix");
 
-    final boolean prefixNames = parameters.getString("prefix") != null;
+    final boolean prefixNames = prefix.length > 0;
     NumberFormat resultNumberFormatter = NumberFormat.getInstance();
     resultNumberFormatter.setGroupingUsed(false);
-    if (id != null) {
+    if (id.length > 0) {
       resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
     } // TODO minimum integer digits for utterance/threadId cases
     
@@ -266,7 +267,15 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           result.setTranscriptId(id[f]);
           try { result.setStartOffset(Double.valueOf(start[f])); } catch (Exception x) {}
           try { result.setEndOffset(Double.valueOf(end[f])); } catch (Exception x) {}
-          result.setPrefix(prefixNames?resultNumberFormatter.format(f+1)+"-":"");
+          if (!prefixNames) {
+            result.setPrefix("");
+          } else {
+            if (prefix.length > f) {
+              result.setPrefix(prefix[f]);
+            } else {
+              result.setPrefix(resultNumberFormatter.format(f+1)+"-");
+            }
+          }
           fragments.add(result);
         } // next ID
       }
