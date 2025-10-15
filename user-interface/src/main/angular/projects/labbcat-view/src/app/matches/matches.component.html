@@ -110,24 +110,24 @@
   </div>
   <div id="csv-export-options" class="{{showCsvOptions?'unhidden-panel':'hidden-panel'}}">
     <div id="csv-export-params">
-    <div *ngIf="task.csv"
-         i18n-title title="Whether to extract annotations about the matched token, or surrounding tokens"><label>
-      <span i18n="targetOffset label">Extract data for:</span>
-      <select id="targetOffset" name="targetOffset" [(ngModel)]="targetOffset">
-        <option value="-1" i18n="targetOffset option">previous token on targeted layer</option>
-        <option value="0" i18n="targetOffset option">matched token</option>
-        <option value="1" i18n="targetOffset option">next token on targeted layer</option>
-      </select>
-    </label></div>
-    <div i18n-title title="Which start/end times to include"><label>
-      <span i18n="offsetThreshold label">Include annotation start/end times:</span>
-      <select id="offsetThreshold" name="offsetThreshold" [(ngModel)]="offsetThreshold">
-        <option value="none" i18n="offsetThreshold option">(never)</option>
-        <option value="100" i18n="offsetThreshold option">only if manually aligned</option>
-        <option value="50" i18n="offsetThreshold option">if manually or automatically aligned</option>
-        <option value="0" i18n="offsetThreshold option">(always) if manually, automatically, or default aligned</option>
-      </select>
-    </label></div>
+      <div *ngIf="task.csv"
+           i18n-title title="Whether to extract annotations about the matched token, or surrounding tokens"><label>
+        <span i18n="targetOffset label">Extract data for:</span>
+        <select id="targetOffset" name="targetOffset" [(ngModel)]="targetOffset">
+          <option value="-1" i18n="targetOffset option">previous token on targeted layer</option>
+          <option value="0" i18n="targetOffset option">matched token</option>
+          <option value="1" i18n="targetOffset option">next token on targeted layer</option>
+        </select>
+      </label></div>
+      <div i18n-title title="Which start/end times to include"><label>
+        <span i18n="offsetThreshold label">Include annotation start/end times:</span>
+        <select id="offsetThreshold" name="offsetThreshold" [(ngModel)]="offsetThreshold">
+          <option value="none" i18n="offsetThreshold option">(never)</option>
+          <option value="100" i18n="offsetThreshold option">only if manually aligned</option>
+          <option value="50" i18n="offsetThreshold option">if manually or automatically aligned</option>
+          <option value="0" i18n="offsetThreshold option">(always) if manually, automatically, or default aligned</option>
+        </select>
+      </label></div>
     </div>
     <fieldset>
       <legend i18n>CSV columns</legend>
@@ -308,19 +308,19 @@
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
     </label></div>
     <div *ngIf="task.csvColumns" id="audio-columns">
-    <div class="header">Columns</div>
-    <div i18n-title title="Column identifying the start time of the fragment"><label>
-        <span i18n>Excerpt start time</span>
-        <select name="startOffsetColumn" [(ngModel)]="startOffsetColumn">
-          <option *ngFor="let column of task.csvColumns">{{column}}</option>
-        </select>
-    </label></div>
-    <div i18n-title title="Column identifying the end time of the fragment"><label>
-        <span i18n>Excerpt end time</span>
-        <select name="endOffsetColumn" [(ngModel)]="endOffsetColumn">
-          <option *ngFor="let column of task.csvColumns">{{column}}</option>
-        </select>
-    </label></div>
+      <div class="header">Columns</div>
+      <div i18n-title title="Column identifying the start time of the fragment"><label>
+          <span i18n>Excerpt start time</span>
+          <select name="startOffsetColumn" [(ngModel)]="startOffsetColumn">
+            <option *ngFor="let column of task.csvColumns">{{column}}</option>
+          </select>
+      </label></div>
+      <div i18n-title title="Column identifying the end time of the fragment"><label>
+          <span i18n>Excerpt end time</span>
+          <select name="endOffsetColumn" [(ngModel)]="endOffsetColumn">
+            <option *ngFor="let column of task.csvColumns">{{column}}</option>
+          </select>
+      </label></div>
     </div>
   </div>
   <div id="dictionary" class="controls">
