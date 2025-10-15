@@ -89,7 +89,7 @@
             <lib-button
               *ngIf="!nextPage && !transcriptQuery"
               (press)="transcripts()"
-              [disabled]="!participantIds || participantIds.length == 0 || ((filterValues['--transcript-count'][0] || filterValues['--transcript-count'][1]) && selectedIds.length == 0)"
+              [disabled]="!participantIds || participantIds.length == 0 || ((filterValues['episode'] || filterValues['--transcript-count'][0] || filterValues['--transcript-count'][1]) && selectedIds.length == 0)"
               img="document.svg" icon="📄"
               i18n-label label="List Transcripts"
               i18n-title title="List transcripts including these participants"
