@@ -252,32 +252,6 @@
                             selected="{{emuLayers}}"></lib-layer-checkboxes>
     </fieldset>
   </div>
-  <div id="dictionary" class="controls">
-    <lib-button (press)="dictionary();"
-                [disabled]="task.csv"                
-                img="book.svg" icon="📕"
-                i18n-label label="Dictionary Export"></lib-button>
-    <lib-button (press)="dictionaryOptions();"
-                [disabled]="task.csv"                
-                img="down-triangle.png"
-                [icon]="showDictionaryOptions ? '▲' : '▼'"
-                [imgStyle]="showDictionaryOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
-                i18n-title title="Dictionary options"
-                ></lib-button>
-  </div>
-  <div id="dictionary-options" class="{{showDictionaryOptions?'unhidden-panel':'hidden-panel'}}">
-    <label>
-      <span i18n="layer for dictionary entries">Layer for entries</span>
-      <select name="definitionLayerId"
-              i18n-title title="Layer for definitions of dictionary entries">
-        <option *ngFor="let layer of wordLayers"
-                value="{{layer.id}}">
-          <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
-          <ng-container *ngIf="layer.id == 'orthography'" i18n>[word list only]</ng-container>
-        </option>
-      </select>
-    </label>
-  </div>
   <div id="serialize" class="controls">
     <lib-button (press)="serialize();"
                 img="{{serializeImg}}" icon="📦"
@@ -345,6 +319,32 @@
           <option *ngFor="let column of task.csvColumns">{{column}}</option>
         </select>
     </label></div>
+  </div>
+  <div id="dictionary" class="controls">
+    <lib-button (press)="dictionary();"
+                [disabled]="task.csv"                
+                img="book.svg" icon="📕"
+                i18n-label label="Dictionary Export"></lib-button>
+    <lib-button (press)="dictionaryOptions();"
+                [disabled]="task.csv"                
+                img="down-triangle.png"
+                [icon]="showDictionaryOptions ? '▲' : '▼'"
+                [imgStyle]="showDictionaryOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
+                i18n-title title="Dictionary options"
+                ></lib-button>
+  </div>
+  <div id="dictionary-options" class="{{showDictionaryOptions?'unhidden-panel':'hidden-panel'}}">
+    <label>
+      <span i18n="layer for dictionary entries">Layer for entries</span>
+      <select name="definitionLayerId"
+              i18n-title title="Layer for definitions of dictionary entries">
+        <option *ngFor="let layer of wordLayers"
+                value="{{layer.id}}">
+          <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
+          <ng-container *ngIf="layer.id == 'orthography'" i18n>[word list only]</ng-container>
+        </option>
+      </select>
+    </label>
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && generableLayers.length">
     <input #generate_layer type="hidden" name="generate_layer" value="">
