@@ -109,6 +109,7 @@
                 ></lib-button>
   </div>
   <div id="csv-export-options" class="{{showCsvOptions?'unhidden-panel':'hidden-panel'}}">
+    <div id="csv-export-params">
     <div *ngIf="task.csv"
          i18n-title title="Whether to extract annotations about the matched token, or surrounding tokens"><label>
       <span i18n="targetOffset label">Extract data for:</span>
@@ -127,6 +128,7 @@
         <option value="0" i18n="offsetThreshold option">(always) if manually, automatically, or default aligned</option>
       </select>
     </label></div>
+    </div>
     <fieldset>
       <legend i18n>CSV columns</legend>
       <div class="csv-checkboxes">
@@ -305,20 +307,21 @@
         <span i18n>Prefix names</span>
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
     </label></div>
-    <div *ngIf="task.csvColumns"
-         i18n-title title="Column identifying the start time of the fragment"><label>
+    <div *ngIf="task.csvColumns" id="audio-columns">
+    <div class="header">Columns</div>
+    <div i18n-title title="Column identifying the start time of the fragment"><label>
         <span i18n>Excerpt start time</span>
         <select name="startOffsetColumn" [(ngModel)]="startOffsetColumn">
           <option *ngFor="let column of task.csvColumns">{{column}}</option>
         </select>
     </label></div>
-    <div *ngIf="task.csvColumns"
-         i18n-title title="Column identifying the end time of the fragment"><label>
+    <div i18n-title title="Column identifying the end time of the fragment"><label>
         <span i18n>Excerpt end time</span>
         <select name="endOffsetColumn" [(ngModel)]="endOffsetColumn">
           <option *ngFor="let column of task.csvColumns">{{column}}</option>
         </select>
     </label></div>
+    </div>
   </div>
   <div id="dictionary" class="controls">
     <lib-button (press)="dictionary();"
