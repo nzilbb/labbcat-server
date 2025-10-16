@@ -1086,6 +1086,10 @@ export class TranscriptComponent implements OnInit {
     isSegmentLayer(layer : Layer) : boolean {
         return layer.parentId == "segment" || layer.id == "segment";
     }
+    /** Test whether the layer allows vertical peers */
+    allowsVerticalPeers(layer : Layer) : boolean {
+        return layer.peersOverlap;
+    }
 
     /** Highlight the annotation with the given ID */
     highlitId: string;
