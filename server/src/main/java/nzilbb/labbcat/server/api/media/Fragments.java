@@ -282,7 +282,10 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         
       if (fragments.size() > 1) { // multiple files
         contentType.accept("application/zip");
-        fileName.accept(name + ".zip");                
+        fileName.accept(
+          // Windows doesn't like folder names ending in dot (and .zip will be expanded)
+          name.replaceAll("\\.$","")
+          + ".zip");                
         // create a stream to pump from
         PipedInputStream inStream = new PipedInputStream();
         final PipedOutputStream outStream = new PipedOutputStream(inStream);

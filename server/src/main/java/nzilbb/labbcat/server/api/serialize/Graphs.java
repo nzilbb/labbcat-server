@@ -276,7 +276,10 @@ public class Graphs extends APIRequestHandler { // TODO unit test
                   
                   // send headers
                   contentType.accept("application/zip");
-                  fileName.accept(finalName + ".zip");
+                  fileName.accept(
+                    // Windows doesn't like folder names ending in dot (and .zip will be expanded)
+                    finalName.replaceAll("\\.$","")
+                    + ".zip");
                   final ZipOutputStream zipOut = new ZipOutputStream(outStream);
                   try {
                     

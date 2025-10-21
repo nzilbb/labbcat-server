@@ -447,7 +447,10 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           IO.Pump(stream.getStream(), out);
         } else { /// multiple files
           contentType.accept("application/zip");
-          fileName.accept(name + ".zip");
+          fileName.accept(
+            // Windows doesn't like folder names ending in dot
+            name.replaceAll("\\.$","")
+            + ".zip");
           
           // create a stream to pump from
           PipedInputStream inStream = new PipedInputStream();
