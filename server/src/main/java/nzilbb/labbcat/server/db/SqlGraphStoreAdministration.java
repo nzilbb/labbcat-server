@@ -662,7 +662,6 @@ public class SqlGraphStoreAdministration
           sql.setString(2, category);
           String subtype = Optional.ofNullable((String)layer.get("subtype"))
             .orElse((String)oldVersion.get("subtype"));
-          subtype = subtype.equals("select")?"select":"string";
           if (Constants.TYPE_NUMBER.equals(layer.getType())) {
             subtype = "number";  // TODO handle type = number/integer
           } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
@@ -892,7 +891,6 @@ public class SqlGraphStoreAdministration
             category = category.replaceAll("^transcript_","");
           }
           sql.setString(2, category);
-          subtype = subtype.equals("select")?"select":"string";
           if (Constants.TYPE_NUMBER.equals(layer.getType())) {
             subtype = "number";  // TODO handle type = number/integer
           } else if (Constants.TYPE_BOOLEAN.equals(layer.getType())) {
