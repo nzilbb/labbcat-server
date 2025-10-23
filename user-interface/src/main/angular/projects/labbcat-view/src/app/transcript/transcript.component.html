@@ -702,7 +702,7 @@
                              [(ngModel)]="annotation.label"
                              (keyup)="annotation._changed = true"
                              (keyup.Enter)="saveTag(annotation)"
-                             [appAutofocus]="true">
+                             appAutofocus="select">
                       <lib-small-button *ngIf="annotation._editing"
                                         i18n-title title="Save changes to tag"
                                         class="save"
