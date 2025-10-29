@@ -131,7 +131,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
     // check parameters
     String name = parameters.getString("name");
     if (name == null || name.trim().length() == 0) name = "transcripts";
-    name = IO.SafeFileNameUrl(name.trim());
+    name = name.trim();
       
     String mimeType = parameters.getString("mimeType");
     if (mimeType == null) {
@@ -248,7 +248,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
                       if (bCancelling) return;
                       try {
                         setStatus(stream.getName());
-                        fileName.accept(stream.getName());
+                        fileName.accept(IO.SafeFileNameUrl(stream.getName()));
                         IO.Pump(stream.getStream(), outStream);
                         outStream.flush();
                         outStream.close();
@@ -276,10 +276,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
                   
                   // send headers
                   contentType.accept("application/zip");
-                  fileName.accept(
-                    // Windows doesn't like folder names ending in dot (and .zip will be expanded)
-                    finalName.replaceAll("\\.$","")
-                    + ".zip");
+                  fileName.accept(IO.SafeFileNameUrl(finalName + ".zip"));
                   final ZipOutputStream zipOut = new ZipOutputStream(outStream);
                   try {
                     
