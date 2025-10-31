@@ -8694,7 +8694,7 @@ public class SqlGraphStore implements GraphStore {
    * @param id The transcript ID.
    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @param mimeType The MIME type of the media, which may include parameters for type
-   * conversion, e.g. "audio/wav; samplerate=16000".
+   * conversion, e.g. "audio/wav; samplerate=16000" or "audio/wav; channel=0".
    * @return A URL to the given media for the given transcript, or null if the given media
    * doesn't exist.
    * @throws StoreException If an error occurs.
@@ -8710,9 +8710,9 @@ public class SqlGraphStore implements GraphStore {
    * @param id The transcript ID.
    * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @param mimeType The MIME type of the media, which may include parameters for type
-   * conversion, e.g. "audio/wav; samplerate=16000"
-   * @param startOffset The start offset of the media sample, or null for the start of the whole
-   * recording. 
+   * conversion, e.g. "audio/wav; samplerate=16000" or "audio/wav; channel=0".
+   * @param startOffset The start offset of the media sample, or null for the start of the
+   * whole recording. 
    * @param endOffset The end offset of the media sample, or null for the end of the
    * whole recording. 
    * @return A URL to the given media for the given transcript, or null if the given
@@ -8767,8 +8767,7 @@ public class SqlGraphStore implements GraphStore {
     }
     if (file.exists()) {
       if (startOffset == null && endOffset == null) {
-        if (getBaseUrl() == null) // TODO check this isn't a security risk
-        {
+        if (getBaseUrl() == null) { // TODO check this isn't a security risk
           return file.toURI().toString(); // TODO resampling?
         } else {
           try {
@@ -8790,24 +8789,26 @@ public class SqlGraphStore implements GraphStore {
             throw new StoreException(exception);
           }
         }
-      }
-      else // a fragment
-      {
-        if (getBaseUrl() == null) // TODO check this isn't a security risk
-        {
-          FragmentExtractor extractor = new FragmentExtractor();
-          if (mimeTypeParameters.containsKey("rate") // this seems to be a standard name
-              && mimeTypeParameters.get("rate") != null) {
-            extractor.setSampleRate(
-              Integer.parseInt(mimeTypeParameters.get("rate")));
-          } else if (mimeTypeParameters.containsKey("samplerate") // this is a legacy name
-              && mimeTypeParameters.get("samplerate") != null) {
-            extractor.setSampleRate(
-              Integer.parseInt(mimeTypeParameters.get("samplerate")));
-          }
-          extractor.setStart(startOffset);
-          extractor.setEnd(endOffset);
+      } else { // a fragment
+        if (getBaseUrl() == null) { // TODO check this isn't a security risk
           try {
+            FragmentExtractor extractor = new FragmentExtractor();
+            ParameterSet config = extractor.configure(new ParameterSet());
+            if (mimeTypeParameters.containsKey("rate")) { // seems to be a standard name
+              mimeTypeParameters.put("samplerate", mimeTypeParameters.get("rate"));
+            }
+            // set the parameter values the extractor wants
+            for (Parameter p : config.values()) {
+              String key = p.getName().toLowerCase();
+              if (mimeTypeParameters.get(key) != null) {
+                p.setValue(mimeTypeParameters.get(key));
+              }
+            } // next parameter
+            extractor.configure(config);
+            
+            extractor.setStart(startOffset);
+            extractor.setEnd(endOffset);
+            
             File fragment = File.createTempFile(
               "SqlGraphStore.getMedia_",
               Graph.FragmentId(id, startOffset, endOffset) + "." + IO.Extension(file));
@@ -8827,7 +8828,7 @@ public class SqlGraphStore implements GraphStore {
           }
         } else {
           StringBuffer url = new StringBuffer(getBaseUrl());
-          url.append("/soundfragment");
+          url.append("/api/media/fragment");
           url.append("?id=");
           try {
             url.append(URLEncoder.encode(id, "UTF-8")

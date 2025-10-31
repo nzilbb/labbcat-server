@@ -87,6 +87,7 @@ import org.apache.commons.csv.CSVRecord;
  *      a subset is required. This can be specifed instead of id/start/end parameters.
  *      This parameter is specified multiple times for multiple values.</li> 
  *  <li><i>sampleRate</i> - (optional) sample rate (Hz) to encode the mono WAV files with.</li>
+ *  <li><i>channel</i> - (optional) channel to extract - 0 for left, or 1 for right.</li>
  *  <li><i>name</i> or <i>collection_name</i> - (optional) name of the collection.</li>
  *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
  *  <li><i>startOffsetColumn</i> - (optional) if threadId identifies a
@@ -207,6 +208,19 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         httpStatus.accept(SC_BAD_REQUEST);
         try {
           out.write(localize("Invalid sample rate: {0}", sampleRate).getBytes()); // TODO i18n
+        } catch(IOException x) {}
+      }
+    }
+    String channel = parameters.getString("channel");
+    if (channel != null) {
+      if (channel.equalsIgnoreCase("left")) channel = "0";
+      else if (channel.equalsIgnoreCase("right")) channel = "1";
+      try {
+        mimeType += "; channel="+Integer.parseInt(channel);
+      } catch(Exception exception) {
+        httpStatus.accept(SC_BAD_REQUEST);
+        try {
+          out.write(localize("Invalid channel: {0}", channel).getBytes()); // TODO i18n
         } catch(IOException x) {}
       }
     }
