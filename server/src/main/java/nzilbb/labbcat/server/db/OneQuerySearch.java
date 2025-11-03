@@ -300,14 +300,7 @@ public class OneQuerySearch extends SearchTask {
       Object oArgs[] = { 
         layer_id, // table
         layerMatch.getNot()?"NOT":"", // [NOT] REGEXP 
-        Integer.valueOf( // case sensitivity
-          // ... for DISC and other IPA layers
-          layer.getType().equals(Constants.TYPE_IPA)
-           // ... and 'select' layers, which may have pairs differing only by case ...
-          || layer.getType().equals(Constants.TYPE_SELECT)
-           // ... and the 'word' (orthography is case-insensitive, and searched by default)
-          || layer.getId().equals(schema.getWordLayerId())
-          ?1:0), // 0 for insensitive, 1 for sensitive
+        Integer.valueOf(layerMatch.getCaseSensitive()?1:0),
         layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
         sExtraMetaCondition.toString(), // e.g. anchoring to the start/end of a span
         (Integer)(columnTargetSegmentLayer.isPresent()?
@@ -919,14 +912,7 @@ public class OneQuerySearch extends SearchTask {
         Object oArgs[] = { 
           layer_id, // table
           layerMatch.getNot()?"NOT":"", // [NOT] REGEXP 
-          Integer.valueOf( // case sensitivity
-            // ... for DISC and other IPA layers
-            layer.getType().equals(Constants.TYPE_IPA)
-            // ... and 'select' layers, which may have pairs differing only by case ...
-            || layer.getType().equals(Constants.TYPE_SELECT)
-            // ... and the 'word' (orthography is case-insensitive, and searched by default)
-            || layer.getId().equals(schema.getWordLayerId())
-            ?1:0), // 0 for insensitive, 1 for sensitive
+          Integer.valueOf(layerMatch.getCaseSensitive()?1:0),
           layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
           sExtraMetaCondition.toString(), // e.g. anchoring to the start of a span
           null,
@@ -1695,6 +1681,30 @@ public class OneQuerySearch extends SearchTask {
   }
   
   /**
+   * Ensure that, if case-sensitivity of a pattern match is not explicitly set,
+   * it defaults to true for phonological, select, and 'word' layer searches, and
+   * ensure that null booleans are set.
+   * @param schema The layer schema defining layer attributes.
+   */
+  protected void normalizeMatrix(Schema schema) {
+    matrix.layerMatchStream()
+      .filter(LayerMatch::HasCondition)
+      .filter(layerMatch -> layerMatch.getCaseSensitive() == null)
+      .filter(layerMatch -> {
+          Layer layer = schema.getLayer(layerMatch.getId());
+          return layer != null &&
+            (// DISC and other IPA layers:
+              layer.getType().equals(Constants.TYPE_IPA)
+              // 'select' layers, which may have pairs differing only by case:
+              || layer.getType().equals(Constants.TYPE_SELECT)
+              // 'word' ('orthography' is case-insensitive and searched by default):
+              || layer.getId().equals(schema.getWordLayerId())
+              );
+        }).forEach(layerMatch -> layerMatch.setCaseSensitive(Boolean.TRUE));
+    matrix.layerMatchStream().forEach(layerMatch -> layerMatch.setNullBooleans());
+  } // end of setDefaultCaseSensitivities()
+  
+  /**
    * Completes a layered search by first identifying the first 'column' of matches
    * (i.e. words that match the first pattern) then matching the results against
    * subsequent 'columns' until what remains are matches for the entire matrix. 
@@ -1706,8 +1716,9 @@ public class OneQuerySearch extends SearchTask {
     Connection connection = getStore().getConnection();
     final Schema schema = getStore().getSchema();
     if (matrix != null) setName(matrix.getDescription());
-    setDescription(matrix.getDescription());
-
+    setDescription(matrix.getDescription());    
+    normalizeMatrix(schema);
+    
     // word columns
 	 
     // list of Word objects that match matrix

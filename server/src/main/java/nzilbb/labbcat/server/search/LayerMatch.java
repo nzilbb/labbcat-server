@@ -1,5 +1,5 @@
 //
-// Copyright 2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2023-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -76,26 +76,48 @@ public class LayerMatch implements CloneableBean {
   }
 
   /**
-   * Whether the #pattern is being negated (i.e. selecting tokens that don't match) or not.
+   * Whether the {@link #pattern} is being negated (i.e. selecting tokens that don't match)
+   * or not.
    * @see #getNot()
    * @see #setNot(Boolean)
    */
   protected Boolean not;
   /**
-   * Getter for {@link #not}: Whether the #pattern is being negated (i.e. selecting tokens
-   * that don't match) or not. 
-   * @return Whether the #pattern is being negated (i.e. selecting tokens that don't
+   * Getter for {@link #not}: Whether the {@link #pattern} is being negated
+   * (i.e. selecting tokens that don't match) or not. 
+   * @return Whether the {@link #pattern} is being negated (i.e. selecting tokens that don't
    * match) or not. 
    */
   @ClonedProperty
   public Boolean getNot() { return not; }
   /**
-   * Setter for {@link #not}: Whether the #pattern is being negated (i.e. selecting tokens
+   * Setter for {@link #not}: Whether the {@link #pattern} is being negated
+   * (i.e. selecting tokens that don't match) or not. 
+   * @param newNot Whether the {@link #pattern} is being negated (i.e. selecting tokens
    * that don't match) or not. 
-   * @param newNot Whether the #pattern is being negated (i.e. selecting tokens that don't
-   * match) or not. 
    */
   public LayerMatch setNot(Boolean newNot) { not = newNot; return this; }
+
+  /**
+   * Whether the {@link #pattern} is to matched in a case-sensitive manner.
+   * @see #getCaseSensitive()
+   * @see #setCaseSensitive(Boolean)
+   */
+  protected Boolean caseSensitive;
+  /**
+   * Getter for {@link #caseSensitive}: Whether the {@link #pattern} is to matched in a
+   * case-sensitive manner.
+   * @return Whether the {@link #pattern} is to matched in a case-sensitive manner.
+   */
+  @ClonedProperty
+  public Boolean getCaseSensitive() { return caseSensitive; }
+  /**
+   * Setter for {@link #caseSensitive}: Whether the {@link #pattern} is to matched in a
+   * case-sensitive manner.
+   * @param newCaseSensitive Whether the {@link #pattern} is to matched in a
+   * case-sensitive manner.
+   */
+  public LayerMatch setCaseSensitive(Boolean newCaseSensitive) { caseSensitive = newCaseSensitive; return this; }
   
   /**
    * The minimum value for the label, assuming it represents a number.
@@ -215,12 +237,14 @@ public class LayerMatch implements CloneableBean {
   public LayerMatch setAnchorEnd(Boolean newAnchorEnd) { anchorEnd = newAnchorEnd; return this; }
   
   /**
-   * Ensures that Boolean attributes ({@link #target}, {@link #not}, {@link #anchorStart},
-   * {@link #anchorEnd}) have non-null values. Any with null values are assumed to be false.
+   * Ensures that Boolean attributes ({@link #target}, {@link #not}, {@link #caseSensitive},
+   * {@link #anchorStart}, {@link #anchorEnd}) have non-null values. Any with null values
+   * are assumed to be false.
    */
   public LayerMatch setNullBooleans() {
     if (target == null) target = Boolean.FALSE;
     if (not == null) not = Boolean.FALSE;
+    if (caseSensitive == null) caseSensitive = Boolean.FALSE;
     if (anchorStart == null) anchorStart = Boolean.FALSE;
     if (anchorEnd == null) anchorEnd = Boolean.FALSE;
     return this;

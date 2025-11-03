@@ -43,6 +43,7 @@ public class TestOneQuerySearch {
         new Column().addLayerMatch(
           new LayerMatch().setId("word").setPattern("needle").setTarget(true))));
     Vector<Object> parameters = new Vector<Object>();
+    search.normalizeMatrix(getSchema());
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
@@ -91,6 +92,7 @@ public class TestOneQuerySearch {
           .setNot(true) // add negation to prevent optimisation
           .setPattern("needle"))));
     Vector<Object> parameters = new Vector<Object>();
+    search.normalizeMatrix(getSchema());
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
       "INSERT INTO _result"
@@ -136,6 +138,7 @@ public class TestOneQuerySearch {
       new Matrix().addColumn(
         new Column().addLayerMatch(
           new LayerMatch().setId("word").setPattern("needle").setTarget(true))));
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(
       parameters, getSchema(), l -> false,
@@ -189,6 +192,7 @@ public class TestOneQuerySearch {
         new Column().addLayerMatch(
           new LayerMatch().setId("word").setPattern("needle").setTarget(true))));
     search.setRestrictByUser("unit-test");
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -253,6 +257,7 @@ public class TestOneQuerySearch {
       new Matrix().addColumn(
         new Column().addLayerMatch(
           new LayerMatch().setId("orthography").setPattern("needle"))));
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateOrthographySql(parameters, getSchema());
     assertEquals(
@@ -289,6 +294,7 @@ public class TestOneQuerySearch {
         new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("2")))
       .addColumn(
         new Column().addLayerMatch(new LayerMatch().setId("orthography").setPattern("3"))));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateOrthographySql(parameters, getSchema());
     assertEquals(
@@ -344,6 +350,7 @@ public class TestOneQuerySearch {
         new Column().addLayerMatch(new LayerMatch().setId("orthography").setMax(2.0)))
       .addColumn(
         new Column().addLayerMatch(new LayerMatch().setId("orthography").setMin(3.0).setMax(3.0))));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateOrthographySql(parameters, getSchema());
     assertEquals(
@@ -405,6 +412,7 @@ public class TestOneQuerySearch {
     search.setMatrix(
       new Matrix().addColumn(
         new Column().addLayerMatch(match)));
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateOneSpanSql(parameters, schema, spanLayer, match);
     assertEquals(
@@ -442,6 +450,7 @@ public class TestOneQuerySearch {
       new Matrix().addColumn(
         new Column().addLayerMatch(match)));
     parameters = new Vector<Object>();
+    search.normalizeMatrix(getSchema());
     sql = search.generateOneSpanSql(parameters, schema, spanLayer, match);
     assertEquals(
       "numeric comparison",
@@ -485,6 +494,7 @@ public class TestOneQuerySearch {
 
     // main participant
     Vector<Object> parameters = new Vector<Object>();
+    search.normalizeMatrix(getSchema());
     search.setMainParticipantOnly(true);
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -539,6 +549,7 @@ public class TestOneQuerySearch {
 
     // main participant
     Vector<Object> parameters = new Vector<Object>();
+    search.normalizeMatrix(getSchema());
     search.setAnchorConfidenceThreshold((byte)50);
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -597,6 +608,7 @@ public class TestOneQuerySearch {
                        .setId("syllable").setPattern("['\"].*")
                        .setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -650,6 +662,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("orthography").setPattern("[aeiou].*"))
         ));
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -707,6 +720,7 @@ public class TestOneQuerySearch {
       .addColumn(new Column()
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
       );
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -767,6 +781,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("syllableCount")
                                 .setMin(2.0)))
       );
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -813,6 +828,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("syllableCount")
                                 .setMax(3.0)))
       );
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -860,6 +876,7 @@ public class TestOneQuerySearch {
                                 .setMin(2.0)
                                 .setMax(3.0)))
       );
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -914,6 +931,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("noise").setPattern("haystack"))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
       );
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(
       parameters, getSchema(),
@@ -977,6 +995,7 @@ public class TestOneQuerySearch {
                                 .setTarget(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
       );
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -1046,6 +1065,7 @@ public class TestOneQuerySearch {
                                 .setAnchorStart(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("mate")))
       );
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(
       parameters, getSchema(),
@@ -1165,6 +1185,7 @@ public class TestOneQuerySearch {
                                 .setAnchorStart(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
       );
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -1285,6 +1306,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
                  .addLayerMatch(new LayerMatch().setId("turn").setAnchorStart(true)))
       );
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -1335,6 +1357,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
                  .addLayerMatch(new LayerMatch().setId("utterance").setAnchorStart(true)))
       );
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -1403,6 +1426,7 @@ public class TestOneQuerySearch {
                                 .setAnchorEnd(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("mate")))
       );
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(
       parameters, getSchema(),
@@ -1522,6 +1546,7 @@ public class TestOneQuerySearch {
                                 .setAnchorEnd(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
       );
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -1639,6 +1664,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
                  .addLayerMatch(new LayerMatch().setId("turn").setAnchorEnd(true)))
       );
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -1692,6 +1718,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
                  .addLayerMatch(new LayerMatch().setId("utterance").setAnchorEnd(true)))
       );
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -1763,6 +1790,7 @@ public class TestOneQuerySearch {
                                 .setAnchorEnd(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("mate")))
       );
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(
       parameters, getSchema(),
@@ -1898,6 +1926,7 @@ public class TestOneQuerySearch {
                                 .setAnchorEnd(true))
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle")))
       );
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -2032,6 +2061,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
                  .addLayerMatch(new LayerMatch().setId("turn").setAnchorEnd(true)))
       );
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -2094,6 +2124,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("needle"))
                  .addLayerMatch(new LayerMatch().setId("utterance").setAnchorEnd(true)))
       );
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(
       parameters, getSchema(),
@@ -2173,6 +2204,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("segment").setPattern("I").setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2228,6 +2260,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("ARPABET").setPattern(".*1"))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2287,6 +2320,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("segment").setPattern("I").setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2347,6 +2381,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("segment").setPattern("I").setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2396,6 +2431,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern("kit"))
                  .addLayerMatch(new LayerMatch().setId("segment").setPattern("I").setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2459,6 +2495,7 @@ public class TestOneQuerySearch {
       .addColumn(new Column()
                  .addLayerMatch(new LayerMatch().setId("segment").setPattern("I").setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2519,6 +2556,7 @@ public class TestOneQuerySearch {
       .addColumn(new Column()
                  .addLayerMatch(new LayerMatch().setId("segment").setPattern("I").setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2582,6 +2620,7 @@ public class TestOneQuerySearch {
                                 // target explicitly set
                                 .setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     String sqlWithExplicitTarget = search.generateSql(
       parameters, getSchema(), l -> false, p -> "", t -> "");
     search.setMatrix(
@@ -2591,6 +2630,7 @@ public class TestOneQuerySearch {
       .addColumn(new Column() // target not explicitly set
                  .addLayerMatch(new LayerMatch().setId("segment").setPattern("I"))
         ));
+    search.normalizeMatrix(getSchema());
     String sqlWithoutTarget = search.generateSql(
       parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals("Implicit segment target", sqlWithExplicitTarget, sqlWithoutTarget);
@@ -2606,6 +2646,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("orthography").setPattern(""))
                  .addLayerMatch(new LayerMatch().setId("segment").setPattern("I"))
         ));
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2673,6 +2714,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("I").setTarget(true))
         ));
     search.setAnchorConfidenceThreshold((byte)100);
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2737,6 +2779,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("segment").setPattern("I").setTarget(true))
         ));
     search.setAnchorConfidenceThreshold((byte)50);
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2824,6 +2867,7 @@ public class TestOneQuerySearch {
                  .addLayerMatch(new LayerMatch().setId("segment").setPattern("I"))
         ));
     search.setAnchorConfidenceThreshold((byte)100);
+    search.normalizeMatrix(getSchema());
     parameters.clear();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2919,6 +2963,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("segment").setPattern("[aeiou]"))
         ));
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -2981,6 +3026,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("segment").setPattern("[aeiou]").setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3046,6 +3092,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("segment").setPattern("[aeiou]").setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3115,6 +3162,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("segment").setPattern("[aeiou]"))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3172,6 +3220,7 @@ public class TestOneQuerySearch {
         .addLayerMatch(new LayerMatch()
                        .setId("ARPABET").setPattern("[AEIOU].*[0-9]"))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3235,6 +3284,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("[ptk]")
                        .setAnchorStart(true))
         ));
+    search.normalizeMatrix(getSchema());
     Vector<Object> parameters = new Vector<Object>();
     String sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3286,6 +3336,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("[ptk]")
                        .setAnchorEnd(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3339,6 +3390,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("[aeiou]")
                        .setAnchorEnd(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3398,6 +3450,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("[ptk]")
                        .setAnchorStart(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3454,6 +3507,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("[ptk]")
                        .setAnchorEnd(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3513,6 +3567,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("[aeiou]")
                        .setAnchorEnd(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3582,6 +3637,7 @@ public class TestOneQuerySearch {
                        .setAnchorEnd(true)
                        .setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3655,6 +3711,7 @@ public class TestOneQuerySearch {
                        .setId("segment").setPattern("[aeiou]")
                        .setAnchorEnd(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
@@ -3735,6 +3792,7 @@ public class TestOneQuerySearch {
                        .setAnchorEnd(true)
                        .setTarget(true))
         ));
+    search.normalizeMatrix(getSchema());
     parameters = new Vector<Object>();
     sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
     assertEquals(
