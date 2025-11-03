@@ -212,8 +212,7 @@ public class Matrix implements CloneableBean {
     return columns.stream()
       .map(column -> column.getLayers().values().stream())
       .reduce(Stream.empty(), Stream::concat)
-      .flatMap(m -> m.stream())
-      .peek(l -> l.setNullBooleans());
+      .flatMap(m -> m.stream());
   } // end of layerPatternStream()
   
   /**
