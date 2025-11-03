@@ -61,7 +61,7 @@ public class TestOneQuerySearch {
       +" /* extra joins */"
       +"  INNER JOIN annotation_layer_0 search_0_0"
       +"  ON search_0_0.turn_annotation_id = turn.annotation_id"
-      +"  AND search_0_0.label  REGEXP  ?"
+      +"  AND CAST(search_0_0.label AS BINARY)  REGEXP BINARY ?"
       +" /* subsequent columns */"
       +"  WHERE 1=1"
       +" /* transcripts */"
@@ -158,7 +158,7 @@ public class TestOneQuerySearch {
       +" /* extra joins */"
       +"  INNER JOIN annotation_layer_0 search_0_0"
       +"  ON search_0_0.turn_annotation_id = turn.annotation_id"
-      +"  AND search_0_0.label  REGEXP  ?"
+      +"  AND CAST(search_0_0.label AS BINARY)  REGEXP BINARY ?"
       +" INNER JOIN transcript ON turn.ag_id = transcript.ag_id" // transcript table included
       +" /* subsequent columns */"
       +"  WHERE 1=1"
@@ -208,7 +208,7 @@ public class TestOneQuerySearch {
       +" /* extra joins */"
       +"  INNER JOIN annotation_layer_0 search_0_0"
       +"  ON search_0_0.turn_annotation_id = turn.annotation_id"
-      +"  AND search_0_0.label  REGEXP  ?"
+      +"  AND CAST(search_0_0.label AS BINARY)  REGEXP BINARY ?"
       +" INNER JOIN transcript ON turn.ag_id = transcript.ag_id" // transcript table included
       +" /* subsequent columns */"
       +"  WHERE 1=1"

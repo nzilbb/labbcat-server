@@ -301,8 +301,13 @@ public class OneQuerySearch extends SearchTask {
         layer_id, // table
         layerMatch.getNot()?"NOT":"", // [NOT] REGEXP 
         Integer.valueOf( // case sensitivity
-          layer.getType().equals(Constants.TYPE_IPA) // ... for DISC
-          || layer.getType().equals(Constants.TYPE_SELECT)?1:0), // ... and 'select' layers
+          // ... for DISC and other IPA layers
+          layer.getType().equals(Constants.TYPE_IPA)
+           // ... and 'select' layers, which may have pairs differing only by case ...
+          || layer.getType().equals(Constants.TYPE_SELECT)
+           // ... and the 'word' (orthography is case-insensitive, and searched by default)
+          || layer.getId().equals(schema.getWordLayerId())
+          ?1:0), // 0 for insensitive, 1 for sensitive
         layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
         sExtraMetaCondition.toString(), // e.g. anchoring to the start/end of a span
         (Integer)(columnTargetSegmentLayer.isPresent()?
@@ -915,8 +920,13 @@ public class OneQuerySearch extends SearchTask {
           layer_id, // table
           layerMatch.getNot()?"NOT":"", // [NOT] REGEXP 
           Integer.valueOf( // case sensitivity
-            layer.getType().equals(Constants.TYPE_IPA) // ... for DISC
-            || layer.getType().equals(Constants.TYPE_SELECT)?1:0), // ... and 'select' layers
+            // ... for DISC and other IPA layers
+            layer.getType().equals(Constants.TYPE_IPA)
+            // ... and 'select' layers, which may have pairs differing only by case ...
+            || layer.getType().equals(Constants.TYPE_SELECT)
+            // ... and the 'word' (orthography is case-insensitive, and searched by default)
+            || layer.getId().equals(schema.getWordLayerId())
+            ?1:0), // 0 for insensitive, 1 for sensitive
           layer.getType().equals(Constants.TYPE_IPA)?"":" ", // segment seperator
           sExtraMetaCondition.toString(), // e.g. anchoring to the start of a span
           null,
@@ -2848,7 +2858,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -2865,7 +2875,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -2968,7 +2978,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -2985,7 +2995,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -3088,7 +3098,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -3106,7 +3116,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -3204,7 +3214,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -3230,7 +3240,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    * </ul>
@@ -3252,7 +3262,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -3270,7 +3280,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -3288,7 +3298,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -3315,7 +3325,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: extra meta condition - e.g. for anchoring to start of annotation</li>
    *  <li>6: search-column suffix </li>
@@ -3340,7 +3350,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: ignored</li>
    *  <li>6: search-column suffix </li>
@@ -3358,7 +3368,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>3: ignored</li>
    *  <li>4: ignored</li>
    *  <li>6: search-column suffix </li>
@@ -3382,7 +3392,7 @@ public class OneQuerySearch extends SearchTask {
    * <ul>
    *  <li>0: layer_id</li>
    *  <li>1: negativity - "" or "NOT"</li>
-   *  <li>2: case sensitivity - "" for insensitive, "BINARY" for sensitive</li>
+   *  <li>2: case sensitivity - 0 for insensitive, 1 for sensitive</li>
    *  <li>6: search-column suffix </li>
    * </ul>
    */
