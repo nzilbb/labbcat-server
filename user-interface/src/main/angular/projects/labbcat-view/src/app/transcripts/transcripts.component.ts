@@ -149,7 +149,7 @@ export class TranscriptsComponent implements OnInit {
             if (queryString // there is a query string
                 || (window.location.search||"") // or list of transcripts for a participant
                        .startsWith("?transcript_expression=labels(%22participant%22)")
-                || (window.location.search||"") // or several participants
+                || (window.location.search||"") // ...or several participants
                        .startsWith("?participant_expression=%5B")) {
                 // nothing further to do
                 resolve();
@@ -601,6 +601,7 @@ export class TranscriptsComponent implements OnInit {
 
     /** Button action */
     clearFilters() : void {
+        sessionStorage.setItem("lastQueryTranscripts", "");
         this.initializeFilters().then(()=>{
             this.listTranscripts();
         });
