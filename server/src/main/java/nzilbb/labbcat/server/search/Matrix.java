@@ -24,6 +24,7 @@ package nzilbb.labbcat.server.search;
 import java.io.StringReader;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -223,7 +224,7 @@ public class Matrix implements CloneableBean {
   public String getTargetLayerId() {
     return layerMatchStream()
       .filter(LayerMatch::HasCondition)
-      .filter(l -> l.getTarget())
+      .filter(l -> Optional.ofNullable(l.getTarget()).orElse(false))
       .map(l -> l.getId())
       .findAny()
       .orElse(null);
@@ -240,7 +241,7 @@ public class Matrix implements CloneableBean {
       if (columns.get(c).getLayers().values().stream()
           .flatMap(m -> m.stream())
           .filter(LayerMatch::HasCondition)
-          .filter(l -> l.getTarget())
+          .filter(l -> Optional.ofNullable(l.getTarget()).orElse(false))
           .findAny().isPresent()) {
         return c;
       }
