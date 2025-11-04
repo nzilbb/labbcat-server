@@ -487,7 +487,9 @@ export class TranscriptComponent implements OnInit {
                     if (layer.id == this.schema.episodeLayerId) continue;
                     if (layer.id == this.schema.participantLayerId) continue;
                     // a temporal layer
-                    this.layerStyles[l] = { color: "silver" };
+                    if (!this.selectedLayerIds.includes(l)) { // not ticked
+                        this.layerStyles[l] = { color: "silver" };
+                    }
                     this.labbcatService.labbcat.countAnnotations(
                         this.transcript.id, l, (count, errors, messages) => {
                             this.layerCounts[l] = count;
