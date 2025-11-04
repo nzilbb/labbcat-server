@@ -475,7 +475,7 @@ public class SqlGraphStoreAdministration
             // LaBB-CAT extensions:
                   
             // enabled
-            if (layer.containsKey("enabled")
+            if (layer.get("enabled") != null
                 && !oldVersion.get("enabled").equals(layer.get("enabled"))) {
               PreparedStatement sql = getConnection().prepareStatement(
                 "UPDATE layer SET enabled = ? WHERE layer_id = ?");
@@ -486,7 +486,7 @@ public class SqlGraphStoreAdministration
             }
             
             // extra
-            if (layer.containsKey("extra")
+            if (layer.get("extra") != null
                 && !layer.get("extra").equals(oldVersion.get("extra"))) {
               PreparedStatement sql = getConnection().prepareStatement(
                 "UPDATE layer SET extra = ? WHERE layer_id = ?");
@@ -499,7 +499,7 @@ public class SqlGraphStoreAdministration
                
         } // non-system layer
 
-        if (layer.containsKey("validLabelsDefinition") // detailed definition of label options
+        if (layer.get("validLabelsDefinition") != null // detailed definition of label options
             && oldVersion.containsKey("validLabelsDefinition")) {
           
           List<Map<String,Object>> validLabelsDefinition =
