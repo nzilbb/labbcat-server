@@ -579,7 +579,10 @@ export class ParticipantsComponent implements OnInit {
         this.labbcatService.labbcat.getParticipant(
             id, this.filterLayers.map(layer => layer.id),
             (participant, errors, messages) => {
-                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (errors) {
+                    errors.filter(m => m != "cancelled")
+                        .forEach(m => this.messageService.error(m));
+                }
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.attributeValues[id] = participant;
                 

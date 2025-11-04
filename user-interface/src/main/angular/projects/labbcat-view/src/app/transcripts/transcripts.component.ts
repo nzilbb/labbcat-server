@@ -563,7 +563,10 @@ export class TranscriptsComponent implements OnInit {
         this.labbcatService.labbcat.getTranscript(
             id, this.filterLayers.map(layer => layer.id),
             (transcript, errors, messages) => {
-                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (errors) {
+                    errors.filter(m => m != "cancelled")
+                        .forEach(m => this.messageService.error(m));
+                }
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.attributeValues[id] = transcript;
             });
