@@ -140,7 +140,9 @@ export class ParticipantsComponent implements OnInit {
                     queryString = queryString.replace(pattern, "");
                 }
             }
-            if (queryString && queryString != "?") { // there is a query string
+            if ((queryString && queryString != "?") // there is a query string
+                || (window.location.search||"") // or list of participants for a transcript
+                       .startsWith("?transcript_expression=%5B")) {
                 // nothing further to do
                 resolve();
             } else {
@@ -194,8 +196,10 @@ export class ParticipantsComponent implements OnInit {
             }
             // strip ay leading/trailing parameter delimiters
             queryString = queryString.replace(/^[?&]/,"").replace(/[?&]$/,"");
-            // save the query in session storage
-            sessionStorage.setItem("lastQueryParticipants", queryString); 
+            if (queryString) {
+                // save the query in session storage
+                sessionStorage.setItem("lastQueryParticipants", queryString);
+            }
             
             // page number
             this.p = parseInt(params["p"]) || 1;
@@ -641,6 +645,7 @@ export class ParticipantsComponent implements OnInit {
     
     /** Button action */
     clearFilters() : void {
+        sessionStorage.setItem("lastQueryParticipants", "");
         this.initializeFilters().then(()=>{
             this.listParticipants();
         });
