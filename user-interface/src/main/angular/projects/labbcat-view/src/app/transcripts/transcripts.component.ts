@@ -146,7 +146,11 @@ export class TranscriptsComponent implements OnInit {
                     queryString = queryString.replace(pattern, "");
                 }
             }
-            if (queryString) { // there is a query string
+            if (queryString // there is a query string
+                || (window.location.search||"") // or list of transcripts for a participant
+                       .startsWith("?transcript_expression=labels(%22participant%22)")
+                || (window.location.search||"") // or several participants
+                       .startsWith("?participant_expression=%5B")) {
                 // nothing further to do
                 resolve();
             } else {
@@ -193,10 +197,12 @@ export class TranscriptsComponent implements OnInit {
             for (let pattern of this.passthroughPatterns) { // but not the passthrough parameters
                 queryString = queryString.replace(pattern, "");
             }
-            // strip ay leading/trailing parameter delimiters
+            // strip any leading/trailing parameter delimiters
             queryString = queryString.replace(/^[?&]/,"").replace(/[?&]$/,"");
-            // save the query in session storage
-            sessionStorage.setItem("lastQueryTranscripts", queryString); 
+            if (queryString) {
+                // save the query in session storage
+                sessionStorage.setItem("lastQueryTranscripts", queryString);
+            }
             // page number
             this.p = parseInt(params["p"]) || 1;
             if (this.p < 1) this.p = 1;
