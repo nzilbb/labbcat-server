@@ -8283,7 +8283,12 @@ public class SqlGraphStore implements GraphStore {
    * @param fromId The start anchor's ID, which can be null if the layer is a tag layer.
    * @param toId The end anchor's ID, which can be null if the layer is a tag layer.
    * @param layerId The layer ID of the resulting annotation.
-   * @param label The label of the resulting annotation.
+   * @param label The label of the resulting annotation, or a two-line label
+   * (i.e. two strings delimited by "\n") in which the first line represents the
+   * annotation label and the second line is a file:// URL for the binary data of
+   * the anotation (elsewhere, this is the "dataUrl" attribute of the Annotation object).
+   * Passing the dataUrl in this way only works for layers with a MIME type set
+   * as the layer type.
    * @param confidence The confidence rating.
    * @param parentId The new annotation's parent's ID.
    * @return The ID of the new annotation.
@@ -8297,13 +8302,37 @@ public class SqlGraphStore implements GraphStore {
     Layer layer = schema.getLayer(layerId);
     if (layer.get("scope") == null)
       throw new StoreException("Only temporal layers are supported: " + layerId);
-    Annotation[] annotations = getMatchingAnnotations("id = '"+parentId+"'");
-    if (annotations.length < 1)
-      throw new StoreException("Invalid parent: " + parentId);
-    Annotation parent = annotations[0];
+
+    // are they passing a dataUrl as part of the label?
+    File dataFile = null;
+    String[] labelParts = label.split("\n");
+    if (labelParts.length == 2 // two line label
+        && layer.getType().indexOf('/') > 0) { // and layer is MIME type
+      if (labelParts[1].startsWith("file:")) {
+        try {
+          dataFile = new File(new URI(labelParts[1]));
+          if (dataFile.exists()) { // an existing file
+            label = labelParts[0];
+          } else { // no existing file specified
+            dataFile = null;
+          }
+        } catch (URISyntaxException x) {
+        }
+      } // dataUrl is set
+    } // maybe a dataUrl?
+    
+    Layer parentLayer = schema.getLayer(layer.getParentId());
+    Annotation parent = null;
+    if (layer.get("scope").equals("F")) { // top level layer
+      parent = getTranscript(id, null); // load just basic information
+    } else { // parent is another layer
+      Annotation[] annotations = getMatchingAnnotations("id = '"+parentId+"'");
+      if (annotations.length < 1)
+        throw new StoreException("Invalid parent: " + parentId);
+      parent = annotations[0];
+    }
     if (!layer.getParentId().equals(parent.getLayerId()))
       throw new StoreException("Layer "+layerId+" is not a child of " + parent.getLayerId());
-    Layer parentLayer = schema.getLayer(parent.getLayerId());
     if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
       // tag layer - ignore given anchors, and use the parent's instead
       fromId = parent.getStartId();
@@ -8316,8 +8345,13 @@ public class SqlGraphStore implements GraphStore {
     if (anchors.length < 2) throw new StoreException("Invalid end anchor: " + toId);
     Anchor to = anchors[1];
     try {
-      Object[] parentAttributes = fmtAnnotationId.parse(parent.getId());
-      Long parentAnnotationId = (Long)parentAttributes[2];
+      Long parentAnnotationId = null; 
+      if (layer.get("scope").equals("F")) { // top level layer
+        parentAnnotationId = Long.valueOf((Integer)parent.get("@ag_id"));
+      } else {
+        Object[] parentAttributes = fmtAnnotationId.parse(parent.getId());
+        parentAnnotationId = (Long)parentAttributes[2];
+      }
       if (!layer.getPeers()) {
         // only one child allowed, so delete any children
         PreparedStatement sql = getConnection().prepareStatement(
@@ -8326,65 +8360,110 @@ public class SqlGraphStore implements GraphStore {
         sql.executeUpdate();
         sql.close();
       }
-      String sql = "INSERT INTO annotation_layer_?"
-        + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
-        + " parent_id, ordinal, annotated_by, annotated_when"
-        + (!layer.get("scope").equals("F")?
-           ", turn_annotation_id":"")
-        + (layer.get("scope").equals("S")||layer.get("scope").equals("W")?
-           ", ordinal_in_turn, word_annotation_id":"")
-        + (layer.get("scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
-        + ")"
-        + " SELECT ag_id, ?, ?, "
-        // non-aligned layers use their parent anchors, regardless of startId/endId
-        +(layer.getAlignment()==Constants.ALIGNMENT_NONE?"start_anchor_id, end_anchor_id,":"?, ?,")
-        + " annotation_id,"
-        +(!layer.getPeers()?"1":
-          // there may already be tags, so choose the next ordinal for each parent
-          "(SELECT COUNT(*)+1 FROM annotation_layer_? WHERE parent_id = ?)")
-        +", ?, Now()"
-        + (!layer.get("scope").equals("F")?
-           ", turn_annotation_id" :"")
-        + (layer.get("scope").equals("S")||layer.get("scope").equals("W")?
-           ", ordinal_in_turn, word_annotation_id":"")
-        + (layer.get("scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
-        + " FROM annotation_layer_?"
-        +" WHERE annotation_id = ?";
-      PreparedStatement sqlInsertAnnotation = getConnection().prepareStatement(sql);
-      int p = 1;
-      sqlInsertAnnotation.setInt(p++, ((Integer)layer.get("layer_id")).intValue());
-      sqlInsertAnnotation.setString(p++, label);
-      sqlInsertAnnotation.setInt(p++, confidence);
-
-      if (layer.getAlignment() != Constants.ALIGNMENT_NONE) { // explicit anchors
-        Object[] anchorAttributes = fmtAnchorId.parse(from.getId());
-        sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
-        
-        anchorAttributes = fmtAnchorId.parse(to.getId());
-        sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
-      }
-      
-      if (layer.getPeers()) {
-        sqlInsertAnnotation.setInt(p++, ((Integer)layer.get("layer_id")).intValue());
-        sqlInsertAnnotation.setLong(p++, parentAnnotationId);
-      }
-
-      sqlInsertAnnotation.setString(p++, getUser());
-      sqlInsertAnnotation.setInt(p++, ((Integer)parentLayer.get("layer_id")).intValue());
-      sqlInsertAnnotation.setLong(p++, parentAnnotationId);
-      sqlInsertAnnotation.executeUpdate();
-      sqlInsertAnnotation.close();
-      sqlInsertAnnotation = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
-      ResultSet rsInsert = sqlInsertAnnotation.executeQuery();
+      if (layer.get("scope").equals("F")) { // top level layer
+        String sql = "INSERT INTO annotation_layer_?"
+          + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
+          + " parent_id, ordinal, annotated_by, annotated_when)"
+          + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, Now())";
+        try(PreparedStatement sqlInsertAnnotation = getConnection().prepareStatement(sql)) {
+          int p = 1;
+          sqlInsertAnnotation.setInt(p++, ((Integer)layer.get("layer_id")).intValue());
+          sqlInsertAnnotation.setLong(p++, parentAnnotationId);
+          sqlInsertAnnotation.setString(p++, label);
+          sqlInsertAnnotation.setInt(p++, confidence);
+          Object[] anchorAttributes = fmtAnchorId.parse(from.getId());
+          sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
+          anchorAttributes = fmtAnchorId.parse(to.getId());
+          sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
+          sqlInsertAnnotation.setLong(p++, parentAnnotationId);        
+          sqlInsertAnnotation.setInt(p++, 1); // ordinal TODO
+          sqlInsertAnnotation.setString(p++, getUser());
+          sqlInsertAnnotation.executeUpdate();
+        }
+      } else { // not a top-level layer
+        String sql = "INSERT INTO annotation_layer_?"
+          + " (ag_id, label, label_status, start_anchor_id, end_anchor_id,"
+          + " parent_id, ordinal, annotated_by, annotated_when"
+          + (!layer.get("scope").equals("F")?
+             ", turn_annotation_id":"")
+          + (layer.get("scope").equals("S")||layer.get("scope").equals("W")?
+             ", ordinal_in_turn, word_annotation_id":"")
+          + (layer.get("scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
+          + ")"
+          + " SELECT ag_id, ?, ?, "
+          // non-aligned layers use their parent anchors, regardless of startId/endId
+          +(layer.getAlignment()==Constants.ALIGNMENT_NONE?"start_anchor_id, end_anchor_id,":"?, ?,")
+          + " annotation_id,"
+          +(!layer.getPeers()?"1":
+            // there may already be tags, so choose the next ordinal for each parent
+            "(SELECT COUNT(*)+1 FROM annotation_layer_? WHERE parent_id = ?)")
+          +", ?, Now()"
+          + (!layer.get("scope").equals("F")?
+             ", turn_annotation_id" :"")
+          + (layer.get("scope").equals("S")||layer.get("scope").equals("W")?
+             ", ordinal_in_turn, word_annotation_id":"")
+          + (layer.get("scope").equals("S")?", ordinal_in_word, segment_annotation_id":"")
+          + " FROM annotation_layer_?"
+          +" WHERE annotation_id = ?";
+        try(PreparedStatement sqlInsertAnnotation = getConnection().prepareStatement(sql)) {
+          int p = 1;
+          sqlInsertAnnotation.setInt(p++, ((Integer)layer.get("layer_id")).intValue());
+          sqlInsertAnnotation.setString(p++, label);
+          sqlInsertAnnotation.setInt(p++, confidence);
+          
+          if (layer.getAlignment() != Constants.ALIGNMENT_NONE) { // explicit anchors
+            Object[] anchorAttributes = fmtAnchorId.parse(from.getId());
+            sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
+            
+            anchorAttributes = fmtAnchorId.parse(to.getId());
+            sqlInsertAnnotation.setLong(p++, (Long)anchorAttributes[0]);
+          }
+          
+          if (layer.getPeers()) {
+            sqlInsertAnnotation.setInt(p++, ((Integer)layer.get("layer_id")).intValue());
+            sqlInsertAnnotation.setLong(p++, parentAnnotationId);
+          }
+          
+          sqlInsertAnnotation.setString(p++, getUser());
+          sqlInsertAnnotation.setInt(p++, ((Integer)parentLayer.get("layer_id")).intValue());
+          sqlInsertAnnotation.setLong(p++, parentAnnotationId);
+          sqlInsertAnnotation.executeUpdate();
+        }
+      } // not a top-level layer
+      PreparedStatement sqlId = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
+      ResultSet rsInsert = sqlId.executeQuery();
       rsInsert.next();
       long annotation_id = rsInsert.getLong(1);
       rsInsert.close();
-      sqlInsertAnnotation.close();
+      sqlId.close();
       Object[] annotationAttributes = {
         layer.get("scope").equals("F")?"":((String)layer.get("scope")).toLowerCase(),
         layer.get("layer_id"),
         Long.valueOf(annotation_id)};
-      return fmtAnnotationId.format(annotationAttributes);
+      String annotationId = fmtAnnotationId.format(annotationAttributes);
+      
+      if (dataFile != null) { // is there a file to save as well?
+        Annotation[] annotations = getMatchingAnnotations("id = '"+annotationId+"'");
+        if (annotations.length == 1) {
+          Annotation annotation = annotations[0];
+          File annotationFile = annotationDataFile(
+            annotation, annotation.getGraph(), layer.getType());
+          if (!dataFile.getAbsoluteFile().equals(annotationFile.getAbsoluteFile())) {
+            // not the same file
+            try {
+              // ensure the directory structure exists`
+              Files.createDirectories(annotationFile.getParentFile().toPath());
+              // move the incoming file to the proper location
+              IO.Rename(dataFile, annotationFile);
+            } catch (IOException x) {
+              System.err.println("Can't save dataUrl file for " + annotationId + ": " + x);
+              x.printStackTrace(System.err);
+            }
+          }
+        } // the annotation is there
+      } // dataUrl is set
+     
+      return annotationId;
     } catch(ParseException exception) {
       System.err.println("Error parsing parent ID: "+parent.getId());
       throw new StoreException("Error parsing parent ID: "+parent.getId());
@@ -8489,6 +8568,66 @@ public class SqlGraphStore implements GraphStore {
     }
   }
 
+  /**
+   * Creates an annotation starting at <var>from</var> and ending at <var>to</var>.
+   * @param id The ID of the transcript.
+   * @param offset The anchor's offset (e.g. seconds since the start of the recording).
+   * @param confidence The confidence rating.
+   * @param existingOk true if the ID of an existing annotation at the same offset
+   * can be accepted (like {@link Graph#getOrCreateAnchorAt(double)}), false if the
+   * anchor must be a new one with no other linked annotations. 
+   * @return The ID of the new anchor.
+   */
+  public String createAnchor(
+    String id, Double offset, Integer confidence, boolean existingOk)
+    throws StoreException, PermissionException, GraphNotFoundException {
+
+    Graph graph = getTranscript(id, null); // load just basic information
+    int ag_id = (Integer)graph.get("@ag_id");
+    Object[] anchor_id = { null };
+    try {
+      if (existingOk) {
+        // see if the graph already has one at that offset with that confidence
+        String sql = "SELECT anchor_id FROM anchor"
+          +" WHERE ag_id = ? AND ABS(anchor.offset - ?) < 0.00005 AND alignment_status = ?";
+        try (PreparedStatement sqlSelectAnchor = getConnection().prepareStatement(sql)) {
+          sqlSelectAnchor.setInt(1, ag_id);
+          sqlSelectAnchor.setDouble(2, offset);
+          sqlSelectAnchor.setInt(3, confidence);
+          try (ResultSet rs = sqlSelectAnchor.executeQuery()) {
+            if (rs.next()) {
+              anchor_id[0] = Long.valueOf(rs.getLong(1));
+            }
+          } // rs
+        } // sqlSelectAnchor
+      }
+      if (anchor_id[0] == null) {      
+        // create an anchor
+        String sql = "INSERT INTO anchor"
+          +" (ag_id, `offset`, alignment_status, annotated_by, annotated_when)"
+          +" VALUES (?, ?, ?, ?, Now())";
+        PreparedStatement sqlInsertAnchor = getConnection().prepareStatement(sql);
+        int p = 1;
+        sqlInsertAnchor.setInt(1, ag_id);
+        sqlInsertAnchor.setDouble(2, offset);
+        sqlInsertAnchor.setInt(3, confidence);
+        sqlInsertAnchor.setString(4, getUser());
+        
+        sqlInsertAnchor.executeUpdate();
+        sqlInsertAnchor.close();
+        sqlInsertAnchor = getConnection().prepareStatement("SELECT LAST_INSERT_ID()");
+        ResultSet rsInsert = sqlInsertAnchor.executeQuery();
+        rsInsert.next();
+        anchor_id[0] = Long.valueOf(rsInsert.getLong(1));
+      }
+      return fmtAnchorId.format(anchor_id);
+    } catch (SQLException exception) {
+      System.err.println("SQL error: " + exception);
+      exception.printStackTrace(System.err);
+      throw new StoreException("Invalid query."); // TODO i18n
+    }
+  }
+  
   /**
    * List the predefined media tracks available for transcripts.
    * @return An ordered list of media track definitions.
