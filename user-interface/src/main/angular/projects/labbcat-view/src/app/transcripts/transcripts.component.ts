@@ -504,14 +504,7 @@ export class TranscriptsComponent implements OnInit {
                             .filter(id => !this.selectedIds.includes(id)));
                         
                         // attribute values
-                        for (let id of this.transcriptIds) {
-                            // if we don't already have their attributes
-                            if (!this.attributeValues[id]) {
-                                this.attributeValues[id] = {};
-                                // get the attributes
-                                this.getAttributeValues(id);
-                            }
-                        } // next transcript
+                        this.loadNextTranscriptAttributes();
                         
                         // create page links
                         this.pageLinks = [];
@@ -559,17 +552,26 @@ export class TranscriptsComponent implements OnInit {
         }
     }
 
-    getAttributeValues(id: string): void {
-        this.labbcatService.labbcat.getTranscript(
-            id, this.filterLayers.map(layer => layer.id),
-            (transcript, errors, messages) => {
-                if (errors) {
-                    errors.filter(m => m != "cancelled")
-                        .forEach(m => this.messageService.error(m));
-                }
-                if (messages) messages.forEach(m => this.messageService.info(m));
-                this.attributeValues[id] = transcript;
-            });
+    loadNextTranscriptAttributes(): void {
+        // look for the next transcript without attributes
+        for (let id of this.transcriptIds) {
+            // if we don't already have their attributes
+            if (!this.attributeValues[id]) {
+                this.attributeValues[id] = {};
+                this.labbcatService.labbcat.getTranscript(
+                    id, this.filterLayers.map(layer => layer.id),
+                    (transcript, errors, messages) => {
+                        if (errors) {
+                            errors.filter(m => m != "cancelled")
+                                .forEach(m => this.messageService.error(m));
+                        }
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        this.attributeValues[id] = transcript;
+                        this.loadNextTranscriptAttributes();
+                    });
+                break; // only one transcript per loadNextTranscriptAttributes invocation
+            }
+        } // next transcript
     }
 
     goToPage(p: number): void {

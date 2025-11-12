@@ -522,13 +522,11 @@ export class ParticipantsComponent implements OnInit {
                         
                         // attribute values
                         for (let id of this.participantIds) {
-                            // if we don't already have their attributes
-                            if (!this.attributeValues[id]) {
-                                this.attributeValues[id] = {};
-                                // get the attributes
-                                this.getAttributeValues(id);
+                            if (!this.attributeValues[id]) { // no attributes object
+                                this.attributeValues[id] = {}; // create one so the UI works
                             }
-                        } // next participant
+                        }
+                        this.loadNextParticipantAttributes();
 
                         // create page links
                         this.pageLinks = [];
@@ -575,29 +573,39 @@ export class ParticipantsComponent implements OnInit {
         }
     }
 
-    getAttributeValues(id: string): void {
-        this.labbcatService.labbcat.getParticipant(
-            id, this.filterLayers.map(layer => layer.id),
-            (participant, errors, messages) => {
-                if (errors) {
-                    errors.filter(m => m != "cancelled")
-                        .forEach(m => this.messageService.error(m));
-                }
-                if (messages) messages.forEach(m => this.messageService.info(m));
-                this.attributeValues[id] = participant;
-                
-                // get the number of transcripts the participant is in
-                this.labbcatService.labbcat.countMatchingTranscriptIds(
-                    "labels('"+this.esc(this.schema.participantLayerId)+"')"
-                    +".includes('"+this.esc(id)+"')",
-                    (count, errors, messages) => {
-                        if (this.attributeValues[id].annotations) {
-                            this.attributeValues[id].annotations["--transcript-count"] = [{
-                                label : count
-                            }];
+    loadNextParticipantAttributes(): void {
+        // look for the next participant without attributes
+        for (let id of this.participantIds) {
+            // if we don't already have their attributes
+            if (Object.keys(this.attributeValues[id]).length == 0) {
+                // get the attributes
+                this.labbcatService.labbcat.getParticipant(
+                    id, this.filterLayers.map(layer => layer.id),
+                    (participant, errors, messages) => {
+                        if (errors) {
+                            errors.filter(m => m != "cancelled")
+                                .forEach(m => this.messageService.error(m));
                         }
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        this.attributeValues[id] = participant;
+                        
+                        // get the number of transcripts the participant is in
+                        this.labbcatService.labbcat.countMatchingTranscriptIds(
+                            "labels('"+this.esc(this.schema.participantLayerId)+"')"
+                                +".includes('"+this.esc(id)+"')",
+                            (count, errors, messages) => {
+                                if (this.attributeValues[id].annotations) {
+                                    this.attributeValues[id].annotations["--transcript-count"] = [{
+                                        label : count
+                                    }];
+                                }
+                            });
+                        
+                        this.loadNextParticipantAttributes();
                     });
-            });
+                break; // only one participant per loadNextParticipantAttributes invocation
+            }
+        } // next participant
     }
 
     goToPage(p: number): void {
