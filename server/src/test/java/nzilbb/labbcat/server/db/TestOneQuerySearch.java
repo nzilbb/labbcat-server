@@ -2311,6 +2311,70 @@ public class TestOneQuerySearch {
     
     assertEquals("Description", "orthography=kit segment=I ARPABET=.*1", search.getDescription());
 
+    // ensure placement of target segment layer is unimportant
+    search.setMatrix(
+      new Matrix().addColumn(
+        new Column()
+        .addLayerMatch(new LayerMatch()
+                       .setId("orthography").setPattern("kit"))
+        .addLayerMatch(new LayerMatch() // non-target first
+                       .setId("ARPABET").setPattern(".*1"))
+        .addLayerMatch(new LayerMatch() // target after
+                       .setId("segment").setPattern("I").setTarget(true))
+        ));
+    search.normalizeMatrix(getSchema());
+    parameters = new Vector<Object>();
+    sql = search.generateSql(parameters, getSchema(), l -> false, p -> "", t -> "");
+    assertEquals(
+      "with two segments, target last",
+      "INSERT INTO _result"
+      +" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,"
+      +" defining_annotation_id, segment_annotation_id, target_annotation_id, turn_annotation_id,"
+      +" first_matched_word_annotation_id, last_matched_word_annotation_id, complete,"
+      +" target_annotation_uid) SELECT ?, search_0_2.ag_id AS ag_id,"
+      +" CAST(turn.label AS SIGNED) AS speaker_number, search_0_2.start_anchor_id,"
+      +" search_0_2.end_anchor_id,0, search_0_1.segment_annotation_id AS segment_annotation_id,"
+      +" search_0_1.annotation_id AS target_annotation_id,"
+      +" search_0_2.turn_annotation_id AS turn_annotation_id,"
+      +" search_0_2.word_annotation_id AS first_matched_word_annotation_id,"
+      +" search_0_2.word_annotation_id AS last_matched_word_annotation_id, 0 AS complete,"
+      +" CONCAT('es_1_', search_0_1.annotation_id) AS target_annotation_uid"
+      +" FROM annotation_layer_11 turn"
+      +" /* extra joins */"
+      +"  INNER JOIN annotation_layer_1 search_0_1"
+      +"  ON search_0_1.turn_annotation_id = turn.annotation_id"
+      +"  AND CAST(search_0_1.label AS BINARY)  REGEXP BINARY ?"
+      +" INNER JOIN annotation_layer_2 search_0_2"
+      +"  ON search_0_2.word_annotation_id = search_0_1.word_annotation_id"
+      +"  AND search_0_2.label  REGEXP  ?"
+      +" INNER JOIN annotation_layer_200 search_0_200"
+      +"  ON search_0_200.segment_annotation_id = search_0_1.segment_annotation_id"
+      +"  AND search_0_200.label  REGEXP  ?"
+      +" /* subsequent columns */"
+      +"  WHERE 1=1"
+      +" /* transcripts */"
+      +"  /* participants */"
+      +"  /* main participant clause */"
+      +"  /* access clause */"
+      +"  /* first column: */"
+      +" /* border conditions */"
+      +"  /* search criteria subqueries */"
+      +"  /* subsequent columns */"
+      +"  ORDER BY search_0_2.turn_annotation_id, search_0_2.ordinal_in_turn,"
+      +" search_0_1.ordinal_in_word",
+      sql);
+    assertEquals("with two segments, target last: number of parameters" + parameters,
+                 3, parameters.size());
+    assertEquals("^(I)$", parameters.get(0));
+    assertTrue(parameters.get(0) instanceof String);
+    assertEquals("^(kit)$", parameters.get(1));
+    assertTrue(parameters.get(1) instanceof String);
+    assertEquals("^(.*1)$", parameters.get(2));
+    assertTrue(parameters.get(2) instanceof String);
+    
+    assertEquals("with two segments, target last: Description",
+                 "orthography=kit ARPABET=.*1 segment=I", search.getDescription());
+
     // with an aligned word-layer condition
     search.setMatrix(
       new Matrix().addColumn(

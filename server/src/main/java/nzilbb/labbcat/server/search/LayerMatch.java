@@ -286,14 +286,23 @@ public class LayerMatch implements CloneableBean {
   } // end of HasPattern()
 
   /**
-   * Determines whether the given LayerMatch actually specifies a {@link #pattern},
-   * {@link #min}, or {@link #max}.
+   * Determines whether the given LayerMatch is the target or not.
    * @param layer The layer match to check.
-   * @return true if the given LayerMatch specifies a {@link #pattern}, {@link #min},
-   * or {@link #max}, false otherwise.
+   * @return true if the given LayerMatch has {@link #target} set to TRUE, false otherwise.
+   * @see #NotTarget(LayerMatch)
    */
   public static boolean IsTarget(LayerMatch layer) {
     return layer.getTarget() != null && layer.getTarget();
+  } // end of HasPattern()
+
+  /**
+   * Determines whether the given LayerMatch is the target or not, but the revers of
+   * {@link #IsTarget(LayerMatch)}.
+   * @param layer The layer match to check.
+   * @return false if the given LayerMatch has {@link #target} set to TRUE, true otherwise.
+   */
+  public static boolean NotTarget(LayerMatch layer) {
+    return !IsTarget(layer);
   } // end of HasPattern()
 
 }

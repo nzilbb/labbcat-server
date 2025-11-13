@@ -40,6 +40,7 @@ import java.util.Vector;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nzilbb.ag.*;
 import nzilbb.labbcat.server.search.Column;
 import nzilbb.labbcat.server.search.LayerMatch;
@@ -164,7 +165,13 @@ public class OneQuerySearch extends SearchTask {
     Optional<LayerMatch> columnTargetSegmentLayer = segmentMatches.stream()
       .filter(LayerMatch::IsTarget)
       .findAny();
-    if (!columnTargetSegmentLayer.isPresent()) { // no explicitly targeted layer
+    if (columnTargetSegmentLayer.isPresent()) {
+      // ensure the target layer is first in the list of segment matches
+      segmentMatches = Stream.concat(
+        segmentMatches.stream().filter(LayerMatch::IsTarget),
+        segmentMatches.stream().filter(LayerMatch::NotTarget))
+        .collect(Collectors.toList());
+    } else { // no explicitly targeted layer
       // target the first segment layer
       columnTargetSegmentLayer = segmentMatches.stream().findAny();
     }
