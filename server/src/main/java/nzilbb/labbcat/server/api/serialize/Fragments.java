@@ -194,7 +194,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     String name = parameters.getString("collection_name");
     if (name == null || name.trim().length() == 0) name = parameters.getString("name");
     if (name == null || name.trim().length() == 0) name = "fragments";
-    name = "fragments_"+IO.SafeFileNameUrl(name.trim());
+    name = "fragments_"+name.trim();
     
     String mimeType = parameters.getString("mimeType");
     if (mimeType == null) mimeType = parameters.getString("content-type");
@@ -416,7 +416,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
                 } else {
                   contentType.accept(serializer.getDescriptor().getMimeType());
                 }
-                fileName.accept(stream.getName());               
+                fileName.accept(IO.SafeFileNameUrl(stream.getName()));
                 try {
                   IO.Pump(stream.getStream(), out);       
                 } catch(IOException exception) {
@@ -443,14 +443,11 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           // don't zip a single file, just return the file
           contentType.accept(mimeType);
           NamedStream stream = files.firstElement();
-          fileName.accept(stream.getName());               
+          fileName.accept(IO.SafeFileNameUrl(stream.getName()));               
           IO.Pump(stream.getStream(), out);
         } else { /// multiple files
           contentType.accept("application/zip");
-          fileName.accept(
-            // Windows doesn't like folder names ending in dot
-            name.replaceAll("\\.$","")
-            + ".zip");
+          fileName.accept(IO.SafeFileNameUrl(name+".zip"));
           
           // create a stream to pump from
           PipedInputStream inStream = new PipedInputStream();

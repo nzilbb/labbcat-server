@@ -871,7 +871,7 @@ public class TestAnnotationAgqlToSql {
                  +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
                  +" WHERE otherLayer.ag_id = annotation.ag_id"
                  +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id"
-                 +" AND otherLayer_start.offset <= end.offset"
+                 +" AND otherLayer_start.offset < end.offset"
                  +" AND start.offset < otherLayer_end.offset) > 100"
                  +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.ordinal, annotation.annotation_id",
                  q.sql);
@@ -892,7 +892,7 @@ public class TestAnnotationAgqlToSql {
                  +" ON otherLayer.end_anchor_id = otherLayer_end.anchor_id"
                  +" WHERE otherLayer.ag_id = annotation.ag_id"
                  +" AND otherLayer.turn_annotation_id = annotation.turn_annotation_id"
-                 +" AND otherLayer_start.offset <= end.offset"
+                 +" AND otherLayer_start.offset < end.offset"
                  +" AND start.offset < otherLayer_end.offset) = 0"
                  +" ORDER BY ag_id, start.offset, end.offset, annotation.parent_id, annotation.ordinal, annotation.annotation_id",
                  q.sql);

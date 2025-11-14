@@ -93,7 +93,7 @@ public class Files extends APIRequestHandler { // TODO unit test
         name = "media";
       }
     }
-    name = IO.SafeFileNameUrl(name.trim());
+    name = name.trim();
     
     try {
       
@@ -156,10 +156,7 @@ public class Files extends APIRequestHandler { // TODO unit test
           IO.Pump(new FileInputStream(file), out);
         } else { // multiple files
           contentType.accept("application/zip");
-          fileName.accept(
-            // Windows doesn't like folder names ending in dot (and .zip will be expanded)
-            IO.SafeFileNameUrl(name).replaceAll("\\.$","")
-            + ".zip");
+          fileName.accept(IO.SafeFileNameUrl(name+".zip"));
           
           // create a stream to pump from
           PipedInputStream inStream = new PipedInputStream();
