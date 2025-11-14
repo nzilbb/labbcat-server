@@ -738,10 +738,11 @@
               </span>
               <div *ngIf="menuId == word.id"
                    id="word-menu" class="menu">
-                <div class="header" id="utterance-options">
+                <div class="header" id="utterance-options" (click)="dontHide($event)">
                   <a class="permalink"
                      i18n-title title="Permalink to utterance"
                      href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{utterance.id}}"
+                     (click)="hidePopups()"
                      i18n>Utterance</a>
                 </div>
                 <div *ngIf="visibleVideoCount + visibleAudioCount > 0"
@@ -806,10 +807,11 @@
                     i18n-title title="Edit utterance transcript"
                     ></lib-menu-option>
                 </div>
-                <div class="header" id="word-options">
+                <div class="header" id="word-options" (click)="dontHide($event)">
                   <a class="permalink"
                      i18n-title title="Permalink to word"
                      href="{{baseUrl}}transcript?transcript={{transcript.id}}#{{word.id}}"
+                     (click)="hidePopups()"
                      i18n>Word</a>
                 </div>
               </div>

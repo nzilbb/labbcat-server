@@ -1939,4 +1939,8 @@ export class TranscriptComponent implements OnInit {
         this.menuId = null;
         this.treeRoot = null;
     }
+    dontHide(event: Event): boolean {
+        if (event) event.stopPropagation();
+        return false;
+    }
 }
