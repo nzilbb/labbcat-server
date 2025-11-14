@@ -19,6 +19,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
 
     helperMatch: MatrixLayerMatch;
     imagesLocation : string;
+    animatingAppend = false;
     
     constructor(@Inject('environment') private environment) {
         this.imagesLocation = this.environment.imagesLocation;
@@ -163,15 +164,17 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
     appendToPattern(match: MatrixLayerMatch, insertion: string, focusId: string): void {
         const input = document.getElementById(focusId) as any;
         if (input) {
-            const oldCursor = input.selectionStart;
-            match.pattern = match.pattern.substring(0, oldCursor) + insertion + match.pattern.substring(oldCursor, input.value.length);
+            const oldStart = this.animatingAppend ? input.selectionEnd : input.selectionStart;
+            const oldEnd = input.selectionEnd;
+            match.pattern = match.pattern.substring(0, oldStart) + insertion + match.pattern.substring(oldEnd, input.value.length);
             input.focus();
-            // make sure toolip is updated:
             window.setTimeout(()=>{
                 input.dispatchEvent(new Event('input'));
-                input.setSelectionRange(oldCursor, oldCursor + insertion.length);
+                input.setSelectionRange(oldStart, oldStart + insertion.length);
+                this.animatingAppend = true;
                 window.setTimeout(()=>{
-                    input.setSelectionRange(oldCursor + insertion.length, oldCursor + insertion.length);
+                    input.setSelectionRange(oldStart + insertion.length, oldStart + insertion.length);
+                    this.animatingAppend = false;
                 }, 1000);
             }, 100);
         }
