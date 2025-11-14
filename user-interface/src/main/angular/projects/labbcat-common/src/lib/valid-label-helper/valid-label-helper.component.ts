@@ -96,4 +96,9 @@ export class ValidLabelHelperComponent implements OnInit {
         if (!this.regularExpression) return symbol;
         return symbol.replace(/([\?\.\*\|\^\$\(\)\{\}\[\]\-\+\\])/g,"\\$1");
     }
+    /* Block SearchMatrixComponent.hideHelper() when clicking inside valid-label-helper */
+    dontHide(event: Event): boolean {
+        if (event) event.stopPropagation();
+        return false;
+    }
 }

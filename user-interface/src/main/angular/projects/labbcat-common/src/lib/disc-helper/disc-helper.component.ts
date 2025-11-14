@@ -17,4 +17,9 @@ export class DiscHelperComponent implements OnInit {
         if (event) event.stopPropagation();
         return false;
     }
+    /* Block SearchMatrixComponent.hideHelper() when clicking inside disc-helper */
+    dontHide(event: Event): boolean {
+        if (event) event.stopPropagation();
+        return false;
+    }
 }

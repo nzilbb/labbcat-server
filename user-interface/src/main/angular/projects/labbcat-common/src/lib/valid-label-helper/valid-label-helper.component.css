@@ -19,7 +19,8 @@
     max-width: 50vw;
 }
 .valid-label-helper a {
-    padding-left: 4px;
+    margin: 0px 1px;
+    padding: 0px 1px;
     color: var(--theme-text-color);
     text-decoration: none;
 }

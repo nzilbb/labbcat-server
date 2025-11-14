@@ -10,7 +10,8 @@
     z-index: 1;
 }
 .disc-helper a {
-    padding-left: 4px;
+    margin: 0px 1px;
+    padding: 0px 1px;
     color: var(--theme-text-color);
     text-decoration: none;
 }
