@@ -31,21 +31,21 @@
             i18n-title title="Narrow down the participants to search by filtering by participant attributes"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && participantDescription"
+            *ngIf="participantIds && participantIds.length && participantDescription && !participantsFile"
             (press)="selectParticipants()"
             img="people.svg"
             i18n-label label="Modify filter"
             i18n-title title="Modify current participant filter"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && participantDescription"
+            *ngIf="participantIds && participantIds.length && participantDescription && !participantsFile"
             (press)="clearParticipantFilter()"
             img="delete.svg"
             i18n-label label="Clear filter"
             i18n-title title="Clear participant filter"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && !participantDescription"
+            *ngIf="participantIds && participantIds.length && (!participantDescription || participantsFile)"
             (press)="clearParticipantFilter()"
             img="delete.svg"
             i18n-label label="Clear selections"
@@ -120,21 +120,21 @@
             i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription"
+            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription && !transcriptsFile"
             (press)="selectTranscripts()"
             img="people.svg"
             i18n-label label="Modify filter"
             i18n-title title="Modify current transcript filter"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription"
+            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription && !transcriptsFile"
             (press)="clearTranscriptFilter()"
             img="delete.svg"
             i18n-label label="Clear filter"
             i18n-title title="Clear transcript filter"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && !transcriptDescription"
+            *ngIf="transcriptIds && transcriptIds.length && (!transcriptDescription || transcriptsFile)"
             (press)="clearTranscriptFilter()"
             img="delete.svg"
             i18n-label label="Clear selections"
