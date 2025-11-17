@@ -147,6 +147,7 @@ export class SearchComponent implements OnInit {
         this.participantDescription = "";
         this.participantIds = [];
         this.participantCount = 0;
+        this.matrix.participantQuery = "";
         sessionStorage.removeItem("lastQueryParticipants");
         this.router.navigate([], {
             queryParams: {
@@ -171,6 +172,7 @@ export class SearchComponent implements OnInit {
         this.transcriptDescription = "";
         this.transcriptIds = [];
         this.transcriptCount = 0;
+        this.matrix.transcriptQuery = "";
         sessionStorage.removeItem("lastQueryTranscripts");
         this.router.navigate([], {
             queryParams: {
