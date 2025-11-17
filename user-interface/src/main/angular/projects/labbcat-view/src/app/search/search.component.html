@@ -281,7 +281,7 @@
     <app-search-matrix
       [schema]="schema"
       [(columns)]="matrix.columns"
-      (keydown.enter)="search()"
+      (searchStarted)="search()"
       ></app-search-matrix>
   </div>
   <div class="search-button">
