@@ -424,7 +424,9 @@ export class SearchComponent implements OnInit {
             } else if (/.*\t.*/.test(lines[0])) { // TSV
                 lines = lines.map(l=>l.split("\t")[0]);
             }
-            console.log("non-blank lines " + lines.length);
+            // remove possible 'participant' header line (e.g. exported from participants page)
+            lines = lines.filter(l => l != 'participant');
+            console.log("non-blank, non-header lines " + lines.length);
             if (lines.length == 0) {
                 component.messageService.error(
                     "File is empty: " + component.participantsFile.name); // TODO i18n
@@ -482,7 +484,9 @@ export class SearchComponent implements OnInit {
             } else if (/.*\t.*/.test(lines[0])) { // TSV
                 lines = lines.map(l=>l.split("\t")[0]);
             }
-            console.log("non-blank lines " + lines.length);
+            // remove possible 'transcript' header line (e.g. exported from transcripts page)
+            lines = lines.filter(l => l != 'transcript');
+            console.log("non-blank, non-header lines " + lines.length);
             if (lines.length == 0) {
                 component.messageService.error(
                     "File is empty: " + component.transcriptsFile.name); // TODO i18n
