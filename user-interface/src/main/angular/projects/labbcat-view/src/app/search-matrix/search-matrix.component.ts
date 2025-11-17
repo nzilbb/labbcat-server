@@ -213,7 +213,6 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         const layer = this.schema.layers[match.id];
         return layer
             && (layer.type == "ipa"
-                || this.hasValidLabels(layer)
                 || layer.id == this.schema.wordLayerId);
     }
 
