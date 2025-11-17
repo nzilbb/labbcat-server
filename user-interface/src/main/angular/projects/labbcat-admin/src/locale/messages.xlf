@@ -1784,7 +1784,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">382,384</context>
+          <context context-type="linenumber">402,404</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -1800,7 +1800,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">287,289</context>
+          <context context-type="linenumber">302,304</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -1816,7 +1816,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">195,197</context>
+          <context context-type="linenumber">205,207</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -1832,7 +1832,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">131,133</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -2155,7 +2155,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">74,76</context>
+          <context context-type="linenumber">76,78</context>
         </context-group>
         <note priority="1" from="description">menu label</note>
       </trans-unit>
@@ -2709,38 +2709,65 @@
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
+      <trans-unit id="7126464771610287155" datatype="html">
+        <source>all</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">48,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">102,103</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">156,157</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">243,244</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">339,340</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">439,440</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="2901819387880218650" datatype="html">
         <source>Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">60,62</context>
+          <context context-type="linenumber">62,64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">112,114</context>
+          <context context-type="linenumber">117,119</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">181,183</context>
+          <context context-type="linenumber">191,193</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">273,275</context>
+          <context context-type="linenumber">288,290</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">368,370</context>
+          <context context-type="linenumber">388,390</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">458,460</context>
+          <context context-type="linenumber">483,485</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1000762815409704864" datatype="html">
         <source>Transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">76,78</context>
+          <context context-type="linenumber">78,80</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -2748,7 +2775,7 @@
         <source>Span</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">128,131</context>
+          <context context-type="linenumber">133,136</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -2756,7 +2783,7 @@
         <source>Phrase</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">197,200</context>
+          <context context-type="linenumber">207,210</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -2764,7 +2791,7 @@
         <source>Word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">289,292</context>
+          <context context-type="linenumber">304,307</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -2772,7 +2799,7 @@
         <source>Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">384,387</context>
+          <context context-type="linenumber">404,407</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -2780,42 +2807,42 @@
         <source>Show full names for participant/transcript attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">474,477</context>
+          <context context-type="linenumber">499,502</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5914843668595618981" datatype="html">
         <source>Show attribute prefixes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">481,484</context>
+          <context context-type="linenumber">506,509</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4092353835228061492" datatype="html">
         <source>Show icons that correspond to layer properties</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">487,488</context>
+          <context context-type="linenumber">512,513</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5398209608237180342" datatype="html">
         <source>Show layer icons</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">495,497</context>
+          <context context-type="linenumber">520,522</context>
         </context-group>
       </trans-unit>
       <trans-unit id="629245355395015846" datatype="html">
         <source>Show the number of annotations in each layer</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">499,502</context>
+          <context context-type="linenumber">524,527</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1008780503793524700" datatype="html">
         <source>Show annotation counts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">506,510</context>
+          <context context-type="linenumber">531,535</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4701377957895724261" datatype="html">

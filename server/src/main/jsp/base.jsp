@@ -376,6 +376,7 @@
     try {
       if (userAgent != null
           && (userAgent.startsWith("Java/") // plain Java connection (probably jsendpraat)
+              || userAgent.startsWith("labbcat-py/") // Python package
               || (labbcatRVersion != null // nzilbb.labbcat R package
                   // and version <= 1.3-0
                   && new SemanticVersionComparator().compare(labbcatRVersion, "1.3-0") <= 0))) {

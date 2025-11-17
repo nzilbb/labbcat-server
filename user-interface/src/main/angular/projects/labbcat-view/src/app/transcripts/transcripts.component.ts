@@ -146,7 +146,11 @@ export class TranscriptsComponent implements OnInit {
                     queryString = queryString.replace(pattern, "");
                 }
             }
-            if (queryString) { // there is a query string
+            if (queryString // there is a query string
+                || (window.location.search||"") // or list of transcripts for a participant
+                       .startsWith("?transcript_expression=labels(%22participant%22)")
+                || (window.location.search||"") // ...or several participants
+                       .startsWith("?participant_expression=%5B")) {
                 // nothing further to do
                 resolve();
             } else {
@@ -193,10 +197,12 @@ export class TranscriptsComponent implements OnInit {
             for (let pattern of this.passthroughPatterns) { // but not the passthrough parameters
                 queryString = queryString.replace(pattern, "");
             }
-            // strip ay leading/trailing parameter delimiters
+            // strip any leading/trailing parameter delimiters
             queryString = queryString.replace(/^[?&]/,"").replace(/[?&]$/,"");
-            // save the query in session storage
-            sessionStorage.setItem("lastQueryTranscripts", queryString); 
+            if (queryString) {
+                // save the query in session storage
+                sessionStorage.setItem("lastQueryTranscripts", queryString);
+            }
             // page number
             this.p = parseInt(params["p"]) || 1;
             if (this.p < 1) this.p = 1;
@@ -498,14 +504,7 @@ export class TranscriptsComponent implements OnInit {
                             .filter(id => !this.selectedIds.includes(id)));
                         
                         // attribute values
-                        for (let id of this.transcriptIds) {
-                            // if we don't already have their attributes
-                            if (!this.attributeValues[id]) {
-                                this.attributeValues[id] = {};
-                                // get the attributes
-                                this.getAttributeValues(id);
-                            }
-                        } // next transcript
+                        this.loadNextTranscriptAttributes();
                         
                         // create page links
                         this.pageLinks = [];
@@ -553,14 +552,26 @@ export class TranscriptsComponent implements OnInit {
         }
     }
 
-    getAttributeValues(id: string): void {
-        this.labbcatService.labbcat.getTranscript(
-            id, this.filterLayers.map(layer => layer.id),
-            (transcript, errors, messages) => {
-                if (errors) errors.forEach(m => this.messageService.error(m));
-                if (messages) messages.forEach(m => this.messageService.info(m));
-                this.attributeValues[id] = transcript;
-            });
+    loadNextTranscriptAttributes(): void {
+        // look for the next transcript without attributes
+        for (let id of this.transcriptIds) {
+            // if we don't already have their attributes
+            if (!this.attributeValues[id]) {
+                this.attributeValues[id] = {};
+                this.labbcatService.labbcat.getTranscript(
+                    id, this.filterLayers.map(layer => layer.id),
+                    (transcript, errors, messages) => {
+                        if (errors) {
+                            errors.filter(m => m != "cancelled")
+                                .forEach(m => this.messageService.error(m));
+                        }
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        this.attributeValues[id] = transcript;
+                        this.loadNextTranscriptAttributes();
+                    });
+                break; // only one transcript per loadNextTranscriptAttributes invocation
+            }
+        } // next transcript
     }
 
     goToPage(p: number): void {
@@ -595,6 +606,7 @@ export class TranscriptsComponent implements OnInit {
 
     /** Button action */
     clearFilters() : void {
+        sessionStorage.setItem("lastQueryTranscripts", "");
         this.initializeFilters().then(()=>{
             this.listTranscripts();
         });

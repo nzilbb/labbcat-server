@@ -44,7 +44,7 @@ export class TranscriptComponent implements OnInit {
     displayLayerIds: boolean;
     displayAttributePrefixes: boolean;
 
-    defaultLayerIds = ["noise","comment"];
+    defaultLayerIds: string[];
     layerSelectionEnabled = false;
     selectedLayerIds : string[];
     interpretedRaw: { [key: string] : boolean };
@@ -141,13 +141,27 @@ export class TranscriptComponent implements OnInit {
                         this.defaultLayerIds = sessionLayerIds as string[];
                     }
                 }
-                if (!this.defaultLayerIds) this.defaultLayerIds = [];
                 if (searchedLayerIds && searchedLayerIds.length > 0) {
+                    if (!this.defaultLayerIds) this.defaultLayerIds = [];
                     for (let l of searchedLayerIds) {
                         if (!this.defaultLayerIds.includes(l)) {
                             this.defaultLayerIds.push(l);
                         }
                     }
+                }
+                if (!this.defaultLayerIds) {
+                    this.labbcatService.labbcat.getSystemAttribute(
+                        "defaultLayers", (attribute, errors, messages) => {
+                            if (attribute.value) {
+                                this.defaultLayerIds = attribute.value.split(",")
+                                    .filter(l=>l); // no blanks
+                            } else {
+                                this.defaultLayerIds = ["noise", "comment"];
+                            }
+                            resolve();
+                        });
+                } else {
+                    resolve();
                 }
             }); // loadThread ... then
         }); // Promise
@@ -473,7 +487,9 @@ export class TranscriptComponent implements OnInit {
                     if (layer.id == this.schema.episodeLayerId) continue;
                     if (layer.id == this.schema.participantLayerId) continue;
                     // a temporal layer
-                    this.layerStyles[l] = { color: "silver" };
+                    if (!this.selectedLayerIds.includes(l)) { // not ticked
+                        this.layerStyles[l] = { color: "silver" };
+                    }
                     this.labbcatService.labbcat.countAnnotations(
                         this.transcript.id, l, (count, errors, messages) => {
                             this.layerCounts[l] = count;
@@ -485,7 +501,10 @@ export class TranscriptComponent implements OnInit {
                                     this.schema.layers[l].description
                                         += ` (${count} annotations)`; // TODO i18n
                                 }
-                                this.layerStyles[l] = {};
+                                if (!this.selectedLayerIds.includes(l)) { // not ticked
+                                    // clear style, so the name is black instead of grey
+                                    this.layerStyles[l] = {};
+                                }
                             } else {
                                 this.schema.layers[l].description
                                     += ' (0 annotations)'; // TODO i18n

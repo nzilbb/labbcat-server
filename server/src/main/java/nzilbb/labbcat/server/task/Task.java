@@ -116,7 +116,8 @@ public class Task extends Thread implements MonitorableTask {
    * @param ex the last task exception, or null if no exception has occurred.
    */
   public void setLastException(Throwable ex) {
-    lastException = ex; 
+    lastException = ex;
+    setStatus("ERROR: "+ex.toString());
   }
 
   /**

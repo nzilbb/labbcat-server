@@ -296,4 +296,7 @@ export class LayerCheckboxesComponent implements OnInit {
         this.displayCounts = !this.displayCounts;
         sessionStorage.setItem("displayLayerCounts", JSON.stringify(this.displayCounts));
     }
+    blankZeroIncludeCount(input: HTMLInputElement): void {
+        if (Number(input.value) <= 0) input.value = "";
+    }
 }

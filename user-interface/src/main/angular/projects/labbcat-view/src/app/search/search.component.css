@@ -27,6 +27,10 @@
 
     overflow-x: clip;
 }
+#overlap_threshold {
+    margin-left: 0.5em;
+    width: 2.5em;
+}
 .search-matrix {
     padding-top: 15px;
 }

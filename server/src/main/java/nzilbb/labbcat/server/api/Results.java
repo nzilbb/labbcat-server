@@ -442,10 +442,10 @@ public class Results extends APIRequestHandler { // TODO unit test
         .map(l -> l.getId())
         .filter(id -> layers.contains(id))
         .forEach(id -> {
-            csvLayers.put(
-              id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id))
-                .orElse(annotationsPerLayer)));
+            String includeCount = parameters.getString("include_count_"+id);
+            if ("".equals(includeCount)) includeCount = "0";
+            if (includeCount == null) includeCount = annotationsPerLayer;
+            csvLayers.put(id, Integer.valueOf(includeCount));
           });
       // transcript attributes
       schema.getRoot().getChildren().values().stream()
@@ -456,10 +456,10 @@ public class Results extends APIRequestHandler { // TODO unit test
         .filter(id -> !id.equals(schema.getEpisodeLayerId()))
         .filter(id -> layers.contains(id))
         .forEach(id -> {
-            csvLayers.put(
-              id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id))
-                .orElse(annotationsPerLayer)));
+            String includeCount = parameters.getString("include_count_"+id);
+            if ("".equals(includeCount)) includeCount = "0";
+            if (includeCount == null) includeCount = annotationsPerLayer;
+            csvLayers.put(id, Integer.valueOf(includeCount));
           });
       // span layers
       schema.getRoot().getChildren().values().stream()
@@ -467,10 +467,10 @@ public class Results extends APIRequestHandler { // TODO unit test
         .map(l -> l.getId())
         .filter(id -> layers.contains(id))
         .forEach(id -> {
-            csvLayers.put(
-              id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id))
-                .orElse(annotationsPerLayer)));
+            String includeCount = parameters.getString("include_count_"+id);
+            if ("".equals(includeCount)) includeCount = "0";
+            if (includeCount == null) includeCount = annotationsPerLayer;
+            csvLayers.put(id, Integer.valueOf(includeCount));
           });
       // phrase layers
       schema.getTurnLayer().getChildren().values().stream()
@@ -478,10 +478,10 @@ public class Results extends APIRequestHandler { // TODO unit test
         .filter(id -> !schema.getWordLayerId().equals(id))
         .filter(id -> layers.contains(id))
         .forEach(id -> {
-            csvLayers.put(
-              id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id))
-                .orElse(annotationsPerLayer)));
+            String includeCount = parameters.getString("include_count_"+id);
+            if ("".equals(includeCount)) includeCount = "0";
+            if (includeCount == null) includeCount = annotationsPerLayer;
+            csvLayers.put(id, Integer.valueOf(includeCount));
           });
       // word layers
       if (layers.contains(schema.getWordLayerId())) {
@@ -492,27 +492,27 @@ public class Results extends APIRequestHandler { // TODO unit test
         .filter(id -> !"segment".equals(id))
         .filter(id -> layers.contains(id))
         .forEach(id -> {
-            csvLayers.put(
-              id, Integer.valueOf(
-                Optional.ofNullable(parameters.getString("include_count_"+id))
-                .orElse(annotationsPerLayer)));
+            String includeCount = parameters.getString("include_count_"+id);
+            if ("".equals(includeCount)) includeCount = "0";
+            if (includeCount == null) includeCount = annotationsPerLayer;
+            csvLayers.put(id, Integer.valueOf(includeCount));
           });
       // segment layers
       if (schema.getLayers().containsKey("segment")) {
+        String includeSegmentCount = parameters.getString("include_count_segment");
+        if ("".equals(includeSegmentCount)) includeSegmentCount = "0";
+        if (includeSegmentCount == null) includeSegmentCount = annotationsPerLayer;
         if (layers.contains("segment")) {
-          csvLayers.put(
-            "segment", Integer.valueOf(
-              Optional.ofNullable(parameters.getString("include_count_segment"))
-              .orElse(annotationsPerLayer)));
+          csvLayers.put("segment", Integer.valueOf(includeSegmentCount));
         }
         schema.getLayer("segment").getChildren().values().stream()
           .map(l -> l.getId())
           .filter(id -> layers.contains(id))
           .forEach(id -> {
-              csvLayers.put(
-                id, Integer.valueOf(
-                  Optional.ofNullable(parameters.getString("include_count_"+id))
-                  .orElse(annotationsPerLayer)));
+              String includeCount = parameters.getString("include_count_"+id);
+              if ("".equals(includeCount)) includeCount = "0";
+              if (includeCount == null) includeCount = annotationsPerLayer;
+              csvLayers.put(id, Integer.valueOf(includeCount));
             });
       }
      
@@ -581,7 +581,7 @@ public class Results extends APIRequestHandler { // TODO unit test
           final String finalSearchName = searchName;
           
           if (contentType.startsWith("text/csv")) {
-            StringBuilder name = new StringBuilder(IO.SafeFileNameUrl(searchName));
+            StringBuilder name = new StringBuilder(searchName);
             if (name.length() > 150) name.setLength(150);
             if (includeCsvPreamble) { // reloaded CSV results
               if (targetOffset < 0) {
@@ -592,10 +592,10 @@ public class Results extends APIRequestHandler { // TODO unit test
               for (String id : layers) {
                 if (name.length() > 150) break;
                 name.append("_");
-                name.append(IO.SafeFileNameUrl(id));         
+                name.append(id);         
               }
             }
-            fileName.accept("results_" + name + ".csv");
+            fileName.accept(IO.SafeFileNameUrl("results_" + name + ".csv"));
           }
           List<String> preambleHeaders = null;
           if (includeCsvPreamble) {
@@ -653,7 +653,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                     Iterator<String> layerIds = csvLayers.keySet().stream()
                       .map(id -> {
                           Vector<String> reps = new Vector<String>();
-                          for (int i = 0; i < csvLayers.get(id); i++) reps.add(id);
+                          for (int i = 0; i < Math.max(csvLayers.get(id), 1); i++) reps.add(id);
                           return reps.stream();
                         })
                       .flatMap(i -> i)
@@ -684,7 +684,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                         if (jsonOut != null) jsonOut.writeNull();
                         if (csvOut != null) {
                           csvOut.print("");
-                          if (offsetsIncluded) {
+                          if (offsetsIncluded && csvLayers.get(layer.getId()) > 0) {
                             switch (layer.getAlignment()) { // offsets
                               case Constants.ALIGNMENT_INTERVAL:
                                 csvOut.print(""); // start
@@ -724,6 +724,7 @@ public class Results extends APIRequestHandler { // TODO unit test
                             + layer + " <> " + annotation.getLayerId() + " " + annotation.getLabel();
                           csvOut.print(annotation.getLabel());
                           if (offsetsIncluded
+                              && csvLayers.get(layer.getId()) > 0
                               && (layer.getAlignment() != Constants.ALIGNMENT_NONE
                                   || layer.getId().equals(finalTargetLayer))) { // offsets
                             String[] anchorIds = {
@@ -849,14 +850,14 @@ public class Results extends APIRequestHandler { // TODO unit test
             Layer layer = schema.getLayer(id);
             switch (layer.getAlignment()) {
               case Constants.ALIGNMENT_INTERVAL:
-                if (csvLayers.get(id) == 1) {
+                if (csvLayers.get(id) <= 1) {
                   csvOut.print(csvHeaderPrefix + id);
-                  if (offsetsIncluded) {
+                  if (offsetsIncluded && csvLayers.get(id) > 0) {
                     csvOut.print(csvHeaderPrefix + id + " start");
                     csvOut.print(csvHeaderPrefix + id + " end");
                   }
                 } else {
-                  for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                  for (int i = 1; i <= Math.max(csvLayers.get(id), 1); i++) {
                     csvOut.print(csvHeaderPrefix + id + " " + i);
                     if (offsetsIncluded) {
                       csvOut.print(csvHeaderPrefix + id + " " + i + " start");
@@ -866,13 +867,13 @@ public class Results extends APIRequestHandler { // TODO unit test
                 }
                 break;
               case Constants.ALIGNMENT_INSTANT:
-                if (csvLayers.get(id) == 1) {
+                if (csvLayers.get(id) <= 1) {
                   csvOut.print(csvHeaderPrefix + id);
-                  if (offsetsIncluded) {
+                  if (offsetsIncluded && csvLayers.get(id) > 0) {
                     csvOut.print(csvHeaderPrefix + id + " offset");
                   }
                 } else {
-                  for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                  for (int i = 1; i <= Math.max(csvLayers.get(id), 1); i++) {
                     csvOut.print(csvHeaderPrefix + id + " " + i);
                     if (offsetsIncluded) {
                       csvOut.print(csvHeaderPrefix + id + " " + i + " offset");
@@ -884,23 +885,23 @@ public class Results extends APIRequestHandler { // TODO unit test
                 if (layer.getParentId() == null
                     || layer.getParentId().equals(schema.getRoot().getId())
                     || layer.getParentId().equals(schema.getParticipantLayerId())) { // attribute
-                  if (csvLayers.get(id) == 1) {
+                  if (csvLayers.get(id) <= 1) {
                     csvOut.print(id);
                   } else {
-                    for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                    for (int i = 1; i <= Math.max(csvLayers.get(id), 1); i++) {
                       csvOut.print(id + " " + i);
                     }
                   }
                 } else { // tag
-                  if (csvLayers.get(id) == 1) {
+                  if (csvLayers.get(id) <= 1) {
                     csvOut.print(csvHeaderPrefix + id);
-                    if (id.equals(targetLayer) && offsetsIncluded) {
+                    if (id.equals(targetLayer) && offsetsIncluded && csvLayers.get(id) > 0) {
                       // always output alignments of target layer
                       csvOut.print(csvHeaderPrefix + id + " start");
                       csvOut.print(csvHeaderPrefix + id + " end");
                     }
                   } else {
-                    for (int i = 1; i <= csvLayers.get(id) ; i++) {
+                    for (int i = 1; i <= Math.max(csvLayers.get(id), 1); i++) {
                       csvOut.print(csvHeaderPrefix + id + " " + i);
                       if (id.equals(targetLayer) && offsetsIncluded) {
                         // always output alignments of target layer
