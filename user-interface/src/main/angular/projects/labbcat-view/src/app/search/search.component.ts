@@ -151,6 +151,7 @@ export class SearchComponent implements OnInit {
         sessionStorage.removeItem("lastQueryParticipants");
         this.router.navigate([], {
             queryParams: {
+                searchJson: null,
                 participant_expression: null,
                 participants: null,
                 current_tab: 'Participants'
@@ -176,6 +177,7 @@ export class SearchComponent implements OnInit {
         sessionStorage.removeItem("lastQueryTranscripts");
         this.router.navigate([], {
             queryParams: {
+                searchJson: null,
                 transcript_expression: null,
                 transcripts: null,
                 current_tab: 'Transcripts'
