@@ -87,3 +87,6 @@ label > span {
 .disabled {
     color: silver;
 }
+label > :first-child {
+    margin-left: 3px;
+}

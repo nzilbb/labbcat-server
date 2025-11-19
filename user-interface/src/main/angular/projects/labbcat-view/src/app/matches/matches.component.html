@@ -277,14 +277,14 @@
       </select>
     </label>
     <div i18n-title title="Prefix each exported file name with the match number"><label>
-        <span i18n>Add prefixes to file names</span>
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
+        <span i18n>Add prefixes to file names</span>
     </label></div>
     <div i18n-title title="Include a TextGrid tier that tags target annotation(s) in each file"><label>
-      <span i18n [class.disabled]="mimeType != 'text/praat-textgrid'">Include "target" tier</span>
       <input name="tag" type="checkbox"
         [checked]="mimeType == 'text/praat-textgrid'"
         [disabled]="mimeType != 'text/praat-textgrid'">
+      <span i18n [class.disabled]="mimeType != 'text/praat-textgrid'">Include "target" tier</span>
     </label></div>
     <fieldset>
     <legend i18n>Layers to export</legend>
@@ -306,8 +306,8 @@
   </div>
   <div id="audio-options" class="{{showAudioOptions?'short-unhidden-panel':'short-hidden-panel'}}">
     <div i18n-title title="Prefix each exported file name with the match number"><label>
-        <span i18n>Add prefixes to file names</span>
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
+        <span i18n>Add prefixes to file names</span>
     </label></div>
     <div *ngIf="task.csvColumns" id="audio-columns">
       <div class="header">Columns</div>
