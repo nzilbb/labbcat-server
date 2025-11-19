@@ -142,7 +142,7 @@ public class Data extends APIRequestHandler { // TODO unit test
               StringBuilder name = new StringBuilder()
                 .append(graph.getId())
                 .append("_[")
-                .append(IO.SafeFileNameUrl(layer.getId()))
+                .append(layer.getId())
                 .append("]__")
                 .append(offsetFormat.format(anchors[0].getOffset()));
               if (anchors.length > 1) {
@@ -155,7 +155,7 @@ public class Data extends APIRequestHandler { // TODO unit test
                 // stream out the file
                 contentType.accept(layer.getType());
                 if (parameters.get("show") == null) { // not showing in the browser
-                  fileName.accept(name.toString());
+                  fileName.accept(IO.SafeFileNameUrl(name.toString()));
                 }
                 IO.Pump​(new FileInputStream(file), out);
                 return;
@@ -164,11 +164,11 @@ public class Data extends APIRequestHandler { // TODO unit test
                   contentType.accept("application/zip");
                   String zipName = Optional.ofNullable(parameters.getString("name"))
                     .orElse(layer.getId());
-                  fileName.accept(zipName + ".zip");
+                  fileName.accept(IO.SafeFileNameUrl(zipName + ".zip"));
                   zipOut = new ZipOutputStream(out);
                 } // start ZIP stream
                 zipOut.putNextEntry(
-                  new ZipEntry(name.toString()));
+                  new ZipEntry(IO.SafeFileNameUrl(name.toString())));
                 // pump the data into it
                 IO.Pump(new FileInputStream(file), zipOut, false);
               } // multiple files

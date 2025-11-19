@@ -581,7 +581,7 @@ public class Results extends APIRequestHandler { // TODO unit test
           final String finalSearchName = searchName;
           
           if (contentType.startsWith("text/csv")) {
-            StringBuilder name = new StringBuilder(IO.SafeFileNameUrl(searchName));
+            StringBuilder name = new StringBuilder(searchName);
             if (name.length() > 150) name.setLength(150);
             if (includeCsvPreamble) { // reloaded CSV results
               if (targetOffset < 0) {
@@ -592,10 +592,10 @@ public class Results extends APIRequestHandler { // TODO unit test
               for (String id : layers) {
                 if (name.length() > 150) break;
                 name.append("_");
-                name.append(IO.SafeFileNameUrl(id));         
+                name.append(id);         
               }
             }
-            fileName.accept("results_" + name + ".csv");
+            fileName.accept(IO.SafeFileNameUrl("results_" + name + ".csv"));
           }
           List<String> preambleHeaders = null;
           if (includeCsvPreamble) {

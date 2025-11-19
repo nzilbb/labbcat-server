@@ -438,7 +438,11 @@
           <div *ngIf="transcript[layer.id]"
                 id="{{layer.id}}" class="values">
             <div *ngFor="let annotation of transcript[layer.id]" class="value">
-              <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">{{annotation.label}}</span>
+              <span class="label" title="{{annotation.annotator}} {{annotation.when | date:'medium'}}">
+                <ng-container *ngIf="layer.subtype != 'url'">{{annotation.label}}</ng-container>
+                <a *ngIf="layer.subtype == 'url'" target="{{layer.id}}"
+                   href="{{annotation.label}}">{{annotation.label}}</a>
+              </span>
               <ng-container *ngIf="layer.type == 'boolean'">
                 <span *ngIf="annotation.label == '1'" class="description" i18n>true</span>
                 <span *ngIf="annotation.label == '0'" class="description" i18n>false</span>
@@ -702,7 +706,7 @@
                              [(ngModel)]="annotation.label"
                              (keyup)="annotation._changed = true"
                              (keyup.Enter)="saveTag(annotation)"
-                             [appAutofocus]="true">
+                             appAutofocus="select">
                       <lib-small-button *ngIf="annotation._editing"
                                         i18n-title title="Save changes to tag"
                                         class="save"

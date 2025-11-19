@@ -140,7 +140,9 @@ export class ParticipantsComponent implements OnInit {
                     queryString = queryString.replace(pattern, "");
                 }
             }
-            if (queryString && queryString != "?") { // there is a query string
+            if ((queryString && queryString != "?") // there is a query string
+                || (window.location.search||"") // or list of participants for a transcript
+                       .startsWith("?transcript_expression=%5B")) {
                 // nothing further to do
                 resolve();
             } else {
@@ -194,8 +196,10 @@ export class ParticipantsComponent implements OnInit {
             }
             // strip ay leading/trailing parameter delimiters
             queryString = queryString.replace(/^[?&]/,"").replace(/[?&]$/,"");
-            // save the query in session storage
-            sessionStorage.setItem("lastQueryParticipants", queryString); 
+            if (queryString) {
+                // save the query in session storage
+                sessionStorage.setItem("lastQueryParticipants", queryString);
+            }
             
             // page number
             this.p = parseInt(params["p"]) || 1;
@@ -518,13 +522,11 @@ export class ParticipantsComponent implements OnInit {
                         
                         // attribute values
                         for (let id of this.participantIds) {
-                            // if we don't already have their attributes
-                            if (!this.attributeValues[id]) {
-                                this.attributeValues[id] = {};
-                                // get the attributes
-                                this.getAttributeValues(id);
+                            if (!this.attributeValues[id]) { // no attributes object
+                                this.attributeValues[id] = {}; // create one so the UI works
                             }
-                        } // next participant
+                        }
+                        this.loadNextParticipantAttributes();
 
                         // create page links
                         this.pageLinks = [];
@@ -571,26 +573,39 @@ export class ParticipantsComponent implements OnInit {
         }
     }
 
-    getAttributeValues(id: string): void {
-        this.labbcatService.labbcat.getParticipant(
-            id, this.filterLayers.map(layer => layer.id),
-            (participant, errors, messages) => {
-                if (errors) errors.forEach(m => this.messageService.error(m));
-                if (messages) messages.forEach(m => this.messageService.info(m));
-                this.attributeValues[id] = participant;
-                
-                // get the number of transcripts the participant is in
-                this.labbcatService.labbcat.countMatchingTranscriptIds(
-                    "labels('"+this.esc(this.schema.participantLayerId)+"')"
-                    +".includes('"+this.esc(id)+"')",
-                    (count, errors, messages) => {
-                        if (this.attributeValues[id].annotations) {
-                            this.attributeValues[id].annotations["--transcript-count"] = [{
-                                label : count
-                            }];
+    loadNextParticipantAttributes(): void {
+        // look for the next participant without attributes
+        for (let id of this.participantIds) {
+            // if we don't already have their attributes
+            if (Object.keys(this.attributeValues[id]).length == 0) {
+                // get the attributes
+                this.labbcatService.labbcat.getParticipant(
+                    id, this.filterLayers.map(layer => layer.id),
+                    (participant, errors, messages) => {
+                        if (errors) {
+                            errors.filter(m => m != "cancelled")
+                                .forEach(m => this.messageService.error(m));
                         }
+                        if (messages) messages.forEach(m => this.messageService.info(m));
+                        this.attributeValues[id] = participant;
+                        
+                        // get the number of transcripts the participant is in
+                        this.labbcatService.labbcat.countMatchingTranscriptIds(
+                            "labels('"+this.esc(this.schema.participantLayerId)+"')"
+                                +".includes('"+this.esc(id)+"')",
+                            (count, errors, messages) => {
+                                if (this.attributeValues[id].annotations) {
+                                    this.attributeValues[id].annotations["--transcript-count"] = [{
+                                        label : count
+                                    }];
+                                }
+                            });
+                        
+                        this.loadNextParticipantAttributes();
                     });
-            });
+                break; // only one participant per loadNextParticipantAttributes invocation
+            }
+        } // next participant
     }
 
     goToPage(p: number): void {
@@ -641,6 +656,7 @@ export class ParticipantsComponent implements OnInit {
     
     /** Button action */
     clearFilters() : void {
+        sessionStorage.setItem("lastQueryParticipants", "");
         this.initializeFilters().then(()=>{
             this.listParticipants();
         });
