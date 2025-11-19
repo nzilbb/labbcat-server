@@ -1,6 +1,9 @@
 <h1 id="title">{{name}}</h1>
 
-<p>{{status}} <span *ngIf="totalUtteranceDuration">(<span i18n>Total utterance duration:</span> {{totalUtteranceDuration | duration}})</span></p>
+<p>{{task.csv ? status.replace('Found', 'Uploaded') : status}}
+  <span *ngIf="task.csv">from {{task.csv}}</span>
+  <span *ngIf="totalUtteranceDuration">(<span i18n>Total utterance duration:</span> {{totalUtteranceDuration | duration}})</span>
+</p>
 
 <lib-wait *ngIf="readingMatches"></lib-wait>
 <form #form method="POST" id="frm" *ngIf="matches.length" todotarget="_blank">
@@ -16,10 +19,16 @@
   <input #todo type="hidden" name="todo" value="">
   <div id="check-all-top">
     
-    <label i18n-title title="Select all results including those not shown here">
-      <input type="checkbox" [(checked)]="selectAll" (change)="all()"
-             [disabled]="task.csv">
+    <label *ngIf="!task.csv"
+      i18n-title title="Select all results, including those not shown here">
+      <input type="checkbox" [(checked)]="selectAll" (change)="all()">
       <span i18n="select all results">Select all results</span>
+      ({{matchCount}})
+    </label>
+    <label *ngIf="task.csv"
+      i18n-title title="It's not possible to select individual results for re-uploaded matches">
+      <input type="checkbox" checked disabled>
+      <span i18n="select all results">All results selected</span>
       ({{matchCount}})
     </label>
     
@@ -49,10 +58,19 @@
       <div class="match-number">
         {{matches.indexOf(match) + 1}}.
       </div>
-      <div class="match-id">
+      <div *ngIf="!task.csv" class="match-id">
         <lib-grouped-checkbox
           group="match"
           i18n-title title="To select individual results, untick 'select all N results'"
+          name="utterance"
+          value="{{match.MatchId}}"
+          [checked]="match._selected" (checkedChange)="match._selected = !match._selected"
+          [disabled]="selectAll"></lib-grouped-checkbox>
+      </div>
+      <div *ngIf="task.csv" class="match-id">
+        <lib-grouped-checkbox
+          group="match"
+          i18n-title title="It's not possible to select individual results for re-uploaded matches"
           name="utterance"
           value="{{match.MatchId}}"
           [checked]="match._selected" (checkedChange)="match._selected = !match._selected"
@@ -89,10 +107,12 @@
       </lib-button>
     </div>
   <div id="check-all-bottom">
-    <label i18n-title title="Select all results including those not shown here">
+    <label *ngIf="!task.csv"
+      i18n-title title="Select all results including those not shown here">
       <input type="checkbox" [(checked)]="selectAll" (change)="all()"             
              [disabled]="task.csv">
-      <span i18n="select all results">Select all results</span>
+      <span i18n="select all results"
+        [class.disabled]="task.csv">Select all results</span>
       ({{matchCount}})
     </label>
   </div>
@@ -325,16 +345,27 @@
       </label></div>
     </div>
   </div>
-  <div id="dictionary" class="controls">
+  <div *ngIf="!task.csv" id="dictionary" class="controls">
     <lib-button (press)="dictionary();"
-                [disabled]="task.csv"                
                 img="book.svg" icon="📕"
                 i18n-label label="Dictionary Export"></lib-button>
     <lib-button (press)="dictionaryOptions();"
-                [disabled]="task.csv"                
                 img="down-triangle.png"
                 [icon]="showDictionaryOptions ? '▲' : '▼'"
                 [imgStyle]="showDictionaryOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
+                i18n-title title="Dictionary options"
+                ></lib-button>
+  </div>
+  <div *ngIf="task.csv" id="dictionary" class="controls">
+    <lib-button (press)="dictionary();"
+                [disabled]="true"
+                img="book.svg" icon="📕"
+                i18n-label label="Dictionary Export"
+                i18n-title title="Dictionary Export (not possible with re-uploaded matches)"></lib-button>
+    <lib-button (press)="dictionaryOptions();"
+                [disabled]="true"
+                img="down-triangle.png"
+                icon="▼"
                 i18n-title title="Dictionary options"
                 ></lib-button>
   </div>
