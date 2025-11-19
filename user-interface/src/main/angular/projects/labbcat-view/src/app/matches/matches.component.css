@@ -84,3 +84,6 @@ label > span {
         flex-direction: column;
     }
 }
+.disabled {
+    color: silver;
+}
