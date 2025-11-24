@@ -1,7 +1,7 @@
 <h1 id="title">{{name}}</h1>
 
-<p>{{task.csv ? status.replace('Found', 'Uploaded') : status}}
-  <span *ngIf="task.csv">from {{task.csv}}</span>
+<p>{{task && task.csv ? status.replace('Found', 'Uploaded') : status}}
+  <span *ngIf="task && task.csv">from {{task.csv}}</span>
   <span *ngIf="totalUtteranceDuration">(<span i18n>Total utterance duration:</span> {{totalUtteranceDuration | duration}})</span>
 </p>
 
