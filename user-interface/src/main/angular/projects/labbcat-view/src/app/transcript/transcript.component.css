@@ -234,6 +234,9 @@ nav, nav > div {
     border-left: 1px solid var(--theme-background-color);
     border-right: 1px solid var(--theme-background-color);
 }
+.underline-vertical-peers .annotation:has(+ .annotation):first-child {
+    text-decoration: underline;
+}
 .annotation lib-small-button.create, .annotation lib-small-button.edit {
     opacity: 0;
 }

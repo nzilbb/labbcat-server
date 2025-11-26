@@ -282,6 +282,7 @@
           category="true"
           [styles]="layerStyles"
           [interpretedRaw]="interpretedRaw"
+          [verticalPeersUnderline]="verticalPeersUnderline"
           [selected]="selectedLayerIds"
           [annotationCounts]="layerCounts"
           (selectedChange)="layersChanged($event)"></lib-layer-checkboxes>
@@ -685,6 +686,7 @@
               <ng-container *ngFor="let l of selectedLayerIds">
                 <span *ngIf="isWordLayer(transcript.schema.layers[l])"
                       class="layer layer-{{l}} alignment-{{transcript.schema.layers[l].alignment}}"
+                      [class.underline-vertical-peers]="verticalPeersUnderline[l]"
                       style="color: {{transcript.schema.layers[l].colour}};"
                       i18n-title="no annotation" title="{{l}}{{word.labels(l).length > 1 ? ' [' + word.labels(l).length + ']' : ''}}: {{(allowsVerticalPeers(transcript.schema.layers[l]) ? word.labels(l).toReversed().join(' ') : word.labels(l).join(' ')) || '(no annotation)'}}">
                   <span *ngFor="let annotation of word.all(l)"
@@ -817,6 +819,7 @@
               <ng-container *ngFor="let l of selectedLayerIds">
                 <span *ngIf="isSegmentLayer(transcript.schema.layers[l])"
                       class="layer layer-{{l}} segment"
+                      [class.underline-vertical-peers]="verticalPeersUnderline[l]"
                       style="color: {{transcript.schema.layers[l].colour}};"
                       i18n-title="no annotation" title="{{l}}: {{word.labels(l).join(' ') || '(no annotation)'}}">
                   <span *ngFor="let annotation of word.all(l)"
