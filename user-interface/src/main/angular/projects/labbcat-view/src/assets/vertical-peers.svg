@@ -1,7 +1,4 @@
-<svg width="500" height="500" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" overflow="hidden">
-  <g>
-    <rect x="0" y="0" width="75" height="500" fill="#859044"/>
-    <rect x="200" y="0" width="350" height="225" fill="#859044"/>
-    <rect x="200" y="275" width="350" height="225" fill="#859044"/>
-  </g>
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 0 200 v -80 c 0 -60, 60 -120, 120 -120 h 160 c 60 0, 120 60, 120 120 v 80 h -60 v -60 c 0 -40, -40 -80, -80 -80, h -120 c -40 0, -80 40, -80 80 v 60 Z" style="fill:#859044;fill-opacity:1" />
+  <path d="M 0 400 v -80 c 0 -60, 60 -120, 120 -120 h 160 c 60 0, 120 60, 120 120 v 80 h -60 v -60 c 0 -40, -40 -80, -80 -80, h -120 c -40 0, -80 40, -80 80 v 60 Z" style="fill:#859044;fill-opacity:1" />
 </svg>
