@@ -255,6 +255,9 @@ nav, nav > div {
     animation-duration: 500ms;
 }
 
+.word-annotation {
+    margin-right: 0.5ch;
+}
 .utterance-editor {
     display: flex;
     flex-direction: row;

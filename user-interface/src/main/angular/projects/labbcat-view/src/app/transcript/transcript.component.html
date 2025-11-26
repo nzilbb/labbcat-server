@@ -692,10 +692,9 @@
                   <span *ngFor="let annotation of word.all(l)"
                         id="{{annotation.id}}"
                         [class.highlight]="annotation.id == highlitId"
-                        class="annotation">
+                        class="annotation word-annotation">
                     <ng-container *ngIf="!annotation._editing">
                       {{renderLabel(annotation)}}</ng-container>
-                    <ng-container *ngIf="!(editableTagLayer(l) && annotation.ordinal == 1)">&nbsp;</ng-container>
                     <ng-container *ngIf="editableTagLayer(l) && annotation.ordinal == 1">
                       <input *ngIf="annotation._editing"
                              type="text"
@@ -736,7 +735,7 @@
                     [class.menu-word]="menuId == word.id"
                     (click)="menuId = menuId == word.id?null:word.id; $event.stopPropagation();"
                     [attr.title]="matchTokens[word.id]?'Result '+matchTokens[word.id]:null">
-                <span id="{{word.id}}" class="annotation">{{renderLabel(word)}}&nbsp;</span>
+                <span id="{{word.id}}" class="annotation word-annotation">{{renderLabel(word)}}</span>
               </span>
               <div *ngIf="menuId == word.id"
                    id="word-menu" class="menu">
