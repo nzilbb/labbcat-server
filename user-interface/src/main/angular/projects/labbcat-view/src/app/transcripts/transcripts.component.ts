@@ -706,11 +706,6 @@ export class TranscriptsComponent implements OnInit {
             this.showSerializationOptions = this.showGenerateLayerSelection = false;
             this.serializeImg = "cog.svg";
         } else { // options selected, so go ahead and do it            
-            if (this.selectedIds.length == 0 && this.matchCount > 10) {
-                if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
-                    return;
-                }
-            }
             this.form.nativeElement.action = this.baseUrl + "api/attributes";
             this.form.nativeElement.submit();
         }

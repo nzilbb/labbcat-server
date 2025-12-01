@@ -709,11 +709,6 @@ export class ParticipantsComponent implements OnInit {
         if (!this.showAttributesSelection) { // show options
             this.showAttributesSelection = true;
         } else { // options selected, so go ahead and do it            
-            if (this.selectedIds.length == 0 && this.matchCount > 10) {
-                if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
-                    return;
-                }
-            }
             this.form.nativeElement.action = this.baseUrl + "api/participant/attributes";
             this.form.nativeElement.submit();
         }
