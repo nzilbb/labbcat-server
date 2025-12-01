@@ -95,6 +95,7 @@
                 i18n-label label="Export Formatted"
                 i18n-title title="Convert to selected format"
                 ></lib-button>
+              <span id="mimeTypeWrapper">
               <select name="mimeType" *ngIf="showSerializationOptions"
                         id="mimeTypeSelection"
                         i18n-title title="Format to convert to"
@@ -103,6 +104,7 @@
                   <option *ngFor="let serializer of serializers"
                           value="{{serializer.mimeType}}">{{serializer.name}}</option>
                 </select>
+              </span>
               <lib-button
                 *ngIf="showSerializationOptions"
                 (press)="collapseExportFormat()"
