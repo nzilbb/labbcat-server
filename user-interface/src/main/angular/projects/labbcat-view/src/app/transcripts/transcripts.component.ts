@@ -38,7 +38,7 @@ export class TranscriptsComponent implements OnInit {
     // hints for 'system layers'
     transcriptLayerHint = "Transcript file name";
     corpusLayerHint = "Corpus";
-    //TODO episodeLayerHint = "Series of transcripts";
+    episodeLayerHint = "Series of transcripts";
     transcriptTypeLayerHint = "Transcript type";
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
@@ -94,18 +94,18 @@ export class TranscriptsComponent implements OnInit {
             // allow filtering by transcript ID, corpus, episode, and type
             let transcriptLayer = this.schema.root as Layer;
             let corpusLayer = this.schema.layers[this.schema.corpusLayerId] as Layer;
-            //TODO let episodeLayer = this.schema.layers[this.schema.episodeLayerId] as Layer;
+            let episodeLayer = this.schema.layers[this.schema.episodeLayerId] as Layer;
             let transcriptTypeLayer = this.schema.layers["transcript_type"] as Layer;
             transcriptLayer.hint = this.transcriptLayerHint;
             corpusLayer.hint = this.corpusLayerHint;
-            //TODO episodeLayer.hint = this.episodeLayerHint;
+            episodeLayer.hint = this.episodeLayerHint;
             transcriptTypeLayer.hint = this.transcriptTypeLayerHint;
             this.filterLayers.push(transcriptLayer);
             this.filterValues[this.schema.root.id] = [];
             this.filterLayers.push();
             this.filterValues[this.schema.corpusLayerId] = [];
-            //TODO this.filterLayers.push(episodeLayer);
-            //TODO this.filterValues[this.schema.episodeLayerId] = [];
+            this.filterLayers.push(episodeLayer);
+            this.filterValues[this.schema.episodeLayerId] = [];
             this.filterLayers.push(transcriptTypeLayer);
             this.filterValues["transcript_type"] = [];
             // and by selected transcript attributes
