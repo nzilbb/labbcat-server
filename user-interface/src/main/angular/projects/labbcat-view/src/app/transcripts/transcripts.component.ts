@@ -316,7 +316,8 @@ export class TranscriptsComponent implements OnInit {
                 }
                 
                 this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/.test(id)";
-                this.queryDescription += "ID matches " +this.filterValues[layer.id][0];
+                this.queryDescription += "ID matches "
+                    + (this.filterValues[layer.id][0].length <= 50 ? this.filterValues[layer.id][0] : this.filterValues[layer.id][0].slice(0, 49) + "…");
                 
             } else if (layer.validLabels && Object.keys(layer.validLabels).length > 0
                 && this.filterValues[layer.id].length > 0) {
@@ -449,7 +450,8 @@ export class TranscriptsComponent implements OnInit {
                 this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/"
                     +".test(labels('" +this.esc(layer.id)+"'))";
                 this.queryDescription += layer.description
-                    +" matches " + this.filterValues[layer.id][0]
+                    +" matches "
+                    + (this.filterValues[layer.id][0].length <= 50 ? this.filterValues[layer.id][0] : this.filterValues[layer.id][0].slice(0, 49) + "…");
                 
             }
         } // next filter layer
