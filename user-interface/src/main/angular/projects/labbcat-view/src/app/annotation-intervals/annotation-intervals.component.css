@@ -30,9 +30,8 @@ details > .advanced li ul {
     margin: auto;
     width: fit-content;
 }
-#containment > span {
-    padding-left: 5px;
-    padding-right: 5px;
+#containment > select {
+    margin: 0px 5px;
 }
 details[open] > div {
     animation-name: roll-down;

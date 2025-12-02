@@ -47,16 +47,6 @@
       </select>
     </span>
   </div>
-  <div id="containment">
-    <span i18n="containment: Extract annotations (...entirely/partially within interval)">Extract annotations</span>
-    <select [(ngModel)]="containment">
-      <option value="entire"
-              i18n="containment: (Extract annotations...) entirely (...within interval)">entirely</option>
-      <option value="partial"
-              i18n="containment: (Extract annotations...) at least partially (...within interval)">at least partially</option>
-    </select>
-    <span i18n="containment: (Extract annotations entirely/at least partially...) within interval">within interval</span>
-  </div>
   <div class="item" id="start-time"
        i18n-title title="Which field identifies the start time of the interval">
     <label for="startTimeColumn" i18n>Interval start time</label>
@@ -77,12 +67,16 @@
       </select>
     </span>
   </div>
-  <div id="layers">
-    <lib-layer-checkboxes
-      name="layerId"
-      [span]="true" [phrase]="true" [word]="true" [segment]="true"
-      [excludeMainParticipant]="true" [excludeTurn]="true" [excludeUtterance]="true"
-      [(selected)]="layerIds"></lib-layer-checkboxes>
+  <div class="header" i18n>Options</div>
+  <div id="containment">
+    <span i18n="containment: Extract annotations (...entirely/partially within interval)">Extract annotations</span>
+    <select [(ngModel)]="containment">
+      <option value="entire"
+              i18n="containment: (Extract annotations...) entirely (...within interval)">entirely</option>
+      <option value="partial"
+              i18n="containment: (Extract annotations...) at least partially (...within interval)">at least partially</option>
+    </select>
+    <span i18n="containment: (Extract annotations entirely/at least partially...) within interval">within interval</span>
   </div>
   <div class="item" id="label-delimiter"
        i18n-title title="If there's more than one annotation, what should separate the labels in the exported file?">
@@ -107,6 +101,14 @@
       <input type="text" [(ngModel)]="labelDelimiter"
              [disabled]="[' ', '\t', '\n'].includes(labelDelimiter)">
     </span>
+  </div>
+  <div class="header" i18n>Layers</div>
+  <div id="layers">
+    <lib-layer-checkboxes
+      name="layerId"
+      [span]="true" [phrase]="true" [word]="true" [segment]="true"
+      [excludeMainParticipant]="true" [excludeTurn]="true" [excludeUtterance]="true"
+      [(selected)]="layerIds"></lib-layer-checkboxes>
   </div>
   <div class="controls">
     <lib-button [disabled]="!layerIds || layerIds.length == 0"
