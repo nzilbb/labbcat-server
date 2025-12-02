@@ -88,7 +88,6 @@
        i18n-title title="If there's more than one annotation, what should separate the labels in the exported file?">
     <label for="labelDelimiter" i18n>Annotation label separator</label>
     <span>
-      <input type="text" [(ngModel)]="labelDelimiter">
       <label [class.selected]="labelDelimiter == ' '"
              (click)="labelDelimiter = ' '"
              i18n-title title="Include a space between labels"
@@ -101,6 +100,12 @@
              (click)="labelDelimiter = '\n'"
              i18n-title title="Put each label on its own line"
              i18n="labelDelimiter option">line break</label>
+      <label [class.selected]="![' ', '\t', '\n'].includes(labelDelimiter)"
+             (click)="labelDelimiter = null"
+             i18n-title title="Specify a custom label"
+             i18n="labelDelimiter option">other:</label>
+      <input type="text" [(ngModel)]="labelDelimiter"
+             [disabled]="[' ', '\t', '\n'].includes(labelDelimiter)">
     </span>
   </div>
   <div class="controls">
