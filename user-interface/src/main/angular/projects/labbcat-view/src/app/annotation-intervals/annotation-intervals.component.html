@@ -9,13 +9,13 @@
     <div class="advanced">
       <span i18n>Comma-separated values (.csv) file exported from results of a search, with</span>
       <ul>
-        <li i18n>One row per token you want to measure (word, segment, etc.)</li>
+        <li i18n>One row per interval you want to extract annotations from</li>
         <li><span i18n="Columns">Columns</span>
           <ul>
             <li i18n>Transcript name</li>
             <li i18n>Participant name</li>
-            <li i18n>Start time for the token you want to measure</li>
-            <li i18n>End time for the token you want to measure</li>
+            <li i18n>Start time for the interval you want to extract annotations from</li>
+            <li i18n>End time for the interval you want to extract annotations from</li>
             <li i18n>(All other columns will be included in the output)</li>
           </ul>
         </li>
@@ -48,18 +48,18 @@
     </span>
   </div>
   <div id="containment">
-    <span i18n="containment: Annotations (...entirely/partially between)">Annotations</span>
+    <span i18n="containment: Extract annotations (...entirely/partially within interval)">Extract annotations</span>
     <select [(ngModel)]="containment">
       <option value="entire"
-              i18n="containment: (Annotations...) entirely (...between)">entirely</option>
+              i18n="containment: (Extract annotations...) entirely (...within interval)">entirely</option>
       <option value="partial"
-              i18n="containment: (Annotations...) partially (...between)">at least partially</option>
+              i18n="containment: (Extract annotations...) at least partially (...within interval)">at least partially</option>
     </select>
-    <span i18n="containment: (Annotations entirely/partially...) between">between</span>
+    <span i18n="containment: (Extract annotations entirely/at least partially...) within interval">within interval</span>
   </div>
   <div class="item" id="start-time"
-       i18n-title title="Which field identifies the start time of the token">
-    <label for="startTimeColumn" i18n>Start time</label>
+       i18n-title title="Which field identifies the start time of the interval">
+    <label for="startTimeColumn" i18n>Interval start time</label>
     <span>
       <select id="startTimeColumn" [(ngModel)]="startTimeColumn">
         <ng-container *ngFor="let field of headers; let f = index">
@@ -68,8 +68,8 @@
     </span>
   </div>
   <div class="item" id="end-time"
-       i18n-title title="Which field identifies the end time of the token">
-    <label for="endTimeColumn" i18n>End time</label>
+       i18n-title title="Which field identifies the end time of the interval">
+    <label for="endTimeColumn" i18n>Interval end time</label>
     <span>
       <select id="endTimeColumn" [(ngModel)]="endTimeColumn">
         <ng-container *ngFor="let field of headers; let f = index">
@@ -85,8 +85,8 @@
       [(selected)]="layerIds"></lib-layer-checkboxes>
   </div>
   <div class="item" id="label-delimiter"
-       i18n-title title="If there's more than one annotation, what should separate the labels?">
-    <label for="labelDelimiter" i18n>Label delimiter</label>
+       i18n-title title="If there's more than one annotation, what should separate the labels in the exported file?">
+    <label for="labelDelimiter" i18n>Annotation label separator</label>
     <span>
       <input type="text" [(ngModel)]="labelDelimiter">
       <label [class.selected]="labelDelimiter == ' '"
@@ -95,7 +95,7 @@
              i18n="labelDelimiter option">space</label>
       <label [class.selected]="labelDelimiter == '\t'"
              (click)="labelDelimiter = '\t'"
-             i18n-title title="Include a tab between labels"
+             i18n-title title="Include a tab character between labels"
              i18n="labelDelimiter option">tab</label>
       <label [class.selected]="labelDelimiter == '\n'"
              (click)="labelDelimiter = '\n'"

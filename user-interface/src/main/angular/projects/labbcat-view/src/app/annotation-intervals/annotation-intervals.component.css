@@ -49,8 +49,6 @@ details[open] > div {
     margin-left: 5px;
     margin-right: 5px;
 }
-#label-delimiter > span > label::before { content: '('; }
-#label-delimiter > span > label::after { content: ')'; }
 #label-delimiter > span > label.selected {
     border: 1px solid var(--theme-text-color);
     color: var(--theme-text-color);
