@@ -56,6 +56,13 @@
           <option value="{{f}}">{{field}}</option></ng-container>
       </select>
     </span>
+    <div class="viz">
+      <div class="before">&nbsp;</div>
+      <div class="before-context">&nbsp;</div>
+      <div class="interval"><div class="l">→</div></div>
+      <div class="after-context">&nbsp;</div>
+      <div class="after">&nbsp;</div>
+    </div>
   </div>
   <div class="item" id="end-time"
        i18n-title title="Which field identifies the end time of the interval">
@@ -66,9 +73,18 @@
           <option value="{{f}}">{{field}}</option></ng-container>
       </select>
     </span>
+    <div class="viz">
+      <div class="before">&nbsp;</div>
+      <div class="before-context">&nbsp;</div>
+      <div class="interval"><span class="r">→</span></div>
+      <div class="after-context">&nbsp;</div>
+      <div class="after">&nbsp;</div>
+    </div>
   </div>
   <div class="header" i18n>Options</div>
-  <div id="containment">
+  <div class="item" id="containment">
+    <div id="containment-container"
+      i18n-title title="Whether to extract only annotations that are entirely within the interval, or to also include annotations whose start/end times extend beyond that of the interval">
     <span i18n="containment: Extract annotations (...entirely/partially within interval)">Extract annotations</span>
     <select [(ngModel)]="containment">
       <option value="entire"
@@ -77,6 +93,17 @@
               i18n="containment: (Extract annotations...) at least partially (...within interval)">at least partially</option>
     </select>
     <span i18n="containment: (Extract annotations entirely/at least partially...) within interval">within interval</span>
+    </div>
+    <div class="viz">
+      <div class="before">&nbsp;</div>
+      <div class="annotation"><div class="l">←</div>✗<div class="r">→</div></div>
+      <div class="annotation" [class.included]="containment=='partial'"><div class="l">←</div>{{containment=='partial' ? '✓' : '✗'}}<div class="r">→</div></div>
+      <div class="annotation included"><div class="l">←</div>✓<div class="r">→</div></div>
+      <div class="annotation included"><div class="l">←</div>✓<div class="r">→</div></div>
+      <div class="annotation" [class.included]="containment=='partial'"><div class="l">←</div>{{containment=='partial' ? '✓' : '✗'}}<div class="r">→</div></div>
+      <div class="annotation"><div class="l">←</div>✗<div class="r">→</div></div>
+      <div class="after">&nbsp;</div>
+    </div>
   </div>
   <div class="item" id="label-delimiter"
        i18n-title title="If there's more than one annotation, what should separate the labels in the exported file?">

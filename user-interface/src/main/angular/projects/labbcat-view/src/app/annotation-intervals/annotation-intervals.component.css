@@ -26,11 +26,7 @@ details > .advanced li ul {
     padding-top: 10px;
     font-weight: bold;
 }
-#settings-form {
-    margin: auto;
-    width: fit-content;
-}
-#containment > select {
+#containment select {
     margin: 0px 5px;
 }
 details[open] > div {
@@ -53,9 +49,12 @@ details[open] > div {
     color: var(--theme-text-color);
 }
 .item > * {
-    width: 50%;
+    width: 25%;
     display: inline-block;
     vertical-align: top;
+}
+#containment-container {
+    width: 50%;
 }
 .validation-hint {
     padding-left: 10px;
@@ -65,4 +64,92 @@ details[open] > div {
 #rowCount {
     padding-left: 1ch;
 }
+.item > .viz {
+    display: none;
+}
+#layers {
+    margin: auto;
+    width: fit-content;
+}
+@media all and (min-width: 640px) {
+    .item > .viz {
+        width: 33vw;
+        display: inline-table;
+        padding: 0px;
+        margin: 0px;
+    }
+    .item, .item > .viz {
+        min-height: 25px;
+        display: flex;
+    }
+    .script input {
+        width: 100%;
+    }
+    .viz > div {
+        display: table-cell;
+        white-space: nowrap;
+        padding: 0px;
+        margin: 0px;
+    }
+    .viz .before {
+        width: 10%;
+    }
+    .viz .before-context {
+        width: 20%;
+    }
+    .viz .interval {
+        width: 40%;
+        background-color: rgba(150,163,57,0.2);
+    }
+    .viz .after-context {
+        width: 20%;
+    }
+    .viz .after {
+        width: 10%;
+    }
+    
+    .r { float: right; white-space: nowrap; }
+    .l { float: left; white-space: nowrap; }
+    
+    .viz .before {
+        background: linear-gradient(to right, rgba(255, 255, 255,1), transparent);
+    }
+    .viz .after {
+        background: linear-gradient(to left, rgba(255, 255, 255,1), transparent);
+    }
+    .viz .before-context, .viz .after-context {
+        background-color: rgba(200,200,200,0.3);
+    }
+    #start-time .interval {
+        border-left: solid black 1px;
+        background: linear-gradient(to right, rgba(150,163,57,1), rgba(200,200,200,0.3));
+    }
+    #end-time .interval {
+        border-right: solid black 1px;
+        background: linear-gradient(to left, rgba(150,163,57,1), rgba(200,200,200,0.3));
+    }
+    .viz .annotation {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        background-color: rgba(200,200,200,0.3);
+        border-left: 1px solid black;
+        width: calc(80% / 6);
+    }
+    .viz .annotation:nth-last-child(1 of .annotation) {
+        border-right: 1px solid black;
+    }
+    .viz .annotation.included {
+        background: rgba(150,163,57,1);
+    }
+    .viz .annotation .l, .viz .annotation .r {
+        display: none;
+    }
+}
 
+@media all and (min-width: 850px) {
+    .viz .annotation .l, .viz .annotation .r {
+        display: unset;
+        font-size: 9pt;
+    }
+}
