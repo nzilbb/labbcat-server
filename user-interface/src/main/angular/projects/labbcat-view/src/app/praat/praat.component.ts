@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { MessageService, LabbcatService } from 'labbcat-common';
+import { MessageService, LabbcatService, VersionInfo } from 'labbcat-common';
 import { Layer, Task } from 'labbcat-common';
 
 @Component({
@@ -21,6 +21,8 @@ export class PraatComponent implements OnInit {
     participantColumn: number;
     startTimeColumn: number;
     endTimeColumn: number;
+    
+    praatVersion: string;
     
     windowOffset = 0.025;
 
@@ -136,6 +138,13 @@ export class PraatComponent implements OnInit {
                 this.pitchDifferentiationLayerId = genderLayer.id;
                 this.intensityDifferentiationLayerId = genderLayer.id;
             }
+        });
+        this.readServerVersions();
+    }
+    
+    readServerVersions(): void {
+        this.labbcatService.labbcat.versionInfo((versions, errors, messages) => {
+            this.praatVersion = versions['ThirdPartySoftware']['Praat'].replaceAll('\u0000','').match(/\d+\.\d+\.\d+/)[0];
         });
     }
 
