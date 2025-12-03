@@ -12,6 +12,7 @@ import { LabbcatService } from '../labbcat.service';
 })
 export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     @Input() threadId: string;
+    @Input() displayStartTime = false;
     @Input() cancelButton = true;
     @Input() showStatus = true;
     @Input() showLastException = true;
