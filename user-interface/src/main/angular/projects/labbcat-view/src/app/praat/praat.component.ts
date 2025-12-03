@@ -12,6 +12,7 @@ export class PraatComponent implements OnInit {
 
     schema: any;
     participantAttributeLayers: Layer[];
+    maxLayerLabelLength: number;
     layerCategories: string[];
     
     csv: File;
@@ -138,6 +139,7 @@ export class PraatComponent implements OnInit {
                 this.pitchDifferentiationLayerId = genderLayer.id;
                 this.intensityDifferentiationLayerId = genderLayer.id;
             }
+            this.maxLayerLabelLength = Math.max(...this.participantAttributeLayers.map(a => a.id.length));
         });
         this.readServerVersions();
     }
