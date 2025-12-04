@@ -11,7 +11,7 @@ declare var ag:  any; // nzibb.ag.js
   providedIn: 'root'
 })
 export class LabbcatService {
-    labbcat: any;
+    _labbcat: any;
     ag: any;
     title: "";
     
@@ -22,19 +22,25 @@ export class LabbcatService {
         @Inject(LOCALE_ID) public locale: string
     ) {
         this.ag = ag;
-        this.labbcat = new labbcat.LabbcatAdmin(this.environment.baseUrl); // TODO username/password
-        labbcat.language = this.locale;
-        this.labbcat.getSystemAttribute("title", (attribute: any) => {
-            this.title = attribute.value;
-        })
+        this._labbcat = new labbcat.LabbcatAdmin(this.environment.baseUrl); // TODO username/password
+        this._labbcat.language = this.locale;
     }
 
-    login(user: string, password: string): Promise<string[]> {
+    get labbcat() : any {
+        if (!this.title) { // ensure we don't call this before login
+            this._labbcat.getSystemAttribute("title", (attribute: any) => {
+                this.title = attribute.value;
+            });
+        }
+        return this._labbcat;
+    }
+
+    login(user: string, password: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            this.labbcat = new labbcat.LabbcatAdmin(this.environment.baseUrl);
+            this._labbcat = new labbcat.LabbcatAdmin(this.environment.baseUrl);
             // do a request to ensure we're in
-            this.labbcat.verbose = true;
-            this.labbcat.login(user, password, (result, errors, messages, call)=>{
+            this._labbcat.verbose = true;
+            this._labbcat.login(user, password, (result, errors, messages, call)=>{
                 console.log("errors " + JSON.stringify(errors));
                 if (errors) {
                     if (errors[0].endsWith("401")) {
@@ -43,7 +49,8 @@ export class LabbcatService {
                         reject(errors.join("\n"));
                     }
                 } else {
-                    resolve(messages);
+                    const url = result && result.url?result.url:null as string;
+                    resolve(url);
                 }
             });
         });

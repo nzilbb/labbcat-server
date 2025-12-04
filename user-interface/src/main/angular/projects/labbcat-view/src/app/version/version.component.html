@@ -43,7 +43,7 @@
       <div class="attribute"
            *ngFor="let id of ids(versions['ThirdPartySoftware'])">
         <label>{{id}}</label>
-        <span class="value" id="ThirdPartySoftware-{{id}}">{{versions['ThirdPartySoftware'][id]}}</span>
+        <span class="value" id="ThirdPartySoftware-{{id}}">{{versions['ThirdPartySoftware'][id].replaceAll('\u0000', '')}}</span>
       </div>
     </div>
   </fieldset>

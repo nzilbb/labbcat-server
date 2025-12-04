@@ -32,7 +32,7 @@ export class SearchComponent implements OnInit {
     onlyAligned: boolean;
     firstMatchOnly: boolean;
     excludeSimultaneousSpeech: boolean;
-    overlapThreshold: number;
+    overlapThreshold = 5;
     suppressResults: boolean;
     threadId:string;
     

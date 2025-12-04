@@ -137,6 +137,8 @@ public class Intervals extends APIRequestHandler {
             cacheStore((SqlGraphStoreAdministration)store);
           }
         });
+      // we will definitely need a store so get it now, before this servlet is receycled
+      task.getStore();
       task.setDataFile(uploadedCsvFile);
       task.setFileName(uploadedCsvFile.getName());
       // determine field delimiter

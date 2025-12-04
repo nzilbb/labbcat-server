@@ -4,7 +4,7 @@ import {OnInit, ElementRef, Input, Directive} from '@angular/core';
   selector: '[appAutofocus]'
 })
 export class AutofocusDirective implements OnInit {
-    @Input() appAutofocus: boolean;
+    @Input() appAutofocus: any;
     private el: any;
     constructor(
         private elementRef:ElementRef,
@@ -12,6 +12,11 @@ export class AutofocusDirective implements OnInit {
         this.el = this.elementRef.nativeElement;   
     }
     ngOnInit(): void {
-        if (this.appAutofocus) this.el.focus();
+        if (this.appAutofocus) {
+            this.el.focus();
+            if (this.appAutofocus == "select") {
+                setTimeout(()=>{ this.el.select(); }, 50);
+            }
+        }
     }   
 }

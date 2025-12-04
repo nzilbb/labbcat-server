@@ -61,6 +61,7 @@
 
   <servlet><servlet-name>media/fragments.jsp</servlet-name><jsp-file>/jsp/media/fragments.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>media/fragments.jsp</servlet-name><url-pattern>/api/media/fragments</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>media/fragments.jsp</servlet-name><url-pattern>/api/media/fragment</url-pattern></servlet-mapping>
 
   <servlet><servlet-name>serialize/graphs.jsp</servlet-name><jsp-file>/jsp/serialize/graphs.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>serialize/graphs.jsp</servlet-name><url-pattern>/api/serialize/graphs</url-pattern></servlet-mapping>
