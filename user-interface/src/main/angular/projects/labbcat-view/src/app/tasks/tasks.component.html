@@ -21,7 +21,7 @@
         <tr class="item" [class.error]="task.lastException" [class.gone]="!task.threadId">
           <td class="creation-time">{{task.creationTime | date:'medium'}}</td>
           <td class="who">{{task.who}}</td>
-          <td class="duration">{{task.duration | duration}}</td>
+          <td class="duration">{{task.duration / 1000 | duration}}</td>
           <td class="name">
             <ng-container *ngIf="task.running">
               <a [routerLink]="['..','task']"

@@ -26,9 +26,9 @@ export class LoginComponent implements OnInit {
 
     login(): void {
         this.labbcatService.login(this.username, this.password)
-            .then((messages)=>{
-                messages.forEach(m => this.messageService.info(m));
-                window.location.assign(".");
+            .then((url)=>{
+                window.location.assign(
+                    url + (window.location.hash || "") || ".");
             })
             .catch((errors)=>{
                 errors.forEach(m => this.messageService.error(m));
