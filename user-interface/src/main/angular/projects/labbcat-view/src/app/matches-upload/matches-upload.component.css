@@ -10,3 +10,11 @@
 #file-chooser details {
     padding-top: 5px;
 }
+.header {
+    padding-top: 10px;
+    font-weight: 700;
+}
+#targetColumn label {
+    display: inline-block;
+    min-width: 150px;
+}

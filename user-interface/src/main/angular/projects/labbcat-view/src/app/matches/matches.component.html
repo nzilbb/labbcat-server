@@ -1,6 +1,9 @@
 <h1 id="title">{{name}}</h1>
 
-<p>{{status}} <span *ngIf="totalUtteranceDuration">(<span i18n>Total utterance duration:</span> {{totalUtteranceDuration | duration}})</span></p>
+<p>{{task && task.csv ? status.replace('Found', 'Uploaded') : status}}
+  <span *ngIf="task && task.csv">from {{task.csv}}</span>
+  <span *ngIf="totalUtteranceDuration">(<span i18n>Total utterance duration:</span> {{totalUtteranceDuration | duration}})</span>
+</p>
 
 <lib-wait *ngIf="readingMatches"></lib-wait>
 <form #form method="POST" id="frm" *ngIf="matches.length" todotarget="_blank">
@@ -16,10 +19,16 @@
   <input #todo type="hidden" name="todo" value="">
   <div id="check-all-top">
     
-    <label i18n-title title="Select all results including those not shown here">
-      <input type="checkbox" [(checked)]="selectAll" (change)="all()"
-             [disabled]="task.csv">
+    <label *ngIf="!task.csv"
+      i18n-title title="Select all results, including those not shown here">
+      <input type="checkbox" [(checked)]="selectAll" (change)="all()">
       <span i18n="select all results">Select all results</span>
+      ({{matchCount}})
+    </label>
+    <label *ngIf="task.csv"
+      i18n-title title="It's not possible to select individual results for re-uploaded matches">
+      <input type="checkbox" checked disabled>
+      <span i18n="select all results">All results selected</span>
       ({{matchCount}})
     </label>
     
@@ -49,10 +58,19 @@
       <div class="match-number">
         {{matches.indexOf(match) + 1}}.
       </div>
-      <div class="match-id">
+      <div *ngIf="!task.csv" class="match-id">
         <lib-grouped-checkbox
           group="match"
           i18n-title title="To select individual results, untick 'select all N results'"
+          name="utterance"
+          value="{{match.MatchId}}"
+          [checked]="match._selected" (checkedChange)="match._selected = !match._selected"
+          [disabled]="selectAll"></lib-grouped-checkbox>
+      </div>
+      <div *ngIf="task.csv" class="match-id">
+        <lib-grouped-checkbox
+          group="match"
+          i18n-title title="It's not possible to select individual results for re-uploaded matches"
           name="utterance"
           value="{{match.MatchId}}"
           [checked]="match._selected" (checkedChange)="match._selected = !match._selected"
@@ -89,10 +107,12 @@
       </lib-button>
     </div>
   <div id="check-all-bottom">
-    <label i18n-title title="Select all results including those not shown here">
+    <label *ngIf="!task.csv"
+      i18n-title title="Select all results including those not shown here">
       <input type="checkbox" [(checked)]="selectAll" (change)="all()"             
              [disabled]="task.csv">
-      <span i18n="select all results">Select all results</span>
+      <span i18n="select all results"
+        [class.disabled]="task.csv">Select all results</span>
       ({{matchCount}})
     </label>
   </div>
@@ -109,24 +129,26 @@
                 ></lib-button>
   </div>
   <div id="csv-export-options" class="{{showCsvOptions?'unhidden-panel':'hidden-panel'}}">
-    <div *ngIf="task.csv"
-         i18n-title title="Whether to extract annotations about the target token, or surrounding tokens"><label>
-      <span i18n="targetOffset label">Extract data for:</span>
-      <select id="targetOffset" name="targetOffset" [(ngModel)]="targetOffset">
-        <option value="-1" i18n="targetOffset option">previous token</option>
-        <option value="0" i18n="targetOffset option">target token</option>
-        <option value="1" i18n="targetOffset option">next token</option>
-      </select>
-    </label></div>
-    <div i18n-title title="Which start/end times to include"><label>
-      <span i18n="offsetThreshold label">Start/end offsets:</span>
-      <select id="offsetThreshold" name="offsetThreshold" [(ngModel)]="offsetThreshold">
-        <option value="none" i18n="offsetThreshold option">not included</option>
-        <option value="100" i18n="offsetThreshold option">included only manually aligned</option>
-        <option value="50" i18n="offsetThreshold option">included when at least automatically aligned</option>
-        <option value="0" i18n="offsetThreshold option">always included</option>
-      </select>
-    </label></div>
+    <div id="csv-export-params">
+      <div *ngIf="task.csv"
+           i18n-title title="Whether to extract annotations about the matched token, or surrounding tokens"><label>
+        <span i18n="targetOffset label">Extract data for:</span>
+        <select id="targetOffset" name="targetOffset" [(ngModel)]="targetOffset">
+          <option value="-1" i18n="targetOffset option">previous token on targeted layer</option>
+          <option value="0" i18n="targetOffset option">matched token</option>
+          <option value="1" i18n="targetOffset option">next token on targeted layer</option>
+        </select>
+      </label></div>
+      <div i18n-title title="Which start/end times to include"><label>
+        <span i18n="offsetThreshold label">Include annotation start/end times:</span>
+        <select id="offsetThreshold" name="offsetThreshold" [(ngModel)]="offsetThreshold">
+          <option value="none" i18n="offsetThreshold option">(never)</option>
+          <option value="100" i18n="offsetThreshold option">only if manually aligned</option>
+          <option value="50" i18n="offsetThreshold option">if manually or automatically aligned</option>
+          <option value="0" i18n="offsetThreshold option">(always) if manually, automatically, or default aligned</option>
+        </select>
+      </label></div>
+    </div>
     <fieldset>
       <legend i18n>CSV columns</legend>
       <div class="csv-checkboxes">
@@ -252,32 +274,6 @@
                             selected="{{emuLayers}}"></lib-layer-checkboxes>
     </fieldset>
   </div>
-  <div id="dictionary" class="controls">
-    <lib-button (press)="dictionary();"
-                [disabled]="task.csv"                
-                img="book.svg" icon="📕"
-                i18n-label label="Dictionary Export"></lib-button>
-    <lib-button (press)="dictionaryOptions();"
-                [disabled]="task.csv"                
-                img="down-triangle.png"
-                [icon]="showDictionaryOptions ? '▲' : '▼'"
-                [imgStyle]="showDictionaryOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
-                i18n-title title="Dictionary options"
-                ></lib-button>
-  </div>
-  <div id="dictionary-options" class="{{showDictionaryOptions?'unhidden-panel':'hidden-panel'}}">
-    <label>
-      <span i18n="layer for dictionary entries">Layer for entries</span>
-      <select name="definitionLayerId"
-              i18n-title title="Layer for definitions of dictionary entries">
-        <option *ngFor="let layer of wordLayers"
-                value="{{layer.id}}">
-          <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
-          <ng-container *ngIf="layer.id == 'orthography'" i18n>[word list only]</ng-container>
-        </option>
-      </select>
-    </label>
-  </div>
   <div id="serialize" class="controls">
     <lib-button (press)="serialize();"
                 img="{{serializeImg}}" icon="📦"
@@ -301,12 +297,14 @@
       </select>
     </label>
     <div i18n-title title="Prefix each exported file name with the match number"><label>
-        <span i18n>Prefix names</span>
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
+        <span i18n>Add prefixes to file names</span>
     </label></div>
-    <div i18n-title title="Tag target annotation in each file"><label>
-      <span i18n>Tag targets</span>
-      <input name="tag" type="checkbox" checked>
+    <div i18n-title title="Include a TextGrid tier that tags target annotation(s) in each file"><label>
+      <input name="tag" type="checkbox"
+        [checked]="mimeType == 'text/praat-textgrid'"
+        [disabled]="mimeType != 'text/praat-textgrid'">
+      <span i18n [class.disabled]="mimeType != 'text/praat-textgrid'">Include "target" tier</span>
     </label></div>
     <fieldset>
     <legend i18n>Layers to export</legend>
@@ -328,23 +326,61 @@
   </div>
   <div id="audio-options" class="{{showAudioOptions?'short-unhidden-panel':'short-hidden-panel'}}">
     <div i18n-title title="Prefix each exported file name with the match number"><label>
-        <span i18n>Prefix names</span>
         <input name="prefix" type="checkbox" [checked]="prefixNames" (change)="togglePrefixNames()">
+        <span i18n>Add prefixes to file names</span>
     </label></div>
-    <div *ngIf="task.csvColumns"
-         i18n-title title="Column identifying the start time of the fragment"><label>
-        <span i18n>Start time column</span>
-        <select name="startOffsetColumn" [(ngModel)]="startOffsetColumn">
-          <option *ngFor="let column of task.csvColumns">{{column}}</option>
-        </select>
-    </label></div>
-    <div *ngIf="task.csvColumns"
-         i18n-title title="Column identifying the end time of the fragment"><label>
-        <span i18n>End time column</span>
-        <select name="endOffsetColumn" [(ngModel)]="endOffsetColumn">
-          <option *ngFor="let column of task.csvColumns">{{column}}</option>
-        </select>
-    </label></div>
+    <div *ngIf="task.csvColumns" id="audio-columns">
+      <div class="header">Columns</div>
+      <div i18n-title title="Column identifying the start time of the fragment"><label>
+          <span i18n>Excerpt start time</span>
+          <select name="startOffsetColumn" [(ngModel)]="startOffsetColumn">
+            <option *ngFor="let column of task.csvColumns">{{column}}</option>
+          </select>
+      </label></div>
+      <div i18n-title title="Column identifying the end time of the fragment"><label>
+          <span i18n>Excerpt end time</span>
+          <select name="endOffsetColumn" [(ngModel)]="endOffsetColumn">
+            <option *ngFor="let column of task.csvColumns">{{column}}</option>
+          </select>
+      </label></div>
+    </div>
+  </div>
+  <div *ngIf="!task.csv" id="dictionary" class="controls">
+    <lib-button (press)="dictionary();"
+                img="book.svg" icon="📕"
+                i18n-label label="Dictionary Export"></lib-button>
+    <lib-button (press)="dictionaryOptions();"
+                img="down-triangle.png"
+                [icon]="showDictionaryOptions ? '▲' : '▼'"
+                [imgStyle]="showDictionaryOptions ? 'transform: rotate(180deg); transition: transform 0.25s linear;' : 'transition: transform 0.25s linear;'"
+                i18n-title title="Dictionary options"
+                ></lib-button>
+  </div>
+  <div *ngIf="task.csv" id="dictionary" class="controls">
+    <lib-button (press)="dictionary();"
+                [disabled]="true"
+                img="book.svg" icon="📕"
+                i18n-label label="Dictionary Export"
+                i18n-title title="Dictionary Export (not possible with re-uploaded matches)"></lib-button>
+    <lib-button (press)="dictionaryOptions();"
+                [disabled]="true"
+                img="down-triangle.png"
+                icon="▼"
+                i18n-title title="Dictionary options"
+                ></lib-button>
+  </div>
+  <div id="dictionary-options" class="{{showDictionaryOptions?'unhidden-panel':'hidden-panel'}}">
+    <label>
+      <span i18n="layer for dictionary entries">Layer for entries</span>
+      <select name="definitionLayerId"
+              i18n-title title="Layer for definitions of dictionary entries">
+        <option *ngFor="let layer of wordLayers"
+                value="{{layer.id}}">
+          <ng-container *ngIf="layer.id != 'orthography'">{{layer.id}}</ng-container>
+          <ng-container *ngIf="layer.id == 'orthography'" i18n>[word list only]</ng-container>
+        </option>
+      </select>
+    </label>
   </div>
   <div id="generate-layers" class="controls" *ngIf="user.roles.includes('edit') && generableLayers.length">
     <input #generate_layer type="hidden" name="generate_layer" value="">
