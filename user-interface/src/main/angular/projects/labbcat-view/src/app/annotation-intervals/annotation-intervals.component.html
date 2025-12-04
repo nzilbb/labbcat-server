@@ -96,12 +96,12 @@
     </div>
     <div class="viz">
       <div class="before">&nbsp;</div>
-      <div class="annotation"><div class="l">←</div>✗<div class="r">→</div></div>
-      <div class="annotation" [class.included]="containment=='partial'"><div class="l">←</div>{{containment=='partial' ? '✓' : '✗'}}<div class="r">→</div></div>
-      <div class="annotation included"><div class="l">←</div>✓<div class="r">→</div></div>
-      <div class="annotation included"><div class="l">←</div>✓<div class="r">→</div></div>
-      <div class="annotation" [class.included]="containment=='partial'"><div class="l">←</div>{{containment=='partial' ? '✓' : '✗'}}<div class="r">→</div></div>
-      <div class="annotation"><div class="l">←</div>✗<div class="r">→</div></div>
+      <div class="annotation"><div class="l">←</div><div class="y-n">✗</div><div class="r">→</div></div>
+      <div class="annotation" [class.included]="containment=='partial'"><div class="l">←</div><div class="y-n">{{containment=='partial' ? '✓' : '✗'}}</div><div class="r">→</div></div>
+      <div class="annotation included"><div class="l">←</div><div class="y-n">✓</div><div class="r">→</div></div>
+      <div class="annotation included"><div class="l">←</div><div class="y-n">✓</div><div class="r">→</div></div>
+      <div class="annotation" [class.included]="containment=='partial'"><div class="l">←</div><div class="y-n">{{containment=='partial' ? '✓' : '✗'}}</div><div class="r">→</div></div>
+      <div class="annotation"><div class="l">←</div><div class="y-n">✗</div><div class="r">→</div></div>
       <div class="after">&nbsp;</div>
     </div>
   </div>
