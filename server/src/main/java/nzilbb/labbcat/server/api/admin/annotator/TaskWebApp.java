@@ -188,6 +188,8 @@ public class TaskWebApp extends APIRequestHandler {
         }
 
         final Annotator annotator = descriptor.getInstance();
+        // ensure the annotator has the latest schema
+        annotator.setSchema(store.getSchema());
         if (annotator.getClass().isAnnotationPresent(UsesGraphStore.class)) {
           annotator.setStore(store);
         }

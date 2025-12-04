@@ -158,10 +158,10 @@ public class Dictionary extends APIRequestHandler { // TODO unit test
             && search.getDescription() != null) {
           searchName = search.getDescription();
         }
-        String name = IO.SafeFileNameUrl(searchName);
+        String name = searchName;
         if (name.length() > 150) name = name.substring(0, 150);
         name = "dictionary_" + name + ".txt";
-        fileName.accept(name);
+        fileName.accept(IO.SafeFileNameUrl(name));
         writer.flush();
 
         // create SQL

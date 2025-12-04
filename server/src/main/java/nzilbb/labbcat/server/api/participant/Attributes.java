@@ -97,7 +97,7 @@ public class Attributes extends APIRequestHandler { // TODO unit test
     
     String name = parameters.getString("name");
     if (name == null || name.trim().length() == 0) name = "participants";
-    name = IO.SafeFileNameUrl(name.trim());
+    name = name.trim();
     if (!name.endsWith(".csv")) {
       name += ".csv";
     }
@@ -127,7 +127,7 @@ public class Attributes extends APIRequestHandler { // TODO unit test
         return;
       }
       
-      fileName.accept(name);
+      fileName.accept(IO.SafeFileNameUrl(name));
       
       try {
         char delimiter = ',';

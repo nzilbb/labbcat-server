@@ -313,10 +313,10 @@ public class Task extends APIRequestHandler {
     context.servletLog("DELETE " + id + " " + parameters.getString("cancel"));
     if (parameters.getString("cancel") != null) {
       task.cancel();
-      return get(pathInfo, parameters, httpStatus, localize("Cancelled {0}", id));
+      return get(pathInfo, parameters, httpStatus, localize("Cancelled: {0}", id));
     } else {
       task.release();
-      return successResult(null, "Released {0}", id);  
+      return successResult(null, "Released: {0}", id);  
     }
     // return the thread info
   }
