@@ -237,6 +237,9 @@ nav, nav > div {
 .underline-vertical-peers .annotation:has(+ .annotation):first-child {
     text-decoration: underline;
 }
+.segment .annotation {
+    margin-right: 0.25ch;
+}
 .annotation lib-small-button.create, .annotation lib-small-button.edit {
     opacity: 0;
 }
