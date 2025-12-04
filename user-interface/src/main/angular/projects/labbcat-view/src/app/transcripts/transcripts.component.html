@@ -95,6 +95,7 @@
                 i18n-label label="Export Formatted"
                 i18n-title title="Convert to selected format"
                 ></lib-button>
+              <span id="mimeTypeWrapper">
               <select name="mimeType" *ngIf="showSerializationOptions"
                         id="mimeTypeSelection"
                         i18n-title title="Format to convert to"
@@ -103,6 +104,7 @@
                   <option *ngFor="let serializer of serializers"
                           value="{{serializer.mimeType}}">{{serializer.name}}</option>
                 </select>
+              </span>
               <lib-button
                 *ngIf="showSerializationOptions"
                 (press)="collapseExportFormat()"
@@ -123,6 +125,7 @@
                   transcript="{{true}}"
                   selected="{{[schema.root.id]}}"
                   excludeMainParticipant="{{true}}"
+                  hideControls="{{true}}"
                   ></lib-layer-checkboxes>
               </span>
               <lib-button
@@ -166,7 +169,7 @@
                   name="layerId"
                   participant="{{true}}" transcript="{{true}}"
                   span="{{true}}" phrase="{{true}}" word="{{true}}" segment="{{true}}"
-                  selected="{{[schema.wordLayerId]}}"
+                  selected="{{[schema.utteranceLayerId, schema.wordLayerId]}}"
                   ></lib-layer-checkboxes>
               </fieldset>
             </div>

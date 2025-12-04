@@ -25,7 +25,7 @@ fieldset > div > input {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    min-width: 140px;
+    min-width: 120px;
     max-width: 280px;
 }
 .range input {
@@ -55,7 +55,7 @@ fieldset > div > input {
     max-height: 24px;
     border: 1px solid transparent;
 }
-.select .large > span:first-child::after {
+.select .large > span:first-child::after, .select .large > span:nth-child(1 of .checked)::after {
     content: '▼';
     opacity: 0.7;
 }
@@ -67,7 +67,7 @@ fieldset > div > input {
     border: 1px solid silver;
     z-index: 5;
 }
-.select .large:hover > span:first-child::after {
+.select .large:hover > span:first-child::after, .select .large:hover > span:nth-child(1 of .checked)::after {
     content: '';
 }
 .select .large span {

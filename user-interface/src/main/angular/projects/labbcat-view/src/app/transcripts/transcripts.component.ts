@@ -35,6 +35,11 @@ export class TranscriptsComponent implements OnInit {
     transcriptQuery = ""; // AGQL query string for pre-matching transcripts
     transcriptDescription = ""; // Human readable description of transcript query
     defaultParticipantFilter = "";
+    // hints for 'system layers'
+    transcriptLayerHint = "Transcript file name";
+    corpusLayerHint = "Corpus";
+    episodeLayerHint = "Series of transcripts";
+    transcriptTypeLayerHint = "Transcript type";
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0; 
@@ -87,13 +92,21 @@ export class TranscriptsComponent implements OnInit {
             this.filterLayers = [];
             this.generableLayers = [];
             // allow filtering by transcript ID, corpus, episode, and type
-            this.filterLayers.push(this.schema.root);
+            let transcriptLayer = this.schema.root as Layer;
+            let corpusLayer = this.schema.layers[this.schema.corpusLayerId] as Layer;
+            let episodeLayer = this.schema.layers[this.schema.episodeLayerId] as Layer;
+            let transcriptTypeLayer = this.schema.layers["transcript_type"] as Layer;
+            transcriptLayer.hint = this.transcriptLayerHint;
+            corpusLayer.hint = this.corpusLayerHint;
+            episodeLayer.hint = this.episodeLayerHint;
+            transcriptTypeLayer.hint = this.transcriptTypeLayerHint;
+            this.filterLayers.push(transcriptLayer);
             this.filterValues[this.schema.root.id] = [];
-            this.filterLayers.push(this.schema.layers[this.schema.corpusLayerId]);
+            this.filterLayers.push();
             this.filterValues[this.schema.corpusLayerId] = [];
-            //TODO this.filterLayers.push(this.schema.layers[this.schema.episodeLayerId]);
-            //TODO this.filterValues[this.schema.episodeLayerId] = [];
-            this.filterLayers.push(this.schema.layers["transcript_type"]);
+            this.filterLayers.push(episodeLayer);
+            this.filterValues[this.schema.episodeLayerId] = [];
+            this.filterLayers.push(transcriptTypeLayer);
             this.filterValues["transcript_type"] = [];
             // and by selected transcript attributes
             for (let layerId in this.schema.layers) {
@@ -309,7 +322,8 @@ export class TranscriptsComponent implements OnInit {
                 }
                 
                 this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/.test(id)";
-                this.queryDescription += "ID matches " +this.filterValues[layer.id][0];
+                this.queryDescription += "ID matches "
+                    + (this.filterValues[layer.id][0].length <= 50 ? this.filterValues[layer.id][0] : this.filterValues[layer.id][0].slice(0, 49) + "…");
                 
             } else if (layer.validLabels && Object.keys(layer.validLabels).length > 0
                 && this.filterValues[layer.id].length > 0) {
@@ -442,7 +456,8 @@ export class TranscriptsComponent implements OnInit {
                 this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/"
                     +".test(labels('" +this.esc(layer.id)+"'))";
                 this.queryDescription += layer.description
-                    +" matches " + this.filterValues[layer.id][0]
+                    +" matches "
+                    + (this.filterValues[layer.id][0].length <= 50 ? this.filterValues[layer.id][0] : this.filterValues[layer.id][0].slice(0, 49) + "…");
                 
             }
         } // next filter layer
@@ -705,11 +720,6 @@ export class TranscriptsComponent implements OnInit {
             this.showSerializationOptions = this.showGenerateLayerSelection = false;
             this.serializeImg = "cog.svg";
         } else { // options selected, so go ahead and do it            
-            if (this.selectedIds.length == 0 && this.matchCount > 10) {
-                if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
-                    return;
-                }
-            }
             this.form.nativeElement.action = this.baseUrl + "api/attributes";
             this.form.nativeElement.submit();
         }
