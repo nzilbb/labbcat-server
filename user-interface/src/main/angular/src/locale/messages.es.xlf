@@ -241,6 +241,14 @@
           <context context-type="linenumber">202</context>
         </context-group>
       </trans-unit>
+<trans-unit id="4392302291671917038" datatype="html">
+        <source>transcript: Transcript file name</source>
+        <target state="translated">transcripción: Nombre del archivo de transcripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-attributes/transcript-attributes.component.html</context>
+          <context context-type="linenumber">4,6</context>
+        </context-group>
+      </trans-unit>
 <trans-unit id="7000097589771137011" datatype="html">
         <source>Episode</source>
         <target state="translated">Episodio</target>
@@ -1101,28 +1109,52 @@
           <context context-type="linenumber">10,14</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="acf2a5f88802653ac62de1fbea1dbdff53dc9024" datatype="html">
-        <source>Regular Expression</source>
-        <target state="translated">Expresión Regular</target>
+<trans-unit id="5897290368516021212" datatype="html">
+        <source>Regular expression (A≠a)</source>
+        <target state="translated">Expresión regular (A≠a)</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">dist/projects/labbcat-common/src/lib/layer-filter/layer-filter.component.ts</context>
-          <context context-type="linenumber">26,27</context>
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">86,87</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">130,131</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2064010604844052750" datatype="html">
+        <source>Regular expression (case sensitive)</source>
+        <target state="translated">Expresión regular (distingue entre mayúsculas y minúsculas)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">87,89</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
-          <context context-type="linenumber">267</context>
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">95,97</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
-          <context context-type="linenumber">550</context>
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">131,133</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6358038517914511495" datatype="html">
+        <source>Regular expression (A=a)</source>
+        <target state="translated">Expresión regular (A=a)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">94,95</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
-          <context context-type="linenumber">656</context>
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">138,139</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6291011840815067432" datatype="html">
+        <source>Regular expression (case insensitive)</source>
+        <target state="translated">Expresión regular (sin distinción entre mayúsculas y minúsculas)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">139,141</context>
         </context-group>
       </trans-unit>
       <trans-unit id="514f6e12d035a6d9b00de6b3e55c18b73488da07" datatype="html">
@@ -2199,6 +2231,7 @@
       </trans-unit>
 <trans-unit id="4102380746592780294" datatype="html">
         <source>Token start time</source>
+        <target state="translated">Principio del token</target>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
           <context context-type="linenumber">51,53</context>
@@ -2206,6 +2239,7 @@
       </trans-unit>
 <trans-unit id="4970934501283726006" datatype="html">
         <source>Token end time</source>
+        <target state="translated">Final del token</target>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
           <context context-type="linenumber">68,70</context>
@@ -3061,6 +3095,14 @@
           <context context-type="linenumber">577</context>
         </context-group>
       </trans-unit>
+<trans-unit id="7080396629875520432" datatype="html">
+        <source>Voicing Threshold</source>
+        <target state="translated">Umbral de Voz</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/praat/praat.component.html</context>
+          <context context-type="linenumber">626,628</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="5530918312588807271" datatype="html">
         <source>Voicing Threshold</source>
         <target state="translated">Umbral de Voz</target>
@@ -3845,6 +3887,34 @@
           <context context-type="linenumber">2</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
+      </trans-unit>
+<trans-unit id="7126464771610287155" datatype="html">
+        <source>all</source>
+        <target state="translated">todo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">48,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">102,103</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">156,157</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">243,244</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">339,340</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">439,440</context>
+        </context-group>
       </trans-unit>
 <trans-unit id="2901819387880218650" datatype="html">
         <source>Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)</source>

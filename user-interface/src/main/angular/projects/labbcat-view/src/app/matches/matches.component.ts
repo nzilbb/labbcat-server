@@ -18,6 +18,7 @@ export class MatchesComponent implements OnInit {
     @ViewChild('form', {static: false}) form: ElementRef;
     @ViewChild('todo', {static: false}) todo: ElementRef;
     @ViewChild('generate_layer', {static: false}) generateLayer: ElementRef;
+    @ViewChild('mimetype', {static: false}) selectMimeTypeElement: ElementRef;
     name: string;
     status: string;
     matchCount: number;
@@ -296,8 +297,18 @@ export class MatchesComponent implements OnInit {
     }
 
     exportAudio(): void {
+        // ensure the serialization mimetype isn't confused for the media mimetype
+        this.selectMimeTypeElement.nativeElement.disabled = true;
+
+        // submit media fragments form
         this.form.nativeElement.action = this.baseUrl + "api/media/fragments";
         this.form.nativeElement.submit();
+
+        // re-enable serialization mimetype selector
+        setTimeout(()=>{
+            this.selectMimeTypeElement.nativeElement.disabled = false;
+        }, 500);
+
     }
 
     serialize(): void {

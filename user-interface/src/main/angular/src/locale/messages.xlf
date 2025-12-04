@@ -96,45 +96,72 @@
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
+<trans-unit id="7126464771610287155" datatype="html">
+        <source>all</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">48,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">102,103</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">156,157</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">243,244</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">339,340</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">439,440</context>
+        </context-group>
+      </trans-unit>
 <trans-unit id="2901819387880218650" datatype="html">
         <source>Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">60,62</context>
+          <context context-type="linenumber">62,64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">112,114</context>
+          <context context-type="linenumber">117,119</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">181,183</context>
+          <context context-type="linenumber">191,193</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">273,275</context>
+          <context context-type="linenumber">288,290</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">368,370</context>
+          <context context-type="linenumber">388,390</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">458,460</context>
+          <context context-type="linenumber">483,485</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2090715847977118331" datatype="html">
         <source>Transcript Attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">74,76</context>
+          <context context-type="linenumber">76,78</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1000762815409704864" datatype="html">
         <source>Transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">76,78</context>
+          <context context-type="linenumber">78,80</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
@@ -150,14 +177,14 @@
         <source>Span Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">131,133</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8990805719441989570" datatype="html">
         <source>Span</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">128,131</context>
+          <context context-type="linenumber">133,136</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -165,14 +192,14 @@
         <source>Phrase Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">195,197</context>
+          <context context-type="linenumber">205,207</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1448488911921670708" datatype="html">
         <source>Phrase</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">197,200</context>
+          <context context-type="linenumber">207,210</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -180,18 +207,18 @@
         <source>Word Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">287,289</context>
+          <context context-type="linenumber">302,304</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4283120042219249873" datatype="html">
         <source>Word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">289,292</context>
+          <context context-type="linenumber">304,307</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">812,814</context>
+          <context context-type="linenumber">818,820</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -199,14 +226,14 @@
         <source>Segment Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">382,384</context>
+          <context context-type="linenumber">402,404</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4495620181723937744" datatype="html">
         <source>Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">384,387</context>
+          <context context-type="linenumber">404,407</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -214,42 +241,42 @@
         <source>Show full names for participant/transcript attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">474,477</context>
+          <context context-type="linenumber">499,502</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5914843668595618981" datatype="html">
         <source>Show attribute prefixes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">481,484</context>
+          <context context-type="linenumber">506,509</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4092353835228061492" datatype="html">
         <source>Show icons that correspond to layer properties</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">487,488</context>
+          <context context-type="linenumber">512,513</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5398209608237180342" datatype="html">
         <source>Show layer icons</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">495,497</context>
+          <context context-type="linenumber">520,522</context>
         </context-group>
       </trans-unit>
 <trans-unit id="629245355395015846" datatype="html">
         <source>Show the number of annotations in each layer</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">499,502</context>
+          <context context-type="linenumber">524,527</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1008780503793524700" datatype="html">
         <source>Show annotation counts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">506,510</context>
+          <context context-type="linenumber">531,535</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4701377957895724261" datatype="html">
@@ -350,7 +377,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">26,27</context>
+          <context context-type="linenumber">30,31</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
@@ -358,7 +385,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">442,443</context>
+          <context context-type="linenumber">447,448</context>
         </context-group>
         <note priority="1" from="description">layer filter boolean label</note>
       </trans-unit>
@@ -370,7 +397,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">27,29</context>
+          <context context-type="linenumber">31,33</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
@@ -378,7 +405,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">443,445</context>
+          <context context-type="linenumber">448,450</context>
         </context-group>
         <note priority="1" from="description">layer filter boolean label</note>
       </trans-unit>
@@ -529,18 +556,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">67,69</context>
+          <context context-type="linenumber">71,73</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
           <context context-type="linenumber">63,64</context>
-        </context-group>
-      </trans-unit>
-<trans-unit id="187187500641108332" datatype="html">
-        <source><x id="INTERPOLATION" equiv-text="{{participantDescription}}"/></source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-view/src/app/all-utterances/all-utterances.component.html</context>
-          <context context-type="linenumber">3,4</context>
         </context-group>
       </trans-unit>
 <trans-unit id="9001154573880120212" datatype="html">
@@ -1097,7 +1117,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">389,391</context>
+          <context context-type="linenumber">390,392</context>
         </context-group>
         <note priority="1" from="description">Episode Documents: {transcript name}</note>
       </trans-unit>
@@ -1158,7 +1178,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">475,476</context>
+          <context context-type="linenumber">480,481</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6212410941069881852" datatype="html">
@@ -1876,7 +1896,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">302,304</context>
+          <context context-type="linenumber">303,305</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
@@ -1938,11 +1958,11 @@
         <source>Hide attribute names</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">37,38</context>
+          <context context-type="linenumber">41,42</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">39,42</context>
+          <context context-type="linenumber">43,46</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
@@ -1954,18 +1974,18 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">453,454</context>
+          <context context-type="linenumber">458,459</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">455,458</context>
+          <context context-type="linenumber">460,463</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4562743922566364558" datatype="html">
         <source>Hide full names for attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">45,47</context>
+          <context context-type="linenumber">49,51</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
@@ -1976,7 +1996,7 @@
         <source>Hide attribute prefixes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">52,57</context>
+          <context context-type="linenumber">56,61</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
@@ -1984,14 +2004,14 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">468,470</context>
+          <context context-type="linenumber">473,475</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2858184975402899754" datatype="html">
         <source>Transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">62,63</context>
+          <context context-type="linenumber">66,67</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
@@ -2014,14 +2034,14 @@
         <source>List transcripts that include this participant</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">63,65</context>
+          <context context-type="linenumber">67,69</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7664072689131643582" datatype="html">
         <source>List all utterances by these participants</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participant/participant.component.html</context>
-          <context context-type="linenumber">68,71</context>
+          <context context-type="linenumber">72,75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
@@ -2185,11 +2205,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">317,319</context>
+          <context context-type="linenumber">318,320</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">325,327</context>
+          <context context-type="linenumber">326,328</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
@@ -3316,7 +3336,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">111,112</context>
+          <context context-type="linenumber">121,122</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3217830042880509138" datatype="html">
@@ -3327,7 +3347,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">113,114</context>
+          <context context-type="linenumber">123,124</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1987778970113179364" datatype="html">
@@ -3338,56 +3358,93 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">114,117</context>
+          <context context-type="linenumber">124,127</context>
         </context-group>
       </trans-unit>
-<trans-unit id="1338733395833138319" datatype="html">
-        <source>Regular expression</source>
+<trans-unit id="5897290368516021212" datatype="html">
+        <source>Regular expression (A≠a)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">86,88</context>
+          <context context-type="linenumber">86,87</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">130,131</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="2064010604844052750" datatype="html">
+        <source>Regular expression (case sensitive)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">87,89</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">95,97</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">131,133</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6358038517914511495" datatype="html">
+        <source>Regular expression (A=a)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">94,95</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">138,139</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8465959503671221000" datatype="html">
         <source>Phoneme symbol selector</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">93,95</context>
+          <context context-type="linenumber">103,105</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="6291011840815067432" datatype="html">
+        <source>Regular expression (case insensitive)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
+          <context context-type="linenumber">139,141</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3080988241411008393" datatype="html">
         <source>Symbol selector</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">147,149</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5458511976969720024" datatype="html">
         <source>Add word-internal segment pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">144,147</context>
+          <context context-type="linenumber">165,168</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7177968829236844694" datatype="html">
         <source>Remove word-internal segment pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">152,154</context>
+          <context context-type="linenumber">173,175</context>
         </context-group>
       </trans-unit>
 <trans-unit id="142567873907021545" datatype="html">
         <source>Anchor to end of <x id="INTERPOLATION" equiv-text="{{schema.wordLayerId}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">156,157</context>
+          <context context-type="linenumber">177,178</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1069686183681032115" datatype="html">
         <source>followed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">167,169</context>
+          <context context-type="linenumber">188,190</context>
         </context-group>
         <note priority="1" from="description">'followed' n words later by...</note>
       </trans-unit>
@@ -3395,14 +3452,14 @@
         <source>Distance between matches</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">168,170</context>
+          <context context-type="linenumber">189,191</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7803787878526251041" datatype="html">
         <source>immediately</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">170,172</context>
+          <context context-type="linenumber">191,193</context>
         </context-group>
         <note priority="1" from="description">followed 'immediately' by...</note>
       </trans-unit>
@@ -3410,7 +3467,7 @@
         <source>1 word later</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">171,173</context>
+          <context context-type="linenumber">192,194</context>
         </context-group>
         <note priority="1" from="description">followed '1 word later' by...</note>
       </trans-unit>
@@ -3418,7 +3475,7 @@
         <source>2 words later</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">172,176</context>
+          <context context-type="linenumber">193,197</context>
         </context-group>
         <note priority="1" from="description">followed '2 words later' by...</note>
       </trans-unit>
@@ -3426,7 +3483,7 @@
         <source>by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">174,178</context>
+          <context context-type="linenumber">195,199</context>
         </context-group>
         <note priority="1" from="description">followed n words later 'by'...</note>
       </trans-unit>
@@ -3434,14 +3491,14 @@
         <source>Make the search one word wider</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">178,180</context>
+          <context context-type="linenumber">199,201</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4534321503092527386" datatype="html">
         <source>Make the search one word narrower</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">184,187</context>
+          <context context-type="linenumber">205,208</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4580988005648117665" datatype="html">
@@ -4270,7 +4327,7 @@
         <source>Which layer to generate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">291,293</context>
+          <context context-type="linenumber">292,294</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
@@ -4281,7 +4338,7 @@
         <source>All layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">292,293</context>
+          <context context-type="linenumber">293,294</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
@@ -4292,53 +4349,53 @@
         <source>Regenerate layers for this transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">303,307</context>
+          <context context-type="linenumber">304,308</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2585104975990756507" datatype="html">
         <source> (main participant)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">311,313</context>
+          <context context-type="linenumber">312,314</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6436307992484416269" datatype="html">
         <source>Edit this participant's attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">318,321</context>
+          <context context-type="linenumber">319,322</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6783980950211086591" datatype="html">
         <source>View this participant's attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">326,329</context>
+          <context context-type="linenumber">327,330</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5718065298860337280" datatype="html">
         <source>List transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">332,333</context>
+          <context context-type="linenumber">333,334</context>
         </context-group>
       </trans-unit>
 <trans-unit id="286509591915961635" datatype="html">
         <source>List transcripts including this participant</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">333,336</context>
+          <context context-type="linenumber">334,337</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1482786409597207283" datatype="html">
         <source>Main Participants</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">338,340</context>
+          <context context-type="linenumber">339,341</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">339,341</context>
+          <context context-type="linenumber">340,342</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
@@ -4349,7 +4406,7 @@
         <source>Original transcript:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">346,349</context>
+          <context context-type="linenumber">347,350</context>
         </context-group>
         <note priority="1" from="description">export original transcript</note>
       </trans-unit>
@@ -4357,21 +4414,21 @@
         <source>Original transcript file</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">349,350</context>
+          <context context-type="linenumber">350,351</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5581452452329294406" datatype="html">
         <source>Export formatted, including transcript lines</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">363,364</context>
+          <context context-type="linenumber">364,365</context>
         </context-group>
       </trans-unit>
 <trans-unit id="476204934090253027" datatype="html">
         <source>and selected layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">366,369</context>
+          <context context-type="linenumber">367,370</context>
         </context-group>
         <note priority="1" from="description">(Export formatted, including transcript lines) and selected layers</note>
       </trans-unit>
@@ -4379,7 +4436,7 @@
         <source>Convert to selected format</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">374,375</context>
+          <context context-type="linenumber">375,376</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
@@ -4390,112 +4447,112 @@
         <source>Documents for this episode</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">390,394</context>
+          <context context-type="linenumber">391,395</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8990633416780502626" datatype="html">
         <source>Search transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">396,399</context>
+          <context context-type="linenumber">397,400</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8141592820114678400" datatype="html">
         <source>Search this transcript for patterns on annotation layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">401,405</context>
+          <context context-type="linenumber">402,406</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6330613292807605504" datatype="html">
         <source>Search episode</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">406,409</context>
+          <context context-type="linenumber">407,410</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4730576050336954611" datatype="html">
         <source>Search transcripts in this episode for patterns on annotation layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">411,415</context>
+          <context context-type="linenumber">412,416</context>
         </context-group>
       </trans-unit>
 <trans-unit id="367282283481603647" datatype="html">
         <source>Search participants</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">416,418</context>
+          <context context-type="linenumber">417,419</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6719026185580295571" datatype="html">
         <source>Search this participant's utterances for patterns on annotation layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">422,426</context>
+          <context context-type="linenumber">423,427</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1458226718043551250" datatype="html">
         <source>Hide full names for participant/transcript attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">461,463</context>
+          <context context-type="linenumber">466,468</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3268940969229475075" datatype="html">
         <source>Edit transcript attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">475,479</context>
+          <context context-type="linenumber">480,484</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8698195166824296640" datatype="html">
         <source>Import Changes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">501,502</context>
+          <context context-type="linenumber">506,507</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3422981570501596511" datatype="html">
         <source>Import changes made to TextGrid into LaBB-CAT</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">502,504</context>
+          <context context-type="linenumber">507,509</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4172480573395269941" datatype="html">
         <source>Edit the transcript of this utterance</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">550,552</context>
+          <context context-type="linenumber">555,557</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4978338642347097724" datatype="html">
         <source>Utterance transcript cannot be blank</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">552,554</context>
+          <context context-type="linenumber">557,559</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1505165139605158611" datatype="html">
         <source>Cancel editing transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">557,559</context>
+          <context context-type="linenumber">562,564</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3017339941320252629" datatype="html">
         <source>Save changes to transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">562,564</context>
+          <context context-type="linenumber">567,569</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8981967027320596196" datatype="html">
         <source><x id="INTERPOLATION" equiv-text="{{l}}"/><x id="INTERPOLATION_1" equiv-text="{{word.labels(l).length &gt; 1 ? ' [' + word.labels(l).length + ']' : ''}}"/>: <x id="INTERPOLATION_2" equiv-text="{{word.labels(l).join(' ') || '(no annotation)'}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">687,688</context>
+          <context context-type="linenumber">693,694</context>
         </context-group>
         <note priority="1" from="description">no annotation</note>
       </trans-unit>
@@ -4503,154 +4560,154 @@
         <source>Tag label, or blank to delete</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">698,700</context>
+          <context context-type="linenumber">704,706</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7655113335609723424" datatype="html">
         <source>Save changes to tag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">705,707</context>
+          <context context-type="linenumber">711,713</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5872175735754226507" datatype="html">
         <source>Edit tag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">712,714</context>
+          <context context-type="linenumber">718,720</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3489857844463718943" datatype="html">
         <source>Add new tag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">723,724</context>
+          <context context-type="linenumber">729,730</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2778032162035047655" datatype="html">
         <source>Permalink to utterance</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">741,742</context>
+          <context context-type="linenumber">747,748</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6087330636148303588" datatype="html">
         <source>Utterance</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">743,745</context>
+          <context context-type="linenumber">749,751</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8564202903947049539" datatype="html">
         <source>Play</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">751,752</context>
+          <context context-type="linenumber">757,758</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6523242662340926404" datatype="html">
         <source>Play this utterance</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">751,754</context>
+          <context context-type="linenumber">757,760</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6484286150591618283" datatype="html">
         <source>Extract audio</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">759,760</context>
+          <context context-type="linenumber">765,766</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1614391658886217383" datatype="html">
         <source>Extract audio fragment for this utterance</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">760,763</context>
+          <context context-type="linenumber">766,769</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6798815465514558426" datatype="html">
         <source>Open audio in Praat</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">768,770</context>
+          <context context-type="linenumber">774,776</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8953662033255273794" datatype="html">
         <source>Open utterance audio in Praat</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">769,772</context>
+          <context context-type="linenumber">775,778</context>
         </context-group>
       </trans-unit>
 <trans-unit id="3758224697324123965" datatype="html">
         <source>Open TextGrid in Praat</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">776,777</context>
+          <context context-type="linenumber">782,783</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1198996077745273128" datatype="html">
         <source>Open utterance audio and TextGrid in Praat</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">777,780</context>
+          <context context-type="linenumber">783,786</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4941679415720160458" datatype="html">
         <source>Open TextGrid incl. ± 1 utterance in Praat</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">784,785</context>
+          <context context-type="linenumber">790,791</context>
         </context-group>
       </trans-unit>
 <trans-unit id="7976424333829428146" datatype="html">
         <source>Open utterance audio and TextGrid in Praat, including previous and next utterances</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">785,788</context>
+          <context context-type="linenumber">791,794</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2299408050604994969" datatype="html">
         <source>Suggest correction</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">794,795</context>
+          <context context-type="linenumber">800,801</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6190558613863433707" datatype="html">
         <source>Suggest a correction to the transcript of this utterance</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">795,798</context>
+          <context context-type="linenumber">801,804</context>
         </context-group>
       </trans-unit>
 <trans-unit id="6245673234381686109" datatype="html">
         <source>Edit Transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">803,805</context>
+          <context context-type="linenumber">809,811</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1851119172026253457" datatype="html">
         <source>Edit utterance transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">804,807</context>
+          <context context-type="linenumber">810,813</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4096341751894571759" datatype="html">
         <source>Permalink to word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">809,810</context>
+          <context context-type="linenumber">815,816</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1142879478016526098" datatype="html">
         <source><x id="INTERPOLATION" equiv-text="{{l}}"/>: <x id="INTERPOLATION_1" equiv-text="{{word.labels(l).join(' ') || '(no annotation)'}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">819,820</context>
+          <context context-type="linenumber">825,826</context>
         </context-group>
         <note priority="1" from="description">no annotation</note>
       </trans-unit>
@@ -4658,7 +4715,7 @@
         <source>Close tree visualization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">904,908</context>
+          <context context-type="linenumber">910,914</context>
         </context-group>
       </trans-unit>
 <trans-unit id="625052246731970136" datatype="html">
@@ -4973,45 +5030,72 @@
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
+<trans-unit id="7126464771610287155" datatype="html">
+        <source>all</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">48,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">102,103</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">156,157</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">243,244</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">339,340</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">439,440</context>
+        </context-group>
+      </trans-unit>
 <trans-unit id="2901819387880218650" datatype="html">
         <source>Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">60,62</context>
+          <context context-type="linenumber">62,64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">112,114</context>
+          <context context-type="linenumber">117,119</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">181,183</context>
+          <context context-type="linenumber">191,193</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">273,275</context>
+          <context context-type="linenumber">288,290</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">368,370</context>
+          <context context-type="linenumber">388,390</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">458,460</context>
+          <context context-type="linenumber">483,485</context>
         </context-group>
       </trans-unit>
 <trans-unit id="2090715847977118331" datatype="html">
         <source>Transcript Attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">74,76</context>
+          <context context-type="linenumber">76,78</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1000762815409704864" datatype="html">
         <source>Transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">76,78</context>
+          <context context-type="linenumber">78,80</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
@@ -5023,14 +5107,14 @@
         <source>Span Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">131,133</context>
         </context-group>
       </trans-unit>
 <trans-unit id="8990805719441989570" datatype="html">
         <source>Span</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">128,131</context>
+          <context context-type="linenumber">133,136</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -5038,14 +5122,14 @@
         <source>Phrase Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">195,197</context>
+          <context context-type="linenumber">205,207</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1448488911921670708" datatype="html">
         <source>Phrase</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">197,200</context>
+          <context context-type="linenumber">207,210</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -5053,14 +5137,14 @@
         <source>Word Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">287,289</context>
+          <context context-type="linenumber">302,304</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4283120042219249873" datatype="html">
         <source>Word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">289,292</context>
+          <context context-type="linenumber">304,307</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -5068,14 +5152,14 @@
         <source>Segment Layers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">382,384</context>
+          <context context-type="linenumber">402,404</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4495620181723937744" datatype="html">
         <source>Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">384,387</context>
+          <context context-type="linenumber">404,407</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -5083,42 +5167,42 @@
         <source>Show full names for participant/transcript attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">474,477</context>
+          <context context-type="linenumber">499,502</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5914843668595618981" datatype="html">
         <source>Show attribute prefixes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">481,484</context>
+          <context context-type="linenumber">506,509</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4092353835228061492" datatype="html">
         <source>Show icons that correspond to layer properties</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">487,488</context>
+          <context context-type="linenumber">512,513</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5398209608237180342" datatype="html">
         <source>Show layer icons</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">495,497</context>
+          <context context-type="linenumber">520,522</context>
         </context-group>
       </trans-unit>
 <trans-unit id="629245355395015846" datatype="html">
         <source>Show the number of annotations in each layer</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">499,502</context>
+          <context context-type="linenumber">524,527</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1008780503793524700" datatype="html">
         <source>Show annotation counts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">506,510</context>
+          <context context-type="linenumber">531,535</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4701377957895724261" datatype="html">
@@ -7705,7 +7789,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">382,384</context>
+          <context context-type="linenumber">402,404</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -7721,7 +7805,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">287,289</context>
+          <context context-type="linenumber">302,304</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -7737,7 +7821,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">195,197</context>
+          <context context-type="linenumber">205,207</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -7753,7 +7837,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">131,133</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -8076,7 +8160,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">74,76</context>
+          <context context-type="linenumber">76,78</context>
         </context-group>
         <note priority="1" from="description">menu label</note>
       </trans-unit>
@@ -8630,38 +8714,65 @@
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
+<trans-unit id="7126464771610287155" datatype="html">
+        <source>all</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">48,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">102,103</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">156,157</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">243,244</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">339,340</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
+          <context context-type="linenumber">439,440</context>
+        </context-group>
+      </trans-unit>
 <trans-unit id="2901819387880218650" datatype="html">
         <source>Whether to show interpretation of labels (e.g. IPA) or uninterpreted labels (e.g. CELEX DISC)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">60,62</context>
+          <context context-type="linenumber">62,64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">112,114</context>
+          <context context-type="linenumber">117,119</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">181,183</context>
+          <context context-type="linenumber">191,193</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">273,275</context>
+          <context context-type="linenumber">288,290</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">368,370</context>
+          <context context-type="linenumber">388,390</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">458,460</context>
+          <context context-type="linenumber">483,485</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1000762815409704864" datatype="html">
         <source>Transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">76,78</context>
+          <context context-type="linenumber">78,80</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -8669,7 +8780,7 @@
         <source>Span</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">128,131</context>
+          <context context-type="linenumber">133,136</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -8677,7 +8788,7 @@
         <source>Phrase</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">197,200</context>
+          <context context-type="linenumber">207,210</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -8685,7 +8796,7 @@
         <source>Word</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">289,292</context>
+          <context context-type="linenumber">304,307</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -8693,7 +8804,7 @@
         <source>Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">384,387</context>
+          <context context-type="linenumber">404,407</context>
         </context-group>
         <note priority="1" from="description">layer type header</note>
       </trans-unit>
@@ -8701,42 +8812,42 @@
         <source>Show full names for participant/transcript attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">474,477</context>
+          <context context-type="linenumber">499,502</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5914843668595618981" datatype="html">
         <source>Show attribute prefixes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">481,484</context>
+          <context context-type="linenumber">506,509</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4092353835228061492" datatype="html">
         <source>Show icons that correspond to layer properties</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">487,488</context>
+          <context context-type="linenumber">512,513</context>
         </context-group>
       </trans-unit>
 <trans-unit id="5398209608237180342" datatype="html">
         <source>Show layer icons</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">495,497</context>
+          <context context-type="linenumber">520,522</context>
         </context-group>
       </trans-unit>
 <trans-unit id="629245355395015846" datatype="html">
         <source>Show the number of annotations in each layer</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">499,502</context>
+          <context context-type="linenumber">524,527</context>
         </context-group>
       </trans-unit>
 <trans-unit id="1008780503793524700" datatype="html">
         <source>Show annotation counts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
-          <context context-type="linenumber">506,510</context>
+          <context context-type="linenumber">531,535</context>
         </context-group>
       </trans-unit>
 <trans-unit id="4701377957895724261" datatype="html">

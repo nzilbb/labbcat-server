@@ -206,6 +206,13 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
         return layer.id == 'segment'
             || layer.parentId == 'segment';
     }
+    isCaseSensitive(match: MatrixLayerMatch): boolean {
+        const layer = this.schema.layers[match.id];
+        return layer
+            && (layer.type == "ipa"
+                || this.hasValidLabels(layer)
+                || layer.id == this.schema.wordLayerId);
+    }
 
     hideHelper() {
         this.helperMatch = null;

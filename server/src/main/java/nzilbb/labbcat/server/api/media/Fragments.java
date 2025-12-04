@@ -87,6 +87,7 @@ import org.apache.commons.csv.CSVRecord;
  *      a subset is required. This can be specifed instead of id/start/end parameters.
  *      This parameter is specified multiple times for multiple values.</li> 
  *  <li><i>sampleRate</i> - (optional) sample rate (Hz) to encode the mono WAV files with.</li>
+ *  <li><i>channel</i> - (optional) channel to extract - 0 for left, or 1 for right.</li>
  *  <li><i>name</i> or <i>collection_name</i> - (optional) name of the collection.</li>
  *  <li><i>prefix</i> - (optional) prefix fragment names with a numeric serial number.</li>
  *  <li><i>startOffsetColumn</i> - (optional) if threadId identifies a
@@ -129,7 +130,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     String name = parameters.getString("collection_name");
     if (name == null || name.trim().length() == 0) name = parameters.getString("name");
     if (name == null || name.trim().length() == 0) name = "media";
-    else name = "media_"+IO.SafeFileNameUrl(name.trim());
+    else name = "media_"+name.trim();
 
     String threadId = parameters.getString("threadId");
     String[] utterance = parameters.getStrings("utterance");
@@ -187,11 +188,12 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       } catch(IOException exception) {}
       return;
     }
+    String[] prefix = parameters.getStrings("prefix");
 
-    final boolean prefixNames = parameters.getString("prefix") != null;
+    final boolean prefixNames = prefix.length > 0;
     NumberFormat resultNumberFormatter = NumberFormat.getInstance();
     resultNumberFormatter.setGroupingUsed(false);
-    if (id != null) {
+    if (id.length > 0) {
       resultNumberFormatter.setMinimumIntegerDigits((int)(Math.log10(id.length)) + 1);
     } // TODO minimum integer digits for utterance/threadId cases
     
@@ -206,6 +208,19 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         httpStatus.accept(SC_BAD_REQUEST);
         try {
           out.write(localize("Invalid sample rate: {0}", sampleRate).getBytes()); // TODO i18n
+        } catch(IOException x) {}
+      }
+    }
+    String channel = parameters.getString("channel");
+    if (channel != null) {
+      if (channel.equalsIgnoreCase("left")) channel = "0";
+      else if (channel.equalsIgnoreCase("right")) channel = "1";
+      try {
+        mimeType += "; channel="+Integer.parseInt(channel);
+      } catch(Exception exception) {
+        httpStatus.accept(SC_BAD_REQUEST);
+        try {
+          out.write(localize("Invalid channel: {0}", channel).getBytes()); // TODO i18n
         } catch(IOException x) {}
       }
     }
@@ -266,14 +281,23 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           result.setTranscriptId(id[f]);
           try { result.setStartOffset(Double.valueOf(start[f])); } catch (Exception x) {}
           try { result.setEndOffset(Double.valueOf(end[f])); } catch (Exception x) {}
-          result.setPrefix(prefixNames?resultNumberFormatter.format(f+1)+"-":"");
+          if (!prefixNames) {
+            result.setPrefix("");
+          } else {
+            if (prefix.length > f) {
+              result.setPrefix(prefix[f]);
+            } else {
+              result.setPrefix(resultNumberFormatter.format(f+1)+"-");
+            }
+          }
           fragments.add(result);
         } // next ID
       }
         
       if (fragments.size() > 1) { // multiple files
         contentType.accept("application/zip");
-        fileName.accept(name + ".zip");                
+        fileName.accept(IO.SafeFileNameUrl(name+".zip")); 
+       
         // create a stream to pump from
         PipedInputStream inStream = new PipedInputStream();
         final PipedOutputStream outStream = new PipedOutputStream(inStream);

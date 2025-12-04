@@ -503,7 +503,7 @@ tbody tr:nth-child(even) {
         padding: 4px;
         &:nth-child(odd)  { background: #EEEEEE; }
         &:nth-child(even) { background: #FFFFFF; }
-        & label {
+        & > label {
             width: 50%;
             &:after { content: ':'; }
         }
