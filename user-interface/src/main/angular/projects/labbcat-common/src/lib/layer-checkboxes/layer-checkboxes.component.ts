@@ -81,6 +81,10 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() interpretedRaw: { [key: string] : any };
     /** Output list of layers with interpreted (true) or raw (false) labels */
     @Output() interpretedRawChange = new EventEmitter<{ [key: string] : any }>();
+    /** Input list of layers with underlines to indicate vertical peers (true) or not (false) */
+    @Input() verticalPeersUnderline: { [key: string] : any };
+    /** Output list of layers with underlines to indicate vertical peers (true) or not (false) */
+    @Output() verticalPeersUnderlineChange = new EventEmitter<{ [key: string] : any }>();
     /** Hide controls bar, overriding the effect of any other settings that would normally trigger showing it */
     @Input() hideControls = false;
     
@@ -119,6 +123,7 @@ export class LayerCheckboxesComponent implements OnInit {
         if (!this.excludeOptionsForLayerId) this.excludeOptionsForLayerId = [];
         if (!this.annotationCounts) this.annotationCounts = {};
         if (!this.interpretedRaw) this.interpretedRaw = {};
+        if (!this.verticalPeersUnderline) this.verticalPeersUnderline = {};
     }
 
     loadSchema(): void {
@@ -283,7 +288,12 @@ export class LayerCheckboxesComponent implements OnInit {
             this.interpretedRawChange.emit(this.interpretedRaw);
         }
     }
-    
+    handleVerticalPeersUnderline(layerId:string): void {
+        if (!this.disabled || !this.disabled.includes(layerId)) {
+            this.verticalPeersUnderline[layerId] = !this.verticalPeersUnderline[layerId];
+            this.verticalPeersUnderlineChange.emit(this.verticalPeersUnderline);
+        }
+    }
     toggleLayerIcons(): void {
         this.displayIcons = !this.displayIcons;
         sessionStorage.setItem("displayLayerIcons", JSON.stringify(this.displayIcons));
