@@ -1,4 +1,4 @@
-<h1 id="title" i18n>Upload Results</h1>
+<h1 id="title" i18n>Extract data based on search results</h1>
 
 <div id="file-chooser">
   <label for="csv" i18n>Upload search results from file</label>
@@ -7,7 +7,21 @@
   <details *ngIf="!headers">
     <summary i18n>What should the file look like?</summary>
     <div class="advanced">
-      <span i18n>Comma-separated values (.csv) file exported from results of a search, with one column that unambiguously identifies the matched token (ideally the original MatchId column, but the token URL can also be used).</span>
+      <span i18n>Comma-separated values (.csv) file exported from results of a search, with</span>
+      <ul>
+        <li i18n>One row per token you want to measure (word, segment, etc.)</li>
+        <li><span i18n="Columns">Columns</span>
+          <ul>
+            <li><span i18n="Unique identifier column">Unique identifier</span>
+              <ul>
+                <li i18n>Ideally the original MatchId column</li>
+                <li i18n>The token URL can also be used as a fallback</li>
+              </ul>
+            </li>
+            <li i18n>(All other columns will be included in the output)</li>
+          </ul>
+        </li>
+      </ul>
     </div>
   </details>
 </div>
@@ -15,7 +29,7 @@
   <div class="header" i18n="CSV column selector">Columns</div>
   <div class="item" id="targetColumn"
        i18n-title title="Which field identifies the match">
-    <label for="targetColumn" i18n>Match ID</label>
+    <label for="targetColumn" i18n>Unique identifier</label>
     <span>
       <select id="targetColumn" [(ngModel)]="targetColumn">
         <ng-container *ngFor="let field of headers">
