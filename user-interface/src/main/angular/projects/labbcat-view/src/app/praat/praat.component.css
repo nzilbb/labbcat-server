@@ -81,6 +81,9 @@ details[open] > div {
 .praat-line-disabled:before {
     content: '#';
 }
+.praat-line-enabled:before {
+    padding-left: 1ch;
+}
 #load-controls div {
     display: inline-block;
 }
