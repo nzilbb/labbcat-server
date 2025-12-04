@@ -62,13 +62,15 @@
                   type="number"
                   i18n-placeholder placeholder="Minimum"                  
                   [(ngModel)]="match.min"
-                  appAutofocus="true">
+                  appAutofocus="true"
+                  (keydown.enter)="startSearch($event)">
                 <span className="lt">&lt;</span>
                 <input
                   class="numeric maximum"
                   type="number"
                   i18n-placeholder placeholder="Maximum"
-                  [(ngModel)]="match.max">
+                  [(ngModel)]="match.max"
+                  (keydown.enter)="startSearch($event)">
               </span>
 
               <span *ngSwitchCase="'ipa'" class="ipa">
@@ -88,7 +90,8 @@
                     type="text"
                     [(value)]="match.pattern"
                     autofocus="true"
-                    id="regexp-{{c}}-{{layerId}}-{{m}}"></lib-input-regexp>
+                    id="regexp-{{c}}-{{layerId}}-{{m}}"
+                    (keydown.enter)="startSearch($event)"></lib-input-regexp>
                   <lib-input-regexp
                     *ngIf="!isCaseSensitive(match)"
                     i18n-placeholder placeholder="Regular expression (A=a)"
@@ -96,7 +99,8 @@
                     type="text"
                     [(value)]="match.pattern"
                     autofocus="true"
-                    id="regexp-{{c}}-{{layerId}}-{{m}}"></lib-input-regexp>
+                    id="regexp-{{c}}-{{layerId}}-{{m}}"
+                    (keydown.enter)="startSearch($event)"></lib-input-regexp>
                 </span>
                 <span class="help">
                   <lib-button
@@ -132,7 +136,8 @@
                     type="text" className="string"
                     [(value)]="match.pattern"
                     autofocus="true"
-                    id="regexp-{{c}}-{{layerId}}-{{m}}"></lib-input-regexp>
+                    id="regexp-{{c}}-{{layerId}}-{{m}}"
+                    (keydown.enter)="startSearch($event)"></lib-input-regexp>
                   <lib-input-regexp
                     *ngIf="!isCaseSensitive(match)"
                     i18n-placeholder placeholder="Regular expression (A=a)"
@@ -140,7 +145,8 @@
                     type="text" className="string"
                     [(value)]="match.pattern"
                     autofocus="true"
-                    id="regexp-{{c}}-{{layerId}}-{{m}}"></lib-input-regexp>
+                    id="regexp-{{c}}-{{layerId}}-{{m}}"
+                    (keydown.enter)="startSearch($event)"></lib-input-regexp>
                 </span>
                 <span class="help" *ngIf="hasValidLabels(schema.layers[layerId])">
                   <lib-button

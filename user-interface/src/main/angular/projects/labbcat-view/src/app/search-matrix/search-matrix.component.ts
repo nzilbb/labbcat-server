@@ -16,6 +16,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
     @Output() selectedLayerIdsChange = new EventEmitter<string[]>();
     @Input() columns: MatrixColumn[];
     @Output() columnsChange = new EventEmitter<MatrixColumn[]>();
+    @Output() searchStarted = new EventEmitter<void>();
 
     helperMatch: MatrixLayerMatch;
     imagesLocation : string;
@@ -216,5 +217,9 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
 
     hideHelper() {
         this.helperMatch = null;
+    }
+    startSearch(event: Event): void {
+        this.searchStarted.emit();
+        if (event) event.stopPropagation();
     }
 }
