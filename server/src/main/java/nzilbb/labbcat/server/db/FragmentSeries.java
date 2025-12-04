@@ -216,7 +216,8 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
     try {
       nextRow++;
       String[] parts = spec.split(";");
-      String graphId = parts[0];
+      String graphId = parts[0]
+        .replace("%3B",";"); // there might have been a ";" in the ID
       String targetId = null;
       if (graphId.startsWith("g_")) graphId = graphId.substring(2);
       String intervalPart = null;
@@ -245,20 +246,31 @@ public class FragmentSeries implements MonitorableSeries<Graph> {
         if (parts[p].startsWith("prefix=")) {
           prefix = parts[p].substring("prefix=".length());
         }
-        if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))
-            // don't filter by utterance - it usually has no descendants, so just makes things
-            // slower without actually discarding anything
-            && !parts[p].startsWith("em_12_")) {
+        if ((parts[p].startsWith("em_") || parts[p].startsWith("m_"))) {
           filterId = parts[p];
         }
       }
         
-      Graph fragment = store.getFragment(graphId, start, end, layers);
+      Graph fragment = null;
+      if (filterId.startsWith("em_12_")) { // are we filtering by utterance?
+        // most likely we just want the utterance fragment
+        fragment = store.getFragment(graphId, filterId, layers);
+        // now that we've got the utterance, double-check its boundaries were specified
+        Annotation utterance = fragment.getAnnotation(filterId);
+        if (start != utterance.getStart().getOffset()
+            || end != utterance.getEnd().getOffset()) {
+          fragment = null;
+        }
+      }
+      if (fragment == null) { // not an utterance, so use offsets directly
+        fragment = store.getFragment(graphId, start, end, layers); 
+      }
       if (shiftAnchors) fragment.shiftAnchors(-start);
       if (prefixNames && prefix.length() > 0) {
         fragment.setId(prefix + fragment.getId());
       }
-      if (filterId.length() > 0) { // filter annotation is specified
+      if (filterId.length() > 0 // filter annotation is specified
+          && !filterId.startsWith("em_12_")) { // and it's not an utterance ID
         // remove annotations that don't belong to the specified filter annotation
         Annotation filterAncestor = fragment.getAnnotationsById().get(filterId);
         if (filterAncestor != null) { // filter is in the graph
