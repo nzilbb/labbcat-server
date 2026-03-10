@@ -321,7 +321,7 @@
           <lib-link
             *ngIf="!user || !user.roles.includes('edit')"
             class="buttons"
-            href="edit/participant?id={{ participant.label | urlEncode }}"
+            href="participant?id={{ participant.label | urlEncode }}"
             img="csv.svg" icon=",a,"
             i18n-label label="Attributes"
             i18n-title title="View this participant's attributes"
