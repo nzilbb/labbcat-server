@@ -46,7 +46,6 @@ public class Task extends Thread implements MonitorableTask {
    * @return An array of the tasks that are currently registered.
    */
   public static Task[] getTasksArray() {
-    System.err.println("getTasksArray " + tasks);
     return tasks.toArray(new Task[0]);
   } // end of getTasks()  
 
@@ -358,7 +357,6 @@ public class Task extends Thread implements MonitorableTask {
     
     // remove the task from the set
     tasks.remove(this);
-    System.err.println("release " + getId() + " : " + tasks);
   } // end of release()
 
   /**
@@ -404,9 +402,7 @@ public class Task extends Thread implements MonitorableTask {
    * Starts the task.
    */
   @Override public void start() {
-    System.err.println("start: " + getName() + " - " + getId());
     tasks.add(this);
-    System.err.println("getTasksArray " + tasks);
     super.start();
   } // end of start()
 
@@ -486,7 +482,6 @@ public class Task extends Thread implements MonitorableTask {
     } finally {
     // remove the task from the set
       tasks.remove(this);
-      System.err.println("waitToDie " + getId() + " : " + tasks);
     }
   } // end of waitToDie()
   
