@@ -21,22 +21,34 @@
 //
 package nzilbb.labbcat.server.task;
 
-import java.util.Date;
-import java.util.ResourceBundle;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import nzilbb.util.MonitorableTask;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
 import nzilbb.labbcat.server.db.SqlGraphStore;
 import nzilbb.labbcat.server.db.StoreCache;
+import nzilbb.util.MonitorableTask;
 
 /**
  * Base class for all long-running server-side tasks.
  */
 public class Task extends Thread implements MonitorableTask {
 
-  protected static final ThreadGroup taskThreadGroup = new ThreadGroup("Tasks");
-  /** Access the Task thread group */
-  public static ThreadGroup getTaskThreadGroup() { return taskThreadGroup; }
+  protected static HashSet<Task> tasks = new HashSet<Task>();  
+  /**
+   * Returns the current tasks, which could be in any state, including
+   * not started yet, running, cancelled, or finished.
+   * @return An array of the tasks that are currently registered.
+   */
+  public static Task[] getTasksArray() {
+    System.err.println("getTasksArray " + tasks);
+    return tasks.toArray(new Task[0]);
+  } // end of getTasks()  
 
   private static SimpleDateFormat logTimeFormat = new SimpleDateFormat("dd MMM HH:mm:ss");
 
@@ -313,7 +325,6 @@ public class Task extends Thread implements MonitorableTask {
    * Constructor
    */
   public Task() {
-    super(taskThreadGroup, "");
     setName(defaultThreadName());
   } // end of constructor
   
@@ -344,25 +355,36 @@ public class Task extends Thread implements MonitorableTask {
     try {
       System.gc();
     } catch (Throwable t) {}
+    
+    // remove the task from the set
+    tasks.remove(this);
+    System.err.println("release " + getId() + " : " + tasks);
   } // end of release()
 
   /**
-   * Finds the named thread.
+   * Finds the named task.
+   * <p> There can be multiple tasks with the same name, e.g. layer generation for
+   * a graph is named after the graph ID. If there are multiple candidates, the
+   * first non-cancelled task is returned. Otherwise the first cancelled taks is returned.
    * @param sName the thread's name
    * @return the named thread, or null if it can't be found.
    */
   public static Task findTask(String sName) {
-    Task task = null;
-    int iThreadCount = taskThreadGroup.activeCount();
-    Thread[] threads = new Thread[iThreadCount];
-    taskThreadGroup.enumerate(threads);
-    for (int i = 0; i < iThreadCount; i++) {
-      if (threads[i] != null && threads[i].getName().equals(sName)) {
-        task = (Task)threads[i];
-        break;
-      }
-    } // next thread
-    return task;
+    if (sName == null) return null;
+    // there can be multiple tasks with the same name
+    // e.g. layer generation of a transcript is named after the transcript
+    List<Task> tasksWithName = tasks.stream()
+      .filter(t->sName.equals(t.getName()))
+      .collect(Collectors.toList());
+    if (tasksWithName.size() == 0) return null;
+    if (tasksWithName.size() > 1) { // multiple tasks with same name
+      Optional<Task> task = tasksWithName.stream()
+        // find the non-cancelled one if any
+        .filter(t->!t.bCancelling)
+        .findAny();
+      if (task.isPresent()) return task.get();
+    }
+    return tasksWithName.get(0);
   }
 
   /**
@@ -371,39 +393,33 @@ public class Task extends Thread implements MonitorableTask {
    * @return The identified thread, or null if it can't be found.
    */
   public static Task findTask(long id) {
-    Task task = null;
-    int iThreadCount = taskThreadGroup.activeCount();
-    Thread[] threads = new Thread[iThreadCount];
-    taskThreadGroup.enumerate(threads);
-    for (int i = 0; i < iThreadCount; i++) {
-      if (threads[i] != null && threads[i].getId() == id) {
-        task = (Task)threads[i];
-        break;
-      }
-    } // next thread
-    return task;
+    Optional<Task> task = tasks.stream()
+      .filter(t->t.getId() == id)
+      .findAny();
+    if (task.isPresent()) return task.get();
+    return null;
   }
+  
+  /**
+   * Starts the task.
+   */
+  @Override public void start() {
+    System.err.println("start: " + getName() + " - " + getId());
+    tasks.add(this);
+    System.err.println("getTasksArray " + tasks);
+    super.start();
+  } // end of start()
 
   /**
    * To be run by derived classes at the start of their 'run' method.
    */
   protected void runStart() {
-    // cancel any other threads running that have the same name
-    Task thread = null;
-    int iThreadCount = taskThreadGroup.activeCount();
-    Thread[] threads = new Thread[iThreadCount];
-    taskThreadGroup.enumerate(threads);
-    for (Thread otherThread : threads) {
-      if (otherThread == null) continue;
-      if (otherThread.getName() != null
-          && otherThread.getName().equals(getName())
-          && otherThread != this
-          && ((Task)otherThread).getRunning()) {
-        // cancel the other thread
-        setStatus("Cancelling other task: " + otherThread.getId());
-        ((Task)otherThread).cancel();
-      }
-    } // next thread
+    tasks.stream()
+      .filter(t->getName().equals(t.getName()) && t != this)
+      .forEach(t->{
+          setStatus("Cancelling other task: " + t.getId());
+          t.cancel();
+        });
 
     bRunning = true;
     bCancelling = false;
@@ -427,8 +443,8 @@ public class Task extends Thread implements MonitorableTask {
     // minimise possible vestigal memory usage // TODO remove this
     try {
       System.gc();
-    }
-    catch (Throwable t) {}
+    } catch (Throwable t) {}
+
   } // end of runEnd()
       
   /**
@@ -453,18 +469,24 @@ public class Task extends Thread implements MonitorableTask {
    * @param lDelay Delay time - i.e. the minimum amount of time to wait before dying.
    */
   public void waitToDie(long lDelay) {
-    if (dtLastKeepAlive.getTime() > 0) { // haven't already been released
-      try { 
-        synchronized(this) {
-          this.wait(lDelay); // wait for up to 2 minutes
-        }
-        while (new Date().getTime() - lDelay < dtLastKeepAlive.getTime()) {
+    try {
+      if (dtLastKeepAlive.getTime() > 0) { // haven't already been released
+        try { 
           synchronized(this) {
             this.wait(lDelay); // wait for up to 2 minutes
           }
-        }
-      } catch (Throwable t) {
-      } // drops out
+          while (new Date().getTime() - lDelay < dtLastKeepAlive.getTime()) {
+            synchronized(this) {
+              this.wait(lDelay); // wait for up to 2 minutes
+            }
+          }
+        } catch (Throwable t) {
+        } // drops out
+      }
+    } finally {
+    // remove the task from the set
+      tasks.remove(this);
+      System.err.println("waitToDie " + getId() + " : " + tasks);
     }
   } // end of waitToDie()
   
