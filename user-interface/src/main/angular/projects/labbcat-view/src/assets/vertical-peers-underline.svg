@@ -1,0 +1,4 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 0 240 v -80 c 0 -60, 60 -120, 120 -120 h 160 c 60 0, 120 60, 120 120 v 80 h -75 v -45 c 0 -40, -40 -80, -80 -80, h -90 c -40 0, -80 40, -80 80 v 45 Z" style="fill:#859044;fill-opacity:1" />
+  <rect y="290" width="400" height="75" style="fill:#859044;fill-opacity:1" />
+</svg>
