@@ -10,3 +10,15 @@
 #file-chooser details {
     padding-top: 5px;
 }
+details > .advanced {
+    border: 1px solid silver;
+    border-radius: 8px;
+    padding: 10px;
+}
+details > .advanced > ul {
+    padding-top: 5px;
+    padding-inline-start: 29px;
+}
+details > .advanced li ul {
+    padding-inline-start: 40px;
+}
