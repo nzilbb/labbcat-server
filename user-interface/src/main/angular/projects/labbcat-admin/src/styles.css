@@ -195,9 +195,7 @@ lib-wait {
             padding-bottom: 0px;
             &:nth-child(even) { background: #FAFAFA; }
         }
-        &:not(:first-child) {
-            border-top: 1px dashed silver;
-        }
+        &:not(:first-child) { border-top: 1px dashed silver; }
         & > span {
             display: block;
             vertical-align: top;
@@ -215,26 +213,16 @@ lib-wait {
                 width: 95%;
             }
         }
-        &:first-child {
-            padding-left: 5px;
-        }
-        &.number {
-            text-align: right;
-        }
-        &.center {
-            text-align: center;
-        }
-        & > legend {
-            font-size: 10pt;
-        }
+        &:first-child { padding-left: 5px; }
+        &.number { text-align: right; }
+        &.center { text-align: center; }
+        & > legend { font-size: 10pt; }
         & > label {
             display: none;
             @media all and (min-width: 640px) { display: block; }
         }
     }
-    & > .header {
-        font-weight: bold;
-    }
+    & > .header { font-weight: bold; }
     & > .attribute-item > label { font-weight:  bold; } 
 }
 
