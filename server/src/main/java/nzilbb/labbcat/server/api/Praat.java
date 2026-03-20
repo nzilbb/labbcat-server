@@ -832,7 +832,7 @@ public class Praat extends APIRequestHandler {
       }
 
       // start the task
-      task.setName(uploadedCsvFile.getParentFile().getName()); // parent dir is a unque version of he name
+      task.setName(uploadedCsvFile.getParentFile().getName()); // parent dir is a unique version of the name
       if (context.getUser() != null) {	
         task.setWho(context.getUser());
       } else {
