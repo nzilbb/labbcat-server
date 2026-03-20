@@ -143,7 +143,7 @@ export class TranscriptMediaComponent extends EditComponent implements OnInit {
         return Object.keys(this.mediaFilesByTrack);
     }
     upload(file: any, suffix: string): void {
-        this.trackUpload[suffix] = "uploading";
+        this.trackUpload[suffix] = "⌛";
         this.labbcatService.labbcat.saveMedia(
             this.id, file, suffix, (result, errors, messages) => {
                 this.trackUpload[suffix] = "";
@@ -154,6 +154,11 @@ export class TranscriptMediaComponent extends EditComponent implements OnInit {
                     messages.forEach(m => this.messageService.info(m));
                 }
                 this.readMedia();
+            }, (e)=> { // progress
+                if (e.lengthComputable) {
+	            this.trackUpload[suffix] = Math.max( // never zero, so UX works
+                        1, Math.round(e.loaded * 100 / e.total));
+                }
             });
     }
     deleteFile(fileName: string): void {
