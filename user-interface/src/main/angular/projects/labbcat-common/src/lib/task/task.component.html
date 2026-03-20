@@ -18,6 +18,7 @@
     </lib-button>
   </div>
   <div class="text">
+    <div class="task-start-time" [style.display]="displayStartTime ? 'block' : 'none'">{{task.creationTime | date: 'medium'}}</div>
     <div *ngIf="showStatus" class="task-status">{{task.status}}</div>
     <div *ngIf="showStatus && task.resultUrl" class="task-result">
       <a href="{{task.resultUrl}}" target="task-{{threadId}}" #resultAnchor>
