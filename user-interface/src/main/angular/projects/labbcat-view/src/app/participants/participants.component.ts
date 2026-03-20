@@ -33,6 +33,11 @@ export class ParticipantsComponent implements OnInit {
     transcriptQuery = ""; // AGQL query string for pre-matching transcripts
     transcriptDescription = ""; // Human readable description of transcript query
     defaultTranscriptFilter = "";
+    // hints for 'system layers'
+    participantLayerHint = "Participant";
+    corpusLayerHint = "Corpus";
+    episodeLayerHint = "Series of transcripts";
+    transcriptCountHint = "Number of transcripts the participant appears in";
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0;
@@ -77,11 +82,17 @@ export class ParticipantsComponent implements OnInit {
             this.participantAttributes = [];
             this.filterLayers = [];
             // allow filtering by participant ID, corpus, and episode
-            this.filterLayers.push(this.schema.layers[this.schema.participantLayerId]);
+            let participantLayer = this.schema.layers[this.schema.participantLayerId] as Layer;
+            let corpusLayer = this.schema.layers[this.schema.corpusLayerId] as Layer;
+            let episodeLayer = this.schema.layers[this.schema.episodeLayerId] as Layer;
+            participantLayer.hint = this.participantLayerHint;
+            corpusLayer.hint = this.corpusLayerHint;
+            episodeLayer.hint = this.episodeLayerHint;
+            this.filterLayers.push(participantLayer);
             this.filterValues[this.schema.participantLayerId] = [];
-            this.filterLayers.push(this.schema.layers[this.schema.corpusLayerId]);
+            this.filterLayers.push(corpusLayer);
             this.filterValues[this.schema.corpusLayerId] = [];
-            this.filterLayers.push(this.schema.layers[this.schema.episodeLayerId]);
+            this.filterLayers.push(episodeLayer);
             this.filterValues[this.schema.episodeLayerId] = [];
             // and transcript count - we use a dummy layer to fool the layer-filter
             this.schema.layers["--transcript-count"] = {
@@ -89,7 +100,8 @@ export class ParticipantsComponent implements OnInit {
                 parentId: this.schema.participantLayerId,                    
                 alignment: 0,
                 peers: false, peersOverlap: false, parentIncludes: true, saturated: true,
-                type: "number", subtype: "integer"
+                type: "number", subtype: "integer",
+                hint: this.transcriptCountHint
             }
             this.filterLayers.push(this.schema.layers["--transcript-count"]);
             this.filterValues["--transcript-count"] = [];
@@ -296,7 +308,7 @@ export class ParticipantsComponent implements OnInit {
                 this.query += "/"+this.esc(this.filterValues[this.schema.participantLayerId][0])
                     +"/.test(id)";
                 this.queryDescription += "ID matches "
-                    +this.filterValues[this.schema.participantLayerId][0];
+                    + (this.filterValues[this.schema.participantLayerId][0].length <= 50 ? this.filterValues[this.schema.participantLayerId][0] : this.filterValues[this.schema.participantLayerId][0].slice(0, 49) + "…");
                 
             } else if (layer.id == "--transcript-count"
                 && this.filterValues[layer.id].length > 0) {
@@ -461,8 +473,8 @@ export class ParticipantsComponent implements OnInit {
                 this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/"
                     +".test(labels('" +this.esc(layer.id)+"'))";
                 this.queryDescription += layer.description
-                    +" matches " + this.filterValues[layer.id][0]
-                
+                    +" matches "
+                    + (this.filterValues[layer.id][0].length <= 50 ? this.filterValues[layer.id][0] : this.filterValues[layer.id][0].slice(0, 49) + "…");
             }
         } // next filter layer
 
@@ -713,11 +725,6 @@ export class ParticipantsComponent implements OnInit {
         if (!this.showAttributesSelection) { // show options
             this.showAttributesSelection = true;
         } else { // options selected, so go ahead and do it            
-            if (this.selectedIds.length == 0 && this.matchCount > 10) {
-                if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
-                    return;
-                }
-            }
             this.form.nativeElement.action = this.baseUrl + "api/participant/attributes";
             this.form.nativeElement.submit();
         }
