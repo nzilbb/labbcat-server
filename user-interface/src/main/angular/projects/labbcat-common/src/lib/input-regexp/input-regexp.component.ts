@@ -28,11 +28,12 @@ export class InputRegexpComponent implements OnInit {
             new RegExp(value, "u");
             this.validRegexp(value);
         } catch(error) {
-            if (error.message.endsWith("Invalid escape")) {
+            if (error.message.endsWith("Invalid escape") || error.message.endsWith("invalid identity escape in regular expression") || error.message.endsWith("invalid escaped character for Unicode pattern")) {
+                // ignore errors thrown by \- outside [], since this pattern isn't problematic for MySQL
                 this.validRegexp(value);
             } else {
-                this.temporaryTitle = error.message.replace(': ', ' ').replace('/u:', '/:');
-                this.regexpError = error.message.match("(?<=/u: ).+");
+                this.regexpError = error.message.replace(/Invalid regular expression: (\/.+\/u: )?/, '');
+                this.temporaryTitle = 'Invalid regular expression /' + value + '/: ' + this.regexpError;
             }
         }
     }
