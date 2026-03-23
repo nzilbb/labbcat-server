@@ -36,10 +36,10 @@ export class TranscriptsComponent implements OnInit {
     transcriptDescription = ""; // Human readable description of transcript query
     defaultParticipantFilter = "";
     // hints for 'system layers'
-    transcriptLayerHint = "Transcript file name";
-    corpusLayerHint = "Corpus";
-    episodeLayerHint = "Series of transcripts";
-    transcriptTypeLayerHint = "Transcript type";
+    transcriptLayerHint = "Transcript file name"; // TODO i18n
+    corpusLayerHint = "Corpus"; // TODO i18n
+    episodeLayerHint = "Series of transcripts"; // TODO i18n
+    transcriptTypeLayerHint = "Transcript type"; // TODO i18n
     // track how many queries we're up to, to avoid old long queries updating the UI when
     // new short queries already have.
     querySerial = 0; 
