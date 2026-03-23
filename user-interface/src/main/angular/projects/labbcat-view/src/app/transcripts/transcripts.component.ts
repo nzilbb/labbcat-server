@@ -670,6 +670,11 @@ export class TranscriptsComponent implements OnInit {
             this.showAttributesSelection = this.showSerializationOptions = false;
             this.serializeImg = "cog.svg";
         } else { // options selected, so go ahead and do it
+            if (this.selectedIds.length == 0 && this.matchCount > 1000) {
+                if (!confirm("This will export all "+this.matchCount+" matches.\nAre you sure?")) { // TODO i18n
+                    return;
+                }
+            }
             this.form.nativeElement.action = this.baseUrl + "edit/layers/regenerate";
             this.form.nativeElement.submit();
         }
