@@ -31,21 +31,21 @@
             i18n-title title="Narrow down the participants to search by filtering by participant attributes"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && participantDescription"
+            *ngIf="participantIds && participantIds.length && participantDescription && !participantsFile"
             (press)="selectParticipants()"
             img="people.svg"
             i18n-label label="Modify filter"
             i18n-title title="Modify current participant filter"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && participantDescription"
+            *ngIf="participantIds && participantIds.length && participantDescription && !participantsFile"
             (press)="clearParticipantFilter()"
             img="delete.svg"
             i18n-label label="Clear filter"
             i18n-title title="Clear participant filter"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && !participantDescription"
+            *ngIf="participantIds && participantIds.length && (!participantDescription || participantsFile)"
             (press)="clearParticipantFilter()"
             img="delete.svg"
             i18n-label label="Clear selections"
@@ -120,21 +120,21 @@
             i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription"
+            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription && !transcriptsFile"
             (press)="selectTranscripts()"
             img="people.svg"
             i18n-label label="Modify filter"
             i18n-title title="Modify current transcript filter"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription"
+            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription && !transcriptsFile"
             (press)="clearTranscriptFilter()"
             img="delete.svg"
             i18n-label label="Clear filter"
             i18n-title title="Clear transcript filter"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && !transcriptDescription"
+            *ngIf="transcriptIds && transcriptIds.length && (!transcriptDescription || transcriptsFile)"
             (press)="clearTranscriptFilter()"
             img="delete.svg"
             i18n-label label="Clear selections"
@@ -270,7 +270,7 @@
           <div class="item">
             <label i18n-title title="Do not open a list of matches when search is complete">
               <input type="checkbox" [(ngModel)]="suppressResults" id="suppressResults" >
-              <span i18n>No matches, only a summary of results</span></label>
+              <span i18n>No matches, only a count of results.</span></label>
           </div>
         </div>
       </div>
@@ -281,7 +281,7 @@
     <app-search-matrix
       [schema]="schema"
       [(columns)]="matrix.columns"
-      (keydown.enter)="search()"
+      (searchStarted)="search()"
       ></app-search-matrix>
   </div>
   <div class="search-button">

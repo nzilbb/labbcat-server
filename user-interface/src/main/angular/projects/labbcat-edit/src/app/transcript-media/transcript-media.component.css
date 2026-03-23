@@ -3,6 +3,11 @@ dl {
     min-width: 50vw;
     margin: auto;
 }
+dt {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
 dd {
     margin-left: 0px;
 }

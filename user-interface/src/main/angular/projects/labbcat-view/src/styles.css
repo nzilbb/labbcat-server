@@ -160,6 +160,8 @@ input[type=number] {
     width: 100%;
     @media all and (min-width: 640px) {
         display: table;
+        width: fit-content;
+        margin: auto;
     }
     & > .item {
         display: flex;
@@ -168,48 +170,35 @@ input[type=number] {
         @media all and (min-width: 640px) {
             display: table-row;
             padding-bottom: 0px;
-        }
-        &:not(:first-child) {
-            border-top: 1px dashed silver;
-        }
-        @media all and (min-width: 640px) {
             &:nth-of-type(odd) { background: #FAFAFA; }
             &:nth-of-type(even) { background: #FFFFFF; }
         }
+        &:not(:first-child) { border-top: 1px dashed silver; }
         & > span {
             display: block;
             vertical-align: top;
             padding-left: 10px;
             white-space: nowrap;
-            @media all and (min-width: 640px) { display: table-cell; }
-            &:first-child {
-                padding-left: 5px;
+            @media all and (min-width: 640px) {
+                display: table-cell;
+                & > legend { display: none; }
             }
             &.header-only {
                 display: none;
                 @media all and (min-width: 640px) { display: table-cell; }
             }
-            &.number {
-                text-align: right;
-            }
-            &.center {
-                text-align: center;
-            }
-            & > legend {
-                font-size: 10pt;
-            }
-            & > input, & select, & > textarea {
-                width: 95%;
-            }
-            & > label {
-                display: none;
-                @media all and (min-width: 640px) { display: block; }
-            }
+        }
+        &:first-child { padding-left: 5px; }
+        &.number { text-align: right; }
+        &.center { text-align: center; }
+        & > legend { font-size: 10pt; }
+        & > input, & select, & > textarea { width: 95%; }
+        & > label {
+            display: none;
+            @media all and (min-width: 640px) { display: block; }
         }
     }
-    & > .header {
-        font-weight: bold;
-    }
+    & > .header { font-weight: bold; }
 }
 
 

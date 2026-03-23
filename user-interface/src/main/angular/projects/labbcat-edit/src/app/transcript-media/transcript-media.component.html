@@ -8,11 +8,16 @@
       <lib-button *ngIf="trackUpload[track.suffix] != 'show'"
                   img="add.svg" icon="➕"
                   i18n-title title="Upload {{track.suffix}} media file"
-                  [processing]="trackUpload[track.suffix] == 'uploading'"
+                  [processing]="trackUpload[track.suffix] > 0"
                   (press)="trackUpload[track.suffix] = 'show'"></lib-button>
       <input *ngIf="trackUpload[track.suffix] == 'show'"
              type="file"
              (change)="upload($event.target.files[0], track.suffix)">
+      <progress *ngIf="trackUpload[track.suffix] > 0"
+                max="100"
+                [value]="trackUpload[track.suffix]"
+                [title]="''+trackUpload[track.suffix]+'%'"
+                >{{trackUpload[track.suffix]}}%</progress>
       </dt>
       <dd><ul>
         <li *ngFor="let mediaFile of mediaFilesByTrack[track.suffix]"

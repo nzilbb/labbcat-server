@@ -7,7 +7,6 @@
     flex-direction: row;
     align-items: center;
 }
-.task-status, .task-result {
+.task-start-time, .task-status, .task-result {
     text-align: center;
 }
-

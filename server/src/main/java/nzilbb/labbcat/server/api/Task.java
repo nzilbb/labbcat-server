@@ -156,9 +156,7 @@ public class Task extends APIRequestHandler {
     // get ID
     if (pathInfo == null || pathInfo.equals("/") || pathInfo.indexOf('/') < 0) {
       // list all thread IDs
-      Thread[] threads = new Thread[
-        nzilbb.labbcat.server.task.Task.getTaskThreadGroup().activeCount()];
-      nzilbb.labbcat.server.task.Task.getTaskThreadGroup().enumerate(threads);
+      Thread[] threads = nzilbb.labbcat.server.task.Task.getTasksArray();
       JsonArrayBuilder tasks = Json.createArrayBuilder();
       for (Thread thread : threads) tasks.add(""+thread.getId());
       return successResult(tasks.build(), null);  
