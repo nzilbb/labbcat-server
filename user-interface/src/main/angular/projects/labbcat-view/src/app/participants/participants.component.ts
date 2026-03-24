@@ -749,24 +749,12 @@ export class ParticipantsComponent implements OnInit {
     transcripts(): void {
         let params = {};
         if (this.selectedIds.length > 0) { // individual check-boxes selected
-            // check if the user has selected all check-boxes corresponding to a filter
-            const allFilteredSelected = this.selectedIds.length == this.matchCount &&
-                this.selectedIds.length == this.participantIds.length &&
-                this.selectedIds.every((x, i) => x == this.participantIds[i]);
-            // TODO handle the case where all participants' check-boxes are selected
-            if (allFilteredSelected) { // user has selected all check-boxes corresponding to a filter
-                params = {
-                    participant_expression: this.query,
-                    participants: this.queryDescription
-                };
-            } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
-                params = {
-                    participant_expression: "["
-                        + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                        + "].includesAny(labels('participant'))",
-                    participants: this.selectedIds.length + " selected participant" + (this.selectedIds.length > 1 ? "s" : "")
-                };
-            }
+            params = {
+                participant_expression: "["
+                    + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
+                    + "].includesAny(labels('participant'))",
+                participants: this.selectedIds.length + " selected participant" + (this.selectedIds.length > 1 ? "s" : "")
+            };
         } else if (this.query) { // no check-boxes selected but some filter applied
             params = {
                 participant_expression: this.query,
