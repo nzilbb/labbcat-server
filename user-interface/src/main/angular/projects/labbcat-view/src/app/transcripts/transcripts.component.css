@@ -34,6 +34,16 @@ span.attribute {
     overflow: clip;
     font-style: italic;
 }
+#mimeTypeWrapper {
+    display: flex;
+    align-items: center;
+    height: 45px;
+}
+@media (min-width: 640px) {
+    #mimeTypeWrapper {
+        height: 32px;
+    }
+}
 #attributesSelection {
     display: inline-block;
     width: 165px;
