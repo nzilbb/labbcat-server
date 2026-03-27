@@ -523,7 +523,7 @@
                          class="tree" href="#{{annotation.id}}"
                          (click)="showTree(annotation, $event);">{{renderLabel(annotation)}}</a>
                       <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
-                         class="image" href="#{{annotation.id}}"
+                         class="image"
                          href="{{annotation.dataUrl}}&show"
                          target="{{annotation.id}}"
                          (mouseover)="annotation.preview = true;"
@@ -535,8 +535,13 @@
                                ><img *ngIf="annotation.preview"
                                      class="preview" src="{{annotation.dataUrl}}"
                                      alt="📷"></a>
+                      <a *ngSwitchCase="annotation.layer.type == 'text/url'"
+                         class="link"
+                         href="{{annotation.label.split('\n')[1]}}"
+                         target="{{annotation.layer.id}}"
+                         >{{renderLabel(annotation)}}</a>
                       <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
-                         class="blob" href="#{{annotation.id}}"
+                         class="blob"
                          href="{{annotation.dataUrl}}"
                          target="{{annotation.id}}"
                          ><img class="icon"
@@ -590,7 +595,7 @@
                            class="tree" href="#{{annotation.id}}"
                            (click)="showTree(annotation, $event);">{{renderLabel(annotation)}}</a>
                         <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
-                           class="image" href="#{{annotation.id}}"
+                           class="image"
                            href="{{annotation.dataUrl}}&show"
                            target="{{annotation.id}}"
                            (mouseover)="annotation.preview = true;"
@@ -602,8 +607,13 @@
                                  ><img *ngIf="annotation.preview"
                                        class="preview" src="{{annotation.dataUrl}}"
                                        alt="📷"></a>
+                        <a *ngSwitchCase="annotation.layer.type == 'text/url'"
+                           class="link"
+                           href="{{annotation.label.split('\n')[1]}}"
+                           target="{{annotation.layer.id}}"
+                           >{{renderLabel(annotation)}}</a>
                         <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
-                           class="blob" href="#{{annotation.id}}"
+                           class="blob"
                            href="{{annotation.dataUrl}}"
                            target="{{annotation.id}}"
                            ><img class="icon"
@@ -658,7 +668,7 @@
                              class="tree" href="#{{annotation.id}}"
                              (click)="showTree(annotation, $event);">{{renderLabel(annotation)}}</a>
                           <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
-                             class="image" href="#{{annotation.id}}"
+                             class="image"
                              href="{{annotation.dataUrl}}&show"
                              target="{{annotation.id}}"
                              (mouseover)="annotation.preview = true;"
@@ -670,8 +680,13 @@
                                    ><img *ngIf="annotation.preview"
                                          class="preview" src="{{annotation.dataUrl}}"
                                          alt="📷"></a>
+                          <a *ngSwitchCase="annotation.layer.type == 'text/url'"
+                             class="link"
+                             href="{{annotation.label.split('\n')[1]}}"
+                             target="{{annotation.layer.id}}"
+                             >{{renderLabel(annotation)}}</a>
                           <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
-                             class="blob" href="#{{annotation.id}}"
+                             class="blob"
                              href="{{annotation.dataUrl}}"
                              target="{{annotation.id}}"
                              ><img class="icon"
@@ -697,7 +712,15 @@
                         [class.highlight]="annotation.id == highlitId"
                         class="annotation word-annotation">
                     <ng-container *ngIf="!annotation._editing">
-                      {{renderLabel(annotation)}}</ng-container>
+                      <ng-container [ngSwitch]="true">
+                        <a *ngSwitchCase="annotation.layer.type == 'text/url'"
+                           class="link"
+                           href="{{annotation.label.split('\n')[1]}}"
+                           target="{{annotation.layer.id}}"
+                           >{{renderLabel(annotation)}}</a>
+                        <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
+                      </ng-container>
+                    </ng-container>
                     <ng-container *ngIf="editableTagLayer(l) && annotation.ordinal == 1">
                       <input *ngIf="annotation._editing"
                              type="text"
@@ -855,7 +878,7 @@
                            class="tree" href="#{{annotation.id}}"
                            (click)="showTree(annotation, $event);">{{renderLabel(annotation)}}</a>
                         <a *ngSwitchCase="annotation.layer.type.startsWith('image/')"
-                           class="image" href="#{{annotation.id}}"
+                           class="image"
                            href="{{annotation.dataUrl}}&show"
                            target="{{annotation.id}}"
                            (mouseover)="annotation.preview = true;"
@@ -867,6 +890,11 @@
                                  ><img *ngIf="annotation.preview"
                                        class="preview" src="{{annotation.dataUrl}}"
                                        alt="📷"></a>
+                        <a *ngSwitchCase="annotation.layer.type == 'text/url'"
+                           class="link"
+                           href="{{annotation.label.split('\n')[1]}}"
+                           target="{{annotation.layer.id}}"
+                           >{{renderLabel(annotation)}}</a>
                         <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
                            class="blob" href="#{{annotation.id}}"
                            href="{{annotation.dataUrl}}"

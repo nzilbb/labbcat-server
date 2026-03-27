@@ -1074,7 +1074,11 @@ export class TranscriptComponent implements OnInit {
     }
 
     renderLabel(annotation: Annotation) : string {
-        let display = annotation.label;
+        let display = annotation.label
+        if (annotation.layer.type == "text/url") { // it's a link layer
+            // first line is label, second link is URL
+            display = annotation.label.split("\n")[0]; // first line only
+        }
         if (this.interpretedRaw[annotation.layer.id]) {
             for (let definition of annotation.layer.validLabelsDefinition) {
                 if (definition.display

@@ -1895,6 +1895,12 @@ public class OneQuerySearch extends SearchTask {
       .filter(match -> match.getId().equals(spanLayers.get(0).getId()))
       .findAny().get();
 
+    // support matching multiline labels - e.g. layer.type == "text/url"
+    try (PreparedStatement sqlMultilineMatch = connection.prepareStatement(
+           "SET default_regex_flags='MULTILINE'")) {
+      sqlMultilineMatch.executeUpdate();
+    }
+
     // generate an SQL statement from the search matrix
     String q = null;
     // Parameter values
