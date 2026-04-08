@@ -1,5 +1,5 @@
 <%@ page info="Annotator Extension" isErrorPage="true"
-    import = "nzilbb.labbcat.server.api.edit.annotator.ExtWebApp" 
+    import = "nzilbb.labbcat.server.api.annotator.ExtWebApp" 
     import = "nzilbb.ag.automation.util.AnnotatorDescriptor"
     import = "java.util.HashMap"
     import = "java.util.Timer"
@@ -9,8 +9,8 @@
 %><%!
 HashMap<String,AnnotatorDescriptor> activeAnnotators = new HashMap<String,AnnotatorDescriptor>();
 // cached descriptors are removed after a while so they don't linger in memory
-Timer annotatorDeactivator = new Timer("edit/annotator/ext");
-%><%@ include file="../../base.jsp" %><%{
+Timer annotatorDeactivator = new Timer("annotator/ext");
+%><%@ include file="../base.jsp" %><%{
     if ("GET".equals(request.getMethod())
         || "POST".equals(request.getMethod())
         || "PUT".equals(request.getMethod())

@@ -20,7 +20,7 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 /**
- * <p> <tt>/api/edit/annotator/&hellip;</tt>
+ * <p> <tt>/api/annotator/&hellip;</tt>
  * : Annotator web apps for users with 'edit' privileges.
  *
  * <p> (These class implementations are decoupled from any HTTP request/response object model.

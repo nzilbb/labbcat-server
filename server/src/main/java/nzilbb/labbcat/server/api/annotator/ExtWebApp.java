@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -19,7 +19,7 @@
 //    along with LaBB-CAT; if not, write to the Free Software
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-package nzilbb.labbcat.server.api.edit.annotator;
+package nzilbb.labbcat.server.api.annotator;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -62,7 +62,7 @@ import nzilbb.webapp.StandAloneWebApp;
  * Server-side implementation of 'ext' web-apps.
  * <p> This servlet provides access to an annotator's 'ext' web-app, if there is one.
  * <p> If there's an 'ext' web-app, the first request should be to a path structured: <br>
- * <tt>/api/admin/annotator/ext/<var>annotatorId</var>/</tt>
+ * <tt>/api/annotator/ext/<var>annotatorId</var>/</tt>
  * <p> The resulting HTML document will then implement the web-app by requesting resources
  * as required.
  * <p> 'Ext' web-apps provide a mechanism for supplying extra information or data to the
@@ -71,7 +71,6 @@ import nzilbb.webapp.StandAloneWebApp;
  * 'task' web-apps.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@RequiredRole("edit")
 public class ExtWebApp extends APIRequestHandler {
   
   HashMap<String,AnnotatorDescriptor> activeAnnotators;
@@ -194,6 +193,17 @@ public class ExtWebApp extends APIRequestHandler {
           if (resource.indexOf('.') > 0) {
             // requests with a dot are taken to be resources for the webapp,
             // e.g. index.html
+            
+            // check access
+            if (resource.startsWith("/edit/") && !context.isUserInRole("edit")) {
+              httpStatus.accept(SC_FORBIDDEN);
+              return;
+            }
+            if (resource.startsWith("/admin/") && !context.isUserInRole("admin")) {
+              httpStatus.accept(SC_FORBIDDEN);
+              return;
+            }
+
             try {
               //context.servletLog("about to get ext" + resource);
               stream = descriptor.getResource("ext"+resource);
@@ -216,8 +226,10 @@ public class ExtWebApp extends APIRequestHandler {
               if (queryString != null) {
                 uri += "?" + queryString;
               }
-              stream = new RequestRouter(annotator).request(
-                method, uri, requestHeaders.apply("Content-Type"), requestBody);
+              stream = new RequestRouter(annotator)
+                .setUserHasRole(role -> context.isUserInRole(role))
+                .request(
+                  method, uri, requestHeaders.apply("Content-Type"), requestBody);
               echoContentType(requestHeaders, contentTypeConsumer, contentEncoding);
             } catch(RequestException exception) {
               context.servletLog(pathInfo + " - RequestException: " + exception);
