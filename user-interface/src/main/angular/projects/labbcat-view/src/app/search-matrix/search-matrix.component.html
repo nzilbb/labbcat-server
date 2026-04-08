@@ -42,20 +42,17 @@
                  >
           </span>
           <div class="match" *ngFor="let match of column.layers[layerId]; index as m">
-            <span *ngIf="isSegmentLayer(schema.layers[layerId])"
-                  class="target segment"
-                  i18n-title title="Target this match">
-              <img
-                i18n-title title="Target this match"
-                alt="🎯" [src]="imagesLocation+'/target.svg'"
-                [class]="column.layers[layerId][m].target?'selected':'deselected'"
-                (click)="setTarget(column.layers[layerId][m])">
-            </span>
-            <ng-container
-              *ngIf="layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
-              [ngSwitch]="schema.layers[layerId].type">
-
-              <span *ngSwitchCase="'number'" class="numeric">
+            <ng-container *ngIf="layerId != schema.turnLayerId && layerId != schema.utteranceLayerId && schema.layers[layerId].type == 'number'">
+              <span class="left-container number">
+                <span *ngIf="isSegmentLayer(schema.layers[layerId])"
+                      class="target segment"
+                      i18n-title title="Target this match">
+                  <img
+                    i18n-title title="Target this match"
+                    alt="🎯" [src]="imagesLocation+'/target.svg'"
+                    [class]="column.layers[layerId][m].target?'selected':'deselected'"
+                    (click)="setTarget(column.layers[layerId][m])">
+                </span>
                 <span className="ge">&ge;</span>
                 <input
                   class="numeric minimum"
@@ -64,6 +61,8 @@
                   [(ngModel)]="match.min"
                   appAutofocus="true"
                   (keydown.enter)="startSearch($event)">
+              </span>
+              <span class="right-container number">
                 <span className="lt">&lt;</span>
                 <input
                   class="numeric maximum"
@@ -71,9 +70,33 @@
                   i18n-placeholder placeholder="Maximum"
                   [(ngModel)]="match.max"
                   (keydown.enter)="startSearch($event)">
+                <div class="add-match"
+                     *ngIf="m+1 == column.layers[layerId].length && (layerId == 'segment' || schema.layers[layerId].parentId == 'segment')">
+                  <lib-button
+                    i18n-title title="Add word-internal segment pattern"
+                    class="small"
+                    icon="➕" img="add.svg"
+                    (press)="addMatch(column, layerId)"></lib-button>
+                  <lib-button
+                    *ngIf="column.layers[layerId].length > 1"
+                    class="small"
+                    icon="➖" img="remove.svg"
+                    i18n-title title="Remove word-internal segment pattern"
+                    (press)="removeMatch(column, layerId)"></lib-button>
+                </div>
               </span>
-
-              <span *ngSwitchCase="'ipa'" class="ipa">
+            </ng-container>
+            <ng-container *ngIf="layerId != schema.turnLayerId && layerId != schema.utteranceLayerId && (schema.layers[layerId].type == 'ipa' || schema.layers[layerId].type == 'string')">
+              <span class="left-container regexp">
+                <span *ngIf="isSegmentLayer(schema.layers[layerId])"
+                      class="target segment"
+                      i18n-title title="Target this match">
+                  <img
+                    i18n-title title="Target this match"
+                    alt="🎯" [src]="imagesLocation+'/target.svg'"
+                    [class]="column.layers[layerId][m].target?'selected':'deselected'"
+                    (click)="setTarget(column.layers[layerId][m])">
+                </span>
                 <span class="not">
                   <select class="not"
                           i18n-title title="match or not"
@@ -82,12 +105,15 @@
                     <option value="true" i18n>doesn't match</option>
                   </select>
                 </span>
+              </span>
+              <span class="right-container regexp">
                 <span class="match">
                   <lib-input-regexp
                     *ngIf="isCaseSensitive(match)"
                     i18n-placeholder placeholder="Regular expression (A≠a)"
                     i18n-title title="Regular expression (case sensitive)"
                     type="text"
+                    [className]="schema.layers[layerId].type == 'string' ? 'string' : ''"
                     [(value)]="match.pattern"
                     autofocus="true"
                     id="regexp-{{c}}-{{layerId}}-{{m}}"
@@ -97,14 +123,23 @@
                     i18n-placeholder placeholder="Regular expression (A=a)"
                     i18n-title title="Regular expression (case sensitive)"
                     type="text"
+                    [className]="schema.layers[layerId].type == 'string' ? 'string' : ''"
                     [(value)]="match.pattern"
                     autofocus="true"
                     id="regexp-{{c}}-{{layerId}}-{{m}}"
                     (keydown.enter)="startSearch($event)"></lib-input-regexp>
                 </span>
-                <span class="help">
+                <span *ngIf="schema.layers[layerId].type == 'ipa' || hasValidLabels(schema.layers[layerId])"
+                  class="help">
                   <lib-button
+                    *ngIf="schema.layers[layerId].type == 'ipa'"
                     i18n-title title="Phoneme symbol selector"
+                    class="small"
+                    icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
+                    (press)="helperMatch = (helperMatch == match?null:match); $event.stopPropagation();"></lib-button>
+                  <lib-button
+                    i18n-title title="Symbol selector"
+                    *ngIf="schema.layers[layerId].type == 'string'"
                     class="small"
                     icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
                     (press)="helperMatch = (helperMatch == match?null:match); $event.stopPropagation();"></lib-button>
@@ -117,68 +152,23 @@
                     [layer]="schema.layers[layerId]"
                     (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-valid-label-helper>
                 </span>
-              </span>
-
-              <span *ngSwitchDefault class="regexp">
-                <span class="not">
-                  <select class="not"
-                          i18n-title title="match or not"                          
-                          [value]="match.not" (change)="match.not = $event.target.value == 'true'">
-                    <option value="false" i18n>matches</option>
-                    <option value="true" i18n>doesn't match</option>
-                  </select>
-                </span>
-                <span class="match">
-                  <lib-input-regexp
-                    *ngIf="isCaseSensitive(match)"
-                    i18n-placeholder placeholder="Regular expression (A≠a)"
-                    i18n-title title="Regular expression (case sensitive)"
-                    type="text" className="string"
-                    [(value)]="match.pattern"
-                    autofocus="true"
-                    id="regexp-{{c}}-{{layerId}}-{{m}}"
-                    (keydown.enter)="startSearch($event)"></lib-input-regexp>
-                  <lib-input-regexp
-                    *ngIf="!isCaseSensitive(match)"
-                    i18n-placeholder placeholder="Regular expression (A=a)"
-                    i18n-title title="Regular expression (case insensitive)"
-                    type="text" className="string"
-                    [(value)]="match.pattern"
-                    autofocus="true"
-                    id="regexp-{{c}}-{{layerId}}-{{m}}"
-                    (keydown.enter)="startSearch($event)"></lib-input-regexp>
-                </span>
-                <span class="help" *ngIf="hasValidLabels(schema.layers[layerId])">
+                <div class="add-match"
+                     *ngIf="m+1 == column.layers[layerId].length && (layerId == 'segment' || schema.layers[layerId].parentId == 'segment')">
                   <lib-button
-                    i18n-title title="Symbol selector"
+                    i18n-title title="Add word-internal segment pattern"
                     class="small"
-                    icon="«" [img]="helperMatch == match?'collapse-down.svg':'expand-down.svg'"
-                    (press)="helperMatch = (helperMatch == match?null:match); $event.stopPropagation();"></lib-button>
-                  <lib-valid-label-helper
-                    *ngIf="helperMatch == match"
-                    regularExpression="{{true}}"
-                    [layer]="schema.layers[layerId]"
-                    (symbolSelected)="appendToPattern(match, $event, 'regexp-'+c+'-'+layerId+'-'+m)"></lib-valid-label-helper>
-                </span>
+                    icon="➕" img="add.svg"
+                    (press)="addMatch(column, layerId)"></lib-button>
+                  <lib-button
+                    *ngIf="column.layers[layerId].length > 1"
+                    class="small"
+                    icon="➖" img="remove.svg"
+                    i18n-title title="Remove word-internal segment pattern"
+                    (press)="removeMatch(column, layerId)"></lib-button>
+                </div>
               </span>
-
-            </ng-container> <!-- switch on layer.type -->
+            </ng-container>
           </div>    <!-- match -->
-          
-          <div class="add-match"
-               *ngIf="layerId == 'segment' || schema.layers[layerId].parentId == 'segment'">
-            <lib-button
-              i18n-title title="Add word-internal segment pattern"
-              class="small"
-              icon="➕" img="add.svg"
-              (press)="addMatch(column, layerId)"></lib-button>
-            <lib-button
-              *ngIf="column.layers[layerId].length > 1"
-              class="small"
-              icon="➖" img="remove.svg"
-              i18n-title title="Remove word-internal segment pattern"
-              (press)="removeMatch(column, layerId)"></lib-button>
-          </div>
           <span *ngIf=isAnchorableLayer(schema.layers[layerId])
                 i18n-title title="Anchor to end of {{schema.wordLayerId}}"
                 class="anchor-end"> <!-- last match in column -->
