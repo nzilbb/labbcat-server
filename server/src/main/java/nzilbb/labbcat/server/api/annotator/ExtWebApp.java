@@ -211,7 +211,7 @@ public class ExtWebApp extends APIRequestHandler {
               if (resource.indexOf(".html") > 0) {
                 contentTypeConsumer.accept("text/html;charset=UTF-8");
               } else if (resource.indexOf(".js") > 0) {
-                contentTypeConsumer.accept("application/json;charset=UTF-8");
+                contentTypeConsumer.accept("text/javascript;charset=UTF-8");
               } else if (resource.indexOf(".css") > 0) {
                 contentTypeConsumer.accept("text/css;charset=UTF-8");
               }
