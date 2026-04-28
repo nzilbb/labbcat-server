@@ -169,50 +169,8 @@
           try {
             Connection db = connectionFactory.newConnection();
             try {
-              // load user groups
-              if (request.getSession().getAttribute("security") == null) {
-                String user = request.getRemoteUser();
-                if (user == null) { // not using authentication
-                  request.getSession().setAttribute("security", "none");
-                  request.getSession().setAttribute("group_view", Boolean.TRUE);
-                  request.getSession().setAttribute("group_edit", Boolean.TRUE);
-                  request.getSession().setAttribute("group_admin", Boolean.TRUE);
-                } else { // using authentication
-                  PreparedStatement sqlUserGroups = db.prepareStatement(
-                    "SELECT role_id FROM role WHERE user_id = ?");
-                  sqlUserGroups.setString(1, user);
-                  ResultSet rstUserGroups = sqlUserGroups.executeQuery();
-                  while (rstUserGroups.next()) {
-                    request.getSession().setAttribute(
-                      "group_" + rstUserGroups.getString("role_id"), Boolean.TRUE);
-                  } // next group
-                  rstUserGroups.close();
-                  sqlUserGroups.close();
-                  
-                  // check what kind of security we're using
-                  PreparedStatement sqlUser = db.prepareStatement(
-                    "SELECT reset_password FROM miner_user WHERE user_id = ?");
-                  sqlUser.setString(1, user);
-                  ResultSet rstUser = sqlUser.executeQuery();
-                  if (rstUser.next()) {
-                    // this user id is in the user table - this means we're
-                    // using JDBCRealm security to connect to our own DB
-                    request.getSession().setAttribute("security", "JDBCRealm");
-                    if (rstUser.getInt("reset_password") == 1) {
-                      request.setAttribute("reset_password", Boolean.TRUE);
-                    }
-                  } else {
-                    // this user id is not in the user table - this means
-                    // we're using some other security mechanism - probably
-                    // LDAP via JNDI
-                    request.getSession().setAttribute("security", "JNDIRealm");
-                  } // user is in user table
-                  rstUser.close();
-                  sqlUser.close();
-                } // using authentication
-              } // security not set yet, must be logging on
-              
-              return request.getSession().getAttribute("group_" + role) != null;
+              return nzilbb.labbcat.server.servlet.LabbcatServlet.IsUserInRole(
+                role, request, db);
             } finally {
               db.close();
             }
