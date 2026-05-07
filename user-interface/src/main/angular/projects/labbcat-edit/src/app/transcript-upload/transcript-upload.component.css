@@ -111,12 +111,26 @@ span.buttons > button > img {
     width: 15px;
 }
 
+details[open] .abridged-error {
+    display: none;
+}
+
+.details {
+    display: flex;
+    flex-direction: row;
+}
 .parameters {
-    width: auto;
-    margin-left: 10px;
     animation-name: roll-down;
     animation-duration: 2s;
     display: block;
+    margin-left: 10px;
+    padding-top: 1px;
+    width: fit-content;
+}
+
+.unabridged-error {
+    vertical-align: top;
+    white-space: pre-wrap;
 }
 .controls {
     text-align: right;

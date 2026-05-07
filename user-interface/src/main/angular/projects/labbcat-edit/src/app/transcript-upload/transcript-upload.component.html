@@ -171,7 +171,8 @@
         <span class="status"
               [class.error]="entry.errors.length > 0"
               [title]="entry.errors.length > 0?entry.errors.join('\n'):entry.status">
-          <span *ngIf="entry.errors.length > 0">{{statusLabel(entry.errors[0])}}</span>
+          <span *ngIf="entry.errors.length > 0"
+                class="abridged-error">{{statusLabel(entry.errors[0])}}</span>
           {{statusLabel(entry.status)}}
         </span>
         <progress max="100" [title]="''+entry.progress+'% '+entry.status" [value]="entry.progress">{{entry.progress}}%</progress>
@@ -186,7 +187,8 @@
             i18n-title title="Cancel"
             (click)="cancelThreads(entry)"><img src="{{imagesLocation}}/cross-mark.svg" alt="❌"></button></span>
       </summary>
-      <div *ngIf="entry.parameters"
+      <div class="details">
+        <div *ngIf="entry.parameters"
                class="parameters list">
         <ng-container *ngFor="let parameter of entry.parameters">
           <div *ngIf="parameter.name != 'labbcat_episode' && parameter.name != 'labbcat_corpus' && parameter.name != 'labbcat_transcript_type' && parameter.name != 'labbcat_generate'"
@@ -233,6 +235,9 @@
             i18n-title title="Set the parameters for this transcript"
             (press)="uploadParameters(entry)"></lib-button>
         </div>
+        </div>
+        <div class="error unabridged-error" title="{{entry.errors.join('\n')}}"
+             >{{entry.errors.join('\n')}}</div>
       </div>
     </details>
   </div>
