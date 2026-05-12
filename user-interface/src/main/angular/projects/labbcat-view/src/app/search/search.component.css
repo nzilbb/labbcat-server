@@ -108,6 +108,7 @@ details[open] > div {
     content: ':';
 }
 .list {
+    margin: unset;
     margin-top: 5px;
 }
 .list-label {
