@@ -540,7 +540,7 @@
                          href="{{annotation.label.split('\n')[1]}}"
                          target="{{annotation.layer.id}}"
                          >{{renderLabel(annotation)}}</a>
-                      <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
+                      <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/') && annotation.layer.type != 'text/url'"
                          class="blob"
                          href="{{annotation.dataUrl}}"
                          target="{{annotation.id}}"
@@ -612,7 +612,7 @@
                            href="{{annotation.label.split('\n')[1]}}"
                            target="{{annotation.layer.id}}"
                            >{{renderLabel(annotation)}}</a>
-                        <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
+                        <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/' && annotation.layer.type != 'text/url')"
                            class="blob"
                            href="{{annotation.dataUrl}}"
                            target="{{annotation.id}}"
@@ -685,7 +685,7 @@
                              href="{{annotation.label.split('\n')[1]}}"
                              target="{{annotation.layer.id}}"
                              >{{renderLabel(annotation)}}</a>
-                          <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
+                          <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/') && annotation.layer.type != 'text/url'"
                              class="blob"
                              href="{{annotation.dataUrl}}"
                              target="{{annotation.id}}"
@@ -895,7 +895,7 @@
                            href="{{annotation.label.split('\n')[1]}}"
                            target="{{annotation.layer.id}}"
                            >{{renderLabel(annotation)}}</a>
-                        <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/')"
+                        <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/') && annotation.layer.type != 'text/url'"
                            class="blob" href="#{{annotation.id}}"
                            href="{{annotation.dataUrl}}"
                            target="{{annotation.id}}"
