@@ -548,7 +548,7 @@
            i18n-title title="Command Praat will use to extract pitch">
         <label for="pitchCommand" i18n>Praat pitch command</label>
         <div class="pitch-container">
-          <select id="pitchCommand" [(ngModel)]="pitchCommand" (change)="adjustPitchParams()">
+          <select id="pitchCommand" [(ngModel)]="pitchCommand" (change)="adjustPitchParams(); pitchChanged = true">
             <option>To Pitch (filtered autocorrelation)</option>
             <option>To Pitch (filtered cross-correlation)</option>
             <option>To Pitch (raw autocorrelation)</option>
@@ -556,7 +556,7 @@
             <option>Custom</option>
           </select>
           <span *ngIf="pitchCommand == 'Custom'" class="script">
-            <input id="scriptPitch" [(ngModel)]="scriptPitch" type="text">
+            <input id="scriptPitch" [(ngModel)]="scriptPitch" type="text" (change)="pitchChanged = true">
           </span>
         </div>
         <lib-link
@@ -577,6 +577,7 @@
             <span>
               <input id="pitchFloorDefault"
                      [(ngModel)]="pitchFloorDefault"
+                     (change)="pitchChanged = true"
                      class="hz"
                      type="number" min="0" step="10">
             </span>
@@ -588,6 +589,7 @@
             <span>
               <input id="pitchCeilingDefault"
                      [(ngModel)]="pitchCeilingDefault"
+                     (change)="pitchChanged = true"
                      class="hz"
                      type="number" min="0" step="10">
             </span>
@@ -599,6 +601,7 @@
             <span>
               <input id="pitchTopDefault"
                      [(ngModel)]="pitchTopDefault"
+                     (change)="pitchChanged = true"
                      class="hz"
                      type="number" min="0" step="10">
             </span>
@@ -609,6 +612,7 @@
             <span>
               <input id="voicingThresholdDefault"
                      [(ngModel)]="voicingThresholdDefault"
+                     (change)="pitchChanged = true"
                      class="small"
                      type="number" min="0" step="0.01">
             </span>
@@ -619,6 +623,7 @@
             <span>
               <input id="octaveCostDefault"
                      [(ngModel)]="octaveCost"
+                     (change)="pitchChanged = true"
                      class="small"
                      type="number" min="0" step="0.005">
             </span>
@@ -627,12 +632,14 @@
         <fieldset class="alternatives">
           <legend>
             <input id="pitchDifferentiateParticipants" type="checkbox"
+                   (change)="pitchChanged = true"
                    [(ngModel)]="pitchDifferentiateParticipants">
             <label for="pitchDifferentiateParticipants"
               [class.disabled]="!pitchDifferentiateParticipants"
               i18n>Except participants whose</label>
             <select id="pitchDifferentiationLayerId" [(ngModel)]="pitchDifferentiationLayerId"
                     i18n-title title="Attribute for differentiating participants"
+                    (change)="pitchChanged = true"
                     [disabled]="!pitchDifferentiateParticipants">
               <ng-container *ngFor="let layer of participantAttributeLayers">
                 <option value="{{layer.id}}">{{layer.label||layer.id}}</option></ng-container>
@@ -645,6 +652,7 @@
                 [class.disabled]="!pitchDifferentiateParticipants"
                 i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
                 <input [(ngModel)]="pitchOtherPattern[o]"
+                       (change)="pitchChanged = true"
                        class="regex"
                        type="text"
                        i18n-title title="Regular expression to match against the layer above"
@@ -658,6 +666,7 @@
               <span>
                 <input id="{{'pitchFloorOther'+o}}"
                        [(ngModel)]="pitchFloorOther[o]"
+                       (change)="pitchChanged = true"
                        class="hz"
                        type="number" min="0" step="10"
                        [disabled]="!pitchDifferentiateParticipants">
@@ -670,6 +679,7 @@
               <span>
                 <input id="{{'pitchCeilingOther'+o}}"
                        [(ngModel)]="pitchCeilingOther[o]"
+                       (change)="pitchChanged = true"
                        class="hz"
                        type="number" min="0" step="100"
                        [disabled]="!pitchDifferentiateParticipants">
@@ -682,6 +692,7 @@
               <span>
                 <input id="{{'pitchTopOther'+o}}"
                        [(ngModel)]="pitchTopOther[o]"
+                       (change)="pitchChanged = true"
                        class="hz"
                        type="number" min="0" step="100"
                        [disabled]="!pitchDifferentiateParticipants">
@@ -693,6 +704,7 @@
               <span>
                 <input id="{{'voicingThresholdOther'+o}}"
                        [(ngModel)]="voicingThresholdOther[o]"
+                       (change)="pitchChanged = true"
                        class="small"
                        type="number" min="0" step="0.01"
                        [disabled]="!pitchDifferentiateParticipants">
@@ -704,6 +716,7 @@
               <span>
                 <input id="{{'octaveCostOther'+o}}"
                        [(ngModel)]="octaveCost"
+                       (change)="pitchChanged = true"
                        class="small"
                        type="number" min="0" step="0.005"
                        disabled>
@@ -712,12 +725,12 @@
           </fieldset>
           <div class="controls">
             <lib-button *ngIf="pitchOtherPattern.length > 1"
-                        (press)="pitchRemoveOther()"
+                        (press)="pitchRemoveOther(); pitchChanged = true"
                         img="remove.svg" icon="-"
                         i18n-title title="Remove alternative settings"
                         [disabled]="!pitchDifferentiateParticipants"
                         ></lib-button>
-            <lib-button (press)="pitchAddOther()"
+            <lib-button (press)="pitchAddOther(); pitchChanged = true"
                         img="add.svg" icon="+"
                         i18n-title title="Add alternative settings"
                         [disabled]="!pitchDifferentiateParticipants"
@@ -743,7 +756,7 @@
       <div class="item"
            i18n-title title="Command Praat will use to extract intensity">
         <label for="scriptIntensity" i18n>Praat intensity command</label>
-        <span class="script"><input id="scriptIntensity" [(ngModel)]="scriptIntensity" type="text"></span>
+        <span class="script"><input id="scriptIntensity" [(ngModel)]="scriptIntensity" (change)="intensityChanged = true" type="text"></span>
       </div>
       <div class="settings-sets">
         <fieldset class="settings-set default">
@@ -754,6 +767,7 @@
             <span>
               <input id="intensityPitchFloorDefault"
                      [(ngModel)]="intensityPitchFloorDefault"
+                     (change)="intensityChanged = true"
                      class="hz"
                      type="number" min="0" step="100">
             </span>
@@ -762,12 +776,14 @@
         <fieldset class="alternatives">
           <legend>
             <input id="intensityDifferentiateParticipants" type="checkbox"
+                   (change)="intensityChanged = true"
                    [(ngModel)]="intensityDifferentiateParticipants">
             <label for="intensityDifferentiateParticipants"
               [class.disabled]="!intensityDifferentiateParticipants"
               i18n>Except participants whose</label>
             <select id="intensityDifferentiationLayerId"
                     [(ngModel)]="intensityDifferentiationLayerId"
+                    (change)="intensityChanged = true"
                     i18n-title title="Attribute for differentiating participants"
                     [disabled]="!intensityDifferentiateParticipants">
               <ng-container *ngFor="let layer of participantAttributeLayers">
@@ -781,6 +797,7 @@
                 [class.disabled]="!intensityDifferentiateParticipants"
                 i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
                 <input [(ngModel)]="intensityOtherPattern[o]"
+                       (change)="intensityChanged = true"
                        class="regex"
                        type="text"
                        i18n-title title="Regular expression to match against the layer above"
@@ -794,6 +811,7 @@
               <span>
                 <input id="{{'intensityPitchFloorOther'+o}}"
                        [(ngModel)]="intensityPitchFloorOther[o]"
+                       (change)="intensityChanged = true"
                        class="hz"
                        type="number" min="0" step="100"
                        [disabled]="!intensityDifferentiateParticipants">
@@ -802,12 +820,12 @@
           </fieldset>
           <div class="controls">
             <lib-button *ngIf="intensityOtherPattern.length > 1"
-                        (press)="intensityRemoveOther()"
+                        (press)="intensityRemoveOther(); intensityChanged = true"
                         img="remove.svg" icon="-"
                         i18n-title title="Remove alternative settings"
                         [disabled]="!intensityDifferentiateParticipants"
                         ></lib-button>
-            <lib-button (press)="intensityAddOther()"
+            <lib-button (press)="intensityAddOther(); intensityChanged = true"
                         img="add.svg" icon="+"
                         i18n-title title="Add alternative settings"
                         [disabled]="!intensityDifferentiateParticipants"
