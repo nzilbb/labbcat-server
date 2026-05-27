@@ -131,13 +131,10 @@ fieldset.other {
 summary > label {
     min-width: 23.5%;
     display: inline-block;
-}
-summary > label > span {
-    display: inline-block;
     width: fit-content;
     cursor: zoom-in;
 }
-details[open] > summary > label > span {
+details[open] > summary > label {
     cursor: zoom-out;
 }
 
