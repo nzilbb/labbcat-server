@@ -106,18 +106,24 @@
     <summary>
       <label onclick="a = event.target.parentElement.parentElement ; a.open = !a.open;" i18n>Formants</label>
       <span>
+        <span class="checkbox-spacer">
         <input id="extractF1" [(ngModel)]="extractF1" type="checkbox"
                i18n-title title="Whether to extract the first formant">
         <label for="extractF1"
                i18n-title title="Whether to extract the first formant" i18n="Formant">F1</label>
+        </span>
+        <span class="checkbox-spacer">
         <input id="extractF2" [(ngModel)]="extractF2" type="checkbox"
                i18n-title title="Whether to extract the second formant">
         <label for="extractF2"
                i18n-title title="Whether to extract the second formant" i18n="Formant">F2</label>
+        </span>
+        <span class="checkbox-spacer">
         <input id="extractF3" [(ngModel)]="extractF3" type="checkbox"
                i18n-title title="Whether to extract the third formant">
         <label for="extractF3" 
                i18n-title title="Whether to extract the third formant" i18n="Formant">F3</label>
+        </span>
       </span>    
     </summary>
     <div class="advanced" id="advanced-formants">
@@ -522,12 +528,18 @@
     <summary>
       <label onclick="a = event.target.parentElement.parentElement ; a.open = !a.open;" i18n>Pitch</label>
       <span class="long">
+        <span class="checkbox-spacer">
         <input id="extractMinimumPitch" [(ngModel)]="extractMinimumPitch" type="checkbox">
         <label for="extractMinimumPitch" i18n="Minimum pitch">Minimum</label>
+        </span>
+        <span class="checkbox-spacer">
         <input id="extractMeanPitch" [(ngModel)]="extractMeanPitch" type="checkbox">
         <label for="extractMeanPitch" i18n="Mean pitch">Mean</label>
+        </span>
+        <span class="checkbox-spacer">
         <input id="extractMaximumPitch" [(ngModel)]="extractMaximumPitch" type="checkbox">
         <label for="extractMaximumPitch" i18n="Maximum pitch">Maximum</label>
+        </span>
       </span>    
     </summary>
     <div class="advanced"
@@ -721,8 +733,10 @@
     <summary>
       <label onclick="a = event.target.parentElement.parentElement ; a.open = !a.open;" i18n>Intensity</label>
       <span>
+        <span class="checkbox-spacer">
         <input id="extractMaximumIntensity" [(ngModel)]="extractMaximumIntensity" type="checkbox">
         <label for="extractMaximumIntensity" i18n="Maximum intensity">Maximum</label>
+        </span>
       </span>    
     </summary>
     <div class="advanced" id="advanced-intensity">

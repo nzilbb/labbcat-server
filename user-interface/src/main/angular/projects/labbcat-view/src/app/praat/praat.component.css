@@ -137,6 +137,15 @@ summary > label {
 details[open] > summary > label {
     cursor: zoom-out;
 }
+.checkbox-spacer:first-child {
+    padding-left: 4px;
+}
+.checkbox-spacer > input {
+    margin: 0;
+}
+.checkbox-spacer > label {
+    padding: 3px 4px 3px 3px;
+}
 
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
