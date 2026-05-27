@@ -164,11 +164,18 @@ details[open] > summary > label > span {
     .label-spacer {
         flex-grow: 1;
     }
+    .pitch-container {
+        flex-grow: 1;
+    }
     lib-link[target=FastTrack] {
         padding-left: 1em;
     }
     input[id^='octaveCostOther']:disabled {
         cursor: not-allowed;
+    }
+    #advanced-pitch lib-link {
+        min-width: unset;
+        padding-left: 2em;
     }
     .script input {
         width: 100%;

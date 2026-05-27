@@ -84,14 +84,17 @@ export class PraatComponent implements OnInit {
     pitchDifferentiateParticipants = true;
     pitchDifferentiationLayerId: string;
     pitchOtherPattern = [ "M" ];
-    pitchFloorDefault = 60; // female
+    pitchFloorDefault = 50; // female
     pitchFloorOther = [ 30 ]; // male
     pitchCeilingDefault = 500; // female
     pitchCeilingOther = [ 250 ]; // male
-    voicingThresholdDefault = 0.5; // female
-    voicingThresholdOther = [ 0.4 ]; // male
-    octaveCost = 0.01
-    scriptPitch = "To Pitch (ac): 0, pitchFloor, 15, \"no\", 0.03, voicingThreshold, octaveCost, 0.35, 0.14, pitchCeiling";
+    pitchTopDefault = 800; // female
+    pitchTopOther = [ 500 ]; // male
+    voicingThresholdDefault = 0.45; // female (0.5 for raw autocorrelation/cross-correlation)
+    voicingThresholdOther = [ 0.45 ]; // male (0.4 for raw autocorrelation/cross-correlation)
+    octaveCost = 0.055; // filtered autocorrelation/cross-correlation (0.01 for raw)
+    pitchCommand = "To Pitch (filtered autocorrelation)";
+    scriptPitch = "To Pitch (filtered autocorrelation): 0, pitchFloor, pitchCeiling, 15, \"no\", 0.03, 0.09, voicingThreshold, octaveCost, 0.35, 0.14";
     
     extractMaximumIntensity = false;
     intensityDifferentiateParticipants = true;
@@ -325,6 +328,29 @@ export class PraatComponent implements OnInit {
         return id.replace(/[^A-Za-z0-9]/g, "_");
     }
 
+    /** Adjust pitch script parameters to account for difference between filtered and raw autocorrelation/cross-correlation
+        (see https://praat.org/manual/how_to_choose_a_pitch_analysis_method.html and https://praat.org/manual/Intro_4_2__Configuring_the_pitch_contour.html)
+        */
+    adjustPitchParams(): void {
+        if (this.pitchCommand.includes('filtered') || (this.pitchCommand == "Custom" && this.scriptPitch.includes('filtered'))) {
+            this.pitchFloorDefault = 50;
+            this.voicingThresholdDefault = 0.45;
+            if (this.pitchDifferentiateParticipants && this.pitchOtherPattern.includes("M")) {
+                this.pitchFloorOther[this.pitchOtherPattern.indexOf("M")] = 30;
+                this.voicingThresholdOther[this.pitchOtherPattern.indexOf("M")] = 0.45;
+            }
+            this.octaveCost = 0.055;
+        } else if (this.pitchCommand.includes('raw')) {
+            this.pitchFloorDefault = 60;
+            this.voicingThresholdDefault = 0.5;
+            if (this.pitchDifferentiateParticipants && this.pitchOtherPattern.includes("M")) {
+                this.pitchFloorOther[this.pitchOtherPattern.indexOf("M")] = 30;
+                this.voicingThresholdOther[this.pitchOtherPattern.indexOf("M")] = 0.4;
+            }
+            this.octaveCost = 0.01;
+        }
+    }
+
     processing = false;
     processingError = "";
     /** start processing */
@@ -382,7 +408,10 @@ export class PraatComponent implements OnInit {
                 extractMeanPitch: this.extractMeanPitch,
                 extractMaximumPitch: this.extractMaximumPitch,
                 pitchFloorDefault: this.pitchFloorDefault,
-                pitchCeilingDefault: this.pitchCeilingDefault,
+                pitchCeilingDefault: this.pitchCommand.includes('filtered')
+                    || (this.pitchCommand == "Custom" && this.scriptPitch.includes('filtered'))
+                    ? this.pitchTopDefault
+                    : this.pitchCeilingDefault,
                 voicingThresholdDefault: this.voicingThresholdDefault,
                 pitchDifferentiationLayerId: this.pitchDifferentiationLayerId,
                 pitchOtherPattern: !this.pitchDifferentiateParticipants?[]
@@ -390,10 +419,18 @@ export class PraatComponent implements OnInit {
                 pitchFloorOther: !this.pitchDifferentiateParticipants?[]
                     :this.pitchFloorOther,
                 pitchCeilingOther: !this.pitchDifferentiateParticipants?[]
-                    :this.pitchCeilingOther,
+                    : this.pitchCommand.includes('filtered')
+                    || (this.pitchCommand == "Custom" && this.scriptPitch.includes('filtered'))
+                    ? this.pitchTopOther
+                    : this.pitchCeilingOther,
                 voicingThresholdOther: !this.pitchDifferentiateParticipants?[]
                     :this.voicingThresholdOther,
-                scriptPitch: 'octaveCost = ' + this.octaveCost + '\n' + this.scriptPitch, // shim
+                scriptPitch: 'octaveCost = ' + this.octaveCost + '\n' + //shim
+                    (this.pitchCommand == 'Custom'
+                    ? this.scriptPitch
+                    : this.pitchCommand.includes('filtered')
+                    ? this.pitchCommand + ': 0, pitchFloor, pitchCeiling, 15, \"no\", 0.03, 0.09, voicingThreshold, octaveCost, 0.35, 0.14'
+                    : this.pitchCommand + ': 0, pitchFloor, pitchCeiling, 15, \"no\", 0.03, voicingThreshold, octaveCost, 0.35, 0.14'),
                 extractMaximumIntensity: this.extractMaximumIntensity,
                 intensityPitchFloorDefault: this.intensityPitchFloorDefault,
                 intensityDifferentiationLayerId: this.intensityDifferentiationLayerId,

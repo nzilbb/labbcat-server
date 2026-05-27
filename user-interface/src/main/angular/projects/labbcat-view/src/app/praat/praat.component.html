@@ -534,8 +534,27 @@
          id="advanced-pitch">
       <div class="item"
            i18n-title title="Command Praat will use to extract pitch">
-        <label for="scriptPitch" i18n>Praat pitch command</label>
-        <span class="script"><input id="scriptPitch" [(ngModel)]="scriptPitch" type="text"></span>
+        <label for="pitchCommand" i18n>Praat pitch command</label>
+        <div class="pitch-container">
+          <select id="pitchCommand" [(ngModel)]="pitchCommand" (change)="adjustPitchParams()">
+            <option>To Pitch (filtered autocorrelation)</option>
+            <option>To Pitch (filtered cross-correlation)</option>
+            <option>To Pitch (raw autocorrelation)</option>
+            <option>To Pitch (raw cross-correlation)</option>
+            <option>Custom</option>
+          </select>
+          <span *ngIf="pitchCommand == 'Custom'" class="script">
+            <input id="scriptPitch" [(ngModel)]="scriptPitch" type="text">
+          </span>
+        </div>
+        <lib-link
+          href="https://praat.org/manual/how_to_choose_a_pitch_analysis_method.html"
+          img="howto.svg"
+          icon="🎓"
+          i18n-title title="The Praat manual's 'How to choose a pitch analysis method' page"
+          i18n-label label="About pitch commands"
+          target="praat-manual"
+          ></lib-link>
       </div>
       <div class="settings-sets">
         <fieldset class="settings-set default">
@@ -551,11 +570,23 @@
             </span>
           </div>
           <div class="item"
+               *ngIf="pitchCommand.includes('raw') || (pitchCommand == 'Custom' && !scriptPitch.includes('filtered'))"
                i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
             <label for="pitchCeilingDefault" i18n>Pitch ceiling</label>
             <span>
               <input id="pitchCeilingDefault"
                      [(ngModel)]="pitchCeilingDefault"
+                     class="hz"
+                     type="number" min="0" step="10">
+            </span>
+          </div>
+          <div class="item"
+               *ngIf="pitchCommand.includes('filtered') || (pitchCommand == 'Custom' && scriptPitch.includes('filtered'))"
+               i18n-title title="Pitch top - value for pitchCeiling in the Praat command">
+            <label for="pitchTopDefault" i18n>Pitch top</label>
+            <span>
+              <input id="pitchTopDefault"
+                     [(ngModel)]="pitchTopDefault"
                      class="hz"
                      type="number" min="0" step="10">
             </span>
@@ -621,11 +652,24 @@
               </span>
             </div>
             <div class="item"
+                 *ngIf="pitchCommand.includes('raw') || (pitchCommand == 'Custom' && !scriptPitch.includes('filtered'))"
                  i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
               <label for="{{'pitchCeilingOther'+o}}" i18n>Pitch ceiling</label>
               <span>
                 <input id="{{'pitchCeilingOther'+o}}"
                        [(ngModel)]="pitchCeilingOther[o]"
+                       class="hz"
+                       type="number" min="0" step="100"
+                       [disabled]="!pitchDifferentiateParticipants">
+              </span>
+            </div>
+            <div class="item"
+                 *ngIf="pitchCommand.includes('filtered') || (pitchCommand == 'Custom' && scriptPitch.includes('filtered'))"
+                 i18n-title title="Pitch top - value for pitchCeiling in the Praat command">
+              <label for="{{'pitchTopOther'+o}}" i18n>Pitch top</label>
+              <span>
+                <input id="{{'pitchTopOther'+o}}"
+                       [(ngModel)]="pitchTopOther[o]"
                        class="hz"
                        type="number" min="0" step="100"
                        [disabled]="!pitchDifferentiateParticipants">
