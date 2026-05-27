@@ -90,7 +90,8 @@ export class PraatComponent implements OnInit {
     pitchCeilingOther = [ 250 ]; // male
     voicingThresholdDefault = 0.5; // female
     voicingThresholdOther = [ 0.4 ]; // male
-    scriptPitch = "To Pitch (ac): 0, pitchFloor, 15, \"no\", 0.03, voicingThreshold, 0.01, 0.35, 0.14, pitchCeiling";
+    octaveCost = 0.01
+    scriptPitch = "To Pitch (ac): 0, pitchFloor, 15, \"no\", 0.03, voicingThreshold, octaveCost, 0.35, 0.14, pitchCeiling";
     
     extractMaximumIntensity = false;
     intensityDifferentiateParticipants = true;
@@ -392,7 +393,7 @@ export class PraatComponent implements OnInit {
                     :this.pitchCeilingOther,
                 voicingThresholdOther: !this.pitchDifferentiateParticipants?[]
                     :this.voicingThresholdOther,
-                scriptPitch: this.scriptPitch,
+                scriptPitch: 'octaveCost = ' + this.octaveCost + '\n' + this.scriptPitch, // shim
                 extractMaximumIntensity: this.extractMaximumIntensity,
                 intensityPitchFloorDefault: this.intensityPitchFloorDefault,
                 intensityDifferentiationLayerId: this.intensityDifferentiationLayerId,

@@ -570,6 +570,16 @@
                      type="number" min="0" step="0.01">
             </span>
           </div>
+          <div class="item"
+               i18n-title title="Octave cost - value for octaveCost in the Praat command">
+            <label for="octaveCostDefault" i18n>Octave cost</label>
+            <span>
+              <input id="octaveCostDefault"
+                     [(ngModel)]="octaveCost"
+                     class="small"
+                     type="number" min="0" step="0.005">
+            </span>
+          </div>
         </fieldset>
         <fieldset class="alternatives">
           <legend>
@@ -630,6 +640,17 @@
                        class="small"
                        type="number" min="0" step="0.01"
                        [disabled]="!pitchDifferentiateParticipants">
+              </span>
+            </div>
+            <div class="item"
+                 i18n-title title="Octave cost - value for octaveCost in the Praat command (can't be adjusted independently)">
+              <label for="{{'octaveCostOther'+o}}" i18n>Octave cost</label>
+              <span>
+                <input id="{{'octaveCostOther'+o}}"
+                       [(ngModel)]="octaveCost"
+                       class="small"
+                       type="number" min="0" step="0.005"
+                       disabled>
               </span>
             </div>
           </fieldset>

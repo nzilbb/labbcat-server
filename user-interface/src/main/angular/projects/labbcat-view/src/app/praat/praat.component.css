@@ -167,6 +167,9 @@ details[open] > summary > label > span {
     lib-link[target=FastTrack] {
         padding-left: 1em;
     }
+    input[id^='octaveCostOther']:disabled {
+        cursor: not-allowed;
+    }
     .script input {
         width: 100%;
     }
