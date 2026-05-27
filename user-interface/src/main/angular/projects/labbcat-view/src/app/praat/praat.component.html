@@ -622,7 +622,7 @@
             </div>
             <div class="item"
                  i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
-              <label for="pitchCeilingDefault" i18n>Pitch ceiling</label>
+              <label for="{{'pitchCeilingOther'+o}}" i18n>Pitch ceiling</label>
               <span>
                 <input id="{{'pitchCeilingOther'+o}}"
                        [(ngModel)]="pitchCeilingOther[o]"
@@ -633,7 +633,7 @@
             </div>
             <div class="item"
                  i18n-title title="Voicing Threshold - value for voicingThreshold in the Praat command">
-              <label for="voicingThresholdDefault" i18n>Voicing Threshold</label>
+              <label for="{{'voicingThresholdOther'+o}}" i18n>Voicing Threshold</label>
               <span>
                 <input id="{{'voicingThresholdOther'+o}}"
                        [(ngModel)]="voicingThresholdOther[o]"
