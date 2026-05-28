@@ -790,6 +790,14 @@
                     i18n-title title="Extract audio fragment for this utterance"
                     ></lib-menu-option>
                 </div>
+                <div class="item" id="copy-utterance-text-option">
+                  <lib-menu-option
+                    (press)="copyTranscriptText(utterance); menuId = null"
+                    img="fa-copy.svg" icon="📋"
+                    i18n-label label="Copy transcript text"
+                    i18n-title title="Copy word annotations for this utterance"
+                    ></lib-menu-option>
+                </div>
                 <ng-container *ngIf="hasWAV && praatIntegration">
                   <div class="item" id="praat-open">
                     <lib-menu-option        
