@@ -147,7 +147,11 @@
            i18n-title title="Command Praat will use to extract formants">
         <label for="scriptFormant">
           <input type="radio" name="formantMethod"  [value]="false" [(ngModel)]="useFastTrack">
-        <span i18n>Praat formant command</span></label>
+          <span *ngIf="useFastTrack"
+                (click)="useFastTrack = false"
+                i18n-title title="Whether to use one of Praat's built-in formant commands"
+                i18n>Praat formant command</span>
+        <span *ngIf="!useFastTrack" i18n>Praat formant command</span></label>
         <span class="script">
           <input id="scriptFormant"
                  [(ngModel)]="scriptFormant"

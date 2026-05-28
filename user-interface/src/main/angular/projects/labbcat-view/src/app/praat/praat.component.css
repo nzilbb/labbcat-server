@@ -172,7 +172,7 @@ details[open] > summary > label {
     lib-link[target=FastTrack] {
         padding-left: 1em;
     }
-    input[id^='octaveCostOther']:disabled {
+    #scriptFormant:disabled, input[id^='octaveCostOther']:disabled {
         cursor: not-allowed;
     }
     #advanced-pitch lib-link {
