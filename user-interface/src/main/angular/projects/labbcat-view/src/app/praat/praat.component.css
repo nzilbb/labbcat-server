@@ -97,11 +97,7 @@ fieldset {
     border: 1px solid silver;
     border-radius: 8px;
 }
-label[for=formantDifferentiateParticipants] {
-    padding-right: 1ch;
-}
-label[for=formantOtherPattern] {
-    padding-left: 1ch;
+label[for$=DifferentiateParticipants], .other-pattern-label {
     padding-right: 1ch;
 }
 .settings-set .item > * {

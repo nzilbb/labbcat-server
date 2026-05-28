@@ -190,6 +190,7 @@
             <legend>
               <label><span
                 [class.disabled]="!formantDifferentiateParticipants"
+                class="other-pattern-label"
                 i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
                 <input [(ngModel)]="formantOtherPattern[o]"
                        class="regex"
@@ -305,6 +306,7 @@
               <legend>
                 <label><span
                   [class.disabled]="!fastTrackDifferentiateParticipants"
+                  class="other-pattern-label"
                   i18n="Formant Ceiling: X for participants whose Y matches Z">…matches</span>
                   <input [(ngModel)]="fastTrackOtherPattern[o]"
                          class="regex"
@@ -650,6 +652,7 @@
             <legend>
               <label><span
                 [class.disabled]="!pitchDifferentiateParticipants"
+                class="other-pattern-label"
                 i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
                 <input [(ngModel)]="pitchOtherPattern[o]"
                        (change)="pitchChanged = true"
@@ -795,6 +798,7 @@
             <legend>
               <label><span
                 [class.disabled]="!intensityDifferentiateParticipants"
+                class="other-pattern-label"
                 i18n="Pitch Ceiling: X for participants whose Y matches Z">…matches</span>
                 <input [(ngModel)]="intensityOtherPattern[o]"
                        (change)="intensityChanged = true"
