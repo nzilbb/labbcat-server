@@ -24,13 +24,15 @@ export class InputRegexpComponent implements OnInit {
 
     checkRegularExpression(event: any): void {
         const value = event.target.value;
+        // prevent errors thrown by [[a][b]], since this pattern isn't problematic for MySQL
+        const checkValue = value.replace(/\[([^[]*)\[([^[\]]+)\]([^[\]]*)\[([^[\]]+)\]([^[\]]*)\]/,'[$1$2$3$4$5]');
         try {
-            new RegExp(value, "u");
+            new RegExp(checkValue, "u");
             this.validRegexp(value);
         } catch(error) {
             if (error.message.endsWith("Invalid escape") || error.message.endsWith("invalid identity escape in regular expression") || error.message.endsWith("invalid escaped character for Unicode pattern")) {
                 // ignore errors thrown by \- outside [], since this pattern isn't problematic for MySQL
-                this.validRegexp(value);
+                this.validRegexp(checkValue);
             } else {
                 this.regexpError = error.message.replace(/Invalid regular expression: (\/.+\/u: )?/, '');
                 this.temporaryTitle = 'Invalid regular expression /' + value + '/: ' + this.regexpError;
