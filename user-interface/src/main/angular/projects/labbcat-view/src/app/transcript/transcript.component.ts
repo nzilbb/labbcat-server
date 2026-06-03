@@ -161,8 +161,9 @@ export class TranscriptComponent implements OnInit {
                             const layer = this.schema.layers[layerId] as Layer;
                             if (layer.layer_id == layer_id) {
                                 if (!this.defaultLayerIds) this.defaultLayerIds = [];
-                                this.defaultLayerIds.push(layer.id);
-                                console.log(`layer ${layer.id}: ${layer.layer_id}`);
+                                if (!this.defaultLayerIds.includes(layer.id)) {
+                                    this.defaultLayerIds.push(layer.id);
+                                }
                                 break;
                             }
                         } // next layer
