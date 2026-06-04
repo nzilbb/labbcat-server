@@ -128,15 +128,15 @@
     </summary>
     <div class="advanced" id="advanced-formants">
       <div class="item"
-           i18n-title title="At which points in the duration of the token at which to take measurements">
+           i18n-title title="Points in the duration of the token at which to take measurements">
         <label for="samplePoints" i18n>Sample points</label>
         <span><input id="samplePoints" [(ngModel)]="samplePoints" (change)="formantChanged = true" type="text"></span>
         <div class="viz">
           <div class="before">&nbsp;</div>
           <div class="before-context">&nbsp;</div>
           <div class="segment">
-            <ng-container *ngFor="let p of samplePoints.split(' ')">
-              <span class="sample-point" style="left: {{p*100}}%"><span>↑</span></span>
+            <ng-container *ngIf="samplePoints">
+              <span *ngFor="let p of samplePoints.trim().split(' ')" class="sample-point" style="left: {{p*100}}%"><span>↑</span></span>
             </ng-container>
           </div>
           <div class="after-context">&nbsp;</div>
@@ -958,7 +958,7 @@ removeObject: "Sound " + sampleName$</pre>
     </div>
   </details>
   <div class="controls">
-    <lib-button *ngIf="extractF1 || extractF2 || extractF3 || extractMinimumPitch || extractMeanPitch || extractMaximumPitch || extractMaximumIntensity || extractCOG1 || extractCOG2 || extractCOG23 || customScript"
+    <lib-button *ngIf="(extractF1 || extractF2 || extractF3 || extractMinimumPitch || extractMeanPitch || extractMaximumPitch || extractMaximumIntensity || extractCOG1 || extractCOG2 || extractCOG23 || customScript) && !((extractF1 || extractF2 || extractF3) && !samplePoints)"
                 (press)="process()"
                 [processing]="processing"
                 [error]="processingError"
@@ -966,10 +966,16 @@ removeObject: "Sound " + sampleName$</pre>
                 i18n-title title="Start processing"
                 i18n-label label="Process"
                 ></lib-button>
-    <lib-button *ngIf="!extractF1 && !extractF2 && !extractF3 && !extractMinimumPitch && !extractMeanPitch && !extractMaximumPitch && !extractMaximumIntensity && !extractCOG1 && !extractCOG2 && !extractCOG23 && !customScript"
+    <lib-button *ngIf="!(extractF1 || extractF2 || extractF3 || extractMinimumPitch || extractMeanPitch || extractMaximumPitch || extractMaximumIntensity || extractCOG1 || extractCOG2 || extractCOG23 || customScript)"
                 img="cog.svg" icon="⚙"
                 disabled="true"
                 i18n-title title="Select at least one measure to extract, or specify a custom script"
+                i18n-label label="Process"
+                ></lib-button>
+    <lib-button *ngIf="(extractF1 || extractF2 || extractF3) && !samplePoints"
+                img="cog.svg" icon="⚙"
+                disabled="true"
+                i18n-title title="Specify at least one sample point for formant measurement"
                 i18n-label label="Process"
                 ></lib-button>
           
