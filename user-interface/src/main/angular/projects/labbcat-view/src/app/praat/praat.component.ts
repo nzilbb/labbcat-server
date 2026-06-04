@@ -359,13 +359,13 @@ export class PraatComponent implements OnInit {
     /** start processing */
     process(): void {
         if (this.pitchChanged && !this.extractMinimumPitch && !this.extractMeanPitch && !this.extractMaximumPitch) {
-            if (!confirm("You have changed pitch settings but you haven't selected a pitch measurement to extract." // TODO i18n
+            if (!confirm("You have changed pitch settings but you haven't selected a pitch measure to extract." // TODO i18n
                          + "\nAre you sure you want to continue?")) {
                 return;
             }
         }
         if (this.intensityChanged && !this.extractMaximumIntensity) {
-            if (!confirm("You have changed intensity settings but you haven't selected an intensity measurement to extract." // TODO i18n
+            if (!confirm("You have changed intensity settings but you haven't selected an intensity measure to extract." // TODO i18n
                          + "\nAre you sure you want to continue?")) {
                 return;
             }
