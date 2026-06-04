@@ -104,6 +104,7 @@ export class PraatComponent implements OnInit {
     intensityPitchFloorOther = [ 30 ]; // male
     scriptIntensity = "To Intensity: intensityPitchFloor, 0, \"yes\"";
     
+    formantChanged = false;
     pitchChanged = false;
     intensityChanged = false;
     
@@ -358,6 +359,12 @@ export class PraatComponent implements OnInit {
     processingError = "";
     /** start processing */
     process(): void {
+        if (this.formantChanged && !this.extractF1 && !this.extractF2 && !this.extractF3) {
+            if (!confirm("You have changed formant settings but you haven't selected a formant measure to extract." // TODO i18n
+                         + "\nAre you sure you want to continue?")) {
+                return;
+            }
+        }
         if (this.pitchChanged && !this.extractMinimumPitch && !this.extractMeanPitch && !this.extractMaximumPitch) {
             if (!confirm("You have changed pitch settings but you haven't selected a pitch measure to extract." // TODO i18n
                          + "\nAre you sure you want to continue?")) {
