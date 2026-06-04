@@ -619,7 +619,7 @@
             </span>
           </div>
           <div class="item"
-               *ngIf="pitchCommand.includes('raw') || (pitchCommand == 'Custom' && !scriptPitch.includes('filtered'))"
+               *ngIf="pitchCommand.includes('raw') || (pitchCommand == 'Custom' && scriptPitch && !scriptPitch.includes('filtered'))"
                i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
             <label for="pitchCeilingDefault" i18n>Pitch ceiling</label>
             <span>
@@ -631,7 +631,7 @@
             </span>
           </div>
           <div class="item"
-               *ngIf="pitchCommand.includes('filtered') || (pitchCommand == 'Custom' && scriptPitch.includes('filtered'))"
+               *ngIf="pitchCommand.includes('filtered') || (pitchCommand == 'Custom' && (!scriptPitch || scriptPitch.includes('filtered')))"
                i18n-title title="Pitch top - value for pitchCeiling in the Praat command">
             <label for="pitchTopDefault" i18n>Pitch top</label>
             <span>
@@ -710,7 +710,7 @@
               </span>
             </div>
             <div class="item"
-                 *ngIf="pitchCommand.includes('raw') || (pitchCommand == 'Custom' && !scriptPitch.includes('filtered'))"
+                 *ngIf="pitchCommand.includes('raw') || (pitchCommand == 'Custom' && scriptPitch && !scriptPitch.includes('filtered'))"
                  i18n-title title="Pitch ceiling - value for pitchCeiling in the Praat command">
               <label for="{{'pitchCeilingOther'+o}}" i18n>Pitch ceiling</label>
               <span>
@@ -723,7 +723,7 @@
               </span>
             </div>
             <div class="item"
-                 *ngIf="pitchCommand.includes('filtered') || (pitchCommand == 'Custom' && scriptPitch.includes('filtered'))"
+                 *ngIf="pitchCommand.includes('filtered') || (pitchCommand == 'Custom' && (!scriptPitch || scriptPitch.includes('filtered')))"
                  i18n-title title="Pitch top - value for pitchCeiling in the Praat command">
               <label for="{{'pitchTopOther'+o}}" i18n>Pitch top</label>
               <span>

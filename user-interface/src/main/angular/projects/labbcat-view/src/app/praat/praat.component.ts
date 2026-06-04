@@ -432,7 +432,7 @@ export class PraatComponent implements OnInit {
                 extractMaximumPitch: this.extractMaximumPitch,
                 pitchFloorDefault: this.pitchFloorDefault,
                 pitchCeilingDefault: this.pitchCommand.includes('filtered')
-                    || (this.pitchCommand == "Custom" && this.scriptPitch.includes('filtered'))
+                    || (this.pitchCommand == "Custom" && (!this.scriptPitch || this.scriptPitch.includes('filtered')))
                     ? this.pitchTopDefault
                     : this.pitchCeilingDefault,
                 voicingThresholdDefault: this.voicingThresholdDefault,
@@ -443,7 +443,7 @@ export class PraatComponent implements OnInit {
                     :this.pitchFloorOther,
                 pitchCeilingOther: !this.pitchDifferentiateParticipants?[]
                     : this.pitchCommand.includes('filtered')
-                    || (this.pitchCommand == "Custom" && this.scriptPitch.includes('filtered'))
+                    || (this.pitchCommand == "Custom" && (!this.scriptPitch || this.scriptPitch.includes('filtered')))
                     ? this.pitchTopOther
                     : this.pitchCeilingOther,
                 voicingThresholdOther: !this.pitchDifferentiateParticipants?[]
