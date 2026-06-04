@@ -449,7 +449,9 @@ export class PraatComponent implements OnInit {
                 voicingThresholdOther: !this.pitchDifferentiateParticipants?[]
                     :this.voicingThresholdOther,
                 scriptPitch: 'octaveCost = ' + this.octaveCost + '\n' + //shim
-                    (this.pitchCommand == 'Custom'
+                    (this.pitchCommand == 'Custom' && !this.scriptPitch
+                    ? 'To Pitch (filtered autocorrelation): 0, pitchFloor, pitchCeiling, 15, \"no\", 0.03, 0.09, voicingThreshold, octaveCost, 0.35, 0.14' //shim
+                    : this.pitchCommand == 'Custom' && this.scriptPitch
                     ? this.scriptPitch
                     : this.pitchCommand.includes('filtered')
                     ? this.pitchCommand + ': 0, pitchFloor, pitchCeiling, 15, \"no\", 0.03, 0.09, voicingThreshold, octaveCost, 0.35, 0.14'
