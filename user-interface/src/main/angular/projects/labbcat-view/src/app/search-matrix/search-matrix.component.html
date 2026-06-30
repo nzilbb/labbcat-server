@@ -28,6 +28,7 @@
               i18n-title title="Target this match"
               alt="🎯" [src]="imagesLocation+'/target.svg'"
               [class]="column.layers[layerId][0].target?'selected':'deselected'"
+              [tabindex]="0"
               (click)="setTarget(column.layers[layerId][0])">
           </span>
           {{layerId}}
@@ -38,6 +39,7 @@
                 class="anchor-start"> <!-- first match in column -->
             <img [src]="imagesLocation+'/lock-'+(column.layers[layerId][0].anchorStart?'locked':'unlocked')+'.svg'"
                  [alt]="column.layers[layerId][0].anchorStart?'🔒':'🔓'"
+                 [tabindex]="0"
                  (click)="column.layers[layerId][0].anchorStart = !column.layers[layerId][0].anchorStart"
                  >
           </span>
@@ -49,6 +51,7 @@
                 i18n-title title="Target this match"
                 alt="🎯" [src]="imagesLocation+'/target.svg'"
                 [class]="column.layers[layerId][m].target?'selected':'deselected'"
+                [tabindex]="0"
                 (click)="setTarget(column.layers[layerId][m])">
             </span>
             <ng-container
@@ -184,6 +187,7 @@
                 class="anchor-end"> <!-- last match in column -->
             <img [src]="imagesLocation+'/lock-'+(column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'locked':'unlocked')+'.svg'"
                  [alt]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'🔒':'🔓'"
+                 [tabindex]="0"
                  (click)="column.layers[layerId][column.layers[layerId].length-1].anchorEnd = !column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
                  >
           </span>
