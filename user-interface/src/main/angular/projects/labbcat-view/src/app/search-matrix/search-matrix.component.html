@@ -1,4 +1,4 @@
-<div class="layer-checkboxes-container">
+<div *ngIf="showLayerCheckboxes" class="layer-checkboxes-container">
 <lib-layer-checkboxes
   name="layer" includeAlignment="true" spoofAlignment="true"
   includeDataType="true" includeVerticalPeers="true"
@@ -7,12 +7,13 @@
   category="true"
   [(selected)]="selectedLayerIds"
   (selectedChange)="syncSelectedLayerIdsWithColumns($event)"
+  [class.read-only]="readOnly"
   (click)="hideHelper();"></lib-layer-checkboxes>
 </div>
 
 <div class="columns"
      (click)="hideHelper();">
-  <div class="column" *ngFor="let column of columns; index as c">
+  <div class="column" [class.last]="last" *ngFor="let column of columns; index as c; last as last">
     <div class="layers">
       <fieldset *ngFor="let layerId of selectedLayerIds"
                 class="layer layer-{{layerId}} parent-{{schema.layers[layerId].parentId}}"
@@ -28,8 +29,9 @@
               i18n-title title="Target this match"
               alt="🎯" [src]="imagesLocation+'/target.svg'"
               [class]="column.layers[layerId][0].target?'selected':'deselected'"
-              [tabindex]="0"
-              (click)="setTarget(column.layers[layerId][0])">
+              [class.read-only]="readOnly"
+              [tabindex]="readOnly ? -1 : 0"
+              (click)="readOnly ? null : setTarget(column.layers[layerId][0])">
           </span>
           {{layerId}}
         </legend>
@@ -39,8 +41,9 @@
                 class="anchor-start"> <!-- first match in column -->
             <img [src]="imagesLocation+'/lock-'+(column.layers[layerId][0].anchorStart?'locked':'unlocked')+'.svg'"
                  [alt]="column.layers[layerId][0].anchorStart?'🔒':'🔓'"
-                 [tabindex]="0"
-                 (click)="column.layers[layerId][0].anchorStart = !column.layers[layerId][0].anchorStart"
+                 [class.read-only]="readOnly"
+                 [tabindex]="readOnly ? -1 : 0"
+                 (click)="readOnly ? null : column.layers[layerId][0].anchorStart = !column.layers[layerId][0].anchorStart"
                  >
           </span>
           <div class="match" *ngFor="let match of column.layers[layerId]; index as m">
@@ -51,8 +54,9 @@
                 i18n-title title="Target this match"
                 alt="🎯" [src]="imagesLocation+'/target.svg'"
                 [class]="column.layers[layerId][m].target?'selected':'deselected'"
-                [tabindex]="0"
-                (click)="setTarget(column.layers[layerId][m])">
+                [class.read-only]="readOnly"
+                [tabindex]="readOnly ? -1 : 0"
+                (click)="readOnly ? null : setTarget(column.layers[layerId][m])">
             </span>
             <ng-container
               *ngIf="layerId != schema.turnLayerId && layerId != schema.utteranceLayerId"
@@ -66,6 +70,8 @@
                   i18n-placeholder placeholder="Minimum"                  
                   [(ngModel)]="match.min"
                   appAutofocus="true"
+                  [disabled]="readOnly"
+                  [class.read-only]="readOnly"
                   (keydown.enter)="startSearch($event)">
                 <span className="lt">&lt;</span>
                 <input
@@ -73,6 +79,8 @@
                   type="number"
                   i18n-placeholder placeholder="Maximum"
                   [(ngModel)]="match.max"
+                  [disabled]="readOnly"
+                  [class.read-only]="readOnly"
                   (keydown.enter)="startSearch($event)">
               </span>
 
@@ -80,6 +88,8 @@
                 <span class="not">
                   <select class="not"
                           i18n-title title="match or not"
+                          [disabled]="readOnly"
+                          [class.read-only]="readOnly"
                           [value]="match.not" (change)="match.not = $event.target.value == 'true'">
                     <option value="false" i18n>matches</option>
                     <option value="true" i18n>doesn't match</option>
@@ -94,6 +104,7 @@
                     [(value)]="match.pattern"
                     autofocus="true"
                     id="regexp-{{c}}-{{layerId}}-{{m}}"
+                    [disabled]="readOnly"
                     (keydown.enter)="startSearch($event)"></lib-input-regexp>
                   <lib-input-regexp
                     *ngIf="!isCaseSensitive(match)"
@@ -103,9 +114,10 @@
                     [(value)]="match.pattern"
                     autofocus="true"
                     id="regexp-{{c}}-{{layerId}}-{{m}}"
+                    [disabled]="readOnly"
                     (keydown.enter)="startSearch($event)"></lib-input-regexp>
                 </span>
-                <span class="help">
+                <span *ngIf="!readOnly" class="help">
                   <lib-button
                     i18n-title title="Phoneme symbol selector"
                     class="small"
@@ -125,7 +137,9 @@
               <span *ngSwitchDefault class="regexp">
                 <span class="not">
                   <select class="not"
-                          i18n-title title="match or not"                          
+                          i18n-title title="match or not"
+                          [disabled]="readOnly"
+                          [class.read-only]="readOnly"
                           [value]="match.not" (change)="match.not = $event.target.value == 'true'">
                     <option value="false" i18n>matches</option>
                     <option value="true" i18n>doesn't match</option>
@@ -140,6 +154,7 @@
                     [(value)]="match.pattern"
                     autofocus="true"
                     id="regexp-{{c}}-{{layerId}}-{{m}}"
+                    [disabled]="readOnly"
                     (keydown.enter)="startSearch($event)"></lib-input-regexp>
                   <lib-input-regexp
                     *ngIf="!isCaseSensitive(match)"
@@ -149,9 +164,10 @@
                     [(value)]="match.pattern"
                     autofocus="true"
                     id="regexp-{{c}}-{{layerId}}-{{m}}"
+                    [disabled]="readOnly"
                     (keydown.enter)="startSearch($event)"></lib-input-regexp>
                 </span>
-                <span class="help" *ngIf="hasValidLabels(schema.layers[layerId])">
+                <span class="help" *ngIf="!readOnly && hasValidLabels(schema.layers[layerId])">
                   <lib-button
                     i18n-title title="Symbol selector"
                     class="small"
@@ -169,7 +185,7 @@
           </div>    <!-- match -->
           
           <div class="add-match"
-               *ngIf="layerId == 'segment' || schema.layers[layerId].parentId == 'segment'">
+               *ngIf="!readOnly && (layerId == 'segment' || schema.layers[layerId].parentId == 'segment')">
             <lib-button
               i18n-title title="Add word-internal segment pattern"
               class="small"
@@ -187,8 +203,9 @@
                 class="anchor-end"> <!-- last match in column -->
             <img [src]="imagesLocation+'/lock-'+(column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'locked':'unlocked')+'.svg'"
                  [alt]="column.layers[layerId][column.layers[layerId].length-1].anchorEnd?'🔒':'🔓'"
-                 [tabindex]="0"
-                 (click)="column.layers[layerId][column.layers[layerId].length-1].anchorEnd = !column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
+                 [class.read-only]="readOnly"
+                 [tabindex]="readOnly ? -1 : 0"
+                 (click)="readOnly ? null : column.layers[layerId][column.layers[layerId].length-1].anchorEnd = !column.layers[layerId][column.layers[layerId].length-1].anchorEnd"
                  >
           </span>
         </div>     <!-- layer -->
@@ -197,6 +214,8 @@
     <div class="adj" *ngIf="c < columns.length - 1">
       <span i18n="'followed' n words later by...">followed</span>
       <select i18n-title title="Distance between matches"
+              [disabled]="readOnly"
+              [class.read-only]="readOnly"
               [(ngModel)]="column.adj">
         <option value="1" i18n="followed 'immediately' by...">immediately</option>
         <option value="2" i18n="followed 'up to 1 word later' by...">up to 1 word later</option>
@@ -204,7 +223,7 @@
       </select>
       <span i18n="followed n words later 'by'...">by</span>
     </div>
-    <div class="add-column"*ngIf="c == columns.length - 1">
+    <div class="add-column" *ngIf="!readOnly && c == columns.length - 1">
       <lib-button
         i18n-title title="Make the search one word wider"
         icon="➕" img="add.svg"
