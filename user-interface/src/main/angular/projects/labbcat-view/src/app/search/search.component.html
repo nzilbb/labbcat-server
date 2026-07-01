@@ -275,6 +275,149 @@
         </div>
       </div>
       
+      <!-- history tab -->
+      <div *ngIf="currentTab == 'History'" id="history">
+        <table>
+          <tbody>
+            <tr *ngFor="let historyItem of history" class="item">
+              <td class="history-name">
+                <lib-task *ngIf="historyItem.task.threadId"
+                  [threadId]="historyItem.task.threadId"
+                  [autoOpenResults]="false"
+                  [singleSpan]="true"
+                  ></lib-task>
+              </td>
+              <td class="history-status">
+                <span *ngIf="historyItem.task.running"
+                  class="loading"
+                  ><span>.</span><span>.</span><span>.</span></span>
+                <a *ngIf="historyItem.task.size"
+                  [href]="historyItem.task.resultUrl"
+                  [target]="'task-' + historyItem.task.threadId"
+                  >{{historyItem.task.size}}&nbsp;<span i18n>results</span></a>
+                <span *ngIf="!historyItem.task.running && historyItem.task.hasOwnProperty('size') && historyItem.task.size == 0"
+                  i18n>0&nbsp;results</span>
+                <span *ngIf="historyItem.cancelled"
+                  i18n>Cancelled</span>
+                <span *ngIf="historyItem.task.lastException"
+                  class="error"
+                  [title]="historyItem.task.lastException"
+                  i18n>Error</span>
+              </td>
+              <td class="history-matrix">
+                <details>
+                  <summary i18n>Search matrix</summary>
+                  <app-search-matrix
+                    [schema]="schema"
+                    [(columns)]="historyItem.matrix.columns"
+                    [showLayerCheckboxes]="false"
+                    [readOnly]="true"
+                    ></app-search-matrix>
+                </details>
+              </td>
+              <td *ngIf="anyFilters(history)" class="history-filters">
+                <details *ngIf="hasFilters(historyItem)">
+                  <summary i18n>Filters</summary>
+                  <div class="attribute-list">
+                    <div *ngIf="historyItem.matrix.participantQuery"
+                      class="attribute">
+                      <label for="participant-filter" i18n>Participants</label>
+                      <span id="participant-filter" class="values"
+                        >{{historyItem.filters.participantDescription}}</span>
+                    </div>
+                    <div *ngIf="historyItem.matrix.transcriptQuery"
+                      class="attribute">
+                      <label for="transcript-filter" i18n>Transcripts</label>
+                      <span id="transcript-filter" class="values"
+                        >{{historyItem.filters.transcriptDescription}}</span>
+                    </div>
+                  </div>
+                </details>
+                <details *ngIf="!hasFilters(historyItem)" disabled
+                  i18n-title title="This search was unfiltered">
+                  <summary tabindex="-1" i18n>Filters</summary>
+                </details>
+              </td>
+              <td class="history-options">
+                <details>
+                  <summary i18n>Match options</summary>
+                  <div class="list">
+                    <div class="item">
+                      <label>
+                        <input type="checkbox" disabled
+                          [checked]="historyItem.matchOptions.mainParticipantOnly">
+                        <span i18n>Only include matches from the main participant in a transcript.</span></label>
+                    </div>
+                    <div class="item">
+                      <label i18n-title
+                             title="Return words that have been reliably word-aligned - e.g. by HTK or manually">
+                        <input type="checkbox" disabled
+                          [checked]="historyItem.matchOptions.onlyAligned">
+                        <span i18n>Only match words that are aligned.</span></label>
+                    </div>
+                    <div class="item">
+                      <label i18n-title title="Return only the first match in each transcript">
+                        <input type="checkbox" disabled
+                          [checked]="historyItem.matchOptions.firstMatchOnly">
+                        <span i18n>Only one match per transcript.</span></label>
+                    </div>
+                    <div class="item">
+                      <label i18n-title title="Exclude simultaneous speech">
+                        <input type="checkbox" disabled
+                          [checked]="historyItem.matchOptions.excludeSimultaneousSpeech">
+                        <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
+                      <label i18n-title title="Define what counts as simultaneous speech">
+                        <input disabled
+                               class="numeric overlap_threshold" type="number"
+                               [value]="historyItem.matchOptions.overlapThreshold">
+                        <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
+                    </div>
+                  </div>
+                </details>
+              </td>
+              <td class="history-buttons">
+                <div class="button-container">
+                  <lib-button
+                    (press)="exportHistoryItem(historyItem)"
+                    img="code-file.svg" icon="<>"
+                    i18n-label label="Export search"
+                    i18n-title title="Export JSON representation of search parameters"
+                    ></lib-button>
+                  <lib-button
+                    (press)="deleteHistoryItem(historyItem)"
+                    action="delete"
+                    i18n-title title="Remove this search from the history"
+                    ></lib-button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot *ngIf="history.length > 1">
+            <tr>
+              <td [colSpan]="anyFilters(history) ? 5 : 4"></td>
+              <td class="history-buttons">
+                <div class="button-container">
+                  <lib-button
+                    (press)="exportHistory()"
+                    img="code-file.svg" icon="<>"
+                    i18n-label label="Export history"
+                    i18n-title title="Export JSON representation of parameters for all searches in history"
+                    ></lib-button>
+                  <lib-button
+                    (press)="deleteHistory()"
+                    img="trash.svg" icon="➖"
+                    i18n-label label="Clear history"
+                    i18n-title title="Remove all searches from the history"
+                    ></lib-button>
+                </div>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+        <a #exportAnchor id="export-anchor"
+          [href]="exportUrl"
+          [download]="exportName"></a>
+      </div>
     </div>
   </div>
   <div class="search-matrix">
@@ -292,5 +435,6 @@
       (click)="search()">
     </lib-button>
   </div>
-  <lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"></lib-task>
+  <lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"
+    (finished)="updateTask(history[history.length - 1], $event.threadId);"></lib-task>
 </div>

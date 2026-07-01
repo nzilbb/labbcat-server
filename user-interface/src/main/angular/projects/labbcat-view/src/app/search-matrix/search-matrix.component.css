@@ -161,3 +161,7 @@ lib-button.small img {
 input.read-only::placeholder {
     opacity: 0;
 }
+/* Hide arrows */
+select.read-only {
+    appearance: unset;
+}

@@ -27,7 +27,7 @@
 
     overflow-x: clip;
 }
-#overlap_threshold {
+#overlap_threshold, .overlap_threshold {
     margin-left: 0.5em;
     width: 2.5em;
 }
@@ -97,6 +97,80 @@ details > .advanced li ul {
 details[open] > div {
     animation-name: roll-down;
     animation-duration: 1s;
+}
+details[disabled] summary {
+    pointer-events: none;
+    user-select: none;
+    color: silver;
+    cursor: not-allowed;
+}
+#history table {
+    width: 100%;
+}
+#history td {
+    padding-left: 5px;
+    padding-right: 5px;
+    &:last-child {
+        padding-right: 0;
+    }
+}
+td:has(~ td > details[open]), td:has(> details[open]) ~ td {
+    vertical-align: top;
+}
+#history .history-buttons {
+    vertical-align: middle;
+}
+.history-name {
+    text-align: center;
+}
+.history-status {
+    min-width: 4em;
+    &:has(> .loading) {
+        text-align: center;
+    }
+    .loading span {
+        animation-duration: 3s;
+        animation-iteration-count: infinite;
+        &:nth-child(1) {
+            animation-name: load-1;
+        }
+        &:nth-child(2) {
+            animation-name: load-2;
+        }
+        &:nth-child(3) {
+            animation-name: load-3;
+        }
+    }
+    .error {
+        font-size: unset;
+    }
+}
+.history-filters {
+    .attribute-list {
+        min-width: unset;
+    }
+    .attribute > label {
+        width: 30%;
+    }
+    .attribute > .values {
+        width: 70%;
+    }
+}
+.attribute:nth-child(2n+1), .list > .item:nth-child(2n+1) {
+    background: #f4f4f4;
+}
+.attribute:nth-child(2n), .list > .item:nth-child(2n) {
+    background: #fafafa;
+}
+.history-options input[disabled] {
+    cursor: not-allowed;
+}
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+}
+#export-anchor {
+    display: none;
 }
 .file-chooser {
     padding-bottom: 10px;
