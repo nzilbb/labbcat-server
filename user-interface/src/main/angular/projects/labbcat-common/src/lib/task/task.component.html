@@ -1,6 +1,6 @@
 <div *ngIf="task" class="task-progress">
-  <h1 *ngIf="showName">{{task.threadName}}</h1>
-  <div class="components">
+  <h1 *ngIf="showName && !singleSpan">{{task.threadName}}</h1>
+  <div *ngIf="!singleSpan" class="components">
     <progress value="{{task.percentComplete}}" max="100"
               title="{{task.percentComplete + '% ' + task.status}}"
               #progress>
@@ -17,7 +17,7 @@
               >
     </lib-button>
   </div>
-  <div class="text">
+  <div *ngIf="!singleSpan" class="text">
     <div class="task-start-time" [style.display]="displayStartTime ? 'block' : 'none'">{{task.creationTime | date: 'medium'}}</div>
     <div *ngIf="showStatus" class="task-status">{{task.status}}</div>
     <div *ngIf="showStatus && task.resultUrl" class="task-result">
@@ -29,4 +29,8 @@
     <div *ngIf="task.lastException && showLastException" class="error">{{task.lastException}}</div>
     <div *ngIf="task.stackTrace && showStackTrace" class="error">{{task.stackTrace}}</div>
   </div>
+  <ng-container *ngIf="singleSpan">
+    <span *ngIf="task.running" class="text">{{task.status}}</span>
+    <span *ngIf="!task.running" class="text">{{task.threadName}}</span>
+  </ng-container>
 </div>

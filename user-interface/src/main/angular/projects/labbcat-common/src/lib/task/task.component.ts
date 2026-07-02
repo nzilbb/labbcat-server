@@ -20,6 +20,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     @Input() showName = true;
     @Input() autoOpenResults = true;
     @Output() finished = new EventEmitter<Task>();
+    @Input() singleSpan: boolean;
     task: Task;
     timeout: number;
     cancelling = false;
