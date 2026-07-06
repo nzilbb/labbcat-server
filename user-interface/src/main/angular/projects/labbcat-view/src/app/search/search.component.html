@@ -322,14 +322,26 @@
                     <div *ngIf="historyItem.matrix.participantQuery"
                       class="attribute">
                       <label for="participant-filter" i18n>Participants</label>
-                      <span id="participant-filter" class="values"
-                        >{{historyItem.filters.participantDescription}}</span>
+                      <span *ngIf="participantDescription"
+                        id="participant-filter"
+                        class="values"
+                        >{{historyItem.filters.participantDescription.split(', ').join('\n')}}</span>
+                      <span *ngIf="!participantDescription"
+                        id="participant-filter"
+                        class="values"
+                        i18n>Selected participants</span>
                     </div>
                     <div *ngIf="historyItem.matrix.transcriptQuery"
                       class="attribute">
                       <label for="transcript-filter" i18n>Transcripts</label>
-                      <span id="transcript-filter" class="values"
-                        >{{historyItem.filters.transcriptDescription}}</span>
+                      <span *ngIf="transcriptDescription"
+                        id="transcript-filter"
+                        class="values"
+                        >{{historyItem.filters.transcriptDescription.split(', ').join('\n')}}</span>
+                      <span *ngIf="!transcriptDescription"
+                        id="transcript-filter"
+                        class="values"
+                        i18n>Selected transcripts</span>
                     </div>
                   </div>
                 </details>

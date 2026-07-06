@@ -147,13 +147,14 @@ td:has(~ td > details[open]), td:has(> details[open]) ~ td {
 }
 .history-filters {
     .attribute-list {
-        min-width: unset;
+        min-width: 20em;
     }
     .attribute > label {
         width: 30%;
     }
     .attribute > .values {
         width: 70%;
+        white-space: pre-line;
     }
 }
 .attribute:nth-child(2n+1), .list > .item:nth-child(2n+1) {
