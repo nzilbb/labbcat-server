@@ -420,9 +420,9 @@ export class SearchComponent implements OnInit {
         historyItem.matrix = structuredClone(this.matrix);
         historyItem.filters = {
             participantDescription: this.participantDescription,
-            participantIds: this.participantIds,
+            participantCount: this.participantCount,
             transcriptDescription: this.transcriptDescription,
-            transcriptIds: this.transcriptIds
+            transcriptCount: this.transcriptCount
         };
         historyItem.matchOptions = {
             mainParticipantOnly: this.mainParticipantOnly,
@@ -451,6 +451,13 @@ export class SearchComponent implements OnInit {
             return undefined;
         }
         if (key == "layers" && Array.isArray(value)) {
+            return undefined;
+        }
+        if (["participantQuery", "transcriptQuery"].includes(key) && value) {
+            return value.replaceAll(/"/g, "'");
+        }
+        if (["participantDescription", "participantCount",
+             "transcriptDescription", "transcriptCount"].includes(key) && !value) {
             return undefined;
         }
         if (typeof value === "undefined") {

@@ -10,9 +10,9 @@ export interface SearchHistoryItem {
     /** Participant/transcript filters (from Search) */
     filters: {
         participantDescription: string,
-        participantIds: string[],
+        participantCount: number,
         transcriptDescription: string,
-        transcriptIds: string[]
+        transcriptCount: number
     };
     
     /** Match options (from Search) */
