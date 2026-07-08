@@ -1920,7 +1920,8 @@ export class TranscriptComponent implements OnInit {
     copyTranscriptText(annotation: Annotation): void {
         const transcriptText = annotation.all(this.schema.wordLayerId).map(a => a.label).join(' ');
         navigator.clipboard.writeText(transcriptText);
-        alert("Copied transcript text to clipboard:\n\n" + transcriptText);
+        this.messageService.info(
+            `Copied transcript text to clipboard:\n${transcriptText}`); // TODO i18n
     }
     /** Participants button actions */
     viewAttributes(participant: string): void {
