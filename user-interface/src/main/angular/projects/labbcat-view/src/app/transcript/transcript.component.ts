@@ -1916,6 +1916,12 @@ export class TranscriptComponent implements OnInit {
             });
         } // 'edit' user
     }
+    /** Copy text of utterance */
+    copyTranscriptText(annotation: Annotation): void {
+        const transcriptText = annotation.all(this.schema.wordLayerId).map(a => a.label).join(' ');
+        navigator.clipboard.writeText(transcriptText);
+        alert("Copied transcript text to clipboard:\n\n" + transcriptText);
+    }
     /** Participants button actions */
     viewAttributes(participant: string): void {
         this.router.navigate(["participant"], {
