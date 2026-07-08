@@ -82,12 +82,6 @@ fieldset.anchor-end span.anchor-end img {
     position: relative;
     width: 100%;
 }
-span.regexp, span.ipa, span.numeric {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-}
 div.match {
     display: flex;
     flex-direction: row;
@@ -97,30 +91,52 @@ div.match {
 }
 div.match > span {
     flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+.left-container.number {
+    flex-basis: 50%
+}
+.right-container.number {
+    flex-basis: 50%
+}
+.number > input {
+    flex-grow: 1;
+}
+.left-container.regexp {
+    flex-basis: 40%
+}
+.right-container.regexp {
+    flex-basis: 60%
+}
+.not {
+    flex-grow: 1;
+}
+span.match {
+    flex-grow: 1;
 }
 div.match > .target.segment {
     flex-grow: revert;
 }
-span.help lib-button {
+span.help lib-button, .add-match lib-button {
     position: relative;
     left: 10px;
 }
-
+.add-match {
+    display: flex;
+    flex-direction: column;
+}
 .target img {
     vertical-align: middle;
-    height: 10pt;
-}
-.segment.target img {
-    vertical-align: bottom;
     height: 10pt;
 }
 .deselected {
     opacity: 0.33;
 }
 
-span.not { width: 40%; }
 span.not select { width: 100%; }
-span.match { width: 60%; }
 input.numeric { width: 45%; }
 
 .adj {
