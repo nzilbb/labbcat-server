@@ -537,7 +537,7 @@
                                      alt="📷"></a>
                       <a *ngSwitchCase="annotation.layer.type == 'text/url'"
                          class="link"
-                         href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{annotation.id}}"
+                         href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{utterance.id}}"
                          target="{{annotation.layer.id}}"
                          >{{renderLabel(annotation)}}</a>
                       <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/') && annotation.layer.type != 'text/url'"
@@ -609,7 +609,7 @@
                                        alt="📷"></a>
                         <a *ngSwitchCase="annotation.layer.type == 'text/url'"
                            class="link"
-                           href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{annotation.id}}"
+                           href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{utterance.id}}"
                            target="{{annotation.layer.id}}"
                            >{{renderLabel(annotation)}}</a>
                         <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/' && annotation.layer.type != 'text/url')"
@@ -682,7 +682,7 @@
                                          alt="📷"></a>
                           <a *ngSwitchCase="annotation.layer.type == 'text/url'"
                              class="link"
-                             href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{annotation.id}}"
+                             href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{word.id}}"
                              target="{{annotation.layer.id}}"
                              >{{renderLabel(annotation)}}</a>
                           <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/') && annotation.layer.type != 'text/url'"
@@ -715,7 +715,7 @@
                       <ng-container [ngSwitch]="true">
                         <a *ngSwitchCase="annotation.layer.type == 'text/url'"
                            class="link"
-                           href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{annotation.id}}"
+                           href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{word.id}}"
                            target="{{annotation.layer.id}}"
                            >{{renderLabel(annotation)}}</a>
                         <ng-container *ngSwitchDefault>{{renderLabel(annotation)}}</ng-container>
@@ -788,6 +788,14 @@
                     img="audio.svg" icon="🔊"
                     i18n-label label="Extract audio"
                     i18n-title title="Extract audio fragment for this utterance"
+                    ></lib-menu-option>
+                </div>
+                <div class="item" id="copy-utterance-text-option">
+                  <lib-menu-option
+                    (press)="copyTranscriptText(utterance); menuId = null"
+                    img="fa-copy.svg" icon="📋"
+                    i18n-label label="Copy transcript text"
+                    i18n-title title="Copy word annotations for this utterance"
                     ></lib-menu-option>
                 </div>
                 <ng-container *ngIf="hasWAV && praatIntegration">
@@ -892,7 +900,7 @@
                                        alt="📷"></a>
                         <a *ngSwitchCase="annotation.layer.type == 'text/url'"
                            class="link"
-                           href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{annotation.id}}"
+                           href="{{annotation.label.split('\n')[1]}}#{{transcript.id}}%23{{utterance.id}}"
                            target="{{annotation.layer.id}}"
                            >{{renderLabel(annotation)}}</a>
                         <a *ngSwitchCase="annotation.layer.type.indexOf('/')>0 && !annotation.layer.type.startsWith('image/') && annotation.layer.type != 'text/url'"

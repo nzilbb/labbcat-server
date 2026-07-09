@@ -183,6 +183,7 @@ td:has(~ td > details[open]), td:has(> details[open]) ~ td {
     content: ':';
 }
 .list {
+    width: 100%;
     margin-top: 5px;
 }
 .list-label {

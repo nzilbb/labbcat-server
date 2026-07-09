@@ -16,6 +16,7 @@
     position: relative;
     display: flex;
     align-items: center;
+    white-space: pre-wrap;
     font-style: italic;
     animation-name: sidle-fade-semitrans;
     animation-duration: 10s;
