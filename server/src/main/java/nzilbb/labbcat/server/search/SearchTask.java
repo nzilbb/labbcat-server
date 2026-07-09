@@ -257,6 +257,23 @@ public abstract class SearchTask extends Task {
    * null to not specify the 'wordsContext' URL parameter. 
    */
   public SearchTask setWordsContext(Integer newWordsContext) { wordsContext = newWordsContext; return this; }
+  
+  /**
+   * URL for matches, once search is finished.
+   * @see #getMatchesUrl()
+   * @see #setMatchesUrl(String)
+   */
+  protected String matchesUrl;
+  /**
+   * Getter for {@link #matchesUrl}: URL for matches, once search is finished.
+   * @return URL for matches, once search is finished.
+   */
+  public String getMatchesUrl() { return matchesUrl; }
+  /**
+   * Setter for {@link #matchesUrl}: URL for matches, once search is finished.
+   * @param newMatchesUrl URL for matches, once search is finished.
+   */
+  public SearchTask setMatchesUrl(String newMatchesUrl) { matchesUrl = newMatchesUrl; return this; }
 
   /**
    * Validates the search conditions.
@@ -293,7 +310,10 @@ public abstract class SearchTask extends Task {
           setStatus("No results available.");
         } else {
           if (!suppressResults && results.size() > 0) {
-            setResultUrl(getStore().getId() + "matches?threadId=" + getId()
+            if (matchesUrl == null) {
+              matchesUrl = getStore().getId() + "matches";
+            }
+            setResultUrl(matchesUrl + "?threadId=" + getId()
                          + (wordsContext==null?"":"&wordsContext="+wordsContext));
             setResultText("Display results");
           }
