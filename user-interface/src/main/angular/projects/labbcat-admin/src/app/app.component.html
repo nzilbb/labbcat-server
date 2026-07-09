@@ -11,4 +11,11 @@
   </article>
   <aside><!-- user info --></aside>
 </div>
+<div id="keepalive-tasks">
+  <lib-task
+    *ngFor="let threadId of searchHistoryThreads"
+    [threadId]="threadId"
+    [autoOpenResults]="false"
+    [purgeHistoryIfInvalid]="true"></lib-task>
+</div>
 <footer *ngIf="!production"><a [routerLink]="['/about']">Copyright &copy; 2020-2024 NZILBB</a></footer>

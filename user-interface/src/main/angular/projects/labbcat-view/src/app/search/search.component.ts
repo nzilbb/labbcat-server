@@ -61,7 +61,7 @@ export class SearchComponent implements OnInit {
         }
         this.participantIds = [];
         this.transcriptIds = [];
-        this.history = [];
+        this.history = JSON.parse(sessionStorage.getItem("searchHistory")) ?? [];
         this.readUserInfo();
         this.setupTabs();
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
@@ -408,6 +408,7 @@ export class SearchComponent implements OnInit {
                 if (task.running || task.lastException || historyItem.cancelled) {
                     delete historyItem.task.size;
                 }
+                sessionStorage.setItem("searchHistory", JSON.stringify(this.history));
                 resolve();
             });
         });
@@ -492,6 +493,7 @@ export class SearchComponent implements OnInit {
 
     deleteHistoryItem(historyItem: SearchHistoryItem): void {
         this.history = this.history.filter(x => x.task.threadId !== historyItem.task.threadId);
+        sessionStorage.setItem("searchHistory", JSON.stringify(this.history));
         if (!this.history.length) {
             delete this.tabs["History"];
             this.tabLabels.pop();
@@ -500,6 +502,7 @@ export class SearchComponent implements OnInit {
 
     deleteHistory(): void {
         this.history = this.history.filter(x => false);
+        sessionStorage.removeItem("searchHistory");
         delete this.tabs["History"];
         this.tabLabels.pop();
     }
