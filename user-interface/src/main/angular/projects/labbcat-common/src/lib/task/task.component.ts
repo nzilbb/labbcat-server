@@ -78,7 +78,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
                     if (this.purgeHistoryIfInvalid && m == "Invalid ID: " + this.threadId) {
                         let history = JSON.parse(sessionStorage.getItem("searchHistory")).filter(x => x.task.threadId !== this.threadId)
                         sessionStorage.setItem("searchHistory", JSON.stringify(history));
-                        this.messageService.info("Removed missing thread " + this.threadId + " from search history");
+                        this.messageService.info("Removed missing thread " + this.threadId + " from search history"); // TODO i18n
                     }
                 });
                 if (messages) messages.forEach(m => this.messageService.info(m));
