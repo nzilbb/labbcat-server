@@ -476,7 +476,7 @@ export class SearchComponent implements OnInit {
         this.updateTask(historyItem, historyItem.task.threadId).then(() => {
             const jsonString = JSON.stringify(historyItem, this.replacer, 2);
             this.exportUrl = this.sanitizer.sanitize(SecurityContext.HTML, 'data:application/json;charset=UTF-8,' + encodeURIComponent(jsonString));
-            this.exportName = historyItem.task.threadName;
+            this.exportName = historyItem.task.threadName + '.json';
             setTimeout(() => this.exportAnchor.nativeElement.click(), 50);
         });
     }
@@ -486,7 +486,7 @@ export class SearchComponent implements OnInit {
         this.updateTask(lastHistoryItem, lastHistoryItem.task.threadId).then(() => {
             const jsonString = JSON.stringify(this.history, this.replacer, 2);
             this.exportUrl = this.sanitizer.sanitize(SecurityContext.HTML, 'data:application/json;charset=UTF-8,' + encodeURIComponent(jsonString));
-            this.exportName = 'search-history.json';
+            this.exportName = 'search-history-' + new Date().toISOString().slice(0,10) + '.json';
             setTimeout(() => this.exportAnchor.nativeElement.click(), 50);
         });
     }
