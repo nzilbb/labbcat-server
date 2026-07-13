@@ -102,7 +102,7 @@ export class TranscriptsComponent implements OnInit {
             transcriptTypeLayer.hint = this.transcriptTypeLayerHint;
             this.filterLayers.push(transcriptLayer);
             this.filterValues[this.schema.root.id] = [];
-            this.filterLayers.push();
+            this.filterLayers.push(corpusLayer);
             this.filterValues[this.schema.corpusLayerId] = [];
             this.filterLayers.push(episodeLayer);
             this.filterValues[this.schema.episodeLayerId] = [];
