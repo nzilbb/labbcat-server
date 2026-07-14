@@ -848,11 +848,11 @@ export class TranscriptsComponent implements OnInit {
                     transcripts: this.queryDescription
                 };
             } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
-                // don't send a transcripts param (transcript count is visible in tab title)
                 params = {
                     transcript_expression: "["
                         + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                        + "].includes(id)"
+                        + "].includes(id)",
+                    transcripts: "individual selections" // TODO i18n
                 };
             }
         } else if (this.query) { // no check-boxes selected but some filter applied
@@ -863,7 +863,7 @@ export class TranscriptsComponent implements OnInit {
         } else { // no check-boxes selected or filter applied
             params = {
                 transcript_expression: "/.+/.test(id)",
-                transcripts: "all transcripts"
+                transcripts: "all transcripts" // TODO i18n
             };
         }
         if (this.participantQuery) {

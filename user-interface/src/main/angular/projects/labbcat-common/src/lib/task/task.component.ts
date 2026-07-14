@@ -20,6 +20,8 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     @Input() showName = true;
     @Input() autoOpenResults = true;
     @Output() finished = new EventEmitter<Task>();
+    @Input() singleSpan: boolean;
+    @Input() purgeHistoryIfInvalid: boolean;
     task: Task;
     timeout: number;
     cancelling = false;
@@ -71,7 +73,14 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
         if (!this.cancelling) { // only update status if we're not cancelling...
             this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
                 // show messages
-                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (errors) errors.forEach(m => {
+                    this.messageService.error(m)
+                    if (this.purgeHistoryIfInvalid && m == "Invalid ID: " + this.threadId) {
+                        let history = JSON.parse(sessionStorage.getItem("searchHistory")).filter(x => x.task.threadId !== this.threadId)
+                        sessionStorage.setItem("searchHistory", JSON.stringify(history));
+                        this.messageService.info("Removed missing thread " + this.threadId + " from search history"); // TODO i18n
+                    }
+                });
                 if (messages) messages.forEach(m => this.messageService.info(m));
 
                 // update model

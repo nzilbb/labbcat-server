@@ -14,6 +14,7 @@ export class InputRegexpComponent implements OnInit {
     @Input() value: string;
     @Output() valueChange = new EventEmitter<string>();
     @Input() autofocus: boolean;
+    @Input() disabled: boolean;
     temporaryTitle: string;
     regexpError: string;
     

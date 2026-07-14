@@ -834,11 +834,11 @@ export class ParticipantsComponent implements OnInit {
                     participants: this.queryDescription
                 };
             } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
-                // don't send a participants param (participant count is visible in tab title)
                 params = {
                     participant_expression: "["
                         + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                        + "].includes(id)"
+                        + "].includes(id)",
+                    participants: "individual selections" // TODO i18n
                 };
             }
         } else if (this.query) { // no check-boxes selected but some filter applied
@@ -849,7 +849,7 @@ export class ParticipantsComponent implements OnInit {
         } else { // no check-boxes selected or filter applied
             params = {
                 participant_expression: "/.+/.test(id)",
-                participants: "all participants"
+                participants: "all participants" // TODO i18n
             };
         }
         if (this.transcriptQuery) {

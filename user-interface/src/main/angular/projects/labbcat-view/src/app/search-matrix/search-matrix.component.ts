@@ -17,6 +17,8 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
     @Input() columns: MatrixColumn[];
     @Output() columnsChange = new EventEmitter<MatrixColumn[]>();
     @Output() searchStarted = new EventEmitter<void>();
+    @Input() showLayerCheckboxes = true;
+    @Input() readOnly = false;
 
     helperMatch: MatrixLayerMatch;
     imagesLocation : string;

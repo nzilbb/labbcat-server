@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, tap } from 'rxjs/operators';
@@ -20,6 +20,7 @@ export class AppComponent {
     production = environment.production;
     header = "";
     footer = "";
+    searchHistoryThreads: string[];
     constructor(
         private router: Router,
         private titleService: Title,
@@ -63,6 +64,13 @@ export class AppComponent {
                 }
             }
         });
+    }
+
+    ngOnInit(): void {
+        const searchHistory = JSON.parse(sessionStorage.getItem("searchHistory"));
+        if (searchHistory) {
+            this.searchHistoryThreads = searchHistory.map(x => x.task.threadId);
+        }
     }
 
     setPageTitle(pageTitle: string) {

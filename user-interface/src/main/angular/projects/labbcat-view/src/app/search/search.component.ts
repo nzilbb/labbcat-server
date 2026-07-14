@@ -1,12 +1,14 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild, ElementRef, SecurityContext } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer } from '@angular/platform-browser';
 
 import { Layer } from 'labbcat-common';
-import { User } from 'labbcat-common';
+import { User, Task } from 'labbcat-common';
 import { MessageService, LabbcatService } from 'labbcat-common';
 
 import { Matrix } from '../matrix';
 import { MatrixLayerMatch } from '../matrix-layer-match';
+import { SearchHistoryItem } from '../search-history-item';
 
 @Component({
   selector: 'app-search',
@@ -35,12 +37,17 @@ export class SearchComponent implements OnInit {
     overlapThreshold = 5;
     suppressResults: boolean;
     threadId:string;
+    history: SearchHistoryItem[];
+    exportUrl: string;
+    exportName: string;
+    @ViewChild('exportAnchor', {static: false}) exportAnchor: ElementRef;
     
     constructor(
         private labbcatService: LabbcatService,
         private messageService: MessageService,
         private route: ActivatedRoute,
         private router: Router,
+        private sanitizer: DomSanitizer,
         @Inject('environment') private environment
     ) {
         this.imagesLocation = this.environment.imagesLocation;
@@ -54,6 +61,7 @@ export class SearchComponent implements OnInit {
         }
         this.participantIds = [];
         this.transcriptIds = [];
+        this.history = JSON.parse(sessionStorage.getItem("searchHistory")) ?? [];
         this.readUserInfo();
         this.setupTabs();
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
@@ -130,6 +138,13 @@ export class SearchComponent implements OnInit {
             description: "Configure options for matching and displaying search results", // TODO i18n
             icon: "cog.svg"
         };
+        if (this.history.length) {
+            this.tabs["History"] = {
+                label: "History", // TODO i18n
+                description: "View history of searches on this browser tab", // TODO i18n
+                icon: "history.svg"
+            };
+        }
         this.tabLabels = Object.keys(this.tabs);
     }
     selectParticipants(): void {
@@ -371,7 +386,125 @@ export class SearchComponent implements OnInit {
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.threadId = result.threadId;
+                this.history.push(this.historyItem());
+                if (!this.tabs["History"]) {
+                    this.tabs["History"] = {
+                        label: "History", // TODO i18n
+                        description: "View history of searches on this browser tab", // TODO i18n
+                        icon: "history.svg"
+                    };
+                    this.tabLabels.push("History");
+                }
         });
+    }
+
+    updateTask(historyItem: SearchHistoryItem, threadId: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.labbcatService.labbcat.taskStatus(threadId, (task, errors, messages) => {
+                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (messages) messages.forEach(m => this.messageService.info(m));
+                historyItem.task = task;
+                historyItem.cancelled = task.status.includes("cancelled");
+                if (task.running || task.lastException || historyItem.cancelled) {
+                    delete historyItem.task.size;
+                }
+                sessionStorage.setItem("searchHistory", JSON.stringify(this.history));
+                resolve();
+            });
+        });
+    }
+
+    historyItem(): SearchHistoryItem {
+        let historyItem = {} as SearchHistoryItem;
+        historyItem.task = {} as Task;
+        this.updateTask(historyItem, this.threadId);
+        historyItem.matrix = structuredClone(this.matrix);
+        historyItem.filters = {
+            participantDescription: this.participantDescription,
+            participantCount: this.participantCount,
+            transcriptDescription: this.transcriptDescription,
+            transcriptCount: this.transcriptCount
+        };
+        historyItem.matchOptions = {
+            mainParticipantOnly: this.mainParticipantOnly,
+            onlyAligned: this.onlyAligned,
+            firstMatchOnly: this.firstMatchOnly,
+            excludeSimultaneousSpeech: this.excludeSimultaneousSpeech,
+            overlapThreshold: this.overlapThreshold
+        };
+        return historyItem;
+    }
+
+    /** Convenience functions for display */
+    hasFilters(historyItem: SearchHistoryItem): boolean {
+        return historyItem.matrix.participantQuery !== undefined ||
+            historyItem.matrix.transcriptQuery !== undefined;
+    }
+    anyFilters(history: SearchHistoryItem[]): boolean {
+        return history.map(x => this.hasFilters(x)).reduce((x, y) => x || y);
+    }
+
+    replacer(key: string, value: string): any {
+        if (["cancelled", "csv", "csvColumns", "percentComplete",
+             "refreshSeconds", "resultTarget", "resultText", "resultUrl",
+             "resultsName", "running", "seriesId", "targetLayer",
+             "totalUtteranceDuration", "who"].includes(key)) {
+            return undefined;
+        }
+        if (key == "layers" && Array.isArray(value)) {
+            return undefined;
+        }
+        if (["participantQuery", "transcriptQuery"].includes(key) && value) {
+            return value.replaceAll(/"/g, "'");
+        }
+        if (["participantDescription", "participantCount",
+             "transcriptDescription", "transcriptCount"].includes(key) && !value) {
+            return undefined;
+        }
+        if (typeof value === "undefined") {
+            if (["mainParticipantOnly","onlyAligned","firstMatchOnly","excludeSimultaneousSpeech"].includes(key)) {
+                return false;
+            } else {
+                return "";
+            }
+        } else {
+            return value;
+        }
+    }
+
+    exportHistoryItem(historyItem: SearchHistoryItem): void {
+        this.updateTask(historyItem, historyItem.task.threadId).then(() => {
+            const jsonString = JSON.stringify(historyItem, this.replacer, 2);
+            this.exportUrl = this.sanitizer.sanitize(SecurityContext.HTML, 'data:application/json;charset=UTF-8,' + encodeURIComponent(jsonString));
+            this.exportName = historyItem.task.threadName + '.json';
+            setTimeout(() => this.exportAnchor.nativeElement.click(), 50);
+        });
+    }
+
+    exportHistory(): void {
+        const lastHistoryItem = this.history[this.history.length-1];
+        this.updateTask(lastHistoryItem, lastHistoryItem.task.threadId).then(() => {
+            const jsonString = JSON.stringify(this.history, this.replacer, 2);
+            this.exportUrl = this.sanitizer.sanitize(SecurityContext.HTML, 'data:application/json;charset=UTF-8,' + encodeURIComponent(jsonString));
+            this.exportName = 'search-history-' + new Date().toISOString().slice(0,10) + '.json';
+            setTimeout(() => this.exportAnchor.nativeElement.click(), 50);
+        });
+    }
+
+    deleteHistoryItem(historyItem: SearchHistoryItem): void {
+        this.history = this.history.filter(x => x.task.threadId !== historyItem.task.threadId);
+        sessionStorage.setItem("searchHistory", JSON.stringify(this.history));
+        if (!this.history.length) {
+            delete this.tabs["History"];
+            this.tabLabels.pop();
+        }
+    }
+
+    deleteHistory(): void {
+        this.history = this.history.filter(x => false);
+        sessionStorage.removeItem("searchHistory");
+        delete this.tabs["History"];
+        this.tabLabels.pop();
     }
 
     transcriptQueryIncludingParticipantConditions(): string {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { environment } from '../environments/environment';
 import { Router, NavigationEnd } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -12,6 +12,7 @@ import { LabbcatService } from 'labbcat-common';
 export class AppComponent {
     title = "";
     production = environment.production;
+    searchHistoryThreads: string[];
     constructor(
         private router: Router,
         private titleService: Title,
@@ -42,6 +43,13 @@ export class AppComponent {
                 }
             }
         });
+    }
+
+    ngOnInit(): void {
+        const searchHistory = JSON.parse(sessionStorage.getItem("searchHistory"));
+        if (searchHistory) {
+            this.searchHistoryThreads = searchHistory.map(x => x.task.threadId);
+        }
     }
 
     setPageTitle(pageTitle: string) {
