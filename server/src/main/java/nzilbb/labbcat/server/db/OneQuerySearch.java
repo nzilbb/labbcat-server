@@ -1899,6 +1899,8 @@ public class OneQuerySearch extends SearchTask {
     try (PreparedStatement sqlMultilineMatch = connection.prepareStatement(
            "SET default_regex_flags='MULTILINE'")) {
       sqlMultilineMatch.executeUpdate();
+    } catch (SQLException x) {
+      setStatus("Can't support multiline labels: " + x.getMessage());
     }
 
     // generate an SQL statement from the search matrix
