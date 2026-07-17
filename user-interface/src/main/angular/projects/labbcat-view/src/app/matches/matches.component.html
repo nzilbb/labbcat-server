@@ -152,6 +152,7 @@
     <fieldset>
       <legend i18n>CSV columns</legend>
       <div class="csv-checkboxes">
+        <div class="csv-options-wrapper">
         <fieldset class="csv-options">
           <legend i18n="csv options title" class="header">Fields</legend>
           <label i18n-title title="Title of this LaBB-CAT database - always exported">
@@ -161,13 +162,15 @@
                    [disabled]="precheckedCsvOptions.includes('labbcat_title')">
             <input type="hidden" name="csv_option" value="labbcat_title"
                    *ngIf="precheckedCsvOptions.includes('labbcat_title')">
-            <span i18n="csv options">Database title</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Database title</span>
+            <span *ngIf="displayExportNames" i18n="csv options">Title</span>
           </label>
           <label i18n-title title="This database's LaBB-CAT version">
             <input type="checkbox" name="csv_option"
                    value="labbcat_version"
                    [checked]="precheckedCsvOptions.includes('labbcat_version')">
-            <span i18n="csv options">LaBB-CAT version</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">LaBB-CAT version</span>
+            <span *ngIf="displayExportNames" i18n="csv options">Version</span>
           </label>
           <label i18n-title title="Version of the corpus data - always exported">
             <input type="checkbox" name="csv_option"
@@ -176,7 +179,8 @@
                    [disabled]="precheckedCsvOptions.includes('data_version')">
             <input type="hidden" name="csv_option" value="data_version"
                    *ngIf="precheckedCsvOptions.includes('data_version')">
-            <span i18n="csv options">Data version</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Data version</span>
+            <span *ngIf="displayExportNames" i18n="csv options">DataVersion</span>
           </label>
           <label i18n-title title="Identifier for this search - always exported">
             <input type="checkbox" name="csv_option"
@@ -186,36 +190,42 @@
             <input type="hidden" name="csv_option"
                    value="collection_name"
                    *ngIf="precheckedCsvOptions.includes('collection_name')">
-            <span i18n="csv options">Search name</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Search name</span>
+            <span *ngIf="displayExportNames" i18n="csv options">SearchName</span>
           </label>
           <label i18n-title title="Result number">
             <input type="checkbox" name="csv_option"
                    value="result_number"
                    [checked]="precheckedCsvOptions.includes('result_number')">
-            <span i18n="csv options">Result number</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Result number</span>
+            <span *ngIf="displayExportNames" i18n="csv options">Number</span>
           </label>
           <label i18n-title title="Start time of the transcript relative to the beginning of the whole episode">
             <input type="checkbox" name="csv_option"
                    value="series_offset"
                    [checked]="precheckedCsvOptions.includes('series_offset')">
-            <span i18n="csv options">Episode offset</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Episode offset</span>
+            <span *ngIf="displayExportNames" i18n="csv options">SeriesOffset</span>
           </label>
           <label i18n-title title="End time of the transcript relative to the beginning of the whole episode">
             <input type="checkbox" name="csv_option"
                    value="series_length"
                    [checked]="precheckedCsvOptions.includes('series_length')">
-            <span i18n="csv options">Episode length</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Episode length</span>
+            <span *ngIf="displayExportNames" i18n="csv options">SeriesLength</span>
           </label>
           <label i18n-title title="Start time of the utterance relative to the beginning of the transcript">
             <input type="checkbox" name="csv_option"
                    value="line_time"
                    [checked]="precheckedCsvOptions.includes('line_time')">
-            <span i18n="csv options">Line start</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Line start</span>
+            <span *ngIf="displayExportNames" i18n="csv options">Line</span>
           </label>
           <label i18n-title title="End time of the utterance relative to the beginning of the transcript">
             <input type="checkbox" name="csv_option" value="line_end_time"
                    [checked]="precheckedCsvOptions.includes('line_end_time')">
-            <span i18n="csv options">Line end</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Line end</span>
+            <span *ngIf="displayExportNames" i18n="csv options">LineEnd</span>
           </label>
           <label i18n-title title="Unique identifier for the match - always exported">
             <input type="checkbox" name="csv_option"
@@ -224,7 +234,8 @@
                    [disabled]="precheckedCsvOptions.includes('match')">
             <input type="hidden" name="csv_option" value="match"
                    *ngIf="precheckedCsvOptions.includes('match')">
-            <span i18n="csv options">Match ID</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Match ID</span>
+            <span *ngIf="displayExportNames" i18n="csv options">MatchId</span>
           </label>
           <label i18n-title title="URL for the match - always exported">
             <input type="checkbox" name="csv_option"
@@ -258,6 +269,14 @@
             <span i18n="csv options">After Match</span>
           </label>
         </fieldset>
+          <fieldset class="csv-controls">
+            <label i18n-title title="Display field names as they appear in the exported CSV">
+              <input type="checkbox" name="displayExportNames"
+                [checked]="displayExportNames" (change)="toggleExportNames()">
+              <span i18n>Show export names</span>
+            </label>
+          </fieldset>
+        </div>
         <!-- TODO disable segment layer anchoring when segment is targeted -->
         <lib-layer-checkboxes
           name="csv_layer"
