@@ -236,11 +236,26 @@
                    *ngIf="precheckedCsvOptions.includes('word_url')">
             <span i18n="csv options">URL</span>
           </label>
-          <label i18n-title title="The transcription of the match and its surrounding context">
+          <label i18n-title title="The transcription of the context before the match">
             <input type="checkbox" name="csv_option"
                    value="result_text"
-                   [checked]="precheckedCsvOptions.includes('result_text')">
+                   (change)="resultText = !resultText"
+                   [checked]="precheckedCsvOptions.includes('result_text') && resultText">
+            <span i18n="csv options">Before Match</span>
+          </label>
+          <label i18n-title title="The transcription of the match">
+            <input type="checkbox" name="csv_option"
+                   value="result_text"
+                   (change)="resultText = !resultText"
+                   [checked]="precheckedCsvOptions.includes('result_text') && resultText">
             <span i18n="csv options">Text</span>
+          </label>
+          <label i18n-title title="The transcription of the context after the match">
+            <input type="checkbox" name="csv_option"
+                   value="result_text"
+                   (change)="resultText = !resultText"
+                   [checked]="precheckedCsvOptions.includes('result_text') && resultText">
+            <span i18n="csv options">After Match</span>
           </label>
         </fieldset>
         <!-- TODO disable segment layer anchoring when segment is targeted -->
