@@ -58,9 +58,14 @@
     flex-direction: column;
     margin-bottom: 2px;
     flex-grow: 1;
+    padding: 0;
+    span {
+        padding-left: 4px;
+    }
 }
 .csv-options label {
     white-space: nowrap;
+    padding: 1px;
 }
 .csv-controls {
     padding: 0;
