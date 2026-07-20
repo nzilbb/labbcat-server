@@ -252,21 +252,24 @@
                    value="result_text"
                    (change)="resultText = !resultText"
                    [checked]="precheckedCsvOptions.includes('result_text') && resultText">
-            <span i18n="csv options">Before Match</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Preceding context</span>
+            <span *ngIf="displayExportNames" i18n="csv options">Before Match</span>
           </label>
           <label i18n-title title="The transcription of the match">
             <input type="checkbox" name="csv_option"
                    value="result_text"
                    (change)="resultText = !resultText"
                    [checked]="precheckedCsvOptions.includes('result_text') && resultText">
-            <span i18n="csv options">Text</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Transcript text</span>
+            <span *ngIf="displayExportNames" i18n="csv options">Text</span>
           </label>
           <label i18n-title title="The transcription of the context after the match">
             <input type="checkbox" name="csv_option"
                    value="result_text"
                    (change)="resultText = !resultText"
                    [checked]="precheckedCsvOptions.includes('result_text') && resultText">
-            <span i18n="csv options">After Match</span>
+            <span *ngIf="!displayExportNames" i18n="csv options">Following context</span>
+            <span *ngIf="displayExportNames" i18n="csv options">After Match</span>
           </label>
         </fieldset>
           <fieldset class="csv-controls">
