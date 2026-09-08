@@ -569,7 +569,7 @@ public class TableServletBase extends APIRequestHandler {
   /**
    * Creates a 'mutable' copy of the JSON object, to which attributes can be added.
    * @param json The object to copy.
-   * @param excludeAttributen The name of an attribute to exclude from the copy, which
+   * @param excludeAttribute The name of an attribute to exclude from the copy, which
    * can be null
    * @return A builder that already has the given object's attributes added.
    */
@@ -641,6 +641,7 @@ public class TableServletBase extends APIRequestHandler {
             // return a copy of it, which we might add stuff to:
             JsonObjectBuilder jsonResult = createMutableCopy(
               json, "_changed"); // exclude _changed flag added by client
+            JsonObjectBuilder jsonIncludingKey = createMutableCopy(json, null);
           
             StringBuffer key = new StringBuffer();
             try {
@@ -662,16 +663,33 @@ public class TableServletBase extends APIRequestHandler {
                     try {
                       if (rsAutoKey.next()) {
                         // generate the value
-                        String value = rsAutoKey.getString(1);
-                        // put it into the INSERT statement
-                        sql.setString(c++, value);
-                        if (dbKeys == urlKeys) {
-                          // add it to the key (for error reporting)
-                          key.append("/");
-                          key.append(value);
+                        try {
+                          int value = rsAutoKey.getInt(1);
+                          // put it into the INSERT statement
+                          sql.setInt(c++, value);
+                          if (dbKeys == urlKeys) {
+                            // add it to the key (for error reporting)
+                            key.append("/");
+                            key.append(value);
+                          }
+                          // add it to the JSON object, for returning to the caller
+                          jsonResult.add(attribute, value);
+                          // and for further processing
+                          jsonIncludingKey.add(attribute, value);
+                        } catch(Exception exception) { // key is not a number
+                          String value = rsAutoKey.getString(1);
+                          // put it into the INSERT statement
+                          sql.setString(c++, value);
+                          if (dbKeys == urlKeys) {
+                            // add it to the key (for error reporting)
+                            key.append("/");
+                            key.append(value);
+                          }
+                          // add it to the JSON object, for returning to the caller
+                          jsonResult.add(attribute, value);
+                          // and for further processing
+                          jsonIncludingKey.add(attribute, value);
                         }
-                        // add it to the JSON object, for returning to the caller
-                        jsonResult.add(attribute, value);
                       }
                     } finally {
                       rsAutoKey.close();
@@ -723,6 +741,9 @@ public class TableServletBase extends APIRequestHandler {
                       // add the key attribute
                       rsLastId.next();
                       jsonResult.add(columnToAttribute.get(autoKey), rsLastId.getLong(1));
+                      // and for further processing
+                      jsonIncludingKey.add(
+                        columnToAttribute.get(autoKey), rsLastId.getLong(1));
                     } finally {
                       rsLastId.close();
                       sqlLastId.close();
@@ -730,7 +751,7 @@ public class TableServletBase extends APIRequestHandler {
                   }
                 
                   // give subclasses an opportunity to process the new record
-                  editNewRecord(json, jsonResult, connection);
+                  editNewRecord(jsonIncludingKey.build(), jsonResult, connection);
                 
                   checkCanDelete(null, json, jsonResult, connection);
                 

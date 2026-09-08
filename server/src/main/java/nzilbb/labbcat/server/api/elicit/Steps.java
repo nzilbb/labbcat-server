@@ -81,12 +81,10 @@ public class Steps extends APIRequestHandler { // TODO automated tests
       try (Connection db = newConnection()) {
         try (PreparedStatement sqlTask = db.prepareStatement(
                "SELECT task_id, task_name, description,"
-               +" corpus.corpus_name AS corpus,"
-               + " transcript_type.transcript_type AS transcriptType,"
+               +" corpus_name AS corpus,"
+               +" transcript_type AS transcriptType,"
                +" preamble, consent, endUrl"
                +" FROM elicitation_task"
-               +" INNER JOIN corpus ON elicitation_task.corpus_id = corpus.corpus_id"
-               +" INNER JOIN transcript_type"
                +" ON elicitation_task.type_id = transcript_type.type_id"
                +" WHERE task_name = ?")) {
           sqlTask.setString(1, task);

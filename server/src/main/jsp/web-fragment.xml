@@ -187,6 +187,18 @@
   <servlet><servlet-name>admin/serialization.jsp</servlet-name><jsp-file>/jsp/admin/serialization.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/serialization.jsp</servlet-name><url-pattern>/api/admin/serialization</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>admin/elicit/tasks.jsp</servlet-name><jsp-file>/jsp/admin/elicit/tasks.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/elicit/tasks.jsp</servlet-name><url-pattern>/api/admin/elicit/tasks/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/elicit/resources.jsp</servlet-name><jsp-file>/jsp/admin/elicit/resources.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/elicit/resources.jsp</servlet-name><url-pattern>/api/admin/elicit/resources/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/elicit/options/transcript.jsp</servlet-name><jsp-file>/jsp/admin/elicit/options/transcript.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/elicit/options/transcript.jsp</servlet-name><url-pattern>/api/admin/elicit/options/transcript/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>admin/elicit/options/participant.jsp</servlet-name><jsp-file>/jsp/admin/elicit/options/participant.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/elicit/options/participant.jsp</servlet-name><url-pattern>/api/admin/elicit/options/participant/*</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>admin/elicit/stimulus.jsp</servlet-name><jsp-file>/jsp/admin/elicit/stimulus.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/elicit/stimulus.jsp</servlet-name><url-pattern>/api/admin/elicit/stimulus/*</url-pattern></servlet-mapping>
 
