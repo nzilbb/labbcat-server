@@ -1,5 +1,5 @@
 //
-// Copyright 2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2025-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -98,7 +98,7 @@ public interface APIRequestContext {
   public String getRequestHeader(String name);
   
   /**
-   * Add the fiven given header to the response.
+   * Add the given given header to the response.
    * @param name Header name.
    * @param value Header value.
    */
