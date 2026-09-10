@@ -32,6 +32,7 @@ import { AdminCategoriesComponent } from './admin-categories/admin-categories.co
 import { AdminAgreementComponent } from './admin-agreement/admin-agreement.component';
 import { AdminFormattersComponent } from './admin-formatters/admin-formatters.component';
 import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
+import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
 
 @NgModule({
     declarations: [
@@ -58,7 +59,8 @@ import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
         AdminCategoriesComponent,
         AdminAgreementComponent,
         AdminFormattersComponent,
-        AdminUpgradeComponent
+        AdminUpgradeComponent,
+        AdminTasksComponent
     ],
     imports: [
         BrowserModule,
@@ -106,6 +108,8 @@ import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
             { path: 'admin/formatters', component: AdminFormattersComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/upgrade', component: AdminUpgradeComponent},
+            { path: 'admin/tasks', component: AdminTasksComponent,
+              canDeactivate: [PendingChangesGuard]},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)

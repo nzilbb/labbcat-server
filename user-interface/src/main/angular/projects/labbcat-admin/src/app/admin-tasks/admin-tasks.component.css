@@ -1,0 +1,55 @@
+@import 'ckeditor5/ckeditor5.css';
+
+input, select { width: 95%; }
+textarea, .end-url input { width: 100%; }
+
+/* when entering details for a new task, the description field is visible, but otherwise not */
+.show-description {
+    opacity: 1;
+    height: 42px;
+    transition: height 0.5s, opacity 0.5s;
+}
+.hide-description {
+    opacity: 0;
+    height: 0px;    
+    transition: height 0.5s, opacity 0.5s;
+}
+
+.task-list {
+    display: flex;
+    flex-direction: column;
+}
+
+div.controls {
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--theme-text-color);
+}
+.description.new-task {
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--theme-text-color);
+}
+
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    .task-name legend, .corpus-name legend, .transcript-type legend,
+    .description.new-task legend {
+        display: none;
+    }
+    .task-list {
+        display: grid;
+        width: auto;
+        grid-column-gap: 5px;
+        grid-row-gap: 0px;
+        grid-template-columns: repeat(4, auto);
+    }
+    .description, .preamble, .consent, .end-url, div.controls, app-wait {
+        grid-column: 1 / -1;
+    }
+    .description textarea, .preamble textarea, .consent textarea,
+    .end-url input {
+        width: 100%;
+    }
+    
+}

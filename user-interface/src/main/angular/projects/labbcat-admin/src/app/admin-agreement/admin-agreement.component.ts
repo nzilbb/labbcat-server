@@ -1,4 +1,5 @@
 import { Component, ViewEncapsulation, OnInit } from '@angular/core';
+import { environment } from '../../environments/environment';
 import { ClassicEditor, UploadAdapter, FileRepository,
          Essentials, Heading, Bold, Italic, Code, Strikethrough, Superscript,
          Link, List, Alignment, HorizontalLine, Indent,
@@ -80,7 +81,10 @@ export class AdminAgreementComponent extends AdminComponent implements OnInit {
             BlockQuote, Table, TableCellProperties, TableProperties, TableToolbar, TableCaption,
             Mention, Paragraph, Undo
         ],
-        extraPlugins: [ LabbcatUploadAdapterPlugin ]
+        extraPlugins: [ LabbcatUploadAdapterPlugin ],
+        LabbcatUploadAdapterPlugin: {
+            uploadBaseUrl: environment.baseUrl + "agreement/"
+        }
         // mention: {
         //     Mention configuration
         // }

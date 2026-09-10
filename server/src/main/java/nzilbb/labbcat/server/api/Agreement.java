@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.*;
@@ -247,8 +248,8 @@ public class Agreement extends APIRequestHandler {
       }
       // take the first file we find
       Optional anyFileValue = parameters.keySet().stream()
-        .map(key->parameters.get(key))
-        .filter(value->value instanceof File)
+        .map(key->parameters.getFile(key))
+        .filter(file->file != null)
         .findAny();
       if (!anyFileValue.isPresent()) { // file not being uploaded
         contentType.accept("application/json");
@@ -279,7 +280,9 @@ public class Agreement extends APIRequestHandler {
         contentEncoding.accept("UTF-8");
         JsonWriter writer = Json.createWriter(new OutputStreamWriter(out, "UTF-8"));
         JsonObjectBuilder model = Json.createObjectBuilder();
-        model.add("url", "agreement"+pathInfo.replaceAll("[^/]+$", file.getName()));
+        model.add(
+          "url", getContext().getBaseUrl()
+          +"/agreement"+pathInfo.replaceAll("[^/]+$", file.getName()));
         writer.writeObject(successResult(model.build(), null));
         writer.close();
         

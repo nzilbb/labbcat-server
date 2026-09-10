@@ -195,10 +195,14 @@ public class Tasks extends TableServletBase {
           errors = new Vector<String>() {{
               add(localize("Task name cannot be blank.")); }};
         }
-        final String task_name = record.getString("task_name").trim();
+        String task_name = record.getString("task_name").trim();
+        int task_id = !record.containsKey("task_id")?-1 // new record
+          :record.getInt("task_id"); // existing record
         try (PreparedStatement sqlCount = connection.prepareStatement(
-               "SELECT task_id FROM elicitation_task WHERE task_name = ?")){
+               "SELECT task_id FROM elicitation_task"
+               +" WHERE task_name = ? AND task_id != ?")) {
           sqlCount.setString(1, task_name);
+          sqlCount.setInt(2, task_id);
           try(ResultSet rsCount = sqlCount.executeQuery()) {
             if (rsCount.next()) {
               errors = new Vector<String>() {{

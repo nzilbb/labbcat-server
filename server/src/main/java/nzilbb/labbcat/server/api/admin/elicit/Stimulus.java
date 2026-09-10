@@ -141,11 +141,8 @@ public class Stimulus extends APIRequestHandler {
           return null;
         }
         Optional anyFileValue = parameters.keySet().stream()
-          .map(key->parameters.get(key))
-          .filter(value->value instanceof Vector)
-          .filter(value->((Vector)value).size() > 0)
-          .map(value->((Vector)value).firstElement())
-          .filter(firstValue->firstValue instanceof File)
+          .map(key->parameters.getFile(key))
+          .filter(file->file != null)
           .findAny();
         if (!anyFileValue.isPresent()) {
           httpStatus.accept(SC_BAD_REQUEST);
@@ -165,6 +162,7 @@ public class Stimulus extends APIRequestHandler {
             // return information
             JsonObjectBuilder jsonResult = Json.createObjectBuilder()
               .add("file_name", stimulusFile.getName())
+              .add("url", getContext().getBaseUrl()+"/elicit/"+stimulusFile.getName())
               .add("file_size", ""+stimulusFile.length())
               .add("file_content_type", mimeType);
             
