@@ -85,7 +85,6 @@ public class Steps extends APIRequestHandler { // TODO automated tests
                +" transcript_type AS transcriptType,"
                +" preamble, consent, endUrl"
                +" FROM elicitation_task"
-               +" ON elicitation_task.type_id = transcript_type.type_id"
                +" WHERE task_name = ?")) {
           sqlTask.setString(1, task);
           try (ResultSet rsTask = sqlTask.executeQuery()) {
@@ -94,7 +93,15 @@ public class Steps extends APIRequestHandler { // TODO automated tests
               return failureResult("Invalid ID: {0}", task);
             } else {
               int taskId = rsTask.getInt("task_id");
-              JsonObjectBuilder model = Json.createObjectBuilder();
+              JsonObjectBuilder model = Json.createObjectBuilder()
+                .add("task_id", rsTask.getInt("task_id"))
+                .add("task_name", rsTask.getString("task_name"))
+                .add("description", rsTask.getString("description"))
+                .add("corpus", rsTask.getString("corpus"))
+                .add("transcriptType", rsTask.getString("transcriptType"))
+                .add("preamble", rsTask.getString("preamble"))
+                .add("consent", rsTask.getString("consent"))
+                .add("endUrl", rsTask.getString("endUrl"));
                 
               try (PreparedStatement sqlTopSteps = db.prepareStatement(
                      "SELECT * FROM elicitation_step"

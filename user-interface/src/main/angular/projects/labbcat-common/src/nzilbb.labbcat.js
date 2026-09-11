@@ -6477,6 +6477,121 @@
     }
     
     /**
+     * Upload a full task definition to be added/updated from a JSON file.
+     * @param [file|string] file The task definition file, the name of which must end
+     *       in <q>.json</q>. The name of the file (without the .json
+     *       extension) is taken as the name of the task being
+     *       uploaded. If there is already a task with that name, it
+     *       will be <u>replaced</u> with the task in the
+     *       file. Otherwise, a new task is created.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute, "task_id",
+     * which identifies the resulting task.
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     * @see LabbcatAdmin#createElicitationTask
+     * @see LabbcatAdmin#readElicitationTasks
+     * @see LabbcatAdmin#updateElicitationTask
+     * @see LabbcatAdmin#deleteElicitationTask
+     */
+    elicitatationTaskUpload(file, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("elicitatationTaskUpload(" + file + ")");
+      }
+      // create form
+      var fd = new FormData();
+      if (!runningOnNode) {
+        
+	fd.append("file", file);
+        
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "elicitatationTaskUpload";
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	
+	xhr.open("POST", this.baseUrl + "api/admin/elicit/task/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var fileName = file.replace(/.*\//g, "");
+        if (exports.verbose) console.log("fileName: " + fileName);
+
+	fd.append(
+          "file", 
+	  fs.createReadStream(file).on('error', function(){
+	    onResult(
+              null, ["Invalid results: " + resultsName], [], "resultsUpload", resultsName);
+	  }), fileName);
+        
+	var urlParts = parseUrl(this.baseUrl + "api/admin/elicit/task/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/admin/elicit/task/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "elicitatationTaskUpload", fileName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "elicitatationTaskUpload", fileName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    }
+    
+    /**
      * Reads a list of elicitation task resources.
      * @see LabbcatAdmin#createElicitationTaskResource
      * @see LabbcatAdmin#updateTask

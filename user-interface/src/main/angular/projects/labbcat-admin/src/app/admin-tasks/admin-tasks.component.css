@@ -2,6 +2,7 @@
 
 input, select { width: 95%; }
 textarea, .end-url input { width: 100%; }
+input[type=file] { width: 50%; }
 
 /* when entering details for a new task, the description field is visible, but otherwise not */
 .show-description {

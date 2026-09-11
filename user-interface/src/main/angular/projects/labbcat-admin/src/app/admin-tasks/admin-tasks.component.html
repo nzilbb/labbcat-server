@@ -16,9 +16,17 @@
     </select>
   </span>
   <span class="buttons" tabindex="5">
-    <lib-button action="create" [processing]="creating"
+    <lib-button action="create" [processing]="creating" *ngIf="!fileSelector"
                 (press)="name.reportValidity() && corpus.reportValidity() && transcript_type.reportValidity() && createRow(name.value, description.value, corpus.value, transcript_type.value) && name.value = description.value = corpus.selectedIndex = transcript_type.selectedIndex = '';"
                 i18n-title title="Add new task"></lib-button>
+    <input *ngIf="fileSelector"
+           type="file" id="taskFile"
+           (change)="selectFile($event.target.files)" autofocus>
+    <lib-button [processing]="uploading" [disabled]="newTaskName"
+                i18n-label label="Upload"
+                (press)="startUpload()"
+                i18n-title title="Upload a task from a .json file"
+                img="upload.svg" icon="⬆"></lib-button>
   </span>
   <span class="description new-task" i18n-title title="A description of the task"><legend i18n>Description</legend>
     <textarea #description i18n-placeholder placeholder="Description" tabindex="4"
@@ -28,14 +36,15 @@
   <ng-container class="item" *ngFor="let task of rows">
     <span class="task-name" i18n-title title="Name"><legend i18n>Name</legend>
       <input type="text" required i18n-placeholder placeholder="Name"
+             (change)="onChange(task)"
              [(ngModel)]="task.task_name"></span>
     <span class="corpus-name" i18n-title title="The corpus for elicited transcripts/recordings"><legend i18n>Corpus</legend>
-      <select [(ngModel)]="task.corpus_name">
+      <select [(ngModel)]="task.corpus_name" (change)="onChange(task)">
         <option *ngFor="let corpus of corpora" value="{{corpus.corpus_name}}">{{corpus.corpus_name}}</option>
       </select>
     </span>
     <span class="transcript-type" i18n-title title="The transcript type for elicited transcripts/recordings"><legend i18n>Transcript Type</legend>
-      <select [(ngModel)]="task.transcript_type">
+      <select [(ngModel)]="task.transcript_type" (change)="onChange(task)">
         <option *ngFor="let transcriptType of transcriptTypes" value="{{transcriptType.label}}">{{transcriptType.description}}</option>
       </select>
     </span>
@@ -59,7 +68,7 @@
     <span class="end-url" i18n-title title="Optional URL to send participants to after they finish the task -
  {participant}, if present in the URL, is replaced by the participant's ID"><legend i18n>End URL</legend>
       <input type="url"
-             [(ngModel)]="task.endUrl"
+             [(ngModel)]="task.endUrl" (change)="onChange(task)"
              i18n-placeholder placeholder="Optional URL to send participants to after they finish the task -
  {participant}, if present in the URL, is replaced by the participant's ID">
     </span>

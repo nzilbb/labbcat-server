@@ -97,7 +97,11 @@ export class AdminTasksComponent extends AdminComponent implements OnInit {
     newTaskName = "";
 
     baseUrl = environment.baseUrl;
-
+    
+    fileSelector = false;
+    taskFile: File;
+    uploading = false;
+    percentCompleted: number;
 
     constructor(
         labbcatService: LabbcatService,
@@ -217,4 +221,67 @@ export class AdminTasksComponent extends AdminComponent implements OnInit {
         } // next row
     }
     
+    startUpload() {
+        this.fileSelector = true;
+        window.setTimeout(()=>{
+            document.getElementById("taskFile").click();
+        }, 100);
+    }
+    /** Called when a task file is selected; parses the file to determine CSV fields. */
+    selectFile(files: File[]): void {
+        if (files.length == 0) {
+            this.fileSelector = false;
+            return;
+        }
+        this.taskFile = files[0]
+        if (!this.taskFile.name.endsWith(".json")) {
+            this.messageService.error("File must be a .json file exported from LaBB-CAT"); // TODO i18n
+            this.taskFile = null;
+            this.fileSelector = false;
+            return;
+        }
+        const fileTaskName = this.taskFile.name.replace(/\.json$/,"");
+        let existingTask = null;
+        for (let task of this.rows) {
+            if (task.task_name == fileTaskName) {
+                existingTask = task;
+                break;
+            }
+        }
+        if (existingTask) {
+            if (!confirm("There is an existing task with this name, would you like to replace it?")) {
+                this.messageService.info(
+                    "If you would like to upload this task with a new name, rename the file, and then upload it.");
+                this.taskFile = null;
+                this.fileSelector = false;
+                return;
+            }
+        }
+        this.upload();
+    }
+    
+    upload() {
+        this.uploading = true;
+        this.labbcatService.labbcat.elicitatationTaskUpload(
+            this.taskFile, (result, errors, messages) => {
+                this.uploading = false;
+                this.taskFile = null;
+                this.fileSelector = false;
+                if (errors) {
+                    for (let message of errors) {
+                        this.messageService.error(message);
+                    }
+                }
+                if (messages) {
+                    for (let message of messages) {
+                        this.messageService.info(message);
+                    }
+                }
+                if (result && result.task_id) {
+                    this.readRows();
+                }
+            }, (event) => {
+                this.percentCompleted = Math.round(100 * event.loaded / event.total);
+            });
+    }
 }

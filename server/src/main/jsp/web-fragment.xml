@@ -202,6 +202,9 @@
   <servlet><servlet-name>admin/elicit/stimulus.jsp</servlet-name><jsp-file>/jsp/admin/elicit/stimulus.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/elicit/stimulus.jsp</servlet-name><url-pattern>/api/admin/elicit/stimulus/*</url-pattern></servlet-mapping>
 
+  <servlet><servlet-name>admin/elicit/task/upload.jsp</servlet-name><jsp-file>/jsp/admin/elicit/task/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/elicit/task/upload.jsp</servlet-name><url-pattern>/api/admin/elicit/task/upload</url-pattern></servlet-mapping>
+
   <servlet><servlet-name>elicit/steps.jsp</servlet-name><jsp-file>/jsp/elicit/steps.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>elicit/steps.jsp</servlet-name><url-pattern>/api/elicit/steps</url-pattern></servlet-mapping>
   

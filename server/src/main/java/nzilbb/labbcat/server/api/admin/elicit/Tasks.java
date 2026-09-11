@@ -156,7 +156,7 @@ public class Tasks extends TableServletBase {
         add(new DeleteCheck(
               "SELECT COUNT(*) FROM elicitation_step WHERE task_id = ?",
               "task_id",
-              "There are still steps defined for this task. Tasks cannot be deleted untill all steps are deleted."));
+              "There are still steps defined for this task. Tasks cannot be deleted until all steps are deleted."));
       }};
     beforeDelete = new Vector<DeleteCheck>() {{
         add(new DeleteCheck("DELETE FROM elicitation_resource_string WHERE task_id = ?",

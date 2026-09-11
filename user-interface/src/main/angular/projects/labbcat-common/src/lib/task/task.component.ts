@@ -94,7 +94,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
                 // this keeps the thread and any resources it's holding alive until nobody
                 // is interested
                 
-                // set timeout for next check...
+                // set timeout for next check... // TODO make sure this keeps polling through outages
                 this.timeout = setTimeout(()=>{
                     // has the thread we're monitoring changed?
                     if (task.threadId == this.threadId) { // the same thread
