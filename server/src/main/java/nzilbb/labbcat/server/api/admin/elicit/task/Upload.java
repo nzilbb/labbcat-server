@@ -26,8 +26,8 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Optional;
@@ -36,14 +36,15 @@ import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonException;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.StoreException;
 import nzilbb.labbcat.server.api.APIRequestHandler;
 import nzilbb.labbcat.server.api.RequestParameters;
 import nzilbb.labbcat.server.api.RequiredRole;
+import nzilbb.labbcat.server.api.admin.elicit.Tasks;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.util.IO;
 
@@ -257,7 +258,12 @@ public class Upload extends APIRequestHandler {
                 } // close sql
               } // not updatedExistingTask
 
-              // resource strings
+              // resource strings ...
+              
+              // first, default strings with help text etc.
+              Tasks.CreateDefaultResources(connection, task_id);
+
+              // second, update strings from json
               try (PreparedStatement sql = connection.prepareStatement(
                      "REPLACE INTO elicitation_resource_string"
                      +" (task_id, resource_id, message) VALUES (?,?,?)")) {
