@@ -32,21 +32,22 @@ export class ActivityService {
     }
     
     poll(): void {
-        const activity = this.labbcatService.labbcat.createRequest(
-            "activity", null, (model, errors, messages) => {
-                this.otherUsersHere = [];
-                if (model) {
-                    this.otherUsersHere = model;
-                } else {
+        if (this.resource) {
+            const activity = this.labbcatService.labbcat.createRequest(
+                "activity", null, (model, errors, messages) => {
                     this.otherUsersHere = [];
-                }
-            },
-            `${this.environment.baseUrl}api/admin/activity?resource=${this.resource}&viewport=${this.viewport}`);
-        try {
-            console.log("activity " + this.resource);
-            activity.send();
-        } catch (x) {
-            console.error(x);
+                    if (model) {
+                        this.otherUsersHere = model;
+                    } else {
+                        this.otherUsersHere = [];
+                    }
+                },
+                `${this.environment.baseUrl}api/admin/activity?resource=${this.resource}&viewport=${this.viewport}`);
+            try {
+                activity.send();
+            } catch (x) {
+                console.error(x);
+            }
         }
     }
 }
