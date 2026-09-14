@@ -77,11 +77,11 @@
                 i18n-label label="Define Steps"
                 i18n-title title="Define individual steps for this task"
                 img="cog.svg" icon="⚙"></lib-link>
-      <lib-link [href]="baseUrl+'admin/taskParticipantAttributes?task_id='+task.task_id"
+      <lib-link [routerLink]="['..','task','attributes','participant',task.task_id]"
                 i18n-label label="Participant Attributes"
                 i18n-title title="Configure available values for participant attributes elicited during the task"
                 img="wrench.svg" icon="🔧"></lib-link>
-      <lib-link [href]="baseUrl+'admin/taskTranscriptAttributes?task_id='+task.task_id"
+      <lib-link [routerLink]="['..','task','attributes','transcript',task.task_id]"
                 i18n-label label="Transcript Attributes"
                 i18n-title title="Configure available values for transcript attributes elicited during the task"
                 img="wrench.svg" icon="🔧"></lib-link>
