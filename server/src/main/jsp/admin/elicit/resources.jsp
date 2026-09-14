@@ -1,4 +1,5 @@
 <%@ page info="Elicitation task localization resources" isErrorPage="true"
+    contentType = "application/json;charset=UTF-8"
     import = "nzilbb.labbcat.server.api.admin.elicit.Resources" 
 %><%@ include file="../../base.jsp" %><%{
     Resources handler = new Resources();
