@@ -1,0 +1,22 @@
+<h2 *ngIf="scope == 'transcript'" id="title"><span i18n="Transcript attributes elicited during task XXX">Transcript Attributes elicited during Task</span> {{task_name}}</h2>
+<h2 *ngIf="scope == 'participant'" id="title"><span i18n="Participant attributes elicited during task XXX">Participant Attributes elicited during Task</span> {{task_name}}</h2>
+<lib-wait *ngIf="!rows" [inSitu]="true"></lib-wait>
+<div *ngIf="rows" class="list attribute-list">
+  <div class="item" *ngFor="let attribute of rows">
+    <span class="label">{{attribute.attribute}}<span class="description" *ngIf="attribute.attribute != attribute.description"> ({{attribute.description}})</span></span>
+    <span class="links">
+      <lib-link class="validation"
+                [href]="baseUrl+'admin/task'+linkScope+'AttributeValidation?task_id='+task_id+'&attribute='+attribute.attribute"
+                i18n-label label="Validation"
+                i18n-title title="Script for validating values entered by the participant"
+                img="cog.svg" icon="⚙"></lib-link>
+      <lib-link *ngIf="attribute.subtype == 'select'"
+                class="options"
+                [href]="baseUrl+'admin/task'+linkScope+'AttributeOptions?task_id='+task_id+'&attribute='+attribute.attribute"
+                i18n-label label="Options"
+                i18n-title title="Options available to participants"
+                img="tag.svg" icon="🏷"
+                ></lib-link>
+    </span>
+  </div>
+</div>

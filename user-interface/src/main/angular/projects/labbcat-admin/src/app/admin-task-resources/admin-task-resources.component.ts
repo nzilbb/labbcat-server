@@ -1,7 +1,6 @@
 import { Component, ViewEncapsulation, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
 import { ClassicEditor, UploadAdapter, FileRepository,
          Essentials, Heading, Bold, Italic, Code, Strikethrough, Superscript,
          Link, List, Alignment, HorizontalLine, Indent,
@@ -89,7 +88,6 @@ export class AdminTaskResourcesComponent extends AdminComponent implements OnIni
     task_id: number;
     task_name: string;
     rows: TaskResource[];
-    baseUrl = environment.baseUrl;
 
     constructor(
         labbcatService: LabbcatService,

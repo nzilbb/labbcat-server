@@ -1,0 +1,11 @@
+.attribute-list {
+    max-width: 300px;
+    margin: auto;
+}
+.attribute-list .item {
+    display: flex;
+    flex-direction: row;
+}
+.label {
+    width: 50%;
+}
