@@ -253,6 +253,13 @@ public class Upgrader extends Task {
     } finally {
       runEnd();
       bRunning = true; // leaving it 'running' so that the UI waits for restart
+      try {
+        Thread.sleep(30000); // wait for a while, LaBB-CAT should restart in this time.
+      } catch(Exception exception) {
+      }
+      // If we're still running, it's because Tomcat needs to be manually restarted
+      setStatus("LABB-CAT must be restarted. Please restart Tomcat to continue with the upgrade.");
+
       waitToDie();
       upgrader = null;
     }
