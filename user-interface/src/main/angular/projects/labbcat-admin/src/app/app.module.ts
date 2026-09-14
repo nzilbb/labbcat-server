@@ -33,6 +33,7 @@ import { AdminAgreementComponent } from './admin-agreement/admin-agreement.compo
 import { AdminFormattersComponent } from './admin-formatters/admin-formatters.component';
 import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
 import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
+import { ActivityComponent } from './activity/activity.component';
 
 @NgModule({
     declarations: [
@@ -60,7 +61,8 @@ import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
         AdminAgreementComponent,
         AdminFormattersComponent,
         AdminUpgradeComponent,
-        AdminTasksComponent
+        AdminTasksComponent,
+        ActivityComponent
     ],
     imports: [
         BrowserModule,

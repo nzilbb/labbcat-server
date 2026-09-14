@@ -51,11 +51,12 @@ import nzilbb.labbcat.server.api.RequiredRole;
  *   <dl>
  *    <dt> GET </dt><dd>
  *     <ul>
- *      <li><em> Optional parameter </em>
+ *      <li><em> Optional parameters </em>
  *        <ul>
+ *         <li><em> resource </em> Resource identifier, which defaults to the referer. </li>
  *         <li><em> viewport </em> A unique identifier for the browser window/tab,
  *             allowing users with multiple tabs open to see other tabs in the list
- *             of other users.. </li>
+ *             of other users. </li>
  *        </ul>
  *      </li>
  *      <li><em> Response Body </em> - the standard JSON envelope, returning
@@ -96,7 +97,8 @@ public class Activity extends APIRequestHandler {
           return null;
         }
         // get thread ID if any
-        String resource = requestHeaders.apply("Referer");
+        String resource = Optional.ofNullable(parameters.getString("resource"))
+          .orElse(requestHeaders.apply("Referer"));
         if (resource == null) {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult("Could not determine resource."); // TODO i18n
