@@ -25,7 +25,6 @@ export class ActivityService {
             map((event: NavigationEnd) => event.url)
         );
         this.urlChanges.subscribe((url)=>{
-            console.log("urlChanges " + url);
             this.resource = url;
             this.poll();
         })

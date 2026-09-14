@@ -85,7 +85,7 @@
                 i18n-label label="Transcript Attributes"
                 i18n-title title="Configure available values for transcript attributes elicited during the task"
                 img="wrench.svg" icon="🔧"></lib-link>
-      <lib-link [href]="baseUrl+'admin/taskResources?task_id='+task.task_id"
+      <lib-link [routerLink]="['..','task','resources',''+task.task_id]"
                 i18n-label label="Messages"
                 i18n-title title="Translate or customize messages that may be shown to the participant during the task"
                 img="globe.svg" icon="🌎"></lib-link>

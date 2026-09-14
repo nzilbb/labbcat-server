@@ -1,0 +1,5 @@
+@import 'ckeditor5/ckeditor5.css';
+
+.help {
+    font-style: italic;
+}

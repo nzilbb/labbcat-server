@@ -1,0 +1,20 @@
+<h2 id="title"><span i18n="Messages for task XXX">Messages for Task</span> {{task_name}}</h2>
+<lib-wait *ngIf="!rows" [inSitu]="true"></lib-wait>
+<div *ngIf="rows" class="list resource-list">
+  <div class="item" *ngFor="let resource of rows">
+    <h3 class="resource-id">{{resource.resource_id}}</h3>
+    <p class="help">{{resource.help}}</p>
+    <div class="message">
+      <ckeditor [editor]="Editor"
+                [config]="config"
+                (change)="onChange(resource)"
+                [(ngModel)]="resource.message"></ckeditor>
+    </div>
+  </div>
+  <div class="buttons">
+    <lib-button action="save" [processing]="updating > 0"
+                (press)="updateChangedRows();"
+                *ngIf="changed"
+                i18n-title title="Save all changed records"></lib-button>
+  </div>
+</div>
