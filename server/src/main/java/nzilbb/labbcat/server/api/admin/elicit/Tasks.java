@@ -176,6 +176,96 @@ public class Tasks extends TableServletBase {
    * @throws ValidationException If the record is invalid.
    * @see #createMutableCopy(JsonObject)
    */
+  protected JsonObject validateBeforeCreate(
+    JsonObject record, Connection connection) throws ValidationException {
+    
+    Vector<String> errors = null;
+    try {
+      if (!record.containsKey("task_name") || record.isNull("task_name")) {
+        errors = new Vector<String>() {{
+            add(localize("No task name was provided.")); }};
+      } else {
+        // trim name
+        if (!record.getString("task_name").equals(record.getString("task_name").trim())) {
+          record = createMutableCopy(record, "task_name")
+            .add("task_name", record.getString("task_name").trim())
+            .build();
+        }
+        if (record.getString("task_name").length() == 0) {
+          errors = new Vector<String>() {{
+              add(localize("Task name cannot be blank.")); }};
+        }
+        String task_name = record.getString("task_name").trim();
+        try (PreparedStatement sqlCount = connection.prepareStatement(
+               "SELECT task_id FROM elicitation_task WHERE task_name = ?")) {
+          sqlCount.setString(1, task_name);
+          try(ResultSet rsCount = sqlCount.executeQuery()) {
+            if (rsCount.next()) {
+              errors = new Vector<String>() {{
+                  add(localize("A task with this name already exists: {0}", task_name)); }};
+            }
+          } // close rsCount
+        } // close sqlCount
+      }
+      // validate corpus
+      if (!record.containsKey("corpus_name") || record.isNull("corpus_name")) {
+        errors = new Vector<String>() {{
+            add(localize("No corpus name was provided.")); }};
+      } else {
+        final String corpus_name = record.getString("corpus_name");
+        try (PreparedStatement sqlCount = connection.prepareStatement(
+               "SELECT corpus_id FROM corpus WHERE corpus_name = ?")){
+          sqlCount.setString(1, corpus_name);
+          try(ResultSet rsCount = sqlCount.executeQuery()) {
+            if (!rsCount.next()) {
+              errors = new Vector<String>() {{
+                  add(localize("Invalid corpus: {0}", corpus_name)); }};
+            }
+          } // close rsCount
+        } // close sqlCount
+      }
+      // validate transcript type
+      if (!record.containsKey("transcript_type") || record.isNull("transcript_type")) {
+        errors = new Vector<String>() {{
+            add(localize("No transcript type name was provided.")); }};
+      } else {
+        final String transcript_type = record.getString("transcript_type");
+        try (PreparedStatement sqlCount = connection.prepareStatement(
+               "SELECT type_id FROM transcript_type WHERE transcript_type = ?")){
+          sqlCount.setString(1, transcript_type);
+          try(ResultSet rsCount = sqlCount.executeQuery()) {
+            if (!rsCount.next()) {
+              errors = new Vector<String>() {{
+                  add(localize("Invalid transcript type: {0}", transcript_type)); }};
+            }
+          } // close rsCount
+        } // close sqlCount
+      }
+    } catch (SQLException x) {
+      if (errors == null) errors = new Vector<String>();
+      errors.add(x.toString());
+      // not expecting this, so log it:
+      context.servletLog("Tasks.validateBeforeUpdate: ERROR " + x);
+    } catch (JsonException x) {
+      if (errors == null) errors = new Vector<String>();
+      errors.add(x.toString());
+      // not expecting this, so log it:
+      context.servletLog("Tasks.validateBeforeUpdate: ERROR " + x);
+    }
+    if (errors != null) throw new ValidationException(errors);
+      return record;
+  } // end of validateBeforeUpdate()
+  
+  /**
+   * Validates a record before UPDATEing it.
+   * @param request The request.
+   * @param record The incoming record to validate, to which attributes can be added.
+   * @param connection A connection to the database.
+   * @return A JSON representation of the valid record, which may or may not be the same
+   * object as <var>record</var>.
+   * @throws ValidationException If the record is invalid.
+   * @see #createMutableCopy(JsonObject)
+   */
   protected JsonObject validateBeforeUpdate(
     JsonObject record, Connection connection) throws ValidationException {
     
@@ -196,8 +286,7 @@ public class Tasks extends TableServletBase {
               add(localize("Task name cannot be blank.")); }};
         }
         String task_name = record.getString("task_name").trim();
-        int task_id = !record.containsKey("task_id")?-1 // new record
-          :record.getInt("task_id"); // existing record
+        int task_id = record.getInt("task_id");
         try (PreparedStatement sqlCount = connection.prepareStatement(
                "SELECT task_id FROM elicitation_task"
                +" WHERE task_name = ? AND task_id != ?")) {
@@ -341,156 +430,168 @@ public class Tasks extends TableServletBase {
     }
     
     try { // create resources for the new task
-      try (PreparedStatement sql = connection.prepareStatement(
-             "INSERT INTO elicitation_resource_string"
-             +" (task_id, resource_id, message, help) VALUES (?,?,?,?)")) {
-        sql.setInt(1, jsonIn.getInt("task_id"));
-
-        sql.setString(2, "next"); // ID
-        sql.setString(3, "Next"); // Default
-        sql.setString(4, "Label for the 'Next' button"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "rerecord"); // ID
-        sql.setString(3, "Re-record"); // Default
-        sql.setString(4, "Label for the 're-record' button"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "uploadFinished"); // ID
-        sql.setString(3, "All recordings have finished uploading."); // Default
-        sql.setString(4, "Message shown when all recordingings have finished uploading."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "uploadingPleaseWait"); // ID
-        sql.setString(3, "Your recordings are being uploaded..."); // Default
-        sql.setString(4, "Message shown after recording is finished, and while the recordings are being uploaded."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "uploadingBeforeUnload"); // ID
-        sql.setString(3, "Your recordings are still uploading. Please wait until the upload is finished."); // Default
-        sql.setString(4, "Popup message shown if they try to close the window before uploading is finished."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "webAudioWarningTitle"); // ID
-        sql.setString(3, "Check Your Microphone"); // Default
-        sql.setString(4, "Title for the 'enable your microphone' page shown before recording starts"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "webAudioWarning"); // ID
-        sql.setString(3, "<p>This task involves recording your speech.</p> <p>For this to work, your microphone must be enabled.</p> <p>If you use an external microphone, please plug it in now.</p> <p>&nbsp;</p> <p>When you're ready, click the arrow below. <br/>You will then be asked permission to share your microphone.</p>"); // Default
-        sql.setString(4, "Message shown before recording begins, explaining that they must check their microphone before beginning."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "webAudioNotSupported"); // ID
-        sql.setString(3, "<p>Sorry, your web browser doesn't support recording sound.</p> <p>Sound recording is known to work using recent versions of <a href=\"https://www.mozilla.org/en-US/firefox/new/\" target=\"download\">Mozilla Firefox</a> and <a href=\"https://encrypted.google.com/intl/en/chrome/browser/\" target=\"download\">Google Chrome</a>.</p>"); // Default
-        sql.setString(4, "Message shown if they're using a web browser that does not support audio recording."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "beforeEnableMicrophone"); // ID
-        sql.setString(3, "<p><br><br>In the next step<br/> you may be asked to enable access to your microphone,<br/> which you do by clicking the <q>Share Selected Device</q> or <q>Allow</q> button<br/> on the box that pops up above the page.</p>"); // Default
-        sql.setString(4, "Message warning them they'll be asked to enable browser access to their microphone"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "pleaseEnableMicrophone"); // ID
-        sql.setString(3, "<p><br><br>Please enable access to your microphone now, by clicking the <q>Share Selected Device</q> or <q>Allow</q> button.</p>"); // Default
-        sql.setString(4, "Message prompting them to enable browser access to their microphone"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "getUserMediaFailed"); // ID
-        sql.setString(3, "<p>Sorry, access to your microphone could not be obtained.</p>"); // Default
-        sql.setString(4, "Message shown when microphone access could not be obtained e.g. because they disabled it."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "participantInfoPrompt"); // ID
-        sql.setString(3, "<p>Please supply the following information.</p>"); // Default
-        sql.setString(4, "Prompt shown when they must fill out the participant information form."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "pleaseSupplyAValueFor"); // ID
-        sql.setString(3, "Please supply a value for"); // Default
-        sql.setString(4, "Popup message displayed when they don't supply an attribute value, if the step title is set.  The message will be followed by the title of the step."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "pleaseSupplyAnAnswer"); // ID
-        sql.setString(3, "Please supply an answer"); // Default
-        sql.setString(4, "Popup message displayed when they don't supply an attribute value, if the step title is not set."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "pleaseSupplyANumberFor"); // ID
-        sql.setString(3, "Please supply a number for"); // Default
-        sql.setString(4, "Popup message displayed when they enter a non-numeric value for a numeric field on the participant form. The message will be followed by the name of the field."); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "overallProgress"); // ID
-        sql.setString(3, "Overall Progress"); // Default
-        sql.setString(4, "Tool-tip text for progress bar during recording"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "countdownMessage"); // ID
-        sql.setString(3, "<p>Please wait...</p>"); // Default
-        sql.setString(4, "Message displayed during countdown before starting to record"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "recording"); // ID
-        sql.setString(3, "Recording..."); // Default
-        sql.setString(4, "Tool-tip text for recording indicator"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "yourParticipantIdIs"); // ID
-        sql.setString(3, "<p>For your records, your Participant ID is:</p>"); // Default
-        sql.setString(4, "Message displayed at the end of the task, preceding their Participant ID"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "pleaseEnterYourNameHere"); // ID
-        sql.setString(3, "Please enter your name here"); // Default
-        sql.setString(4, "Prompt text for the consent 'signature' box"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "pleaseEnterYourNameToIndicateYourConsent"); // ID
-        sql.setString(3, "Please type your name in the box to indicate your consent"); // Default
-        sql.setString(4, "Popup message when they don't fill in the 'signature' box"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "startAgain"); // ID
-        sql.setString(3, "Start Again"); // Default
-        sql.setString(4, "Text for 'start again' button that is shown at the end of the task"); // Help text
-        
-        sql.setString(2, "participantIdOrAccessCodeIncorrect"); // ID
-        sql.setString(3, "Participant ID or Access Code incorrect, please try again."); // Default
-        sql.setString(4, "Message displayed when login fails"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "timeFor"); // ID
-        sql.setString(3, "Time for"); // Default
-        sql.setString(4, "When task reminders are configured, the text of the reminder is this message followed by the task description"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "back"); // ID
-        sql.setString(3, "Back"); // Default
-        sql.setString(4, "Button text for back button"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "yes"); // ID
-        sql.setString(3, "Yes"); // Default
-        sql.setString(4, "Label for boolean attribute 'true' option"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "no"); // ID
-        sql.setString(3, "No"); // Default
-        sql.setString(4, "Label for boolean attribute 'false' option"); // Help text
-        sql.executeUpdate();
-        
-        sql.setString(2, "history"); // ID
-        sql.setString(3, "History:"); // Default
-        sql.setString(4, "Heading for the task history list"); // Help text
-        sql.executeUpdate();
-        
-      } // close sql
+      CreateDefaultResources(connection, jsonIn.getInt("task_id"));
     } catch (SQLException x) {
       context.servletLog("editNewRecord: " + x);
     }
     
     editUpdatedRecord(jsonIn, jsonOut, connection);
   } // end of editNewRecord()
+  
+  /**
+   * Create default resource strings for the given task.
+   * @param connection
+   * @param task_id
+   * @throws SQLException
+   */
+  public static void CreateDefaultResources(Connection connection, int task_id)
+    throws SQLException {
+    try (PreparedStatement sql = connection.prepareStatement(
+           "INSERT INTO elicitation_resource_string"
+           +" (task_id, resource_id, message, help) VALUES (?,?,?,?)")) {
+      sql.setInt(1, task_id);
+      
+      sql.setString(2, "next"); // ID
+      sql.setString(3, "Next"); // Default
+      sql.setString(4, "Label for the 'Next' button"); // Help text
+      sql.executeUpdate();
+      
+      sql.setString(2, "rerecord"); // ID
+      sql.setString(3, "Re-record"); // Default
+      sql.setString(4, "Label for the 're-record' button"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "uploadFinished"); // ID
+      sql.setString(3, "All recordings have finished uploading."); // Default
+      sql.setString(4, "Message shown when all recordingings have finished uploading."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "uploadingPleaseWait"); // ID
+      sql.setString(3, "Your recordings are being uploaded..."); // Default
+      sql.setString(4, "Message shown after recording is finished, and while the recordings are being uploaded."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "uploadingBeforeUnload"); // ID
+      sql.setString(3, "Your recordings are still uploading. Please wait until the upload is finished."); // Default
+      sql.setString(4, "Popup message shown if they try to close the window before uploading is finished."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "webAudioWarningTitle"); // ID
+      sql.setString(3, "Check Your Microphone"); // Default
+      sql.setString(4, "Title for the 'enable your microphone' page shown before recording starts"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "webAudioWarning"); // ID
+      sql.setString(3, "<p>This task involves recording your speech.</p> <p>For this to work, your microphone must be enabled.</p> <p>If you use an external microphone, please plug it in now.</p> <p>&nbsp;</p> <p>When you're ready, click the arrow below. <br/>You will then be asked permission to share your microphone.</p>"); // Default
+      sql.setString(4, "Message shown before recording begins, explaining that they must check their microphone before beginning."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "webAudioNotSupported"); // ID
+      sql.setString(3, "<p>Sorry, your web browser doesn't support recording sound.</p> <p>Sound recording is known to work using recent versions of <a href=\"https://www.mozilla.org/en-US/firefox/new/\" target=\"download\">Mozilla Firefox</a> and <a href=\"https://encrypted.google.com/intl/en/chrome/browser/\" target=\"download\">Google Chrome</a>.</p>"); // Default
+      sql.setString(4, "Message shown if they're using a web browser that does not support audio recording."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "beforeEnableMicrophone"); // ID
+      sql.setString(3, "<p><br><br>In the next step<br/> you may be asked to enable access to your microphone,<br/> which you do by clicking the <q>Share Selected Device</q> or <q>Allow</q> button<br/> on the box that pops up above the page.</p>"); // Default
+      sql.setString(4, "Message warning them they'll be asked to enable browser access to their microphone"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "pleaseEnableMicrophone"); // ID
+      sql.setString(3, "<p><br><br>Please enable access to your microphone now, by clicking the <q>Share Selected Device</q> or <q>Allow</q> button.</p>"); // Default
+      sql.setString(4, "Message prompting them to enable browser access to their microphone"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "getUserMediaFailed"); // ID
+      sql.setString(3, "<p>Sorry, access to your microphone could not be obtained.</p>"); // Default
+      sql.setString(4, "Message shown when microphone access could not be obtained e.g. because they disabled it."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "participantInfoPrompt"); // ID
+      sql.setString(3, "<p>Please supply the following information.</p>"); // Default
+      sql.setString(4, "Prompt shown when they must fill out the participant information form."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "pleaseSupplyAValueFor"); // ID
+      sql.setString(3, "Please supply a value for"); // Default
+      sql.setString(4, "Popup message displayed when they don't supply an attribute value, if the step title is set.  The message will be followed by the title of the step."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "pleaseSupplyAnAnswer"); // ID
+      sql.setString(3, "Please supply an answer"); // Default
+      sql.setString(4, "Popup message displayed when they don't supply an attribute value, if the step title is not set."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "pleaseSupplyANumberFor"); // ID
+      sql.setString(3, "Please supply a number for"); // Default
+      sql.setString(4, "Popup message displayed when they enter a non-numeric value for a numeric field on the participant form. The message will be followed by the name of the field."); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "overallProgress"); // ID
+      sql.setString(3, "Overall Progress"); // Default
+      sql.setString(4, "Tool-tip text for progress bar during recording"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "countdownMessage"); // ID
+      sql.setString(3, "<p>Please wait...</p>"); // Default
+      sql.setString(4, "Message displayed during countdown before starting to record"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "recording"); // ID
+      sql.setString(3, "Recording..."); // Default
+      sql.setString(4, "Tool-tip text for recording indicator"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "yourParticipantIdIs"); // ID
+      sql.setString(3, "<p>For your records, your Participant ID is:</p>"); // Default
+      sql.setString(4, "Message displayed at the end of the task, preceding their Participant ID"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "pleaseEnterYourNameHere"); // ID
+      sql.setString(3, "Please enter your name here"); // Default
+      sql.setString(4, "Prompt text for the consent 'signature' box"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "pleaseEnterYourNameToIndicateYourConsent"); // ID
+      sql.setString(3, "Please type your name in the box to indicate your consent"); // Default
+      sql.setString(4, "Popup message when they don't fill in the 'signature' box"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "startAgain"); // ID
+      sql.setString(3, "Start Again"); // Default
+      sql.setString(4, "Text for 'start again' button that is shown at the end of the task"); // Help text
+        
+      sql.setString(2, "participantIdOrAccessCodeIncorrect"); // ID
+      sql.setString(3, "Participant ID or Access Code incorrect, please try again."); // Default
+      sql.setString(4, "Message displayed when login fails"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "timeFor"); // ID
+      sql.setString(3, "Time for"); // Default
+      sql.setString(4, "When task reminders are configured, the text of the reminder is this message followed by the task description"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "back"); // ID
+      sql.setString(3, "Back"); // Default
+      sql.setString(4, "Button text for back button"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "yes"); // ID
+      sql.setString(3, "Yes"); // Default
+      sql.setString(4, "Label for boolean attribute 'true' option"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "no"); // ID
+      sql.setString(3, "No"); // Default
+      sql.setString(4, "Label for boolean attribute 'false' option"); // Help text
+      sql.executeUpdate();
+        
+      sql.setString(2, "history"); // ID
+      sql.setString(3, "History:"); // Default
+      sql.setString(4, "Heading for the task history list"); // Help text
+      sql.executeUpdate();
+        
+    } // close sql
+    
+  } // end of CreateDefaultResources()
   
 } // end of class Tasks
