@@ -253,8 +253,8 @@ public class Tasks extends TableServletBase {
       context.servletLog("Tasks.validateBeforeUpdate: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
-      return record;
-  } // end of validateBeforeUpdate()
+    return record;
+  } // end of validateBeforeCreate()
   
   /**
    * Validates a record before UPDATEing it.
@@ -346,7 +346,7 @@ public class Tasks extends TableServletBase {
       context.servletLog("Tasks.validateBeforeUpdate: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
-      return record;
+    return record;
   } // end of validateBeforeUpdate()
   
   /**
