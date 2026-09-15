@@ -1,0 +1,54 @@
+<h2 id="title"><span i18n="Task TASK NAME">Task:</span> {{task_name}}</h2>
+<h3 id="title"><span i18n="Options for ATTRIBUTE-NAME">Options for</span> {{attribute}}</h3>
+<div class="list option-list">
+  <div class="item option header"> 
+    <span class="option-value" i18n-title title="The underlying option value"><legend i18n>Value</legend>
+      <select #value required>
+        <option value="" disabled selected i18n>Value</option>
+        <ng-container *ngFor="let label of validLabels">
+          <option *ngIf="!existingOptions.includes(label)"
+                   value="{{label}}">
+            {{label}}
+            <span *ngIf="label != layer.validLabels[label]"> ({{layer.validLabels[label]}})</span>
+          </option>
+        </ng-container>
+    </select></span>
+    <span class="option-description" i18n-title title="The participant-facing description of the option"><legend i18n>Description</legend>
+      <input #description type="text" i18n-placeholder placeholder="Description">
+    </span>
+    <span class="buttons">
+      <lib-button action="create" [processing]="creating"
+                  [disabled]="value.selectedIndex == 0"
+                  (press)="value.reportValidity() && description.reportValidity() && createRow(value.value, description.value) && value.value = description.value = '';"
+                  i18n-title title="Add new option"></lib-button>
+      <lib-button [processing]="creating"
+                  [disabled]="existingOptions.length >= validLabels.length"
+                  i18n-label label="Add All"
+                  (press)="addAll()"
+                  i18n-title title="Add all options not already available"
+                  img="labels.svg" icon="🏷"></lib-button>
+    </span>
+  </div>
+  <lib-wait *ngIf="!rows"></lib-wait>
+  <div class="item option" *ngFor="let option of rows">
+    <span class="option-name" i18n-title title="The underlying option value"><legend i18n>Name</legend>
+      {{option.value}}</span>
+    <span class="option-description" i18n-title title="The participant-facing description of the option"><legend i18n>Description</legend>
+      <input type="text" i18n-placeholder placeholder="Description"
+             (input)="onChange(option)"
+             [(ngModel)]="option.description">
+    </span>
+    <div class="controls buttons">
+      <lib-button  action="delete" [processing]="option._deleting"
+                   disabled="{{option._cantDelete}}"
+                   (press)="deleteRow(option);"
+                   title="{{option._cantDelete}}"></lib-button>
+    </div>
+  </div>
+</div>
+<div class="buttons">
+  <lib-button action="save" [processing]="updating > 0"
+              (press)="updateChangedRows();"
+              *ngIf="changed"
+              i18n-title title="Save all changed records"></lib-button>
+</div>

@@ -5284,8 +5284,8 @@
     /**
      * Creates a new media track record.
      * @see LabbcatAdmin#readMediaTracks
-     * @see LabbcatAdmin#updateTask
-     * @see LabbcatAdmin#deleteTask
+     * @see LabbcatAdmin#updateMediaTrack
+     * @see LabbcatAdmin#deleteMediaTrack
      * @param {string} suffix The suffix of the mediaTrack.
      * @param {string} description The description of the mediaTrack.
      * @param {int} display_order The position of the mediaTrack relative to other mediaTracks.
@@ -5305,8 +5305,8 @@
     /**
      * Reads a list of media track records.
      * @see LabbcatAdmin#createMediaTrack
-     * @see LabbcatAdmin#updateTask
-     * @see LabbcatAdmin#deleteTask
+     * @see LabbcatAdmin#updateMediaTrack
+     * @see LabbcatAdmin#deleteMediaTrack
      * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
      * records will be returned). 
      * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -6347,8 +6347,8 @@
     /**
      * Creates a new elicitation task.
      * @see LabbcatAdmin#readElicitationTasks
-     * @see LabbcatAdmin#updateTask
-     * @see LabbcatAdmin#deleteTask
+     * @see LabbcatAdmin#updateElicitationTask
+     * @see LabbcatAdmin#deleteElicitationTask
      * @param {string} taskName The name of the elicitation task.
      * @param {string} description The description of the task.
      * @param {string} corpusName The corpus for elicited transcripts/recordings.
@@ -6382,14 +6382,14 @@
     /**
      * Reads a list of elicitation task records.
      * @see LabbcatAdmin#createElicitationTask
-     * @see LabbcatAdmin#updateTask
-     * @see LabbcatAdmin#deleteTask
+     * @see LabbcatAdmin#updateElicitationTask
+     * @see LabbcatAdmin#deleteElicitationTask
      * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
      * records will be returned). 
      * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
      * @param {resultCallback} onResult Invoked when the request has returned a 
-     * <var>result</var> which will be: A list of mediaTrack records with the following
-     * attributes:
+     * <var>result</var> which will be: A list of elicitation task records with the
+     * following attributes:
      * <dl>
      *  <dt> task_id </dt><dd> The database key for the record. </dd>
      *  <dt> task_name </dt><dd> The name of the task. </dd>
@@ -6443,7 +6443,7 @@
      *         they finish the task (<tt>{participant}</tt>, if present in
      *         the URL, is replaced by the participant's ID).
      * @param {resultCallback} onResult Invoked when the request has returned a 
-     * <var>result</var> which will be: A copy of the mediaTrack record. 
+     * <var>result</var> which will be: A copy of the elicitation task record. 
      */
     updateElicitationTask(
       taskId, taskName, description, corpusName, transcriptType, preamble, consent, endUrl,
@@ -6594,14 +6594,14 @@
     /**
      * Reads a list of elicitation task resources.
      * @see LabbcatAdmin#createElicitationTaskResource
-     * @see LabbcatAdmin#updateTask
-     * @see LabbcatAdmin#deleteTask
+     * @see LabbcatAdmin#updateElicitationTaskResource
+     * @see LabbcatAdmin#deleteElicitationTaskResource
      * @param {int} taskId The task_id of the elicitaiton task. 
      * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
      * records will be returned). 
      * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
      * @param {resultCallback} onResult Invoked when the request has returned a 
-     * <var>result</var> which will be: A list of mediaTrack records with the following
+     * <var>result</var> which will be: A list of resource records with the following
      * attributes:
      * <dl>
      *  <dt> task_id </dt><dd> The database key for the elicitation task. </dd>
@@ -6653,6 +6653,129 @@
           message : message }));
     }
     
+    /**
+     * Creates a new elicitation task attribute option.
+     * @see LabbcatAdmin#readElicitationTaskAttributeOptions
+     * @see LabbcatAdmin#updateElicitationTaskAttributeOption
+     * @see LabbcatAdmin#deleteElicitationTaskAttributeOption
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} value The option for the attribute value.
+     * @param {string} description The participant-facing description of the option.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the attribute option record. 
+     */
+    createElicitationTaskAttributeOption(
+      taskId, scope, attribute, value, description, onResult) {
+      this.createRequest(
+        "elicitationTaskAttributeOptions", null, onResult,
+        this.baseUrl+"/api/admin/elicit/options/"
+          +(scope=="transcript"?"transcript":"participant")
+          +"/"+encodeURIComponent(taskId), "POST",
+        null, "application/json")
+        .send(JSON.stringify({
+          task_id : taskId,
+          attribute : attribute,
+          value : value,
+          description : description }));
+    }
+    
+    /**
+     * Reads a list of elicitation task attribute option records.
+     * @see LabbcatAdmin#createElicitationTaskAttributeOption
+     * @see LabbcatAdmin#updateElicitationTaskAttributeOption
+     * @see LabbcatAdmin#deleteElicitationTaskAttributeOption
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+     * records will be returned). 
+     * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A list of attribute option records with the
+     * following attributes:
+     * <dl>
+     *  <dt> task_id </dt><dd> The database key for the record. </dd>
+     *  <dt> attribute </dt><dd> The transcript attribute. </dd>
+     *  <dt> value </dt><dd> The possible value presented to the participant, which
+     *       must be one of the valid labels for the given attribute. </dd>
+     *  <dt> description </dt><dd> The participant-facing text describing the option. </dd>
+     * </dl>
+     */
+    readElicitationTaskAttributeOptions(
+      taskId, scope, attribute, pageNumber, pageLength, onResult) {
+      if (typeof pageNumber === "function") { // (onResult)
+        onResult = pageNumber;
+        pageNumber = null;
+        pageLength = null;
+      } else if (typeof pageLength === "function") { // (p, onResult)
+        onResult = pageLength;
+        pageLength = null;
+      }
+      this.createRequest(
+        "elicitationTaskAttributeOptions", {
+          pageNumber:pageNumber,
+          pageLength:pageLength
+        }, onResult, 
+        this.baseUrl+"/api/admin/elicit/options/"
+          +(scope=="transcript"?"transcript":"participant")
+          +"/"+encodeURIComponent(taskId)
+          +"/"+encodeURIComponent(attribute))
+        .send();
+    }
+    
+    /**
+     * Updates an existing elicitation task.
+     * @see LabbcatAdmin#createElicitationTaskAttributeOption
+     * @see LabbcatAdmin#readElicitationTaskAttributeOptions
+     * @see LabbcatAdmin#deleteElicitationTaskAttributeOption
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} value The option for the attribute value.
+     * @param {string} description The participant-facing description of the option.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the attribute option record. 
+     */
+    updateElicitationTaskAttributeOption(
+      taskId, scope, attribute, value, description, onResult) {
+      this.createRequest(
+        "elicitationTaskAttributeOptions", null, onResult, 
+        this.baseUrl+"/api/admin/elicit/options/"
+          +(scope=="transcript"?"transcript":"participant"), "PUT")
+        .send(JSON.stringify({
+          task_id : taskId,
+          attribute : attribute,
+          value : value,
+          description : description }));
+    }
+    
+    /**
+     * Deletes an existing elicitation task.
+     * @see LabbcatAdmin#createElicitationTaskAttributeOption
+     * @see LabbcatAdmin#readElicitationTaskAttributeOptions
+     * @see LabbcatAdmin#updateElicitationTaskAttributeOption
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} value The option for the attribute value.
+     * @param {resultCallback} onResult Invoked when the request has completed.
+     */
+    deleteElicitationTaskAttributeOption(taskId, scope, attribute, value, onResult) {
+      this.createRequest(
+        "elicitationTaskAttributeOptions", null, onResult,
+        this.baseUrl+"/api/admin/elicit/options/"
+          +(scope=="transcript"?"transcript":"participant")
+          +"/"+encodeURIComponent(taskId)
+          +"/"+encodeURIComponent(attribute)
+          +"/"+encodeURIComponent(value),
+        "DELETE").send();
+    }
   }
   
   /**

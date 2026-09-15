@@ -35,6 +35,7 @@ import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
 import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
 import { AdminTaskResourcesComponent } from './admin-task-resources/admin-task-resources.component';
 import { AdminTaskAttributesComponent } from './admin-task-attributes/admin-task-attributes.component';
+import { AdminTaskAttributeOptionsComponent } from './admin-task-attribute-options/admin-task-attribute-options.component';
 import { ActivityComponent } from './activity/activity.component';
 
 @NgModule({
@@ -66,6 +67,7 @@ import { ActivityComponent } from './activity/activity.component';
         AdminTasksComponent,
         AdminTaskResourcesComponent,
         AdminTaskAttributesComponent,
+        AdminTaskAttributeOptionsComponent,
         ActivityComponent
     ],
     imports: [
@@ -119,6 +121,8 @@ import { ActivityComponent } from './activity/activity.component';
             { path: 'admin/task/resources/:task_id', component: AdminTaskResourcesComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/attributes/:scope/:task_id', component: AdminTaskAttributesComponent},
+            { path: 'admin/task/options/:scope/:task_id/:attribute', component: AdminTaskAttributeOptionsComponent,
+              canDeactivate: [PendingChangesGuard]},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,
         LabbcatCommonModule.forRoot(environment)

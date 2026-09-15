@@ -12,7 +12,7 @@
                 img="cog.svg" icon="⚙"></lib-link>
       <lib-link *ngIf="attribute.subtype == 'select'"
                 class="options"
-                [href]="baseUrl+'admin/task'+linkScope+'AttributeOptions?task_id='+task_id+'&attribute='+attribute.attribute"
+                [routerLink]="['/', 'admin', 'task','options',scope,''+task_id,attribute.attribute]"
                 i18n-label label="Options"
                 i18n-title title="Options available to participants"
                 img="tag.svg" icon="🏷"
