@@ -125,7 +125,7 @@ import nzilbb.labbcat.server.api.RequiredRole;
 public class ParticipantAttributeOptions extends TableServletBase {   
   
   public ParticipantAttributeOptions() {
-    super("elicitation_participant_attribute_option", // table
+    super("elicitation_speaker_attribute_option", // table
           new Vector<String>() {{ // primary keys
             add("task_id");
             add("attribute");
@@ -170,13 +170,13 @@ public class ParticipantAttributeOptions extends TableServletBase {
         } else {
           // ensure task_id is valid
           try (PreparedStatement sql = connection.prepareStatement(
-                 "SELECT COUNT(*) FROM elicitation_participant_attribute"
+                 "SELECT COUNT(*) FROM elicitation_step"
                  +" WHERE task_id = ? AND attribute = ?")) {
             sql.setInt(1, record.getInt("task_id"));
-            sql.setString(2, record.getString("attribute"));
+            sql.setString(2, "participant_"+record.getString("attribute"));
             try(ResultSet rs = sql.executeQuery()) {
               rs.next();
-              if (rs.getInt(1) != 0) {
+              if (rs.getInt(1) == 0) {
                 errors = new Vector<String>() {{
                     add(localize("Attribute \"{0}\" is not elicited in task {1}",
                                  record.getString("attribute"),
@@ -195,9 +195,10 @@ public class ParticipantAttributeOptions extends TableServletBase {
                   try(ResultSet rsValue = sqlValue.executeQuery()) {
                     if (!rsValue.next()) {
                       errors = new Vector<String>() {{
-                          add(localize("Value \"{0}\" is not valid for attribute \"{1}\"",
-                                       record.getString("value"),
-                                       record.getString("attribute"))); }};
+                          add(localize(
+                                "Value \"{0}\" is not valid for participant attribute \"{1}\"",
+                                record.getString("value"),
+                                record.getString("attribute"))); }};
                     }
                   } // close rsValue
                 } // close sqlValue

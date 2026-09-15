@@ -87,7 +87,8 @@ import nzilbb.labbcat.server.api.RequiredRole;
  *     </ul></dd> 
  *    
  *    <dt> PUT </dt><dd> Update an existing record, specified by the
- *         <var> task_name </var> given in the request body.
+ *         <var> task_id </var>, <var> attribute </var>, and <var> value </var>
+ *         given in the request body.
  *     <ul>
  *      <li><em> Request Body </em> - a JSON-encoded object representing the record. </li>
  *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
@@ -170,13 +171,13 @@ public class TranscriptAttributeOptions extends TableServletBase {
         } else {
           // ensure task_id is valid
           try (PreparedStatement sql = connection.prepareStatement(
-                 "SELECT COUNT(*) FROM elicitation_transcript_attribute"
+                 "SELECT COUNT(*) FROM elicitation_step"
                  +" WHERE task_id = ? AND attribute = ?")) {
             sql.setInt(1, record.getInt("task_id"));
-            sql.setString(2, record.getString("attribute"));
+            sql.setString(2, "transcript_"+record.getString("attribute"));
             try(ResultSet rs = sql.executeQuery()) {
               rs.next();
-              if (rs.getInt(1) != 0) {
+              if (rs.getInt(1) == 0) {
                 errors = new Vector<String>() {{
                     add(localize("Attribute \"{0}\" is not elicited in task {1}",
                                  record.getString("attribute"),
@@ -195,9 +196,10 @@ public class TranscriptAttributeOptions extends TableServletBase {
                   try(ResultSet rsValue = sqlValue.executeQuery()) {
                     if (!rsValue.next()) {
                       errors = new Vector<String>() {{
-                          add(localize("Value \"{0}\" is not valid for attribute \"{1}\"",
-                                       record.getString("value"),
-                                       record.getString("attribute"))); }};
+                          add(localize(
+                                "Value \"{0}\" is not valid for transcript attribute \"{1}\"",
+                                record.getString("value"),
+                                record.getString("attribute"))); }};
                     }
                   } // close rsValue
                 } // close sqlValue

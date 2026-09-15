@@ -98,7 +98,7 @@
         "task_id": 6,
         "step_count": 0,
         "suppress_next": 0,
-        "attribute": "transcript_scribe",
+        "attribute": "transcript_language",
         "tags": "",
         "shuffle_words": 0,
         "prompt": "<p>\n\tPlease enter the scribe name</p>\n",

@@ -286,6 +286,27 @@ public class Upload extends APIRequestHandler {
                 sql.setInt(1, task_id);
                 sql.executeUpdate();
               } // sql.close();
+              // ...and attributes/options
+              try (PreparedStatement sql = connection.prepareStatement( 
+                     "DELETE FROM elicitation_speaker_attribute WHERE task_id = ?")) {
+                sql.setInt(1, task_id);
+                sql.executeUpdate();
+              } // sql.close();
+              try (PreparedStatement sql = connection.prepareStatement( 
+                     "DELETE FROM elicitation_speaker_attribute_option WHERE task_id = ?")){
+                sql.setInt(1, task_id);
+                sql.executeUpdate();
+              } // sql.close();
+              try (PreparedStatement sql = connection.prepareStatement( 
+                     "DELETE FROM elicitation_transcript_attribute WHERE task_id = ?")) {
+                sql.setInt(1, task_id);
+                sql.executeUpdate();
+              } // sql.close();
+              try (PreparedStatement sql = connection.prepareStatement( 
+                     "DELETE FROM elicitation_transcript_attribute_option WHERE task_id = ?")){
+                sql.setInt(1, task_id);
+                sql.executeUpdate();
+              } // sql.close();
               
               try (PreparedStatement sql = connection.prepareStatement(
                      "INSERT INTO elicitation_step"
