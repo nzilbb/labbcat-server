@@ -447,7 +447,7 @@ public class Tasks extends TableServletBase {
   public static void CreateDefaultResources(Connection connection, int task_id)
     throws SQLException {
     try (PreparedStatement sql = connection.prepareStatement(
-           "INSERT INTO elicitation_resource_string"
+           "REPLACE INTO elicitation_resource_string" // // might already exist
            +" (task_id, resource_id, message, help) VALUES (?,?,?,?)")) {
       sql.setInt(1, task_id);
       
