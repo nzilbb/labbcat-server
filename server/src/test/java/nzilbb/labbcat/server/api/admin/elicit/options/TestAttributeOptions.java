@@ -127,6 +127,12 @@ public class TestAttributeOptions {
     assertEquals("Attribute correct", en.getAttribute(), option.getAttribute());
     assertEquals("Value correct", en.getValue(), option.getValue());
     assertEquals("Description correct", en.getDescription(), option.getDescription());
+    try {
+      l.createElicitationTaskTranscriptAttributeOption(en);
+      fail("Can't delete option that's not there: " + en);
+    } catch(Exception x) {
+      System.out.println(x.getMessage());
+    }
       
     // read
     options = l.readElicitationTaskTranscriptAttributeOptions(taskId, "language");
@@ -152,6 +158,14 @@ public class TestAttributeOptions {
     options = l.readElicitationTaskTranscriptAttributeOptions(taskId, "language");
     assertEquals("There are no longer any options " + Arrays.asList(options),
                  0, options.length);
+    
+    try {
+      l.deleteElicitationTaskTranscriptAttributeOption(en);
+      fail("Can't delete option that's not there: " + en);
+    } catch(Exception x) {
+      System.out.println(x.getMessage());
+    }
+
   }
 
   /** Ensure elicitation task participant attribute options can be
@@ -176,6 +190,12 @@ public class TestAttributeOptions {
     assertEquals("Attribute correct", male.getAttribute(), option.getAttribute());
     assertEquals("Value correct", male.getValue(), option.getValue());
     assertEquals("Description correct", male.getDescription(), option.getDescription());
+    try {
+      l.createElicitationTaskParticipantAttributeOption(male);
+      fail("Can't create option that's already there: " + male);
+    } catch(Exception x) {
+      System.out.println(x.getMessage());
+    }
 
     // read
     options = l.readElicitationTaskParticipantAttributeOptions(taskId, "gender");
@@ -202,6 +222,12 @@ public class TestAttributeOptions {
     assertEquals("There are no longer any options " + Arrays.asList(options),
                  0, options.length);
 
+    try {
+      l.deleteElicitationTaskParticipantAttributeOption(male);
+      fail("Can't delete option that's not there: " + male);
+    } catch(Exception x) {
+      System.out.println(x.getMessage());
+    }
   }
 
   /** Ensure elicitation task attribute options are properly validated .*/
