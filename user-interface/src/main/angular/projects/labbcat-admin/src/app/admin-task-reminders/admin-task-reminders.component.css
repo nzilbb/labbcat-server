@@ -1,0 +1,13 @@
+.header .reminder-time label {
+    display: none;
+}
+
+@media all and (min-width: 640px) {
+    .header .reminder-time label.hidden {
+        display: none;
+    }
+    .header .reminder-time label {
+        display: revert;
+        color: silver;
+    }
+}

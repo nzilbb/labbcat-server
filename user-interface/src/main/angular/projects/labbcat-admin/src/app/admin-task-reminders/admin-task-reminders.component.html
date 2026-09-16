@@ -1,0 +1,116 @@
+<h2 id="title"><span i18n="Task TASK NAME">Task:</span> {{task_name}}</h2>
+<div class="list reminder-list">
+  <div class="item reminder header"> 
+    <span class="reminder-label" i18n-title title="The participant-facing label for the reminder"><legend i18n>Label</legend>
+      <input #label type="text" required i18n-placeholder placeholder="Label">
+    </span>
+    <span class="reminder-participant-pattern" i18n-title title="Regular expression that matches the IDs of participants for whom these reminders will be set."><legend i18n>Participant Pattern</legend>
+      <lib-input-regexp
+        id="pattern" #participantPattern
+        type="text"
+        i18n-placeholder placeholder="Participant Patten"></lib-input-regexp>
+    </span>
+    <span class="reminder-day" i18n-title title="How often to remind the participant to do the task"><legend i18n="Task reminder day schedule header">Day</legend>
+      <select #reminderDay required>
+        <option value="" disabled selected
+                i18n="Task reminder day schedule header">Day</option>
+        <option value="daily" i18n="Task reminder day option">Daily</option>
+        <option value="2" i18n="Task reminder day option">Every other day</option>
+        <option value="3" i18n="Task reminder day option">Every third day</option>
+        <option value="4" i18n="Task reminder day option">Every fourth day</option>
+        <option value="5" i18n="Task reminder day option">Every fifth day</option>
+        <option value="6" i18n="Task reminder day option">Every sixth day</option>
+        <option value="weekly" i18n="Task reminder day option">Weekly</option>
+        <option value="monday" i18n="Task reminder day option">Monday</option>
+        <option value="tuesday" i18n="Task reminder day option">Tuesday</option>
+        <option value="wednesday" i18n="Task reminder day option">Wednesday</option>
+        <option value="thursday" i18n="Task reminder day option">Thursday</option>
+        <option value="friday" i18n="Task reminder day option">Friday</option>
+        <option value="saturday" i18n="Task reminder day option">Saturday</option>
+        <option value="sunday" i18n="Task reminder day option">Sunday</option>
+        <option value="2-weekly" i18n="Task reminder day option">Fortnightly</option>
+      </select>
+    </span>
+    <span class="reminder-time" i18n-title title="Default time for the reminder."><legend i18n>Time</legend>
+      <label [class.hidden]="label.value" i18n>Time</label>
+      <input #reminderTime [class.hidden]="!label.value" type="time" step="60" required
+             i18n-placeholder="Task reminder schedule header" placeholder="Time">
+    </span>
+    <span class="from-day" i18n-title title="Start day, from the first episode, or 0 for the same day."><legend i18n>From Day</legend>
+      <input #fromDay type="number" step="1" required
+             i18n-placeholder="Task reminder schedule header" placeholder="From Day">
+    </span>
+    <span class="to-day" i18n-title title="Start day, to the first episode, or 0 for the same day."><legend i18n>To Day</legend>
+      <input #toDay type="number" step="1" required
+             i18n-placeholder="Task reminder schedule header" placeholder="To Day">
+    </span>
+    <span class="buttons">
+      <lib-button action="create" [processing]="creating"
+                  [disabled]="!label.value"
+                  (press)="label.reportValidity() && reminderDay.reportValidity() && reminderTime.reportValidity() && fromDay.reportValidity() && toDay.reportValidity() && createRow(label.value, participantPattern.value, reminderDay.value, reminderTime.value, fromDay.value, toDay.value) && label.value = participantPattern.value = reminderDay.value = reminderTime.value = fromDay.value = toDay.value = '';"
+                  i18n-title title="Add new reminder"></lib-button>
+    </span>
+  </div>
+  <lib-wait *ngIf="!rows"></lib-wait>
+  <div class="item reminder" *ngFor="let reminder of rows">
+    <span class="reminder-label" i18n-title title="The participant-facing label for the reminder"><legend i18n>Label</legend>
+      <input [(ngModel)]="reminder.label"
+             (input)="onChange(reminder)"
+             type="text" required i18n-placeholder placeholder="Label">
+    </span>
+    <span class="reminder-participant-pattern" i18n-title title="Regular expression that matches the IDs of participants for whom these reminders will be set."><legend i18n>Participant Pattern</legend>
+      <lib-input-regexp
+        type="text"
+        i18n-placeholder placeholder="All participants"
+        (input)="onChange(reminder)"
+        [(value)]="reminder.participant_pattern"></lib-input-regexp>
+    </span>
+    <span class="reminder-day" i18n-title title="How often to remind the participant to do the task"><legend i18n="Task reminder day schedule header">Day</legend>
+      <select [(ngModel)]="reminder.reminder_day"
+             (input)="onChange(reminder)">
+        <option value="daily" i18n="Task reminder day option">Daily</option>
+        <option value="2" i18n="Task reminder day option">Every other day</option>
+        <option value="3" i18n="Task reminder day option">Every third day</option>
+        <option value="4" i18n="Task reminder day option">Every fourth day</option>
+        <option value="5" i18n="Task reminder day option">Every fifth day</option>
+        <option value="6" i18n="Task reminder day option">Every sixth day</option>
+        <option value="weekly" i18n="Task reminder day option">Weekly</option>
+        <option value="monday" i18n="Task reminder day option">Monday</option>
+        <option value="tuesday" i18n="Task reminder day option">Tuesday</option>
+        <option value="wednesday" i18n="Task reminder day option">Wednesday</option>
+        <option value="thursday" i18n="Task reminder day option">Thursday</option>
+        <option value="friday" i18n="Task reminder day option">Friday</option>
+        <option value="saturday" i18n="Task reminder day option">Saturday</option>
+        <option value="sunday" i18n="Task reminder day option">Sunday</option>
+        <option value="2-weekly" i18n="Task reminder day option">Fortnightly</option>
+      </select>
+    </span>
+    <span class="reminder-time" i18n-title title="Default time for the reminder."><legend i18n>Time</legend>
+      <input [(ngModel)]="reminder.reminder_time" type="time" step="60"
+             (input)="onChange(reminder)"
+             i18n-placeholder="Task reminder schedule header" placeholder="Time">
+    </span>
+    <span class="from-day" i18n-title title="Start day, from the first episode, or 0 for the same day."><legend i18n>From Day</legend>
+      <input [(ngModel)]="reminder.from_day" type="number" step="1"
+             (input)="onChange(reminder)"
+             i18n-placeholder="Task reminder schedule header" placeholder="From Day">
+    </span>
+    <span class="to-day" i18n-title title="Start day, to the first episode, or 0 for the same day."><legend i18n>To Day</legend>
+      <input [(ngModel)]="reminder.to_day" type="number" step="1"
+             (input)="onChange(reminder)"
+             i18n-placeholder="Task reminder schedule header" placeholder="To Day">
+    </span>
+    <div class="controls buttons">
+      <lib-button  action="delete" [processing]="reminder._deleting"
+                   disabled="{{reminder._cantDelete}}"
+                   (press)="deleteRow(reminder);"
+                   title="{{reminder._cantDelete}}"></lib-button>
+    </div>
+  </div>
+</div>
+<div class="buttons">
+  <lib-button action="save" [processing]="updating > 0"
+              (press)="updateChangedRows();"
+              *ngIf="changed"
+              i18n-title title="Save all changed records"></lib-button>
+</div>

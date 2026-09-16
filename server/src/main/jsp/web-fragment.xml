@@ -193,6 +193,9 @@
   <servlet><servlet-name>admin/elicit/resources.jsp</servlet-name><jsp-file>/jsp/admin/elicit/resources.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/elicit/resources.jsp</servlet-name><url-pattern>/api/admin/elicit/resources/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>admin/elicit/reminders.jsp</servlet-name><jsp-file>/jsp/admin/elicit/reminders.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>admin/elicit/reminders.jsp</servlet-name><url-pattern>/api/admin/elicit/reminders/*</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>admin/elicit/attributes.jsp</servlet-name><jsp-file>/jsp/admin/elicit/attributes.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>admin/elicit/attributes.jsp</servlet-name><url-pattern>/api/admin/elicit/attributes/*</url-pattern></servlet-mapping>
   

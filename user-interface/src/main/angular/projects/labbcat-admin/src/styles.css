@@ -368,3 +368,6 @@ lib-task {
 .header {
     font-style: italic;
 }
+.hidden {
+    display: none;
+}

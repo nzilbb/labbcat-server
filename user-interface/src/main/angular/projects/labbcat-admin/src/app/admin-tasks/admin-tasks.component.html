@@ -89,7 +89,7 @@
                 i18n-label label="Messages"
                 i18n-title title="Translate or customize messages that may be shown to the participant during the task"
                 img="globe.svg" icon="🌎"></lib-link>
-      <lib-link [href]="baseUrl+'admin/taskReminders?task_id='+task.task_id"
+      <lib-link [routerLink]="['..','task','reminders',task.task_id]"
                 i18n-label label="Reminders"
                 i18n-title title="Default schedule for reminders in mobile app"
                 img="bell.svg" icon="🔔"></lib-link>

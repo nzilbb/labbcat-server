@@ -36,6 +36,7 @@ import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
 import { AdminTaskResourcesComponent } from './admin-task-resources/admin-task-resources.component';
 import { AdminTaskAttributesComponent } from './admin-task-attributes/admin-task-attributes.component';
 import { AdminTaskAttributeOptionsComponent } from './admin-task-attribute-options/admin-task-attribute-options.component';
+import { AdminTaskRemindersComponent } from './admin-task-reminders/admin-task-reminders.component';
 import { ActivityComponent } from './activity/activity.component';
 
 @NgModule({
@@ -68,6 +69,7 @@ import { ActivityComponent } from './activity/activity.component';
         AdminTaskResourcesComponent,
         AdminTaskAttributesComponent,
         AdminTaskAttributeOptionsComponent,
+        AdminTaskRemindersComponent,
         ActivityComponent
     ],
     imports: [
@@ -122,6 +124,8 @@ import { ActivityComponent } from './activity/activity.component';
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/attributes/:scope/:task_id', component: AdminTaskAttributesComponent},
             { path: 'admin/task/options/:scope/:task_id/:attribute', component: AdminTaskAttributeOptionsComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'admin/task/reminders/:task_id', component: AdminTaskRemindersComponent,
               canDeactivate: [PendingChangesGuard]},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,

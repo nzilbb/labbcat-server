@@ -163,6 +163,8 @@ public class Tasks extends TableServletBase {
                             "task_id", null));
         add(new DeleteCheck("DELETE FROM elicitation_step_group WHERE task_id = ?",
                             "task_id", null));
+        add(new DeleteCheck("DELETE FROM elicitation_reminder WHERE task_id = ?",
+                            "task_id", null));
       }};
   }
   
