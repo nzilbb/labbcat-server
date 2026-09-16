@@ -101,7 +101,7 @@
                 i18n-label label="Task URL"
                 i18n-title title="Link for distributing to participants"
                 img="link.svg" icon="🔗"></lib-link>
-      <lib-link [href]="baseUrl+'admin/copyTask?task_id='+task.task_id"
+      <lib-link [href]="baseUrl+'admin/copyTask?task_id='+task.task_id+'&task='+task.task_name"
                 i18n-label label="Copy"
                 i18n-title title="Create a copy of this task"
                 img="duplicate.svg" icon="⧉"></lib-link>
