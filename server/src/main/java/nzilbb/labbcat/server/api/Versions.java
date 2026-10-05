@@ -199,11 +199,9 @@ public class Versions extends APIRequestHandler {
         jsonOut.writeEnd(); // Layer Managers
 
         String dataVersion = store.getSystemAttribute("dataVersion");
-        if (dataVersion != null && dataVersion.length() > 0) {
-          jsonOut.writeStartObject("Data");
-          jsonOut.write("dataVersion", dataVersion);
-          jsonOut.writeEnd(); // Data
-        }
+        jsonOut.writeStartObject("Data");
+        jsonOut.write("dataVersion", dataVersion);
+        jsonOut.writeEnd(); // Data
         
         endSuccessResult(jsonOut, null);
       } finally {
