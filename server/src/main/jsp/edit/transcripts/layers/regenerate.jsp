@@ -19,32 +19,33 @@
         } else {
           %><jsp:include page="../../../file-upload-tomcat10.jsp" /><%
         } 
-        RequestParameters parameters = (RequestParameters)
-        request.getAttribute("multipart-parameters");
-        Regenerate handler = new Regenerate();
-        initializeHandler(handler, request, response);
-        JsonObject json = handler.post(
-          parameters, (status)->response.setStatus(status),
-          (Collection<Integer> ag_ids, Integer layer_id)-> { // layer generator
-            // TODO replace this legacy method for generating layers, once all layer managers are annotators
-            GraphsLayerGenerator regenerationThread
-              = new GraphsLayerGenerator(
-                new Vector<Integer>(ag_ids),
-                layer_id == null?null:new HashSet<Integer>() {{ add(layer_id); }},
-                (Labbcat)getServletContext().getAttribute("labbcat"));
-            if (request.getRemoteUser() != null) {
-              regenerationThread.setWho(request.getRemoteUser());
-            } else {
-              regenerationThread.setWho(request.getRemoteHost());
-            }
-            regenerationThread.start();
-            return ""+regenerationThread.getId();
-          });
-        if (json != null) {
-          JsonWriter writer = Json.createWriter(response.getWriter());
-          writer.writeObject(json);
-          writer.close();
-        }
+        try (RequestParameters parameters = (RequestParameters)
+             request.getAttribute("multipart-parameters")) {
+          Regenerate handler = new Regenerate();
+          initializeHandler(handler, request, response);
+          JsonObject json = handler.post(
+            parameters, (status)->response.setStatus(status),
+            (Collection<Integer> ag_ids, Integer layer_id)-> { // layer generator
+              // TODO replace this legacy method for generating layers, once all layer managers are annotators
+              GraphsLayerGenerator regenerationThread
+                = new GraphsLayerGenerator(
+                  new Vector<Integer>(ag_ids),
+                  layer_id == null?null:new HashSet<Integer>() {{ add(layer_id); }},
+                  (Labbcat)getServletContext().getAttribute("labbcat"));
+              if (request.getRemoteUser() != null) {
+                regenerationThread.setWho(request.getRemoteUser());
+              } else {
+                regenerationThread.setWho(request.getRemoteHost());
+              }
+              regenerationThread.start();
+              return ""+regenerationThread.getId();
+            });
+          if (json != null) {
+            JsonWriter writer = Json.createWriter(response.getWriter());
+            writer.writeObject(json);
+            writer.close();
+          }
+        } // delete any temporary files
       } else if ("OPTIONS".equals(request.getMethod())) {
         response.addHeader("Allow", "OPTIONS, POST");
       } else {

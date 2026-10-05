@@ -28,17 +28,18 @@
           } else {
         %><jsp:include page="../file-upload-tomcat10.jsp" /><%
       } 
-      RequestParameters parameters =
-        (RequestParameters) request.getAttribute("multipart-parameters");
-      JsonObject json = handler.post(
-        parameters,
-        (status)->response.setStatus(status),
-        getAnnotatorDir());
-      if (json != null) {
-        JsonWriter writer = Json.createWriter(response.getWriter());
-        writer.writeObject(json);   
-        writer.close();
-      }
+      try (RequestParameters parameters =
+           (RequestParameters) request.getAttribute("multipart-parameters")) {
+        JsonObject json = handler.post(
+          parameters,
+          (status)->response.setStatus(status),
+          getAnnotatorDir());
+        if (json != null) {
+          JsonWriter writer = Json.createWriter(response.getWriter());
+          writer.writeObject(json);   
+          writer.close();
+        }
+      } // delete any temporary files
     } else if ("OPTIONS".equals(request.getMethod())) {
       response.addHeader("Allow", "OPTIONS, POST");
     } else {

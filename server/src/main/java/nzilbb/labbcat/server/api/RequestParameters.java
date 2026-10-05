@@ -23,6 +23,7 @@
 package nzilbb.labbcat.server.api;
 
 import java.io.File;
+import java.io.Closeable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
@@ -32,7 +33,7 @@ import java.util.Vector;
  * values, and values can be either Strings or Files. 
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class RequestParameters extends HashMap<String,Object> {
+public class RequestParameters extends HashMap<String,Object> implements Closeable {
   /**
    * Default constructor.
    */
@@ -146,5 +147,18 @@ public class RequestParameters extends HashMap<String,Object> {
     } // next value
     return allFiles;
   } // end of getAllFiles()
+  
+  /**
+   * Deletes all temporary files that were created while reading file parameters.
+   */
+  public void close() {
+    for (File file : getAllFiles()) {      
+      if (file.exists()) {
+        if (!file.delete()) {
+          System.err.println("Could not delete file from request: " + file.getPath());
+        }
+      } // file still exists
+    } // next file
+  } // end of close()
   
 } // end of class RequestParameters

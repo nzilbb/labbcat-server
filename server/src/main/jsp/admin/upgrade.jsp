@@ -20,10 +20,11 @@
       } else {
         %><jsp:include page="/api/file-upload-tomcat10.jsp" /><%
       } 
-      RequestParameters parameters = (RequestParameters)
-        request.getAttribute("multipart-parameters");
-      log("parameters: " + parameters);
-      json = handler.post(parameters, (status)->response.setStatus(status));
+      try (RequestParameters parameters = (RequestParameters)
+           request.getAttribute("multipart-parameters")) {
+        log("parameters: " + parameters);
+        json = handler.post(parameters, (status)->response.setStatus(status));
+      } // delete any temporary files
     } else if ("PUT".equals(request.getMethod())) {
       json = handler.put(
         request.getPathInfo(),

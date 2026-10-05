@@ -7,7 +7,8 @@
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="../base.jsp" %><%{
-    RequestParameters parameters = new RequestParameters();
+  RequestParameters parameters = new RequestParameters();
+  try {
     if (!request.getPathInfo().toLowerCase().endsWith("savetranscript")
         && !request.getPathInfo().toLowerCase().endsWith("newlayer")
         && !request.getPathInfo().toLowerCase().endsWith("savelayer")) {
@@ -49,4 +50,7 @@
     } else {
       response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
+  } finally {
+    parameters.close();
+  } // delete any temporary files
 }%>

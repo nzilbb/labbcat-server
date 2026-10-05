@@ -29,16 +29,17 @@
       } else {
         %><jsp:include page="/api/file-upload-tomcat10.jsp" /><%
       } 
-      RequestParameters parameters = (RequestParameters)
-        request.getAttribute("multipart-parameters");
-      handler.post(
-        request.getPathInfo(),
-        (path)->new File(getServletContext().getRealPath(path)),
-        parameters,
-        response.getOutputStream(),
-        (contentType)->response.setContentType(contentType),
-        (encoding)->response.setCharacterEncoding(encoding),
-        (status)->response.setStatus(status));
+      try (RequestParameters parameters = (RequestParameters)
+           request.getAttribute("multipart-parameters")) {
+        handler.post(
+          request.getPathInfo(),
+          (path)->new File(getServletContext().getRealPath(path)),
+          parameters,
+          response.getOutputStream(),
+          (contentType)->response.setContentType(contentType),
+          (encoding)->response.setCharacterEncoding(encoding),
+          (status)->response.setStatus(status));
+      } // delete any temporary files
     } else if ("PUT".equals(request.getMethod())) {
       handler.put(
         request.getPathInfo(),

@@ -15,19 +15,20 @@
       } else {
         %><jsp:include page="../file-upload-tomcat10.jsp" /><%
       } 
-      RequestParameters parameters = (RequestParameters)
-        request.getAttribute("multipart-parameters");
-      Intervals handler = new Intervals();
-      initializeHandler(handler, request, response);
-      JsonObject json = handler.post(
-        parameters,
-        (fileName)->handler.getContext().responseAttachmentName(fileName),
-        (status)->response.setStatus(status));
-      if (json != null) {
-        JsonWriter writer = Json.createWriter(response.getWriter());
-        writer.writeObject(json);   
-        writer.close();
-      }
+      try (RequestParameters parameters = (RequestParameters)
+           request.getAttribute("multipart-parameters")) {
+        Intervals handler = new Intervals();
+        initializeHandler(handler, request, response);
+        JsonObject json = handler.post(
+          parameters,
+          (fileName)->handler.getContext().responseAttachmentName(fileName),
+          (status)->response.setStatus(status));
+        if (json != null) {
+          JsonWriter writer = Json.createWriter(response.getWriter());
+          writer.writeObject(json);   
+          writer.close();
+        }
+      } // delete any temporary files
     } else if ("OPTIONS".equals(request.getMethod())) {
       response.addHeader("Allow", "OPTIONS, POST");
     } else {

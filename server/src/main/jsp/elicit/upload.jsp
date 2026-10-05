@@ -16,34 +16,35 @@
         } else {
           %><jsp:include page="../file-upload-tomcat10.jsp" /><%
         } 
-        RequestParameters parameters = (RequestParameters)
-        request.getAttribute("multipart-parameters");
-        Upload handler = new Upload();
-        initializeHandler(handler, request, response);
-        JsonObject json = handler.post(
-          parameters, (status)->response.setStatus(status),
-          (graph)-> { // layer generator
-            // TODO replace this legacy method for generating layers, once all layer managers are annotators
-            LayersDataGenerator generator = new LayersDataGenerator(
-              (Labbcat)getServletContext().getAttribute("labbcat"));
-            if (request.getRemoteUser() != null) {	
-              generator.setWho(request.getRemoteUser());
-            } else {
-              generator.setWho(request.getRemoteHost());
-            }
-
-            // ensure threads don't hang around too long, as they might be uploading a huge batch
-            generator.setWaitToDieMilliseconds(5000);
-            
-            generator.setName(graph.getId());
-            generator.runGenerateTranscript(-1, null, (Integer)graph.get("@ag_id"));
-            return ""+generator.getId();
-          });
-        if (json != null) {
-          JsonWriter writer = Json.createWriter(response.getWriter());
-          writer.writeObject(json);   
-          writer.close();
-        }
+        try (RequestParameters parameters = (RequestParameters)
+             request.getAttribute("multipart-parameters")) {
+          Upload handler = new Upload();
+          initializeHandler(handler, request, response);
+          JsonObject json = handler.post(
+            parameters, (status)->response.setStatus(status),
+            (graph)-> { // layer generator
+              // TODO replace this legacy method for generating layers, once all layer managers are annotators
+              LayersDataGenerator generator = new LayersDataGenerator(
+                (Labbcat)getServletContext().getAttribute("labbcat"));
+              if (request.getRemoteUser() != null) {	
+                generator.setWho(request.getRemoteUser());
+              } else {
+                generator.setWho(request.getRemoteHost());
+              }
+              
+              // ensure threads don't hang around too long, as they might be uploading a huge batch
+              generator.setWaitToDieMilliseconds(5000);
+              
+              generator.setName(graph.getId());
+              generator.runGenerateTranscript(-1, null, (Integer)graph.get("@ag_id"));
+              return ""+generator.getId();
+            });
+          if (json != null) {
+            JsonWriter writer = Json.createWriter(response.getWriter());
+            writer.writeObject(json);   
+            writer.close();
+          }
+        } // delete any temporary files
       } else if ("OPTIONS".equals(request.getMethod())) {
         response.addHeader("Allow", "OPTIONS, POST");
       } else {

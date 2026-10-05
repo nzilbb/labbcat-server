@@ -7,8 +7,8 @@
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter" 
 %><%@ include file="../base.jsp" %><%{
-    try {
-      RequestParameters parameters = new RequestParameters();
+  RequestParameters parameters = new RequestParameters();
+  try {
       if ("GET".equals(request.getMethod())) { // no request body, parse URL parameters
         parameters = parseParameters(request);
       } else if ("POST".equals(request.getMethod()) // request body will be parameters
@@ -48,7 +48,9 @@
       } else {
         response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
       }
-    } catch (Throwable t) {
-      jsonError(t, response);
-    }
+  } catch (Throwable t) {
+    jsonError(t, response);
+  } finally {
+    if (parameters != null ) parameters.close();
+  } // delete any temporary files
 }%>

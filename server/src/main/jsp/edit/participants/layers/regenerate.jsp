@@ -23,43 +23,44 @@
         } else {
           %><jsp:include page="../../../file-upload-tomcat10.jsp" /><%
         } 
-        RequestParameters parameters = (RequestParameters)
-        request.getAttribute("multipart-parameters");
-        Regenerate handler = new Regenerate();
-        initializeHandler(handler, request, response);
-        JsonObject json = handler.post(
-          parameters, (status)->response.setStatus(status),
-          (Collection<Annotation> participants, Layer layer)-> { // layer generator
-            // TODO replace this legacy method for generating layers, once all layer managers are annotators
-            Labbcat labbcat = (Labbcat)getServletContext().getAttribute("labbcat");
-	    LayerManager manager = labbcat.getLayerManager(
-              (String)layer.get("layer_manager_id"));
-            
-            // convert Annotations to Speakers
-            Vector<Speaker> speakers = new Vector<Speaker>();
-            for (Annotation participant : participants) {
-              Speaker speaker = new Speaker();
-              speaker.setName(participant.getLabel());
-              speaker.setSpeakerNumber(
-                Integer.parseInt(participant.getId().replace("m_-2_","")));
-              speakers.add(speaker);
-            } // next participant
-	    RegenerateSpeakerUtterancesThread regenerationThread
-              = new RegenerateSpeakerUtterancesThread(
-                speakers, manager, (Integer)layer.get("layer_id"), labbcat);
-            if (request.getRemoteUser() != null) {
-              regenerationThread.setWho(request.getRemoteUser());
-            } else {
-              regenerationThread.setWho(request.getRemoteHost());
-            }
-            regenerationThread.start();
-            return ""+regenerationThread.getId();
-          });
-        if (json != null) {
-          JsonWriter writer = Json.createWriter(response.getWriter());
-          writer.writeObject(json);
-          writer.close();
-        }
+        try (RequestParameters parameters = (RequestParameters)
+             request.getAttribute("multipart-parameters")) {
+          Regenerate handler = new Regenerate();
+          initializeHandler(handler, request, response);
+          JsonObject json = handler.post(
+            parameters, (status)->response.setStatus(status),
+            (Collection<Annotation> participants, Layer layer)-> { // layer generator
+              // TODO replace this legacy method for generating layers, once all layer managers are annotators
+              Labbcat labbcat = (Labbcat)getServletContext().getAttribute("labbcat");
+              LayerManager manager = labbcat.getLayerManager(
+                (String)layer.get("layer_manager_id"));
+              
+              // convert Annotations to Speakers
+              Vector<Speaker> speakers = new Vector<Speaker>();
+              for (Annotation participant : participants) {
+                Speaker speaker = new Speaker();
+                speaker.setName(participant.getLabel());
+                speaker.setSpeakerNumber(
+                  Integer.parseInt(participant.getId().replace("m_-2_","")));
+                speakers.add(speaker);
+              } // next participant
+              RegenerateSpeakerUtterancesThread regenerationThread
+                = new RegenerateSpeakerUtterancesThread(
+                  speakers, manager, (Integer)layer.get("layer_id"), labbcat);
+              if (request.getRemoteUser() != null) {
+                regenerationThread.setWho(request.getRemoteUser());
+              } else {
+                regenerationThread.setWho(request.getRemoteHost());
+              }
+              regenerationThread.start();
+              return ""+regenerationThread.getId();
+            });
+          if (json != null) {
+            JsonWriter writer = Json.createWriter(response.getWriter());
+            writer.writeObject(json);
+            writer.close();
+          }
+        } // delete any temporary files
       } else if ("OPTIONS".equals(request.getMethod())) {
         response.addHeader("Allow", "OPTIONS, POST");
       } else {
