@@ -149,7 +149,7 @@ public class Files extends APIRequestHandler { // TODO unit test
           return;
         } else if (files.size() == 1) { // one file only
           // don't zip a single file, just return the file
-          // TODO if mimeType is blank try to guess it from the existension
+          // TODO if mimeType is blank try to guess it from the extension
           contentType.accept(mimeType);
           File file = files.firstElement();
           fileName.accept(file.getName());               
