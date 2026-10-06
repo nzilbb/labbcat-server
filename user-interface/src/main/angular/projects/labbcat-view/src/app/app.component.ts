@@ -89,4 +89,8 @@ export class AppComponent {
             }
         }
     }
+    /** Triggered by task */
+    purgeHistory(threadId: string): void {
+        this.searchHistoryThreads = this.searchHistoryThreads.filter(x => x != threadId);
+    }
 }

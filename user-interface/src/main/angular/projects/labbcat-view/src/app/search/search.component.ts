@@ -739,6 +739,9 @@ export class SearchComponent implements OnInit {
     /** Triggered by task */
     purgeHistory(threadId: string): void {
         this.history = this.history.filter(x => x.task.threadId != threadId);
+        if (this.threadId == threadId) {
+            this.threadId = null;
+        }
     }
 
     transcriptQueryIncludingParticipantConditions(): string {

@@ -278,7 +278,7 @@
       
       <!-- history tab -->
       <div *ngIf="currentTab == 'History'" id="history">
-        <table>
+        <table *ngIf="tab == currentTab">
           <tbody>
             <tr *ngFor="let historyItem of history; index as i" class="item">
               <td class="history-name">
@@ -286,6 +286,7 @@
                   [threadId]="historyItem.task.threadId"
                   [autoOpenResults]="false"
                   [singleSpan]="true"
+                  [purgeHistoryIfInvalid]="true"
                   (historyPurged)="purgeHistory($event)"
                   ></lib-task>
                 <div *ngIf="historyItem.sourceFile" [title]="historyItem.sourceFile">
@@ -543,5 +544,7 @@
   <lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"
     (finished)="updateTask($event.threadId);"
     (cancelled)="updateTask($event);"
+    [purgeHistoryIfInvalid]="true"
+    (historyPurged)="purgeHistory($event)"
     ></lib-task>
 </div>
