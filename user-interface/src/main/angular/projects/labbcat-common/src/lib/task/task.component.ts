@@ -20,6 +20,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     @Input() showName = true;
     @Input() autoOpenResults = true;
     @Output() finished = new EventEmitter<Task>();
+    @Output() cancelled = new EventEmitter<string>();
     @Input() singleSpan: boolean;
     @Input() purgeHistoryIfInvalid: boolean;
     @Output() historyPurged = new EventEmitter<string>();
@@ -139,6 +140,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
 
             // stop the regular timeout from firing
             clearTimeout(this.timeout);
+            this.cancelled.emit(this.threadId);
             this.cancelling = false;
 
             // get the status again
