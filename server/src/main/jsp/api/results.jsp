@@ -1,0 +1,22 @@
+<%@ page info="Search results" isErrorPage="true"
+    import = "nzilbb.labbcat.server.api.Results" 
+    import = "javax.json.Json" 
+    import = "javax.json.JsonObject" 
+    import = "javax.json.JsonWriter" 
+%><%@ include file="../base.jsp" %><%{
+    if ("GET".equals(request.getMethod()) || "POST".equals(request.getMethod())) { // GET/POST only
+      Results handler = new Results();
+      initializeHandler(handler, request, response);
+      handler.get(
+        parseParameters(request),
+        (headerName)->request.getHeader(headerName),
+        response.getOutputStream(),
+        (contentType)->response.setContentType(contentType),
+        (fileName)->handler.getContext().responseAttachmentName(fileName),
+        (status)->response.setStatus(status));
+    } else if ("OPTIONS".equals(request.getMethod())) {
+      response.addHeader("Allow", "OPTIONS, GET, POST");
+    } else {
+      response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    }
+}%>

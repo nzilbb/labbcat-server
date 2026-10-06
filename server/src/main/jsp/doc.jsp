@@ -1,5 +1,5 @@
-<%@ page info="Corpus access agreement" isErrorPage="true"
-    import = "nzilbb.labbcat.server.api.Doc" 
+<%@ page info="Documentation files" isErrorPage="true"
+    import = "nzilbb.labbcat.server.content.Doc" 
 %><%@ include file="base.jsp" %><%{
     Doc handler = new Doc();
     initializeHandler(handler, request, response);

@@ -1,5 +1,5 @@
 <%@ page info="Corpus access agreement" isErrorPage="true"
-    import = "nzilbb.labbcat.server.api.Agreement" 
+    import = "nzilbb.labbcat.server.content.Agreement" 
 %><%@ include file="base.jsp" %><%{
     Agreement handler = new Agreement();
     initializeHandler(handler, request, response);

@@ -4,46 +4,46 @@
 	xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-fragment_5_0.xsd"
 	version="5.0" metadata-complete="false">
   <servlet><servlet-name>file-upload-tomcat9.jsp</servlet-name><jsp-file>/jsp/file-upload-tomcat9.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>file-upload-tomcat9.jsp</servlet-name><url-pattern>/api/file-upload-tomcat9.jsp</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>file-upload-tomcat9.jsp</servlet-name><url-pattern>/file-upload-tomcat9.jsp</url-pattern></servlet-mapping>
   <servlet><servlet-name>file-upload-tomcat10.jsp</servlet-name><jsp-file>/jsp/file-upload-tomcat10.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>file-upload-tomcat10.jsp</servlet-name><url-pattern>/api/file-upload-tomcat10.jsp</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>file-upload-tomcat10.jsp</servlet-name><url-pattern>/file-upload-tomcat10.jsp</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>versions.jsp</servlet-name><jsp-file>/jsp/versions.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>versions.jsp</servlet-name><url-pattern>/api/versions</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/versions.jsp</servlet-name><jsp-file>/jsp/api/versions.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/versions.jsp</servlet-name><url-pattern>/api/versions</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>dashboard.jsp</servlet-name><jsp-file>/jsp/dashboard.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>dashboard.jsp</servlet-name><url-pattern>/api/dashboard</url-pattern></servlet-mapping>
-  <servlet><servlet-name>dashboard/statistics.jsp</servlet-name><jsp-file>/jsp/dashboard/statistics.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>dashboard/statistics.jsp</servlet-name><url-pattern>/api/dashboard/statistics</url-pattern></servlet-mapping>
-  <servlet><servlet-name>dashboard/express.jsp</servlet-name><jsp-file>/jsp/dashboard/express.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>dashboard/express.jsp</servlet-name><url-pattern>/api/dashboard/express</url-pattern></servlet-mapping>
-  <servlet><servlet-name>dashboard/item.jsp</servlet-name><jsp-file>/jsp/dashboard/item.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>dashboard/item.jsp</servlet-name><url-pattern>/api/dashboard/item/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/dashboard.jsp</servlet-name><jsp-file>/jsp/api/dashboard.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/dashboard.jsp</servlet-name><url-pattern>/api/dashboard</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/dashboard/statistics.jsp</servlet-name><jsp-file>/jsp/api/dashboard/statistics.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/dashboard/statistics.jsp</servlet-name><url-pattern>/api/dashboard/statistics</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/dashboard/express.jsp</servlet-name><jsp-file>/jsp/api/dashboard/express.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/dashboard/express.jsp</servlet-name><url-pattern>/api/dashboard/express</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/dashboard/item.jsp</servlet-name><jsp-file>/jsp/api/dashboard/item.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/dashboard/item.jsp</servlet-name><url-pattern>/api/dashboard/item/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>user.jsp</servlet-name><jsp-file>/jsp/user.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>user.jsp</servlet-name><url-pattern>/api/user</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/user.jsp</servlet-name><jsp-file>/jsp/api/user.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/user.jsp</servlet-name><url-pattern>/api/user</url-pattern></servlet-mapping>
 
   <servlet><servlet-name>a.jsp</servlet-name><jsp-file>/jsp/a.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>a.jsp</servlet-name><url-pattern>/a</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>corpus.jsp</servlet-name><jsp-file>/jsp/corpus.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>corpus.jsp</servlet-name><url-pattern>/api/corpus/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/corpus.jsp</servlet-name><jsp-file>/jsp/api/corpus.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/corpus.jsp</servlet-name><url-pattern>/api/corpus/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>task.jsp</servlet-name><jsp-file>/jsp/task.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>task.jsp</servlet-name><url-pattern>/api/task/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/task.jsp</servlet-name><jsp-file>/jsp/api/task.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/task.jsp</servlet-name><url-pattern>/api/task/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>keepalive.jsp</servlet-name><jsp-file>/jsp/keepalive.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>keepalive.jsp</servlet-name><url-pattern>/api/keepalive</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>keepalive.jsp</servlet-name><url-pattern>/keepalive</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/keepalive.jsp</servlet-name><jsp-file>/jsp/api/keepalive.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/keepalive.jsp</servlet-name><url-pattern>/api/keepalive</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/keepalive.jsp</servlet-name><url-pattern>/keepalive</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>attributes.jsp</servlet-name><jsp-file>/jsp/attributes.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>attributes.jsp</servlet-name><url-pattern>/api/attributes</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/attributes.jsp</servlet-name><jsp-file>/jsp/api/attributes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/attributes.jsp</servlet-name><url-pattern>/api/attributes</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>participant/attributes.jsp</servlet-name><jsp-file>/jsp/participant/attributes.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>participant/attributes.jsp</servlet-name><url-pattern>/api/participant/attributes</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/participant/attributes.jsp</servlet-name><jsp-file>/jsp/api/participant/attributes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/participant/attributes.jsp</servlet-name><url-pattern>/api/participant/attributes</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>search.jsp</servlet-name><jsp-file>/jsp/search.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>search.jsp</servlet-name><url-pattern>/api/search</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/search.jsp</servlet-name><jsp-file>/jsp/api/search.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/search.jsp</servlet-name><url-pattern>/api/search</url-pattern></servlet-mapping>
   
   <servlet><servlet-name>files.jsp</servlet-name><jsp-file>/jsp/files.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>files.jsp</servlet-name><url-pattern>/files/*</url-pattern></servlet-mapping>
@@ -51,39 +51,39 @@
   <servlet><servlet-name>api/files.jsp</servlet-name><jsp-file>/jsp/api/files.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/files.jsp</servlet-name><url-pattern>/api/files</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>annotation/data.jsp</servlet-name><jsp-file>/jsp/annotation/data.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>annotation/data.jsp</servlet-name><url-pattern>/api/annotation/data</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/annotation/data.jsp</servlet-name><jsp-file>/jsp/api/annotation/data.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/annotation/data.jsp</servlet-name><url-pattern>/api/annotation/data</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>annotation/intervals.jsp</servlet-name><jsp-file>/jsp/annotation/intervals.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>annotation/intervals.jsp</servlet-name><url-pattern>/api/annotation/intervals</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/annotation/intervals.jsp</servlet-name><jsp-file>/jsp/api/annotation/intervals.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/annotation/intervals.jsp</servlet-name><url-pattern>/api/annotation/intervals</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>serialize/fragments.jsp</servlet-name><jsp-file>/jsp/serialize/fragments.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>serialize/fragments.jsp</servlet-name><url-pattern>/api/serialize/fragments</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>serialize/fragments.jsp</servlet-name><url-pattern>/api/serialize/fragment</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>serialize/fragments.jsp</servlet-name><url-pattern>/serialize/fragment</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/serialize/fragments.jsp</servlet-name><jsp-file>/jsp/api/serialize/fragments.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/serialize/fragments.jsp</servlet-name><url-pattern>/api/serialize/fragments</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/serialize/fragments.jsp</servlet-name><url-pattern>/api/serialize/fragment</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/serialize/fragments.jsp</servlet-name><url-pattern>/serialize/fragment</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>media/fragments.jsp</servlet-name><jsp-file>/jsp/media/fragments.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>media/fragments.jsp</servlet-name><url-pattern>/api/media/fragments</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>media/fragments.jsp</servlet-name><url-pattern>/api/media/fragment</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/media/fragments.jsp</servlet-name><jsp-file>/jsp/api/media/fragments.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/media/fragments.jsp</servlet-name><url-pattern>/api/media/fragments</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/media/fragments.jsp</servlet-name><url-pattern>/api/media/fragment</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>serialize/graphs.jsp</servlet-name><jsp-file>/jsp/serialize/graphs.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>serialize/graphs.jsp</servlet-name><url-pattern>/api/serialize/graphs</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>serialize/graphs.jsp</servlet-name><url-pattern>/serialize/graphs</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/serialize/graphs.jsp</servlet-name><jsp-file>/jsp/api/serialize/graphs.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/serialize/graphs.jsp</servlet-name><url-pattern>/api/serialize/graphs</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/serialize/graphs.jsp</servlet-name><url-pattern>/serialize/graphs</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>results/dictionary.jsp</servlet-name><jsp-file>/jsp/results/dictionary.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>results/dictionary.jsp</servlet-name><url-pattern>/api/results/dictionary</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/results/dictionary.jsp</servlet-name><jsp-file>/jsp/api/results/dictionary.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/results/dictionary.jsp</servlet-name><url-pattern>/api/results/dictionary</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>results/upload.jsp</servlet-name><jsp-file>/jsp/results/upload.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>results/upload.jsp</servlet-name><url-pattern>/api/results/upload</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/results/upload.jsp</servlet-name><jsp-file>/jsp/api/results/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/results/upload.jsp</servlet-name><url-pattern>/api/results/upload</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>results.jsp</servlet-name><jsp-file>/jsp/results.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>results.jsp</servlet-name><url-pattern>/api/results</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/results.jsp</servlet-name><jsp-file>/jsp/api/results.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/results.jsp</servlet-name><url-pattern>/api/results</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>praat.jsp</servlet-name><jsp-file>/jsp/praat.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>praat.jsp</servlet-name><url-pattern>/api/praat</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/praat.jsp</servlet-name><jsp-file>/jsp/api/praat.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/praat.jsp</servlet-name><url-pattern>/api/praat</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>utterances.jsp</servlet-name><jsp-file>/jsp/utterances.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>utterances.jsp</servlet-name><url-pattern>/api/utterances</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/utterances.jsp</servlet-name><jsp-file>/jsp/api/utterances.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/utterances.jsp</servlet-name><url-pattern>/api/utterances</url-pattern></servlet-mapping>
 
   <servlet><servlet-name>agreement.jsp</servlet-name><jsp-file>/jsp/agreement.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>agreement.jsp</servlet-name><url-pattern>/agreement.html</url-pattern></servlet-mapping>
@@ -92,136 +92,136 @@
   <servlet><servlet-name>doc.jsp</servlet-name><jsp-file>/jsp/doc.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>doc.jsp</servlet-name><url-pattern>/doc/*</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>password.jsp</servlet-name><jsp-file>/jsp/password.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>password.jsp</servlet-name><url-pattern>/api/password</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/password.jsp</servlet-name><jsp-file>/jsp/api/password.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/password.jsp</servlet-name><url-pattern>/api/password</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>admin/password.jsp</servlet-name><jsp-file>/jsp/admin/password.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/password.jsp</servlet-name><url-pattern>/api/admin/password</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/password.jsp</servlet-name><jsp-file>/jsp/api/admin/password.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/password.jsp</servlet-name><url-pattern>/api/admin/password</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/systemattributes.jsp</servlet-name><jsp-file>/jsp/admin/systemattributes.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/systemattributes.jsp</servlet-name><url-pattern>/api/admin/systemattributes</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/systemattributes.jsp</servlet-name><jsp-file>/jsp/api/admin/systemattributes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/systemattributes.jsp</servlet-name><url-pattern>/api/admin/systemattributes</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/upgrade.jsp</servlet-name><jsp-file>/jsp/admin/upgrade.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/upgrade.jsp</servlet-name><url-pattern>/api/admin/upgrade/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/upgrade.jsp</servlet-name><jsp-file>/jsp/api/admin/upgrade.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/upgrade.jsp</servlet-name><url-pattern>/api/admin/upgrade/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>systemattributes.jsp</servlet-name><jsp-file>/jsp/systemattributes.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>systemattributes.jsp</servlet-name><url-pattern>/api/systemattributes/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/systemattributes.jsp</servlet-name><jsp-file>/jsp/api/systemattributes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/systemattributes.jsp</servlet-name><url-pattern>/api/systemattributes/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>categories.jsp</servlet-name><jsp-file>/jsp/categories.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>categories.jsp</servlet-name><url-pattern>/api/categories/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/categories.jsp</servlet-name><jsp-file>/jsp/api/categories.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/categories.jsp</servlet-name><url-pattern>/api/categories/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>store.jsp</servlet-name><jsp-file>/jsp/store.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>store.jsp</servlet-name><url-pattern>/api/store/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/store.jsp</servlet-name><jsp-file>/jsp/api/store.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/store.jsp</servlet-name><url-pattern>/api/store/*</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>layers/managers.jsp</servlet-name><jsp-file>/jsp/layers/managers.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>layers/managers.jsp</servlet-name><url-pattern>/api/layers/managers/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/layers/managers.jsp</servlet-name><jsp-file>/jsp/api/layers/managers.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/layers/managers.jsp</servlet-name><url-pattern>/api/layers/managers/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>edit/store.jsp</servlet-name><jsp-file>/jsp/edit/store.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/store.jsp</servlet-name><url-pattern>/api/edit/store/*</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>edit/store.jsp</servlet-name><url-pattern>/edit/store/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/store.jsp</servlet-name><jsp-file>/jsp/api/edit/store.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/store.jsp</servlet-name><url-pattern>/api/edit/store/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/edit/store.jsp</servlet-name><url-pattern>/edit/store/*</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>annotator/ext.jsp</servlet-name><jsp-file>/jsp/annotator/ext.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>annotator/ext.jsp</servlet-name><url-pattern>/api/edit/annotator/ext/*</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>annotator/ext.jsp</servlet-name><url-pattern>/edit/annotator/ext/*</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>annotator/ext.jsp</servlet-name><url-pattern>/api/annotator/ext/*</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>annotator/ext.jsp</servlet-name><url-pattern>/annotator/ext/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/annotator/ext.jsp</servlet-name><jsp-file>/jsp/api/annotator/ext.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/annotator/ext.jsp</servlet-name><url-pattern>/api/edit/annotator/ext/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/annotator/ext.jsp</servlet-name><url-pattern>/edit/annotator/ext/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/annotator/ext.jsp</servlet-name><url-pattern>/api/annotator/ext/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/annotator/ext.jsp</servlet-name><url-pattern>/annotator/ext/*</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>edit/transcript/upload.jsp</servlet-name><jsp-file>/jsp/edit/transcript/upload.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/transcript/upload.jsp</servlet-name><url-pattern>/api/edit/transcript/upload/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/transcript/upload.jsp</servlet-name><jsp-file>/jsp/api/edit/transcript/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/transcript/upload.jsp</servlet-name><url-pattern>/api/edit/transcript/upload/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>edit/fragment/upload.jsp</servlet-name><jsp-file>/jsp/edit/fragment/upload.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/fragment/upload.jsp</servlet-name><url-pattern>/api/edit/fragment/upload/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/fragment/upload.jsp</servlet-name><jsp-file>/jsp/api/edit/fragment/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/fragment/upload.jsp</servlet-name><url-pattern>/api/edit/fragment/upload/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>edit/participants/attributes/upload.jsp</servlet-name><jsp-file>/jsp/edit/participants/attributes/upload.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/participants/attributes/upload.jsp</servlet-name><url-pattern>/api/edit/participants/attributes/upload</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/participants/attributes/upload.jsp</servlet-name><jsp-file>/jsp/api/edit/participants/attributes/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/participants/attributes/upload.jsp</servlet-name><url-pattern>/api/edit/participants/attributes/upload</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>edit/transcripts/attributes/upload.jsp</servlet-name><jsp-file>/jsp/edit/transcripts/attributes/upload.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/transcripts/attributes/upload.jsp</servlet-name><url-pattern>/api/edit/transcripts/attributes/upload</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/transcripts/attributes/upload.jsp</servlet-name><jsp-file>/jsp/api/edit/transcripts/attributes/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/transcripts/attributes/upload.jsp</servlet-name><url-pattern>/api/edit/transcripts/attributes/upload</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>edit/transcripts/layers/regenerate.jsp</servlet-name><jsp-file>/jsp/edit/transcripts/layers/regenerate.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/transcripts/layers/regenerate.jsp</servlet-name><url-pattern>/api/edit/transcripts/layers/regenerate</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/transcripts/layers/regenerate.jsp</servlet-name><jsp-file>/jsp/api/edit/transcripts/layers/regenerate.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/transcripts/layers/regenerate.jsp</servlet-name><url-pattern>/api/edit/transcripts/layers/regenerate</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>edit/participants/layers/regenerate.jsp</servlet-name><jsp-file>/jsp/edit/participants/layers/regenerate.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/participants/layers/regenerate.jsp</servlet-name><url-pattern>/api/edit/participants/layers/regenerate</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/participants/layers/regenerate.jsp</servlet-name><jsp-file>/jsp/api/edit/participants/layers/regenerate.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/participants/layers/regenerate.jsp</servlet-name><url-pattern>/api/edit/participants/layers/regenerate</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>edit/annotations/tokens.jsp</servlet-name><jsp-file>/jsp/edit/annotations/tokens.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/annotations/tokens.jsp</servlet-name><url-pattern>/api/edit/annotations/tokens</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/annotations/tokens.jsp</servlet-name><jsp-file>/jsp/api/edit/annotations/tokens.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/annotations/tokens.jsp</servlet-name><url-pattern>/api/edit/annotations/tokens</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>edit/annotations/intervals.jsp</servlet-name><jsp-file>/jsp/edit/annotations/intervals.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>edit/annotations/intervals.jsp</servlet-name><url-pattern>/api/edit/annotations/intervals</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/edit/annotations/intervals.jsp</servlet-name><jsp-file>/jsp/api/edit/annotations/intervals.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/annotations/intervals.jsp</servlet-name><url-pattern>/api/edit/annotations/intervals</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/activity.jsp</servlet-name><jsp-file>/jsp/admin/activity.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/activity.jsp</servlet-name><url-pattern>/api/admin/activity</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/activity.jsp</servlet-name><jsp-file>/jsp/api/admin/activity.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/activity.jsp</servlet-name><url-pattern>/api/admin/activity</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/store.jsp</servlet-name><jsp-file>/jsp/admin/store.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/store.jsp</servlet-name><url-pattern>/api/admin/store/*</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>admin/store.jsp</servlet-name><url-pattern>/admin/store/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/store.jsp</servlet-name><jsp-file>/jsp/api/admin/store.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/store.jsp</servlet-name><url-pattern>/api/admin/store/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/admin/store.jsp</servlet-name><url-pattern>/admin/store/*</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>admin/categories.jsp</servlet-name><jsp-file>/jsp/admin/categories.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/categories.jsp</servlet-name><url-pattern>/api/admin/categories/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/categories.jsp</servlet-name><jsp-file>/jsp/api/admin/categories.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/categories.jsp</servlet-name><url-pattern>/api/admin/categories/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/corpora.jsp</servlet-name><jsp-file>/jsp/admin/corpora.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/corpora.jsp</servlet-name><url-pattern>/api/admin/corpora/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/corpora.jsp</servlet-name><jsp-file>/jsp/api/admin/corpora.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/corpora.jsp</servlet-name><url-pattern>/api/admin/corpora/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/mediatracks.jsp</servlet-name><jsp-file>/jsp/admin/mediatracks.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/mediatracks.jsp</servlet-name><url-pattern>/api/admin/mediatracks/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/mediatracks.jsp</servlet-name><jsp-file>/jsp/api/admin/mediatracks.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/mediatracks.jsp</servlet-name><url-pattern>/api/admin/mediatracks/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/roles/permissions.jsp</servlet-name><jsp-file>/jsp/admin/roles/permissions.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/roles/permissions.jsp</servlet-name><url-pattern>/api/admin/roles/permissions/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/roles/permissions.jsp</servlet-name><jsp-file>/jsp/api/admin/roles/permissions.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/roles/permissions.jsp</servlet-name><url-pattern>/api/admin/roles/permissions/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/roles.jsp</servlet-name><jsp-file>/jsp/admin/roles.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/roles.jsp</servlet-name><url-pattern>/api/admin/roles/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/roles.jsp</servlet-name><jsp-file>/jsp/api/admin/roles.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/roles.jsp</servlet-name><url-pattern>/api/admin/roles/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/users.jsp</servlet-name><jsp-file>/jsp/admin/users.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/users.jsp</servlet-name><url-pattern>/api/admin/users/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/users.jsp</servlet-name><jsp-file>/jsp/api/admin/users.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/users.jsp</servlet-name><url-pattern>/api/admin/users/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/annotator/config.jsp</servlet-name><jsp-file>/jsp/admin/annotator/config.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/annotator/config.jsp</servlet-name><url-pattern>/api/admin/annotator/config/*</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>admin/annotator/config.jsp</servlet-name><url-pattern>/admin/annotator/config/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/annotator/config.jsp</servlet-name><jsp-file>/jsp/api/admin/annotator/config.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/annotator/config.jsp</servlet-name><url-pattern>/api/admin/annotator/config/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/admin/annotator/config.jsp</servlet-name><url-pattern>/admin/annotator/config/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/annotator/task.jsp</servlet-name><jsp-file>/jsp/admin/annotator/task.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/annotator/task.jsp</servlet-name><url-pattern>/api/admin/annotator/task/*</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>admin/annotator/task.jsp</servlet-name><url-pattern>/admin/annotator/task/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/annotator/task.jsp</servlet-name><jsp-file>/jsp/api/admin/annotator/task.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/annotator/task.jsp</servlet-name><url-pattern>/api/admin/annotator/task/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/admin/annotator/task.jsp</servlet-name><url-pattern>/admin/annotator/task/*</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>admin/annotator.jsp</servlet-name><jsp-file>/jsp/admin/annotator.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/annotator.jsp</servlet-name><url-pattern>/api/admin/annotator/*</url-pattern></servlet-mapping>
-  <servlet-mapping><servlet-name>admin/annotator.jsp</servlet-name><url-pattern>/admin/annotator/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/annotator.jsp</servlet-name><jsp-file>/jsp/api/admin/annotator.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/annotator.jsp</servlet-name><url-pattern>/api/admin/annotator/*</url-pattern></servlet-mapping>
+  <servlet-mapping><servlet-name>api/admin/annotator.jsp</servlet-name><url-pattern>/admin/annotator/*</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>admin/serialization.jsp</servlet-name><jsp-file>/jsp/admin/serialization.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/serialization.jsp</servlet-name><url-pattern>/api/admin/serialization</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/serialization.jsp</servlet-name><jsp-file>/jsp/api/admin/serialization.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/serialization.jsp</servlet-name><url-pattern>/api/admin/serialization</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/elicit/tasks.jsp</servlet-name><jsp-file>/jsp/admin/elicit/tasks.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/elicit/tasks.jsp</servlet-name><url-pattern>/api/admin/elicit/tasks/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/elicit/tasks.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/tasks.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/tasks.jsp</servlet-name><url-pattern>/api/admin/elicit/tasks/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/elicit/resources.jsp</servlet-name><jsp-file>/jsp/admin/elicit/resources.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/elicit/resources.jsp</servlet-name><url-pattern>/api/admin/elicit/resources/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/elicit/resources.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/resources.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/resources.jsp</servlet-name><url-pattern>/api/admin/elicit/resources/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/elicit/reminders.jsp</servlet-name><jsp-file>/jsp/admin/elicit/reminders.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/elicit/reminders.jsp</servlet-name><url-pattern>/api/admin/elicit/reminders/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/elicit/reminders.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/reminders.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/reminders.jsp</servlet-name><url-pattern>/api/admin/elicit/reminders/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/elicit/attributes.jsp</servlet-name><jsp-file>/jsp/admin/elicit/attributes.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/elicit/attributes.jsp</servlet-name><url-pattern>/api/admin/elicit/attributes/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/elicit/attributes.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/attributes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/attributes.jsp</servlet-name><url-pattern>/api/admin/elicit/attributes/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/elicit/options/transcript.jsp</servlet-name><jsp-file>/jsp/admin/elicit/options/transcript.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/elicit/options/transcript.jsp</servlet-name><url-pattern>/api/admin/elicit/options/transcript/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/elicit/options/transcript.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/options/transcript.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/options/transcript.jsp</servlet-name><url-pattern>/api/admin/elicit/options/transcript/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/elicit/options/participant.jsp</servlet-name><jsp-file>/jsp/admin/elicit/options/participant.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/elicit/options/participant.jsp</servlet-name><url-pattern>/api/admin/elicit/options/participant/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/elicit/options/participant.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/options/participant.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/options/participant.jsp</servlet-name><url-pattern>/api/admin/elicit/options/participant/*</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>admin/elicit/stimulus.jsp</servlet-name><jsp-file>/jsp/admin/elicit/stimulus.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/elicit/stimulus.jsp</servlet-name><url-pattern>/api/admin/elicit/stimulus/*</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/elicit/stimulus.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/stimulus.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/stimulus.jsp</servlet-name><url-pattern>/api/admin/elicit/stimulus/*</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>admin/elicit/task/upload.jsp</servlet-name><jsp-file>/jsp/admin/elicit/task/upload.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>admin/elicit/task/upload.jsp</servlet-name><url-pattern>/api/admin/elicit/task/upload</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/admin/elicit/task/upload.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/task/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/task/upload.jsp</servlet-name><url-pattern>/api/admin/elicit/task/upload</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>elicit/steps.jsp</servlet-name><jsp-file>/jsp/elicit/steps.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>elicit/steps.jsp</servlet-name><url-pattern>/api/elicit/steps</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/elicit/steps.jsp</servlet-name><jsp-file>/jsp/api/elicit/steps.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/elicit/steps.jsp</servlet-name><url-pattern>/api/elicit/steps</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>elicit/upload.jsp</servlet-name><jsp-file>/jsp/elicit/upload.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>elicit/upload.jsp</servlet-name><url-pattern>/api/elicit/upload</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/elicit/upload.jsp</servlet-name><jsp-file>/jsp/api/elicit/upload.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/elicit/upload.jsp</servlet-name><url-pattern>/api/elicit/upload</url-pattern></servlet-mapping>
   
-  <servlet><servlet-name>elicit/verify.jsp</servlet-name><jsp-file>/jsp/elicit/verify.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>elicit/verify.jsp</servlet-name><url-pattern>/api/elicit/verify</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/elicit/verify.jsp</servlet-name><jsp-file>/jsp/api/elicit/verify.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/elicit/verify.jsp</servlet-name><url-pattern>/api/elicit/verify</url-pattern></servlet-mapping>
   
   <!-- Also map ui requests to their static resources, which are packed into the .jar -->
   <!--servlet><servlet-name>ui.jsp</servlet-name><jsp-file>/jsp/ui.jsp</jsp-file></servlet>
@@ -230,7 +230,7 @@
     <url-pattern>/ui/en/search</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-    <servlet-name>default</servlet-name>
+    <servlet-name>api/default</servlet-name>
     <url-pattern>/ui/*</url-pattern>
   </servlet-mapping-->
 

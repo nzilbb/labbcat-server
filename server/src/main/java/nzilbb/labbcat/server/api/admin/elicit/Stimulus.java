@@ -140,6 +140,10 @@ public class Stimulus extends APIRequestHandler {
         if (!hasAccess(store.getConnection())) {
           return null;
         }
+        if (parameters == null) {
+          httpStatus.accept(SC_BAD_REQUEST);
+          return failureResult("No file received.");
+        }
         Optional anyFileValue = parameters.keySet().stream()
           .map(key->parameters.getFile(key))
           .filter(file->file != null)

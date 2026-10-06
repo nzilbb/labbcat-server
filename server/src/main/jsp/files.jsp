@@ -1,7 +1,7 @@
 <%@ page info="Media files" isErrorPage="true"
     import = "nzilbb.labbcat.server.content.Files" 
 %><%@ include file="base.jsp" %><%{
-  Files handler = new Files(new File(getServletContext().getRealPath("files")));
+  Files handler = new Files(new File(getRootDir(), "files"));
   initializeHandler(handler, request, response);
   if ("GET".equals(request.getMethod())) {
     handler.get(
