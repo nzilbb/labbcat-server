@@ -471,13 +471,15 @@ export class SearchComponent implements OnInit {
                 return;
             }
             this.labbcatService.labbcat.taskStatus(threadId, (task, errors, messages) => {
-                if (errors) errors.forEach(m => this.messageService.error(m));
-                if (messages) messages.forEach(m => this.messageService.info(m));
                 historyItem.task = task;
-                historyItem.cancelled = task.status.includes("cancelled");
-                if (task.running || task.lastException || historyItem.cancelled) {
-                    delete historyItem.task.size;
-                }
+
+                if (task) { // task is still there
+                    historyItem.cancelled = task.status.includes("cancelled");
+                    if (task.running || task.lastException || historyItem.cancelled) {
+                        delete historyItem.task.size;
+                    }
+                } // task is still there
+
                 sessionStorage.setItem("searchHistory", JSON.stringify(this.history));
                 resolve(historyItem);
             });
