@@ -478,13 +478,15 @@ export class SearchComponent implements OnInit {
                 if (task.running || task.lastException || historyItem.cancelled) {
                     delete historyItem.task.size;
                 }
-                if (!task.running) {
-                    this.searchRunning = false;
-                }
                 sessionStorage.setItem("searchHistory", JSON.stringify(this.history));
                 resolve(historyItem);
             });
         });
+    }
+
+    finishTask(threadId: string): void {
+        this.searchRunning = false;
+        this.updateTask(threadId);
     }
 
     historyItem(): void {

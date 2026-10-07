@@ -542,8 +542,8 @@
     </lib-button>
   </div>
   <lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"
-    (finished)="updateTask($event.threadId);"
-    (cancelled)="updateTask($event);"
+    (finished)="finishTask($event.threadId);"
+    (cancelled)="finishTask($event);"
     [purgeHistoryIfInvalid]="true"
     (historyPurged)="purgeHistory($event)"
     ></lib-task>
