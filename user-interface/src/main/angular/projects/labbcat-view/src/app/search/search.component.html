@@ -545,6 +545,7 @@
     (finished)="finishTask($event.threadId);"
     (cancelled)="finishTask($event);"
     [purgeHistoryIfInvalid]="true"
+    [purgeSilently]="true"
     (historyPurged)="purgeHistory($event)"
     ></lib-task>
 </div>
