@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -36,6 +36,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Types;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -967,6 +968,10 @@ public class TableServletBase extends APIRequestHandler {
             String[] keyValues = null;
             if (pathInfo != null && !pathInfo.equals("/")) {
               keyValues = pathInfo.substring(1).split("/");
+              if (pathInfo.endsWith("/")) { // last key value is empty string
+                keyValues = Arrays.copyOf(keyValues, keyValues.length + 1);
+                keyValues[keyValues.length - 1] = "";
+              }
               // only accept a path if all urlKeys have a value
               if (keyValues.length != urlKeys.size()) keyValues = null;
             }
@@ -976,7 +981,8 @@ public class TableServletBase extends APIRequestHandler {
                 keyValues = emptyKey;
               } else {
                 httpStatus.accept(SC_BAD_REQUEST);
-                writeResponse(out, failureResult("Key values not found in path: {0}" + pathInfo));
+                writeResponse(
+                  out, failureResult("Key values not found in path: {0}", pathInfo));
                 return;
               }
             }
