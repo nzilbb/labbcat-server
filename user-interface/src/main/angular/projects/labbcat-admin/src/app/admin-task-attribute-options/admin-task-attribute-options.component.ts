@@ -17,8 +17,11 @@ export class AdminTaskAttributeOptionsComponent extends AdminComponent implement
     task_name: string;
     rows: any[];
 
+    newValue = "";
+    newDescription = "";
+
     layer: Layer;
-    validLabels: string[];
+    validLabels: string[] = [];
     existingOptions: string[] = [];
 
     constructor(
@@ -39,8 +42,9 @@ export class AdminTaskAttributeOptionsComponent extends AdminComponent implement
             this.attribute = this.route.snapshot.paramMap.get('attribute');
             this.readTask()
                 .then(()=>{
-                    this.readLayer();
-                    this.readRows();
+                    this.readLayer().then(()=>{
+                        this.readRows();
+                    });
                 });
         });
     }
@@ -103,6 +107,7 @@ export class AdminTaskAttributeOptionsComponent extends AdminComponent implement
     addAll(): void {
         this.creating = true;
         for (let value of this.validLabels) {
+            if (!value) continue; // not blank values
             if (!this.existingOptions.includes(value)) {
                 this.labbcatService.labbcat.createElicitationTaskAttributeOption(
                     this.task_id, this.scope, this.attribute,
@@ -136,7 +141,7 @@ export class AdminTaskAttributeOptionsComponent extends AdminComponent implement
                         // remove from the model/view
                         this.rows = this.rows.filter(r => { return r !== row;});
                         this.existingOptions = this.existingOptions.filter(
-                            r => { return r !== row.attribute;});
+                            r => { return r !== row.value;});
                         this.updateChangedFlag();
                     }});
         } else {
@@ -144,6 +149,12 @@ export class AdminTaskAttributeOptionsComponent extends AdminComponent implement
         }
     }
     
+    selectNewValue() {
+        if (this.layer) {
+            this.newDescription = this.layer.validLabels[this.newValue];
+        }
+    }
+
     onChange(row: any) {
         row._changed = this.changed = true;        
     }
