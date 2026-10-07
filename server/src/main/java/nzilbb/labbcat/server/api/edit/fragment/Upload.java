@@ -214,7 +214,7 @@ public class Upload extends APIRequestHandler {
           uploadedFragment.delete();
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult(
-            "File does not represent a fragment: {0}", uploadedFragment.getName()); // TODO i18n
+            "File does not represent a fragment: {0}", uploadedFragment.getName());
         }
         
         File fragment = new File(dir, uploadedFragment.getName());
@@ -303,7 +303,7 @@ public class Upload extends APIRequestHandler {
     }        
     if (!id.startsWith("_fragment_")) {
       httpStatus.accept(SC_BAD_REQUEST);
-      return failureResult("Invalid ID: {0}", id); // TODO i18n
+      return failureResult("Invalid ID: {0}", id);
     }        
     // context.servletLog("PUT id " + id);
     
@@ -331,7 +331,7 @@ public class Upload extends APIRequestHandler {
         // context.servletLog("PUT fragment " + fragment); // TODO
         if (fragment == null) {
           httpStatus.accept(SC_BAD_REQUEST);
-          return failureResult("No fragments found for: {0}", id); // TODO i18n
+          return failureResult("No fragments found for: {0}", id);
         }
 
         // infer transcript ID and fragment bounds from file name
@@ -670,7 +670,7 @@ public class Upload extends APIRequestHandler {
     }        
     if (!id.startsWith("_fragment_")) {
       httpStatus.accept(SC_BAD_REQUEST);
-      return failureResult("Invalid ID: {0}", id); // TODO i18n
+      return failureResult("Invalid ID: {0}", id);
     }        
     // context.servletLog("id " + id);
     File dir = null;

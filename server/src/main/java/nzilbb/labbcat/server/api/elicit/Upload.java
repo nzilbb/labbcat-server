@@ -503,43 +503,43 @@ public class Upload extends APIRequestHandler {
     if (read != 4) {
       System.err.println(
         "ElicitSpeech.Upload: invalid WAV: could not read first 4 bytes");
-      return localize("Media not WAV: {0}", wav.getName()); // TODO i18n
+      return localize("Media not WAV: {0}", wav.getName());
     }
     if (!"RIFF".equals(new String(chunk))) {
       System.err.println(
         "ElicitSpeech.Upload: invalid WAV: First 4 bytes not RIFF: "
         + new String(chunk));
-      return localize("Media not WAV: {0}", wav.getName()); // TODO i18n
+      return localize("Media not WAV: {0}", wav.getName());
     }
     read = in.read(chunk); // file size - 4
     if (read != 4) {
       System.err.println(
         "ElicitSpeech.Upload: invalid WAV: could not read second 4 bytes");
-      return localize("Media not WAV: {0}", wav.getName()); // TODO i18n
+      return localize("Media not WAV: {0}", wav.getName());
     }
     read = in.read(chunk);
     if (read != 4) {
       System.err.println(
         "ElicitSpeech.Upload: invalid WAV: could not read third 4 bytes");
-      return localize("Media not WAV: {0}", wav.getName()); // TODO i18n
+      return localize("Media not WAV: {0}", wav.getName());
     }
     if (!"WAVE".equals(new String(chunk))) {
       System.err.println(
         "ElicitSpeech.Upload: invalid WAV: Second 4 bytes not WAV: "
         + new String(chunk));
-      return localize("Media not WAV: {0}", wav.getName()); // TODO i18n
+      return localize("Media not WAV: {0}", wav.getName());
     }
     read = in.read(chunk);
     if (read != 4) {
       System.err.println(
         "ElicitSpeech.Upload: invalid WAV: could not read fourth 4 bytes");
-      return localize("Media not WAV: {0}", wav.getName()); // TODO i18n
+      return localize("Media not WAV: {0}", wav.getName());
     }
     if (!"fmt ".equals(new String(chunk))) {
       System.err.println(
         "ElicitSpeech.Upload: invalid WAV: First 4 bytes not \"fmt \": "
         + new String(chunk));
-      return localize("Media not WAV: {0}", wav.getName()); // TODO i18n
+      return localize("Media not WAV: {0}", wav.getName());
     }
     return null;
   } // end of validateWav()

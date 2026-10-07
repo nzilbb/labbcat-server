@@ -123,7 +123,7 @@ public class Upload extends APIRequestHandler {
           try {
             if (!formFile.getName().endsWith(".json")) {
               httpStatus.accept(SC_UNSUPPORTED_MEDIA_TYPE); // 415
-              return failureResult("Invalid file: {0}", formFile.getName()); // TODO i18n
+              return failureResult("Invalid file: {0}", formFile.getName());
             }
             String taskName = IO.WithoutExtension(formFile);
             if (taskName.trim().length() == 0) {
@@ -136,7 +136,7 @@ public class Upload extends APIRequestHandler {
                 .readObject().getJsonObject("model");
               if (model == null) {
                 httpStatus.accept(SC_UNPROCESSABLE_CONTENT);
-                return failureResult("Invalid JSON: {0}", "model"); // TODO i18n
+                return failureResult("Invalid JSON: {0}", "model");
               }
               String[] topLevelAttributes = {
                 "task_name", "description", "corpus", "transcriptType", "preamble",
@@ -145,7 +145,7 @@ public class Upload extends APIRequestHandler {
               for (String attribute : topLevelAttributes) {
                 if (!model.containsKey(attribute)) {
                   httpStatus.accept(SC_UNPROCESSABLE_CONTENT);
-                  return failureResult("Invalid JSON: {0}", attribute); // TODO i18n
+                  return failureResult("Invalid JSON: {0}", attribute);
                 }
               }
               
@@ -348,18 +348,18 @@ public class Upload extends APIRequestHandler {
                 return successResult(
                   jsonResult.build(),
                   updatedExistingTask
-                  ?"Updated task {0} with {1} steps" // TODO i18n
-                  :"Added task {0} with {1} steps", // TODO i18n
+                  ?"Updated task {0} with {1} steps"
+                  :"Added task {0} with {1} steps",
                   taskName, stepsAdded);
               } // close sqlAttributeExists, sqlInsertAttribute, sql etc.
             } catch(JsonException exception) {
               httpStatus.accept(SC_UNPROCESSABLE_CONTENT);
-              return failureResult("Invalid JSON: {0}", exception.getMessage()); // TODO i18n
+              return failureResult("Invalid JSON: {0}", exception.getMessage());
             } catch(SQLException exception) {
               System.err.println("task.Upload: " + exception);
               exception.printStackTrace(System.err);
               httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-              return failureResult("Database error: {0}", exception.getMessage()); // TODO i18n
+              return failureResult("Database error: {0}", exception.getMessage());
             }
           } finally {
             formFile.delete();

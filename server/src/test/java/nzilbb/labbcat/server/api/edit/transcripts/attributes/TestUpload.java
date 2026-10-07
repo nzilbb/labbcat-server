@@ -73,7 +73,7 @@ public class TestUpload
   @Test public void uploadTranscriptAttributes() throws Exception {
 
     File transcript = new File(
-      getDir().getParentFile().getParentFile(), "nzilbb.labbcat.server.test.txt");
+      getDir(), "nzilbb.labbcat.server.attributes.txt");
     String[] ids = l.getCorpusIds();
     assertTrue("There is at least one corpus", ids.length > 0);
     String corpus = ids[0];
@@ -175,7 +175,7 @@ public class TestUpload
     String multiValueAttribute = "transcript_test_multivalue";
     
     File transcript = new File(
-      getDir().getParentFile().getParentFile(), "nzilbb.labbcat.server.test.txt");
+      getDir(), "nzilbb.labbcat.server.attributes.txt");
     String[] ids = l.getCorpusIds();
     assertTrue("There is at least one corpus", ids.length > 0);
     String corpus = ids[0];

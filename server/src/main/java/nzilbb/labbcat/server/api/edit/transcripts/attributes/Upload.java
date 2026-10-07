@@ -164,7 +164,7 @@ public class Upload extends APIRequestHandler {
         if (idColumn < 0) {
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult(
-            "Transcript column \"{0}\" must be a positive integer", idColumn); // TODO i18n
+            "Transcript column \"{0}\" must be a positive integer", idColumn);
         }
         
         String[] columnLayer = requestParameters.getStrings("columnLayer");
@@ -190,7 +190,7 @@ public class Upload extends APIRequestHandler {
             httpStatus.accept(SC_BAD_REQUEST);
             return failureResult(
               "There are more column to layer mappings ({0}) than columns ({1}).",
-              columnLayer.length, headers.size()); // TODO i18n
+              columnLayer.length, headers.size());
           }
           String[] fields = new String[headers.size()];
           for (int c = 0; c < headers.size(); c++) fields[c] = headers.get(c);
@@ -209,10 +209,10 @@ public class Upload extends APIRequestHandler {
                   || fieldLayer[c].getAlignment() != 0
                   || !"transcript".equals(fieldLayer[c].get("class_id"))) {
                 httpStatus.accept(SC_BAD_REQUEST);
-                return failureResult("Not a transcript attribute: {0}", columnLayer[c]); // TODO i18n
+                return failureResult("Not a transcript attribute: {0}", columnLayer[c]);
               }
             } else {
-              messages.add(localize("Ignoring column: {0}", fields[c])); // TODO i18n
+              messages.add(localize("Ignoring column: {0}", fields[c]));
             }
           } // next column
           String[] attributeLayerIds = Arrays.stream(fieldLayer)
@@ -228,7 +228,7 @@ public class Upload extends APIRequestHandler {
             row++;
             String id = record.get(idColumn);
             if (id == null || id.length() == 0) {
-              messages.add(localize("Row {0} was ignored: no ID specified.")); // TODO i18n
+              messages.add(localize("Row {0} was ignored: no ID specified."));
               continue;
             }
             try { // find the transcript            
@@ -327,7 +327,7 @@ public class Upload extends APIRequestHandler {
           .add("missing", missing);
         messages.add(
           localize(
-            "Imported data for {0} {0,choice,1#transcript|1<transcripts} ({1} not found)", // TODO i18n
+            "Imported data for {0} {0,choice,1#transcript|1<transcripts} ({1} not found)",
             updated, missing));
         return successResult(model.build(), messages);
       } finally {

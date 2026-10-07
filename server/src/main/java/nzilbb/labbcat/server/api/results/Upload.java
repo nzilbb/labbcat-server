@@ -139,7 +139,7 @@ public class Upload extends APIRequestHandler {
         Iterator<CSVRecord> records = parser.iterator();          
         if (!records.hasNext()) {
           httpStatus.accept(SC_BAD_REQUEST);
-          return failureResult("Empty received."); // TODO i18n
+          return failureResult("Empty file received");
         }
         // list the columns
         CSVRecord headers = records.next();
@@ -153,7 +153,7 @@ public class Upload extends APIRequestHandler {
       } // parser
       if (!targetFound) {
         httpStatus.accept(SC_BAD_REQUEST);
-        return failureResult("Target column is missing: {0}", targetColumn); // TODO i18n
+        return failureResult("Target column is missing: {0}", targetColumn);
       }
       
       // start parsing the file

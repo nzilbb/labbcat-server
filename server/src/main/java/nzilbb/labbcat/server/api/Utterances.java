@@ -116,7 +116,7 @@ public class Utterances extends APIRequestHandler { // TODO unit test
           +")");
       } else {
         httpStatus.accept(SC_BAD_REQUEST);
-        return failureResult("No participants specified."); // TODO i18n
+        return failureResult("No participants specified.");
       }
     }
     task.setTranscriptQuery(parameters.getString("transcript_expression"));

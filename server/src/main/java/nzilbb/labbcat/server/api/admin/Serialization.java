@@ -162,7 +162,7 @@ public class Serialization extends APIRequestHandler {
           File formFile = (File)anyFileValue.get();
           if (!formFile.getName().endsWith(".jar")) {
             httpStatus.accept(SC_BAD_REQUEST);
-            return failureResult("Invalid file: {0}", formFile.getName()); // TODO i18n
+            return failureResult("Invalid file: {0}", formFile.getName());
           }
           File uploadedJarFile = new File(tempDir, formFile.getName());
           uploadedJarFile.deleteOnExit();
@@ -201,7 +201,7 @@ public class Serialization extends APIRequestHandler {
               : null;
             if (descriptor == null) {
               httpStatus.accept(SC_BAD_REQUEST);
-              return failureResult("No formatter found in {0}", uploadedJarFile); // TODO i18n
+              return failureResult("No formatter found in {0}", uploadedJarFile);
             }
             SemanticVersionComparator versionComparator = new SemanticVersionComparator();
             if (versionComparator.compare(
@@ -212,7 +212,7 @@ public class Serialization extends APIRequestHandler {
                 descriptor.getMimeType(),
                 descriptor.getVersion(),
                 descriptor.getMinimumApiVersion(),
-                nzilbb.ag.Constants.VERSION); // TODO i18n
+                nzilbb.ag.Constants.VERSION);
             }
             GraphDeserializer previousDeserializer = store.deserializerForMimeType(
               descriptor.getMimeType());
@@ -249,7 +249,7 @@ public class Serialization extends APIRequestHandler {
             if (previous != null) {
               jsonResult = jsonResult.add("installedVersion", previous.getVersion());
             }
-            return successResult(jsonResult.build(), "Formatter received."); // TODO i18n
+            return successResult(jsonResult.build(), "Formatter received.");
           } catch(Exception exception) {
             httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
             return failureResult(exception);
@@ -290,7 +290,7 @@ public class Serialization extends APIRequestHandler {
             
             // delete jar file
             if (jar != null) jar.delete();
-            return successResult(null, "Formatter uninstalled."); // TODO i18n
+            return successResult(null, "Formatter uninstalled"); 
             
           } else { // install/cancel
             String fileName = parameters.getString("jar");
@@ -333,7 +333,7 @@ public class Serialization extends APIRequestHandler {
                   : null;
                 if (descriptor == null) {
                   httpStatus.accept(SC_BAD_REQUEST);
-                  return failureResult("No formatter found in {0}", fileName); // TODO i18n
+                  return failureResult("No formatter found in {0}", fileName);
                 }
                 File installedFile = new File(
                   store.getSerializersDirectory(), 
@@ -402,7 +402,7 @@ public class Serialization extends APIRequestHandler {
                       .add("mimeType", descriptor.getMimeType())
                       .add("version", descriptor.getVersion());
                     
-                    return successResult(jsonResult.build(), "Formatter installed."); // TODO i18n
+                    return successResult(jsonResult.build(), "Formatter installed");
                   } else { // cancel
                     return successResult(null, "Installation cancelled.");
                   }

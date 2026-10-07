@@ -195,8 +195,8 @@ public class Upload extends APIRequestHandler {
           if (columnLayer.length > headers.size()) {
             httpStatus.accept(SC_BAD_REQUEST);
             return failureResult(
-              "There are more column to layer mappings ({0}) than columns ({1}).",
-              columnLayer.length, headers.size()); // TODO i18n
+              "There are more column to layer mappings ({0}) than columns ({1})",
+              columnLayer.length, headers.size());
           }
           String[] fields = new String[headers.size()];
           for (int c = 0; c < headers.size(); c++) fields[c] = headers.get(c);
@@ -216,11 +216,11 @@ public class Upload extends APIRequestHandler {
                     || fieldLayer[c].getAlignment() != 0
                     || !"speaker".equals(fieldLayer[c].get("class_id"))) {
                   httpStatus.accept(SC_BAD_REQUEST);
-                  return failureResult("Not a participant attribute: {0}", columnLayer[c]); // TODO i18n
+                  return failureResult("Not a participant attribute: {0}", columnLayer[c]);
                 }
               } // not _password
             } else {
-              messages.add(localize("Ignoring column: {0}", fields[c])); // TODO i18n
+              messages.add(localize("Ignoring column: {0}", fields[c]));
             }
           } // next column
           String[] attributeLayerIds = Arrays.stream(fieldLayer)
@@ -245,7 +245,7 @@ public class Upload extends APIRequestHandler {
               // don't setTracker, because that uses the ID and we don't have one
               if (!store.saveParticipant(participant)) {
                 httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-                return failureResult("Could not create new participant records."); // TODO i18n
+                return failureResult("Could not create new participant records");
               }
               created++;
 
@@ -256,7 +256,7 @@ public class Upload extends APIRequestHandler {
             } else { // use ID column
               String id = record.get(idColumn);
               if (id == null || id.length() == 0) {
-                messages.add(localize("Row {0} was ignored: no ID specified.")); // TODO i18n
+                messages.add(localize("Row {0} was ignored: no ID specified"));
                 continue;
               }
               // find the speaker
@@ -375,7 +375,7 @@ public class Upload extends APIRequestHandler {
           .add("created", created);
         messages.add(
           localize(
-            "Imported data for {0} {0,choice,1#participant|1<participants} ({1} new)", // TODO i18n
+            "Imported data for {0} {0,choice,1#participant|1<participants} ({1} new)",
             updated+created, created));
         return successResult(model.build(), messages);
       } finally {

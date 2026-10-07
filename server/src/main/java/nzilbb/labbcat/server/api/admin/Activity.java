@@ -101,7 +101,7 @@ public class Activity extends APIRequestHandler {
           .orElse(requestHeaders.apply("Referer"));
         if (resource == null) {
           httpStatus.accept(SC_BAD_REQUEST);
-          return failureResult("Could not determine resource."); // TODO i18n
+          return failureResult("Could not determine resource");
         }
         String user = Optional.ofNullable(context.getUser())
           .orElse(context.getUserHost());

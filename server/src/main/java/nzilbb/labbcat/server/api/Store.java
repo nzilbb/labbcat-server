@@ -1574,7 +1574,7 @@ public class Store extends APIRequestHandler {
       }
     }
     if (annotationId == null && (start == null || end == null)) {
-      errors.add(localize("Annotation ID not specified.")); // TODO i18n
+      errors.add(localize("No annotation ID specified."));
     }
     
     if (errors.size() > 0) return failureResult(errors);

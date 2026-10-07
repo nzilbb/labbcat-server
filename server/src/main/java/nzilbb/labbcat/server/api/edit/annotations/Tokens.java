@@ -171,7 +171,7 @@ public class Tokens extends APIRequestHandler {
       if (idColumn < 0) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "Transcript column \"{0}\" must be a positive integer", idColumn); // TODO i18n
+          "Transcript column \"{0}\" must be a positive integer", idColumn);
       }
       final int finalIdColumn = idColumn;
         
@@ -194,14 +194,14 @@ public class Tokens extends APIRequestHandler {
       if (columnLayer.length > headers.size()) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "There are more column to layer mappings ({0}) than columns ({1}).",
-          columnLayer.length, headers.size()); // TODO i18n
+          "There are more column to layer mappings ({0}) than columns ({1})",
+          columnLayer.length, headers.size());
       }
       if (idColumn >= headers.size()) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "ID column ({0}) is greater than the number of columns ({1}).",
-          idColumn, headers.size()); // TODO i18n
+          "ID column ({0}) is greater than the number of columns ({1})",
+          idColumn, headers.size());
       }
       String[] fields = new String[headers.size()];
       for (int c = 0; c < headers.size(); c++) fields[c] = headers.get(c);
@@ -222,7 +222,7 @@ public class Tokens extends APIRequestHandler {
                 || (layer.get("layer_manager_id") != null
                     && ((String)layer.get("layer_manager_id")).length() > 0)) {
               httpStatus.accept(SC_BAD_REQUEST);
-              return failureResult("Cannot annotate layer: {0}", columnLayer[c]); // TODO i18n
+              return failureResult("Cannot annotate layer: {0}", columnLayer[c]);
             }
           } else if (layer.getParentId().equals(schema.getTurnLayerId())) {
             if (layer.getId().equals(schema.getWordLayerId())
@@ -230,26 +230,26 @@ public class Tokens extends APIRequestHandler {
                 || (layer.get("layer_manager_id") != null
                     && ((String)layer.get("layer_manager_id")).length() > 0)) {
               httpStatus.accept(SC_BAD_REQUEST);
-              return failureResult("Cannot annotate layer: {0}", columnLayer[c]); // TODO i18n
+              return failureResult("Cannot annotate layer: {0}", columnLayer[c]);
             }
           } else if (layer.getParentId().equals("segment")) {
             if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL
                 || (layer.get("layer_manager_id") != null
                     && ((String)layer.get("layer_manager_id")).length() > 0)) {
               httpStatus.accept(SC_BAD_REQUEST);
-              return failureResult("Cannot annotate layer: {0}", columnLayer[c]); // TODO i18n
+              return failureResult("Cannot annotate layer: {0}", columnLayer[c]);
             }
           } else {
-            return failureResult("Cannot annotate layer: {0}", columnLayer[c]); // TODO i18n
+            return failureResult("Cannot annotate layer: {0}", columnLayer[c]);
           }
         } else {
-          messages.add(localize("Ignoring column: {0}", fields[c])); // TODO i18n
+          messages.add(localize("Ignoring column: {0}", fields[c]));
         }
       } // next column
 
       if (mappingCount == 0) {
         httpStatus.accept(SC_BAD_REQUEST);
-        return failureResult("No layers specified"); // TODO i18n
+        return failureResult("No layers specified.");
       }
       
       final String[] layerIds = Arrays.stream(fieldLayer)
@@ -288,7 +288,7 @@ public class Tokens extends APIRequestHandler {
                       
                   String identifier = record.get(finalIdColumn);
                   if (identifier == null || identifier.length() == 0) {
-                    setStatus("Row "+row+" was ignored: no ID specified."); // TODO i18n
+                    setStatus(localize("Row {0} was ignored: no ID specified", row));
                     skippedCount++;
                     continue;
                   }

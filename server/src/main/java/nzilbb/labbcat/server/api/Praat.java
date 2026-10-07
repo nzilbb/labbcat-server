@@ -24,7 +24,8 @@ package nzilbb.labbcat.server.api;
 
 import java.io.*;
 import java.net.*;
-import java.sql.*;
+import java.nio.file.Files;
+import java.sql.Connection;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -240,10 +241,14 @@ import org.xml.sax.*;
  */
 public class Praat extends APIRequestHandler {
    
+  File uploadsDir;
+
   /**
    * Constructor
    */
   public Praat() {
+    uploadsDir = new File(new File(System.getProperty("java.io.tmpdir")), "LaBB-CAT.Praat");
+    if (!uploadsDir.exists()) uploadsDir.mkdir();
   } // end of constructor
   
   // Servlet methods
@@ -257,14 +262,19 @@ public class Praat extends APIRequestHandler {
    */
   public JsonObject post(RequestParameters parameters, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     
+    File dir = null;
     try {
       Vector<File> files =  parameters.getFiles("csv");
       if (files.size() == 0) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult("No file received.");
       }
-      // get the file
-      File uploadedCsvFile = files.elementAt(0);
+      // get a copy of the file
+      dir = Files.createTempDirectory(
+        uploadsDir.toPath(), files.elementAt(0).getName()+"-").toFile();
+      dir.deleteOnExit();
+      File uploadedCsvFile = new File(dir, files.elementAt(0).getName());
+      IO.Rename(files.elementAt(0), uploadedCsvFile);
           
       ProcessWithPraat task = new ProcessWithPraat();
       final SqlGraphStoreAdministration store = getStore();
@@ -828,7 +838,7 @@ public class Praat extends APIRequestHandler {
       }
 
       // start the task
-      task.setName(uploadedCsvFile.getParentFile().getName()); // parent dir is a unique version of the name
+      task.setName(dir.getName()); // parent dir is a unique version of the name
       if (context.getUser() != null) {	
         task.setWho(context.getUser());
       } else {

@@ -23,6 +23,7 @@
 package nzilbb.labbcat.server.api.annotation;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.net.*;
 import java.sql.*;
 import java.util.*;
@@ -97,10 +98,15 @@ import org.xml.sax.*;
  */
 public class Intervals extends APIRequestHandler {
   
+  File uploadsDir;
+
   /**
    * Constructor
    */
   public Intervals() {
+    uploadsDir = new File(
+      new File(System.getProperty("java.io.tmpdir")), "LaBB-CAT.Intervals");
+    if (!uploadsDir.exists()) uploadsDir.mkdir();
   } // end of constructor
   
   // Servlet methods
@@ -114,14 +120,19 @@ public class Intervals extends APIRequestHandler {
    */
   public JsonObject post(RequestParameters parameters, Consumer<String> fileName, Consumer<Integer> httpStatus) {
     
+    File dir = null;
     try {
       Vector<File> files =  parameters.getFiles("csv");
       if (files.size() == 0) {
         httpStatus.accept(APIRequestHandler.SC_BAD_REQUEST);
         return failureResult("No file received.");
       }
-      // get the file
-      File uploadedCsvFile = files.elementAt(0);
+      // get a copy of the file
+      dir = Files.createTempDirectory(
+        uploadsDir.toPath(), files.elementAt(0).getName()+"-").toFile();
+      dir.deleteOnExit();
+      File uploadedCsvFile = new File(dir, files.elementAt(0).getName());
+      IO.Rename(files.elementAt(0), uploadedCsvFile);
       
       ExtractIntervalLabels task = new ExtractIntervalLabels();
       task.setStoreCache(new StoreCache() {

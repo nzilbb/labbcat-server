@@ -176,7 +176,7 @@ public class Intervals extends APIRequestHandler {
       if (transcriptColumn < 0) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "Transcript column \"{0}\" must be a positive integer", transcriptColumn); // TODO i18n
+          "Transcript column \"{0}\" must be a positive integer", transcriptColumn);
       }
       final int finalTranscriptColumn = transcriptColumn;
         
@@ -197,7 +197,7 @@ public class Intervals extends APIRequestHandler {
       if (startTimeColumn < 0) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "Start time column \"{0}\" must be a positive integer", startTimeColumn); // TODO i18n
+          "Start time column \"{0}\" must be a positive integer", startTimeColumn);
       }
       final int finalStartTimeColumn = startTimeColumn;
         
@@ -218,7 +218,7 @@ public class Intervals extends APIRequestHandler {
       if (endTimeColumn < 0) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "End time column \"{0}\" must be a positive integer", endTimeColumn); // TODO i18n
+          "End time column \"{0}\" must be a positive integer", endTimeColumn);
       }
       final int finalEndTimeColumn = endTimeColumn;
         
@@ -241,26 +241,26 @@ public class Intervals extends APIRequestHandler {
       if (columnLayer.length > headers.size()) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "There are more column to layer mappings ({0}) than columns ({1}).",
-          columnLayer.length, headers.size()); // TODO i18n
+          "There are more column to layer mappings ({0}) than columns ({1})",
+          columnLayer.length, headers.size());
       }
       if (transcriptColumn >= headers.size()) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "Transcript column ({0}) is greater than the number of columns ({1}).", // TODO i18n
-          transcriptColumn, headers.size()); // TODO i18n
+          "Transcript column ({0}) is greater than the number of columns ({1})",
+          transcriptColumn, headers.size());
       }
       if (startTimeColumn >= headers.size()) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "Start time column ({0}) is greater than the number of columns ({1}).", // TODO i18n
-          startTimeColumn, headers.size()); // TODO i18n
+          "Start time column ({0}) is greater than the number of columns ({1})",
+          startTimeColumn, headers.size());
       }
       if (endTimeColumn >= headers.size()) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult(
-          "End time column ({0}) is greater than the number of columns ({1}).", // TODO i18n
-          endTimeColumn, headers.size()); // TODO i18n
+          "End time column ({0}) is greater than the number of columns ({1})",
+          endTimeColumn, headers.size());
       }
       String[] fields = new String[headers.size()];
       for (int c = 0; c < headers.size(); c++) fields[c] = headers.get(c);
@@ -281,19 +281,19 @@ public class Intervals extends APIRequestHandler {
                 || (layer.get("layer_manager_id") != null
                     && ((String)layer.get("layer_manager_id")).length() > 0)) {
               httpStatus.accept(SC_BAD_REQUEST);
-              return failureResult("Cannot annotate layer: {0}", columnLayer[c]); // TODO i18n
+              return failureResult("Cannot annotate layer: {0}", columnLayer[c]);
             }
           } else {
-            return failureResult("Cannot annotate layer: {0}", columnLayer[c]); // TODO i18n
+            return failureResult("Cannot annotate layer: {0}", columnLayer[c]);
           }
         } else {
-          messages.add(localize("Ignoring column: {0}", fields[c])); // TODO i18n
+          messages.add(localize("Ignoring column: {0}", fields[c]));
         }
       } // next column
 
       if (mappingCount == 0) {
         httpStatus.accept(SC_BAD_REQUEST);
-        return failureResult("No layers specified"); // TODO i18n
+        return failureResult("No layers specified");
       }
       
       final String[] layerIds = Arrays.stream(fieldLayer)

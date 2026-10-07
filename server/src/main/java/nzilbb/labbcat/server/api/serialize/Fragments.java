@@ -239,7 +239,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_BAD_REQUEST);
       try {
-        out.write(localize("No IDs specified").getBytes()); // TODO i18n       
+        out.write(localize("No IDs specified").getBytes());       
       } catch(IOException exception) {}
       return;
     }
@@ -248,7 +248,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_BAD_REQUEST);
       try {
-        out.write(localize("No start offsets specified").getBytes()); // TODO i18n
+        out.write(localize("No start offsets specified").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -257,7 +257,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_BAD_REQUEST);
       try {
-        out.write(localize("No end offsets specified").getBytes()); // TODO i18n
+        out.write(localize("No end offsets specified").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -268,7 +268,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_BAD_REQUEST);
       try {
-        out.write(localize("Mismatched number of id, start, end, and filter parameters").getBytes()); // TODO i18n
+        out.write(localize("Mismatched number of id, start, end, and filter parameters").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -369,7 +369,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         if (serializer == null) {
          contentType.accept("text/plain;charset=UTF-8");
          httpStatus.accept(SC_BAD_REQUEST);
-         out.write(localize("Invalid MIME type: {0}", mimeType).getBytes()); // TODO i18n
+         out.write(localize("Invalid MIME type: {0}", mimeType).getBytes());
          return;
         }
         Schema schema = store.getSchema();
@@ -438,7 +438,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
         if (files.size() == 0) {
           contentType.accept("text/plain;charset=UTF-8");
           httpStatus.accept(SC_NOT_FOUND);
-          out.write(localize("No files were generated.").getBytes()); // TODO i18n
+          out.write(localize("No files were generated").getBytes());
         } else if (files.size() == 1) { // one file only
           // don't zip a single file, just return the file
           contentType.accept(mimeType);

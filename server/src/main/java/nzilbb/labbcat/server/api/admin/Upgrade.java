@@ -202,7 +202,7 @@ public class Upgrade extends APIRequestHandler {
           if (dir != null) IO.RecursivelyDelete​(dir);
           
           httpStatus.accept(SC_BAD_REQUEST);
-          return failureResult("Invalid upgrader."); // TODO i18n
+          return failureResult("Invalid upgrader");
         }
 
         JsonObjectBuilder model = Json.createObjectBuilder()
@@ -229,7 +229,7 @@ public class Upgrade extends APIRequestHandler {
           if (dir != null) IO.RecursivelyDelete​(dir);
           httpStatus.accept(SC_BAD_REQUEST);
           return failureResult(
-            "Could not determine the version in the file: {0}", exception.toString()); // TODO i18n
+            "Could not determine the version in the file: {0}", exception.toString());
         }
 
         // context.servletLog("POST success " + localize("Uploaded: {0}", transcript.getName()));

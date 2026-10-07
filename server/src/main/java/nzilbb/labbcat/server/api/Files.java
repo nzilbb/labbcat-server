@@ -137,7 +137,9 @@ public class Files extends APIRequestHandler { // TODO unit test
           } catch(Exception x) {
             contentType.accept("text/plain;charset=UTF-8");
             httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-            out.write(localize("Could not get file for {0}: {1}", transcriptId, x.toString()).getBytes()); // TODO i18n
+            out.write(localize(
+                        "Could not get file for {0}: {1}",
+                        transcriptId, x.toString()).getBytes());
             return;
           }
         } // next ID

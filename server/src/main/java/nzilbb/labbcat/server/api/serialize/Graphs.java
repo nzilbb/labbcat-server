@@ -138,7 +138,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
       try {
-        out.write(localize("No MIME type specified").getBytes()); // TODO i18n
+        out.write(localize("No MIME type specified").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -149,7 +149,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_BAD_REQUEST);
       try {
-        out.write(localize("No layers specified").getBytes()); // TODO i18n
+        out.write(localize("No layers specified").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -167,7 +167,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
           if (ids.length == 0) {
             contentType.accept("text/plain;charset=UTF-8");
             httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-            out.write(localize("No IDs were specified").getBytes()); // TODO i18n
+            out.write(localize("No IDs specified").getBytes());
             return;
           }
         } // no "id" parameter values
@@ -181,7 +181,7 @@ public class Graphs extends APIRequestHandler { // TODO unit test
         if (serializer == null) {
           contentType.accept("text/plain;charset=UTF-8");
           httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-          out.write(localize("Invalid MIME type: {0}", mimeType).getBytes()); // TODO i18n
+          out.write(localize("Invalid MIME type: {0}", mimeType).getBytes());
           return;
         }
         Schema schema = store.getSchema();

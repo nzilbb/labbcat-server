@@ -190,7 +190,7 @@ public class Reminders extends TableServletBase {
         Pattern.compile(record.getString("participant_pattern"));
       } catch(Exception x) {
         if (errors == null) errors = new Vector<String>();
-        errors.add(localize("\"{0}\" is not a valid regular expression: {1}", // TODO i18n
+        errors.add(localize("\"{0}\" is not a valid regular expression: {1}",
                             record.getString("participant_pattern"), x.getMessage()));
       }
     }
