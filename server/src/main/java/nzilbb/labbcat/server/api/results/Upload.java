@@ -105,11 +105,14 @@ public class Upload extends APIRequestHandler {
       dir.deleteOnExit();
       
       // get results file
-      File csvFile = requestParameters.getFile("results");
-      if (csvFile == null) {
+      File resultsFile = requestParameters.getFile("results");
+      if (resultsFile == null) {
         httpStatus.accept(SC_BAD_REQUEST);
         return failureResult("No file received.");
       }
+      // take a copy of the file before it's deleted
+      File csvFile = new File(dir, resultsFile.getName());
+      IO.Rename(resultsFile, csvFile);
       
       // determine field delimiter
       String csvFieldDelimiter = requestParameters.getString("csvFieldDelimiter");
