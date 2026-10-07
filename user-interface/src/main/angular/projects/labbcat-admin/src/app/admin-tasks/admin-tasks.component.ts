@@ -163,6 +163,7 @@ export class AdminTasksComponent extends AdminComponent implements OnInit {
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 // update the model with the field returned
                 if (row) this.rows.push(row as ElicitationTask);
+                this.newTaskName = "";
                 this.updateChangedFlag();
             });
         return true;
