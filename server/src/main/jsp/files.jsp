@@ -8,6 +8,7 @@
       request.getPathInfo(),
       parseParameters(request),
       (path)->new File(getServletContext().getRealPath(path)),
+      (fileName)->handler.getContext().responseAttachmentName(fileName),
       (status)->response.setStatus(status),
       (forwardTo)->{
         try {

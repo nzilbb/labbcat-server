@@ -37,6 +37,7 @@ import nzilbb.ag.StoreException;
 import nzilbb.ag.PermissionException;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
+import nzilbb.util.IO;
 import nzilbb.labbcat.server.api.APIRequestContext;
 import nzilbb.labbcat.server.api.APIRequestHandler;
 import nzilbb.labbcat.server.api.RequestParameters;
@@ -78,12 +79,13 @@ public class Files extends APIRequestHandler {
    * @param pathInfo The URL path.
    * @param parameters Request parameter map.
    * @param realPath Function for translating an absolute URL path into a File.
+   * @param fileName Receives the filename for specification in the response headers.
    * @param httpStatus Receives the response status code, in case of error.
    * @param forward Receives a servlet name for the request to be forwarded to.
    */
   public void get(
     String pathInfo, RequestParameters parameters, Function<String,File> realPath,
-    Consumer<Integer> httpStatus, Consumer<String> forward) {
+    Consumer<String> fileName, Consumer<Integer> httpStatus, Consumer<String> forward) {
 
     if (pathInfo == null) { // root directory with no slash
       httpStatus.accept(SC_BAD_REQUEST);
@@ -187,16 +189,15 @@ public class Files extends APIRequestHandler {
           httpStatus.accept(SC_FORBIDDEN);
         }
         
-        // TODO still need this?
-        // if (f.getParentFile().equals(files))
-        // { // it's in .../files - might be a processWithPraat results temp file
-        //   if (f.getName().matches(".*-__-.*-__\\..*")) {
-        //     // the file name includes -__-xxx-__\\. which we strip out for the download name
-        //     // this temp file name ugliness e.g. long strings of digits
-        //     APIRequestContext context = (APIRequestContext)request.getAttribute("APIRequestContext");
-        //     context.responseAttachmentName(f.getName().replaceAll("-__-.*-__\\.", "."));
-        //   }
-        // }        
+        if (f.getParentFile().equals(filesDir)) { // it's in .../files
+          // might be a processWithPraat results temp file
+          if (f.getName().matches(".*-__-.*-__\\..*")) {
+            // the file name includes -__-xxx-__\\. which we strip out for the download name
+            // this temp file name ugliness e.g. long strings of digits
+            fileName.accept(IO.SafeFileNameUrl(
+                              f.getName().replaceAll("-__-.*-__\\.", ".")));
+          }
+        }        
         
         forward.accept("default");
       } finally {
