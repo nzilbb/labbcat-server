@@ -2143,8 +2143,7 @@ public class ProcessWithPraat extends Task {
     File baseDir)
     throws Exception {
     Vector<Vector<String>> results = new Vector<Vector<String>>();
-    if (wav != null)
-    {
+    if (wav != null) {
       setStatus(
         "Generating script for " + targets.size() 
         + " target" + (targets.size()==1?"":"s")
@@ -2297,6 +2296,7 @@ public class ProcessWithPraat extends Task {
         if (extractCOG2) result.add("");
         if (extractCOG23) result.add("");
         for (String field : customScriptHeaders) result.add("");
+        result.add(""); // error (will be appended afterwards)
         results.add(result);
       } // next target
     }
