@@ -167,10 +167,23 @@ The image does not include a MySQL server, which can be supplied from the MySQL 
 image:
 
 ```
+echo MYSQL_DATABASE=labbcat > labbcat.env
+echo MYSQL_USER=labbcat >> labbcat.env
+echo MYSQL_PASSWORD=secret >> labbcat.env
+docker network create labbcat-net
 docker run --name=labbcat-db \
- -e MYSQL_DATABASE=labbcat -e MYSQL_USER=labbcat \
- -e MYSQL_PASSWORD=secret \
+ --env-file labbcat.env --network labbcat-net \
  -d mysql/mysql-server:5.6 \
  --skip-log-bin --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
-docker run -v /path/to/external/directory:/labbcat/files --name=labbcat --link labbcat-db -d -p 8888:8080 nzilbb/labbcat
+docker run --name=labbcat \
+ --env-file labbcat.env --network labbcat-net \
+ -d -p 8888:8080 nzilbb/labbcat
 ```
+
+For debugging purposes, the following command opens `bash` in the *labbcat* container:
+
+```
+docker exec -it labbcat /bin/bash
+```
+
+Log files are in `/usr/local/tomcat/logs/`

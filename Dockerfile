@@ -38,5 +38,10 @@ RUN sed -i '/USER-SECURITY/d' WEB-INF/web_install.xml
 RUN sed -i '/BASIC-AUTH/d' WEB-INF/web_install.xml
 RUN sed -i '/FORM-AUTH/d' WEB-INF/web_install.xml
 
+# ensure Tomcat has enough cache to actually start up the pre-installation webapp
+RUN sed -i \
+  's/<Context>/<Context><Resources cacheMaxSize="100000" cachingAllowed="true"\/>/'\
+  /usr/local/tomcat/conf/context.xml
+
 # Tomcat runs on port 8080
 EXPOSE 8080
