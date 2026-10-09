@@ -66,8 +66,6 @@ import nzilbb.util.IO;
  */
 public class Versions extends APIRequestHandler {
 
-  SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-  
   /** Constructor */
   public Versions() {}
   
@@ -202,10 +200,7 @@ public class Versions extends APIRequestHandler {
         jsonOut.writeEnd(); // Layer Managers
 
         String dataVersion = store.getSystemAttribute("dataVersion");
-        if (dataVersion == null || dataVersion.length() == 0) {
-          // return the current data/time, for reference
-          dataVersion = isoDateFormat.format(new java.util.Date());
-        }
+        if (dataVersion == null) dataVersion = "";
         jsonOut.writeStartObject("Data");
         jsonOut.write("dataVersion", dataVersion);
         jsonOut.writeEnd(); // Data
