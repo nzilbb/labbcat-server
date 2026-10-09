@@ -6,4 +6,5 @@ export interface VersionInfo {
     ThirdPartySoftware: { [id: string]: string; }
     RDBMS: { [id: string]: string; }
     LayerManagers: { [id: string]: string; }
+    Data: { [id: string]: string; }
 }

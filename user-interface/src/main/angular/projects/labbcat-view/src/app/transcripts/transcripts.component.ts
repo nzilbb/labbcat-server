@@ -47,6 +47,13 @@ export class TranscriptsComponent implements OnInit {
     searchJson: string;
     imagesLocation: string;
     generateLayerId = "";
+    // parameters to pass back to search
+    mainParticipantOnly: boolean;
+    onlyAligned: boolean;
+    firstMatchOnly: boolean;
+    excludeSimultaneousSpeech: boolean;
+    overlapThreshold: number;
+    suppressResults: boolean;
     
     serializers: SerializationDescriptor[];
     mimeTypeToSerializer = {};
@@ -141,9 +148,13 @@ export class TranscriptsComponent implements OnInit {
         /[?&](to)=([^&]*)/,
         /[?&](participant_expression)=([^&]*)/,
         /[?&](participants)=([^&]*)/,
-        /[?&](transcript_expression)=([^&]*)/,
-        /[?&](transcripts)=([^&]*)/,
-        /[?&](searchJson)=([^&]*)/
+        /[?&](searchJson)=([^&]*)/,
+        /[?&](mainParticipantOnly)=([^&]*)/,
+        /[?&](onlyAligned)=([^&]*)/,
+        /[?&](firstMatchOnly)=([^&]*)/,
+        /[?&](excludeSimultaneousSpeech)=([^&]*)/,
+        /[?&](overlapThreshold)=([^&]*)/,
+        /[?&](suppressResults)=([^&]*)/
     ];
     
     /** if no query parameters are passed, load the default from system settings */
@@ -248,6 +259,12 @@ export class TranscriptsComponent implements OnInit {
                     this.searchJson = params["searchJson"];
                 }
             }
+            if (params["mainParticipantOnly"]) this.mainParticipantOnly = params["mainParticipantOnly"];
+            if (params["onlyAligned"]) this.onlyAligned = params["onlyAligned"];
+            if (params["firstMatchOnly"]) this.firstMatchOnly = params["firstMatchOnly"];
+            if (params["excludeSimultaneousSpeech"]) this.excludeSimultaneousSpeech = params["excludeSimultaneousSpeech"];
+            if (params["overlapThreshold"]) this.overlapThreshold = params["overlapThreshold"];
+            if (params["suppressResults"]) this.suppressResults = params["suppressResults"];
             this.listTranscripts();
         });
     }    
@@ -312,8 +329,62 @@ export class TranscriptsComponent implements OnInit {
     listTranscripts(): void {
         this.query = this.transcriptQuery; // if any
         this.queryDescription = this.transcriptDescription;
+        if (this.query) { // page loaded with transcript_expression param
+            this.transcriptQuery = "";
+            this.transcriptDescription = "";
+            const queryItems = this.query.split(" && ");
+            for (let item of queryItems) {
+                // all transcripts: clear filters and don't consider further query items
+                if (item.match(/^\/\.\+\/\.test\(id\)$/)) {
+                    this.clearFilters();
+                    break;
+                }
+                // transcript filter
+                const testId = item.match(/^\/(.+)\/\.test\(id\)$/);
+                if (testId) {
+                    this.filterValues["transcript"] = [testId[1]];
+                    continue;
+                }
+                // all other filters
+                const layerMatch = item.match(/(labels|first)\('(.+?)'\)/);
+                if (layerMatch && this.filterLayers.map(x => x.id).includes(layerMatch[2])) {
+                    // /REGEXP/.test(labels('LAYER'))
+                    const testLabels = item.match(/\/(?<regexp>.+)\/\.test/);
+                    if (testLabels) {
+                        this.filterValues[layerMatch[2]][0] = testLabels.groups.regexp;
+                        continue;
+                    }
+                    // ["VALUE1", "VALUE2"].includesAny(labels('LAYER'))
+                    const includesAny = item.match(/(?<not>!?)\["(?<value>.+)"\].includesAny/);
+                    if (includesAny) {
+                        if (!includesAny.groups.not) {
+                            this.filterValues[layerMatch[2]] = includesAny.groups.value.split('","');
+                        } else {
+                            this.filterValues[layerMatch[2]] = Object
+                                .keys(this.filterLayers.filter(l => l.id == layerMatch[2])[0].validLabels)
+                                .filter(l => !includesAny.groups.value.split('","').includes(l))
+                                .toSpliced(0, 0, "!");
+                        }
+                        continue;
+                    }
+                    // first('LAYER').label OPERATOR [']VALUE[']
+                    const firstLabel = item.match(/first\('.+'\)\.label (?<operator>..?) '?(?<value>[^']+)/);
+                    if (firstLabel) {
+                        if ([">=", "="].includes(firstLabel.groups.operator)) {
+                            this.filterValues[layerMatch[2]] = [firstLabel.groups.value, ""];
+                        } else if (firstLabel.groups.operator == "<=") {
+                            this.filterValues[layerMatch[2]] = [
+                                this.filterValues[layerMatch[2]][0] ?? "",
+                                firstLabel.groups.value.replace(" 23:59:59", "")
+                            ];
+                        }
+                        continue;
+                    }
+                }
+            }
+        } else {
+            // TODO indenting
         for (let layer of this.filterLayers) {
-
             if (layer.id == this.schema.root.id
                 && this.filterValues[layer.id][0]) {
                 // transcript layer
@@ -462,14 +533,20 @@ export class TranscriptsComponent implements OnInit {
                 
             }
         } // next filter layer
+            // end TODO indenting
+        }
         // change the query string so the user can easily replicate this filter
         const queryParams: Params = {};
         if (this.nextPage) queryParams.to = this.nextPage; // pass through context parameters...
         if (this.participantQuery) queryParams.participant_expression = this.participantQuery;
         if (this.participantDescription) queryParams.participants = this.participantDescription;
-        if (this.transcriptQuery) queryParams.transcript_expression = this.transcriptQuery;
-        if (this.transcriptDescription) queryParams.transcripts = this.transcriptDescription;
         if (this.searchJson) queryParams.searchJson = this.searchJson;
+        if (this.mainParticipantOnly) queryParams.mainParticipantOnly = this.mainParticipantOnly;
+        if (this.onlyAligned) queryParams.onlyAligned = this.onlyAligned;
+        if (this.firstMatchOnly) queryParams.firstMatchOnly = this.firstMatchOnly;
+        if (this.excludeSimultaneousSpeech) queryParams.excludeSimultaneousSpeech = this.excludeSimultaneousSpeech;
+        if (this.overlapThreshold) queryParams.overlapThreshold = this.overlapThreshold;
+        if (this.suppressResults) queryParams.suppressResults = this.suppressResults;
         for (let layer of this.filterLayers) { // for each filter layer
             if (this.filterValues[layer.id].length > 0) { // there's at least one value
                 // add it to the query parameters
@@ -836,6 +913,12 @@ export class TranscriptsComponent implements OnInit {
         let params = this.selectedTranscriptsQueryParameters("participant_id");
         if (this.searchJson) params["searchJson"] = this.searchJson;
         if (this.participantDescription) params["participants"] = this.participantDescription;
+        if (this.mainParticipantOnly) params["mainParticipantOnly"] = this.mainParticipantOnly;
+        if (this.onlyAligned) params["onlyAligned"] = this.onlyAligned;
+        if (this.firstMatchOnly) params["firstMatchOnly"] = this.firstMatchOnly;
+        if (this.excludeSimultaneousSpeech) params["excludeSimultaneousSpeech"] = this.excludeSimultaneousSpeech;
+        if (this.overlapThreshold) params["overlapThreshold"] = this.overlapThreshold;
+        if (this.suppressResults) params["suppressResults"] = this.suppressResults;
         this.router.navigate(["search"], { queryParams: params });
     }
 
@@ -870,11 +953,11 @@ export class TranscriptsComponent implements OnInit {
                     transcripts: this.queryDescription
                 };
             } else { // typical check-box use case: a proper subset of filtered check-boxes are selected
-                // don't send a transcripts param (transcript count is visible in tab title)
                 params = {
                     transcript_expression: "["
                         + this.selectedIds.map(id=>"'"+id.replace(/'/,"\\'")+"'").join(",")
-                        + "].includes(id)"
+                        + "].includes(id)",
+                    transcripts: "individual selections" // TODO i18n
                 };
             }
         } else if (this.query) { // no check-boxes selected but some filter applied
@@ -885,7 +968,7 @@ export class TranscriptsComponent implements OnInit {
         } else { // no check-boxes selected or filter applied
             params = {
                 transcript_expression: "/.+/.test(id)",
-                transcripts: "all transcripts"
+                transcripts: "all transcripts" // TODO i18n
             };
         }
         if (this.participantQuery) {

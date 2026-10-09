@@ -31,21 +31,21 @@
             i18n-title title="Narrow down the participants to search by filtering by participant attributes"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && participantDescription && !participantsFile"
+            *ngIf="participantIds && participantIds.length && participantDescription != 'individual selections' && !participantsFile"
             (press)="selectParticipants()"
             img="people.svg"
             i18n-label label="Modify filter"
             i18n-title title="Modify current participant filter"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && participantDescription && !participantsFile"
+            *ngIf="participantIds && participantIds.length && participantDescription != 'individual selections' && !participantsFile"
             (press)="clearParticipantFilter()"
             img="delete.svg"
             i18n-label label="Clear filter"
             i18n-title title="Clear participant filter"
             ></lib-button>
           <lib-button
-            *ngIf="participantIds && participantIds.length && (!participantDescription || participantsFile)"
+            *ngIf="participantIds && participantIds.length && (participantDescription == 'individual selections' || participantsFile)"
             (press)="clearParticipantFilter()"
             img="delete.svg"
             i18n-label label="Clear selections"
@@ -120,21 +120,21 @@
             i18n-title title="Narrow down the transcripts to search by filtering by transcript attributes"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription && !transcriptsFile"
+            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription != 'individual selections' && !transcriptsFile"
             (press)="selectTranscripts()"
             img="people.svg"
             i18n-label label="Modify filter"
             i18n-title title="Modify current transcript filter"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription && !transcriptsFile"
+            *ngIf="transcriptIds && transcriptIds.length && transcriptDescription != 'individual selections' && !transcriptsFile"
             (press)="clearTranscriptFilter()"
             img="delete.svg"
             i18n-label label="Clear filter"
             i18n-title title="Clear transcript filter"
             ></lib-button>
           <lib-button
-            *ngIf="transcriptIds && transcriptIds.length && (!transcriptDescription || transcriptsFile)"
+            *ngIf="transcriptIds && transcriptIds.length && (transcriptDescription == 'individual selections' || transcriptsFile)"
             (press)="clearTranscriptFilter()"
             img="delete.svg"
             i18n-label label="Clear selections"
@@ -212,7 +212,8 @@
           </div>
         </div>
         <span *ngIf="matrix.participantQuery && matrix.participantQuery.includes('all(\'transcript\').length')"
-              id="nb-disabled">Filtering transcripts is disabled when the "Transcript count" participant filter is active</span>
+              id="nb-disabled"
+              i18n>Filtering transcripts is disabled when the "Transcript count" participant filter is active</span>
         <div id="transcript-ids">
           <p><span i18n>Selected transcripts</span>{{transcriptDescription ? ' ['+transcriptDescription+']' : ''}}:
             <span *ngIf="(!transcriptIds || !transcriptIds.length) && !participantIds.length" class="all" i18n>all transcripts</span>
@@ -275,6 +276,254 @@
         </div>
       </div>
       
+      <!-- history tab -->
+      <div *ngIf="currentTab == 'History'" id="history">
+        <table *ngIf="tab == currentTab">
+          <tbody>
+            <tr *ngFor="let historyItem of history; index as i" class="item">
+              <td class="history-name">
+                <lib-task *ngIf="!historyItem.sourceFile && historyItem.task.threadId"
+                  [threadId]="historyItem.task.threadId"
+                  [autoOpenResults]="false"
+                  [singleSpan]="true"
+                  [purgeHistoryIfInvalid]="true"
+                  (historyPurged)="purgeHistory($event)"
+                  ></lib-task>
+                <div *ngIf="historyItem.sourceFile" [title]="historyItem.sourceFile">
+                  <img [src]="imagesLocation + '/file-import.svg'"
+                    [alt]="historyItem.sourceFile">
+                  <span>{{historyItem.task.threadName}}</span>
+                </div>
+              </td>
+              <td *ngIf="anyImported(history)" class="history-metadata">
+                <details>
+                  <summary>
+                    <img *ngIf="labbcatTitle != historyItem.metadata.labbcat_title || versions.System['LaBB-CAT'] != historyItem.metadata.labbcat_version || versions.Data.dataVersion != historyItem.metadata.data_version"
+                            [src]="imagesLocation + '/triangle-exclamation.svg'"
+                            i18n-title title="One or more metadata fields does not match this corpus">
+                    <span i18n>Metadata</span>
+                  </summary>
+                  <div class="attribute-list-container">
+                    <!-- TODO indenting -->
+                  <div class="attribute-list">
+                    <div class="attribute">
+                      <label for="labbcat-title" i18n>LaBB-CAT title</label>
+                      <span id="labbcat-title" class="values">
+                        <img *ngIf="labbcatTitle != historyItem.metadata.labbcat_title"
+                          [src]="imagesLocation + '/triangle-exclamation.svg'"
+                          i18n-title title="Does not match this corpus"
+                          >{{historyItem.metadata.labbcat_title}}</span>
+                    </div>
+                    <div class="attribute">
+                      <label for="labbcat-version" i18n>LaBB-CAT version</label>
+                      <span id="labbcat-version" class="values">
+                        <img *ngIf="versions.System['LaBB-CAT'] != historyItem.metadata.labbcat_version"
+                          [src]="imagesLocation + '/triangle-exclamation.svg'"
+                          i18n-title title="Does not match this corpus"
+                          >{{historyItem.metadata.labbcat_version}}</span>
+                    </div>
+                    <div *ngIf="versions.Data.dataVersion || historyItem.metadata.data_version"
+                      class="attribute">
+                      <label for="data-version" i18n>Data version</label>
+                      <span *ngIf="historyItem.metadata.data_version"
+                        id="data-version" class="values">
+                        <img *ngIf="versions.Data.dataVersion != historyItem.metadata.data_version"
+                          [src]="imagesLocation + '/triangle-exclamation.svg'"
+                          i18n-title title="Does not match this corpus"
+                          >{{historyItem.metadata.data_version}}</span>
+                      <span *ngIf="!historyItem.metadata.data_version"
+                        id="data-version" class="values">
+                        <img *ngIf="versions.Data.dataVersion != historyItem.metadata.data_version"
+                          [src]="imagesLocation + '/triangle-exclamation.svg'"
+                          i18n-title title="Does not match this corpus"
+                          i18n>(None)</span>
+                    </div>
+                  </div>
+                    <!-- end TODO indenting -->
+                  </div>
+                </details>
+              </td>
+              <td class="history-status">
+                <span *ngIf="historyItem.task.running"
+                  class="loading"
+                  ><span>.</span><span>.</span><span>.</span></span>
+                <a *ngIf="historyItem.task.size && historyItem.task.resultUrl"
+                  [href]="historyItem.task.resultUrl"
+                  [target]="'task-' + historyItem.task.threadId"
+                  >{{historyItem.task.size}}&nbsp;<span
+                    *ngIf="historyItem.task.size == 1"
+                    i18n="singular result">result</span><span
+                    *ngIf="historyItem.task.size > 1"
+                    i18n="plural results">results</span></a>
+                <span *ngIf="historyItem.task.size && !historyItem.task.resultUrl"
+                  >{{historyItem.task.size}}&nbsp;<span i18n>results</span></span>
+                <span *ngIf="!historyItem.task.running && historyItem.task.hasOwnProperty('size') && historyItem.task.size == 0"
+                  i18n>0&nbsp;results</span>
+                <span *ngIf="historyItem.cancelled"
+                  i18n>Cancelled</span>
+                <span *ngIf="historyItem.task.lastException"
+                  class="error"
+                  [title]="historyItem.task.lastException"
+                  i18n>Error</span>
+              </td>
+              <td class="history-matrix">
+                <span
+                  *ngIf="sameMatrixAsPrevious(i)"
+                  class="same-prev"
+                  i18n>Same as previous</span>
+                <details *ngIf="!sameMatrixAsPrevious(i)">
+                  <summary i18n>Search matrix</summary>
+                  <app-search-matrix
+                    [schema]="schema"
+                    [(columns)]="historyItem.matrix.columns"
+                    [showLayerCheckboxes]="false"
+                    [readOnly]="true"
+                    ></app-search-matrix>
+                </details>
+              </td>
+              <td *ngIf="anyFilters(history)" class="history-filters">
+                <span
+                  *ngIf="sameFiltersAsPrevious(i)"
+                  class="same-prev"
+                  i18n>Same as previous</span>
+                <details *ngIf="!sameFiltersAsPrevious(i) && hasFilters(historyItem)">
+                  <summary i18n>Filters</summary>
+                  <div class="attribute-list-container">
+                    <!-- TODO indenting -->
+                  <div class="attribute-list">
+                    <div *ngIf="historyItem.matrix.participantQuery"
+                      class="attribute">
+                      <label for="participant-filter" i18n>Participants</label>
+                      <span *ngIf="historyItem.filters.participantDescription"
+                        id="participant-filter"
+                        class="values"
+                        >{{historyItem.filters.participantDescription.split(', ').join('\n')}}</span>
+                      <span *ngIf="!historyItem.filters.participantDescription"
+                        id="participant-filter"
+                        class="values"
+                        i18n>Selected participants</span>
+                    </div>
+                    <div *ngIf="historyItem.matrix.transcriptQuery"
+                      class="attribute">
+                      <label for="transcript-filter" i18n>Transcripts</label>
+                      <span *ngIf="historyItem.filters.transcriptDescription"
+                        id="transcript-filter"
+                        class="values"
+                        >{{historyItem.filters.transcriptDescription.split(', ').join('\n')}}</span>
+                      <span *ngIf="!historyItem.filters.transcriptDescription"
+                        id="transcript-filter"
+                        class="values"
+                        i18n>Selected transcripts</span>
+                    </div>
+                  </div>
+                    <!-- end TODO indenting -->
+                  </div>
+                </details>
+                <span *ngIf="!sameFiltersAsPrevious(i) && !hasFilters(historyItem)"
+                  i18n-title title="No filters were applied to this search"
+                  class="no-filters"
+                  i18n>No filters</span>
+              </td>
+              <td class="history-options">
+                <span
+                  *ngIf="sameOptionsAsPrevious(i)"
+                  class="same-prev"
+                  i18n>Same as previous</span>
+                <details *ngIf="!sameOptionsAsPrevious(i)">
+                  <summary i18n>Match options</summary>
+                  <div class="list">
+                    <div class="item">
+                      <label>
+                        <input type="checkbox" disabled
+                          [checked]="historyItem.matchOptions.mainParticipantOnly">
+                        <span i18n>Only include matches from the main participant in a transcript.</span></label>
+                    </div>
+                    <div class="item">
+                      <label i18n-title
+                             title="Return words that have been reliably word-aligned - e.g. by HTK or manually">
+                        <input type="checkbox" disabled
+                          [checked]="historyItem.matchOptions.onlyAligned">
+                        <span i18n>Only match words that are aligned.</span></label>
+                    </div>
+                    <div class="item">
+                      <label i18n-title title="Return only the first match in each transcript">
+                        <input type="checkbox" disabled
+                          [checked]="historyItem.matchOptions.firstMatchOnly">
+                        <span i18n>Only one match per transcript.</span></label>
+                    </div>
+                    <div class="item">
+                      <label i18n-title title="Exclude simultaneous speech">
+                        <input type="checkbox" disabled
+                          [checked]="historyItem.matchOptions.excludeSimultaneousSpeech">
+                        <span i18n="... [n]% overlap">Exclude utterances with more than</span></label>    
+                      <label i18n-title title="Define what counts as simultaneous speech">
+                        <input disabled
+                               class="numeric overlap_threshold" type="number"
+                               [value]="historyItem.matchOptions.overlapThreshold">
+                        <span i18n="Exclude utterances with more than [n] ...">% overlap</span></label>
+                    </div>
+                  </div>
+                </details>
+              </td>
+              <td class="history-buttons">
+                <div class="button-container">
+                  <lib-button
+                    (press)="repeat(historyItem)"
+                    [disabled]="searchRunning"
+                    img="repeat.svg" icon="🔁"
+                    i18n-label label="Repeat"
+                    i18n-title title="Copy search matrix, filters, and match options to this page"
+                    ></lib-button>
+                  <lib-button
+                    (press)="exportHistoryItem(historyItem)"
+                    img="code-file.svg" icon="<>"
+                    i18n-label label="Export search"
+                    i18n-title title="Export JSON representation of search parameters"
+                    ></lib-button>
+                  <lib-button
+                    (press)="deleteHistoryItem(historyItem)"
+                    action="delete"
+                    i18n-title title="Remove this search from the history"
+                    ></lib-button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td [colSpan]="4 + (anyImported(history) ? 1 : 0) + (anyFilters(history) ? 1 : 0)" class="file-chooser">
+                <label for="import-history" i18n>Import history from file</label>
+                <input type="file" id="import-history" (change)="selectHistoryFile($event.target.files)" autofocus>
+                <details>
+                  <summary i18n>What should the file look like?</summary>
+                  <div class="advanced">
+                    <span i18n>JavaScript Object Notation (.json) file exported using this tab's "Export Search" or "Export History" button</span>
+                  </div>
+                </details>
+              </td>
+              <td class="history-buttons">
+                <div *ngIf="history.length > 1" class="button-container">
+                  <lib-button
+                    (press)="exportHistory()"
+                    img="code-file.svg" icon="<>"
+                    i18n-label label="Export history"
+                    i18n-title title="Export JSON representation of parameters for all searches in history"
+                    ></lib-button>
+                  <lib-button
+                    (press)="deleteHistory()"
+                    img="trash.svg" icon="➖"
+                    i18n-label label="Clear history"
+                    i18n-title title="Remove all searches from the history"
+                    ></lib-button>
+                </div>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+        <a #exportAnchor id="export-anchor"
+          [href]="exportUrl"
+          [download]="exportName"></a>
+      </div>
     </div>
   </div>
   <div class="search-matrix">
@@ -292,5 +541,11 @@
       (click)="search()">
     </lib-button>
   </div>
-  <lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"></lib-task>
+  <lib-task *ngIf="threadId" [threadId]="threadId" [autoOpenResults]="!suppressResults"
+    (finished)="finishTask($event.threadId);"
+    (cancelled)="finishTask($event);"
+    [purgeHistoryIfInvalid]="true"
+    [purgeSilently]="true"
+    (historyPurged)="purgeHistory($event)"
+    ></lib-task>
 </div>

@@ -2,6 +2,12 @@ input {
     width: 100%;
     text-align: center;
 }
+input[disabled] {
+    cursor: not-allowed;
+    &::placeholder {
+        opacity: 0;
+    }
+}
 .invalid {
     color: red;
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, Output, EventEmitter } from '@angular/core';
 import { Inject } from '@angular/core';
 
 import { LabbcatService } from '../labbcat.service';
@@ -126,6 +126,10 @@ export class LayerCheckboxesComponent implements OnInit {
         if (!this.verticalPeersUnderline) this.verticalPeersUnderline = {};
     }
 
+    ngOnChanges(): void {
+        this.processSchema()
+    }
+
     loadSchema(): void {
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
@@ -172,6 +176,8 @@ export class LayerCheckboxesComponent implements OnInit {
                 if (layer.category) {
                     this.categorySelections[layer.category] = true;
                 }
+            } else {
+                layer._selected = false;
             }
             // fill in missing attribute hints
             if (layer.id == "participant") layer.hint = "Participant";
