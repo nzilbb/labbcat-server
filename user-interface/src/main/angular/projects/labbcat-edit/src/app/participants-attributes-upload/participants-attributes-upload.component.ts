@@ -167,7 +167,7 @@ export class ParticipantsAttributesUploadComponent implements OnInit {
                 // create it
                 this.processing = true;
                 this.labbcatService.labbcat.newLayer(
-                    newLayerId, this.schema.participantLayerId, newLayerId, 0,
+                    newLayerId, this.schema.participantLayerId, newAttribute, 0,
                     false, false, true, true, "string", null, newAttributeCategory,
                     (newLayer, errors, messages) => {
                         this.processing = false;
