@@ -299,7 +299,7 @@
                 <details>
                   <summary>
                     <img *ngIf="labbcatTitle != historyItem.metadata.labbcat_title || versions.System['LaBB-CAT'] != historyItem.metadata.labbcat_version || versions.Data.dataVersion != historyItem.metadata.data_version"
-                            [src]="imagesLocation + '/triangle-exclamation.svg'"
+                            [src]="imagesLocation + '/triangle-exclamation.svg'" alt="⚠"
                             i18n-title title="One or more metadata fields does not match this corpus">
                     <span i18n>Metadata</span>
                   </summary>
@@ -310,7 +310,7 @@
                       <label for="labbcat-title" i18n>LaBB-CAT title</label>
                       <span id="labbcat-title" class="values">
                         <img *ngIf="labbcatTitle != historyItem.metadata.labbcat_title"
-                          [src]="imagesLocation + '/triangle-exclamation.svg'"
+                          [src]="imagesLocation + '/triangle-exclamation.svg'" alt="⚠"
                           i18n-title title="Does not match this corpus"
                           >{{historyItem.metadata.labbcat_title}}</span>
                     </div>
@@ -318,7 +318,7 @@
                       <label for="labbcat-version" i18n>LaBB-CAT version</label>
                       <span id="labbcat-version" class="values">
                         <img *ngIf="versions.System['LaBB-CAT'] != historyItem.metadata.labbcat_version"
-                          [src]="imagesLocation + '/triangle-exclamation.svg'"
+                          [src]="imagesLocation + '/triangle-exclamation.svg'" alt="⚠"
                           i18n-title title="Does not match this corpus"
                           >{{historyItem.metadata.labbcat_version}}</span>
                     </div>
@@ -328,13 +328,13 @@
                       <span *ngIf="historyItem.metadata.data_version"
                         id="data-version" class="values">
                         <img *ngIf="versions.Data.dataVersion != historyItem.metadata.data_version"
-                          [src]="imagesLocation + '/triangle-exclamation.svg'"
+                          [src]="imagesLocation + '/triangle-exclamation.svg'" alt="⚠"
                           i18n-title title="Does not match this corpus"
                           >{{historyItem.metadata.data_version}}</span>
                       <span *ngIf="!historyItem.metadata.data_version"
                         id="data-version" class="values">
                         <img *ngIf="versions.Data.dataVersion != historyItem.metadata.data_version"
-                          [src]="imagesLocation + '/triangle-exclamation.svg'"
+                          [src]="imagesLocation + '/triangle-exclamation.svg'" alt="⚠"
                           i18n-title title="Does not match this corpus"
                           i18n>(None)</span>
                     </div>
