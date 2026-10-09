@@ -20,6 +20,11 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
     @Input() showName = true;
     @Input() autoOpenResults = true;
     @Output() finished = new EventEmitter<Task>();
+    @Output() cancelled = new EventEmitter<string>();
+    @Input() singleSpan: boolean;
+    @Input() purgeHistoryIfInvalid: boolean;
+    @Input() purgeSilently: boolean;
+    @Output() historyPurged = new EventEmitter<string>();
     task: Task;
     timeout: number;
     cancelling = false;
@@ -71,20 +76,31 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
         if (!this.cancelling) { // only update status if we're not cancelling...
             this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
                 // show messages
-                if (errors) errors.forEach(m => this.messageService.error(m));
+                if (errors) errors.forEach(m => {
+                    if (this.purgeHistoryIfInvalid && m == "Invalid ID: " + this.threadId) {
+                        let history = JSON.parse(sessionStorage.getItem("searchHistory")).filter(x => x.task && x.task.threadId !== this.threadId);
+                        sessionStorage.setItem("searchHistory", JSON.stringify(history));
+                        if (!this.purgeSilently) {
+                            this.messageService.info("Removed missing thread " + this.threadId + " from search history"); // TODO i18n
+                        }
+                        this.historyPurged.emit(this.threadId);
+                    } else {
+                        this.messageService.error(m);
+                    }
+                });
                 if (messages) messages.forEach(m => this.messageService.info(m));
 
                 // update model
                 this.task = task || this.task;
 
                 // if still running, results haven't been opened
-                if (this.task.running) this.resultsOpened = false;
+                if (this.task && this.task.running) this.resultsOpened = false;
 
-                if (!this.task.running) {
+                if (this.task && !this.task.running) {
                     this.finished.emit(this.task);
                 }
                 // if finished and there's a result URL, open the results
-                if (!this.task.running && this.task.resultUrl) {
+                if (this.task && !this.task.running && this.task.resultUrl) {
                     if (this.autoOpenResults) {
                         this.openResults();
                     }
@@ -97,10 +113,10 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
                 // set timeout for next check... // TODO make sure this keeps polling through outages
                 this.timeout = setTimeout(()=>{
                     // has the thread we're monitoring changed?
-                    if (task.threadId == this.threadId) { // the same thread
+                    if (task && task.threadId == this.threadId) { // the same thread
                         this.readTaskStatus();
                     }
-                }, this.task.refreshSeconds*1000 || 5000);
+                }, (this.task && this.task.refreshSeconds) ? this.task.refreshSeconds*1000 : 5000);
             });
         }
     }
@@ -128,6 +144,7 @@ export class TaskComponent implements OnInit, OnChanges, OnDestroy {
 
             // stop the regular timeout from firing
             clearTimeout(this.timeout);
+            this.cancelled.emit(this.threadId);
             this.cancelling = false;
 
             // get the status again

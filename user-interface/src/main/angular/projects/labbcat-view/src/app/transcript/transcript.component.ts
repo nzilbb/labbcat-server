@@ -1944,7 +1944,7 @@ export class TranscriptComponent implements OnInit {
         this.router.navigate(["search"], {
             queryParams: {
                 transcript_expression: "['" + this.id + "'].includes(id)",
-                transcripts: this.id
+                transcripts: "individual selections"
             }
         });
     }
@@ -1960,7 +1960,7 @@ export class TranscriptComponent implements OnInit {
         this.router.navigate(["search"], {
             queryParams: {
                 participant_expression: "['" + participant + "'].includes(id)",
-                participants: participant
+                participants: "individual selections"
             }
         });
     }

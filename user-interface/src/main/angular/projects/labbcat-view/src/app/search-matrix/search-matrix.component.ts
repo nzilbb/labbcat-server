@@ -17,6 +17,8 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
     @Input() columns: MatrixColumn[];
     @Output() columnsChange = new EventEmitter<MatrixColumn[]>();
     @Output() searchStarted = new EventEmitter<void>();
+    @Input() showLayerCheckboxes = true;
+    @Input() readOnly = false;
 
     helperMatch: MatrixLayerMatch;
     imagesLocation : string;
@@ -32,7 +34,7 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (!this.columns) this.columns = [];
         // if we haven't set selectedLayerIds yet
-        if (this.schema && !this.selectedLayerIds) {
+        if (this.schema) {
             // if there's no search matrix yet
             if (this.columns.length == 0) {
                 // default to a word search (preferably orthography)
@@ -97,6 +99,9 @@ export class SearchMatrixComponent implements OnInit, OnChanges {
             }
             column.layers = newLayers;
         } // next column
+
+        // update layers
+        this.selectedLayerIds = selectedLayerIds;
     }
 
     setTarget(targetMatch: MatrixLayerMatch): void {
