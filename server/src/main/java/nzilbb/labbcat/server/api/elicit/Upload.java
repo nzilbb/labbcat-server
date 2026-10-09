@@ -414,7 +414,7 @@ public class Upload extends APIRequestHandler {
           }
           
           return successResult(
-            Json.createObjectBuilder(), "Saved: {0}", transcript.getName());
+            Json.createObjectBuilder().build(), "Saved: {0}", transcript.getName());
         } finally { // delete all uploaded file parameters
           for (File uploadFile : allFiles) uploadFile.delete();
         }
