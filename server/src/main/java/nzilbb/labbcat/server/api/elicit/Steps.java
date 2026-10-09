@@ -263,7 +263,7 @@ public class Steps extends APIRequestHandler { // TODO automated tests
                   "consentUrl", context.getBaseUrl().toString() + "/elicit/consent");
                 model.add(
                   "newParticipantUrl", context.getBaseUrl() + "/elicit/participant");
-                model.add("verifyUrl", context.getBaseUrl() + "/elicit/verify");
+                model.add("verifyUrl", context.getBaseUrl() + "/api/elicit/verify");
                 
                 // set filename for cases where this is a task definition export
                 fileName.accept(task + ".json");
