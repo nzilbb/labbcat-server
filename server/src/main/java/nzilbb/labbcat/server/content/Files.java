@@ -80,12 +80,15 @@ public class Files extends APIRequestHandler {
    * @param parameters Request parameter map.
    * @param realPath Function for translating an absolute URL path into a File.
    * @param fileName Receives the filename for specification in the response headers.
+   * @param contentType Receives the content type for specification in the
+   * response headers. 
    * @param httpStatus Receives the response status code, in case of error.
    * @param forward Receives a servlet name for the request to be forwarded to.
    */
   public void get(
     String pathInfo, RequestParameters parameters, Function<String,File> realPath,
-    Consumer<String> fileName, Consumer<Integer> httpStatus, Consumer<String> forward) {
+    Consumer<String> fileName, Consumer<String> contentType, Consumer<Integer> httpStatus,
+    Consumer<String> forward) {
 
     if (pathInfo == null) { // root directory with no slash
       httpStatus.accept(SC_BAD_REQUEST);
@@ -197,6 +200,14 @@ public class Files extends APIRequestHandler {
             fileName.accept(IO.SafeFileNameUrl(
                               f.getName().replaceAll("-__-.*-__\\.", ".")));
           }
+          // or a zip file of results
+          if (f.getName().endsWith(".zip")) {
+            contentType.accept("application/zip");
+            fileName.accept(f.getName());
+          }
+        } else { // ensure the content-type and attachment name are set
+          contentType.accept(media.getMimeType());
+          fileName.accept(f.getName());
         }        
         
         forward.accept("default");
