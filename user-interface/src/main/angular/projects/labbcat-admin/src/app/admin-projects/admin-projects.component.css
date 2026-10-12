@@ -1,5 +1,5 @@
 .project-name input {
-    min-wdith: 70px;
+    min-width: 70px;
 }
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
