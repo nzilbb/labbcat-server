@@ -164,6 +164,10 @@
           <context context-type="linenumber">78,80</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">61,63</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
           <context context-type="linenumber">121,123</context>
         </context-group>
@@ -495,6 +499,294 @@
           <context context-type="linenumber">3,4</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="641917325992291701" datatype="html">
+        <source>Upload Annotation Data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">1,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4248327036097608973" datatype="html">
+        <source>Annotation Data File</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4535249028535646526" datatype="html">
+        <source><x id="INTERPOLATION" equiv-text="{{rowCount}}"/> rows</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">6,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">6,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3289607943310311422" datatype="html">
+        <source>What should the file look like?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">9,11</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="688282212100268456" datatype="html">
+        <source>Comma-separated values (.csv) file exported from results of a search, with</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7285473720091088140" datatype="html">
+        <source>One row per annotation you want to create/update</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5963306749760999176" datatype="html">
+        <source>For tagging matched tokens:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">14,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4194451887983185967" datatype="html">
+        <source>One column that identifies the individual match token - e.g. MatchId</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">16,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1028102987175280148" datatype="html">
+        <source>For tagging intervals of time:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">19,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="907515340158650500" datatype="html">
+        <source>A column that identifies the transcript name - e.g. Transcript</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">21,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1949951002954679973" datatype="html">
+        <source>A column that identifies the start time - e.g. Line</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">22,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8697554708550537303" datatype="html">
+        <source>A column that identifies the end time - e.g. LineEnd</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">23,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="843548054527451651" datatype="html">
+        <source>Columns</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">33,35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+        <note priority="1" from="description">CSV column selector</note>
+      </trans-unit>
+      <trans-unit id="645490046909700277" datatype="html">
+        <source>Which field identifies identity of the matched token</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3289800167413296192" datatype="html">
+        <source>Tag Tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">39,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8660101300890844002" datatype="html">
+        <source>Match column</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">42,44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8389763682711459243" datatype="html">
+        <source>Which fields identifies the interval to annotate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">53,55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7700638036077112418" datatype="html">
+        <source>Interval Annotation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">57,60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8402693831242705878" datatype="html">
+        <source>The name of the transcript to annotate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">60,62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7368553141636355421" datatype="html">
+        <source>The start time of the annotation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">71,73</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4204880191779081093" datatype="html">
+        <source>Start Time</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">72,74</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2736309149741538333" datatype="html">
+        <source>The end time of the annotation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">82,84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3845185958891849368" datatype="html">
+        <source>End Time</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">83,85</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2326852750443276784" datatype="html">
+        <source>Mapping from CSV columns to layers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">94,95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4387964261679403541" datatype="html">
+        <source>Name of the CSV column</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">97,99</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6274404167196009355" datatype="html">
+        <source>Which annotation layer to import this column into</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">100,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2879017934900204826" datatype="html">
+        <source>ignore</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">103,105</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">44,48</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">41,45</context>
+        </context-group>
+        <note priority="1" from="description">CSV import column-to-layer option</note>
+      </trans-unit>
+      <trans-unit id="4580760657581467715" datatype="html">
+        <source>Import data from file</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">113,115</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">73,75</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">70,72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6932865105766151309" datatype="html">
+        <source>Upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">115,118</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">35,36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/menu-upload/menu-upload.component.html</context>
+          <context context-type="linenumber">1,4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">75,79</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">67,68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">72,76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="628478652558593118" datatype="html">
+        <source>There were warnings during data processing:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/annotations-upload/annotations-upload.component.html</context>
+          <context context-type="linenumber">130,134</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="2774049696124473355" datatype="html">
         <source>Episode Documents</source>
         <context-group purpose="location">
@@ -515,6 +807,296 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/episode-documents/episode-documents.component.html</context>
           <context context-type="linenumber">25,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2654571276166006370" datatype="html">
+        <source>Upload Fragments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">1,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2978028594818600343" datatype="html">
+        <source>Defaults</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7529364102603583700" datatype="html">
+        <source>Whether to automate upload by allowing LaBB-CAT to make all decisions about tier/layer mappings and other options, and upload files one after the other automatically.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">39,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4217484061449923624" datatype="html">
+        <source>Automated Upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">10,12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">42,44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2159130950882492111" datatype="html">
+        <source>Cancel</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">22,23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">54,55</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">188</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+      <trans-unit id="9096686131068622693" datatype="html">
+        <source>Cancel current processing</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4913436974014819414" datatype="html">
+        <source>Follow progress</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">27,29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">59,61</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7506829264320148834" datatype="html">
+        <source>Add all fragments to LaBB-CAT</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">35,38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8700121026680200191" datatype="html">
+        <source>Clear</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">42,43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">93,94</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+      <trans-unit id="1733912613176236885" datatype="html">
+        <source>Remove all files from the queue</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">42,45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">93,96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7008439939460403347" datatype="html">
+        <source>Report</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">48,50</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">99,101</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+      <trans-unit id="3650515205757147547" datatype="html">
+        <source>Report about uploads</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">48,51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">99,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6219940534662997938" datatype="html">
+        <source>Drop fragment files (e.g. utterance TextGrids) on to this area</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">55,57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3180858346073987680" datatype="html">
+        <source>Queue of fragments to upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">61,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2728471020234722275" datatype="html">
+        <source>Select files for upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">63,65</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">114,116</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5298365184726383687" datatype="html">
+        <source>Queue length</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">69,70</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">120,121</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="697012447096965660" datatype="html">
+        <source>Fragment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">70,72</context>
+        </context-group>
+        <note priority="1" from="description">Upload batch column</note>
+      </trans-unit>
+      <trans-unit id="5611592591303869712" datatype="html">
+        <source>Status</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">71,73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">126,128</context>
+        </context-group>
+        <note priority="1" from="description">Upload batch column</note>
+      </trans-unit>
+      <trans-unit id="3419681791450150574" datatype="html">
+        <source>Progress</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">72,75</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">127,130</context>
+        </context-group>
+        <note priority="1" from="description">Upload batch column</note>
+      </trans-unit>
+      <trans-unit id="1773330174139432021" datatype="html">
+        <source>Show/hide parameters</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">81,82</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">136,137</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4039424112813937091" datatype="html">
+        <source>[no fragment yet]</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">96,99</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5362126518639961906" datatype="html">
+        <source>Remove this file from the queue</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">109,111</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">182,184</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4563965495368336177" datatype="html">
+        <source>Skip</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">152,153</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
+          <context context-type="linenumber">229,230</context>
+        </context-group>
+        <note priority="1" from="description">Batch upload</note>
+      </trans-unit>
+      <trans-unit id="7023391108044052440" datatype="html">
+        <source>Skip this fragment and upload the next</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">152,154</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8168941722469405288" datatype="html">
+        <source>Set the parameters for this fragment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/fragment-upload/fragment-upload.component.html</context>
+          <context context-type="linenumber">158,160</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5294678812754450009" datatype="html">
+        <source>Update utterance annotations from TextGrid files</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/menu-upload/menu-upload.component.html</context>
+          <context context-type="linenumber">5,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3285326033913012866" datatype="html">
+        <source>Add annotations from a CSV file</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/menu-upload/menu-upload.component.html</context>
+          <context context-type="linenumber">9,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="75076602792741875" datatype="html">
+        <source>Regenerate annotations in selected transcripts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/menu-upload/menu-upload.component.html</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="15057490725712661" datatype="html">
+        <source>Regenerate annotations in selected participants&apos; utterances</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/menu-upload/menu-upload.component.html</context>
+          <context context-type="linenumber">17,20</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7738733953567775674" datatype="html">
@@ -724,6 +1306,225 @@
           <context context-type="linenumber">220,224</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="2314570968436736409" datatype="html">
+        <source>Upload Participant Data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">1,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="15275345237461663" datatype="html">
+        <source>Participant Data File</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1153615422182796981" datatype="html">
+        <source>Comma-separated values (.csv) file, with</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">10,12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">10,12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9134239669767880470" datatype="html">
+        <source>One row per participant you want to create/update</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">12,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6851832108508787582" datatype="html">
+        <source>One column that identifies the participant by ID/name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">13,14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7615481277212899675" datatype="html">
+        <source>A column for each participant attribute you want to import</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">14,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2762141226282955893" datatype="html">
+        <source>Which field identifies the ID/name of the participant</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">23,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7841559380776971094" datatype="html">
+        <source>Participant identity column</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="606179468257318390" datatype="html">
+        <source>Automatically Generated</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">27,29</context>
+        </context-group>
+        <note priority="1" from="description">Imported participants ID column option</note>
+      </trans-unit>
+      <trans-unit id="350795280999724614" datatype="html">
+        <source>Mapping from CSV columns to participant attributes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">33,35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4443632696351868455" datatype="html">
+        <source>Which attribute to import this column into</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="757815711752704212" datatype="html">
+        <source>Use as password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+        <note priority="1" from="description">CSV import column-to-attribute option</note>
+      </trans-unit>
+      <trans-unit id="5720231703896819520" datatype="html">
+        <source>create new attribute called...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">48,50</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">45,47</context>
+        </context-group>
+        <note priority="1" from="description">CSV import column-to-attribute option</note>
+      </trans-unit>
+      <trans-unit id="3271269739842482875" datatype="html">
+        <source>New attribute name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">55,57</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">52,54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8099859610557103941" datatype="html">
+        <source>New attribute category</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">60,62</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">57,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1521858531727005930" datatype="html">
+        <source>Participants processed : <x id="INTERPOLATION" equiv-text="{{updated}}"/> updated, <x id="INTERPOLATION_1" equiv-text="{{created}}"/> created. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-attributes-upload/participants-attributes-upload.component.html</context>
+          <context context-type="linenumber">83,85</context>
+        </context-group>
+        <note priority="1" from="description">Upload result, do not translate {{updated}} and {{created}}</note>
+      </trans-unit>
+      <trans-unit id="3422664024744243664" datatype="html">
+        <source>Regenerate Participant Utterances</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">1,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8749603328740582549" datatype="html">
+        <source>Which layer to generate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8546497588822553841" datatype="html">
+        <source>Layer to generate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">6,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">6,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7362755962110807479" datatype="html">
+        <source>Participant ID List</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">15,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="804906742805252250" datatype="html">
+        <source>A plain text file (e.g. .txt) with one participant name per line.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">23,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2730881398060880852" datatype="html">
+        <source><x id="INTERPOLATION" equiv-text="{{lineCount}}"/> lines</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">27,28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="758919393644897561" datatype="html">
+        <source>This file looks like it might be a CSV file with multiple columns. Please ensure that the file has only one participant name on each line.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">33,36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6936786995385420720" datatype="html">
+        <source>Start processing</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">41,43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="467152698327190533" datatype="html">
+        <source>Process</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/participants-layers-regenerate/participants-layers-regenerate.component.html</context>
+          <context context-type="linenumber">42,44</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="4392302291671917038" datatype="html">
         <source>transcript: Transcript file name</source>
         <context-group purpose="location">
@@ -811,13 +1612,6 @@
           <context context-type="linenumber">1,5</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2978028594818600343" datatype="html">
-        <source>Defaults</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">5,7</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="3062709378414401571" datatype="html">
         <source>Transcript Type</source>
         <context-group purpose="location">
@@ -846,58 +1640,6 @@
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
           <context context-type="linenumber">31,33</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="7529364102603583700" datatype="html">
-        <source>Whether to automate upload by allowing LaBB-CAT to make all decisions about tier/layer mappings and other options, and upload files one after the other automatically.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">39,40</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="4217484061449923624" datatype="html">
-        <source>Automated Upload</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">40,42</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">42,44</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2159130950882492111" datatype="html">
-        <source>Cancel</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">54,55</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">188</context>
-        </context-group>
-        <note priority="1" from="description">Batch upload</note>
-      </trans-unit>
-      <trans-unit id="9096686131068622693" datatype="html">
-        <source>Cancel current processing</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">54,56</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="4913436974014819414" datatype="html">
-        <source>Follow progress</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">59,61</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="6932865105766151309" datatype="html">
-        <source>Upload</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">67,68</context>
-        </context-group>
-        <note priority="1" from="description">Batch upload</note>
       </trans-unit>
       <trans-unit id="3166624348134525054" datatype="html">
         <source>Add all transcripts to LaBB-CAT</source>
@@ -951,36 +1693,6 @@
           <context context-type="linenumber">87,90</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="8700121026680200191" datatype="html">
-        <source>Clear</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">93,94</context>
-        </context-group>
-        <note priority="1" from="description">Batch upload</note>
-      </trans-unit>
-      <trans-unit id="1733912613176236885" datatype="html">
-        <source>Remove all files from the queue</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">93,96</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="7008439939460403347" datatype="html">
-        <source>Report</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">99,101</context>
-        </context-group>
-        <note priority="1" from="description">Batch upload</note>
-      </trans-unit>
-      <trans-unit id="3650515205757147547" datatype="html">
-        <source>Report about uploads</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">99,102</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="4187562861917781527" datatype="html">
         <source>Drop transcript and media files on to this area</source>
         <context-group purpose="location">
@@ -993,20 +1705,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
           <context context-type="linenumber">112,114</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2728471020234722275" datatype="html">
-        <source>Select files for upload</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">114,116</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="5298365184726383687" datatype="html">
-        <source>Queue length</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">120,121</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3250391385569692601" datatype="html">
@@ -1025,50 +1723,12 @@
         </context-group>
         <note priority="1" from="description">Upload batch column</note>
       </trans-unit>
-      <trans-unit id="5611592591303869712" datatype="html">
-        <source>Status</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">126,128</context>
-        </context-group>
-        <note priority="1" from="description">Upload batch column</note>
-      </trans-unit>
-      <trans-unit id="3419681791450150574" datatype="html">
-        <source>Progress</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">127,130</context>
-        </context-group>
-        <note priority="1" from="description">Upload batch column</note>
-      </trans-unit>
-      <trans-unit id="1773330174139432021" datatype="html">
-        <source>Show/hide parameters</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">136,137</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="7083176320247907066" datatype="html">
         <source>[no transcript yet]</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
           <context context-type="linenumber">151,153</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="5362126518639961906" datatype="html">
-        <source>Remove this file from the queue</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">182,184</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="4563965495368336177" datatype="html">
-        <source>Skip</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
-          <context context-type="linenumber">229,230</context>
-        </context-group>
-        <note priority="1" from="description">Batch upload</note>
       </trans-unit>
       <trans-unit id="4015601168245383471" datatype="html">
         <source>Skip this transcript and upload the next</source>
@@ -1082,6 +1742,105 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-edit/src/app/transcript-upload/transcript-upload.component.html</context>
           <context context-type="linenumber">235,237</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3327666791532921035" datatype="html">
+        <source>Upload Transcript Data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">1,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8322317136905404871" datatype="html">
+        <source>Transcript Data File</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4225974622298629483" datatype="html">
+        <source>One row per transcript you want to update</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">12,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5144176920957429428" datatype="html">
+        <source>One column that identifies the transcript by ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">13,14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1312020023336080293" datatype="html">
+        <source>A column for each transcript attribute you want to import</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">14,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8411963452160564451" datatype="html">
+        <source>Which field identifies the ID/name of the transcript</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">23,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7027294627084566770" datatype="html">
+        <source>Transcript identity column</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8099492857080001007" datatype="html">
+        <source>Mapping from CSV columns to transcript attributes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">32,34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3990857526624823589" datatype="html">
+        <source>Transcripts processed : <x id="INTERPOLATION" equiv-text="{{updated}}"/> updated, <x id="INTERPOLATION_1" equiv-text="{{missing}}"/> missing. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-attributes-upload/transcripts-attributes-upload.component.html</context>
+          <context context-type="linenumber">80,82</context>
+        </context-group>
+        <note priority="1" from="description">Upload result, do not translate {{updated}} and {{missing}}</note>
+      </trans-unit>
+      <trans-unit id="5509319933817957189" datatype="html">
+        <source>Regenerate Transcript Layers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">1,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9214894060071366520" datatype="html">
+        <source>All layers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4424344434800224284" datatype="html">
+        <source>Transcript ID List</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">16,17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8571498054776426467" datatype="html">
+        <source>A plain text file (e.g. .txt) with one transcript name per line.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">24,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6726905638149889747" datatype="html">
+        <source>This file looks like it might be a CSV file with multiple columns. Please ensure that the file has only one transcript name on each line.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-edit/src/app/transcripts-layers-regenerate/transcripts-layers-regenerate.component.html</context>
+          <context context-type="linenumber">34,37</context>
         </context-group>
       </trans-unit>
     </body>

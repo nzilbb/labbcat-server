@@ -710,6 +710,10 @@
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
           <context context-type="linenumber">210,214</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">498,500</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="688282212100268456" datatype="html">
         <source>Comma-separated values (.csv) file exported from results of a search, with</source>
@@ -1014,7 +1018,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">167,169</context>
+          <context context-type="linenumber">168,170</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1960248467408366593" datatype="html">
@@ -1665,6 +1669,10 @@
           <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
           <context context-type="linenumber">170,172</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">318,319</context>
+        </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
       <trans-unit id="5378123397719336393" datatype="html">
@@ -1679,6 +1687,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/matches/matches.component.html</context>
           <context context-type="linenumber">179,181</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">327,328</context>
         </context-group>
         <note priority="1" from="description">csv options</note>
       </trans-unit>
@@ -2142,6 +2154,10 @@
           <context context-type="linenumber">183,184</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">408,409</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
           <context context-type="linenumber">1,2</context>
         </context-group>
@@ -2169,6 +2185,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/participants/participants.component.html</context>
           <context context-type="linenumber">1,2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">396,397</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcript-attributes/transcript-attributes.component.html</context>
@@ -2238,7 +2258,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">119,121</context>
+          <context context-type="linenumber">120,122</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1381772517765827024" datatype="html">
@@ -2249,7 +2269,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">120,122</context>
+          <context context-type="linenumber">121,123</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2722293800272465493" datatype="html">
@@ -2260,7 +2280,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">135,138</context>
+          <context context-type="linenumber">136,139</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3264165192467598415" datatype="html">
@@ -2285,7 +2305,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">150,152</context>
+          <context context-type="linenumber">151,153</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2827230378147260711" datatype="html">
@@ -2329,11 +2349,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">221,223</context>
+          <context context-type="linenumber">222,224</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">225,227</context>
+          <context context-type="linenumber">226,228</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7131740446034926808" datatype="html">
@@ -2344,7 +2364,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">235,238</context>
+          <context context-type="linenumber">236,239</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4121901150144132457" datatype="html">
@@ -2369,7 +2389,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">252,254</context>
+          <context context-type="linenumber">253,255</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2948866050986689295" datatype="html">
@@ -3177,7 +3197,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">60,62</context>
+          <context context-type="linenumber">67,69</context>
         </context-group>
         <note priority="1" from="description">Minimum pitch</note>
       </trans-unit>
@@ -3201,7 +3221,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">71,72</context>
+          <context context-type="linenumber">80,81</context>
         </context-group>
         <note priority="1" from="description">Maximum pitch</note>
       </trans-unit>
@@ -3527,130 +3547,130 @@
         <source>Target this match</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">26,29</context>
+          <context context-type="linenumber">27,30</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">29,31</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">49,51</context>
+          <context context-type="linenumber">54,56</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">51,53</context>
+          <context context-type="linenumber">56,58</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">93,95</context>
+          <context context-type="linenumber">104,106</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">95,97</context>
+          <context context-type="linenumber">106,108</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2921151104759780624" datatype="html">
         <source>Anchor to start of <x id="INTERPOLATION" equiv-text="{{schema.wordLayerId}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">37,38</context>
+          <context context-type="linenumber">40,41</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5458511976969720024" datatype="html">
         <source>Add word-internal segment pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">76,78</context>
+          <context context-type="linenumber">87,89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">158,160</context>
+          <context context-type="linenumber">175,177</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7177968829236844694" datatype="html">
         <source>Remove word-internal segment pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">84,85</context>
+          <context context-type="linenumber">95,96</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">166,167</context>
+          <context context-type="linenumber">183,184</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1653870629135193766" datatype="html">
         <source>match or not</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">102,103</context>
+          <context context-type="linenumber">115,117</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3217830042880509138" datatype="html">
         <source>matches</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">104,105</context>
+          <context context-type="linenumber">119,120</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1987778970113179364" datatype="html">
         <source>doesn&apos;t match</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">105,108</context>
+          <context context-type="linenumber">120,123</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5897290368516021212" datatype="html">
         <source>Regular expression (A≠a)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">113,114</context>
+          <context context-type="linenumber">128,129</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2064010604844052750" datatype="html">
         <source>Regular expression (case sensitive)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">114,116</context>
+          <context context-type="linenumber">129,131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">124,126</context>
+          <context context-type="linenumber">140,142</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6358038517914511495" datatype="html">
         <source>Regular expression (A=a)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">123,124</context>
+          <context context-type="linenumber">139,140</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8465959503671221000" datatype="html">
         <source>Phoneme symbol selector</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">136,138</context>
+          <context context-type="linenumber">153,155</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3080988241411008393" datatype="html">
         <source>Symbol selector</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">141,143</context>
+          <context context-type="linenumber">158,160</context>
         </context-group>
       </trans-unit>
       <trans-unit id="142567873907021545" datatype="html">
         <source>Anchor to end of <x id="INTERPOLATION" equiv-text="{{schema.wordLayerId}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">173,174</context>
+          <context context-type="linenumber">190,191</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1069686183681032115" datatype="html">
         <source>followed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">184,186</context>
+          <context context-type="linenumber">203,206</context>
         </context-group>
         <note priority="1" from="description">&apos;followed&apos; n words later by...</note>
       </trans-unit>
@@ -3658,14 +3678,14 @@
         <source>Distance between matches</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">185,187</context>
+          <context context-type="linenumber">204,206</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7803787878526251041" datatype="html">
         <source>immediately</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">187,188</context>
+          <context context-type="linenumber">208,209</context>
         </context-group>
         <note priority="1" from="description">followed &apos;immediately&apos; by...</note>
       </trans-unit>
@@ -3673,7 +3693,7 @@
         <source>up to 1 word later</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">188,190</context>
+          <context context-type="linenumber">209,211</context>
         </context-group>
         <note priority="1" from="description">followed &apos;up to 1 word later&apos; by...</note>
       </trans-unit>
@@ -3681,7 +3701,7 @@
         <source>up to 2 words later</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">189,193</context>
+          <context context-type="linenumber">210,214</context>
         </context-group>
         <note priority="1" from="description">followed &apos;up to 2 words later&apos; by...</note>
       </trans-unit>
@@ -3689,7 +3709,7 @@
         <source>by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">191,195</context>
+          <context context-type="linenumber">212,215</context>
         </context-group>
         <note priority="1" from="description">followed n words later &apos;by&apos;...</note>
       </trans-unit>
@@ -3697,14 +3717,14 @@
         <source>Make the search one word wider</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">195,197</context>
+          <context context-type="linenumber">216,218</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4534321503092527386" datatype="html">
         <source>Make the search one word narrower</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search-matrix/search-matrix.component.html</context>
-          <context context-type="linenumber">201,204</context>
+          <context context-type="linenumber">222,225</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4580988005648117665" datatype="html">
@@ -3715,7 +3735,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">291,293</context>
+          <context context-type="linenumber">540,542</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4977124625884908805" datatype="html">
@@ -3769,7 +3789,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">160,161</context>
+          <context context-type="linenumber">161,162</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6734148625518264402" datatype="html">
@@ -3899,6 +3919,10 @@
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
           <context context-type="linenumber">92,93</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">404,406</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="7388345456235507513" datatype="html">
         <source>all participants</source>
@@ -3922,7 +3946,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">229,231</context>
+          <context context-type="linenumber">230,232</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4004367037501471908" datatype="html">
@@ -4055,88 +4079,131 @@
           <context context-type="linenumber">200,203</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="3379020323742238785" datatype="html">
+        <source>Filtering transcripts is disabled when the &quot;Transcript count&quot; participant filter is active</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">216,218</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="8339694140879954102" datatype="html">
         <source>Selected transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">217,218</context>
+          <context context-type="linenumber">218,219</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">416,419</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1449132642536315635" datatype="html">
         <source>all transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">218,219</context>
+          <context context-type="linenumber">219,220</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8033506883620749766" datatype="html">
         <source>all transcripts with selected participants</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">219,221</context>
+          <context context-type="linenumber">220,222</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1057592339589740606" datatype="html">
         <source>List more transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">228,230</context>
+          <context context-type="linenumber">229,231</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2927811201893402644" datatype="html">
         <source>Match options</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">239,242</context>
+          <context context-type="linenumber">240,243</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">433,435</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8842543624980762072" datatype="html">
         <source>Only include matches from the main participant in a transcript.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">243,246</context>
+          <context context-type="linenumber">244,247</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">439,441</context>
         </context-group>
       </trans-unit>
       <trans-unit id="426041029217844666" datatype="html">
         <source>Return words that have been reliably word-aligned - e.g. by HTK or manually</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">247,248</context>
+          <context context-type="linenumber">248,249</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">443,445</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3711337075658905974" datatype="html">
         <source>Only match words that are aligned.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">249,252</context>
+          <context context-type="linenumber">250,253</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">446,448</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4979708585759352745" datatype="html">
         <source>Return only the first match in each transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">252,253</context>
+          <context context-type="linenumber">253,254</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">449,451</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9171906402072521489" datatype="html">
         <source>Only one match per transcript.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">254,257</context>
+          <context context-type="linenumber">255,258</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">452,454</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2287378034795981120" datatype="html">
         <source>Exclude simultaneous speech</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">257,258</context>
+          <context context-type="linenumber">258,259</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">455,457</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1930098652065133255" datatype="html">
         <source>Exclude utterances with more than</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">259,260</context>
+          <context context-type="linenumber">260,261</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">458,459</context>
         </context-group>
         <note priority="1" from="description">... [n]% overlap</note>
       </trans-unit>
@@ -4144,14 +4211,22 @@
         <source>Define what counts as simultaneous speech</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">260,262</context>
+          <context context-type="linenumber">261,263</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">459,461</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6711803987257877773" datatype="html">
         <source>% overlap</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">265,269</context>
+          <context context-type="linenumber">266,270</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">463,468</context>
         </context-group>
         <note priority="1" from="description">Exclude utterances with more than [n] ...</note>
       </trans-unit>
@@ -4159,28 +4234,237 @@
         <source>Display option</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">269,271</context>
+          <context context-type="linenumber">270,272</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4748999865766743359" datatype="html">
         <source>Do not open a list of matches when search is complete</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">271,272</context>
+          <context context-type="linenumber">272,273</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9020646266054694786" datatype="html">
         <source>No matches, only a count of results.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">273,278</context>
+          <context context-type="linenumber">274,279</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6810072234728990107" datatype="html">
+        <source>One or more metadata fields does not match this corpus</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">303,305</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="218403386307979629" datatype="html">
+        <source>Metadata</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">304,306</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7627337123425646056" datatype="html">
+        <source>LaBB-CAT title</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">310,312</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5888697855424881790" datatype="html">
+        <source>Does not match this corpus</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">314,315</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">322,323</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">332,334</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">338,341</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5172769349703733346" datatype="html">
+        <source>result</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">355,357</context>
+        </context-group>
+        <note priority="1" from="description">singular result</note>
+      </trans-unit>
+      <trans-unit id="1338297011053827475" datatype="html">
+        <source>results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">357,358</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">359,360</context>
+        </context-group>
+        <note priority="1" from="description">plural results</note>
+      </trans-unit>
+      <trans-unit id="429700417833511798" datatype="html">
+        <source>0 results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">361,363</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4043049091728011235" datatype="html">
+        <source>Cancelled</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">363,365</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1519954996184640001" datatype="html">
+        <source>Error</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">367,370</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/tasks/tasks.component.html</context>
+          <context context-type="linenumber">48,51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6724311977024337760" datatype="html">
+        <source>Same as previous</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">373,375</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">388,389</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">431,433</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7976341814156890729" datatype="html">
+        <source>Search matrix</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">375,377</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4163272119298020373" datatype="html">
+        <source>Filters</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">390,392</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3932217447073548645" datatype="html">
+        <source>No filters were applied to this search</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">423,425</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1946568146736450576" datatype="html">
+        <source>No filters</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">425,428</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3571391964903695725" datatype="html">
+        <source>Repeat</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">475</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
+          <context context-type="linenumber">248,249</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3379613618717127338" datatype="html">
+        <source>Copy search matrix, filters, and match options to this page</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">475,478</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="143902258344773365" datatype="html">
+        <source>Export search</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">480,481</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="448392434715909741" datatype="html">
+        <source>Export JSON representation of search parameters</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">481,484</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7546643908261519988" datatype="html">
+        <source>Remove this search from the history</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">486,489</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5870041128116445851" datatype="html">
+        <source>Import history from file</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">495,496</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2855851466621927737" datatype="html">
+        <source>JavaScript Object Notation (.json) file exported using this tab&apos;s &quot;Export Search&quot; or &quot;Export History&quot; button</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">500,503</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4504755123285582487" datatype="html">
+        <source>Export history</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">509,510</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4458289952857206994" datatype="html">
+        <source>Export JSON representation of parameters for all searches in history</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">510,513</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3371190801768479896" datatype="html">
+        <source>Clear history</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">515,516</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="496576527536061153" datatype="html">
+        <source>Remove all searches from the history</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
+          <context context-type="linenumber">516,519</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1700570971584489561" datatype="html">
         <source>Search for instance of this pattern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/search/search.component.html</context>
-          <context context-type="linenumber">289,291</context>
+          <context context-type="linenumber">538,540</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7799705044914967756" datatype="html">
@@ -4275,14 +4559,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/tasks/tasks.component.html</context>
           <context context-type="linenumber">44,46</context>
-        </context-group>
-        <note priority="1" from="description">task progress description</note>
-      </trans-unit>
-      <trans-unit id="1519954996184640001" datatype="html">
-        <source>Error</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-view/src/app/tasks/tasks.component.html</context>
-          <context context-type="linenumber">48,51</context>
         </context-group>
         <note priority="1" from="description">task progress description</note>
       </trans-unit>
@@ -4515,13 +4791,6 @@
           <context context-type="linenumber">242,245</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3571391964903695725" datatype="html">
-        <source>Repeat</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-view/src/app/transcript/transcript.component.html</context>
-          <context context-type="linenumber">248,249</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="7307257245779005182" datatype="html">
         <source>Edit Media</source>
         <context-group purpose="location">
@@ -4537,7 +4806,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">61,63</context>
+          <context context-type="linenumber">62,64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9214894060071366520" datatype="html">
@@ -4548,7 +4817,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">62,63</context>
+          <context context-type="linenumber">63,64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1653119576157732912" datatype="html">
@@ -4605,7 +4874,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">213,215</context>
+          <context context-type="linenumber">214,216</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4049031172017305148" datatype="html">
@@ -4646,7 +4915,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">96,98</context>
+          <context context-type="linenumber">97,99</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2164777678925399417" datatype="html">
@@ -4949,119 +5218,119 @@
         <source>Collapse &apos;Generate&apos; options</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">72,75</context>
+          <context context-type="linenumber">73,76</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1459056152613318943" datatype="html">
         <source>Export Media</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">79,80</context>
+          <context context-type="linenumber">80,81</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4327148980468054681" datatype="html">
         <source>Export media files of all selected transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">80,83</context>
+          <context context-type="linenumber">81,84</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5023167267957510058" datatype="html">
         <source>Export Original</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">87,88</context>
+          <context context-type="linenumber">88,89</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1081509610124614927" datatype="html">
         <source>Export original transcript of all selected transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">88,91</context>
+          <context context-type="linenumber">89,92</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5475669019014532828" datatype="html">
         <source>Export Formatted</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">95,97</context>
+          <context context-type="linenumber">96,98</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6636971717569479875" datatype="html">
         <source>Format to convert to</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">101,103</context>
+          <context context-type="linenumber">102,104</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2567273207097845369" datatype="html">
         <source>Collapse &apos;Export Formatted&apos; options</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">112,115</context>
+          <context context-type="linenumber">113,116</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4640886210623165341" datatype="html">
         <source>List Participants</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">142,143</context>
+          <context context-type="linenumber">143,144</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2055540256987667458" datatype="html">
         <source>List participants in these transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">143,146</context>
+          <context context-type="linenumber">144,147</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4936921096314897867" datatype="html">
         <source>Search selected transcripts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">151,153</context>
+          <context context-type="linenumber">152,154</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5828986229481489693" datatype="html">
         <source>Clear filters relating to participants</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">161,164</context>
+          <context context-type="linenumber">162,165</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4150233176132782540" datatype="html">
         <source>Annotation layers to include in the exported files</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">166,168</context>
+          <context context-type="linenumber">167,169</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3250391385569692601" datatype="html">
         <source>Media</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">218,219</context>
+          <context context-type="linenumber">219,220</context>
         </context-group>
       </trans-unit>
       <trans-unit id="454440866306834514" datatype="html">
         <source>Upload Transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">245,247</context>
+          <context context-type="linenumber">246,248</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4179990852702981397" datatype="html">
         <source>Add or update a transcript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">246,248</context>
+          <context context-type="linenumber">247,249</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3327666791532921035" datatype="html">
         <source>Upload Transcript Data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-view/src/app/transcripts/transcripts.component.html</context>
-          <context context-type="linenumber">251,252</context>
+          <context context-type="linenumber">252,253</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2369423116644077158" datatype="html">

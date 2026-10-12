@@ -89,8 +89,8 @@
         <td i18n="xxx.war contains version:"> contains version:</td>
         <td class="version">{{newVersion}}</td></tr>
       <tr *ngIf="downgrade">
-        <td colspan="2" i18n>
-          <p class="error">WARNING: the file contains a version that is older than your current version</p>
+        <td colspan="2">
+          <p class="error" i18n>WARNING: the file contains a version that is older than your current version</p>
       </td></tr>
       <tr *ngIf="migration"><td colspan="2">
           <p class="warning" i18n>WARNING: the file contains migration data from another corpus.</p>
