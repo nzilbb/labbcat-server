@@ -135,7 +135,7 @@ public class Upgrader extends Task {
 
   /**
    * Sets the thread status.
-   * @param sMessage a status message to display to anyone who's watching the thread.
+   * @param message a status message to display to anyone who's watching the thread.
    */
   @Override public void setStatus(String message) {
     System.err.println(message);
