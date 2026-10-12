@@ -92,7 +92,6 @@ public class Attributes extends APIRequestHandler {
    * GET handler - receive an uploaded stimulus file.
    * @param pathInfo The request path.
    * @param httpStatus Receives the response status code, in case of error.
-   * @param annotatorDir The directory in which annotator jars and their files are stored.
    * @return JSON-encoded object representing the response
    */
   @SuppressWarnings("rawtypes")

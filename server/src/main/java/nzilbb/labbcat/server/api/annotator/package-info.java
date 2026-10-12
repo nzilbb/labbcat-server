@@ -26,4 +26,4 @@
  * <p> (These class implementations are decoupled from any HTTP request/response object model.
  * HTTP transaction details are currently implemented by JSP files in <tt>src/main/jsp/edit/annotator/</tt>)
  */
-package nzilbb.labbcat.server.api.edit.annotator;
+package nzilbb.labbcat.server.api.annotator;

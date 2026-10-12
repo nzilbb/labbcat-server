@@ -128,7 +128,6 @@ public class Stimulus extends APIRequestHandler {
    * POST handler - receive an uploaded stimulus file.
    * @param parameters Request parameter map.
    * @param httpStatus Receives the response status code, in case of error.
-   * @param annotatorDir The directory in which annotator jars and their files are stored.
    * @return JSON-encoded object representing the response
    */
   @SuppressWarnings("rawtypes")
@@ -197,7 +196,6 @@ public class Stimulus extends APIRequestHandler {
   /**
    * GET handler - list stimulus files.
    * @param httpStatus Receives the response status code, in case of error.
-   * @param annotatorDir The directory in which annotator jars and their files are stored.
    * @return JSON-encoded object representing the response
    */
   public JsonObject get(Consumer<Integer> httpStatus) {
@@ -232,9 +230,6 @@ public class Stimulus extends APIRequestHandler {
   /**
    * DELETE handler: Delete the given stimulus file.
    * @param pathInfo The URL path.
-   * @param out Response body output stream.
-   * @param contentType Receives the content type for specification in the response headers.
-   * @param contentEncoding Receives content character encoding for specification in the
    * @param httpStatus Receives the response status code, in case of error.
    * @return JSON-encoded object representing the response
    */

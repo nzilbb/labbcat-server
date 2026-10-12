@@ -65,7 +65,7 @@ import nzilbb.util.IO;
  *  <dl>
  *   <dt> id </dt>
  *       <dd> A unique identifier for the upload which can be passed into subsequent PUT calls
- *        to {@link #put(String,RequestParameters,Consumer,Function) /api/admin/upgrade/...} 
+ *        to {@link #put(String,RequestParameters,Consumer) /api/admin/upgrade/...} 
  *        for finalizing the upgrade. </dd> 
  *   <dt> oldVersion </dt>
  *       <dd> The version of LaBB-CAT currently installed. </dd> 
