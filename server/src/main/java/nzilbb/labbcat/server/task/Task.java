@@ -68,7 +68,7 @@ public class Task extends Thread implements MonitorableTask {
   /** Cancels the task. */
   public void cancel() {
     if (!bCancelling) {
-      setStatus("Cancelling...");
+      if (bRunning) setStatus("Cancelling...");
       bCancelling = true;
     }
   }
