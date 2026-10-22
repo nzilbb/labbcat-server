@@ -158,6 +158,12 @@ public class RequestParameters extends HashMap<String,Object> implements Closeab
           System.err.println("Could not delete file from request: " + file.getPath());
         }
       } // file still exists
+      if (file.getParentFile().list().length == 0) {
+        if (!file.getParentFile().delete()) {
+          System.err.println(
+            "Could not delete directory from request: " + file.getParentFile().getPath());
+        }
+      }
     } // next file
   } // end of close()
   
