@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import { Inject } from '@angular/core';
 
 import { LabbcatService } from '../labbcat.service';
@@ -126,8 +126,16 @@ export class LayerCheckboxesComponent implements OnInit {
         if (!this.verticalPeersUnderline) this.verticalPeersUnderline = {};
     }
 
-    ngOnChanges(): void {
-        this.processSchema()
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.selected // are changes to 'selected' available?
+            && changes.selected.previousValue && changes.selected.currentValue) {
+            // have the selected layers actually changed?
+            if (changes.selected.previousValue.length != changes.selected.currentValue.length
+                || !changes.selected.previousValue.every(function(value, index) {
+                    return value === changes.selected.currentValue[index]})) {
+                this.processSchema()
+            } // selected has changed
+        } // selected changes available
     }
 
     loadSchema(): void {
