@@ -1857,19 +1857,22 @@ public class ProcessWithPraat extends Task {
         }
       }
     } finally {
-      if (out != null) try {out.close();} catch(IOException exception) {}
-      if (in != null) try {in.close();} catch(IOException exception) {}
-      if (outputFile != null) {
-        try {
-          setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
-                       + URLEncoder.encode(outputFile.getName(), "UTF-8"));
-        } catch(UnsupportedEncodingException impossible) { 
-          setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
-                       + outputFile.getName());
+      try {
+        if (out != null) try {out.close();} catch(IOException exception) {}
+        if (in != null) try {in.close();} catch(IOException exception) {}
+        if (outputFile != null) {
+          try {
+            setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
+                         + URLEncoder.encode(outputFile.getName(), "UTF-8"));
+          } catch(UnsupportedEncodingException impossible) { 
+            setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
+                         + outputFile.getName());
+          }
+          setResultText("CSV file with measurements");
         }
-        setResultText("CSV file with measurements");
+      } finally {
+        runEnd();
       }
-      runEnd();
     }
     if (bCancelling) {
       setStatus(getStatus() + " - cancelled.");
