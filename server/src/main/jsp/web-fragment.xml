@@ -208,6 +208,9 @@
   <servlet><servlet-name>api/admin/elicit/options/participant.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/options/participant.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/elicit/options/participant.jsp</servlet-name><url-pattern>/api/admin/elicit/options/participant/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>api/admin/elicit/validation.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/validation.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/validation.jsp</servlet-name><url-pattern>/api/admin/elicit/validation/*</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>api/admin/elicit/stimulus.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/stimulus.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/elicit/stimulus.jsp</servlet-name><url-pattern>/api/admin/elicit/stimulus/*</url-pattern></servlet-mapping>
 
