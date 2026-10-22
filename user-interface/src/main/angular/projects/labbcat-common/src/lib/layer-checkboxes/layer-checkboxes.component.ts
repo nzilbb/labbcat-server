@@ -151,7 +151,7 @@ export class LayerCheckboxesComponent implements OnInit {
         this.phraseLayers = [];
         this.wordLayers = [];
         this.segmentLayers = [];
-        this.categorySelections = {};
+        this.categorySelections = this.categorySelections || {};
         this.displayIcons = JSON.parse(sessionStorage.getItem("displayLayerIcons")) ??
             (typeof this.displayIcons == "string" ? this.displayIcons === "true" : this.displayIcons) ??
             true;
@@ -165,13 +165,15 @@ export class LayerCheckboxesComponent implements OnInit {
 
         // add category selectors in defined order
         for (let c in this.schema.categories) {
-            if (c.startsWith("participant_")) { // participant attribute category
-                if (this.participant) this.categorySelections[c] = false;
-            } else if (c.startsWith("transcript_")) {  // transcript attribute category
-                if (this.transcript) this.categorySelections[c] = false;
-            } else  { // temporal layer category/project
-                if (this.span || this.phrase || this.word) {
-                     this.categorySelections[c] = false;
+            if (!this.categorySelections.hasOwnProperty(c)) {
+                if (c.startsWith("participant_")) { // participant attribute category
+                    if (this.participant) this.categorySelections[c] = false;
+                } else if (c.startsWith("transcript_")) {  // transcript attribute category
+                    if (this.transcript) this.categorySelections[c] = false;
+                } else  { // temporal layer category/project
+                    if (this.span || this.phrase || this.word) {
+                        this.categorySelections[c] = false;
+                    }
                 }
             }
 
