@@ -191,7 +191,7 @@ public class Corpora extends TableServletBase {
       context.servletLog("Corpora.validateBeforeUpdate: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
-      return record;
+    return record;
   } // end of validateBeforeUpdate()
   
 } // end of class Corpora
