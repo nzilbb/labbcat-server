@@ -141,7 +141,13 @@
     var messages = null;
     try {
       if (evt.target.raw) {
-        result = this.responseText;
+        if (this.status >= 400) {
+          errors = [`Error ${this.status} ${this.responseText}`.trim()];
+          messages = [];
+        } else {
+          result = this.responseText;
+          errors = messages = [];
+        }
       } else {
         var response = JSON.parse(this.responseText);
         if (response.model != null) {
@@ -6776,6 +6782,50 @@
           +"/"+encodeURIComponent(value),
         "DELETE").send();
     }
+    
+    /**
+     * Reads the given elicitation task attribute validation script.
+     * @see LabbcatAdmin#updateElicitedAttributeValidation
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be the validation JavaScript, if any.
+     */
+    readElicitedAttributeValidation(taskId, scope, attribute, onResult) {
+      this.createRequest(
+        "readElicitedAttributeValidation", {}, onResult, 
+        this.baseUrl+"api/admin/elicit/validation"
+          +"/"+encodeURIComponent(taskId)
+          +(scope=="transcript"?"/transcript":"/participant")
+          +"/"+encodeURIComponent(attribute), "GET", null, null,
+        true) // raw response
+        .send();
+    }
+    
+    /**
+     * Updates the given elicitation task attribute validation script.
+     * @see LabbcatAdmin#readElicitedAttributeValidation
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} script The validation JavaScript.
+     * @param {resultCallback} onResult Invoked when the request has returned. 
+     */
+    updateElicitedAttributeValidation(taskId, scope, attribute, script, onResult) {
+      this.createRequest(
+        "updateElicitedAttributeValidation", null, onResult, 
+        this.baseUrl+"/api/admin/elicit/validation"
+          +"/"+encodeURIComponent(taskId)
+          +(scope=="transcript"?"/transcript":"/participant")
+          +"/"+encodeURIComponent(attribute),
+        "PUT", null, null,
+        true) // raw response
+        .send(script);
+    }
+    
   }
   
   /**

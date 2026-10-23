@@ -1,0 +1,13 @@
+.comment {
+    color: darkgreen;    
+}
+.keyword {
+    color: purple;
+}
+.string {
+    color: #555555;
+}
+textarea {
+    width: 100%;
+    min-height: 200px;
+}

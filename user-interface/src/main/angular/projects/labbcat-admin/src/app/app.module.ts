@@ -36,6 +36,7 @@ import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
 import { AdminTaskResourcesComponent } from './admin-task-resources/admin-task-resources.component';
 import { AdminTaskAttributesComponent } from './admin-task-attributes/admin-task-attributes.component';
 import { AdminTaskAttributeOptionsComponent } from './admin-task-attribute-options/admin-task-attribute-options.component';
+import { AdminTaskAttributeValidationComponent } from './admin-task-attribute-validation/admin-task-attribute-validation.component';
 import { AdminTaskRemindersComponent } from './admin-task-reminders/admin-task-reminders.component';
 import { ActivityComponent } from './activity/activity.component';
 
@@ -69,6 +70,7 @@ import { ActivityComponent } from './activity/activity.component';
         AdminTaskResourcesComponent,
         AdminTaskAttributesComponent,
         AdminTaskAttributeOptionsComponent,
+        AdminTaskAttributeValidationComponent,
         AdminTaskRemindersComponent,
         ActivityComponent
     ],
@@ -122,8 +124,10 @@ import { ActivityComponent } from './activity/activity.component';
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/resources/:task_id', component: AdminTaskResourcesComponent,
               canDeactivate: [PendingChangesGuard]},
-            { path: 'admin/task/attributes/:scope/:task_id', component: AdminTaskAttributesComponent},
-            { path: 'admin/task/options/:scope/:task_id/:attribute', component: AdminTaskAttributeOptionsComponent,
+            { path: 'admin/task/attributes/:task_id/:scope', component: AdminTaskAttributesComponent},
+            { path: 'admin/task/options/:task_id/:scope/:attribute', component: AdminTaskAttributeOptionsComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'admin/task/validation/:task_id/:scope/:attribute', component: AdminTaskAttributeValidationComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/reminders/:task_id', component: AdminTaskRemindersComponent,
               canDeactivate: [PendingChangesGuard]},
