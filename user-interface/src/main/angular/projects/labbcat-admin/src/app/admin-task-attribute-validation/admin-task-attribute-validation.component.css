@@ -1,11 +1,11 @@
 .comment {
-    color: darkgreen;    
+    color: #940;
 }
 .keyword {
-    color: purple;
+    color: #708;
 }
 .string {
-    color: #555555;
+    color: #a11;
 }
 textarea {
     width: 100%;

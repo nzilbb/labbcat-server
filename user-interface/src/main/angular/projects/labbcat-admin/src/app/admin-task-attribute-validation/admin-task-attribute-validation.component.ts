@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
+import {EditorView, basicSetup} from "codemirror";
+import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
+import {CompletionContext} from "@codemirror/autocomplete"
 
 import { MessageService, LabbcatService, Response, Layer } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
@@ -15,7 +18,7 @@ export class AdminTaskAttributeValidationComponent extends AdminComponent implem
     scope: string;
     attribute: string;
     task_name: string;
-    script: string;
+    editor: EditorView;
     updating = false;
 
     constructor(
@@ -59,26 +62,66 @@ export class AdminTaskAttributeValidationComponent extends AdminComponent implem
     }
     readScript(): void {
         this.updating = true;
+        const tagOptions = [
+            "constructor", "deprecated", "link", "param", "returns", "type"
+        ].map(tag => ({label: "@" + tag, type: "keyword"}))
         this.labbcatService.labbcat.readElicitedAttributeValidation(
             this.task_id, this.scope, this.attribute, (script, errors, messages) => {
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 this.updating = false;
-                this.script = script;
+                this.editor = new EditorView({
+                    doc: script,
+                    extensions: [
+                        basicSetup,
+                        javascript(),
+                        // add autocomplete for isValid() and isInvalid(message)
+                        javascriptLanguage.data.of({
+                            autocomplete: (context: CompletionContext)=>{
+                                const word = context.matchBefore(/\w*/)
+                                if (word.from == word.to && !context.explicit) return null;
+                                return {
+                                    from: word.from,
+                                    options: [{
+                                        label: "isValid()", type: "function",
+                                        apply: "isValid()",
+                                        info: "...if the value is valid."
+                                    },{
+                                        label: "isInvalid(message)", type: "function",
+                                        apply: "isInvalid(`${value} is invalid`);",
+                                        info: "...if the value is not valid."
+                                    }]
+                                }
+                            }
+                        }),
+                        EditorView.updateListener.of((e)=>{
+                            if (e.docChanged) {
+                                this.changed = true;
+                            } 
+                        })],
+                    parent: document.getElementById("script")
+                });
             });
     }
 
     updateScript() {
-        this.updating = true;
-        this.labbcatService.labbcat.updateElicitedAttributeValidation(
-            this.task_id, this.scope, this.attribute, this.script,
-            (response, errors, messages) => {
-                this.updating = false;
-                if (errors) errors.forEach(m => this.messageService.error(m));
-                if (messages) messages.forEach(m => this.messageService.info(m));
-                // update the model with the field returned
-                this.changed = false;
-            });
+        const script = this.editor.state.doc.toString();
+        // check they call isValid() somewhere
+        if (script && !/isValid\(\)/.test(script)) {
+            alert("If you never call isValid() anywhere in the script,"
+                  +" the participant will not be able to continue.");
+        } else {
+            this.updating = true;
+            this.labbcatService.labbcat.updateElicitedAttributeValidation(
+                this.task_id, this.scope, this.attribute, script,
+                (response, errors, messages) => {
+                    this.updating = false;
+                    if (errors) errors.forEach(m => this.messageService.error(m));
+                    if (messages) messages.forEach(m => this.messageService.info(m));
+                    // update the model with the field returned
+                    this.changed = false;
+                });
+        }
     }
 
 }
