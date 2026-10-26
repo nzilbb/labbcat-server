@@ -28,6 +28,7 @@
     "@angular/router": "~17.3.5",
     "@ckeditor/ckeditor5-angular": "^9.0.0",
     "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-sql": "^6.10.0",
     "@types/vis": "^4.21.27",
     "ckeditor5": "^43.2.0",
     "codemirror": "^6.0.2",

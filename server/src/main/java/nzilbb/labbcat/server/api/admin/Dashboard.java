@@ -35,7 +35,7 @@ import nzilbb.labbcat.server.api.RequiredRole;
 
 /**
  * <tt>/api/admin/dashboard/{link|sql}[/<var>item_id</var>]</tt> 
- * : Administration of <em> media track </em> records.
+ * : Administration of <em> dahboard item </em> records.
  *  <p> Allows administration (Create/Read/Update/Delete) of dashboard items via
  *  JSON-encoded objects with the following attributes:
  *   <dl>
@@ -57,6 +57,7 @@ import nzilbb.labbcat.server.api.RequiredRole;
  *       (excluding <var>item_id</var>). </li>
  *      <li><em> Response Body </em> - the standard JSON envelope, with the model as an
  *       object representing the new record (including <var>item_id</var>). </li>
+
  *      <li><em> Response Status </em>
  *        <ul>
  *         <li><em> 200 </em> : The record was successfully created. </li>
