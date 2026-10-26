@@ -5,7 +5,7 @@ import {EditorView, basicSetup} from "codemirror";
 import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
 import {CompletionContext} from "@codemirror/autocomplete"
 
-import { MessageService, LabbcatService, Response, Layer } from 'labbcat-common';
+import { MessageService, LabbcatService } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({
