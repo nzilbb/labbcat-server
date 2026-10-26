@@ -1,0 +1,71 @@
+.header, .item {
+    display: flex;
+    flex-direction: column;
+}
+.item {
+    margin-top: 8px;
+}
+.fields {
+    display: flex;
+    flex-direction: row;
+}
+.display-order {
+    width: 10%;
+}
+.fields input {
+    width: 95%;
+}
+.dashboard, .express, .statistics {
+    width: 8%;
+    text-align: center;
+}
+.icon {
+    width: 15%;
+}
+.item-label {
+    width: 35%;
+}
+span.buttons {
+    width: 15%;
+}
+.link {
+    display: flex;
+    flex-direction: row;
+}
+.link a {
+    flex-grow: 0;
+}
+.link input {
+    flex-grow: 1;
+}
+.hidden {
+    display: none;
+}
+.icon > button {
+    height: 28px;
+    width: 28px !important;
+    padding: 0px;
+}
+.icon > button > img {
+    vertical-align: middle;
+    width: 25px;
+    height: 25px;
+    aspect-ratio: 1 / 1 !important;
+}
+.icon-selector {
+    position: absolute;
+    background: var(--theme-background-color);
+    border: 1px solid var(--theme-text-color);
+    z-index: 2;
+}
+.result {
+    display: flex;
+    flex-direction: row;
+}
+.result label {
+    width: 10%;
+    min-width: 75px;
+}
+.result label::after {
+    content: ':';
+}

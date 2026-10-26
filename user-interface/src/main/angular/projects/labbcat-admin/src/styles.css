@@ -347,6 +347,32 @@ lib-task {
     }
 }
 
+/* tabs UX */
+.tab-labels {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: stretch;
+    & label.tab-label {
+        flex-grow: 1;
+        display: inline-block;
+        padding: 8px;
+        border: 1px var(--theme-text-color) solid;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        text-align: center;
+        &.active {
+            border-bottom: 1px white solid;
+        }
+    }
+}
+.tab-body {
+    animation-name: roll-down;
+    animation-duration: 1s;
+    &.inactive { display: none; }
+    &.attribute-list { width: 100%; }
+}
+
 /* Layout on wider screens */
 @media all and (min-width: 640px) {
     app-root nav { min-height: 100px; max-width: min-content; }

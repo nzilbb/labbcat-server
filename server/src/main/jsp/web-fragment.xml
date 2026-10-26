@@ -166,6 +166,9 @@
   <servlet><servlet-name>api/admin/mediatracks.jsp</servlet-name><jsp-file>/jsp/api/admin/mediatracks.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/mediatracks.jsp</servlet-name><url-pattern>/api/admin/mediatracks/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>api/admin/dashboardTest.jsp</servlet-name><jsp-file>/jsp/api/admin/dashboardTest.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/dashboardTest.jsp</servlet-name><url-pattern>/api/admin/dashboard/test</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>api/admin/dashboard.jsp</servlet-name><jsp-file>/jsp/api/admin/dashboard.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/dashboard.jsp</servlet-name><url-pattern>/api/admin/dashboard/*</url-pattern></servlet-mapping>
   
@@ -193,6 +196,9 @@
   <servlet><servlet-name>api/admin/serialization.jsp</servlet-name><jsp-file>/jsp/api/admin/serialization.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/serialization.jsp</servlet-name><url-pattern>/api/admin/serialization</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>api/admin/icon.jsp</servlet-name><jsp-file>/jsp/api/admin/icon.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/icon.jsp</servlet-name><url-pattern>/api/admin/icon/*</url-pattern></servlet-mapping>
+
   <servlet><servlet-name>api/admin/elicit/tasks.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/tasks.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/elicit/tasks.jsp</servlet-name><url-pattern>/api/admin/elicit/tasks/*</url-pattern></servlet-mapping>
   

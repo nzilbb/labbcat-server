@@ -26,6 +26,7 @@ import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotato
 import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AdminLayersComponent } from './admin-layers/admin-layers.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { AdminLayerLabelsComponent } from './admin-layer-labels/admin-layer-labels.component';
 import { AdminAttributesComponent } from './admin-attributes/admin-attributes.component';
 import { AdminCategoriesComponent } from './admin-categories/admin-categories.component';
@@ -63,6 +64,7 @@ import { ActivityComponent } from './activity/activity.component';
         AdminLayerLabelsComponent,
         AdminAttributesComponent,
         AdminCategoriesComponent,
+        AdminDashboardComponent,
         AdminAgreementComponent,
         AdminFormattersComponent,
         AdminUpgradeComponent,
@@ -115,6 +117,8 @@ import { ActivityComponent } from './activity/activity.component';
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
             { path: 'admin/attributes/:scope', component: AdminAttributesComponent},
             { path: 'admin/categories/:scope', component: AdminCategoriesComponent},
+            { path: 'admin/dashboard/:scope', component: AdminDashboardComponent,
+              canDeactivate: [PendingChangesGuard]},
             { path: 'admin/agreement', component: AdminAgreementComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/formatters', component: AdminFormattersComponent,

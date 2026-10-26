@@ -1,0 +1,136 @@
+<h2 id="title" i18n="page header">Dashboard</h2>
+
+<div class="tabs">
+  <div class="tab-labels">
+    <label [ngClass]="(scope == 'link')?'tab-label active':'tab-label inactive'"
+           (click)="changeScope('link')" i18n="Dashboard links">Links</label>
+    <label [ngClass]="(scope == 'sql')?'tab-label active':'tab-label inactive'"
+           (click)="changeScope('sql')" i18n="Dashboard queries">Queries</label>
+  </div>
+  <div class="dashboard-items-list tab-body">
+    <div class="header">
+      <div class="fields">
+        <span class="icon"
+              i18n-title title="The icon for the dashboard item" i18n>Icon</span>
+        <span class="item-label" i18n-title title="The label for the dashboard item">
+          <input #label type="text" i18n-placeholder placeholder="Label"></span>
+        <span class="display-order"
+              i18n-title title="Ordering of dashboard items" i18n>Order</span>
+        <span class="dashboard"
+              i18n-title title="Whether the item is shown on the home page dashboard">
+          <label><span i18n>Dash</span>
+            <input #dashboard type="checkbox" [class.hidden]="label.value == ''" required></label></span>
+        <span class="express"
+              i18n-title title="Whether the item is shown on the 'express' dashboard">
+          <label><span i18n>Express</span>
+            <input #express type="checkbox" [class.hidden]="label.value == ''"></label></span>
+        <span [class.hidden]="scope == 'link'"
+              class="statistics"
+              i18n-title title="Whether the item is shown on the statistics page">
+          <label><span i18n>Stats</span>
+            <input #statistics type="checkbox" [class.hidden]="label.value == ''"></label></span>
+        <span class="buttons" i18n-title title="Add a new dashboard item">
+          <lib-button action="create"
+                      [disabled]="label.value == ''"
+                      (press)="label.reportValidity() && createRow(label.value, '', definitionLink.value, dashboard.checked, express.checked, statistics.checked, null) && label.value = definitionLink.value = newItemError = '' && (newItemValue = ' ') && dashboard.checked = express.checked = statistics.checked = false;" [processing]="creating"
+                      i18n-title title="Add new record"></lib-button>
+        </span>
+      </div>
+      <div [class.hidden]="label.value == '' || scope != 'link'" class="link"
+           i18n-title title="The link URL for the item">
+        <a [href]="baseUrl + definitionLink.value" target="definition">{{baseUrl}}</a>
+        <input #definitionLink type="text" required>
+      </div>
+      <fieldset [class.hidden]="label.value == '' || scope != 'sql'" class="sql"
+                i18n-title title="The SQL query for the item">
+        <legend>Definition</legend>
+        <div id="sql-new" class="sql"></div>
+      </fieldset>
+      <div *ngIf="scope == 'sql' && label.value != ''"
+           class="result"
+           i18n-title title="The result of the SQL query">
+        <label i18n>Result</label>
+        <lib-wait [inSitu]="true" *ngIf="!newItemValue && !newItemError"></lib-wait>
+        <div class="value">{{newItemValue}}</div>
+        <div class="error">{{newItemError}}</div>
+      </div>
+    </div>
+    <div class="item" *ngFor="let item of rows">
+      <div class="fields">
+        <span class="icon"
+              i18n-title title="The icon for the dashboard item">
+          <input type="hidden" [(ngModel)]="item.icon">
+          <button (click)="changingIconId = changingIconId==item.item_id?null:item.item_id;">
+            <label *ngIf="!item.icon" i18n>Icon</label>
+            <img *ngIf="item.icon" [src]="iconBaseUrl+item.icon" [alt]="item.icon">
+          </button>
+          <div class="icon-selector" *ngIf="changingIconId == item.item_id">
+            <button *ngIf="item.icon != ''"
+                    (click)="item.icon = ''; changingIconId = null; onChange(item);"
+                    i18n-title title="Do not use an icon for this item" i18n>No icon</button>
+            <button *ngFor="let icon of icons"
+                    (click)="item.icon = icon; changingIconId = null; onChange(item);"
+                    i18n-title title="Select this icon">
+              <img src="{{iconBaseUrl+icon}}" alt="{{icon}}">
+            </button>
+            <input type="file"                 
+                   i18n-title title="Upload a new icon"
+                   (change)="selectFile(item, $event.target.files)">          
+          </div>
+        </span>
+        <span class="item-label" i18n-title title="The label for the item">
+          <input type="text" [(ngModel)]="item.label"
+                 (input)="onChange(item)">
+        </span>
+        <span class="display-order"
+              i18n-title title="Ordering of dashboard items">
+          <input type="number" [(ngModel)]="item.display_order"
+                 [title]="item.display_order"
+                 (input)="onChange(item)">
+        </span>
+        <span class="dashboard"
+              i18n-title title="Whether the item is shown on the home page dashboard">
+          <input type="checkbox" [(ngModel)]="item.dashboard"
+                 (input)="onChange(item)">
+        </span>
+        <span class="express"
+              i18n-title title="Whether the item is shown on the 'express' dashboard">
+          <input type="checkbox" [(ngModel)]="item.express"
+                 (input)="onChange(item)">
+        </span>
+        <span [class.hidden]="scope == 'link'"
+              class="statistics"
+              i18n-title title="Whether the item is shown on the statistics page">
+          <input type="checkbox" [(ngModel)]="item.statisics"
+                 (input)="onChange(item)">
+        </span>
+        <span class="buttons" i18n-title title="Delete the dashboard item">
+          <lib-button action="delete"
+                      (press)="deleteRow(item);" [processing]="item._deleting"></lib-button>
+        </span>
+      </div>
+      <div *ngIf="scope == 'link'" class="link"
+           i18n-title title="The link URL for the item">
+        <a [href]="baseUrl + item.definition" target="definition">{{baseUrl}}</a>
+        <input type="text" [(ngModel)]="item.definition" (input)="onChange(item)">
+      </div>
+      <fieldset *ngIf="scope == 'sql'" class="sql"
+                i18n-title title="The SQL query for the item"><legend>Definition</legend>
+        <div id="sql-{{item.item_id}}" class="sql"></div>
+      </fieldset>
+      <div *ngIf="scope == 'sql'" class="result"
+           i18n-title title="The result of the SQL query">
+        <label i18n>Result</label>
+        <lib-wait [inSitu]="true" *ngIf="!item.value && !item.error"></lib-wait>
+        <div class="value">{{item.value}}</div>
+        <div class="error">{{item.error}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="buttons">
+    <lib-button action="save" [processing]="updating > 0"
+                (press)="updateChangedRows();"
+                *ngIf="changed"
+                i18n-title title="Save all changed records"></lib-button>
+  </div>
+</div>
