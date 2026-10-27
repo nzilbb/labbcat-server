@@ -1530,7 +1530,7 @@ public class OneQuerySearch extends SearchTask {
     q.append(" 0 AS complete,");
     q.append(" CONCAT('ew_2_', token_"+targetCol+".annotation_id) AS target_annotation_uid");
     q.append(" FROM annotation_layer_2 token_0");
-    // susequent word joins
+    // subsequent word joins
     for (int c = 1; c < matrix.getColumns().size(); c++) {
       q.append(" INNER JOIN annotation_layer_2 token_"+c);
       q.append(" ON token_"+c+".turn_annotation_id = token_0.turn_annotation_id");
@@ -1594,7 +1594,7 @@ public class OneQuerySearch extends SearchTask {
 
   /**
    * Create an SQL query that identifies results that match the search matrix patterns,
-   * optimised for a matrix that only searches one span layer,  filling in the
+   * optimised for a matrix that only searches one span layer, filling in the
    * given lists with information about parameters to set. 
    * <p>This implementation makes speed gains over {@link #generateSql} by 
    * supporting only a single span (freeform) layer, identifying the matching spans first,
@@ -1684,6 +1684,126 @@ public class OneQuerySearch extends SearchTask {
       parameters.add(getRestrictByUser());
     } // filtering by role
     q.append(" ORDER BY token.ag_id, start.offset");
+    return q.toString();
+  }
+  
+  /**
+   * Create an SQL query that identifies results that match the search matrix patterns,
+   * optimised for a matrix that only searches one phrase layer, filling in the
+   * given lists with information about parameters to set. 
+   * <p>This implementation makes speed gains over {@link #generateSql} by 
+   * supporting only a single phrase (meta) layer, identifying the matching spans first,
+   * and then identifying the nearest word for each to provide the match token.
+   * @param parameters List of parameter values, which must be Double, Integer, or String.
+   * @param schema The layer schema.
+   * @param phraseLayer The one phrase layer being searched.
+   * @param layerMatch The one phrase's match condition.
+   * @return An SQL query to implement the query.
+   * @throws Exception If the search should be halted for any reason
+   * - e.g. the {@link Matrix#participantQuery} identifies no participants.
+   */
+  public String generateOnePhraseSql(
+    Vector<Object> parameters, Schema schema, Layer phraseLayer, LayerMatch layerMatch)
+    throws Exception {
+    setDescription(matrix.getDescription());
+    int targetCol = Math.max(0, matrix.getTargetColumn());
+    int iWordColumn = 0;
+    StringBuilder q = new StringBuilder()
+      .append("INSERT INTO _result")
+      .append(" (search_id, ag_id, speaker_number, start_anchor_id, end_anchor_id,")
+      .append(" defining_annotation_id, segment_annotation_id, target_annotation_id,")
+      .append(" turn_annotation_id, first_matched_word_annotation_id,")
+      .append(" last_matched_word_annotation_id, complete, target_annotation_uid)")
+      .append(" SELECT ?, token_0.ag_id AS ag_id, 0 AS speaker_number,")
+      .append(" token_0.start_anchor_id,")
+      .append(" token_").append(""+(matrix.getColumns().size()-1)).append(".end_anchor_id,")
+      .append(" NULL AS defining_annotation_id,")
+      .append(" NULL AS segment_annotation_id,")
+      .append(" token_").append(""+targetCol).append(".annotation_id AS target_annotation_id,")
+      .append(" token_").append(""+targetCol).append(".turn_annotation_id,")
+      // nearest to start - this is too slow, so we do it layer in setPhraseTokenIds
+      // .append(" (")
+      // .append("SELECT word.annotation_id AS first_matched_word_annotation_id")
+      // .append(" FROM annotation_layer_0 word")
+      // .append(" INNER JOIN anchor word_start ON word.start_anchor_id = word_start.anchor_id")
+      // .append(" WHERE word.turn_annotation_id = token.turn_annotation_id")
+      // .append(" ORDER BY ABS(start.offset - word_start.offset) LIMIT 1")
+      // .append(" )")
+      .append(" NULL")
+      .append(" AS first_matched_word_annotation_id,")
+      .append(" NULL AS last_matched_word_annotation_id,")
+      .append(" 0 AS complete,")
+      .append(" CONCAT('em_',").append(phraseLayer.get("layer_id").toString())
+      .append(",'_', token_").append(""+targetCol).append(".annotation_id) AS target_annotation_uid")
+      .append(" FROM annotation_layer_").append(phraseLayer.get("layer_id").toString())
+      .append(" token_0")
+      .append(" INNER JOIN anchor start ON token_0.start_anchor_id = start.anchor_id");
+    if (matrix.getTranscriptQuery() != null) {
+      q.append(" INNER JOIN transcript ON token_0.ag_id = transcript.ag_id");
+    }
+    // subsequent word joins
+    for (int c = 1; c < matrix.getColumns().size(); c++) {
+      q.append(" INNER JOIN annotation_layer_")
+        .append(phraseLayer.get("layer_id").toString()).append(" token_"+c);
+      q.append(" ON token_"+c+".turn_annotation_id = token_0.turn_annotation_id");
+      q.append(" AND token_"+c+".ordinal = token_"+(c-1)+".ordinal + 1");
+    }
+    // ensure there really is a pattern with a condition
+    int c = 0;
+    for (Column column : matrix.getColumns()) {
+      // set the WHERE condition for this column
+      q.append(c==0?" WHERE ":" AND ");
+      // ensure there really is a pattern with a condition
+      LayerMatch match = column.getFirstLayerMatch(phraseLayer.getId());
+      if (match == null) throw new Exception("No "+phraseLayer+" match for column "+c);
+      if (match.getPattern() != null) {
+        match.ensurePatternAnchored();
+        q.append("token_"+c+".label REGEXP ?");
+        parameters.add(match.getPattern());
+      } else { // numeric
+        if (match.getMin() != null) {
+          q.append("CAST(token_"+c+".label AS DECIMAL(20,10)) >= ?");
+          parameters.add(Double.valueOf(match.getMin()));
+        }
+        if (match.getMax() != null) {
+          if (match.getMin() != null) q.append(" AND ");
+          q.append("CAST(token_"+c+".label AS DECIMAL(20,10)) < ?");
+          parameters.add(Double.valueOf(match.getMax()));
+        } else if (match.getMin() == null) { // no condition set at all
+          throw new Exception("No "+phraseLayer+" condition for column "+c); // TODO i18n
+        }
+      }
+      c++;
+    } // next column
+    
+    if (matrix.getTranscriptQuery() != null) {
+      GraphAgqlToSql transformer = new GraphAgqlToSql(getStore().getSchema());
+      GraphAgqlToSql.Query query = transformer.sqlFor(
+        matrix.getTranscriptQuery(), "transcript.transcript_id", null, null, null);
+      q.append(query.sql
+               .replaceFirst("^SELECT transcript.transcript_id FROM transcript WHERE ", " AND ")
+               .replaceFirst(" ORDER BY transcript.transcript_id$",""));
+    }
+    if (getRestrictByUser() != null) {
+      q.append(" AND (EXISTS (SELECT * FROM role")
+        .append(" INNER JOIN role_permission ON role.role_id = role_permission.role_id")
+        .append(" INNER JOIN annotation_transcript access_attribute")
+        .append(" ON access_attribute.layer = role_permission.attribute_name")
+        .append(" AND access_attribute.label REGEXP role_permission.value_pattern")
+        .append(" AND role_permission.entity REGEXP '.*t.*'") // transcript access
+        .append(" WHERE user_id = ? AND access_attribute.ag_id = token_0.ag_id)");
+      parameters.add(getRestrictByUser());
+      q.append(" OR EXISTS (SELECT * FROM role")
+        .append(" INNER JOIN role_permission ON role.role_id = role_permission.role_id")
+        .append(" AND role_permission.attribute_name = 'corpus'")
+        .append(" AND role_permission.entity REGEXP '.*t.*'") // transcript access
+        .append(" INNER JOIN transcript")
+        .append(" ON transcript.corpus_name REGEXP role_permission.value_pattern")
+        .append(" WHERE transcript.ag_id = token_0.ag_id")
+        .append(" AND user_id = ?))");
+      parameters.add(getRestrictByUser());
+    } // filtering by role
+    q.append(" ORDER BY token_0.ag_id, start.offset");
     return q.toString();
   }
   
@@ -1895,6 +2015,35 @@ public class OneQuerySearch extends SearchTask {
       .filter(match -> match.getId().equals(spanLayers.get(0).getId()))
       .findAny().get();
 
+    // we can generate optimized SQL one-phrase-only searches
+    boolean noNonPhraseLayers = !matrix.getColumns().stream() // no adj > 1
+      .filter(column -> column.getAdj() > 1)
+      .findAny().isPresent()
+      && !matrix.layerMatchStream().filter(LayerMatch::HasCondition)
+      .map(layerMatch -> schema.getLayer(layerMatch.getId()))
+      .filter(Objects::nonNull)
+      // non-turn child layers
+      .filter(layer -> !layer.getParentId().equals(schema.getTurnLayerId())
+              // word / utteranance layers don't count
+              || layer.getParentId().equals(schema.getWordLayerId())
+              || layer.getParentId().equals(schema.getUtteranceLayerId()))
+      .findAny().isPresent();
+    Set<Layer> phraseLayers = matrix.layerMatchStream().filter(LayerMatch::HasCondition)
+      .map(layerMatch -> schema.getLayer(layerMatch.getId()))
+      .filter(Objects::nonNull)
+      // no non-turn child layers
+      .filter(layer -> layer.getParentId().equals(schema.getTurnLayerId()))
+      // but not word
+      .filter(layer -> !layer.getParentId().equals(schema.getWordLayerId()))
+      // nor utterance
+      .filter(layer -> !layer.getParentId().equals(schema.getUtteranceLayerId()))
+      .collect(Collectors.toSet());
+    LayerMatch phraseLayerMatch = phraseLayers.size() > 1?null
+      :matrix.layerMatchStream()
+      .filter(LayerMatch::HasCondition)
+      .filter(match -> match.getId().equals(phraseLayers.iterator().next().getId()))
+      .findAny().get();
+    
     // support matching multiline labels - e.g. layer.type == "text/url"
     try (PreparedStatement sqlMultilineMatch = connection.prepareStatement(
            "SET default_regex_flags='MULTILINE'")) {
@@ -1916,6 +2065,11 @@ public class OneQuerySearch extends SearchTask {
                  && spanLayerMatch.getTarget()) {
         setStatus("Optimising for one-span-only search...");
         q = generateOneSpanSql(parameters, schema, spanLayers.get(0), spanLayerMatch);
+      } else if (noNonPhraseLayers && phraseLayers.size() == 1
+                 && phraseLayerMatch.getTarget()) {
+        setStatus("Optimising for one-phrase-only search...");
+        q = generateOnePhraseSql(
+          parameters, schema, phraseLayers.iterator().next(), phraseLayerMatch);
       } else {
         q = generateSql(
           parameters, schema,
@@ -1924,7 +2078,7 @@ public class OneQuerySearch extends SearchTask {
       setStatus("SQL: " + q);
     } catch (Exception x) {
       setStatus(x.getMessage());
-      if (!x.getMessage().equals("Cancelled.")) {
+      if (!"Cancelled.".equals(x.getMessage())) {
         setLastException(x);
       }
       return;
@@ -2002,10 +2156,15 @@ public class OneQuerySearch extends SearchTask {
     }
     iPercentComplete = SQL_FINISHED_PERCENT;
 
-    // if it's a single-span search, we need to fill in the token IDs
+    // if it's a single-span/phrase search, we need to fill in the token IDs
     if (noNonSpanLayers && spanLayers.size() == 1
         && spanLayerMatch.getTarget()) {
-      setTokenIds(connection, spanLayers.get(0), spanLayerMatch, participantCondition);
+      setSpanTokenIds(
+        connection, spanLayers.get(0), spanLayerMatch, participantCondition);
+    } else if (noNonPhraseLayers && phraseLayers.size() == 1
+               && phraseLayerMatch.getTarget()) {
+      setPhraseTokenIds(
+        connection, phraseLayers.iterator().next(), phraseLayerMatch, participantCondition);
     }
     
     setStatus("Query complete, collating results...");
@@ -2171,7 +2330,7 @@ public class OneQuerySearch extends SearchTask {
    * @param layerMatch The one span layer's match conditions.
    * @throws SQLException
    */
-  protected void setTokenIds(
+  protected void setSpanTokenIds(
     Connection connection, Layer spanLayer, LayerMatch layerMatch,
     UnaryOperator<String> participantCondition) throws Exception {
 
@@ -2238,6 +2397,7 @@ public class OneQuerySearch extends SearchTask {
     PreparedStatement sqlLinkedWordLine = connection.prepareStatement(linkedWord.toString());
     PreparedStatement sqlNearestWordLine = connection.prepareStatement(nearestWord.toString());
     
+    setStatus("Identifying word tokens...");
     PreparedStatement sqlResults = connection.prepareStatement("SELECT * FROM _result");
     PreparedStatement sqlUpdateResult = connection.prepareStatement(
       "UPDATE _result SET speaker_number = ?, start_anchor_id = ?, end_anchor_id = ?,"
@@ -2302,7 +2462,115 @@ public class OneQuerySearch extends SearchTask {
       sqlUpdateResult.close();
       sqlDeleteResult.close();
     }
-  } // end of setTokenIds()
+  } // end of setSpanTokenIds()
+
+  /**
+   * Fills in the token IDs for the result set, assuming they're missing because the
+   * search query identified the target annotation ID but not the word tokens IDs.
+   * @param phraseLayer The one span layer being searched.
+   * @param layerMatch The one span layer's match conditions.
+   * @throws SQLException
+   */
+  protected void setPhraseTokenIds(
+    Connection connection, Layer phraseLayer, LayerMatch layerMatch,
+    UnaryOperator<String> participantCondition) throws Exception {
+
+    // try for the nearest word to the target start
+    // (e.g. including phones falling between words)
+    StringBuilder wordLine = new StringBuilder()
+      .append("SELECT")
+      .append(" line.label, line.start_anchor_id, line.end_anchor_id,")
+      .append(" line.annotation_id AS defining_annotation_id, word.turn_annotation_id,")
+      .append(" word.annotation_id AS first_matched_word_annotation_id,")
+      .append(" word.annotation_id AS last_matched_word_annotation_id")
+      .append(" FROM annotation_layer_0 word")
+      .append(" INNER JOIN anchor word_start ON word.start_anchor_id = word_start.anchor_id")
+      .append(" INNER JOIN annotation_layer_12 line")
+      .append(" ON word.turn_annotation_id = line.turn_annotation_id")
+      .append(" INNER JOIN anchor line_start ON line.start_anchor_id = line_start.anchor_id")
+      .append(" INNER JOIN anchor line_end ON line.end_anchor_id = line_end.anchor_id");
+    if(mainParticipantOnly) {
+      wordLine.append(" INNER JOIN transcript_speaker ON transcript_speaker.ag_id = word.ag_id")
+        .append(" AND transcript_speaker.speaker_number = line.label AND main_speaker = 1");
+    }
+    wordLine.append(" INNER JOIN anchor span_start ON span_start.anchor_id = ?")
+      .append(" INNER JOIN anchor span_end ON span_end.anchor_id = ?")
+      .append(" AND word.utterance_annotation_id = line.annotation_id")
+      .append(" WHERE word.turn_annotation_id = ?");
+    String speakerWhere = participantCondition.apply(matrix.getParticipantQuery());
+    if (speakerWhere == null && getLastException() != null) {
+      throw (Exception)getLastException();
+    }
+    wordLine.append(speakerWhere.replace("turn.label","line.label"));
+    if (layerMatch.getAnchorStart()) {
+      wordLine.append(" AND word.start_anchor_id = span_start.anchor_id");
+    }
+    if (layerMatch.getAnchorEnd()) {
+      wordLine.append(" AND word.end_anchor_id = span_end.anchor_id");
+    }
+
+    // up to here, all of the three possibilities use the same query
+    // but the WHERE/ORDER BY conditions vary for each...
+
+    StringBuilder nearestWord = new StringBuilder(wordLine);    
+    // word nearest to the start of the span:
+    nearestWord.append(" ORDER BY ABS(span_start.offset - word_start.offset) LIMIT 1");
+    
+    int tokenCount = 0;
+    try (PreparedStatement sqlResults = connection.prepareStatement(
+          "SELECT COUNT(*) FROM _result")) {
+      try (ResultSet rsResults = sqlResults.executeQuery()) {
+        if (rsResults.next()) {
+          tokenCount = rsResults.getInt(1);
+        }
+      }
+    }
+    setStatus("Identifying "+tokenCount+" word tokens...");
+    try (PreparedStatement sqlNearestWordLine = connection.prepareStatement(
+           nearestWord.toString());
+         PreparedStatement sqlResults = connection.prepareStatement(
+           "SELECT * FROM _result");
+         PreparedStatement sqlUpdateResult = connection.prepareStatement(
+           "UPDATE _result SET speaker_number = ?, start_anchor_id = ?, end_anchor_id = ?,"
+           +" defining_annotation_id = ?,"
+           +" first_matched_word_annotation_id = ?, last_matched_word_annotation_id = ?"
+           +" WHERE search_id = ? AND match_id = ?");
+         PreparedStatement sqlDeleteResult = connection.prepareStatement(
+           "DELETE FROM _result WHERE search_id = ? AND match_id = ?")) {
+      try (ResultSet rsResults = sqlResults.executeQuery() ) {
+        int t = 0;
+        while (rsResults.next() && !bCancelling) {
+          sqlNearestWordLine.setLong(1, rsResults.getLong("start_anchor_id"));
+          sqlNearestWordLine.setLong(2, rsResults.getLong("end_anchor_id"));
+          sqlNearestWordLine.setInt(3, rsResults.getInt("turn_annotation_id"));
+          try (ResultSet rsWordLine = sqlNearestWordLine.executeQuery()) {
+            if (rsWordLine.next()) { // only the first one
+              sqlUpdateResult.setString(
+                1, rsWordLine.getString("label")); // speaker_number
+              sqlUpdateResult.setLong(2, rsWordLine.getLong("start_anchor_id"));
+              sqlUpdateResult.setLong(3, rsWordLine.getLong("end_anchor_id"));
+              sqlUpdateResult.setLong(4, rsWordLine.getLong("defining_annotation_id"));
+              sqlUpdateResult.setLong(
+                5, rsWordLine.getLong("first_matched_word_annotation_id"));
+              sqlUpdateResult.setLong(
+                6, rsWordLine.getLong("last_matched_word_annotation_id"));
+              sqlUpdateResult.setInt(7, rsResults.getInt("search_id"));
+              sqlUpdateResult.setInt(8, rsResults.getInt("match_id"));
+              sqlUpdateResult.executeUpdate();
+            } else { // no matching token, so invalid result
+              sqlDeleteResult.setInt(1, rsResults.getInt("search_id"));
+              sqlDeleteResult.setInt(2, rsResults.getInt("match_id"));
+              sqlDeleteResult.executeUpdate();
+            }
+          } // close rsWordLine
+          
+          if (++t % 1000 == 0) {
+            setStatus("Identifying word tokens ("+t+"/"+tokenCount+")...");
+          }
+        } // next result
+      } // close rsResults
+    } // close sqlResults, sqlNearestWordLine, sqlUpdateResult, sqlDeleteResult
+  } // end of setPhraseIds()
 
   /**
    * Removes results that should be excluded; e.g. simultaneous speech as per the
