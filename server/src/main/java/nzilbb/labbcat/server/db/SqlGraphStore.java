@@ -4317,18 +4317,27 @@ public class SqlGraphStore implements GraphStore {
         else if (layer.getParentId() != null
                  && layer.getParentId().equals(schema.getTurnLayerId())) { // phrase layer
           Integer layer_id = (Integer)layer.get("layer_id");
-          if (targetLayer.getId().equals(layer.getId()) // target is selected layer
-              && targetOffset == 0) { // and we're after our own details
+          if (targetLayer.getId().equals(layer.getId())) { // target is selected layer
             String sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
               +" FROM annotation_layer_"+layer_id+" annotation"
               +" WHERE annotation.annotation_id = ?"
               +" ORDER BY annotation.ordinal, annotation.annotation_id"
               +" LIMIT 1"; // there can be only one match 
+            if (targetOffset != 0) { // and we're after our own details
+              sql = "SELECT DISTINCT annotation.*, ? AS layer, annotation.ag_id AS graph"
+                +" FROM annotation_layer_"+layer_id+" token"
+                +" INNER JOIN annotation_layer_"+layer_id+" annotation"
+                +" ON token.turn_annotation_id = annotation.turn_annotation_id"
+                +" AND annotation.ordinal = token.ordinal + "+targetOffset
+                +" WHERE token.annotation_id = ?"
+                +" ORDER BY annotation.ordinal, annotation.annotation_id"
+                +" LIMIT 0, " + layerIdToMaxAnnotations.get(layerId);
+            }
             Object[] groups = { layer.getId(), target_annotation_id_group };
-            queries.put(layerId, getConnection().prepareStatement(sql));
-            parameterGroups.put(layerId, groups);
-            altQueries.put(layerId, null); // there is no alternative query
-            altParameterGroups.put(layerId, null);
+              queries.put(layerId, getConnection().prepareStatement(sql));
+              parameterGroups.put(layerId, groups);
+              altQueries.put(layerId, null); // there is no alternative query
+              altParameterGroups.put(layerId, null);
           } else if (targetLayer.isAncestor(schema.getTurnLayerId())) {
             // target table has turn_annotation_id field
             String sql = "SELECT DISTINCT annotation.*, ? AS layer,"
