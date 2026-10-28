@@ -6452,36 +6452,47 @@ public class SqlGraphStore implements GraphStore {
             String turnIdList = adjustPhraseOrdinals.get(layer_id).stream()
               .map(uid -> uid.replace("em_11_", "")) // convert uid to turn_annotation_id
               .collect(Collectors.joining(","));
-            if (turnIdList.length() > 0) {
-              String sqlCreate = "CREATE TEMPORARY TABLE annotation_ordinal"
-                +" SELECT u.annotation_id,"
-                +" (SELECT COUNT(*)"
-                +"  FROM annotation_layer_"+layer_id+" o"
-                +"  INNER JOIN anchor o_start"
-                +"  ON o.start_anchor_id = o_start.anchor_id"
-                +"  WHERE o.turn_annotation_id = u.turn_annotation_id"
-                +"   AND o_start.offset <= start.offset) ordinal"
-                +"  FROM annotation_layer_"+layer_id+" u"
-                +" INNER JOIN anchor start ON u.start_anchor_id = start.anchor_id"
-                +" WHERE u.turn_annotation_id IN ("+turnIdList+")";
-              PreparedStatement sql = connection.prepareStatement(sqlCreate);
-              sql.executeUpdate();
-              sql.close();
-
-              String sqlUpdate = "UPDATE annotation_layer_"+layer_id+" u"
-                +" INNER JOIN annotation_ordinal on u.annotation_id"
-                +"  = annotation_ordinal.annotation_id"
-                +" SET u.ordinal = annotation_ordinal.ordinal";
-              sql = connection.prepareStatement(sqlUpdate);
-              sql.executeUpdate();
-              sql.close();
-
-              String sqlDrop = "DROP TEMPORARY TABLE annotation_ordinal";
-              sql = connection.prepareStatement(sqlDrop);
-              sql.executeUpdate();
-              sql.close();
-              
-            } // there are turn IDs
+            try (PreparedStatement sqlTempTableRowNumber = connection.prepareStatement(
+                   "CREATE TEMPORARY TABLE annotation_ordinal"
+                   +" (INDEX ix_annotation_id (annotation_id))"
+                   +" SELECT annotation_id, row_number() OVER (ORDER BY `offset`) ordinal"
+                   +" FROM annotation_layer_"+layer_id+" u"
+                   +" INNER JOIN anchor start ON u.start_anchor_id = start.anchor_id"
+                   +" WHERE CONCAT('em_11_', u.turn_annotation_id) = ?");
+                 // MySQL <= 5.7 don't support row_number()
+                 // so we fall back to a much slower subquery option:
+                 PreparedStatement sqlTempTableSelect = connection.prepareStatement(
+                   "CREATE TEMPORARY TABLE annotation_ordinal"
+                   +" SELECT u.annotation_id,"
+                   +" (SELECT COUNT(*)"
+                   +"  FROM annotation_layer_"+layer_id+" o"
+                   +"  INNER JOIN anchor o_start"
+                   +"  ON o.start_anchor_id = o_start.anchor_id"
+                   +"  WHERE o.turn_annotation_id = u.turn_annotation_id"
+                   +"   AND o_start.offset <= start.offset) ordinal"
+                   +"  FROM annotation_layer_"+layer_id+" u"
+                   +" INNER JOIN anchor start ON u.start_anchor_id = start.anchor_id"
+                   +" WHERE CONCAT('em_11_', u.turn_annotation_id) = ?");
+                 PreparedStatement sqlUpdateOrdinals = connection.prepareStatement(
+                   "UPDATE annotation_layer_"+layer_id+" u"
+                   +" INNER JOIN annotation_ordinal on u.annotation_id"
+                   +"  = annotation_ordinal.annotation_id"
+                   +" SET u.ordinal = annotation_ordinal.ordinal");
+                 PreparedStatement sqlDrop = connection.prepareStatement(
+                   "DROP TEMPORARY TABLE annotation_ordinal")) {
+              for (String turnUid : adjustPhraseOrdinals.get(layer_id)) {
+                sqlTempTableRowNumber.setString(1, turnUid);
+                try { // earlier versions of MySQL don't support row_number()
+                  sqlTempTableRowNumber.executeUpdate();
+                } catch (SQLException x) { // fall back to slower subselect
+                  System.out.println(""+x);
+                  sqlTempTableSelect.setString(1, turnUid);
+                  sqlTempTableSelect.executeUpdate();
+                }
+                sqlUpdateOrdinals.executeUpdate();
+                sqlDrop.executeUpdate();
+              } // next turn ID              
+            } // close statements
               
           } // next updating phrase layer
           // timers.end("update ordinals");
