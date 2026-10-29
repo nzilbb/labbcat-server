@@ -104,6 +104,9 @@
   <servlet><servlet-name>api/admin/upgrade.jsp</servlet-name><jsp-file>/jsp/api/admin/upgrade.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/upgrade.jsp</servlet-name><url-pattern>/api/admin/upgrade/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>api/admin/export.jsp</servlet-name><jsp-file>/jsp/api/admin/export.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/export.jsp</servlet-name><url-pattern>/api/admin/export</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>api/systemattributes.jsp</servlet-name><jsp-file>/jsp/api/systemattributes.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/systemattributes.jsp</servlet-name><url-pattern>/api/systemattributes/*</url-pattern></servlet-mapping>
   

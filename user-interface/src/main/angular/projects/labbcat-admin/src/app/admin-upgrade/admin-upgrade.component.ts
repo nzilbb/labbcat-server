@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { environment } from '../../environments/environment';
 
-import { MessageService, LabbcatService, SerializationDescriptor, Task } from 'labbcat-common';
+import { MessageService, LabbcatService, Task } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
 
 @Component({

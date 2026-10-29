@@ -1,0 +1,18 @@
+<h2 i18n="page header">Export/Migrate LaBB-CAT</h2>
+
+<p i18n>This page allows you to export your LaBB-CAT data/application for backup, or for copying/migrating it to another computer.</p>
+
+<div id="include-media"><label><input type="checkbox" [(ngModel)]="media"><span i81n>Include media files</span></label></div>
+<div class="buttons">
+  <lib-button (press)="export()"
+              [processing]="exporting"
+              img="download.svg" icon="💾"
+              i18n-label label="Export Now"
+              i18n-title title="Pack up the LaBB-CAT application and all its transcripts, annotations, and media"></lib-button>
+</div>
+<div class="export-task">
+  <lib-task *ngIf="exportTask"
+            [threadId]="exportTask.threadId"
+            (finished)="finished()"
+            ></lib-task>
+</div>

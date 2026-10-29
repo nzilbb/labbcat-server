@@ -33,6 +33,7 @@ import { AdminCategoriesComponent } from './admin-categories/admin-categories.co
 import { AdminAgreementComponent } from './admin-agreement/admin-agreement.component';
 import { AdminFormattersComponent } from './admin-formatters/admin-formatters.component';
 import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
+import { AdminExportComponent } from './admin-export/admin-export.component';
 import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
 import { AdminTaskResourcesComponent } from './admin-task-resources/admin-task-resources.component';
 import { AdminTaskAttributesComponent } from './admin-task-attributes/admin-task-attributes.component';
@@ -68,6 +69,7 @@ import { ActivityComponent } from './activity/activity.component';
         AdminAgreementComponent,
         AdminFormattersComponent,
         AdminUpgradeComponent,
+        AdminExportComponent,
         AdminTasksComponent,
         AdminTaskResourcesComponent,
         AdminTaskAttributesComponent,
@@ -124,6 +126,7 @@ import { ActivityComponent } from './activity/activity.component';
             { path: 'admin/formatters', component: AdminFormattersComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/upgrade', component: AdminUpgradeComponent},
+            { path: 'admin/export', component: AdminExportComponent},
             { path: 'admin/tasks', component: AdminTasksComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/resources/:task_id', component: AdminTaskResourcesComponent,
