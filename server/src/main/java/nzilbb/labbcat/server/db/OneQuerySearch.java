@@ -2038,7 +2038,7 @@ public class OneQuerySearch extends SearchTask {
       // nor utterance
       .filter(layer -> !layer.getParentId().equals(schema.getUtteranceLayerId()))
       .collect(Collectors.toSet());
-    LayerMatch phraseLayerMatch = phraseLayers.size() > 1?null
+    LayerMatch phraseLayerMatch = phraseLayers.size() != 1?null
       :matrix.layerMatchStream()
       .filter(LayerMatch::HasCondition)
       .filter(match -> match.getId().equals(phraseLayers.iterator().next().getId()))
