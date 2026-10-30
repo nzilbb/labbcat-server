@@ -11,6 +11,7 @@ import { AppComponent } from './app.component';
 import { LabbcatCommonModule, TaskComponent, PendingChangesGuard, AboutComponent, LoginComponent } from 'labbcat-common';
 import { AdminCorporaComponent } from './admin-corpora/admin-corpora.component';
 import { AdminMenuComponent } from './admin-menu/admin-menu.component';
+import { AdminMenuUtilitiesComponent } from './admin-menu-utilities/admin-menu-utilities.component';
 import { AdminProjectsComponent } from './admin-projects/admin-projects.component';
 import { AdminTracksComponent } from './admin-tracks/admin-tracks.component';
 import { AdminRolesComponent } from './admin-roles/admin-roles.component';
@@ -47,6 +48,7 @@ import { ActivityComponent } from './activity/activity.component';
         AppComponent,
         AdminCorporaComponent,
         AdminMenuComponent,
+        AdminMenuUtilitiesComponent,
         AdminProjectsComponent,
         AdminTracksComponent,
         AdminRolesComponent,
@@ -86,6 +88,7 @@ import { ActivityComponent } from './activity/activity.component';
             { path: 'login', component: LoginComponent },
             { path: 'task', component: TaskComponent },
             
+            { path: 'admin/utilities', component: AdminMenuUtilitiesComponent },
             { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/corpora', component: AdminCorporaComponent,
