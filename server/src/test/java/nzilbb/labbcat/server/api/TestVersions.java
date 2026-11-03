@@ -73,6 +73,8 @@ public class TestVersions {
     assertTrue("RDBMS info present", versions.containsKey("RDBMS"));
     assertTrue("RDBMS version present",
                versions.get("RDBMS").containsKey("version"));
+    assertTrue("Data info present", versions.containsKey("Data"));
+    assertTrue("dataVerion present", versions.get("Data").containsKey("dataVersion"));
   }
 
   public static void main(String args[]) {

@@ -24,8 +24,6 @@ package nzilbb.labbcat.server.api;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * <tt>/api/dashboard</tt>

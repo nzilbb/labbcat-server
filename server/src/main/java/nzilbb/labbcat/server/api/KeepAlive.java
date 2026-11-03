@@ -27,7 +27,7 @@ import nzilbb.labbcat.server.task.Task;
 
 /**
  * <tt>/keepalive</tt> or <tt>/api/keepalive</tt> : Keeps the current session/task alive.
- *  <p> This enpoint is intended to that the user's session, and a given task, is not
+ *  <p> This endpoint is intended to that the user's session, and a given task, is not
  *  disposed of even if they don't browse to a new page for a long time.
  *   <p> The only method supported is:
  *   <dl>

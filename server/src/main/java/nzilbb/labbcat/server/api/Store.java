@@ -40,11 +40,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import nzilbb.ag.*;
@@ -1579,7 +1574,7 @@ public class Store extends APIRequestHandler {
       }
     }
     if (annotationId == null && (start == null || end == null)) {
-      errors.add(localize("Annotation ID not specified.")); // TODO i18n
+      errors.add(localize("No annotation ID specified."));
     }
     
     if (errors.size() > 0) return failureResult(errors);

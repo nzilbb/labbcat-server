@@ -1,0 +1,15 @@
+#preview-view {
+    width: 90%;
+    margin: auto;
+}
+
+label {
+    white-space: nowrap;
+}
+/* Layout on wider screens */
+@media all and (min-width: 1080px) {
+    #form {
+        width: 30vw;
+        margin: auto;
+    }
+}

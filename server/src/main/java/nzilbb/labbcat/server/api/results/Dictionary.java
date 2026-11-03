@@ -120,7 +120,7 @@ public class Dictionary extends APIRequestHandler { // TODO unit test
         String threadId = parameters.getString("threadId");
         if (threadId == null) {
           httpStatus.accept(SC_BAD_REQUEST);
-          writer.println("No task ID specified."); // TODO i18n
+          writer.println("No task ID specified.");
           return;
         }
         Task task = Task.findTask(Long.valueOf(threadId));

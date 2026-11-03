@@ -10,6 +10,7 @@
     (input)="checkRegularExpression($event)"
     [(ngModel)]="value"
     (ngModelChange)="valueChange.emit(value)"
+    [disabled]="disabled"
     [appAutofocus]="autofocus?true:false">
   <span
     *ngIf="regexpError"

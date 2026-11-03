@@ -166,7 +166,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_BAD_REQUEST);
       try {
-        out.write(localize("No IDs specified").getBytes()); // TODO i18n       
+        out.write(localize("No IDs specified").getBytes());       
       } catch(IOException exception) {}
       return;
     }
@@ -175,7 +175,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_BAD_REQUEST);
       try {
-        out.write(localize("No start offsets specified").getBytes()); // TODO i18n
+        out.write(localize("No start offsets specified").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -184,7 +184,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       contentType.accept("text/plain;charset=UTF-8");
       httpStatus.accept(SC_BAD_REQUEST);
       try {
-        out.write(localize("No end offsets specified").getBytes()); // TODO i18n
+        out.write(localize("No end offsets specified").getBytes());
       } catch(IOException exception) {}
       return;
     }
@@ -207,7 +207,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       } catch(Exception exception) {
         httpStatus.accept(SC_BAD_REQUEST);
         try {
-          out.write(localize("Invalid sample rate: {0}", sampleRate).getBytes()); // TODO i18n
+          out.write(localize("Invalid sample rate: {0}", sampleRate).getBytes());
         } catch(IOException x) {}
       }
     }
@@ -220,7 +220,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
       } catch(Exception exception) {
         httpStatus.accept(SC_BAD_REQUEST);
         try {
-          out.write(localize("Invalid channel: {0}", channel).getBytes()); // TODO i18n
+          out.write(localize("Invalid channel: {0}", channel).getBytes());
         } catch(IOException x) {}
       }
     }
@@ -428,13 +428,13 @@ public class Fragments extends APIRequestHandler { // TODO unit test
           } else {
             contentType.accept("text/plain;charset=UTF-8");
             httpStatus.accept(SC_NOT_FOUND);
-            out.write(localize("No files were generated.").getBytes()); // TODO i18n
+            out.write(localize("No files were generated").getBytes());
           }
         } // next fragment
       } else { // no files
         contentType.accept("text/plain;charset=UTF-8");
         httpStatus.accept(SC_NOT_FOUND);
-        out.write(localize("No files were generated.").getBytes()); // TODO i18n
+        out.write(localize("No files were generated").getBytes());
         cacheStore(store);
       }      
     } catch(Exception ex) {

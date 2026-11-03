@@ -140,6 +140,7 @@ div.messages {
 div.messages div.error { color: var(--theme-error-color); font-weight: bold; }
 .message { color: black; }
 .error { color: var(--theme-error-color); }
+.warning { color: var(--theme-warning-color); }
 
 lib-wait {
     display: block;

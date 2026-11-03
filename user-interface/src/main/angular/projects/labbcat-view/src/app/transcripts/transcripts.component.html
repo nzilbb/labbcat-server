@@ -57,11 +57,12 @@
                 i18n-title title="Regenerate layers for all selected transcripts"
                 ></lib-button>
               <div id="generateLayerSelection" *ngIf="showGenerateLayerSelection">
-                <select name="layer_id"
+                <select name="layerId"
+                        [(ngModel)]="generateLayerId"
                         i18n-title title="Which layer to generate">
                   <option value="" i18n>All layers</option>
                   <ng-container *ngFor="let layer of generableLayers">
-                    <option value="{{layer.layer_id}}">{{layer.id}}</option>
+                    <option value="{{layer.id}}">{{layer.id}}</option>
                   </ng-container>
                 </select>
               </div>
@@ -246,8 +247,8 @@
     i18n-title title="Add or update a transcript"></lib-link>
   <lib-link
     *ngIf="user && user.roles.includes('edit') && !nextPage"
-    href="{{baseUrl}}edit/transcript/attributesBatch"
-    img="wrench.svg" icon="🔧"
+    href="{{baseUrl}}edit/transcripts/attributes/upload"
+    img="csv.svg" icon="c,s,v"
     i18n-label label="Upload Transcript Data"
     i18n-title title="Import participant data from a CSV file"></lib-link>
 </div>

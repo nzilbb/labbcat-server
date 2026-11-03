@@ -1857,19 +1857,22 @@ public class ProcessWithPraat extends Task {
         }
       }
     } finally {
-      if (out != null) try {out.close();} catch(IOException exception) {}
-      if (in != null) try {in.close();} catch(IOException exception) {}
-      if (outputFile != null) {
-        try {
-          setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
-                       + URLEncoder.encode(outputFile.getName(), "UTF-8"));
-        } catch(UnsupportedEncodingException impossible) { 
-          setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
-                       + outputFile.getName());
+      try {
+        if (out != null) try {out.close();} catch(IOException exception) {}
+        if (in != null) try {in.close();} catch(IOException exception) {}
+        if (outputFile != null) {
+          try {
+            setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
+                         + URLEncoder.encode(outputFile.getName(), "UTF-8"));
+          } catch(UnsupportedEncodingException impossible) { 
+            setResultUrl(baseUrl +"/" + getStore().getFiles().getName() + "/"
+                         + outputFile.getName());
+          }
+          setResultText("CSV file with measurements");
         }
-        setResultText("CSV file with measurements");
+      } finally {
+        runEnd();
       }
-      runEnd();
     }
     if (bCancelling) {
       setStatus(getStatus() + " - cancelled.");
@@ -2143,8 +2146,7 @@ public class ProcessWithPraat extends Task {
     File baseDir)
     throws Exception {
     Vector<Vector<String>> results = new Vector<Vector<String>>();
-    if (wav != null)
-    {
+    if (wav != null) {
       setStatus(
         "Generating script for " + targets.size() 
         + " target" + (targets.size()==1?"":"s")
@@ -2297,6 +2299,7 @@ public class ProcessWithPraat extends Task {
         if (extractCOG2) result.add("");
         if (extractCOG23) result.add("");
         for (String field : customScriptHeaders) result.add("");
+        result.add(""); // error (will be appended afterwards)
         results.add(result);
       } // next target
     }

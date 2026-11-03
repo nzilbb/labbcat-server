@@ -1,0 +1,13 @@
+.activity {
+    position: fixed;
+    right: 10px;
+    text-align: left;
+    background: var(--theme-background-color);
+    z-index: -1;
+}
+.activity p, .activity ul {
+    margin: 1px;
+}
+ul.other-users {
+    list-style-type: "👤";
+}

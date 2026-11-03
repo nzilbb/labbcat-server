@@ -1,8 +1,8 @@
 <%@ page info="Corpus access agreement" isErrorPage="true"
-    import = "nzilbb.labbcat.server.api.Agreement" 
+    import = "nzilbb.labbcat.server.content.Agreement" 
 %><%@ include file="base.jsp" %><%{
     Agreement handler = new Agreement();
-    initializeHandler(handler, request);
+    initializeHandler(handler, request, response);
     if ("GET".equals(request.getMethod())) {
       handler.get(        
         request.getPathInfo(),
@@ -21,16 +21,17 @@
       } else {
         %><jsp:include page="/api/file-upload-tomcat10.jsp" /><%
       } 
-      RequestParameters parameters = (RequestParameters)
-        request.getAttribute("multipart-parameters");
-      handler.post(
-        request.getPathInfo(),
-        (path)->new File(getServletContext().getRealPath(path)),
-        parameters,
-        response.getOutputStream(),
-        (contentType)->response.setContentType(contentType),
-        (encoding)->response.setCharacterEncoding(encoding),
-        (status)->response.setStatus(status));
+      try (RequestParameters parameters = (RequestParameters)
+           request.getAttribute("multipart-parameters")) {
+        handler.post(
+          request.getPathInfo(),
+          (path)->new File(getServletContext().getRealPath(path)),
+          parameters,
+          response.getOutputStream(),
+          (contentType)->response.setContentType(contentType),
+          (encoding)->response.setCharacterEncoding(encoding),
+          (status)->response.setStatus(status));
+      } // delete any temporary files
     } else if ("PUT".equals(request.getMethod())) {
       handler.put(
         request.getPathInfo(),

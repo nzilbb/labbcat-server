@@ -76,7 +76,7 @@ export class PraatService {
                 }, // onProgress
                 
                 (code, summary, error) => { // onUploadResponse
-                    if (summary) this.messageService.info(summary);
+                    if (summary) this.messageService.info(summary.trim());
                     if (error) {
                         this.messageService.error(error);
                         if (this.uploadReject) {

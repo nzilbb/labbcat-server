@@ -74,7 +74,9 @@ public class APIRequestHandler {
   // Constants
   
   public static final int SC_OK = 200;
+  public static final int SC_CREATED = 201;
   public static final int SC_BAD_REQUEST = 400;
+  public static final int SC_UNAUTHORIZED = 401;
   public static final int SC_FORBIDDEN = 403;
   public static final int SC_NOT_FOUND = 404;
   public static final int SC_METHOD_NOT_ALLOWED = 405;
@@ -88,7 +90,14 @@ public class APIRequestHandler {
   protected String defaultTitle;
   protected ResourceBundle defaultResourceBundle;
 
-  protected APIRequestContext context;
+  protected APIRequestContext context;  
+  /**
+   * Gets the servlet context.
+   * @return The context.
+   */
+  public APIRequestContext getContext() {
+    return context;
+  } // end of getContext()
   
   // Methods:
   

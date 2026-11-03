@@ -1,0 +1,58 @@
+label {
+    padding-right: 5px;
+}
+label:after {
+    content: ':';
+}
+.upload-progress {
+    max-width: 500px;
+    margin: auto;
+}
+
+
+#upgrade-versions {
+    margin: auto;
+}
+.war {
+    font-style: italic;
+}
+.version {
+    font-weight: bold;
+    text-align: center;
+}
+.to {
+    text-align: center;
+}
+.buttons {
+    text-align: center;
+}
+
+#messages .message {
+    white-space: pre-wrap;
+}
+
+#task-list {
+    width: 97vw;
+}
+#tasks {
+    width: fit-content;
+    max-width: 97vw;
+    padding-bottom: 30px;
+}
+
+td, th {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+.progress-description > span {
+    padding-left: 3px;
+}
+.controls {
+    text-align: right;
+}
+.gone {
+    color: silver;
+}
+#tasks caption {
+    white-space: nowrap;
+}

@@ -59,42 +59,40 @@ export default class InsertUtteranceCommand extends Command {
     }
     
     getFragment(transcriptId, utteranceId) {
-        // what layers are currently selected?
-        $.getJSON(`${baseUrl}/selectedLayers`, (response, status)=>{
-            layers = response.model;
-            // ensure that at least "word" is selected
-            if (!layers || layers.length == 0) layers = [ "word" ];
-            if (!layers.includes("word")) layers.push("word");
-            // don't want "orthography"
-            if (layers.includes("orthography")) layers = layers.filter(l=>l != "orthography");
-            const layerIds = layers.join("&layerIds=");
-            
-            // load fragment including selected layers
-            const fragmentUrl = `${baseUrl}/api/store/getFragment?id=${transcriptId}&annotationId=${utteranceId}&layerIds=${layerIds}`;
-            $.getJSON(fragmentUrl, (response, status)=>{
-                if (response.errors.length > 0) {
-                    alert(response.errors.join("\n"));
-                    return;
-                }
-                
-                // extract out the bits we want
-                const fragment = response.model;
-                const idPattern = /.*__([0-9]+\.[0-9]+)-([0-9]+\.[0-9]+)$/;
-                const startOffset = fragment.id.replace(idPattern,"$1")
-                const endOffset = fragment.id.replace(idPattern,"$2")
-                
-                // compile URLs we need
-                const audioUrl = `${baseUrl}/soundfragment?id=${transcriptId}&start=${startOffset}&end=${endOffset}`;
-                const transcriptUrl = `${baseUrl}/transcript?transcript=${transcriptId}#${utteranceId}`;
-                
-                // create the utterance element
-                this.editor.model.change( writer => {
-                    this.editor.model.insertContent(
-                        this.createUtterance(writer, transcriptUrl, audioUrl,
-                                             fragment.participant[0].turn[0]));
-                });
-            });
+      // what layers are currently selected?        
+      layers = JSON.parse(sessionStorage.getItem("selectedLayerIds"));
+      // ensure that at least "word" is selected
+      if (!layers || layers.length == 0) layers = [ "word" ];
+      if (!layers.includes("word")) layers.push("word");
+      // don't want "orthography"
+      if (layers.includes("orthography")) layers = layers.filter(l=>l != "orthography");
+      const layerIds = layers.join("&layerIds=");
+      
+      // load fragment including selected layers
+      const fragmentUrl = `${baseUrl}/api/store/getFragment?id=${transcriptId}&annotationId=${utteranceId}&layerIds=${layerIds}`;
+      $.getJSON(fragmentUrl, (response, status)=>{
+        if (response.errors.length > 0) {
+          alert(response.errors.join("\n"));
+          return;
+        }
+        
+        // extract out the bits we want
+        const fragment = response.model;
+        const idPattern = /.*__([0-9]+\.[0-9]+)-([0-9]+\.[0-9]+)$/;
+        const startOffset = fragment.id.replace(idPattern,"$1")
+        const endOffset = fragment.id.replace(idPattern,"$2")
+        
+        // compile URLs we need
+        const audioUrl = `${baseUrl}/soundfragment?id=${transcriptId}&start=${startOffset}&end=${endOffset}`;
+        const transcriptUrl = `${baseUrl}/transcript?transcript=${transcriptId}#${utteranceId}`;
+        
+        // create the utterance element
+        this.editor.model.change( writer => {
+          this.editor.model.insertContent(
+            this.createUtterance(writer, transcriptUrl, audioUrl,
+                                 fragment.participant[0].turn[0]));
         });
+      });
     }
     
     createUtterance(writer, transcriptUrl, audioUrl, turn) {

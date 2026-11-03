@@ -141,7 +141,13 @@
     var messages = null;
     try {
       if (evt.target.raw) {
-        result = this.responseText;
+        if (this.status >= 400) {
+          errors = [`Error ${this.status} ${this.responseText}`.trim()];
+          messages = [];
+        } else {
+          result = this.responseText;
+          errors = messages = [];
+        }
       } else {
         var response = JSON.parse(this.responseText);
         if (response.model != null) {
@@ -4028,6 +4034,700 @@
     }
 
     /**
+     * Upload an annotated fragment file, as the first stage in updating a fragment
+     * (e.g. a single utterance) in LaBB-CAT. The second stage is
+     * {@link #fragmentUploadParameters}
+     * @param {file|string} fragment The fragment to upload. In a browser, this
+     * must be a file object, and in Node, it must be the full path to the file. 
+     * @param automaticMapping A value of true indicates that default parameters
+     * for processing the upload (e.g. mappings from TextGrid tiers to LaBB-CAT layers)
+     * should be automatically applied, and the resulting data should be immediately
+     * saved, instead of using the two-step process of first uploading the file via
+     * this method and then setting parameters via {@link #fragmentUploadParameters}.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * result, which is and object that has the following attributes:
+     * <dl>
+     *  <dt> id </dt> <dd> The unique identifier to use for this upload when subsequently
+     *          calling {@link #fragmentUploadParameters}. </dd>
+     *  <dt> transcript </dt>
+     *     <dd> The name of the transcript, inferred from the fragment file name. </dd> 
+     *  <dt> start </dt>
+     *     <dd> The start time of the fragment, inferred from the fragment file name. </dd> 
+     *  <dt> end </dt>
+     *     <dd> The end time of the fragment, inferred from the fragment file name. </dd> 
+     *  <dt> parameters </dt> <dd> An array of objects representing the parameters that
+     *          require values to be passed into {@link #fragmentUploadParameters}. 
+     *          The <q>parameters</q> returned may include both information
+     *          required by the format deserializer (e.g. mappings from tiers to LaBB-CAT
+     *          layers) and also general information required by LaBB-CAT (e.g. the
+     *          corpus, episode, and type of the fragment). 
+     *                 </dd>
+     * <p> Each parameter may contain the following attributes:
+     *  <dl>
+     *   <dt> name </dt>
+     *       <dd> The name that should be used when specifying the value for the parameter
+     *        when calling {@link #fragmentUploadParameters}. </dd> 
+     *   <dt> label </dt>
+     *       <dd> A label for the parameter intended for display to the user.</dd> 
+     *   <dt> hint </dt>
+     *       <dd> A description of the purpose of the parameter, for display to the user.</dd> 
+     *   <dt> type </dt>
+     *       <dd> The type of the parameter, e.g. <q>String</q>, <q>Double</q>, <q>Integer</q>,  
+     *         <q>Boolean</q>.</dd> 
+     *   <dt> required </dt>
+     *       <dd> <tt>true</tt> if the value must be specified, <tt>false</tt> if it is optional.</dd> 
+     *   <dt> value </dt>
+     *       <dd> A default value for the parameter.</dd> 
+     *   <dt> possibleValues </dt>
+     *       <dd> A list of possible values, if the possibilities are limited to a finite set.</dd> 
+     *  </dl>
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    fragmentUpload(fragment, automaticMapping, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("fragmentUpload(" + fragment + ", " + automaticMapping + ")");
+      }
+      // create form
+      var fd = new FormData();
+      fd.append("automaticMapping", ""+(automaticMapping?true:false));
+      
+      if (!runningOnNode) {	
+        
+	fd.append("fragment", fragment);
+        
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "fragmentUpload";
+	xhr.id = fragment.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = fragment.name; // for knowing what status to update during events
+	
+	xhr.open("POST", this.baseUrl + "api/edit/fragment/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var fragmentName = fragment.replace(/.*\//g, "");
+        if (exports.verbose) console.log("fragmentName: " + fragmentName);
+        
+	fd.append(
+          "fragment", 
+	  fs.createReadStream(fragment).on('error', function(){
+	    onResult(
+              null, ["Invalid fragment: " + fragmentName], [], "fragmentUpload", fragmentName);
+	  }), fragmentName);
+        
+	var urlParts = parseUrl(this.baseUrl + "api/edit/fragment/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/edit/fragment/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "fragmentUpload", fragmentName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "fragmentUpload", fragmentName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // fragmentUpload
+    
+    /**
+     * The second part of a fragment upload process started by a call to
+     * {@link #fragmentUpload}, which specifies values for the parameters
+     * required to save the uploaded fragment to LaBB-CAT's database. 
+     * @param {string} id Upload ID returned by the prior call to {@link #fragmentUpload}.
+     * @param {object} parameters Object with an attribute and value for each parameter
+     * returned by the prior call to {@link #fragmentUpload}.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * result, which is and object that has the following attributes:
+     * <dl>
+     *  <dt> id </dt> <dd> The unique identifier to use for this upload when subsequently
+     *          calling {@link #fragmentUploadParameters} (if parameters are returned). </dd>
+     *   <dt> transcript </dt>
+     *     <dd> The name of the transcript, inferred from the fragment file name. </dd> 
+     *   <dt> start </dt>
+     *     <dd> The start time of the fragment, inferred from the fragment file name. </dd> 
+     *   <dt> end </dt>
+     *     <dd> The end time of the fragment, inferred from the fragment file name. </dd> 
+     *   <dt> url </dt>
+     *     <dd> The URL for the fragment, in the context of the whole transcript. </dd> 
+     *  <dt> parameters </dt> <dd> An array of objects representing the parameters that
+     *          still require values. </dd>
+     * <p> If parameters are returned, they have the same structure as those returned by 
+     * {@link #fragmentUpload}
+     */
+    fragmentUploadParameters(id, parameters, onResult) {
+      if (parameters.constructor === Array) { // array of parameter objects, not keys/values
+        var parameterValues = {}
+        for (var p in parameters) {
+          var parameter = parameters[p];
+          if (parameter.name) {
+            parameterValues[parameter.name] = parameter.value;
+          }
+        } // next parameter
+        parameters = parameterValues;
+      }
+      this.createRequest(
+        "fragmentUploadParameters", null, onResult,
+        this.baseUrl+"api/edit/fragment/upload/"+encodeURIComponent(id)
+          + "?"+this.parametersToQueryString(parameters),
+        "PUT").send();
+    } // fragmentUploadParameters
+
+    /**
+     * Cancel a fragment upload started by a call to {@link #fragmentUpload}, 
+     * deleting any uploaded files from the server.
+     * @param {string} id Upload ID returned by the prior call to {@link #fragmentUpload}.
+     * @param {resultCallback} onResult Invoked when the request has returned.
+     */
+    fragmentUploadDelete(id, onResult) {
+      this.createRequest(
+        "fragmentUploadDelete", null, onResult,
+        this.baseUrl+"api/edit/fragment/upload/"+encodeURIComponent(id),
+        "DELETE").send();
+    } // fragmentUploadDelete
+    
+    /**
+     * Uploads attribute values for multiple participants from CSV file.
+     * @param {file|string} csv CSV file containing the attribute values to import.
+     * @param {number} idColumn The (zero based) index of the column that
+     * identifies the participant; if the participant exists, its
+     * attribute values will be updated, otherwise, and new participant
+     * will be created with the specified attribute values. If set to -1,
+     * all participant are new, and created with automatically generated
+     * IDs, formatted using the <q>participantNameFormat</q> system attribute. 
+     * @param {string[]} columnLayer Multiple values, where the index of the value
+     * corresponds to the (zero based) CSV column index, and the value
+     * is blank to ignore the column, the layer ID of the participant
+     * attribute to update, or <q>_password</q> if the columns contains the
+     * participants' passwords (for logging in to do elicitation tasks). 
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * result, which is an array of two integers; the first is the number of existing
+     * participants that were updated, and the second, the number of
+     * newly-added participants.
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadParticipantAttributes(csv, idColumn, columnLayer, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("uploadParticipantAttributes(" + csv + ", " + idColumn + ", " + JSON.stringify(columnLayer) + ")");
+      }
+      var fd = new FormData();
+      fd.append("idColumn", idColumn);
+      for (let c of columnLayer) {
+        fd.append("columnLayer", c||"");
+      }
+      if (!runningOnNode) {	        
+	fd.append("csv", csv);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadParticipantAttributes";
+	xhr.id = csv.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = csv.name;
+	
+	xhr.open("POST", this.baseUrl + "api/edit/participants/attributes/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var csvName = csv.replace(/.*\//g, "");
+        if (exports.verbose) console.log("csvName: " + csvName);
+        
+	fd.append(
+          "csv", 
+	  fs.createReadStream(csv).on('error', function(){
+	    onResult(
+              null, ["Invalid file: " + csvName], [], "uploadParticipantAttributes", csvName);
+	  }), csvName);
+	var urlParts = parseUrl(this.baseUrl + "api/edit/participants/attributes/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(error, contentLength) {
+          if (error) console.log(error);
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl
+                        + "api/edit/participants/attributes/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "uploadParticipantAttributes", csvName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadParticipantAttributes", csvName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // uploadParticipantAttributes
+    
+    /**
+     * Uploads attribute values for multiple transcripts from CSV file.
+     * @param {file|string} csv CSV file containing the attribute values to import.
+     * @param {number} idColumn The (zero based) index of the column that
+     * identifies the transcript; if the transcript exists, its
+     * attribute values will be updated, otherwise, the row is ignored. 
+     * @param {string[]} columnLayer Multiple values, where the index of the value
+     * corresponds to the (zero based) CSV column index, and the value
+     * is blank to ignore the column, the layer ID of the transcript
+     * attribute to update. 
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * result, which is an array of two integers; the first is the number of existing
+     * transcripts that were updated, and the second, the number of transcripts
+     * that were not found.
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadTranscriptAttributes(csv, idColumn, columnLayer, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("uploadTranscriptAttributes("
+                    + csv + ", " + idColumn + ", " + JSON.stringify(columnLayer) + ")");
+      }
+      var fd = new FormData();
+      fd.append("idColumn", idColumn);
+      for (let c of columnLayer) {
+        fd.append("columnLayer", c||"");
+      }
+      if (!runningOnNode) {	        
+	fd.append("csv", csv);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadTranscriptAttributes";
+	xhr.id = csv.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = csv.name;
+	
+	xhr.open("POST", this.baseUrl + "api/edit/transcripts/attributes/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var csvName = csv.replace(/.*\//g, "");
+        if (exports.verbose) console.log("csvName: " + csvName);
+        
+	fd.append(
+          "csv", 
+	  fs.createReadStream(csv).on('error', function(){
+	    onResult(
+              null, ["Invalid file: " + csvName], [], "uploadTranscriptAttributes", csvName);
+	  }), csvName);
+	var urlParts = parseUrl(this.baseUrl + "api/edit/transcripts/attributes/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(error, contentLength) {
+          if (error) console.log(error);
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl
+                        + "api/edit/transcripts/attributes/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "uploadTranscriptAttributes", csvName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadTranscriptAttributes", csvName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // uploadTranscriptAttributes
+    
+    /**
+     * Uploads annotation labels for tagging match tokens from a results CSV file.
+     * @param {file|string} csv CSV file containing the annotation labels to import.
+     * @param {number} idColumn The (zero based) index of the column that contains
+     * MatchId or another identifier that identifies target token(s);
+     * If the tokens are found, they're annotated with the labels in the columns
+     * identified by <var>columnLayer</var>, otherwise, the row is ignored. 
+     * @param {string[]} columnLayer Multiple values, where the index of the value
+     * corresponds to the (zero based) CSV column index, and the value
+     * is blank to ignore the column, or the ID of the layer to annotate the
+     * tokens on. 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute, the
+     * <var>threadId</var> of the server task processing the annotations. 
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadTokenAnnotations(csv, idColumn, columnLayer, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("uploadTokenAnnotations("
+                    + csv + ", " + idColumn + ", " + JSON.stringify(columnLayer) + ")");
+      }
+      var fd = new FormData();
+      fd.append("idColumn", idColumn);
+      for (let c of columnLayer) {
+        fd.append("columnLayer", c||"");
+      }
+      if (!runningOnNode) {	        
+	fd.append("csv", csv);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadTokenAnnotations";
+	xhr.id = csv.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = csv.name;
+	
+	xhr.open("POST", this.baseUrl + "api/edit/annotations/tokens");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var csvName = csv.replace(/.*\//g, "");
+        if (exports.verbose) console.log("csvName: " + csvName);
+        
+	fd.append(
+          "csv", 
+	  fs.createReadStream(csv).on('error', function(){
+	    onResult(
+              null, ["Invalid file: " + csvName], [], "uploadTranscriptAttributes", csvName);
+	  }), csvName);
+	var urlParts = parseUrl(this.baseUrl + "api/edit/annotations/tokens");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(error, contentLength) {
+          if (error) console.log(error);
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl
+                        + "api/edit/annotations/tokens");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "uploadTranscriptAttributes", csvName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadTranscriptAttributes", csvName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // uploadTokenAnnotations
+        
+    /**
+     * Uploads annotation labels for tagging time intervals from a results CSV file.
+     * @param {file|string} csv CSV file containing the annotation labels to import.
+     * @param {number} idColumn The (zero based) index of the column that contains
+     * @param {number} transcriptColumn The (zero based) index of the column that contains
+     * the transcript name to annotate.
+     * @param {number} startTimeColumn The (zero based) index of the column that contains
+     * the start time for the annotation.
+     * @param {number} endTimeColumn The (zero based) index of the column that contains the
+     * end time for the annotation.
+     * @param {string[]} columnLayer Multiple values, where the index of the value
+     * corresponds to the (zero based) CSV column index, and the value
+     * is blank to ignore the column, or the ID of the layer to annotate the
+     * intervals on. 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute, the
+     * <var>threadId</var> of the server task processing the annotations. 
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadIntervalAnnotations(
+      csv, transcriptColumn, startTimeColumn, endTimeColumn, columnLayer,
+      onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("uploadIntervalAnnotations("
+                    + csv + ", " + idColumn + ", " + JSON.stringify(columnLayer) + ")");
+      }
+      var fd = new FormData();
+      fd.append("transcriptColumn", transcriptColumn);
+      fd.append("startTimeColumn", startTimeColumn);
+      fd.append("endTimeColumn", endTimeColumn);
+      for (let c of columnLayer) {
+        fd.append("columnLayer", c||"");
+      }
+      if (!runningOnNode) {	        
+	fd.append("csv", csv);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadIntervalAnnotations";
+	xhr.id = csv.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = csv.name;
+	
+	xhr.open("POST", this.baseUrl + "api/edit/annotations/intervals");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var csvName = csv.replace(/.*\//g, "");
+        if (exports.verbose) console.log("csvName: " + csvName);
+        
+	fd.append(
+          "csv", 
+	  fs.createReadStream(csv).on('error', function(){
+	    onResult(
+              null, ["Invalid file: " + csvName], [], "uploadTranscriptAttributes", csvName);
+	  }), csvName);
+	var urlParts = parseUrl(this.baseUrl + "api/edit/annotations/intervals");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(error, contentLength) {
+          if (error) console.log(error);
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl
+                        + "api/edit/annotations/intervals");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "uploadTranscriptAttributes", csvName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadTranscriptAttributes", csvName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // uploadIntervalAnnotations
+    
+    /**
      * For HTK dictionary-filling, this adds a new dictionary entry and updates all tokens.
      * @param {string} layerId The dictionary of this layer will be used.
      * @param {string} label The word label to add an entry for.
@@ -4590,8 +5290,8 @@
     /**
      * Creates a new media track record.
      * @see LabbcatAdmin#readMediaTracks
-     * @see LabbcatAdmin#updateTask
-     * @see LabbcatAdmin#deleteTask
+     * @see LabbcatAdmin#updateMediaTrack
+     * @see LabbcatAdmin#deleteMediaTrack
      * @param {string} suffix The suffix of the mediaTrack.
      * @param {string} description The description of the mediaTrack.
      * @param {int} display_order The position of the mediaTrack relative to other mediaTracks.
@@ -4611,8 +5311,8 @@
     /**
      * Reads a list of media track records.
      * @see LabbcatAdmin#createMediaTrack
-     * @see LabbcatAdmin#updateTask
-     * @see LabbcatAdmin#deleteTask
+     * @see LabbcatAdmin#updateMediaTrack
+     * @see LabbcatAdmin#deleteMediaTrack
      * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
      * records will be returned). 
      * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -4676,6 +5376,132 @@
     deleteMediaTrack(suffix, onResult) {
       this.createRequest(
         "mediaTracks", null, onResult, `${this.baseUrl}api/admin/mediatracks/${suffix}`,
+        "DELETE").send();
+    }
+    
+    /**
+     * Creates a new dashboard item.
+     * @see LabbcatAdmin#readDashboardItems
+     * @see LabbcatAdmin#updateDashboardItem
+     * @see LabbcatAdmin#deleteDashboardItem
+     * @param {string} type "link" or "sql".
+     * @param {string} label The item label.
+     * @param {string} icon The icon for the item, if any.
+     * @param {string} definition The URL/fragment for "link" items
+     *        or the SQL query for "sql" items.
+     * @param {string} dashboard Whether the item is for the home page.
+     * @param {string} express Whether the item is for the 'express' home page.
+     * @param {string} statistics Whether the item is for the statistics page.
+     * @param {int} display_order The position of the dashboardItem relative to other dashboardItems.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the dashboardItem record. 
+     */
+    createDashboardItem(
+      type, label, icon, definition, dashboard, express, statistics, display_order,
+      onResult) {
+      this.createRequest(
+        "dashboardItems", null, onResult, this.baseUrl+"api/admin/dashboard", "POST",
+        null, "application/json")
+        .send(JSON.stringify({
+          type : type,
+          label : label,
+          icon : icon || "",
+          definition : definition,
+          dashboard : dashboard?1:0,
+          express : express?1:0,
+          statistics : statistics?1:0,
+          display_order: display_order}));
+    }
+    
+    /**
+     * Reads a list of dashboard items.
+     * @see LabbcatAdmin#createDashboardItem
+     * @see LabbcatAdmin#updateDashboardItem
+     * @see LabbcatAdmin#deleteDashboardItem
+     * @param {string} type "link" or "sql". 
+     * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+     * records will be returned). 
+     * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A list of dashboardItem records with the following
+     * attributes:
+     * <dl>
+     *  <dt> item_id </dt><dd> A unique identidier for the item. </dd>
+     *  <dt> label </dt><dd> The label for the item. </dd>
+     *  <dt> icon </dt><dd> The item's icon. </dd>
+     *  <dt> definition </dt><dd> The items' definition - i.e. a URL/fragment for "link"
+     *       items or an SQL query for "sql" items. </dd>
+     *  <dt> dashboard </dt><dd> Whether the item is shown on the home page. </dd>
+     *  <dt> express </dt><dd> Whether the item is shown on the 'express' home page. </dd>
+     *  <dt> statistics </dt><dd> Whether the item is shown on the statistics page. </dd>
+     *  <dt> display_order </dt><dd> The position of the track amongst other tracks. </dd>
+     * </dl>
+     */
+    readDashboardItems(type, pageNumber, pageLength, onResult) {
+      if (typeof pageNumber === "function") { // (onResult)
+        onResult = pageNumber;
+        pageNumber = null;
+        pageLength = null;
+      } else if (typeof l === "function") { // (p, onResult)
+        onResult = l;
+        pageLength = null;
+      }
+      this.createRequest(
+        "dashboardItems", {
+          pageNumber:pageNumber,
+          pageLength:pageLength
+        }, onResult, this.baseUrl+"api/admin/dashboard/"+type)
+        .send();
+    }
+    
+    /**
+     * Updates an existing dashboard item.
+     * @see LabbcatAdmin#createDashboardItem
+     * @see LabbcatAdmin#readDashboardItems
+     * @see LabbcatAdmin#deleteDashboardItem
+     * @param {string} type "link" or "sql".
+     * @param {int} item_id The ID of the item.
+     * @param {string} label The item label.
+     * @param {string} icon The icon for the item, if any.
+     * @param {string} definition The URL/fragment for "link" items
+     *        or the SQL query for "sql" items.
+     * @param {string} dashboard Whether the item is for the home page.
+     * @param {string} express Whether the item is for the 'express' home page.
+     * @param {string} statistics Whether the item is for the statistics page.
+     * @param {int} display_order The position of the dashboardItem relative to other dashboardItems.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the dashboardItem record. 
+     */
+    updateDashboardItem(
+      type, item_id, label, icon, definition, dashboard, express, statistics, display_order,
+      onResult) {
+      this.createRequest(
+        "dashboardItems", null, onResult, this.baseUrl+"api/admin/dashboard", "PUT")
+        .send(JSON.stringify({
+          item_id : item_id,
+          type : type,
+          label : label,
+          icon : icon || "",
+          definition : definition,
+          dashboard : dashboard?1:0,
+          express : express?1:0,
+          statistics : statistics?1:0,
+          display_order: display_order}));
+    }
+    
+    /**
+     * Deletes an existing dashboard item.
+     * @see LabbcatAdmin#createDashboardItem
+     * @see LabbcatAdmin#readDashboardItems
+     * @see LabbcatAdmin#updateDashboardItem
+     * @param {string} type "link" or "sql".
+     * @param {int} item_id The ID of the item.
+     * @param {resultCallback} onResult Invoked when the request has completed.
+     */
+    deleteDashboardItem(type, item_id, onResult) {
+      this.createRequest(
+        "dashboardItems", null, onResult,
+        `${this.baseUrl}api/admin/dashboard/${type}/${item_id}`,
         "DELETE").send();
     }
     
@@ -4954,6 +5780,175 @@
           value : value}));
     }
     
+    /**
+     * Uploads a serialization (formatter) module in preparation for installing it.
+     * @param {string|file} jarFile Serialization .jar file.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object describing the attributes of the
+     * serialization found in the jar file:
+     * <dl>
+     *  <dt> jar </dt><dd> The name of the .jar file uploaded (this must be used in the
+     *                     subsequent request). </dd>
+     *  <dt> name </dt><dd> The human-readable name of the file format handled by the 
+     *                     serialization module found in the .jar file. </dd>
+     *  <dt> mimeType </dt><dd> The MIME (Content) Type handled by the serialization module
+     *                     found in the .jar file. </dd>
+     *  <dt> version </dt><dd> The version of the serialization implementation. </dd>
+     *  <dt> deserializer </dt><dd> Whether or not the module can read files of the
+     *                     given format </dd> 
+     *  <dt> serializer </dt><dd> Whether or not the module can produce files of the
+     *                     given format </dd> 
+     *  <dt> icon </dt><dd> URL for the module's icon. </dd>
+     *  <dt> installedVersion </dt><dd> The version of the already-installed serialization
+     *                     implementation, if any. </dd>
+     * </dl>
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadSerialization(jarFile, onResult, onProgress) {
+
+      // create form
+      var fd = new FormData();
+
+      // TODO nzibb/labbcat-server/user-interface thinks it's running on Node when actually
+      // it's running in a browser, so we need a better test for runningOnNode
+      if (runningOnNode || true) {                
+        
+	fd.append("jarFile", jarFile);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadSerialization";
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	
+	xhr.open("POST", this.baseUrl + "api/admin/serialization");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+        
+	var jarName = jarFile.replace(/.*\//g, "");
+        if (exports.verbose) console.log("jarName: " + jarName);
+        fd.append(
+          "jarFile", 
+	  fs.createReadStream(jarFile).on('error', function(){
+	    onResult(null, ["Invalid jar: " + jarFile], [], "uploadSerialization", jarFile);
+	  }), jarName);
+        
+	var urlParts = parseUrl(this.baseUrl + "api/admin/serialization");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/admin/serialization");
+          }
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		//console.log('data ' + buffer);
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+                if (exports.verbose) console.log("response: " + responseText);
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+                // for this call, the result is an object with one key, whose
+                // value is the threadId - so just return that
+		onResult(
+                  result[jarName], errors, messages, "uploadSerialization", jarName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadSerialization", jarName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    }
+    
+    /**
+     * Installs (or cancels the installation of) a serialization module.
+     * @param {string} jar Name of the serialization .jar file already uploaded, as
+     * specified by the "jar" attribute of the uploadSerialization() response. 
+     * @param {boolean} install true to install the serialization, false to cancel the
+     * installation. 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object describing the attributes of the
+     * serialization installed:
+     * <dl>
+     *  <dt> jar </dt><dd> The name of the .jar file uploaded (this must be used in the
+     *                     subsequent request). </dd>
+     *  <dt> name </dt><dd> The human-readable name of the file format handled by the 
+     *                     serialization module found in the .jar file. </dd>
+     *  <dt> mimeType </dt><dd> The MIME (Content) Type handled by the serialization module
+     *                     found in the .jar file. </dd>
+     *  <dt> version </dt><dd> The version of the serialization implementation. </dd>
+     * </dl>
+     */
+    installSerialization(jar, install, onResult) {
+      this.createRequest(
+        "installSerialization", null, onResult, this.baseUrl+"api/admin/serialization",
+        "POST", // not GET, because the number of parameters can make the URL too long
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
+        .send(this.parametersToQueryString({
+          jar : jar,
+          action : install?"install":"cancel"
+        }));
+    }
+
+    /**
+     * Uninstalls a serialization module.
+     * @param {string} mimeType The MIME (Content) Type handled by the serialization module.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var>.
+     */
+    uninstallSerialization(mimeType, onResult) {
+      this.createRequest(
+        "uninstallSerialization", null, onResult, this.baseUrl+"api/admin/serialization",
+        "POST", // not GET, because the number of parameters can make the URL too long
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
+        .send(this.parametersToQueryString({
+          mimeType : mimeType,
+          action : "uninstall"
+        }));
+    }
+
     /**
      * Uploads an annotator module in preparation for installing it.
      * @param {string|file} jarFile Annotator .jar file.
@@ -5481,6 +6476,482 @@
         .send();
     }
 
+    /**
+     * Creates a new elicitation task.
+     * @see LabbcatAdmin#readElicitationTasks
+     * @see LabbcatAdmin#updateElicitationTask
+     * @see LabbcatAdmin#deleteElicitationTask
+     * @param {string} taskName The name of the elicitation task.
+     * @param {string} description The description of the task.
+     * @param {string} corpusName The corpus for elicited transcripts/recordings.
+     * @param {string} transcriptType The transcript type for elicited transcripts/recordings.
+     * @param {string} preamble HTML-encoded text the participant sees when they are
+     *         about to start the task.
+     * @param {string} consent Optional HTML-encoded consent form to be 'signed' by
+     *         the participant.
+     * @param {string} endUrl Optional URL to send participants to after
+     *         they finish the task (<tt>{participant}</tt>, if present in
+     *         the URL, is replaced by the participant's ID).
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the elicitation task record. 
+     */
+    createElicitationTask(
+      taskName, description, corpusName, transcriptType, preamble, consent, endUrl,
+      onResult) {
+      this.createRequest(
+        "elicitationTasks", null, onResult, this.baseUrl+"api/admin/elicit/tasks", "POST",
+        null, "application/json")
+        .send(JSON.stringify({
+          task_name : taskName,
+          description : description,
+          corpus_name : corpusName,
+          transcript_type : transcriptType,
+          preamble : preamble,
+          consent : consent,
+          endUrl : endUrl}));
+    }
+    
+    /**
+     * Reads a list of elicitation task records.
+     * @see LabbcatAdmin#createElicitationTask
+     * @see LabbcatAdmin#updateElicitationTask
+     * @see LabbcatAdmin#deleteElicitationTask
+     * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+     * records will be returned). 
+     * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A list of elicitation task records with the
+     * following attributes:
+     * <dl>
+     *  <dt> task_id </dt><dd> The database key for the record. </dd>
+     *  <dt> task_name </dt><dd> The name of the task. </dd>
+     *  <dt> description </dt><dd> Description of the task. </dd>
+     *  <dt> corpus_name </dt><dd> The corpus for elicited transcripts/recordings. </dd>
+     *  <dt> transcript_type </dt><dd> The transcript type for elicited transcripts/recordings. </dd>
+     *  <dt> preamble </dt><dd> HTML-encoded text the participant sees when they are
+     *       about to start the task. </dd>
+     *  <dt> consent </dt><dd> Optional HTML-encoded consent form to be 'signed' by
+     *       the participant. </dd>
+     *  <dt> endUrl </dt><dd> Optional URL to send participants to after
+     *       they finish the task (<tt>{participant}</tt>, if present in
+     *       the URL, is replaced by the participant's ID). </dd>
+     *  <dt> _cantDelete </dt><dd> This is not a database field, but rather is present in
+     *       records returned from the server that can not currently be deleted; 
+     *       a string representing the reason the record can't be deleted. </dd>
+     * </dl>
+     */
+    readElicitationTasks(pageNumber, pageLength, onResult) {
+      if (typeof pageNumber === "function") { // (onResult)
+        onResult = pageNumber;
+        pageNumber = null;
+        pageLength = null;
+      } else if (typeof l === "function") { // (p, onResult)
+        onResult = l;
+        pageLength = null;
+      }
+      this.createRequest(
+        "elicitationTasks", {
+          pageNumber:pageNumber,
+          pageLength:pageLength
+        }, onResult, this.baseUrl+"api/admin/elicit/tasks")
+        .send();
+    }
+    
+    /**
+     * Updates an existing elicitation task.
+     * @see LabbcatAdmin#createElicitationTask
+     * @see LabbcatAdmin#readElicitationTasks
+     * @see LabbcatAdmin#deleteElicitationTask
+     * @param {number} taskId The database ID of the elicitation task.
+     * @param {string} taskName The name of the elicitation task.
+     * @param {string} description The description of the task.
+     * @param {string} corpusName The corpus for elicited transcripts/recordings.
+     * @param {string} transcriptType The transcript type for elicited transcripts/recordings.
+     * @param {string} preamble HTML-encoded text the participant sees when they are
+     *         about to start the task.
+     * @param {string} consent Optional HTML-encoded consent form to be 'signed' by
+     *         the participant.
+     * @param {string} endUrl Optional URL to send participants to after
+     *         they finish the task (<tt>{participant}</tt>, if present in
+     *         the URL, is replaced by the participant's ID).
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the elicitation task record. 
+     */
+    updateElicitationTask(
+      taskId, taskName, description, corpusName, transcriptType, preamble, consent, endUrl,
+      onResult) {
+      this.createRequest(
+        "elicitationTasks", null, onResult, this.baseUrl+"api/admin/elicit/tasks", "PUT")
+        .send(JSON.stringify({
+          task_id : taskId,
+          task_name : taskName,
+          description : description,
+          corpus_name : corpusName,
+          transcript_type : transcriptType,
+          preamble : preamble,
+          consent : consent,
+          endUrl : endUrl}));
+    }
+    
+    /**
+     * Deletes an existing elicitation task.
+     * @see LabbcatAdmin#createElicitationTask
+     * @see LabbcatAdmin#readElicitationTasks
+     * @see LabbcatAdmin#updateElicitationTask
+     * @param {int} taskId The task_id of the task.
+     * @param {resultCallback} onResult Invoked when the request has completed.
+     */
+    deleteElicitationTask(taskId, onResult) {
+      this.createRequest(
+        "elicitationTasks", null, onResult,
+        `${this.baseUrl}api/admin/elicit/tasks/${taskId}`,
+        "DELETE").send();
+    }
+    
+    /**
+     * Upload a full task definition to be added/updated from a JSON file.
+     * @param [file|string] file The task definition file, the name of which must end
+     *       in <q>.json</q>. The name of the file (without the .json
+     *       extension) is taken as the name of the task being
+     *       uploaded. If there is already a task with that name, it
+     *       will be <u>replaced</u> with the task in the
+     *       file. Otherwise, a new task is created.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute, "task_id",
+     * which identifies the resulting task.
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     * @see LabbcatAdmin#createElicitationTask
+     * @see LabbcatAdmin#readElicitationTasks
+     * @see LabbcatAdmin#updateElicitationTask
+     * @see LabbcatAdmin#deleteElicitationTask
+     */
+    elicitatationTaskUpload(file, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("elicitatationTaskUpload(" + file + ")");
+      }
+      // create form
+      var fd = new FormData();
+      if (!runningOnNode) {
+        
+	fd.append("file", file);
+        
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "elicitatationTaskUpload";
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	
+	xhr.open("POST", this.baseUrl + "api/admin/elicit/task/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var fileName = file.replace(/.*\//g, "");
+        if (exports.verbose) console.log("fileName: " + fileName);
+
+	fd.append(
+          "file", 
+	  fs.createReadStream(file).on('error', function(){
+	    onResult(
+              null, ["Invalid results: " + resultsName], [], "resultsUpload", resultsName);
+	  }), fileName);
+        
+	var urlParts = parseUrl(this.baseUrl + "api/admin/elicit/task/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/admin/elicit/task/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "elicitatationTaskUpload", fileName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "elicitatationTaskUpload", fileName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    }
+    
+    /**
+     * Reads a list of elicitation task resources.
+     * @see LabbcatAdmin#createElicitationTaskResource
+     * @see LabbcatAdmin#updateElicitationTaskResource
+     * @see LabbcatAdmin#deleteElicitationTaskResource
+     * @param {int} taskId The task_id of the elicitaiton task. 
+     * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+     * records will be returned). 
+     * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A list of resource records with the following
+     * attributes:
+     * <dl>
+     *  <dt> task_id </dt><dd> The database key for the elicitation task. </dd>
+     *  <dt> resource_id </dt><dd> The database key for the resource (message). </dd>
+     *  <dt> help </dt><dd> A description of the message to help administrators/translators
+     *       understand the purpose of the resource. </dd>
+     *  <dt> message </dt><dd> The participant-facing message. </dd>
+     * </dl>
+     */
+    readElicitationTaskResources(taskId, pageNumber, pageLength, onResult) {
+      if (typeof pageNumber === "function") { // (onResult)
+        onResult = pageNumber;
+        pageNumber = null;
+        pageLength = null;
+      } else if (typeof l === "function") { // (p, onResult)
+        onResult = l;
+        pageLength = null;
+      }
+      this.createRequest(
+        "elicitationTaskResources", {
+          pageNumber:pageNumber,
+          pageLength:pageLength
+        }, onResult, this.baseUrl+"api/admin/elicit/resources/"+taskId)
+        .send();
+    }
+    
+    /**
+     * Updates an existing elicitation resource record.
+     * @see LabbcatAdmin#createElicitationTaskResource
+     * @see LabbcatAdmin#readElicitationTaskResources
+     * @see LabbcatAdmin#deleteElicitationTaskResource
+     * @param {number} taskId The database ID of the elicitation task.
+     * @param {string} resourceId The name of the elicitation task.
+     * @param {string} help A description of the message to help administrators/translators
+     *         understand the purpose of the resource.
+     * @param {string} message The participant-facing message.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the resource record. 
+     */
+    updateElicitationTaskResource(
+      taskId, resourceId, help, message, onResult) {
+      this.createRequest(
+        "elicitationTaskResources", null, onResult,
+        this.baseUrl+"api/admin/elicit/resources", "PUT")
+        .send(JSON.stringify({
+          task_id : taskId,
+          resource_id : resourceId,
+          help : help,
+          message : message }));
+    }
+    
+    /**
+     * Creates a new elicitation task attribute option.
+     * @see LabbcatAdmin#readElicitationTaskAttributeOptions
+     * @see LabbcatAdmin#updateElicitationTaskAttributeOption
+     * @see LabbcatAdmin#deleteElicitationTaskAttributeOption
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} value The option for the attribute value.
+     * @param {string} description The participant-facing description of the option.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the attribute option record. 
+     */
+    createElicitationTaskAttributeOption(
+      taskId, scope, attribute, value, description, onResult) {
+      this.createRequest(
+        "elicitationTaskAttributeOptions", null, onResult,
+        this.baseUrl+"/api/admin/elicit/options/"
+          +(scope=="transcript"?"transcript":"participant")
+          +"/"+encodeURIComponent(taskId), "POST",
+        null, "application/json")
+        .send(JSON.stringify({
+          task_id : taskId,
+          attribute : attribute,
+          value : value,
+          description : description }));
+    }
+    
+    /**
+     * Reads a list of elicitation task attribute option records.
+     * @see LabbcatAdmin#createElicitationTaskAttributeOption
+     * @see LabbcatAdmin#updateElicitationTaskAttributeOption
+     * @see LabbcatAdmin#deleteElicitationTaskAttributeOption
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+     * records will be returned). 
+     * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A list of attribute option records with the
+     * following attributes:
+     * <dl>
+     *  <dt> task_id </dt><dd> The database key for the record. </dd>
+     *  <dt> attribute </dt><dd> The transcript attribute. </dd>
+     *  <dt> value </dt><dd> The possible value presented to the participant, which
+     *       must be one of the valid labels for the given attribute. </dd>
+     *  <dt> description </dt><dd> The participant-facing text describing the option. </dd>
+     * </dl>
+     */
+    readElicitationTaskAttributeOptions(
+      taskId, scope, attribute, pageNumber, pageLength, onResult) {
+      if (typeof pageNumber === "function") { // (onResult)
+        onResult = pageNumber;
+        pageNumber = null;
+        pageLength = null;
+      } else if (typeof pageLength === "function") { // (p, onResult)
+        onResult = pageLength;
+        pageLength = null;
+      }
+      this.createRequest(
+        "elicitationTaskAttributeOptions", {
+          pageNumber:pageNumber,
+          pageLength:pageLength
+        }, onResult, 
+        this.baseUrl+"/api/admin/elicit/options/"
+          +(scope=="transcript"?"transcript":"participant")
+          +"/"+encodeURIComponent(taskId)
+          +"/"+encodeURIComponent(attribute))
+        .send();
+    }
+    
+    /**
+     * Updates an existing elicitation task.
+     * @see LabbcatAdmin#createElicitationTaskAttributeOption
+     * @see LabbcatAdmin#readElicitationTaskAttributeOptions
+     * @see LabbcatAdmin#deleteElicitationTaskAttributeOption
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} value The option for the attribute value.
+     * @param {string} description The participant-facing description of the option.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the attribute option record. 
+     */
+    updateElicitationTaskAttributeOption(
+      taskId, scope, attribute, value, description, onResult) {
+      this.createRequest(
+        "elicitationTaskAttributeOptions", null, onResult, 
+        this.baseUrl+"/api/admin/elicit/options/"
+          +(scope=="transcript"?"transcript":"participant"), "PUT")
+        .send(JSON.stringify({
+          task_id : taskId,
+          attribute : attribute,
+          value : value,
+          description : description }));
+    }
+    
+    /**
+     * Deletes an existing elicitation task.
+     * @see LabbcatAdmin#createElicitationTaskAttributeOption
+     * @see LabbcatAdmin#readElicitationTaskAttributeOptions
+     * @see LabbcatAdmin#updateElicitationTaskAttributeOption
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} value The option for the attribute value.
+     * @param {resultCallback} onResult Invoked when the request has completed.
+     */
+    deleteElicitationTaskAttributeOption(taskId, scope, attribute, value, onResult) {
+      this.createRequest(
+        "elicitationTaskAttributeOptions", null, onResult,
+        this.baseUrl+"/api/admin/elicit/options/"
+          +(scope=="transcript"?"transcript":"participant")
+          +"/"+encodeURIComponent(taskId)
+          +"/"+encodeURIComponent(attribute)
+          +"/"+encodeURIComponent(value),
+        "DELETE").send();
+    }
+    
+    /**
+     * Reads the given elicitation task attribute validation script.
+     * @see LabbcatAdmin#updateElicitedAttributeValidation
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be the validation JavaScript, if any.
+     */
+    readElicitedAttributeValidation(taskId, scope, attribute, onResult) {
+      this.createRequest(
+        "readElicitedAttributeValidation", {}, onResult, 
+        this.baseUrl+"api/admin/elicit/validation"
+          +"/"+encodeURIComponent(taskId)
+          +(scope=="transcript"?"/transcript":"/participant")
+          +"/"+encodeURIComponent(attribute), "GET", null, null,
+        true) // raw response
+        .send();
+    }
+    
+    /**
+     * Updates the given elicitation task attribute validation script.
+     * @see LabbcatAdmin#readElicitedAttributeValidation
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} script The validation JavaScript.
+     * @param {resultCallback} onResult Invoked when the request has returned. 
+     */
+    updateElicitedAttributeValidation(taskId, scope, attribute, script, onResult) {
+      this.createRequest(
+        "updateElicitedAttributeValidation", null, onResult, 
+        this.baseUrl+"/api/admin/elicit/validation"
+          +"/"+encodeURIComponent(taskId)
+          +(scope=="transcript"?"/transcript":"/participant")
+          +"/"+encodeURIComponent(attribute),
+        "PUT", null, null,
+        true) // raw response
+        .send(script);
+    }
+    
   }
   
   /**

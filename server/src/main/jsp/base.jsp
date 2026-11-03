@@ -92,8 +92,18 @@
         XPath xpath = XPathFactory.newInstance().newXPath();
         driverName = "com.mysql.cj.jdbc.Driver";
         connectionURL = xpath.evaluate("//Realm/@connectionURL", doc);
+        if (connectionURL == null) { // tomcat 10
+          connectionURL = xpath.evaluate("//Resource/@url", doc);
+          log("connectionURL not found in Realm, trying Resource...");
+        }
         connectionName = xpath.evaluate("//Realm/@connectionName", doc);
+        if (connectionName == null) { // tomcat 10
+          connectionName = xpath.evaluate("//Resource/@username", doc);
+        }
         connectionPassword = xpath.evaluate("//Realm/@connectionPassword", doc);
+        if (connectionPassword == null) { // tomcat 10
+          connectionPassword = xpath.evaluate("//Resource/@password", doc);
+        }
         connectionFactory = new MySQLConnectionFactory(
           connectionURL, connectionName, connectionPassword);
 
@@ -111,9 +121,11 @@
    * Initialize the given request handler.
    * @param handler The API request handler.
    * @param request The HTTP request, from which the locale might be inferred.
+   * @param response The HTTP response.
    * @return The handler.
    */
-  APIRequestHandler initializeHandler(APIRequestHandler handler, HttpServletRequest request) {
+  APIRequestHandler initializeHandler(
+    APIRequestHandler handler, HttpServletRequest request, HttpServletResponse response) {
     handler.init(new APIRequestContext() {
         
         /**
@@ -161,6 +173,95 @@
         }
         
         /**
+         * Returns the path portion of the request URL.
+         * @return The path portion of the request URL.
+         */
+        public String getPathInfo() {
+          return request.getPathInfo();
+        }
+        
+        /**
+         * Provides access to a given header of the request.
+         * @param name The name of the header.
+         * @return The request header.
+         */
+        public String getRequestHeader(String name) {
+          return request.getHeader(name);
+        }
+        
+        /**
+         * Add the fiven given header to the response.
+         * @param name Header name.
+         * @param value Header value.
+         */
+        public void addResponseHeader(String name, String value) {
+          response.addHeader(name, value);
+        }
+        
+        /**
+         * Provides access to a given attribute of the request.
+         * @param name The name of the attribute.
+         * @return The request attribute.
+         */
+        public Object getRequestAttribute(String name) {
+          return request.getAttribute(name);
+        }
+        
+        /**
+         * Sets the value of a given attribute of the request.
+         * @param name The name of the attribute.
+         * @param value The value for the attribute.
+         */
+        public void setRequestAttribute(String name, Object value) {
+          request.setAttribute(name, value);
+        }
+
+        /**
+         * Provides access to a given attribute of the user session.
+         * @param name The name of the attribute.
+         * @return The session attribute.
+         */
+        public Object getSessionAttribute(String name) {
+          return request.getSession().getAttribute(name);
+        }
+        
+        /**
+         * Sets the value of a given attribute of the user session.
+         * @param name The name of the attribute.
+         * @param value The value for the attribute.
+         */
+        public void setSessionAttribute(String name, Object value) {
+          request.getSession().setAttribute(name, value);
+        }
+        
+        /**
+         * Provides access to a given attribute of the serlvet context.
+         * @param name The name of the attribute.
+         * @return The context attribute.
+         */
+        public Object getServletContextAttribute(String name){
+          return request.getServletContext().getAttribute(name);
+        }
+
+        /**
+         * Sets the value of a given attribute of the serlvet context.
+         * @param name The name of the attribute.
+         * @param value The new value for the attribute.
+         */
+        public void setServletContextAttribute(String name, Object value) {
+          request.getServletContext().setAttribute(name, value);
+        }
+        
+        /**
+         * Provides the local file corresponding to the given path within the servlet context.
+         * @param path The path within the servlet context.
+         * @return The local path corresponding to the given path.
+         */
+        public String getRealPath(String path) {
+          return request.getServletContext().getRealPath(path);
+        }
+        
+        /**
          * Determines whether the logged-in user is in the given role.
          * @param role The desired role.
          * @return true if the user is in the given role, false otherwise.
@@ -169,8 +270,7 @@
           try {
             Connection db = connectionFactory.newConnection();
             try {
-              return nzilbb.labbcat.server.servlet.LabbcatServlet.IsUserInRole(
-                role, request, db);
+              return isUserInRole(role, db);
             } finally {
               db.close();
             }
@@ -287,77 +387,6 @@
     }
     return baseUrl;
   } // end of baseUrl()
-
-  /**
-   * Sets the Content-Disposition header of the given Response correctly for saving a file
-   * to the given name. 
-   * <p> This should handle special characters/spaces in the file name correctly.
-   * @param response The response to set the header of.
-   * @param fileName The file name to save the response body as.
-   */
-  public void ResponseAttachmentName(
-    HttpServletRequest request, HttpServletResponse response, String fileName) {
-    if (fileName == null) return;
-    fileName = IO.SafeFileNameUrl(fileName);
-    String onlyASCIIFileName = IO.OnlyASCII(fileName)
-      .replace(",","-"); // Chrome/Edge don't like commas
-    String onlyASCIIFileNameNoQuotes = onlyASCIIFileName
-      .replace(" ","_").replace(";","_");
-    
-    if (fileName.indexOf(' ') >= 0 // contains spaces
-        || fileName.indexOf(';') >= 0 // contains semicolon
-        || !fileName.equals(onlyASCIIFileName)) { // contains non-ascii
-      try {
-        fileName = "\""+URLEncoder.encode(fileName, "UTF-8").replace('+',' ')+"\"";
-      } catch(UnsupportedEncodingException exception) {
-        fileName = "\""+fileName+"\"";
-      }
-    } else {
-      try {
-        fileName = URLEncoder.encode(fileName, "UTF-8").replace('+',' ');
-      } catch(UnsupportedEncodingException exception) {
-      }
-    }
-    if (onlyASCIIFileName.indexOf(' ') >= 0 || onlyASCIIFileName.indexOf(';') >= 0){
-      onlyASCIIFileName = "\""+onlyASCIIFileName+"\"";
-    }
-    
-    // are we being called by the nzilbb.labbcat R package or by java (jsendpraat)?
-    String userAgent = Optional.ofNullable(request.getHeader("User-Agent")).orElse("");
-    String labbcatRVersion = null;
-    if (userAgent.startsWith("labbcat-R")) {
-      String[] parts = userAgent.split("/");
-      if (parts.length > 1) {
-        labbcatRVersion = parts[1];
-      }
-    }
-    try {
-      if (userAgent != null
-          && (userAgent.startsWith("Java/") // plain Java connection (probably jsendpraat)
-              || userAgent.startsWith("labbcat-py/") // Python package
-              || (labbcatRVersion != null // nzilbb.labbcat R package
-                  // and version <= 1.3-0
-                  && new SemanticVersionComparator().compare(labbcatRVersion, "1.3-0") <= 0))) {
-        // specify only 'filename' without quotes
-        response.addHeader(
-          "Content-Disposition", "attachment; filename="+onlyASCIIFileNameNoQuotes);
-      } else if ("jsendpraat 20240927.1325".equals(userAgent)) {
-        response.addHeader( // this jsendpraat version prefers filename* second...
-          "Content-Disposition", "attachment; filename="+onlyASCIIFileName+"; filename*="+fileName);
-      } else {
-        // MDN recommends not to use URLEncoder.encode
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#as_a_response_header_for_the_main_body
-        // TODO we can use User-Agent to send un-URL-encoded responses to Safari only
-        response.addHeader(
-          "Content-Disposition", "attachment; filename*="+fileName+"; filename="+onlyASCIIFileName);
-      }
-      // send headers immediately, so that the browser shows the 'save' prompt
-      response.getOutputStream().flush();
-    }
-    catch(IOException exception) {
-      log("base.jsp:ResponseAttachmentName - " + exception);
-    }
-  } // end of ResponseAttachmentName()
   
   /**
    * Returns the root of the persistent file system.

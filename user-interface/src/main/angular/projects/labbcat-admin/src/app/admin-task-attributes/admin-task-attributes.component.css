@@ -1,0 +1,14 @@
+.attribute-list {
+    max-width: 400px;
+    margin: auto;
+}
+.attribute-list .item {
+    display: flex;
+    flex-direction: row;
+}
+.label {
+    width: 50%;
+}
+.links lib-link {
+    padding-left: 10px;
+}

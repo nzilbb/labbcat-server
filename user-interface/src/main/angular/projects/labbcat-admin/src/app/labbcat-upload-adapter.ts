@@ -7,13 +7,16 @@ import {
 
 // Image Upload
 export default class LabbcatUploadAdapter {
+    uploadBaseUrl: string;
     loader: FileLoader;
     xhr: any;
     // ...
-    constructor(loader: FileLoader) {
+    constructor(loader: FileLoader, uploadBaseUrl: string) {
         // The file loader instance to use during the upload. It sounds scary but do not
         // worry — the loader will be passed into the adapter later on in this guide.
         this.loader = loader;
+        this.uploadBaseUrl = uploadBaseUrl;
+        if (!this.uploadBaseUrl.endsWith("/")) this.uploadBaseUrl += "/";
     }
     // Starts the upload process.
     upload(): Promise<UploadResponse> {
@@ -41,7 +44,7 @@ export default class LabbcatUploadAdapter {
         // integration to choose the right communication channel. This example uses
         // a POST request with JSON as a data structure but your configuration
         // could be different.
-        xhr.open('POST', 'agreement/'+name, true);
+        xhr.open('POST', `${this.uploadBaseUrl}${name}`, true);
         xhr.responseType = 'json';
     }
     // Initializes XMLHttpRequest listeners.
@@ -116,6 +119,7 @@ export function LabbcatUploadAdapterPlugin(editor: any) {
         loader: FileLoader
     ) => {
         // Configure the URL to the upload script in your back-end here!
-        return new LabbcatUploadAdapter(loader);
+        return new LabbcatUploadAdapter(
+            loader, editor.config._config.LabbcatUploadAdapterPlugin.uploadBaseUrl);
     };
 }

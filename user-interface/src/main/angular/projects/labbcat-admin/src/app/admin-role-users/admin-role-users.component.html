@@ -5,7 +5,7 @@
     <div *ngFor="let user of nonmembers" class="user non-member">
       <button i18n-title title="Click to add user to role"
               (click)="addUser($event, user);"
-              class="icon-only"><img src="assets/add.svg" alt="+"></button>
+              class="icon-only"><img src="{{imagesLocation+'/add.svg'}}" alt="+"></button>
       {{user.user}}
     </div>
   </div>
@@ -15,7 +15,7 @@
       <div *ngFor="let user of members" class="user member">
         <button i18n-title title="Click to remove user from role"
                 (click)="removeUser($event, user);"
-                class="icon-only"><img src="assets/remove.svg" alt="-"></button>
+                class="icon-only"><img src="{{imagesLocation+'/remove.svg'}}" alt="-"></button>
         {{user.user}}
       </div>
     </div>

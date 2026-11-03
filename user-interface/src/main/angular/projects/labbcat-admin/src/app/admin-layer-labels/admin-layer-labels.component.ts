@@ -170,7 +170,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
                             if (phonological) {
                                 if (/[aeiouyɒɔəɛɜʉʊʎæɐɑɚɪøœʏ]/.test(label.toLowerCase())) {
                                     labelDefinition.category = "VOWEL";
-                                    if (label.replace(/[ː˥˦˧˨˩]/g,"").length == 1) {
+                                    if (label.replace(/[:ː˥˦˧˨˩]/g,"").length == 1) {
                                         labelDefinition.subcategory = "Monophthong";
                                     } else {
                                         labelDefinition.subcategory = "Diphthong";

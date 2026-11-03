@@ -1,0 +1,126 @@
+<h2 i18n="page header">Upgrade LaBB-CAT</h2>
+
+<p i18n>If you have downloaded a newer version of LaBB-CAT, you can upgrade to it from this page.</p>
+<div id="task-list" *ngIf="tasks.length && !monitoring && !upgradeComplete">
+  <table id="tasks" class="list">
+    <caption i18n class="warning">Warning: Upgrading will interrupt the following processing:</caption>
+    <thead>
+      <tr *ngIf="tasks.length > 0" class="header">
+        <th class="creation-time" i18n="Tasks header">Started</th>
+        <th class="who" i18n="Tasks header">By</th>
+        <th class="duration" i18n="Tasks header">Duration</th>
+        <th class="name" i18n="Tasks header">Task</th>
+        <th class="status" i18n="Tasks header">Status</th>
+        <th class="progress-description" i18n="Tasks header"></th>
+        <th class="progress" i18n="Tasks header">Progress</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let task of tasks">
+        <tr class="item" [class.error]="task.lastException" [class.gone]="!task.threadId">
+          <td class="creation-time">{{task.creationTime | date:'medium'}}</td>
+          <td class="who">{{task.who}}</td>
+          <td class="duration">{{task.duration / 1000 | duration}}</td>
+          <td class="name">
+            <ng-container *ngIf="task.running">
+              <a [routerLink]="['..','task']"
+                 [queryParams]="{threadId:task.threadId}"
+                 i18n-title title="Monitor this task" target="task">{{task.threadName}}</a>
+            </ng-container>
+            <ng-container *ngIf="!task.running">{{task.threadName}}</ng-container>
+          </td>
+          <td class="status">{{task.status}}</td>
+          <td class="progress-description">
+            <ng-container *ngIf="task.resultUrl">
+              <a href="{{task.resultUrl}}" target="{{task.resultTarget}}">
+                <span *ngIf="task.resultText">{{task.resultText}}</span>
+                <span *ngIf="!task.resultText" i18n="Default task result text">Open Results</span>
+              </a>
+            </ng-container>
+            <ng-container *ngIf="!task.resultUrl">
+              <span *ngIf="task.running" i18n="task progress description">Running</span>
+              <span *ngIf="!task.running && task.percentComplete==100 && !task.resultText"
+                    i18n="task progress description">Complete</span>
+              <span *ngIf="task.resultText">{{task.resultText}}</span>
+            </ng-container>
+            <span *ngIf="task.lastException"
+                  i18n="task progress description">Error</span>
+          </td>
+          <td class="progress">
+            <progress value="{{task.percentComplete}}" max="100"
+                      title="{{task.percentComplete + '% ' + task.status}}">
+              <div class="progress-container">
+                <div class="progress"
+                     title="{{task.percentComplete + '% ' + task.status}}"
+                     [style.width]="task.percentComplete + '%'">&nbsp;</div>
+              </div>
+            </progress>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="!war" id="file-selection">
+
+  <label for="war" i18n>Upgrade File</label>
+  <input type="file" id="war"
+         [readonly]="uploading"
+         (change)="selectFile($event.target.files)" autofocus>
+  
+  <p i18n>The LaBB-CAT upgrade file is the labbcat.war file contained in the zip file of the new version of LaBB-CAT you downloaded.</p>
+</div>
+<div *ngIf="uploading" id="upload-progress">
+  <p i18n>Uploading...</p>
+  <progress value="{{percentComplete}}" max="100"
+            title="{{percentComplete + '% '}}"
+            id="progress">
+  </progress>
+</div>
+<div *ngIf="id" id="confirmation">
+  <h3 id="war">{{war.name}}</h3>
+  <table id="upgrade-versions"><tbody>
+      <tr class="old">
+        <td i18n>Your current version is:</td>
+        <td class="version">{{oldVersion}}</td></tr>
+      <tr><td class="war">{{war.name}}</td><td class="to">&darr;</td></tr>
+      <tr class="new">
+        <td i18n="xxx.war contains version:"> contains version:</td>
+        <td class="version">{{newVersion}}</td></tr>
+      <tr *ngIf="downgrade">
+        <td colspan="2">
+          <p class="error" i18n>WARNING: the file contains a version that is older than your current version</p>
+      </td></tr>
+      <tr *ngIf="migration"><td colspan="2">
+          <p class="warning" i18n>WARNING: the file contains migration data from another corpus.</p>
+          <p class="warning" i18n>WARNING: If you proceed, all your current corpus data and recordings will be deleted and replaced by the data and recordings of the imported corpus.</p>
+      </td></tr>
+  </tbody></table>
+  <div class="buttons">
+    <lib-button (press)="confirm()"
+                [processing]="confirming"
+                [disabled]="cancelling"
+                img="save.svg" icon="✅"
+                i18n-label label="Upgrade"
+                i18n-title title="Confirm upgrade"></lib-button>
+    <lib-button (press)="cancel()"
+                [processing]="cancelling"
+                [disabled]="confirming"
+                img="cross-mark.svg" icon="𐄂"
+                i18n-label label="Cancel"
+                i18n-title title="Cancel upgrade"></lib-button>
+  </div>
+</div>
+<div *ngIf="monitoring" id="upgrade-progress">
+  <progress value="{{percentComplete}}" max="100"
+            title="{{percentComplete + '% '}}"
+            id="progress">
+  </progress>
+  <div class="messages">
+    <div *ngFor="let message of upgradeMessages; index as m" class="message"><span id="{{'message-'+m}}">{{message}}</span></div>
+  </div>
+  <div *ngIf="lastException" class="error">{{lastException}}</div>
+  <pre *ngIf="stackTrace" class="error">{{stackTrace}}</pre>
+</div>
+<div *ngIf="upgradeComplete" id="complete" i18n>Upgrade complete.</div>

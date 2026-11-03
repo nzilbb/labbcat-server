@@ -1293,8 +1293,8 @@ public class SqlGraphStore implements GraphStore {
    
   /**
    * Gets the participant record specified by the given identifier.
-   * @param id The ID of the participant, which could be their name or their database annotation
-   * ID. 
+   * @param id The ID of the participant, which could be their name or their database
+   * annotation ID. 
    * @param layerIds The IDs of the participant attribute layers to load, or null if only
    * participant data is required. 
    * @return An annotation representing the participant, or null if the participant was
@@ -1304,6 +1304,7 @@ public class SqlGraphStore implements GraphStore {
    */
   public Annotation getParticipant(String id, String[] layerIds)
     throws StoreException, PermissionException {
+    if (id == null) return null;
     try {
       String speakerNumber = null;
       String name = null;
@@ -1465,8 +1466,9 @@ public class SqlGraphStore implements GraphStore {
   /**
    * Saves a participant, and all its tags, to the database.  The participant is
    * represented by an Annotation that isn't assumed to be part of a graph.
-   * <p> If a participant with the corresponding ID does not exist, a new participant
-   * record is created.
+   * <p> Tracked changes are used to determine what has to be updated in the
+   * database, so all annotations should have a change tracker or be flagged for
+   * creation or destruction, as required.
    * @param participant
    * @return true if changes were saved, false if there were no changes to save.
    * @throws StoreException If an error prevents the participant from being saved.
@@ -1542,6 +1544,7 @@ public class SqlGraphStore implements GraphStore {
             if (attribute.getChange() != Change.Operation.NoChange) {
               thereWereChanges = true;
               if (attribute.getParentId() == null) attribute.setParentId(participant.getId());
+              assert participant.getId() != null : "participant.getId() != null " + participant.getLabel();
               saveParticipantAttributeChanges(
                 attribute, sqlInsertParticipantAttribute, sqlUpdateParticipantAttribute,
                 sqlDeleteParticipantAttribute, sqlDeleteAllParticipantAttributesOnLayer,
@@ -6475,7 +6478,8 @@ public class SqlGraphStore implements GraphStore {
           // timers.end("update ordinals");
         } // not a new graph
 
-        if (wordChanges || utteranceChanges) {
+        if (!updatingFragment // (not for every utterance during forced alignment)
+            && (wordChanges || utteranceChanges)) {
           // timers.start("word utterances");
           // (re-)link words to utterances for fast search result collation
           PreparedStatement sqlFindWordUtterance = connection.prepareStatement(
@@ -8271,9 +8275,9 @@ public class SqlGraphStore implements GraphStore {
       } // not password update
       annotation.put("@SqlUpdated", Boolean.TRUE); // flag the annotation as having been updated
     } catch(ParseException exception) {
-      System.err.println("Error parsing ID for transcript attribute: "+annotation.getId());
+      System.err.println("Error parsing ID for participant attribute: "+annotation.getId());
       throw new StoreException(
-        "Error parsing ID for transcript attribute: "+annotation.getId(), exception);
+        "Error parsing ID for participant attribute: "+annotation.getId(), exception);
     }
   } // end of saveParticipantAttributeChanges()
 
@@ -9453,8 +9457,7 @@ public class SqlGraphStore implements GraphStore {
                          .replace("+", "%20"));
               url.append("/doc/");
               url.append(f.getName());
-              mediaFile.setUrl(URLEncoder.encode(url.toString(), "UTF-8")
-                               .replace("+", "%20"));
+              mediaFile.setUrl(url.toString());
             }
             files.add(mediaFile);
           }

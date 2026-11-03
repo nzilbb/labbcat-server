@@ -7,7 +7,7 @@
 %><%@ include file="base.jsp" %><%{
     if ("GET".equals(request.getMethod())) { // GET only
       Token handler = new Token();
-      initializeHandler(handler, request);
+      initializeHandler(handler, request, response);
       final Cookie[] cookies = request.getCookies();
       JsonObject json = handler.get(
         (headerName)->request.getHeader(headerName),

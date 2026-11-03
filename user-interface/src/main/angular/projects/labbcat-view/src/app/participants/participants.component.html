@@ -127,7 +127,7 @@
               value="{{id}}"
               [checked]="selectedIds.includes(id)"
               (checkedChange)="selectedIds.includes(id)?selectedIds.splice(selectedIds.indexOf(id),1):selectedIds.push(id)"></lib-grouped-checkbox>
-            {{id}}
+            <a [href]="(user && user.roles.includes('edit') ?'edit/':'') + 'participant?id=' + (id | urlEncode)" title="{{id}}">{{id}}</a>
           </span>
           <span class="attribute" *ngIf="layer.id != schema.participantLayerId && attributeValues[id].annotations">
 
@@ -174,8 +174,8 @@
     ></lib-button>
   <lib-link
     *ngIf="user && user.roles.includes('edit') && !nextPage"
-    href="{{baseUrl}}edit/participants/upload"
-    img="wrench.svg" icon="🔧"
+    href="{{baseUrl}}edit/participants/attributes/upload"
+    img="csv.svg" icon="c,s,v"
     i18n-label label="Upload Participant Data"
     i18n-title title="Import participant data from a CSV file"></lib-link>
 </div>

@@ -27,8 +27,6 @@ import java.util.Vector;
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * <tt>/api/categories/<var>class_id</var>[/<var>category</var>]</tt> 

@@ -55,7 +55,7 @@ public class TestUpload {
     }
   }
 
-  /** Ensure search results can be uploaded and resulting annotaitions returned. */
+  /** Ensure search results can be uploaded and resulting annotations returned. */
   @Test public void resultsUpload() throws Exception {
     // get a participant ID to use
     String[] ids = l.getParticipantIds();

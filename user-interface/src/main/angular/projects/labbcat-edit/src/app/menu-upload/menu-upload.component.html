@@ -1,0 +1,19 @@
+<h1 i18n="upload menu page title">Upload</h1>
+<ul id="upload-menu">
+  <li id="fragment-upload">
+    <a [routerLink]="['..','fragment','upload']"
+       i18n-title title="Update utterance annotations from TextGrid files"
+       >Fragments</a></li>
+  <li id="annotations-upload">
+    <a [routerLink]="['..','annotations','upload']"
+       i18n-title title="Add annotations from a CSV file"
+       >Annotations from CSV</a></li>
+  <li id="transcripts-layers-regenerate">
+    <a [routerLink]="['..','transcripts','layers','regenerate']"
+       i18n-title title="Regenerate annotations in selected transcripts"
+       >Regenerate Transcripts</a></li>
+  <li id="participants-layers-regenerate">
+    <a [routerLink]="['..','participants','layers','regenerate']"
+       i18n-title title="Regenerate annotations in selected participants' utterances"
+       >Regenerate Participant Utterances</a></li>
+</ul>

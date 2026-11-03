@@ -5,6 +5,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-content: stretch;
+    min-width: 50vw;
 }
 
 #non-members, #members, #set {

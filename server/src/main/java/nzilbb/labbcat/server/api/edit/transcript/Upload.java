@@ -58,6 +58,7 @@ import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.labbcat.server.api.APIRequestHandler;
 import nzilbb.labbcat.server.api.RequestParameters;
+import nzilbb.labbcat.server.api.RequiredRole;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.util.IO;
 
@@ -139,7 +140,7 @@ import nzilbb.util.IO;
  * annotation layers, etc. 
  * <p> The request method must be <b> PUT </b> and the URL path following
  * <tt>.../upload/</tt> must be the <var>id</var> that was returned by the earlier 
- * <a href="POST">POST</a>. 
+ * <a href="#POST">POST</a>. 
  * <p> The URL-encoded parameters should include values for the parameters returned by 
  *  the earlier POST request. These may include both information
  * required by the format deserializer (e.g. mappings from tiers to LaBB-CAT layers) 
@@ -170,9 +171,16 @@ import nzilbb.util.IO;
  *        to <i>thread</i>.</dd> 
  *  </dl>
  * <p> The <q>parameters</q> returned have the <a href="#parameters">same structure</a> as
- * used by the POST request. 
+ * used by the POST request.
+ *
+ * <h2 id="DELETE"> <tt>/api/edit/transcript/upload/...</tt> </h2>
+ * <p> <b> DELETE </b> method requests cancel a previously POSTed upload. 
+ * <p> The request method must be <b> DELETE </b> and the URL path following
+ * <tt>.../upload/</tt> must be the <var>id</var> that was returned by the earlier 
+ * <a href="#POST">POST</a>. 
  * @author Robert Fromont robert@fromont.net.nz
  */
+@RequiredRole("edit")
 public class Upload extends APIRequestHandler {
 
   File uploadsDir;
@@ -192,11 +200,18 @@ public class Upload extends APIRequestHandler {
    * @return JSON-encoded object representing the response
    */
   public JsonObject post(RequestParameters requestParameters, Consumer<Integer> httpStatus) {
-    context.servletLog("POST post " + requestParameters.getFile("transcript").getPath());
+    context.servletLog(
+      "POST post " + requestParameters
+      + (requestParameters.getFile("transcript") != null?
+         requestParameters.getFile("transcript").getPath():"(no transcript)"));
     File dir = null;
     try {
       SqlGraphStoreAdministration store = getStore();
       try {
+        if (!hasAccess(store.getConnection())) {
+          httpStatus.accept(SC_FORBIDDEN);
+          return null;
+        }
         boolean merge = !Optional.ofNullable(requestParameters.getString("merge")).orElse("false")
           .equals("false");
         String dirPrefix = merge?"_merge_":"_new_";
@@ -361,6 +376,10 @@ public class Upload extends APIRequestHandler {
       // context.servletLog("PUT generateLayers " + generateLayers + " - " + requestParameters);
 
       try {
+        if (!hasAccess(store.getConnection())) {
+          httpStatus.accept(SC_FORBIDDEN);
+          return null;
+        }
         boolean merge = id.startsWith("_merge_");
         dir = new File(uploadsDir, id);
         if (!dir.exists()) {
@@ -882,6 +901,10 @@ public class Upload extends APIRequestHandler {
       SqlGraphStoreAdministration store = getStore();
       // context.servletLog("store " + store.getId());
       try {
+        if (!hasAccess(store.getConnection())) {
+          httpStatus.accept(SC_FORBIDDEN);
+          return null;
+        }
         dir = new File(uploadsDir, id);
         if (!dir.exists()) {
           httpStatus.accept(SC_BAD_REQUEST);

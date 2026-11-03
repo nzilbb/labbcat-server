@@ -1,0 +1,7 @@
+<div class="activity warning" *ngIf="activityService.otherUsersHere && activityService.otherUsersHere.length">
+  <p i18n-title title="You may overwrite each other's changes when saving"
+     i18n>Other users are editing this page:</p>
+  <ul class="other-users">
+    <li *ngFor="let user of activityService.otherUsersHere">{{user}}</li>
+  </ul>
+</div>

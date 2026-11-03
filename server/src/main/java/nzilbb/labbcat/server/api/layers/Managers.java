@@ -24,8 +24,6 @@ package nzilbb.labbcat.server.api.layers;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
 import nzilbb.labbcat.server.api.TableServletBase;
 
 /**

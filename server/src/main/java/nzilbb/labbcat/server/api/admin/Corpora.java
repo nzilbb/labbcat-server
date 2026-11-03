@@ -27,8 +27,6 @@ import java.util.Vector;
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
 import nzilbb.labbcat.server.api.TableServletBase;
 import nzilbb.labbcat.server.api.RequiredRole;
 
@@ -193,7 +191,7 @@ public class Corpora extends TableServletBase {
       context.servletLog("Corpora.validateBeforeUpdate: ERROR " + x);
     }
     if (errors != null) throw new ValidationException(errors);
-      return record;
+    return record;
   } // end of validateBeforeUpdate()
   
 } // end of class Corpora

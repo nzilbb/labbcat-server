@@ -1,0 +1,46 @@
+<h1 id="title" i18n>Regenerate Transcript Layers</h1>
+
+<div id="form">
+  <div class="list">
+    <div class="item" i18n-title title="Which layer to generate">
+      <label i18n>Layer to generate</label>
+      <span><select name="layerId" [(ngModel)]="layerId">
+          <option value="" i18n>All layers</option>
+          <ng-container *ngFor="let layer of generableLayers">
+            <option value="{{layer.id}}">{{layer.id}}</option>
+          </ng-container>
+      </select></span>
+    </div>
+    <div id="file-chooser" class="item"
+         i18n-title="A plain text file (e.g. .txt) with one transcript name per line.">
+      <label for="idsFile" i18n>Transcript ID List</label>
+      <span><input type="file" id="idsFile" (change)="selectFile($event.target.files)" autofocus></span>    
+    </div>
+  </div>
+  <div>
+    <details *ngIf="!preview">
+      <summary i18n>What should the file look like?</summary>
+      <div class="advanced">
+        <span i18n>A plain text file (e.g. .txt) with one transcript name per line.</span>
+      </div>
+    </details>
+  </div>
+  <fieldset *ngIf="preview" id="preview-view"><legend *ngIf="lineCount" id="lineCount" i18n>{{lineCount}} lines</legend>
+    <pre id="preview">{{preview}}</pre><span *ngIf="previewLines < lineCount">&hellip;</span>
+  </fieldset>
+  <div *ngIf="maybeCsv"
+       class="warning"
+       id="maybe-csv"
+       i18n>This file looks like it might be a CSV file with multiple columns. Please ensure that the file has only one transcript name on each line.</div>
+  <div class="controls">
+    <lib-button (press)="process()"
+                [disabled]="!preview"
+                [processing]="processing"
+                [error]="processingError"
+                img="cog.svg" icon="⚙"
+                i18n-title title="Start processing"
+                i18n-label label="Process"
+                ></lib-button>
+  </div>
+  <lib-task *ngIf="threadId" threadId="{{threadId}}" (finished)="finished($event)"></lib-task>
+</div>

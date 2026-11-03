@@ -84,9 +84,9 @@ import nzilbb.util.IO;
  *   <dl>
  *     <dt> action </dt><dd> Either <q>install</q> or <q>cancel</q> </dd>
  *     <dt> jar </dt><dd> The name of the .jar file, as returned in the response to the
- *                        preovious request. </dd>
+ *                        previous request. </dd>
  *   </dl>
- *       If action was <q>instsall</q>, then the response is a JSON-encoded envelope with
+ *       If action was <q>intsall</q>, then the response is a JSON-encoded envelope with
  *       a "model" object with the following attributes: 
  *   <dl>
  *     <dt> jar </dt><dd> The name of the .jar file, as returned in the response to the

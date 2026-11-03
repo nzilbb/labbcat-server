@@ -24,9 +24,6 @@ package nzilbb.labbcat.server.api;
 
 import java.io.*;
 import java.net.*;
-import javax.servlet.*; // d:/jakarta-tomcat-5.0.28/common/lib/servlet-api.jar
-import javax.servlet.http.*;
-import javax.servlet.annotation.WebServlet;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -113,7 +110,9 @@ public class User extends APIRequestHandler {
       endSuccessResult(jsonOut, null);
     } catch(SQLException exception) {
       jsonOut.writeEnd(); // array
-      endFailureResult(jsonOut, exception.getMessage());
+      System.err.println("api.User SQL ERROR: " + exception);
+      exception.printStackTrace(System.err);
+      endFailureResult(jsonOut, "Unexpected error.");
     }
   }
 } // end of class User

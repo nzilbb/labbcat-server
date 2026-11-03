@@ -124,7 +124,7 @@ public class SqlGraphStoreAdministration
    * @param files Root directory for file structure.
    * @param connectString The database connection string.
    * @param databaseUser The database username.
-   * @param password The databa password.
+   * @param password The database password.
    * @param storeUser ID of the user
    * @throws SQLException If an error occurs during connection or loading of configuraion.
    * @throws PermissionException If the store user doesn't have administrator privileges
@@ -237,6 +237,7 @@ public class SqlGraphStoreAdministration
       sqlRegister.setString(3, descriptor.getVersion());
       sqlRegister.setString(4, descriptor.getName());
       sqlRegister.setString(5, IO.JarFileOfClass(serializer.getClass()).getName());
+      System.err.println("registerSerializer: "+IO.JarFileOfClass(serializer.getClass()).getPath());
       sqlRegister.executeUpdate();
       sqlRegister.close();
 	 
@@ -901,7 +902,9 @@ public class SqlGraphStoreAdministration
           } 
           if (layer.getValidLabels().keySet().size() > 0) {
             subtype = "select";
-          } 
+          } else if ("T".equals(subtype)) {
+            subtype = "string";
+          }
           sql.setString(3, subtype);
           sql.setString(4, Optional.ofNullable((String)layer.get("style")).orElse(""));
           sql.setString(5, Optional.ofNullable((String)layer.get("hint")).orElse(""));

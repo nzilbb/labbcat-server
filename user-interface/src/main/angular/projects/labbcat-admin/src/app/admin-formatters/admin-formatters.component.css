@@ -1,0 +1,39 @@
+img.icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    padding-right: 3px;
+}
+.descriptor-de-serializer img {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    padding-right: 3px;
+}
+.buttons input[type=file] {
+    display: none;
+}
+.new {
+    animation-name: fade-down;
+    animation-duration: 1s;
+    color: var(--theme-text-color);
+}
+.old-version {
+    color: silver;
+}
+.old-version:after {
+    content: ' → ';
+}
+.new-version {
+    font-weight: bold;
+}
+
+/* Layout on wider screens */
+@media all and (min-width: 640px) {
+    .descriptor-de-serializer {
+        text-align: center;
+    }
+    .list > .item > span {
+        vertical-align: middle;
+    }
+}

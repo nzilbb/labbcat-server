@@ -341,6 +341,6 @@ public class TestUpload
   public void setDir(File fNewDir) { fDir = fNewDir; }
 
   public static void main(String args[]) {
-    org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.api.edit.test.TestUpload");
+    org.junit.runner.JUnitCore.main("nzilbb.labbcat.server.api.edit.transcript.TestUpload");
   }
 }

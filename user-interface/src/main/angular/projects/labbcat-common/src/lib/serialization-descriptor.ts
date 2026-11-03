@@ -5,4 +5,7 @@ export interface SerializationDescriptor {
     icon: string; // URL
     numberOfInputs: number;
     version: string;
+    deserializer: boolean;
+    serializer: boolean;
+    _deleting: boolean;
 }

@@ -32,8 +32,6 @@ import java.util.Vector;
 import java.text.DecimalFormat;
 import java.util.function.Consumer;
 import javax.json.JsonObject;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
 import nzilbb.labbcat.server.api.Dashboard;
 
 /**

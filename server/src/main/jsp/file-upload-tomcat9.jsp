@@ -42,6 +42,11 @@
           int lastSlash = fileName.lastIndexOf('/');
           if (lastSlash < 0) lastSlash = fileName.lastIndexOf('\\');
           if (lastSlash >= 0) fileName = fileName.substring(lastSlash + 1);
+          // sometimes it's like:
+          // 1-AP511_MikeThorpe__1.3-7.1.TextGrid; filename=1-AP511_MikeThorpe__1.3-7.1.TextGrid
+          int semicolon = fileName.lastIndexOf(';');
+          // if so, take the first part
+          if (semicolon >= 0) fileName = fileName.substring(0, semicolon);
           // // '+' is misinterpreted as an HTML-encoded ' ' in some places
           // fileName = fileName.replaceAll("\\+","_");
           File f = File.createTempFile("file-upload-tomcat9-", "-"+fileName);

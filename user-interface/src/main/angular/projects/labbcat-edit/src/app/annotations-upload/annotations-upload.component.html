@@ -1,0 +1,133 @@
+<h1 id="title" i18n>Upload Annotation Data</h1>
+
+<div id="form">
+  <div id="file-chooser">
+    <label for="csv" i18n>Annotation Data File</label>
+    <input type="file" id="csv" (change)="selectFile($event.target.files)" autofocus>
+    <span *ngIf="rowCount" id="rowCount" i18n>{{rowCount}} rows</span>
+    <details *ngIf="!headers">
+      <summary i18n>What should the file look like?</summary>
+      <div class="advanced">
+        <span i18n>Comma-separated values (.csv) file exported from results of a search, with</span>
+        <ul>
+          <li i18n>One row per annotation you want to create/update</li>
+          <li><span i18n>For tagging matched tokens:</span>
+            <ul>
+              <li i18n>One column that identifies the individual match token - e.g. MatchId</li>
+            </ul>
+          </li>
+          <li><span i18n>For tagging intervals of time:</span>
+            <ul>
+              <li i18n>A column that identifies the transcript name - e.g. Transcript</li>
+              <li i18n>A column that identifies the start time - e.g. Line</li>
+              <li i18n>A column that identifies the end time - e.g. LineEnd</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <div id="settings-form" *ngIf="headers">
+    
+    <div class="header" i18n="CSV column selector">Columns</div>
+    <fieldset id="token-tagging"
+              i18n-title title="Which field identifies identity of the matched token">
+      <legend>
+        <input id="alignment0" type="radio" name="alignment"
+               value="0" [(ngModel)]="alignment" (change)="alignmentChanged()">
+        <label for="alignment0" i18n>Tag Tokens</label>
+      </legend>
+      <div class="item">
+        <label for="idColumn" i18n>Match column</label>
+        <span>
+          <select id="idColumn" [(ngModel)]="idColumn"
+                  [disabled]="alignment != '0' || processing">
+            <ng-container *ngFor="let field of headers; let f = index">
+              <option value="{{f}}">{{field}}</option></ng-container>
+          </select>
+        </span>
+      </div>
+    </fieldset>
+    <fieldset id="interval-annotation"
+              i18n-title title="Which fields identifies the interval to annotate">
+      <legend>
+        <input id="alignment2" type="radio" name="alignment"
+               value="2" [(ngModel)]="alignment" (change)="alignmentChanged()">
+        <label for="alignment2" i18n>Interval Annotation</label>
+      </legend>
+      <div class="item"
+           i18n-title title="The name of the transcript to annotate">
+        <label for="transcriptColumn" i18n>Transcript</label>
+        <span>
+          <select id="transcriptColumn" [(ngModel)]="transcriptColumn"
+                  [disabled]="alignment != '2' || processing">
+            <ng-container *ngFor="let field of headers; let f = index">
+              <option value="{{f}}">{{field}}</option></ng-container>
+          </select>
+        </span>
+      </div>
+      <div class="item"
+           i18n-title title="The start time of the annotation">
+        <label for="startTimeColumn" i18n>Start Time</label>
+        <span>
+          <select id="startTimeColumn" [(ngModel)]="startTimeColumn"
+                  [disabled]="alignment != '2' || processing">
+            <ng-container *ngFor="let field of headers; let f = index">
+              <option value="{{f}}">{{field}}</option></ng-container>
+          </select>
+        </span>
+      </div>
+      <div class="item"
+           i18n-title title="The end time of the annotation">
+        <label for="endTimeColumn" i18n>End Time</label>
+        <span>
+          <select id="endTimeColumn" [(ngModel)]="endTimeColumn"
+                  [disabled]="alignment != '2' || processing">
+            <ng-container *ngFor="let field of headers; let f = index">
+              <option value="{{f}}">{{field}}</option></ng-container>
+          </select>
+        </span>
+      </div>
+    </fieldset>
+    
+    <div class="header" i18n>Mapping from CSV columns to layers</div>
+    <div class="item" *ngFor="let field of headers; let f = index">
+      <label for="column-{{f}}"
+             i18n-title title="Name of the CSV column">{{field}} →</label>
+      <span class="attribute">
+        <select id="column-{{f}}"
+                i18n-title title="Which annotation layer to import this column into"
+                [(ngModel)]="columnLayer[f]"
+                [disabled]="processing">
+          <option value="" i18n="CSV import column-to-layer option">ignore</option>
+          <ng-container *ngFor="let layer of layers">
+            <option value="{{layer.id}}">{{layer.id}}</option></ng-container>
+        </select>
+      </span>
+    </div>
+    <div class="controls">
+      <lib-button (press)="process()"
+                  [processing]="processing"
+                  img="upload.svg" icon="🠭"
+                  i18n-title title="Import data from file"
+                  i18n-label label="Upload"
+                  ></lib-button>
+    </div>
+  </div>
+  <div id="#result">
+    <progress *ngIf="uploadPercentProgress > 0"
+              value="{{uploadPercentProgress}}" max="100"
+              title="{{uploadPercentProgress + '%'}}"></progress>
+    <lib-task *ngIf="threadId"
+              threadId="{{threadId}}"
+              (finished)="finished($event)"
+              [showStackTrace]="false"
+              [showLastException]="false"
+              [showName]="false"></lib-task>
+  </div>
+  <div id="log" *ngIf="taskLog">
+    <p class="error" i18n>There were warnings during data processing:</p>
+    <pre>{{taskLog}}</pre>
+  </div>
+</div>

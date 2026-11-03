@@ -410,7 +410,6 @@ public class Store extends nzilbb.labbcat.server.api.Store {
     InputStream requestBody, SqlGraphStoreAdministration store)
     throws IOException, StoreException, PermissionException,
     GraphNotFoundException {
-    context.servletLog("saveTranscript...");
     
     // parse body as JSON to construct incoming graph
     // serialize with JSON serialization
@@ -424,7 +423,6 @@ public class Store extends nzilbb.labbcat.server.api.Store {
             new NamedStream().setStream(requestBody).setMimeType("application/json")),
           schema));
       Graph editedGraph = s.deserialize()[0];
-      context.servletLog("saveTranscript " + editedGraph.getId());
     
       // list layers, check they're all transcript attribute layers
       Vector<String> layerIds = new Vector<String>();
@@ -447,9 +445,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
       
       // merge attribute changes
       Merger merger = new Merger(editedGraph);
-      context.servletLog("saveTranscript about to merge...");
       merger.transform(ag);
-      context.servletLog("saveTranscript merged.");
 
       // save changes to graph store
       boolean thereWereChanges = store.saveTranscript(ag);
@@ -607,18 +603,22 @@ public class Store extends nzilbb.labbcat.server.api.Store {
       .map(l->l.getId())
       .collect(Collectors.toList())
       .toArray(new String[0]));
+    ChangeTracker tracker = new ChangeTracker();
     if (participant == null) { // create a new one
       participant = new Annotation()
         .setLayerId(schema.getParticipantLayerId())
         .setLabel(id);
-      participant.setId(id);
+      // ensure changes are tracked for the participant and all children
+      if (id != null) participant.setId(id);
       participant.create();
-    } 
-    // ensure changes are tracked for the participant and all children
-    participant.setTracker(new ChangeTracker());
+      // don't setTracker, because that uses the ID and we don't have one
+    } else {
+      // ensure changes are tracked for the participant and all children
+      participant.setTracker(tracker);
+    }
     for (SortedSet<Annotation> layers : participant.getAnnotations().values()) {
       for (Annotation child : layers) {
-        child.setTracker(participant.getTracker());
+        child.setTracker(tracker);
       } // next child
     } // next child layer
     String label = parameters.getString("label");
@@ -632,7 +632,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
       if ("readonly".equals(layer.get("type"))) continue; // ignore readonly layers
       if (!layer.getPeers()) { // single value
         Annotation annotation = participant.first(layer.getId());
-        if (annotation != null) annotation.setTracker(participant.getTracker());
+        if (annotation != null) annotation.setTracker(tracker);
         String value = parameters.getString(layer.getId());
         if (layer.get("other") != null) {
           String otherValue = parameters.getString(layer.getId() + "_other");
@@ -671,7 +671,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
         }
         HashMap<String,Annotation> currentAnnotations = new HashMap<String,Annotation>();
         for (Annotation annotation : participant.getAnnotations(layer.getId())) {
-          annotation.setTracker(participant.getTracker());
+          annotation.setTracker(tracker);
           currentAnnotations.put(annotation.getLabel(), annotation);
         } // next annotation
         
@@ -703,9 +703,9 @@ public class Store extends nzilbb.labbcat.server.api.Store {
         for (Annotation removed : toRemove) {
           participant.getAnnotations(removed.getLayerId()).remove(removed);
         }
-        return successResult(true, "Participant saved: {0}", id);
+        return successResult(true, "Participant saved: {0}", participant.getId());
       } else {
-        return successResult(false, "No changes to save: {0}", id);
+        return successResult(false, "No changes to save: {0}", participant.getId());
       }
     } catch(Exception exception) {
       errors.add(exception.getMessage());

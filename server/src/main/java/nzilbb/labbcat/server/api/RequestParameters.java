@@ -23,7 +23,9 @@
 package nzilbb.labbcat.server.api;
 
 import java.io.File;
+import java.io.Closeable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -31,7 +33,7 @@ import java.util.Vector;
  * values, and values can be either Strings or Files. 
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class RequestParameters extends HashMap<String,Object> {
+public class RequestParameters extends HashMap<String,Object> implements Closeable {
   /**
    * Default constructor.
    */
@@ -89,13 +91,13 @@ public class RequestParameters extends HashMap<String,Object> {
     Object value = get(key);
     if (value != null) {
       if (value instanceof Vector) {
-        return (File)((Vector)value).elementAt(0);
-      } else {
+        value = ((Vector)value).elementAt(0);
+      }
+      if (value instanceof File) {
         return (File)value;
       }
-    } else {
-      return null;
-    } 
+    }
+    return null;
   } // end of getFiles()
   
   /**
@@ -108,15 +110,61 @@ public class RequestParameters extends HashMap<String,Object> {
     Object value = get(key);
     if (value != null) {
       if (value instanceof Vector) {
-        return (Vector<File>)value;
+        if (((Vector)value).size() > 0 && ((Vector)value).elementAt(0) instanceof File) {
+          return (Vector<File>)value;
+        }
       } else {
         Vector<File> files = new Vector<File>();
-        files.add((File)value);
+        if (value instanceof File) {
+          files.add((File)value);
+        }
         return files;
       }
-    } else {
-      return new Vector<File>();
-    } 
+    }
+    return new Vector<File>();
   } // end of getFiles()
+  
+  /**
+   * Obtains all files in the parameters.
+   * @return All the files uploaded with the parameters.
+   */
+  @SuppressWarnings("unchecked")
+  public List<File> getAllFiles() {
+    Vector<File> allFiles = new Vector<File>();
+    for (Object value : values()) {
+      if (value instanceof File) {
+        allFiles.add((File)value);
+      } else if (value instanceof Vector) {
+        Vector values = (Vector)value;
+        if (values.size() > 0) {
+          if (values.elementAt(0) instanceof File) {
+            for (Object file : values) {
+              allFiles.add((File)file);
+            }
+          }
+        }
+      }
+    } // next value
+    return allFiles;
+  } // end of getAllFiles()
+  
+  /**
+   * Deletes all temporary files that were created while reading file parameters.
+   */
+  public void close() {
+    for (File file : getAllFiles()) {      
+      if (file.exists()) {
+        if (!file.delete()) {
+          System.err.println("Could not delete file from request: " + file.getPath());
+        }
+      } // file still exists
+      if (file.getParentFile().list().length == 0) {
+        if (!file.getParentFile().delete()) {
+          System.err.println(
+            "Could not delete directory from request: " + file.getParentFile().getPath());
+        }
+      }
+    } // next file
+  } // end of close()
   
 } // end of class RequestParameters

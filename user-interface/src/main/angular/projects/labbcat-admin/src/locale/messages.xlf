@@ -2,6 +2,20 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en" datatype="plaintext" original="ng2.template">
     <body>
+      <trans-unit id="705527876638727230" datatype="html">
+        <source>You may overwrite each other&apos;s changes when saving</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/activity/activity.component.html</context>
+          <context context-type="linenumber">2,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="437269151217483284" datatype="html">
+        <source>Other users are editing this page:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/activity/activity.component.html</context>
+          <context context-type="linenumber">3,5</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="4409341297488013901" datatype="html">
         <source>Add Data License Agreement</source>
         <context-group purpose="location">
@@ -330,6 +344,34 @@
           <context context-type="linenumber">25,28</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">16,17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">18,21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">31,32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">32,33</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">51,53</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tracks/admin-tracks.component.html</context>
           <context context-type="linenumber">6,7</context>
         </context-group>
@@ -459,6 +501,22 @@
           <context context-type="linenumber">48,50</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">115,117</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-resources/admin-task-resources.component.html</context>
+          <context context-type="linenumber">18,21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">119,121</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-transcript-types/admin-transcript-types.component.html</context>
           <context context-type="linenumber">32,34</context>
         </context-group>
@@ -536,6 +594,26 @@
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-annotator/admin-annotator.component.html</context>
           <context context-type="linenumber">35,38</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">26,27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">26,27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">55,57</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">55,57</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="5088286317508582496" datatype="html">
         <source> Version </source>
@@ -550,6 +628,10 @@
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-annotator/admin-annotator.component.html</context>
           <context context-type="linenumber">43,44</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">40,41</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="325178065368366261" datatype="html">
         <source>Confirm annotator installation</source>
@@ -563,6 +645,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-annotator/admin-annotator.component.html</context>
           <context context-type="linenumber">47,48</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">44,45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">112,113</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8962110723197431031" datatype="html">
@@ -594,7 +684,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
-          <context context-type="linenumber">65,67</context>
+          <context context-type="linenumber">69,72</context>
         </context-group>
         <note priority="1" from="description">page header</note>
       </trans-unit>
@@ -653,6 +743,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-annotators/admin-annotators.component.html</context>
           <context context-type="linenumber">32,35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">73,77</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4279344312577823847" datatype="html">
@@ -824,6 +918,26 @@
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-attributes/admin-attributes.component.html</context>
           <context context-type="linenumber">83,85</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">34,36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">35,36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">88,89</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">92,93</context>
+        </context-group>
         <note priority="1" from="description">Label type option</note>
       </trans-unit>
       <trans-unit id="3972366190860153161" datatype="html">
@@ -967,6 +1081,22 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layer-labels/admin-layer-labels.component.html</context>
           <context context-type="linenumber">77,80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">6,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">56,58</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">60,61</context>
         </context-group>
         <note priority="1" from="description">Layer Label</note>
       </trans-unit>
@@ -1438,6 +1568,30 @@
           <context context-type="linenumber">24,26</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">21,22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">21,22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">50,51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">50,52</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-projects/admin-projects.component.html</context>
           <context context-type="linenumber">4,5</context>
         </context-group>
@@ -1480,6 +1634,30 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-roles/admin-roles.component.html</context>
           <context context-type="linenumber">18,20</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">4,6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">39,40</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3502464962467524050" datatype="html">
@@ -1615,6 +1793,101 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-corpora/admin-corpora.component.html</context>
           <context context-type="linenumber">42,44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4991885837987925492" datatype="html">
+        <source>Formatters</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">1,5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">65,67</context>
+        </context-group>
+        <note priority="1" from="description">page header</note>
+      </trans-unit>
+      <trans-unit id="2742981785472097021" datatype="html">
+        <source>Content Type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">6,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="188151689808739140" datatype="html">
+        <source>MIME Type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">6,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">53,55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5672084880175562772" datatype="html">
+        <source>Module version</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1350049590617674818" datatype="html">
+        <source>Add or upgrade a formatter</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">12,14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2680757582527333796" datatype="html">
+        <source>Transcripts in this format can be uploaded</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">31,33</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">59,61</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="214396287730427813" datatype="html">
+        <source>Transcripts and fragments can be exported in this format</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">34,36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">62,65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8940461123499768484" datatype="html">
+        <source>Install formatter</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6082538160456566767" datatype="html">
+        <source>Cancel installation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3008420115644088420" datatype="html">
+        <source>Configuration</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-formatters/admin-formatters.component.html</context>
+          <context context-type="linenumber">67,70</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7915902358595320713" datatype="html">
@@ -1988,6 +2261,10 @@
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-layers/admin-layers.component.html</context>
           <context context-type="linenumber">106,108</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">27,28</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="8372007266188249803" datatype="html">
         <source>Never</source>
@@ -2154,6 +2431,10 @@
           <context context-type="linenumber">25,27</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">85,86</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
           <context context-type="linenumber">76,78</context>
         </context-group>
@@ -2172,6 +2453,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
           <context context-type="linenumber">29,32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">81,82</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-common/src/lib/layer-checkboxes/layer-checkboxes.component.html</context>
@@ -2287,19 +2572,67 @@
         </context-group>
         <note priority="1" from="description">menu label</note>
       </trans-unit>
-      <trans-unit id="4425984099989161457" datatype="html">
-        <source>View, install, and uninstall annotator modules</source>
+      <trans-unit id="2015407598228403834" datatype="html">
+        <source>View, install, and uninstall modules that read/produce specific transcript file formats</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
           <context context-type="linenumber">64,67</context>
         </context-group>
         <note priority="1" from="description">menu title</note>
       </trans-unit>
+      <trans-unit id="4425984099989161457" datatype="html">
+        <source>View, install, and uninstall annotator modules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">68,71</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+      <trans-unit id="2241864271122059192" datatype="html">
+        <source>View, create, and edit elicitation tasks for participants</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">72,74</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+      <trans-unit id="3273491551175582180" datatype="html">
+        <source>Elicitation Tasks</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">73,76</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">1,3</context>
+        </context-group>
+        <note priority="1" from="description">menu label</note>
+      </trans-unit>
+      <trans-unit id="3588424100991583512" datatype="html">
+        <source>Upgrade LaBB-CAT to a newer version</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">76,79</context>
+        </context-group>
+        <note priority="1" from="description">menu title</note>
+      </trans-unit>
+      <trans-unit id="2849750161085431718" datatype="html">
+        <source>Upgrade</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
+          <context context-type="linenumber">77,79</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">106,107</context>
+        </context-group>
+        <note priority="1" from="description">menu label</note>
+      </trans-unit>
       <trans-unit id="4204023624947970320" datatype="html">
         <source>Edit the data access license agreement</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
-          <context context-type="linenumber">68,71</context>
+          <context context-type="linenumber">80,83</context>
         </context-group>
         <note priority="1" from="description">menu title</note>
       </trans-unit>
@@ -2307,7 +2640,7 @@
         <source>Data License Agreement</source>
         <context-group purpose="location">
           <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-menu/admin-menu.component.html</context>
-          <context context-type="linenumber">69,71</context>
+          <context context-type="linenumber">81,83</context>
         </context-group>
         <note priority="1" from="description">menu label</note>
       </trans-unit>
@@ -2458,6 +2791,697 @@
           <context context-type="linenumber">32,34</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="4496247909313019334" datatype="html">
+        <source>Task:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">1,2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">1,3</context>
+        </context-group>
+        <note priority="1" from="description">Task TASK NAME</note>
+      </trans-unit>
+      <trans-unit id="265366483406296208" datatype="html">
+        <source>Options for</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">2,5</context>
+        </context-group>
+        <note priority="1" from="description">Options for ATTRIBUTE-NAME</note>
+      </trans-unit>
+      <trans-unit id="5021126536706611347" datatype="html">
+        <source>The underlying option value</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6555318547274416232" datatype="html">
+        <source>Value</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3976008163456583363" datatype="html">
+        <source>The participant-facing description of the option</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">16,17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8025963579466502575" datatype="html">
+        <source>Add new option</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8001138849328254631" datatype="html">
+        <source>Add All</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7043219665618558619" datatype="html">
+        <source>Add all options not already available</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attribute-options/admin-task-attribute-options.component.html</context>
+          <context context-type="linenumber">29,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4962033115679460421" datatype="html">
+        <source>Transcript Attributes elicited during Task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attributes/admin-task-attributes.component.html</context>
+          <context context-type="linenumber">1,2</context>
+        </context-group>
+        <note priority="1" from="description">Transcript attributes elicited during task XXX</note>
+      </trans-unit>
+      <trans-unit id="3980748059187530180" datatype="html">
+        <source>Participant Attributes elicited during Task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attributes/admin-task-attributes.component.html</context>
+          <context context-type="linenumber">2,4</context>
+        </context-group>
+        <note priority="1" from="description">Participant attributes elicited during task XXX</note>
+      </trans-unit>
+      <trans-unit id="2957163997998056771" datatype="html">
+        <source>Validation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attributes/admin-task-attributes.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3328950161780878204" datatype="html">
+        <source>Script for validating values entered by the participant</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attributes/admin-task-attributes.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8432562579042371182" datatype="html">
+        <source>Options</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attributes/admin-task-attributes.component.html</context>
+          <context context-type="linenumber">17,18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2714359706537004970" datatype="html">
+        <source>Options available to participants</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-attributes/admin-task-attributes.component.html</context>
+          <context context-type="linenumber">17,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1120460431393880787" datatype="html">
+        <source>The participant-facing label for the reminder</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">56,58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8668893183746122913" datatype="html">
+        <source>Regular expression that matches the IDs of participants for whom these reminders will be set.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">61,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4596811309844010784" datatype="html">
+        <source>Participant Pattern</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">61,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5205118439256447908" datatype="html">
+        <source>Participant Patten</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1194836810577943786" datatype="html">
+        <source>How often to remind the participant to do the task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">13,14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">68,69</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1286983255645370171" datatype="html">
+        <source>Day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">13,16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">68,71</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day schedule header</note>
+      </trans-unit>
+      <trans-unit id="2988589012964101797" datatype="html">
+        <source>Daily</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">17,19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">71,73</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="7373227413576979774" datatype="html">
+        <source>Every other day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">18,20</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">72,74</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="4655478145537405908" datatype="html">
+        <source>Every third day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">19,21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">73,75</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="4391708876550359680" datatype="html">
+        <source>Every fourth day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">20,22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">74,76</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="7001817381122902313" datatype="html">
+        <source>Every fifth day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">75,77</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="3580233819576313235" datatype="html">
+        <source>Every sixth day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">76,78</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="928838138686087140" datatype="html">
+        <source>Weekly</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">23,25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">77,79</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="8739442281958563044" datatype="html">
+        <source>Monday</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">78,80</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="9176037901730521018" datatype="html">
+        <source>Tuesday</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">25,27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">79,81</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="8798932904948432529" datatype="html">
+        <source>Wednesday</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">26,28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">80,82</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="1433683192825895947" datatype="html">
+        <source>Thursday</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">27,29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">81,83</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="3730139500618908668" datatype="html">
+        <source>Friday</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">28,30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">82,84</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="1830554030016307335" datatype="html">
+        <source>Saturday</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">29,31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">83,85</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="6950140976689343775" datatype="html">
+        <source>Sunday</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">30,32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">84,86</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="2238322424648916104" datatype="html">
+        <source>Fortnightly</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">31,34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">85,88</context>
+        </context-group>
+        <note priority="1" from="description">Task reminder day option</note>
+      </trans-unit>
+      <trans-unit id="5001275987566036701" datatype="html">
+        <source>Default time for the reminder.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">34,35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">88,89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4184182457114762910" datatype="html">
+        <source>Start day, from the first episode, or 0 for the same day.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">39,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">93,94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7943322712137185173" datatype="html">
+        <source>From Day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">41,43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">93,94</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">96,98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2613923423841556178" datatype="html">
+        <source>Start day, to the first episode, or 0 for the same day.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">43,44</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">98,99</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7088298382890008546" datatype="html">
+        <source>To Day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">46,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">98,99</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">102,104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2506929820871032854" datatype="html">
+        <source>Add new reminder</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">51,54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6751598028420881373" datatype="html">
+        <source>All participants</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-reminders/admin-task-reminders.component.html</context>
+          <context context-type="linenumber">64,66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4973228402045928224" datatype="html">
+        <source>Messages for Task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-task-resources/admin-task-resources.component.html</context>
+          <context context-type="linenumber">1,3</context>
+        </context-group>
+        <note priority="1" from="description">Messages for task XXX</note>
+      </trans-unit>
+      <trans-unit id="7991363122588212257" datatype="html">
+        <source>The name of the task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1662569506883244905" datatype="html">
+        <source>The corpus for elicited transcripts/recordings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">6,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">41,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1164567695833119232" datatype="html">
+        <source>Corpus</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">6,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">41,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1281011829861980484" datatype="html">
+        <source>The transcript type for elicited transcripts/recordings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">12,13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">46,47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3062709378414401571" datatype="html">
+        <source>Transcript Type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">12,14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">14,15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">46,47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6896245792698395855" datatype="html">
+        <source>Add new task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="83145062145907404" datatype="html">
+        <source>Upload a task from a .json file</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">28,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6214748623225044738" datatype="html">
+        <source>A description of the task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">31,32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">51,52</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7526475097820717276" datatype="html">
+        <source>Text the participant sees when they are about to start the task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">56,58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2909925597137061738" datatype="html">
+        <source>Preamble</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">56,58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7600651449926235390" datatype="html">
+        <source>Optional consent form to be &apos;signed&apos; by the participant</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">62,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5422128942637362811" datatype="html">
+        <source>Consent</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">62,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9203269421688303215" datatype="html">
+        <source>Optional URL to send participants to after they finish the task -
+ {participant}, if present in the URL, is replaced by the participant&apos;s ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">68,71</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">72,76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5656136285581787862" datatype="html">
+        <source>End URL</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">69,71</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7799873417615629800" datatype="html">
+        <source>Define Steps</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">77,78</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6232260253825370383" datatype="html">
+        <source>Define individual steps for this task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">78,80</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7611759213504722007" datatype="html">
+        <source>Configure available values for participant attributes elicited during the task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">82,84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6616604039827708521" datatype="html">
+        <source>Configure available values for transcript attributes elicited during the task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">86,88</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6452372740127749380" datatype="html">
+        <source>Messages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">89,90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4192335038540518217" datatype="html">
+        <source>Translate or customize messages that may be shown to the participant during the task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">90,92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2983318659047499045" datatype="html">
+        <source>Reminders</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">93,94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8384754211097276686" datatype="html">
+        <source>Default schedule for reminders in mobile app</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">94,96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7462301153729425254" datatype="html">
+        <source>Export</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1969078475456540990" datatype="html">
+        <source>Export the definition of this task to a file</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">98,100</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4256736616422966530" datatype="html">
+        <source>Task URL</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">101,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9098182300237106081" datatype="html">
+        <source>Link for distributing to participants</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">102,104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4323470180912194028" datatype="html">
+        <source>Copy</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">106,107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="175674534783955454" datatype="html">
+        <source>Create a copy of this task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-tasks/admin-tasks.component.html</context>
+          <context context-type="linenumber">106,108</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="3452123914085901223" datatype="html">
         <source>Suffix</source>
         <context-group purpose="location">
@@ -2529,6 +3553,197 @@
           <context context-type="linenumber">27,30</context>
         </context-group>
         <note priority="1" from="description">Media files with no suffix</note>
+      </trans-unit>
+      <trans-unit id="4776012258267482145" datatype="html">
+        <source>Upgrade LaBB-CAT</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">1,3</context>
+        </context-group>
+        <note priority="1" from="description">page header</note>
+      </trans-unit>
+      <trans-unit id="5243343810100388067" datatype="html">
+        <source>If you have downloaded a newer version of LaBB-CAT, you can upgrade to it from this page.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6317389546889852131" datatype="html">
+        <source>Warning: Upgrading will interrupt the following processing:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">6,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3326877877555410533" datatype="html">
+        <source>Started</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">9,11</context>
+        </context-group>
+        <note priority="1" from="description">Tasks header</note>
+      </trans-unit>
+      <trans-unit id="7702646444963497962" datatype="html">
+        <source>By</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">11,12</context>
+        </context-group>
+        <note priority="1" from="description">Tasks header</note>
+      </trans-unit>
+      <trans-unit id="7410432243549869948" datatype="html">
+        <source>Duration</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+        <note priority="1" from="description">Tasks header</note>
+      </trans-unit>
+      <trans-unit id="4578192247039196794" datatype="html">
+        <source>Task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">12,14</context>
+        </context-group>
+        <note priority="1" from="description">Tasks header</note>
+      </trans-unit>
+      <trans-unit id="5611592591303869712" datatype="html">
+        <source>Status</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+        <note priority="1" from="description">Tasks header</note>
+      </trans-unit>
+      <trans-unit id="3419681791450150574" datatype="html">
+        <source>Progress</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">15,19</context>
+        </context-group>
+        <note priority="1" from="description">Tasks header</note>
+      </trans-unit>
+      <trans-unit id="3403112836659721605" datatype="html">
+        <source>Monitor this task</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">28,30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5808008943070251347" datatype="html">
+        <source>Open Results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">37,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-common/src/lib/task/task.component.html</context>
+          <context context-type="linenumber">26,29</context>
+        </context-group>
+        <note priority="1" from="description">Default task result text</note>
+      </trans-unit>
+      <trans-unit id="2956098160626271284" datatype="html">
+        <source>Running</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">41,43</context>
+        </context-group>
+        <note priority="1" from="description">task progress description</note>
+      </trans-unit>
+      <trans-unit id="8384225360105280028" datatype="html">
+        <source>Complete</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+        <note priority="1" from="description">task progress description</note>
+      </trans-unit>
+      <trans-unit id="1519954996184640001" datatype="html">
+        <source>Error</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">47,50</context>
+        </context-group>
+        <note priority="1" from="description">task progress description</note>
+      </trans-unit>
+      <trans-unit id="305038020009862655" datatype="html">
+        <source>Upgrade File</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">67,70</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1325568663267986475" datatype="html">
+        <source>The LaBB-CAT upgrade file is the labbcat.war file contained in the zip file of the new version of LaBB-CAT you downloaded.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">72,75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1245343823699368872" datatype="html">
+        <source>Uploading...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">75,77</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9024194268922241398" datatype="html">
+        <source>Your current version is:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">85,87</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7035163636161508623" datatype="html">
+        <source> contains version:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">89,92</context>
+        </context-group>
+        <note priority="1" from="description">xxx.war contains version:</note>
+      </trans-unit>
+      <trans-unit id="1050918519140332841" datatype="html">
+        <source><x id="START_PARAGRAPH" ctype="x-p" equiv-text="&lt;p class=&quot;error&quot;&gt;"/>WARNING: the file contains a version that is older than your current version<x id="CLOSE_PARAGRAPH" ctype="x-p" equiv-text="&lt;/p&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">93,95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1882616061950018670" datatype="html">
+        <source>WARNING: the file contains migration data from another corpus.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">96,97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6101917878523694622" datatype="html">
+        <source>WARNING: If you proceed, all your current corpus data and recordings will be deleted and replaced by the data and recordings of the imported corpus.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">97,101</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3366171804766127609" datatype="html">
+        <source>Confirm upgrade</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">106,108</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5480827660553819737" datatype="html">
+        <source>Cancel upgrade</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">112,115</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3392559623204358019" datatype="html">
+        <source>Upgrade complete.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">projects/labbcat-admin/src/app/admin-upgrade/admin-upgrade.component.html</context>
+          <context context-type="linenumber">126,127</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="2128755808672960949" datatype="html">
         <source>User ID</source>
@@ -3007,14 +4222,6 @@
           <context context-type="sourcefile">projects/labbcat-common/src/lib/task/task.component.html</context>
           <context context-type="linenumber">15,18</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="5808008943070251347" datatype="html">
-        <source>Open Results</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">projects/labbcat-common/src/lib/task/task.component.html</context>
-          <context context-type="linenumber">26,29</context>
-        </context-group>
-        <note priority="1" from="description">Default task result text</note>
       </trans-unit>
       <trans-unit id="3593984582899464681" datatype="html">
         <source>Any <x id="INTERPOLATION" equiv-text="{{category}}"/></source>

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 import { MessageService, LabbcatService, Response, User } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
@@ -13,6 +14,7 @@ export class AdminRoleUsersComponent extends AdminComponent implements OnInit {
     role_id: string;
     members: User[];
     nonmembers: User[];
+    imagesLocation = environment.imagesLocation;
     
     constructor(
         labbcatService: LabbcatService,

@@ -1,0 +1,167 @@
+<h1 i18n>Upload Fragments</h1>
+
+<div id="header">
+  <fieldset id="defaults" class="list">
+    <legend i18n>Defaults</legend>
+    <div class="item"
+         i18n-title title="Whether to automate upload by allowing LaBB-CAT to make all decisions about tier/layer mappings and other options, and upload files one after the other automatically.">
+      <label for="useDefaultParameterValues" i18n>Automated Upload</label>
+      <span class="value">
+        <legend i18n>Automated Upload</legend>
+        <input type="checkbox"
+               id="useDefaultParameterValues"
+               [(ngModel)]="useDefaultParameterValues">
+      </span>
+    </div>
+  </fieldset>
+  <div id="buttons">    
+    <div id="always-visible-buttons">
+      <lib-button
+        *ngIf="processing"
+        i18n-label="Batch upload" label="Cancel"
+        i18n-title title="Cancel current processing"
+        img="cross-mark.svg" icon="❌"
+        (press)="onCancel()"></lib-button>
+      <lib-button
+        *ngIf="processing"
+        i18n-title title="Follow progress"
+        img="pin.svg" icon="📌"
+        (press)="followProgress = !followProgress"
+        [ngClass]="{'deselected' : !followProgress}"
+        ></lib-button>
+    </div>
+    <lib-button
+      i18n-label="Batch upload" label="Upload"
+      i18n-title title="Add all fragments to LaBB-CAT"
+      img="upload.svg" icon="↑"
+      (press)="onUpload()"
+      [processing]="uploading"
+      [disabled]="processing || entries.length == 0"></lib-button>
+    <lib-button
+      i18n-label="Batch upload" label="Clear"
+      i18n-title title="Remove all files from the queue"
+      img="delete.svg" icon="⌫"
+      (press)="onClear()"
+      [disabled]="processing || entries.length == 0"></lib-button>
+    <lib-button
+      i18n-label="Batch upload" label="Report"
+      i18n-title title="Report about uploads"
+      img="csv.svg" icon="🗎"
+      (press)="onReport()"
+      [disabled]="processing || entries.length == 0"></lib-button>
+  </div>
+</div>
+<div id="drag-drop"
+     i18n-title title="Drop fragment files (e.g. utterance TextGrids) on to this area"
+     (dragover)="fileDragHover($event)"
+     (dragleave)="fileDragHover($event)"
+     (drop)="fileSelectHandler($event)"
+     [class.dragover]="hovering"
+     [class.processing-entries]="processingEntries">
+  <div id="fragments" class="fragment-batch" i18n-title title="Queue of fragments to upload">
+    <input type="file"
+           i18n-title title="Select files for upload"
+           [(ngModel)]="fileSelector"
+           (change)="chooseFile($event)"
+           [disabled]="processing"
+           multiple observeFiles>
+    <div class="fragment-entry">
+      <span class="entry-selector header" i18n-title title="Queue length">{{entries.length}}</span>
+      <span class="fragment-name header" i18n="Upload batch column">Fragment</span>
+      <span class="status header" i18n="Upload batch column">Status</span>
+      <span class="progress header" i18n="Upload batch column">Progress</span>
+      <span class="buttons header">&nbsp;</span>
+    </div>
+    <details *ngFor="let entry of entries; index as e" class="entry-container"
+             [open]="entry.parametersVisible">
+      <summary [class]="{ 'fragment-entry' : true, 'exists': entry.exists }"
+               [id]="entry.transcript?entry.transcript.name||'entry-'+e:'entry-'+e">
+        <span class="entry-selector buttons">
+          <button *ngIf="entry.parameters"
+                  i18n-title title="Show/hide parameters"
+                  (click)="entry.parametersVisible = !entry.parametersVisible">
+            <img [src]="imagesLocation + '/wrench.svg'" 
+                 [alt]="entry.parametersVisible?'▾':'▸'">
+          </button>
+        </span>
+        <span class="fragment-name" title="{{entry.transcript?entry.transcript.name:''}}">
+          <img *ngIf="entry.descriptor"
+               src="{{entry.descriptor.icon}}"
+               title="{{entry.descriptor.name}}">
+          <span *ngIf="entry.transcript && !entry.exists">{{entry.transcript.name}}</span>
+          <a *ngIf="entry.transcript && entry.exists"
+             target="{{entry.transcriptId}}"
+             href="{{baseUrl}}fragment?fragment={{entry.transcriptId | urlEncode}}"
+             >{{entry.transcriptId||entry.transcript.name}}</a>
+          <span *ngIf="!entry.transcript" i18n>[no fragment yet]</span>
+        </span>
+        <span class="status"
+              [class.error]="entry.errors.length > 0"
+              [title]="entry.errors.length > 0?entry.errors.join('\n'):entry.status">
+          <span *ngIf="entry.errors.length > 0"
+                class="abridged-error">{{statusLabel(entry.errors[0])}}</span>
+          {{statusLabel(entry.status)}}
+        </span>
+        <progress max="100" [title]="''+entry.progress+'% '+entry.status" [value]="entry.progress">{{entry.progress}}%</progress>
+        <span class="buttons">
+          <button
+            *ngIf="!entry.generating()"
+            i18n-title title="Remove this file from the queue"
+            (click)="removeEntry(entry.id)"
+            [disabled]="processing"><img src="{{imagesLocation}}/remove.svg" alt="➖"></button>
+</span>
+      </summary>
+      <div class="details">
+        <div *ngIf="entry.parameters"
+               class="parameters list">
+        <ng-container *ngFor="let parameter of entry.parameters">
+          <div class="item"
+               title="{{parameter.hint}}">
+            <label>{{parameter.label}}</label>
+            <span class="value">
+              <legend>{{parameter.label}}</legend>
+              <select *ngIf="parameter.possibleValues && parameter.possibleValues.length"
+                      [(ngModel)]="parameter.value"
+                      [disabled]="entry.transcriptThreads || entry.progress > 50">
+                <option *ngFor="let option of parameter.possibleValues">{{option}}</option>
+              </select>
+              <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.String'"
+                     type="text"
+                     [(ngModel)]="parameter.value"
+                     [disabled]="entry.transcriptThreads || entry.progress > 50">
+              <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Integer'"
+                     type="number" step="1"
+                     [(ngModel)]="parameter.value"
+                     [disabled]="entry.transcriptThreads || entry.progress > 50">
+              <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Double'"
+                     type="number" step="0.01"
+                     [(ngModel)]="parameter.value"
+                     [disabled]="entry.transcriptThreads || entry.progress > 50">
+              <input *ngIf="(!parameter.possibleValues || !parameter.possibleValues.length) && parameter.type == 'java.lang.Boolean'"
+                     type="checkbox"
+                     [(ngModel)]="parameter.value"
+                     [disabled]="entry.transcriptThreads || entry.progress > 50">
+            </span>
+          </div>
+        </ng-container>
+        <div *ngIf="uploading && !entry.transcriptThreads && entry.progress <= 50"
+             class="item controls">
+          <span>&nbsp;</span>
+          <lib-button
+            i18n-label="Batch upload" label="Skip"
+            i18n-title title="Skip this fragment and upload the next"
+            img="cross-mark.svg" icon="❌"
+            (press)="skipEntry(entry, false)"></lib-button>
+          <lib-button
+            action="save"
+            autofocus="true"
+            i18n-title title="Set the parameters for this fragment"
+            (press)="uploadParameters(entry)"></lib-button>
+        </div>
+        </div>
+        <div class="error unabridged-error" title="{{entry.errors.join('\n')}}"
+             >{{entry.errors.join('\n')}}</div>
+      </div>
+    </details>
+  </div>
+</div>

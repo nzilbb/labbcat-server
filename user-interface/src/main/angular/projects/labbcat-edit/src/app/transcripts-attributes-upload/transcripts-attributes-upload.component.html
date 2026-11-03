@@ -1,0 +1,81 @@
+<h1 id="title" i18n>Upload Transcript Data</h1>
+
+<div id="file-chooser">
+  <label for="csv" i18n>Transcript Data File</label>
+  <input type="file" id="csv" (change)="selectFile($event.target.files)" autofocus>
+  <span *ngIf="rowCount" id="rowCount" i18n>{{rowCount}} rows</span>
+  <details *ngIf="!headers">
+    <summary i18n>What should the file look like?</summary>
+    <div class="advanced">
+      <span i18n>Comma-separated values (.csv) file, with</span>
+      <ul>
+        <li i18n>One row per transcript you want to update</li>
+        <li i18n>One column that identifies the transcript by ID</li>
+        <li i18n>A column for each transcript attribute you want to import</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div id="settings-form" *ngIf="headers">
+  <div class="header" i18n="CSV column selector">Columns</div>
+  <div class="item" id="transcript"
+       i18n-title title="Which field identifies the ID/name of the transcript">
+    <label for="idColumn" i18n>Transcript identity column</label>
+    <span>
+      <select id="idColumn" [(ngModel)]="idColumn" [disabled]="processing">
+        <ng-container *ngFor="let field of headers; let f = index">
+          <option value="{{f}}">{{field}}</option></ng-container>
+      </select>
+    </span>
+  </div>
+  <div class="header" i18n>Mapping from CSV columns to transcript attributes</div>
+  <div class="item" *ngFor="let field of headers; let f = index">
+    <label for="column-{{f}}"
+           i18n-title title="Name of the CSV column">{{field}} →</label>
+    <span class="attribute">
+      <select id="column-{{f}}"
+              i18n-title title="Which attribute to import this column into"
+              [(ngModel)]="columnLayer[f]"
+              [disabled]="processing">
+        <option value="" i18n="CSV import column-to-attribute option">ignore</option>
+        <option
+          *ngIf="(!user || user.roles.includes('admin'))"
+          value="_create"
+          i18n="CSV import column-to-attribute option">create new attribute called...</option>
+        <ng-container *ngFor="let attribute of transcriptAttributeLayers">
+          <option value="{{attribute.id}}">{{attribute.attribute||attribute.id}}</option></ng-container>
+      </select>
+      <span *ngIf="columnLayer[f] == '_create'" class="new">
+        <input type="text"
+               class="attribute"
+               i18n-title title="New attribute name"
+               placeholder="{{field}}"
+               [(ngModel)]="newLayerName[f]"
+               [disabled]="processing">
+        <select class="category"
+                i18n-title title="New attribute category"
+                [(ngModel)]="newLayerCategory[f]"
+                [disabled]="processing">
+          <ng-container *ngFor="let category of categories">
+            <option>{{category}}</option></ng-container>
+        </select>
+      </span>
+    </span>
+  </div>
+  <div class="controls">
+    <lib-button (press)="process()"
+                [processing]="processing"
+                img="upload.svg" icon="🠭"
+                i18n-title title="Import data from file"
+                i18n-label label="Upload"
+                ></lib-button>
+  </div>
+</div>
+<div id="#result">
+  <progress *ngIf="uploadPercentProgress > 0"
+            value="{{uploadPercentProgress}}" max="100"
+            title="{{uploadPercentProgress + '%'}}"></progress>
+  <p *ngIf="updated || missing" id="result" class="message"
+     i18n="Upload result, do not translate {{updated}} and {{missing}}">Transcripts processed : {{updated}} updated, {{missing}} missing. </p>
+</div>

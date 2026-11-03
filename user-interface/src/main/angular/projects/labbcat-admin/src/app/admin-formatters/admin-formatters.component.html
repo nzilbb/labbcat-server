@@ -1,0 +1,76 @@
+<h2 id="title" i18n="page header">Formatters</h2>
+
+<div class="list formatter-list">  
+  <div class="item header">
+    <span class="descriptor-name" i18n-title title="Name" i18n>Name</span>
+    <span class="descriptor-mime-type" i18n-title title="Content Type" i18n>MIME Type</span>
+    <span class="descriptor-version" i18n-title title="Module version" i18n>Version</span>
+    <span class="descriptor-de-serializer">&nbsp;</span>
+    <span class="buttons">
+      <lib-button action="create" [processing]="creating"
+                  (press)="startInstallation()"
+                  i18n-title title="Add or upgrade a formatter"></lib-button>
+      <input *ngIf="fileSelector"
+             type="file" id="formatterFile"
+             (change)="selectFile($event.target.files)" autofocus>
+    </span>
+  </div>
+  
+  <lib-wait *ngIf="!rows"></lib-wait>
+  <div class="item new" *ngIf="uploadedFormatter">
+    <span class="descriptor-name" i18n-title title="Name"><legend i18n>Name</legend>
+      <img src="{{uploadedFormatter.icon}}" class="icon" alt="🖹">
+      <span class="name">{{uploadedFormatter.name}}</span></span>
+    <span class="descriptor-mime-type" i18n-title title="Content Type"><legend i18n>MIME Type</legend>
+      {{uploadedFormatter.mimeType}}</span>
+    <span class="descriptor-version" i18n-title title="Version"><legend i18n>Version</legend>
+      <span *ngIf="previousVersion" class="old-version">{{previousVersion}}</span>
+      <span class="new-version">{{uploadedFormatter.version}}</span></span>
+    <span class="descriptor-de-serializer">
+      <img *ngIf="uploadedFormatter.deserializer"
+           i18n-title title="Transcripts in this format can be uploaded"
+           src="{{imagesLocation+'/upload.svg'}}" alt="↑">
+      <img *ngIf="uploadedFormatter.serializer"
+           i18n-title title="Transcripts and fragments can be exported in this format"
+           src="{{imagesLocation+'/download.svg'}}" alt="↓">
+    </span>
+    <span class="buttons">
+      <lib-button autofocus="true"
+                  i18n-label="Formatter installation" label="Install"
+                  i18n-title title="Install formatter"
+                  img="add.svg" icon="➕"
+                  (press)="install(true);"></lib-button>
+      <lib-button i18n-label="Formatter installation" label="Cancel"
+                  i18n-title title="Cancel installation"
+                  img="cross-mark.svg" icon="❌"
+                  (press)="install(false);"></lib-button>
+    </span>
+  </div>
+  <div class="item" *ngFor="let row of rows | keyvalue">
+    <span class="descriptor-name" i18n-title title="Name"><legend i18n>Name</legend>
+      <img src="{{row.value.icon}}" class="icon" alt="🖹">
+      <span class="name">{{row.value.name}}</span></span>
+    <span class="descriptor-mime-type" title="{{row.value.fileSuffixes.join(' ')}}"><legend i18n>MIME Type</legend>
+      {{row.value.mimeType}}</span>
+    <span class="descriptor-version" i18n-title title="Version"><legend i18n>Version</legend>
+      {{row.value.version}}</span>
+    <span class="descriptor-de-serializer">
+      <img *ngIf="row.value.deserializer"
+           i18n-title title="Transcripts in this format can be uploaded"
+           src="{{imagesLocation+'/upload.svg'}}">
+      <img *ngIf="row.value.serializer"
+           i18n-title title="Transcripts and fragments can be exported in this format"
+           src="{{imagesLocation+'/download.svg'}}">
+    </span>
+    <span class="buttons">
+      <lib-link href="{{'admin/serialization?mimetype='+row.value.mimeType}}"
+                i18n-title title="Configuration"
+                img="wrench.svg" icon="🔧"
+                ></lib-link>
+      <lib-button action="delete"
+                  (press)="uninstall(row.value.mimeType);"
+                  [processing]="row.value._deleting"
+                  i18n-title title="Uninstall"></lib-button>
+    </span>
+  </div>
+</div>

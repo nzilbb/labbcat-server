@@ -137,7 +137,9 @@ public class Files extends APIRequestHandler { // TODO unit test
           } catch(Exception x) {
             contentType.accept("text/plain;charset=UTF-8");
             httpStatus.accept(SC_INTERNAL_SERVER_ERROR);
-            out.write(localize("Could not get file for {0}: {1}", transcriptId, x.toString()).getBytes()); // TODO i18n
+            out.write(localize(
+                        "Could not get file for {0}: {1}",
+                        transcriptId, x.toString()).getBytes());
             return;
           }
         } // next ID
@@ -149,7 +151,7 @@ public class Files extends APIRequestHandler { // TODO unit test
           return;
         } else if (files.size() == 1) { // one file only
           // don't zip a single file, just return the file
-          // TODO if mimeType is blank try to guess it from the existension
+          // TODO if mimeType is blank try to guess it from the extension
           contentType.accept(mimeType);
           File file = files.firstElement();
           fileName.accept(file.getName());               

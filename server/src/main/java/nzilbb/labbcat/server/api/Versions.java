@@ -1,5 +1,5 @@
 //
-// Copyright 2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2025-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import javax.json.Json;
@@ -64,7 +65,7 @@ import nzilbb.util.IO;
  * @author Robert Fromont
  */
 public class Versions extends APIRequestHandler {
-  
+
   /** Constructor */
   public Versions() {}
   
@@ -197,6 +198,12 @@ public class Versions extends APIRequestHandler {
           sql.close();
         }
         jsonOut.writeEnd(); // Layer Managers
+
+        String dataVersion = store.getSystemAttribute("dataVersion");
+        if (dataVersion == null) dataVersion = "";
+        jsonOut.writeStartObject("Data");
+        jsonOut.write("dataVersion", dataVersion);
+        jsonOut.writeEnd(); // Data
         
         endSuccessResult(jsonOut, null);
       } finally {

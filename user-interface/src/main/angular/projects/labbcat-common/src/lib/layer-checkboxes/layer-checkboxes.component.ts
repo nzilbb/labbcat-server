@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import { Inject } from '@angular/core';
 
 import { LabbcatService } from '../labbcat.service';
@@ -100,6 +100,9 @@ export class LayerCheckboxesComponent implements OnInit {
     scopeCount = 0;
     categorySelections: any;
 
+    /** Did a change to selected layers originate from a checkbox click? */
+    fromCheckbox = false;
+
     constructor(
         private labbcatService: LabbcatService,
         @Inject('environment') private environment
@@ -128,6 +131,13 @@ export class LayerCheckboxesComponent implements OnInit {
         if (!this.verticalPeersUnderline) this.verticalPeersUnderline = {};
     }
 
+    ngOnChanges(): void {
+        if (!this.fromCheckbox) {
+            this.processSchema();
+        }
+        this.fromCheckbox = false;
+    }
+
     loadSchema(): void {
         this.labbcatService.labbcat.getSchema((schema, errors, messages) => {
             this.schema = schema;
@@ -141,7 +151,7 @@ export class LayerCheckboxesComponent implements OnInit {
         this.phraseLayers = [];
         this.wordLayers = [];
         this.segmentLayers = [];
-        this.categorySelections = {};
+        this.categorySelections = this.categorySelections || {};
         this.displayIcons = JSON.parse(sessionStorage.getItem("displayLayerIcons")) ??
             (typeof this.displayIcons == "string" ? this.displayIcons === "true" : this.displayIcons) ??
             true;
@@ -155,13 +165,15 @@ export class LayerCheckboxesComponent implements OnInit {
 
         // add category selectors in defined order
         for (let c in this.schema.categories) {
-            if (c.startsWith("participant_")) { // participant attribute category
-                if (this.participant) this.categorySelections[c] = false;
-            } else if (c.startsWith("transcript_")) {  // transcript attribute category
-                if (this.transcript) this.categorySelections[c] = false;
-            } else  { // temporal layer category/project
-                if (this.span || this.phrase || this.word) {
-                     this.categorySelections[c] = false;
+            if (!this.categorySelections.hasOwnProperty(c)) {
+                if (c.startsWith("participant_")) { // participant attribute category
+                    if (this.participant) this.categorySelections[c] = false;
+                } else if (c.startsWith("transcript_")) {  // transcript attribute category
+                    if (this.transcript) this.categorySelections[c] = false;
+                } else  { // temporal layer category/project
+                    if (this.span || this.phrase || this.word) {
+                        this.categorySelections[c] = false;
+                    }
                 }
             }
 
@@ -174,6 +186,8 @@ export class LayerCheckboxesComponent implements OnInit {
                 if (layer.category) {
                     this.categorySelections[layer.category] = true;
                 }
+            } else {
+                layer._selected = false;
             }
             // fill in missing attribute hints
             if (layer.id == "participant") layer.hint = "Participant";
@@ -289,6 +303,7 @@ export class LayerCheckboxesComponent implements OnInit {
             this.selected = this.selected.filter(l => l != layerId); // remove it
         }
         this.selectedChange.emit(this.selected);
+        this.fromCheckbox = true;
     }
     handleInterpretedRaw(layerId:string): void {
         if (!this.disabled || !this.disabled.includes(layerId)) {

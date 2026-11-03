@@ -1,0 +1,133 @@
+#header {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+#defaults {
+}
+#buttons {
+    width: 50%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-end;
+}
+#drag-drop {
+    width: 95vw;
+    min-height: 300px;
+    border: 2px #DEE6EF dashed;
+    text-align: center;
+}
+#drag-drop.processing-entries {
+    cursor: wait;
+}
+div#drag-drop:hover, div.hover {
+    border: 2px #777777 dashed;
+}
+div#drag-drop.dragover {
+    border: 2px var(--theme-block-color) dashed;
+}
+div.fragment-batch {
+    width: 100%;
+    padding: 0px;
+    text-align: left;
+}
+
+div.fragment-batch .fragment-entry {
+    display: flex;
+    flex-direction: row;
+    height: 23px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.fragment-entry span.header {
+}
+.fragment-entry .entry-selector.header {
+    text-align: center;
+}
+.fragment-entry span {
+    text-align: center;
+}
+.fragment-entry span.entry-selector {
+    width: 3%;
+    text-align: left;
+    padding-left: 0px;
+}
+.fragment-entry span.fragment-name {
+    width: 45%;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 10px;
+    overflow: hidden;
+}
+span.fragment-name img {
+    width: 16px;
+}
+.fragment-entry span.status {
+    vertical-align: middle;
+    width: 26%;
+    padding-left: 10px;
+    overflow: hidden;
+}
+.fragment-entry progress, .fragment-entry .progress {
+    vertical-align: middle;
+    max-width: 26%;
+}
+
+.fragment-entry div.buttons {
+    width: 5%;
+    margin-left: 10px;
+}
+span.buttons > button {
+    height: 20px;
+    min-height: 20px;
+    width: 20px;
+    min-width: 20px;
+    padding: 0px;
+    vertical-align: center;
+}
+span.buttons > button > img {
+    height: 15px;
+    width: 15px;
+}
+
+details[open] .abridged-error {
+    display: none;
+}
+
+.details {
+    display: flex;
+    flex-direction: row;
+}
+.parameters {
+    animation-name: roll-down;
+    animation-duration: 2s;
+    display: block;
+    margin-left: 10px;
+    padding-top: 1px;
+    width: fit-content;
+}
+
+.unabridged-error {
+    vertical-align: top;
+    white-space: pre-wrap;
+}
+.controls {
+    text-align: right;
+}
+
+.error {
+    color: var(--theme-error-color);
+}
+#always-visible-buttons {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 6;
+}
+.deselected {
+    opacity: 0.33;
+}

@@ -186,7 +186,9 @@ public class Task extends APIRequestHandler {
     model = model.add("who", task.getWho());
     model = model.add("creationTime", iso.format(task.getCreationTime()));
     if (task.getLastException() != null) {
-      model = model.add("lastException", ""+task.getLastException());
+      model = model.add("lastException", task.getLastException().toString()
+                        // if it's a generic exception, no need to include the class name
+                        .replaceAll("^java.lang.Exception: ",""));
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       task.getLastException().printStackTrace(pw);

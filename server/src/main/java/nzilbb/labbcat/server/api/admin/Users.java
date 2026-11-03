@@ -34,8 +34,6 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.stream.JsonGenerator;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
 import nzilbb.labbcat.server.api.TableServletBase;
 import nzilbb.labbcat.server.api.RequiredRole;
 

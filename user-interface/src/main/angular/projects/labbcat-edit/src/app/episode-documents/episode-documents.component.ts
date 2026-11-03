@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { EditComponent } from '../edit-component';
 import { MessageService, LabbcatService, MediaFile } from 'labbcat-common';
-
+// TODO URLs are incorrectly encoded
 @Component({
   selector: 'app-episode-documents',
   templateUrl: './episode-documents.component.html',

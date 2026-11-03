@@ -1624,7 +1624,7 @@ export class TranscriptComponent implements OnInit {
     /** Export utterance audio */
     utteranceAudio(utterance : Annotation) : boolean {
         const transcriptIdForUrl = encodeURIComponent(this.transcript.id);
-        const url = `${this.baseUrl}soundfragment?id=${transcriptIdForUrl}&start=${utterance.start.offset}&end=${utterance.end.offset}`;
+        const url = `${this.baseUrl}api/media/fragments?id=${transcriptIdForUrl}&start=${utterance.start.offset}&end=${utterance.end.offset}`;
         document.location = url;
         return false;
     }    
@@ -1742,7 +1742,7 @@ export class TranscriptComponent implements OnInit {
             }
         }).then((authorization: string)=>{ // getAuthorization...
             const transcriptIdForUrl = encodeURIComponent(this.transcript.id);
-            const audioUrl = this.baseUrl+"soundfragment"
+            const audioUrl = this.baseUrl+"api/media/fragments"
                 +"?id="+transcriptIdForUrl
                 +"&start="+utterance.start.offset
                 +"&end="+utterance.end.offset;
@@ -1777,12 +1777,12 @@ export class TranscriptComponent implements OnInit {
                 .replace(/[^a-zA-Z0-9]+/g,"_") // Praat isn't inclusive about object names
                 +("__"+utterance.start.offset).replace(".","_")
                 +("_"+utterance.end.offset).replace(".","_");
-            const audioUrl = this.baseUrl+"soundfragment"
+            const audioUrl = this.baseUrl+"api/media/fragments"
                 +"?id="+transcriptIdForUrl
                 +"&start="+utterance.start.offset
                 +"&end="+utterance.end.offset;
             this.textGridUrl = this.baseUrl
-                +"serialize/fragment?mimeType=text/praat-textgrid"
+                +"api/serialize/fragments?mimeType=text/praat-textgrid"
                 +"&id="+transcriptIdForUrl
                 +"&layerId="+this.schema.utteranceLayerId
                 +"&layerId="+this.schema.wordLayerId
@@ -1835,12 +1835,12 @@ export class TranscriptComponent implements OnInit {
                 .replace(" ","_")
                 +("__"+firstUtterance.start.offset).replace(".","_")
                 +("_"+lastUtterance.end.offset).replace(".","_");
-            const audioUrl = this.baseUrl+"soundfragment"
+            const audioUrl = this.baseUrl+"api/media/fragments"
                 +"?id="+transcriptIdForUrl
                 +"&start="+firstUtterance.start.offset
                 +"&end="+lastUtterance.end.offset;
             this.textGridUrl = this.baseUrl
-                +"serialize/fragment?mimeType=text/praat-textgrid"
+                +"api/serialize/fragment?mimeType=text/praat-textgrid"
                 +"&id="+transcriptIdForUrl
                 +"&layerId="+this.schema.utteranceLayerId
                 +"&layerId="+this.schema.wordLayerId
@@ -1887,7 +1887,7 @@ export class TranscriptComponent implements OnInit {
     praatImportChanges(): void {
         if (this.user.roles.includes("edit")) {
             this.getAuthorization().then((authorization: string)=>{
-                const uploadUrl = this.baseUrl+"edit/uploadFragment";
+                const uploadUrl = this.baseUrl+"api/edit/fragment/upload";
                 this.praatService.upload(
                     [ // script
                         "select TextGrid "+this.praatUtteranceName,
@@ -1944,7 +1944,7 @@ export class TranscriptComponent implements OnInit {
         this.router.navigate(["search"], {
             queryParams: {
                 transcript_expression: "['" + this.id + "'].includes(id)",
-                transcripts: this.id
+                transcripts: "individual selections"
             }
         });
     }
@@ -1960,7 +1960,7 @@ export class TranscriptComponent implements OnInit {
         this.router.navigate(["search"], {
             queryParams: {
                 participant_expression: "['" + participant + "'].includes(id)",
-                participants: participant
+                participants: "individual selections"
             }
         });
     }

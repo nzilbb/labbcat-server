@@ -1,0 +1,25 @@
+<h2 id="title"><span i18n="Task TASK NAME">Task:</span> {{task_name}}</h2>
+<h3 id="title"><span i18n="Validation script for ATTRIBUTE-NAME">Validation script for</span> {{attribute}}</h3>
+<lib-wait *ngIf="updating"></lib-wait>
+<div class="validation">
+  <div class="script">
+<pre><span class="comment">/**
+ * Function to validate the value entered by the participant.
+ * &#64;param value The value the participant entered for the field.
+ * &#64;param isValid The function to call if value is valid.    
+ * &#64;param isInvalid The function to call, with a message as an argument, if value is not valid.
+ *   
+ * Call isValid() if the value is valid, or isInvalid(message) if not.
+ */</span>
+<span class="keyword">function</span> validate(value, isValid, isInvalid) &#123;
+     <span class="keyword">const</span> field = <span class="string">"{{scope}}_{{attribute}}"</span>;</pre>
+<div id="script"></div>
+<pre>&#125;</pre>
+  </div>
+  <div class="buttons">
+    <lib-button action="save" [processing]="updating"
+                (press)="updateScript();"
+                *ngIf="changed"
+                i18n-title title="Save script"></lib-button>
+  </div>
+</div>

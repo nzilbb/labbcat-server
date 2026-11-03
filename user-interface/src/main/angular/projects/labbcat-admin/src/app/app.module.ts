@@ -26,10 +26,20 @@ import { AdminAnnotatorExtComponent } from './admin-annotator-ext/admin-annotato
 import { AdminUsersComponent } from './admin-users/admin-users.component';
 import { AdminChangePasswordComponent } from './admin-change-password/admin-change-password.component';
 import { AdminLayersComponent } from './admin-layers/admin-layers.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { AdminLayerLabelsComponent } from './admin-layer-labels/admin-layer-labels.component';
 import { AdminAttributesComponent } from './admin-attributes/admin-attributes.component';
 import { AdminCategoriesComponent } from './admin-categories/admin-categories.component';
 import { AdminAgreementComponent } from './admin-agreement/admin-agreement.component';
+import { AdminFormattersComponent } from './admin-formatters/admin-formatters.component';
+import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
+import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
+import { AdminTaskResourcesComponent } from './admin-task-resources/admin-task-resources.component';
+import { AdminTaskAttributesComponent } from './admin-task-attributes/admin-task-attributes.component';
+import { AdminTaskAttributeOptionsComponent } from './admin-task-attribute-options/admin-task-attribute-options.component';
+import { AdminTaskAttributeValidationComponent } from './admin-task-attribute-validation/admin-task-attribute-validation.component';
+import { AdminTaskRemindersComponent } from './admin-task-reminders/admin-task-reminders.component';
+import { ActivityComponent } from './activity/activity.component';
 
 @NgModule({
     declarations: [
@@ -54,7 +64,17 @@ import { AdminAgreementComponent } from './admin-agreement/admin-agreement.compo
         AdminLayerLabelsComponent,
         AdminAttributesComponent,
         AdminCategoriesComponent,
-        AdminAgreementComponent
+        AdminDashboardComponent,
+        AdminAgreementComponent,
+        AdminFormattersComponent,
+        AdminUpgradeComponent,
+        AdminTasksComponent,
+        AdminTaskResourcesComponent,
+        AdminTaskAttributesComponent,
+        AdminTaskAttributeOptionsComponent,
+        AdminTaskAttributeValidationComponent,
+        AdminTaskRemindersComponent,
+        ActivityComponent
     ],
     imports: [
         BrowserModule,
@@ -97,7 +117,23 @@ import { AdminAgreementComponent } from './admin-agreement/admin-agreement.compo
             { path: 'admin/layers/:scope', component: AdminLayersComponent},
             { path: 'admin/attributes/:scope', component: AdminAttributesComponent},
             { path: 'admin/categories/:scope', component: AdminCategoriesComponent},
+            { path: 'admin/dashboard/:scope', component: AdminDashboardComponent,
+              canDeactivate: [PendingChangesGuard]},
             { path: 'admin/agreement', component: AdminAgreementComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'admin/formatters', component: AdminFormattersComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'admin/upgrade', component: AdminUpgradeComponent},
+            { path: 'admin/tasks', component: AdminTasksComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'admin/task/resources/:task_id', component: AdminTaskResourcesComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'admin/task/attributes/:task_id/:scope', component: AdminTaskAttributesComponent},
+            { path: 'admin/task/options/:task_id/:scope/:attribute', component: AdminTaskAttributeOptionsComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'admin/task/validation/:task_id/:scope/:attribute', component: AdminTaskAttributeValidationComponent,
+              canDeactivate: [PendingChangesGuard]},
+            { path: 'admin/task/reminders/:task_id', component: AdminTaskRemindersComponent,
               canDeactivate: [PendingChangesGuard]},
         ]), // TODO add { path: '**', component: PageNotFoundComponent }
         FormsModule,

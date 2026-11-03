@@ -26,9 +26,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Vector;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import nzilbb.labbcat.server.db.SqlGraphStore;
 import nzilbb.labbcat.server.db.StoreCache;
@@ -66,7 +68,7 @@ public class Task extends Thread implements MonitorableTask {
   /** Cancels the task. */
   public void cancel() {
     if (!bCancelling) {
-      setStatus("Cancelling...");
+      if (bRunning) setStatus("Cancelling...");
       bCancelling = true;
     }
   }
@@ -80,7 +82,18 @@ public class Task extends Thread implements MonitorableTask {
   public boolean getRunning() {
     return bRunning;
   }
-    
+
+  /**
+   * Listeners for status updates.
+   * @see #getStatusObservers()
+   */
+  protected List<Consumer<String>> statusObservers = new Vector<Consumer<String>>();
+  /**
+   * Getter for {@link #statusObservers}: Listeners for status updates.
+   * @return Listeners for status updates.
+   */
+  public List<Consumer<String>> getStatusObservers() { return statusObservers; }
+  
   private String sStatus = "Initialising... ";
   /**
    * The current status of the thread.
@@ -93,6 +106,7 @@ public class Task extends Thread implements MonitorableTask {
    */
   public void setStatus(String sMessage) {
     sStatus = sMessage;
+    for (Consumer<String> observer : statusObservers) observer.accept(sMessage);
     try {
       log.append(logTimeFormat.format(new Date()) + "\t" + sMessage + "\n");
       // log too big?
