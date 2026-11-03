@@ -22,3 +22,10 @@ li:hover lib-small-button.edit {
 .empty-corpus {
     font-style: italic;
 }
+
+ul.episodes li {
+    list-style-type: '🗀 '; 
+}
+ul.episodes li.empty-corpus {
+    list-style-type: none; 
+}
