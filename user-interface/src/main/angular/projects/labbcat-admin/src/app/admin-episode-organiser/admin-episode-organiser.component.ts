@@ -58,8 +58,10 @@ export class AdminEpisodeOrganiserComponent extends AdminComponent implements On
             alert("Episode name cannot be blank.");
             return;
         }
+        episode._saving = true;
         this.labbcatService.labbcat.updateEpisode(
             episode.episode_id, episode.name, episode.corpus, (updated, errors, messages) => {
+                episode._saving = false;
                 if (errors) errors.forEach(m => this.messageService.error(m));
                 if (messages) messages.forEach(m => this.messageService.info(m));
                 if (updated) {

@@ -36,7 +36,7 @@
                    (keyup.Enter)="saveEpisode(episode)"
                    appAutofocus="select">
             <lib-small-button *ngIf="episode._changed"
-                              [disabled]="!episode.name"
+                              [disabled]="!episode.name || episode._saving"
                               i18n-title title="Save episode name"
                               class="save"
                               img="save.svg" icon="💾"
