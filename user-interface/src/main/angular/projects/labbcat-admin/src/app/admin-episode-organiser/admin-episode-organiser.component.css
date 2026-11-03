@@ -8,6 +8,7 @@ li {
 }
 
 lib-small-button.edit {
+    position: absolute; /* otherwise line height changes, making the list jittery */
     display: none;
 }
 li:hover lib-small-button.edit {
@@ -15,9 +16,6 @@ li:hover lib-small-button.edit {
 }
 .episode-name {
     user-select: none;
-    cursor: move;
-    position: relative;
-    z-index: 1;
 }
 .empty-corpus {
     font-style: italic;
