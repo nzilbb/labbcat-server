@@ -17,6 +17,7 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 export class MatchesComponent implements OnInit { 
     @ViewChild('form', {static: false}) form: ElementRef;
     @ViewChild('todo', {static: false}) todo: ElementRef;
+    @ViewChild('display_export_names', {static: false}) displayExportNamesElement: ElementRef;
     @ViewChild('generate_layer', {static: false}) generateLayer: ElementRef;
     @ViewChild('mimetype', {static: false}) selectMimeTypeElement: ElementRef;
     name: string;
@@ -331,6 +332,12 @@ export class MatchesComponent implements OnInit {
     toggleExportNames(): void {
         this.displayExportNames = !this.displayExportNames;
         sessionStorage.setItem("displayCSVExportNames", JSON.stringify(this.displayExportNames));
+    }
+    // triggered by click of "Show attribute prefixes"
+    updateExportNames(displayAttributePrefixes: boolean): void {
+        if (this.displayExportNames) {
+            this.displayExportNamesElement.nativeElement.indeterminate = !displayAttributePrefixes;
+        }
     }
 
     serializationOptions(): void {

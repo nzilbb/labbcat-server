@@ -153,6 +153,7 @@
       <legend i18n>CSV columns</legend>
       <div class="csv-checkboxes">
         <div class="csv-options-wrapper">
+          <!-- TODO indenting -->
         <fieldset class="csv-options">
           <legend i18n="csv options title" class="header">Fields</legend>
           <label i18n-title title="Title of this LaBB-CAT database - always exported">
@@ -272,10 +273,11 @@
             <span *ngIf="displayExportNames" i18n="csv options">After Match</span>
           </label>
         </fieldset>
+          <!-- end TODO indenting -->
           <fieldset class="csv-controls">
             <label i18n-title title="Display field names as they appear in the exported CSV">
-              <input type="checkbox" name="displayExportNames"
-                [checked]="displayExportNames" (change)="toggleExportNames()">
+              <input #display_export_names type="checkbox" name="displayExportNames"
+                [checked]="displayExportNames" (click)="toggleExportNames()">
               <span i18n>Show export names</span>
             </label>
           </fieldset>
@@ -288,6 +290,7 @@
           span="true" phrase="true" word="true" segment="true"
           excludeMainParticipant="true" excludeTurn="true" excludeUtterance="true"
           includeAnchorSharing="true" excludeOptionsForLayerId="{{task.targetLayer}}"
+          (attributePrefixesChange)="updateExportNames($event)"
           selected="{{selectedLayers}}"></lib-layer-checkboxes>
       </div>
     </fieldset>
