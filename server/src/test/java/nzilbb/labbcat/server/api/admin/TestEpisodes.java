@@ -57,6 +57,9 @@ public class TestEpisodes {
   static String username = "labbcat";
   static String password = "labbcat";
   static LabbcatAdmin l;
+  static String readonly_username = "readonly";
+  static String readonly_password = "labbcat";
+  static LabbcatAdmin ro;
   static String transcriptName = "nzilbb.labbcat.server.test.txt";
   static String episodeName = "server-test";
   static String corpus = null;
@@ -68,6 +71,9 @@ public class TestEpisodes {
     try {
       l = new LabbcatAdmin(labbcatUrl, username, password);
       l.setBatchMode(true);
+      ro = new LabbcatAdmin(labbcatUrl, readonly_username, readonly_password);
+      ro.setBatchMode(true);
+      
       corpus = l.getCorpusIds()[0];
       otherCorpus = l.getCorpusIds()[1];
     
@@ -167,7 +173,82 @@ public class TestEpisodes {
       assertTrue("Episode is in corpus", episode.isPresent());
       assertEquals("Episode corpus is correct", corpus, episode.get().getCorpus());
   }  
+
+  /** Ensure functions only accept valid parameters. */
+  @Test public void validation() throws StoreException, PermissionException {
+
+    // a nonexistent corpus just returns an empty list
+    Episode[] episodes = l.readEpisodes("nonexistent corpus");
+    assertEquals("Can't read episodes of invalid corpus",
+                 0, episodes.length);
+
+    if (episode_id < 0) { // get episode_id
+      episodes = l.readEpisodes(corpus);
+      Optional<Episode> episode = Arrays.stream(episodes)
+        .filter(e->e.getName().equals(episodeName))
+        .findAny();
+      episode_id = episode.get().getEpisodeId();
+    }
+    
+    try {
+      l.updateEpisode(
+        new Episode().setEpisodeId(episode_id)
+        .setName("") // blank name
+        .setCorpus(corpus));
+      fail("Can set episode name to empty string");
+    } catch (ResponseException x) {
+      System.out.println(""+x);
+    }
+    
+    try {
+      l.updateEpisode(
+        new Episode().setEpisodeId(episode_id)
+        .setName(episodeName)
+        .setCorpus(""));
+      fail("Can set episode corpus to blank string");
+    } catch (ResponseException x) {
+      System.out.println(""+x);
+    }
+    try {
+      l.updateEpisode(
+        new Episode().setEpisodeId(episode_id)
+        .setName(episodeName)
+        .setCorpus("nonexistent corpus"));
+      fail("Can set episode corpus to nonexistent corpus");
+    } catch (ResponseException x) {
+      System.out.println(""+x);
+    }
+  }
   
+  /** Ensure only admin users can access functions. */
+  @Test public void adminAccessEnforced() throws StoreException, PermissionException {
+    
+    try {
+      Episode[] episodes = ro.readEpisodes(corpus);
+      fail("Can't read episodes as non-admin user");
+    } catch(ResponseException x) {
+      System.out.println(""+x);
+    }
+    
+    if (episode_id < 0) { // get episode_id
+      Episode[] episodes = l.readEpisodes(corpus);
+      Optional<Episode> episode = Arrays.stream(episodes)
+        .filter(e->e.getName().equals(episodeName))
+        .findAny();
+      episode_id = episode.get().getEpisodeId();
+    }
+    
+    try {
+      ro.updateEpisode(
+        new Episode().setEpisodeId(episode_id)
+        .setName(episodeName)
+        .setCorpus(corpus));
+      fail("Can't update episode as non-admin user");
+    } catch(ResponseException x) {
+      System.out.println(""+x);
+    }
+  }
+
   /**
    * Directory for text files.
    * @see #getDir()

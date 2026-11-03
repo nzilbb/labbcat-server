@@ -348,7 +348,7 @@ public class Episodes extends APIRequestHandler {
       } // close rs
       sql.setString(1, newCorpus);
       try (ResultSet rs = sql.executeQuery()) {
-        if (!rs.next()) return localize("Invalid ID: {0}", oldCorpus);
+        if (!rs.next()) return localize("Invalid ID: {0}", newCorpus);
         new_corpus_id = rs.getInt("corpus_id");
       } // close rs
     } // close sql
