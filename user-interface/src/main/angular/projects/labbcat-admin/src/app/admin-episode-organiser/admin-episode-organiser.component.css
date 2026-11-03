@@ -1,0 +1,24 @@
+summary {
+    cursor: pointer;
+    user-select: none;
+}
+li {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+lib-small-button.edit {
+    display: none;
+}
+li:hover lib-small-button.edit {
+    display: revert;
+}
+.episode-name {
+    user-select: none;
+    cursor: move;
+    position: relative;
+    z-index: 1;
+}
+.empty-corpus {
+    font-style: italic;
+}

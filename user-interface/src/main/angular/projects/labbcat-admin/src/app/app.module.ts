@@ -10,6 +10,7 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { LabbcatCommonModule, TaskComponent, PendingChangesGuard, AboutComponent, LoginComponent } from 'labbcat-common';
 import { AdminCorporaComponent } from './admin-corpora/admin-corpora.component';
+import { AdminEpisodeOrganiserComponent } from './admin-episode-organiser/admin-episode-organiser.component';
 import { AdminMenuComponent } from './admin-menu/admin-menu.component';
 import { AdminMenuUtilitiesComponent } from './admin-menu-utilities/admin-menu-utilities.component';
 import { AdminProjectsComponent } from './admin-projects/admin-projects.component';
@@ -47,6 +48,7 @@ import { ActivityComponent } from './activity/activity.component';
     declarations: [
         AppComponent,
         AdminCorporaComponent,
+        AdminEpisodeOrganiserComponent,
         AdminMenuComponent,
         AdminMenuUtilitiesComponent,
         AdminProjectsComponent,
@@ -92,6 +94,8 @@ import { ActivityComponent } from './activity/activity.component';
             { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/corpora', component: AdminCorporaComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/episodes', component: AdminEpisodeOrganiserComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/projects', component: AdminProjectsComponent,
               canDeactivate: [PendingChangesGuard] },

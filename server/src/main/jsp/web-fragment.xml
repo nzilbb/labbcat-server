@@ -166,6 +166,9 @@
   <servlet><servlet-name>api/admin/corpora.jsp</servlet-name><jsp-file>/jsp/api/admin/corpora.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/corpora.jsp</servlet-name><url-pattern>/api/admin/corpora/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>api/admin/episodes.jsp</servlet-name><jsp-file>/jsp/api/admin/episodes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/episodes.jsp</servlet-name><url-pattern>/api/admin/episodes/*</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>api/admin/mediatracks.jsp</servlet-name><jsp-file>/jsp/api/admin/mediatracks.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/mediatracks.jsp</servlet-name><url-pattern>/api/admin/mediatracks/*</url-pattern></servlet-mapping>
   
