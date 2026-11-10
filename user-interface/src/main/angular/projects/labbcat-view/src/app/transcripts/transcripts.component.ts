@@ -327,11 +327,8 @@ export class TranscriptsComponent implements OnInit {
     loadingList = false;
     /** List transcripts that match the filters */
     listTranscripts(): void {
-        this.query = this.transcriptQuery; // if any
-        this.queryDescription = this.transcriptDescription;
-        if (this.query) { // page loaded with transcript_expression param
-            this.transcriptQuery = "";
-            this.transcriptDescription = "";
+        let queryCanBeTranslatedToFilterValues = true; 
+        if (this.transcriptQuery) { // page loaded with transcript_expression param
             const queryItems = this.query.split(" && ");
             for (let item of queryItems) {
                 // all transcripts: clear filters and don't consider further query items
@@ -380,9 +377,18 @@ export class TranscriptsComponent implements OnInit {
                         }
                         continue;
                     }
+                } else { // a pattern not handled by filterValues
+                    // e.g. from partiipant attributes page:
+                    // labels("participant").includes("AP511_MikeThorpe")
+                    queryCanBeTranslatedToFilterValues = false;
+                    break;
                 }
-            }
-        } else {
+            } // next queryItem
+        } // if there's a transcriptQuery
+        
+        if (!queryCanBeTranslatedToFilterValues) {
+        this.query = this.transcriptQuery; // if any
+        this.queryDescription = this.transcriptDescription;
             // TODO indenting
         for (let layer of this.filterLayers) {
             if (layer.id == this.schema.root.id
