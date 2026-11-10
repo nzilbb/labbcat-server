@@ -279,6 +279,12 @@ export class MatchesComponent implements OnInit {
     }
     
     allMatches(): void { // TODO find a way to only load the rest
+        if (this.matchCount > 2000) {
+            if (!confirm("There are " + this.matchCount + " matches." // TODO i18n
+                         +"\nAre you sure you want to show them all?")) {
+                return;
+            }
+        }
         this.allLoading = true;
         // load all the results
         this.matches = [];
