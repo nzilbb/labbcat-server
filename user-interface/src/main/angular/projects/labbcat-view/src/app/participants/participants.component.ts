@@ -140,6 +140,8 @@ export class ParticipantsComponent implements OnInit {
         /[?&](to)=([^&]*)/,
         /[?&](transcript_expression)=([^&]*)/,
         /[?&](transcripts)=([^&]*)/,
+//        /[?&](participant_expression)=([^&]*)/,
+//        /[?&](participants)=([^&]*)/,
         /[?&](searchJson)=([^&]*)/,
         /[?&](mainParticipantOnly)=([^&]*)/,
         /[?&](onlyAligned)=([^&]*)/,
@@ -307,13 +309,8 @@ export class ParticipantsComponent implements OnInit {
     loadingList = false;
     /** List participants that match the filters */
     listParticipants(): void {
-        // this.query = this.participantQuery || this.transcriptQuery; // if any
-        this.query = this.participantQuery; // if any
-        // this.queryDescription = this.participantDescription || this.transcriptDescription;
-        this.queryDescription = this.participantDescription;
-        if (this.query) { // page loaded with participant_expression param
-            this.participantQuery = "";
-            this.participantDescription = "";
+        let queryCanBeTranslatedToFilterValues = true; 
+        if (this.participantQuery) { // page loaded with participant_expression param
             const queryItems = this.query.split(" && ");
             for (let item of queryItems) {
                 // all participants: clear filters and don't consider further query items
@@ -375,10 +372,22 @@ export class ParticipantsComponent implements OnInit {
                         }
                         continue;
                     }
+                } else { // a pattern not handled by filterValues
+                    // e.g. from trascript attributes page:
+                    // labels("transcript").includes("AP511_MikeThorpe.eaf")
+                    queryCanBeTranslatedToFilterValues = false;
+                    break;
                 }
+            } // next queryItem
+            if (queryCanBeTranslatedToFilterValues) {
+                this.participantQuery = "";
+                this.participantDescription = "";
             }
-        } else {
-            // TODO indenting
+        } // if there's a participantQuery
+        if (!queryCanBeTranslatedToFilterValues) {
+            this.query = this.participantQuery; // if any
+            this.queryDescription = this.participantDescription;
+        // TODO indenting
         for (let layer of this.filterLayers) {
             if (layer.id == this.schema.participantLayerId
                 && this.filterValues[layer.id][0]) {
