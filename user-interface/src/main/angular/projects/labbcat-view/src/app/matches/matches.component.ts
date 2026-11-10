@@ -118,7 +118,10 @@ export class MatchesComponent implements OnInit {
     }
     readTaskStatus(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
-            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (errors) {
+                this.readingMatches = false;
+                errors.forEach(m => this.messageService.error(m));
+            }
             if (messages) messages.forEach(m => this.messageService.info(m));
             this.task = task;
             this.status = task.status;
