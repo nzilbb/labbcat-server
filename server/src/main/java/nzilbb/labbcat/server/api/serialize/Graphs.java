@@ -360,14 +360,18 @@ public class Graphs extends APIRequestHandler { // TODO unit test
               }
             } // run
           };
-        task.setStore(store);
-        if (context.getUser() != null) {	
-          task.setWho(context.getUser());
-        } else {
-          task.setWho(context.getUserHost());
+        try {
+          task.setStore(store);
+          if (context.getUser() != null) {	
+            task.setWho(context.getUser());
+          } else {
+            task.setWho(context.getUserHost());
+          }
+          task.start();
+          IO.Pump(inStream, out);
+        } finally {
+          task.release();
         }
-        task.start();
-        IO.Pump(inStream, out);
         
       } finally {
         cacheStore(store);
