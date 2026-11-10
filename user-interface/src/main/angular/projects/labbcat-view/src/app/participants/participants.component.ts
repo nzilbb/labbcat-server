@@ -140,8 +140,6 @@ export class ParticipantsComponent implements OnInit {
         /[?&](to)=([^&]*)/,
         /[?&](transcript_expression)=([^&]*)/,
         /[?&](transcripts)=([^&]*)/,
-//        /[?&](participant_expression)=([^&]*)/,
-//        /[?&](participants)=([^&]*)/,
         /[?&](searchJson)=([^&]*)/,
         /[?&](mainParticipantOnly)=([^&]*)/,
         /[?&](onlyAligned)=([^&]*)/,
@@ -384,192 +382,198 @@ export class ParticipantsComponent implements OnInit {
                 this.participantDescription = "";
             }
         } // if there's a participantQuery
+        
         if (!queryCanBeTranslatedToFilterValues) {
             this.query = this.participantQuery; // if any
             this.queryDescription = this.participantDescription;
-        // TODO indenting
-        for (let layer of this.filterLayers) {
-            if (layer.id == this.schema.participantLayerId
-                && this.filterValues[layer.id][0]) {
-                // participant layer
-                if (this.query) {
-                    this.query += " && ";
-                    this.queryDescription += ", ";
-                }
-                
-                this.query += "/"+this.esc(this.filterValues[this.schema.participantLayerId][0])
-                    +"/.test(id)";
-                this.queryDescription += "ID matches "
-                    + (this.filterValues[this.schema.participantLayerId][0].length <= 50 ? this.filterValues[this.schema.participantLayerId][0] : this.filterValues[this.schema.participantLayerId][0].slice(0, 49) + "…");
-                
-            } else if (layer.id == "--transcript-count"
-                && this.filterValues[layer.id].length > 0) {
-                
-                // from?
-                if (this.filterValues[layer.id][0]) {
-                    if (this.query) this.query += " && ";
-                    const value = (layer.subtype == "integer"?
-                        parseInt:parseFloat)(this.filterValues[layer.id][0])
-                    this.query += "all('transcript').length >= "+ value;
-                }
-                
-                // to?
-                if (this.filterValues[layer.id][1]) {
-                    if (this.query) this.query += " && ";
+            
+            for (let layer of this.filterLayers) {
+                if (layer.id == this.schema.participantLayerId
+                    && this.filterValues[layer.id][0]) {
+                    // participant layer
+                    if (this.query) {
+                        this.query += " && ";
+                        this.queryDescription += ", ";
+                    }
                     
-                    const value = (layer.subtype == "integer"?
-                        parseInt:parseFloat)(this.filterValues[layer.id][1])
-                    this.query += "all('transcript').length <= "+ value;
-                }
-                
-                if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
-                    this.queryDescription += 
+                    this.query += "/"+this.esc(
+                        this.filterValues[this.schema.participantLayerId][0])
+                        +"/.test(id)";
+                    this.queryDescription += "ID matches "
+                        + (this.filterValues[
+                            this.schema.participantLayerId][0].length <= 50 ?
+                            this.filterValues[this.schema.participantLayerId][0]
+                            : this.filterValues[this.schema.participantLayerId][0].slice(0, 49) + "…");
+                    
+                } else if (layer.id == "--transcript-count"
+                    && this.filterValues[layer.id].length > 0) {
+                    
+                    // from?
+                    if (this.filterValues[layer.id][0]) {
+                        if (this.query) this.query += " && ";
+                        const value = (layer.subtype == "integer"?
+                            parseInt:parseFloat)(this.filterValues[layer.id][0])
+                        this.query += "all('transcript').length >= "+ value;
+                    }
+                    
+                    // to?
+                    if (this.filterValues[layer.id][1]) {
+                        if (this.query) this.query += " && ";
+                        
+                        const value = (layer.subtype == "integer"?
+                            parseInt:parseFloat)(this.filterValues[layer.id][1])
+                        this.query += "all('transcript').length <= "+ value;
+                    }
+                    
+                    if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription += 
                         "Transcript count " + this.filterValues[layer.id][0] // TODO i18n
-                        + "–" + this.filterValues[layer.id][1];
-                } else if (this.filterValues[layer.id][0]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
-                    this.queryDescription +=
+                            + "–" + this.filterValues[layer.id][1];
+                    } else if (this.filterValues[layer.id][0]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription +=
                         "Transcript count ≥ " + this.filterValues[layer.id][0]; // TODO i18n
-                } else if (this.filterValues[layer.id][1]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
-                    this.queryDescription += 
+                    } else if (this.filterValues[layer.id][1]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription += 
                         "Transcript count ≤ " + this.filterValues[layer.id][1]; // TODO i18n
-                }
-                
-            } else if (layer.validLabels && Object.keys(layer.validLabels).length > 0
-                && this.filterValues[layer.id].length > 0) {
-                // select from possible values
-                if (this.query) {
-                    this.query += " && ";
-                    this.queryDescription += ", ";
-                }
-                this.filterValues[layer.id].sort();
-
-                // the value "!" means "a label other than the labels in validLabels"...
-                
-                if (!this.filterValues[layer.id].includes("!")) {
-                    // ordinary positive selection 
-                    this.query += JSON.stringify(this.filterValues[layer.id])
-                        +".includesAny(labels('"+this.esc(layer.id)+"'))";
-                    if (this.filterValues[layer.id].length == 1) {
-                        this.queryDescription += layer.description
-                            + " = " + this.filterValues[layer.id][0];
-                    } else {
-                        this.queryDescription += layer.description
-                            + " in (" + this.filterValues[layer.id].join(",") + ")";
                     }
-                } else { // "!" 'other' selected
-                    // so we *exclude* all values not selected
-                    const labelsToExclude = Object.keys(layer.validLabels)
-                        .filter(l=>!this.filterValues[layer.id].includes(l));
-                    this.query += "!"+JSON.stringify(labelsToExclude)
-                        +".includesAny(labels('"+this.esc(layer.id)+"'))";
-                    if (labelsToExclude.length == 1) {
-                        this.queryDescription += layer.description
-                            + " ≠ " + this.filterValues[layer.id][0];
-                    } else {
-                        this.queryDescription += layer.description
-                            + " not in " + labelsToExclude.join(",").replace(/^,/,"");
+                    
+                } else if (layer.validLabels && Object.keys(layer.validLabels).length > 0
+                    && this.filterValues[layer.id].length > 0) {
+                    // select from possible values
+                    if (this.query) {
+                        this.query += " && ";
+                        this.queryDescription += ", ";
                     }
-                }
-            } else if (layer.type == "number"
-                && this.filterValues[layer.id].length > 1) {
-                
-                // from?
-                if (this.filterValues[layer.id][0]) {
-                    if (this.query) this.query += " && ";
-                    const value = (layer.subtype == "integer"?
-                        parseInt:parseFloat)(this.filterValues[layer.id][0])
-                    this.query += "first('"+this.esc(layer.id)+"').label >= "+ value;
-                }
-                
-                // to?
-                if (this.filterValues[layer.id][1]) {
-                    if (this.query) this.query += " && ";
-                    
-                    const value = (layer.subtype == "integer"?
-                        parseInt:parseFloat)(this.filterValues[layer.id][1])
-                    this.query += "first('"+this.esc(layer.id)+"').label <= "+ value;
-                }
+                    this.filterValues[layer.id].sort();
 
-                if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
-                    this.queryDescription += layer.description
-                        +" " + this.filterValues[layer.id][0]
-                        + "–" + this.filterValues[layer.id][1];
-                } else if (this.filterValues[layer.id][0]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
-                    this.queryDescription += layer.description
-                        +" ≥ " + this.filterValues[layer.id][0];
-                } else if (this.filterValues[layer.id][1]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
-                    this.queryDescription += layer.description
-                        +" ≤ " + this.filterValues[layer.id][1];
-                }
-
-            } else if ((layer.subtype == "date" || layer.subtype == "datetime")
-                && this.filterValues[layer.id].length > 1) {
-                
-                // from?
-                if (this.filterValues[layer.id][0]) {
-                    if (this.query) this.query += " && ";
-                    const value = this.filterValues[layer.id][0];
-                    this.query += "first('"+this.esc(layer.id)+"').label"
-                        +" >= '"+this.esc(value)+"'";
-                    this.queryDescription += layer.description
-                }
-                
-                // to?
-                if (this.filterValues[layer.id][1]) {
-                    if (this.query) this.query += " && ";
+                    // the value "!" means "a label other than the labels in validLabels"...
                     
-                    const value = this.filterValues[layer.id][1];
-                    this.query += "first('"+this.esc(layer.id)+"').label"
-                        +" <= '"+value+" 23:59:59'";
-                    this.queryDescription += layer.description+" ≤ " + value
-                }
-                
-                if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
+                    if (!this.filterValues[layer.id].includes("!")) {
+                        // ordinary positive selection 
+                        this.query += JSON.stringify(this.filterValues[layer.id])
+                            +".includesAny(labels('"+this.esc(layer.id)+"'))";
+                        if (this.filterValues[layer.id].length == 1) {
+                            this.queryDescription += layer.description
+                                + " = " + this.filterValues[layer.id][0];
+                        } else {
+                            this.queryDescription += layer.description
+                                + " in (" + this.filterValues[layer.id].join(",") + ")";
+                        }
+                    } else { // "!" 'other' selected
+                        // so we *exclude* all values not selected
+                        const labelsToExclude = Object.keys(layer.validLabels)
+                            .filter(l=>!this.filterValues[layer.id].includes(l));
+                        this.query += "!"+JSON.stringify(labelsToExclude)
+                            +".includesAny(labels('"+this.esc(layer.id)+"'))";
+                        if (labelsToExclude.length == 1) {
+                            this.queryDescription += layer.description
+                                + " ≠ " + this.filterValues[layer.id][0];
+                        } else {
+                            this.queryDescription += layer.description
+                                + " not in " + labelsToExclude.join(",").replace(/^,/,"");
+                        }
+                    }
+                } else if (layer.type == "number"
+                    && this.filterValues[layer.id].length > 1) {
+                    
+                    // from?
+                    if (this.filterValues[layer.id][0]) {
+                        if (this.query) this.query += " && ";
+                        const value = (layer.subtype == "integer"?
+                            parseInt:parseFloat)(this.filterValues[layer.id][0])
+                        this.query += "first('"+this.esc(layer.id)+"').label >= "+ value;
+                    }
+                    
+                    // to?
+                    if (this.filterValues[layer.id][1]) {
+                        if (this.query) this.query += " && ";
+                        
+                        const value = (layer.subtype == "integer"?
+                            parseInt:parseFloat)(this.filterValues[layer.id][1])
+                        this.query += "first('"+this.esc(layer.id)+"').label <= "+ value;
+                    }
+
+                    if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription += layer.description
+                            +" " + this.filterValues[layer.id][0]
+                            + "–" + this.filterValues[layer.id][1];
+                    } else if (this.filterValues[layer.id][0]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription += layer.description
+                            +" ≥ " + this.filterValues[layer.id][0];
+                    } else if (this.filterValues[layer.id][1]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription += layer.description
+                            +" ≤ " + this.filterValues[layer.id][1];
+                    }
+
+                } else if ((layer.subtype == "date" || layer.subtype == "datetime")
+                    && this.filterValues[layer.id].length > 1) {
+                    
+                    // from?
+                    if (this.filterValues[layer.id][0]) {
+                        if (this.query) this.query += " && ";
+                        const value = this.filterValues[layer.id][0];
+                        this.query += "first('"+this.esc(layer.id)+"').label"
+                            +" >= '"+this.esc(value)+"'";
+                        this.queryDescription += layer.description
+                    }
+                    
+                    // to?
+                    if (this.filterValues[layer.id][1]) {
+                        if (this.query) this.query += " && ";
+                        
+                        const value = this.filterValues[layer.id][1];
+                        this.query += "first('"+this.esc(layer.id)+"').label"
+                            +" <= '"+value+" 23:59:59'";
+                        this.queryDescription += layer.description+" ≤ " + value
+                    }
+                    
+                    if (this.filterValues[layer.id][0] && this.filterValues[layer.id][1]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription += layer.description
+                            +" " + this.filterValues[layer.id][0]
+                            + "–" + this.filterValues[layer.id][1];
+                    } else if (this.filterValues[layer.id][0]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription += layer.description
+                            +" ≥ " + this.filterValues[layer.id][0];
+                    } else if (this.filterValues[layer.id][1]) {
+                        if (this.queryDescription) this.queryDescription += ", ";
+                        this.queryDescription += layer.description
+                            +" ≤ " + this.filterValues[layer.id][1];
+                    }
+                } else if (layer.type == "boolean"
+                    && this.filterValues[layer.id][0]) {
+                    if (this.query) {
+                        this.query += " && ";
+                        this.queryDescription += ", ";
+                    }
+                    
+                    this.query += "first('"+this.esc(layer.id)+"').label = "
+                        + this.filterValues[layer.id][0];
+                    this.queryDescription += (this.filterValues[layer.id][0]=="1"?"":"NOT ")
+                        +layer.description;
+                    
+                } else if (this.filterValues[layer.id][0]) { // assume regexp match
+                    if (this.query) {
+                        this.query += " && ";
+                        this.queryDescription += ", ";
+                    }
+                    
+                    this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/"
+                        +".test(labels('" +this.esc(layer.id)+"'))";
                     this.queryDescription += layer.description
-                        +" " + this.filterValues[layer.id][0]
-                        + "–" + this.filterValues[layer.id][1];
-                } else if (this.filterValues[layer.id][0]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
-                    this.queryDescription += layer.description
-                        +" ≥ " + this.filterValues[layer.id][0];
-                } else if (this.filterValues[layer.id][1]) {
-                    if (this.queryDescription) this.queryDescription += ", ";
-                    this.queryDescription += layer.description
-                        +" ≤ " + this.filterValues[layer.id][1];
+                        +" matches "
+                        + (this.filterValues[layer.id][0].length <= 50 ?
+                            this.filterValues[layer.id][0]
+                            : this.filterValues[layer.id][0].slice(0, 49) + "…");
                 }
-            } else if (layer.type == "boolean"
-                && this.filterValues[layer.id][0]) {
-                if (this.query) {
-                    this.query += " && ";
-                    this.queryDescription += ", ";
-                }
-                
-                this.query += "first('"+this.esc(layer.id)+"').label = "
-                    + this.filterValues[layer.id][0];
-                this.queryDescription += (this.filterValues[layer.id][0]=="1"?"":"NOT ")
-                    +layer.description;
-                
-            } else if (this.filterValues[layer.id][0]) { // assume regexp match
-                if (this.query) {
-                    this.query += " && ";
-                    this.queryDescription += ", ";
-                }
-                
-                this.query += "/"+this.esc(this.filterValues[layer.id][0])+"/"
-                    +".test(labels('" +this.esc(layer.id)+"'))";
-                this.queryDescription += layer.description
-                    +" matches "
-                    + (this.filterValues[layer.id][0].length <= 50 ? this.filterValues[layer.id][0] : this.filterValues[layer.id][0].slice(0, 49) + "…");
-            }
-        } // next filter layer
-            // end TODO indenting
+            } // next filter layer
         }
 
         // change the query string so the user can easily replicate this filter
