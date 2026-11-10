@@ -502,7 +502,7 @@ public class CsvResults implements SearchResults {
             try {
               if (sqlWordIdToSpeakerNumber == null) {
                 sqlWordIdToSpeakerNumber = getConnection().prepareStatement(
-                  "SELECT turn.label FROM annotation_layer_11 turn"
+                  "SELECT turn.label, word.ag_id FROM annotation_layer_11 turn"
                   +" INNER JOIN annotation_layer_0 word"
                   +" ON word.turn_annotation_id = turn.annotation_id"
                   +" WHERE word.annotation_id = ?");
@@ -512,6 +512,7 @@ public class CsvResults implements SearchResults {
               ResultSet rs = sqlWordIdToSpeakerNumber.executeQuery();
               if (rs.next()) {
                 match.setSpeakerNumber(rs.getInt(1));
+                if (match.getGraphId() == null) match.setGraphId(rs.getInt(2));
               }
             } catch(SQLException exception) {
               System.err.println("CsvResults.next: " + exception);
@@ -524,7 +525,8 @@ public class CsvResults implements SearchResults {
               if (sqlWordIdToUtteranceId == null) {
                 sqlWordIdToUtteranceId = getConnection().prepareStatement(
                   "SELECT utterance.annotation_id,"
-                  +" utterance.start_anchor_id, utterance.end_anchor_id"
+                  +" utterance.start_anchor_id, utterance.end_anchor_id,"
+                  +" word.ag_id"
                   +" FROM annotation_layer_12 utterance"
                   +" INNER JOIN annotation_layer_0 word"
                   +" ON word.utterance_annotation_id = utterance.annotation_id"
@@ -537,6 +539,7 @@ public class CsvResults implements SearchResults {
                 match.setDefiningAnnotationUid("em_12_"+rs.getInt(1));
                 if (match.getStartAnchorId() == null) match.setStartAnchorId(rs.getLong(2));
                 if (match.getEndAnchorId() == null) match.setEndAnchorId(rs.getLong(3));
+                if (match.getGraphId() == null) match.setGraphId(rs.getInt(4));
               }
             } catch(SQLException exception) {
               System.err.println("CsvResults.next: " + exception);

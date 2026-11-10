@@ -6952,6 +6952,43 @@
         .send(script);
     }
     
+    /**
+     * Reads a list of episodes for a given corpus.
+     * @see LabbcatAdmin#updateEpisode
+     * @param {string} corpus The name of the corpus.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A list of episode records with the following
+     * attributes:
+     * <dl>
+     *    <dt> episode_id </dt><dd> The database key for the record. </dd>
+     *    <dt> name </dt><dd> The name of the episode. </dd>
+     *    <dt> corpus </dt><dd> The name of the corpus. </dd>
+     *    <dt> transcript_count </dt><dd> The number of transcript in the episode. </dd>
+     * </dl>
+     */
+    readEpisodes(corpus, onResult) {
+      this.createRequest(
+        "episodes", {}, onResult, `${this.baseUrl}api/admin/episodes/${corpus}`)
+        .send();
+    }
+    
+    /**
+     * Updates an existing episode record.
+     * @see LabbcatAdmin#readEpisodes
+     * @param {string} episode_id The name/ID of the role.
+     * @param {string} name The (new) name of the episode.
+     * @param {string} corpus The (new) name of the corpus.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the episode record. 
+     */
+    updateEpisode(episode_id, name, corpus, onResult) {
+      var permission = this.createRequest(
+        "episodes", null, onResult, this.baseUrl+"api/admin/episodes", "PUT")
+          .send(JSON.stringify({
+            episode_id : episode_id,
+            name : name,
+            corpus : corpus}));
+    }
   }
   
   /**

@@ -1,0 +1,49 @@
+<h2 id="title" i18n="page header">Episode Organiser</h2>
+<div class="list corpus-list">
+  <lib-wait *ngIf="!corpora"></lib-wait>
+  <ng-container *ngFor="let corpus of corpora">
+    <details class="corpus" (click)="expandCorpus($event, corpus);" id="{{corpus.corpus_id}}">
+      <summary title="{{corpus.corpus_description}}"
+               id="sumary-{{corpus.corpus_id}}">{{corpus.corpus_name}}</summary>
+      <lib-wait [inSitu]="true" *ngIf="episodes[corpus.corpus_name] == null"></lib-wait>
+      <ul class="episodes">
+        <li *ngIf="episodes[corpus.corpus_name] && episodes[corpus.corpus_name].length == 0"
+            class="empty-corpus"
+            i18n>There are no episodes in this corpus</li>
+        <li *ngFor="let episode of episodes[corpus.corpus_name]">
+          <div *ngIf="!episode._editing">
+            <span class="episode-name">{{episode.name}}</span>
+            <span *ngIf="episode.transcript_count"
+                  class="transcript-count"
+                  i18n-title title="Number of transcripts in episode">
+              ({{episode.transcript_count}}) </span>
+            <lib-small-button action="edit"
+                              i18n-title title="Edit episode"
+                              class="edit"
+                              (press)="episode._editing = true"></lib-small-button>
+          </div>
+          <div *ngIf="episode._editing">
+            <select i18n-title title="Corpus"
+                    [(ngModel)]="episode.corpus"
+                    (change)="episode._changed = true">
+              <option *ngFor="let corpus of corpora">{{corpus.corpus_name}}</option>
+            </select>
+            <input type="text"
+                   i18n-title title="Episode name"
+                   i18n-placeholder placeholder="Name"
+                   [(ngModel)]="episode.name"
+                   (keyup)="episode._changed = true"
+                   (keyup.Enter)="saveEpisode(episode)"
+                   appAutofocus="select">
+            <lib-small-button *ngIf="episode._changed"
+                              [disabled]="!episode.name || episode._saving"
+                              i18n-title title="Save episode name"
+                              class="save"
+                              img="save.svg" icon="💾"
+                              (press)="saveEpisode(episode)"></lib-small-button>
+          </div>
+        </li>
+      </ul>
+    </details>
+  </ng-container>
+</div>

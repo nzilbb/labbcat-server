@@ -104,6 +104,9 @@
   <servlet><servlet-name>api/admin/upgrade.jsp</servlet-name><jsp-file>/jsp/api/admin/upgrade.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/upgrade.jsp</servlet-name><url-pattern>/api/admin/upgrade/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>api/admin/export.jsp</servlet-name><jsp-file>/jsp/api/admin/export.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/export.jsp</servlet-name><url-pattern>/api/admin/export</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>api/systemattributes.jsp</servlet-name><jsp-file>/jsp/api/systemattributes.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/systemattributes.jsp</servlet-name><url-pattern>/api/systemattributes/*</url-pattern></servlet-mapping>
   
@@ -162,6 +165,9 @@
   
   <servlet><servlet-name>api/admin/corpora.jsp</servlet-name><jsp-file>/jsp/api/admin/corpora.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/corpora.jsp</servlet-name><url-pattern>/api/admin/corpora/*</url-pattern></servlet-mapping>
+  
+  <servlet><servlet-name>api/admin/episodes.jsp</servlet-name><jsp-file>/jsp/api/admin/episodes.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/episodes.jsp</servlet-name><url-pattern>/api/admin/episodes/*</url-pattern></servlet-mapping>
   
   <servlet><servlet-name>api/admin/mediatracks.jsp</servlet-name><jsp-file>/jsp/api/admin/mediatracks.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/mediatracks.jsp</servlet-name><url-pattern>/api/admin/mediatracks/*</url-pattern></servlet-mapping>

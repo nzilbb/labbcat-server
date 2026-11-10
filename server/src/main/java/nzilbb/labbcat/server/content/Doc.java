@@ -791,6 +791,6 @@ public class Doc extends APIRequestHandler {
    * @return true if the current user is allowed to PUT documents, false otherwise.
    */
   protected boolean canEdit() {
-    return context.isUserInRole("admin");
+    return context.isUserInRole("admin") || context.isUserInRole("doc-author");
   } // end of canEdit()
 }

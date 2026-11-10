@@ -10,7 +10,9 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { LabbcatCommonModule, TaskComponent, PendingChangesGuard, AboutComponent, LoginComponent } from 'labbcat-common';
 import { AdminCorporaComponent } from './admin-corpora/admin-corpora.component';
+import { AdminEpisodeOrganiserComponent } from './admin-episode-organiser/admin-episode-organiser.component';
 import { AdminMenuComponent } from './admin-menu/admin-menu.component';
+import { AdminMenuUtilitiesComponent } from './admin-menu-utilities/admin-menu-utilities.component';
 import { AdminProjectsComponent } from './admin-projects/admin-projects.component';
 import { AdminTracksComponent } from './admin-tracks/admin-tracks.component';
 import { AdminRolesComponent } from './admin-roles/admin-roles.component';
@@ -33,6 +35,7 @@ import { AdminCategoriesComponent } from './admin-categories/admin-categories.co
 import { AdminAgreementComponent } from './admin-agreement/admin-agreement.component';
 import { AdminFormattersComponent } from './admin-formatters/admin-formatters.component';
 import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
+import { AdminExportComponent } from './admin-export/admin-export.component';
 import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
 import { AdminTaskResourcesComponent } from './admin-task-resources/admin-task-resources.component';
 import { AdminTaskAttributesComponent } from './admin-task-attributes/admin-task-attributes.component';
@@ -45,7 +48,9 @@ import { ActivityComponent } from './activity/activity.component';
     declarations: [
         AppComponent,
         AdminCorporaComponent,
+        AdminEpisodeOrganiserComponent,
         AdminMenuComponent,
+        AdminMenuUtilitiesComponent,
         AdminProjectsComponent,
         AdminTracksComponent,
         AdminRolesComponent,
@@ -68,6 +73,7 @@ import { ActivityComponent } from './activity/activity.component';
         AdminAgreementComponent,
         AdminFormattersComponent,
         AdminUpgradeComponent,
+        AdminExportComponent,
         AdminTasksComponent,
         AdminTaskResourcesComponent,
         AdminTaskAttributesComponent,
@@ -84,9 +90,12 @@ import { ActivityComponent } from './activity/activity.component';
             { path: 'login', component: LoginComponent },
             { path: 'task', component: TaskComponent },
             
+            { path: 'admin/utilities', component: AdminMenuUtilitiesComponent },
             { path: 'admin/transcriptTypes', component: AdminTranscriptTypesComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/corpora', component: AdminCorporaComponent,
+              canDeactivate: [PendingChangesGuard] },
+            { path: 'admin/episodes', component: AdminEpisodeOrganiserComponent,
               canDeactivate: [PendingChangesGuard] },
             { path: 'admin/projects', component: AdminProjectsComponent,
               canDeactivate: [PendingChangesGuard] },
@@ -124,6 +133,7 @@ import { ActivityComponent } from './activity/activity.component';
             { path: 'admin/formatters', component: AdminFormattersComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/upgrade', component: AdminUpgradeComponent},
+            { path: 'admin/export', component: AdminExportComponent},
             { path: 'admin/tasks', component: AdminTasksComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/resources/:task_id', component: AdminTaskResourcesComponent,

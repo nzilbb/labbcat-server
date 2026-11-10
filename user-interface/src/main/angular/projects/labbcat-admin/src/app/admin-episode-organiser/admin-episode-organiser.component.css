@@ -1,0 +1,29 @@
+summary {
+    cursor: pointer;
+    user-select: none;
+}
+li {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+lib-small-button.edit {
+    position: absolute; /* otherwise line height changes, making the list jittery */
+    display: none;
+}
+li:hover lib-small-button.edit {
+    display: revert;
+}
+.episode-name {
+    user-select: none;
+}
+.empty-corpus {
+    font-style: italic;
+}
+
+ul.episodes li {
+    list-style-type: '🗀 '; 
+}
+ul.episodes li.empty-corpus {
+    list-style-type: none; 
+}

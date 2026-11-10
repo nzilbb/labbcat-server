@@ -34,6 +34,7 @@ span.buttons {
 }
 .link a {
     flex-grow: 0;
+    align-self: anchor-center;
 }
 .link input {
     flex-grow: 1;
