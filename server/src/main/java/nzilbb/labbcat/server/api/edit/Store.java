@@ -401,7 +401,7 @@ public class Store extends nzilbb.labbcat.server.api.Store {
 
   /**
    * Implementation of {@link nzilbb.ag.GraphStore#saveTranscript(Graph)}, which currently
-   * only supports transcript attribute update.
+   * only supports transcript attribute or main_participant update.
    * @param requestBody For access to the request body.
    * @param store A graph store object.
    * @return A JSON response for returning to the caller.
@@ -429,7 +429,8 @@ public class Store extends nzilbb.labbcat.server.api.Store {
       Vector<String> errors = new Vector<String>();
       for (Layer layer : editedGraph.getSchema().getLayers().values()) {
         if (layer.getParent() != null
-            && layer.getParent().equals(editedGraph.getSchema().getRoot())
+            && (layer.getParent().equals(editedGraph.getSchema().getRoot())
+                || "main_participant".equals(layer.getId()))
             && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
           layerIds.add(layer.getId());
         } else if (!layer.equals(editedGraph.getSchema().getRoot())) {

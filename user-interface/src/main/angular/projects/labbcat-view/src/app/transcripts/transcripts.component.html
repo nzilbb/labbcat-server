@@ -211,10 +211,6 @@
           </td>
           <td class="buttons">
             <lib-link *ngIf="user && user.roles.includes('edit')"
-                      i18n-title title="Main Participants"
-                      img="people.svg" icon="👥"
-                      href="edit/transcript/mainParticipants?id={{id | urlEncode}}"></lib-link>
-            <lib-link *ngIf="user && user.roles.includes('edit')"
                       i18n-title title="Media"
                       img="audio.svg" icon="🔊"
                       href="edit/transcript/media?id={{id | urlEncode}}"></lib-link>

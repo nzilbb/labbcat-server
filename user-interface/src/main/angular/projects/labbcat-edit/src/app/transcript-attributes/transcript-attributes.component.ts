@@ -21,7 +21,8 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
     categoryLabels: string[];
     currentCategory: string;
     categories: object; // string->Category
-    transcript: object;
+    transcript: any;
+    mainParticipants: { [id: string] : boolean } = {};
     updating = false;
     multiValueAttributes: object; // layerId->(value->ticked)
     otherValues: object; // layerId->value
@@ -78,8 +79,6 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                 let corpusLayer: Layer; // corpus layer - save it for last
                 // transcript attributes
                 for (let layerId in schema.layers) {
-                    // main_transcript this relates transcripts to transcripts, so ignore that
-                    if (layerId == "main_transcript") continue;
                     
                     const layer = schema.layers[layerId] as Layer;
                     if (layer.parentId == "transcript"
@@ -111,6 +110,9 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                                 this.textAreas.push(layer.id); // track textareas for auto-resize
                             }
                         }
+                    } else if (layer.id == schema.participantId
+                        || layer.id == "main_participant") {
+                        this.attributes.push(layer.id);
                     }
                 }
                 resolve();
@@ -164,6 +166,11 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                     } // next layer/attribute
                     this.changed = false;
                     this.transcript = transcript;
+                    this.mainParticipants = {};
+                    for (let participant of transcript[this.schema.participantLayerId]) {
+                        this.mainParticipants[participant.id]
+                            = participant.main_participant?true:false;
+                    }
                     
                     // resize textareas after the view has had a chance to render
                     setTimeout(()=>{
@@ -224,6 +231,7 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
         } // next category
         
         this.updating = true;
+        
         // compile single-value and multi-value attribute values
         for (let layerId of this.attributes) {
             if (this.isMultiValue(layerId)) {
@@ -247,6 +255,21 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
                 }
             } // single value
         } // next attribute
+
+        // check for changes to main_participant
+        for (let participant of this.transcript[this.schema.participantLayerId]) {
+            if (this.mainParticipants[participant.id]) { // now a main participant
+                participant.main_participant = participant.main_participant || [];
+                if (participant.main_participant.length == 0) {
+                    participant.main_participant.push({
+                        layerId: "main_participant",
+                        label: participant.label
+                    } as Annotation);
+                }
+            } else { // now not a main participant
+                delete participant.main_participant;
+            }
+        }
         this.labbcatService.labbcat.saveTranscript(
             this.transcript, (updated, errors, messages) => {
                 this.updating = false;

@@ -371,7 +371,7 @@ export class ParticipantsComponent implements OnInit {
                         continue;
                     }
                 } else { // a pattern not handled by filterValues
-                    // e.g. from trascript attributes page:
+                    // e.g. from transcript attributes page:
                     // labels("transcript").includes("AP511_MikeThorpe.eaf")
                     queryCanBeTranslatedToFilterValues = false;
                     break;

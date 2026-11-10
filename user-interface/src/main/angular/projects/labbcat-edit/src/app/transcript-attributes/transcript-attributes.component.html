@@ -29,6 +29,9 @@
            title="{{categories[category].description}}">
       {{category.replace("transcript_","")}}
     </label>
+    <label [ngClass]="('participants'==currentCategory)?'tab-label active':'tab-label inactive'"
+           (click)="currentCategory = 'participants'"
+           i18n-title title="Participants" i18n>Participants</label>
   </div>
   <div *ngFor="let category of categoryLabels"
        [ngClass]="(category==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
@@ -191,7 +194,25 @@
           </ng-container><!-- !readonly -->
         </span>
       </div>
-    </div>
+  </div>
+  <div [ngClass]="('participants'==currentCategory)?'attribute-list tab-body active':'attribute-list tab-body inactive'">
+    <fieldset><legend i18n>Main Participants</legend>
+      <div *ngFor="let participant of transcript.participant"
+           class="participant">
+        <label>
+          <input type="checkbox"
+                 [(ngModel)]="mainParticipants[participant.id]"
+                 (input)="onChange(participant)">
+          {{participant.label}}
+        </label>
+      </div>
+    </fieldset>
+    <lib-link
+      href="{{baseUrl}}participants?participant_expression=labels(&quot;transcript&quot;).includes(&quot;{{id}}&quot;)&participants=Participants in {{id}}"
+      img="people.svg" icon="👥"
+      i18n-label label="Participants"
+      i18n-title title="List participant that are included in this transcript"></lib-link>
+  </div>
 </div>
 <div *ngIf="transcript" id="attributes" class="attribute-list">
   <div class="buttons">
@@ -201,12 +222,4 @@
                 *ngIf="changed"
                 i18n-title title="Save all pronunciations"></lib-button>
   </div>
-</div>
-
-<div *ngIf="transcript" class="links">
-  <lib-link
-    href="{{baseUrl}}participants?participant_expression=labels(&quot;transcript&quot;).includes(&quot;{{id}}&quot;)&participants=Participants in {{id}}"
-    img="people.svg" icon="👥"
-    i18n-label label="Participants"
-    i18n-title title="List participant that are included in this transcript"></lib-link>
 </div>
