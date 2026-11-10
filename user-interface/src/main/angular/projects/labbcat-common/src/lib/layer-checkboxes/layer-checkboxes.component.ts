@@ -98,9 +98,6 @@ export class LayerCheckboxesComponent implements OnInit {
     scopeCount = 0;
     categorySelections: any;
 
-    /** Did a change to selected layers originate from a checkbox click? */
-    fromCheckbox = false;
-
     constructor(
         private labbcatService: LabbcatService,
         @Inject('environment') private environment
@@ -129,11 +126,15 @@ export class LayerCheckboxesComponent implements OnInit {
         if (!this.verticalPeersUnderline) this.verticalPeersUnderline = {};
     }
 
-    ngOnChanges(): void {
-        if (!this.fromCheckbox) {
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.selected // are changes to 'selected' available?
+                && changes.selected.previousValue && changes.selected.currentValue
+                // have the selected layers actually changed?
+                && (changes.selected.previousValue.length != changes.selected.currentValue.length
+                    || !changes.selected.previousValue.every(function(value, index) {
+                        return value === changes.selected.currentValue[index]}))) {
             this.processSchema();
         }
-        this.fromCheckbox = false;
     }
 
     loadSchema(): void {
@@ -295,7 +296,6 @@ export class LayerCheckboxesComponent implements OnInit {
             this.selected = this.selected.filter(l => l != layerId); // remove it
         }
         this.selectedChange.emit(this.selected);
-        this.fromCheckbox = true;
     }
     handleInterpretedRaw(layerId:string): void {
         if (!this.disabled || !this.disabled.includes(layerId)) {
