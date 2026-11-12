@@ -2452,7 +2452,12 @@ public class ProcessWithPraat extends Task {
       customAttributes.append(attributeValues.get(attribute).replace("\"","\\\""));
       customAttributes.append("\"");
     }
-    String customScriptSnippet = // TODO participant attributes
+    // It would be nice to be able to define the custom script as a procedure only once
+    // and then call it for each sample.
+    // Unfortunately custom scripts can "include" other files, which might define
+    // other procedures, but defining procedures inside other procedures isn't supported
+    // by Praaat. So we just repeat the code over and over
+    String customScriptSnippet =
       "\n######### CUSTOM SCRIPT STARTS HERE #########"
       // these for backwards compatibility
       +"\nsampleStartTime = {0,number,#.###}" 
@@ -2594,11 +2599,26 @@ public class ProcessWithPraat extends Task {
           +"\nprint ''result:0''"
           +"\nprintline":"")
         +"\nRemove":"") // spectrum object
-      +(customScript != null && customScript.trim().length() > 0?customScriptSnippet:"")
+        +(customScript != null && customScript.trim().length() > 0?customScriptSnippet:"")
       +"\nselect Sound sample{10,number,#0}"
       +"\nRemove", // sound sample
       Locale.UK);
     int count = 0;
+    String customScriptlet = customScript;
+    // Somewhere around Praat version 6.4.63, defining the same procedure multiple times
+    // generates a warning. This stops R's `nzilbb.labbcat::praatScriptFastTrack` from
+    // working because it 'include's FastTrack files, which causes FastTrack procedures
+    // to be defined over and over, once for each sample.
+    // To avoid this, we comment out any "include" calls after the first one
+    String customScriptNoInclude = customScript;
+    if (customScript != null && customScript.trim().length() > 0 // there's a custom script
+      // and it invokes 'include':
+      && (customScript.indexOf("\ninclude") >= 0 || customScript.startsWith("include"))) {
+      // comment out includes from the script
+      customScriptNoInclude = Pattern.compile(
+        "^include ", Pattern.MULTILINE).matcher(customScript)
+        .replaceAll("# already done above: include ");
+    }
     for (Vector<Double> tuple : targets) {
       Double startTime = tuple.elementAt(0);
       Double endTime = tuple.elementAt(1);
@@ -2632,12 +2652,15 @@ public class ProcessWithPraat extends Task {
           /* 4=*/ pitchFloor, pitchCeiling, voicingThreshold, 
           /* 7=*/ relativeEndWindow, relativeStartTime, relativeEndTime,
           /*10=*/ Integer.valueOf(count++),
-          /*11=*/ customScript,
+          /*11=*/ customScriptlet,
           /*12=*/ startTime, endTime, (endTime - startTime), windowOffset,
           /*16=*/ intensityPitchFloor, 
           /*17=*/ fastTrackLowestAnalysisFrequency, fastTrackHighestAnalysisFrequency
         };
         scriptWriter.write(fmtScript.format(oArgs));
+
+        // custom script includes are only included once
+        customScriptlet = customScriptNoInclude;
       } // valid interval
     } // next target
     
