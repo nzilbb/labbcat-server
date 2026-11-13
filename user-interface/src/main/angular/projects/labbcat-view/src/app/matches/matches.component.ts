@@ -17,6 +17,7 @@ import { MessageService, LabbcatService } from 'labbcat-common';
 export class MatchesComponent implements OnInit { 
     @ViewChild('form', {static: false}) form: ElementRef;
     @ViewChild('todo', {static: false}) todo: ElementRef;
+    @ViewChild('display_export_names', {static: false}) displayExportNamesElement: ElementRef;
     @ViewChild('generate_layer', {static: false}) generateLayer: ElementRef;
     @ViewChild('mimetype', {static: false}) selectMimeTypeElement: ElementRef;
     name: string;
@@ -43,6 +44,8 @@ export class MatchesComponent implements OnInit {
     precheckedCsvOptions = [
         "labbcat_title", "data_version", "collection_name", "result_number",
         "line_time", "line_end_time", "match", "word_url", "result_text"];
+    resultText = this.precheckedCsvOptions.includes("result_text");
+    displayExportNames: boolean;
     selectedLayers: string[];
     showEmuOptions = false;
     emuLayers = [ "word", "segment" ];
@@ -100,6 +103,7 @@ export class MatchesComponent implements OnInit {
         this.readSerializers();
         this.readGenerableLayers();
         this.readEmuWebappSetting();
+        this.displayExportNames = JSON.parse(sessionStorage.getItem("displayCSVExportNames")) ?? false;
     }
 
     readBaseUrl(): void {
@@ -114,7 +118,10 @@ export class MatchesComponent implements OnInit {
     }
     readTaskStatus(): void {
         this.labbcatService.labbcat.taskStatus(this.threadId, (task, errors, messages) => {
-            if (errors) errors.forEach(m => this.messageService.error(m));
+            if (errors) {
+                this.readingMatches = false;
+                errors.forEach(m => this.messageService.error(m));
+            }
             if (messages) messages.forEach(m => this.messageService.info(m));
             this.task = task;
             this.status = task.status;
@@ -272,6 +279,12 @@ export class MatchesComponent implements OnInit {
     }
     
     allMatches(): void { // TODO find a way to only load the rest
+        if (this.matchCount > 2000) {
+            if (!confirm("There are " + this.matchCount + " matches." // TODO i18n
+                         +"\nAre you sure you want to show them all?")) {
+                return;
+            }
+        }
         this.allLoading = true;
         // load all the results
         this.matches = [];
@@ -324,6 +337,16 @@ export class MatchesComponent implements OnInit {
         this.todo.nativeElement.value = "csv";
         this.form.nativeElement.action = this.baseUrl + "api/results";
         this.form.nativeElement.submit();
+    }
+    toggleExportNames(): void {
+        this.displayExportNames = !this.displayExportNames;
+        sessionStorage.setItem("displayCSVExportNames", JSON.stringify(this.displayExportNames));
+    }
+    // triggered by click of "Show attribute prefixes"
+    updateExportNames(displayAttributePrefixes: boolean): void {
+        if (this.displayExportNames) {
+            this.displayExportNamesElement.nativeElement.indeterminate = !displayAttributePrefixes;
+        }
     }
 
     serializationOptions(): void {
