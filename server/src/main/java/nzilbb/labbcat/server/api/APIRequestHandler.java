@@ -341,7 +341,7 @@ public class APIRequestHandler {
    * @return An object for returning as the request result.
    */
   protected JsonObject failureResult(Throwable t) {
-    String message = ""+t.getMessage();
+    String message = localize(""+t.getMessage()); // the message might be localized
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     t.printStackTrace(pw);
@@ -498,7 +498,6 @@ public class APIRequestHandler {
    * the given request, substituting in the given arguments if any.
    * <p> The message is assumed to be a MessageFormat template like 
    * "Row could not be added: {0}"
-   * @param request The request, for discovering the locale.
    * @param message The message format to localize.
    * @param args Arguments to be substituted into the message. 
    * @return The localized message (or if the messages couldn't be localized, the

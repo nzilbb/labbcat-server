@@ -39,6 +39,7 @@ export class TranscriptAttributesComponent extends EditComponent implements OnIn
     }
     
     ngOnInit(): void {
+        if (window.location.hash) this.currentCategory = window.location.hash.substring(1);
         this.readBaseUrl();
         this.readCategories();
         this.readSchema().then(()=> {

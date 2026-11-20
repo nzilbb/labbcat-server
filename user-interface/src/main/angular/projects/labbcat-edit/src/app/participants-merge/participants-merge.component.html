@@ -1,0 +1,68 @@
+<h1 id="title" i18n>Merge Participants</h1>
+
+<p *ngIf="participants && participants.length < 2" class="error" i18n>More than one participant required for merge.</p>
+<div *ngIf="participants && participants.length >= 2" id="merge-form">
+  <p id="description" i18n>This will merge all selected participants into a single new record. Existing attribute values will be assigned to the new participant. Transcripts for these participants will be assigned to the new participant. Automatically generated participant attributes will need to be regenerated to ensure their values are based on all the data.</p>
+  
+  <ul class="participants">
+    <li *ngFor="let participant of participants">
+      <a [routerLink]="['/','edit','participant']"
+         [queryParams]="{id: participant.label}"]
+         [target]="participant.id">{{participant.label}}</a>
+    </li>
+  </ul>
+  <fieldset class="attribute-list"><legend i18n>Conflicts</legend>
+    <p i18n>Please select the values for the merged record:</p>
+    <div class="attribute">
+      <label for="name" i18n>Name</label>
+      <input type="text" id="name" required
+             i18n-placeholder placeholder="Name" [(ngModel)]="label">
+    </div>
+    <ng-container *ngFor="let layer of participantAttributes">
+      <div *ngIf="layerIdToLabels[layer.id].length > 1"
+           class="attribute" title="{{layer.id}}{{layer.hint?': '+layer.hint:''}}">
+        <label for="{{layer.id}}">{{layer.description}}</label>
+        
+        <ng-container [ngSwitch]="reconciliationType(layer)">
+          
+          <span *ngSwitchCase="'all-possibilities'"
+                id="values-{{layer.id}}" class="values">
+            <textarea id="{{layer.id}}" [(ngModel)]="singleValueAttributes[layer.id]"></textarea>
+          </span>
+        
+        <span *ngSwitchCase="'any-possibility'"
+                id="values-{{layer.id}}" class="values">
+          <div id="{{layer.id}}" class="peers">
+            <label *ngFor="let label of layerIdToLabels[layer.id]">
+              <input type="checkbox"
+                     value="{{label}}"
+                     [(ngModel)]="multiValueAttributes[layer.id][label]">
+              {{label}}
+              <ng-container *ngIf="layer.validLabels[label] && layer.validLabels[label] != label">({{layer.validLabels[label]}})</ng-container>
+            </label> 
+          </div>
+        </span>
+        
+        <span *ngSwitchCase="'one-possibility'"                
+              id="values-{{layer.id}}" class="values">
+          <select id="{{layer.id}}" [(ngModel)]="singleValueAttributes[layer.id]">
+            <option *ngFor="let label of layerIdToLabels[layer.id]"
+                    value="{{label}}">
+              {{label}}
+              <ng-container *ngIf="layer.validLabels[label] && layer.validLabels[label] != label">({{layer.validLabels[label]}})</ng-container>
+            </option> 
+          </select>
+        </span>
+        </ng-container>
+      </div>
+    </ng-container>
+  </fieldset>
+  <p id="cannot-be-undone" class="warning" i18n>WARNING: merging participant records cannot be undone.</p>
+  
+  <div class="buttons">
+    <lib-button action="save"
+                [processing]="merging"
+                (press)="merge();"
+                i18n-title title="Merge"></lib-button>
+  </div>
+</div>
