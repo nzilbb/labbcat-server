@@ -815,10 +815,7 @@ export class ParticipantsComponent implements OnInit {
     mergeParticipants(): void {
         window.location.href = this.baseUrl
             + "edit/participants/merge?"
-            + this.selectedIds.map(id=> {
-                // needs speaker_number, which we retrieve from the participant.id
-                return "speaker_number="+this.attributeValues[id].id.replace(/m_-2_/,"")
-            }).join("&");
+            + this.selectedIds.map(id=>"id="+this.attributeValues[id].id).join("&");
     }
 
     showAttributesSelection = false;

@@ -1,0 +1,9 @@
+#merge-form {
+    width: min-content;
+    min-width: 500px;
+    margin: auto;
+}
+.peers {
+    display: flex;
+    flex-direction: column;
+}

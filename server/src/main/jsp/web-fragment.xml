@@ -135,6 +135,9 @@
   <servlet><servlet-name>api/edit/fragment/upload.jsp</servlet-name><jsp-file>/jsp/api/edit/fragment/upload.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/edit/fragment/upload.jsp</servlet-name><url-pattern>/api/edit/fragment/upload/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>api/edit/participants/merge.jsp</servlet-name><jsp-file>/jsp/api/edit/participants/merge.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/edit/participants/merge.jsp</servlet-name><url-pattern>/api/edit/participants/merge</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>api/edit/participants/attributes/upload.jsp</servlet-name><jsp-file>/jsp/api/edit/participants/attributes/upload.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/edit/participants/attributes/upload.jsp</servlet-name><url-pattern>/api/edit/participants/attributes/upload</url-pattern></servlet-mapping>
   
