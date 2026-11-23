@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
                     || url.endsWith("j_security_check") // login request
                     || url.endsWith("keepalive") // heartbeat
                     || /.*\/api\/.*/.test(url) // e.g. ...api/systemattributes/title
-                    || /.*\.[a-z]+(\?.*)?$/.test(url)) { // e.g. ...style.css?20250224
+                    || /.*\.css(\?.*)?$/.test(url)) { // e.g. ...style.css?20250224
                     url = this.environment.baseUrl;
                 }
                 window.location.assign(url + (window.location.hash || ""));
