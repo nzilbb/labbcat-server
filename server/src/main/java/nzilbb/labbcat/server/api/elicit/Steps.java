@@ -146,11 +146,11 @@ public class Steps extends APIRequestHandler { // TODO automated tests
                     setAttributeDefinition(
                       step, rsSteps.getString("attribute"), taskId, sqlField,
                       sqlFieldOptions);
-                    steps.add(step);
                     JsonArrayBuilder children = getChildSteps(
                       taskId, rsSteps.getInt("step_id"), sqlChildSteps, sqlField,
                       sqlFieldOptions);
                     if (children != null) step.add("steps", children);
+                    steps.add(step);
                   } // next phase group
                 } // rs.close
                 model.add("steps", steps);
@@ -344,6 +344,7 @@ public class Steps extends APIRequestHandler { // TODO automated tests
     boolean thereWereSteps = false;
     try (ResultSet rs = sqlChildSteps.executeQuery()) {
       while (rs.next()) {
+        thereWereSteps = true;
         JsonObjectBuilder step = ObjectFromResultSet(rs);
         setAttributeDefinition(
           step, rs.getString("attribute"), taskId, sqlField, sqlFieldOptions);
