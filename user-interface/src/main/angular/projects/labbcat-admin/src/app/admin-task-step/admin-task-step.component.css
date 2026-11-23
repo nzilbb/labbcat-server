@@ -1,0 +1,17 @@
+.attributes {
+    margin-left: 20px;
+}
+.children {
+    margin-left: 20px;
+    padding-left: 10px;
+    border-left: 1px var(--theme-text-color) solid;
+    border-bottom: 1px var(--theme-text-color) solid;
+    border-bottom-left-radius: 10px;
+}
+summary {
+    cursor: default;
+}
+
+.preview img {
+    max-width: 500px;
+}

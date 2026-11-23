@@ -73,7 +73,7 @@
  {participant}, if present in the URL, is replaced by the participant's ID">
     </span>
     <div class="controls buttons">
-      <lib-link [href]="baseUrl+'admin/steps?task_id='+task.task_id+'&task='+task.task_name"
+      <lib-link [routerLink]="['..','task','steps',task.task_id]"
                 i18n-label label="Define Steps"
                 i18n-title title="Define individual steps for this task"
                 img="cog.svg" icon="⚙"></lib-link>

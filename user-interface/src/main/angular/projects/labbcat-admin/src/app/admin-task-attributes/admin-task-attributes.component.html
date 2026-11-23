@@ -1,5 +1,5 @@
-<h2 *ngIf="scope == 'transcript'" id="title"><span i18n="Transcript attributes elicited during task XXX">Transcript Attributes elicited during Task</span> {{task_name}}</h2>
-<h2 *ngIf="scope == 'participant'" id="title"><span i18n="Participant attributes elicited during task XXX">Participant Attributes elicited during Task</span> {{task_name}}</h2>
+<h2 *ngIf="scope == 'transcript'" id="title"><span i18n="Transcript attributes elicited during task XXX">Transcript Attributes elicited during Task</span> <span id="task-name">{{task_name}}</span></h2>
+<h2 *ngIf="scope == 'participant'" id="title"><span i18n="Participant attributes elicited during task XXX">Participant Attributes elicited during Task</span> <span id="task-name">{{task_name}}</span></h2>
 <lib-wait *ngIf="!rows" [inSitu]="true"></lib-wait>
 <div *ngIf="rows" class="list attribute-list">
   <span *ngIf="rows.length == 0" class="message" i18n>There are no attributes elicited.</span>

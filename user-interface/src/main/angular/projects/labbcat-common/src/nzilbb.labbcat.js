@@ -3013,6 +3013,43 @@
           text : text
         }));
     }
+
+    /**
+     * Reads a complete elicitation task definition.
+     * @see LabbcatAdmin#createElicitationTask
+     * @see LabbcatAdmin#readElicitationTasks
+     * @see LabbcatAdmin#updateElicitationTask
+     * @see LabbcatAdmin#deleteElicitationTask
+     * @param {string} taskName The name of the task (not the task_id). 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: The complete elicitation task definition,
+     * comprising of am object with the following atributes:
+     * <dl>
+     *  <dt> task_id </dt><dd> The database key for the record. </dd>
+     *  <dt> task_name </dt><dd> The name of the task. </dd>
+     *  <dt> description </dt><dd> Description of the task. </dd>
+     *  <dt> corpus_name </dt><dd> The corpus for elicited transcripts/recordings. </dd>
+     *  <dt> transcript_type </dt><dd> The transcript type for elicited transcripts/recordings. </dd>
+     *  <dt> preamble </dt><dd> HTML-encoded text the participant sees when they are
+     *       about to start the task. </dd>
+     *  <dt> consent </dt><dd> Optional HTML-encoded consent form to be 'signed' by
+     *       the participant. </dd>
+     *  <dt> endUrl </dt><dd> Optional URL to send participants to after
+     *       they finish the task (<tt>{participant}</tt>, if present in
+     *       the URL, is replaced by the participant's ID). </dd>
+     *  <dt> _cantDelete </dt><dd> This is not a database field, but rather is present in
+     *       records returned from the server that can not currently be deleted; 
+     *       a string representing the reason the record can't be deleted. </dd>
+     * </dl>
+     */
+    getElicitationTask(taskName, onResult) {
+      this.createRequest(
+        "getElicitationTask", { task:taskName }, onResult,
+        this.baseUrl+"api/elicit/steps")
+        .send();
+    }
+    
+    
     
   } // class LabbcatView
 

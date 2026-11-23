@@ -1,0 +1,13 @@
+<h2 id="title"><span i18n="Define steps for elicitation Task: XXX">Define steps for elicitation Task</span> <span id="task-name">{{task_name}}</span></h2>
+
+<div *ngIf="task" id="steps">
+  <div *ngFor="let step of task.steps" >
+    <app-admin-task-step
+      [step]="step"
+      [open]="true"
+      [transcriptAttributes]="transcriptAttributes"
+      [participantAttributes]="participantAttributes"
+      [baseUrl]="baseUrl"
+      [stimuli]="stimuli"></app-admin-task-step>
+  </div>
+</div>

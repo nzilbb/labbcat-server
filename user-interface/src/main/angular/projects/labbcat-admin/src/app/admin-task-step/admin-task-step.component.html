@@ -1,0 +1,142 @@
+<div class="step">
+  <details [open]="open"><summary>{{step.title||step.transcript}}</summary>
+    <div class="attributes list">
+      <div class="item condition-attribute">
+        <label i18n>Show when</label>
+        <span><select [(ngModel)]="step.condition_attribute">
+            <option value="" i18n="Show option">Always</option>
+            <optgroup i18n-label label="Transcript">
+              <option *ngFor="let attribute of transcriptAttributes">{{attribute.id}}</option>
+            </optgroup>
+            <optgroup i18n-label label="Participant">
+              <option *ngFor="let attribute of participantAttributes">{{attribute.id}}</option>
+            </optgroup>
+        </select></span>
+      </div>      
+      <div class="item condition-value" *ngIf="step.condition_attribute">
+        <label i18n="[Show when XXX ... has value YYY]">...has value</label>
+        <span><input [(ngModel)]="step.condition_value"></span>
+      </div>
+      
+      <div class="item title">
+        <label i18n>Title</label>
+        <span><input [(ngModel)]="step.title"></span>
+      </div>
+      <div class="item prompt">
+        <label i18n>Prompt</label>
+        <span><textarea [(ngModel)]="step.prompt"></textarea></span>
+      </div>
+      <div class="item record">
+        <label i18n>Elicit</label>
+        <span><select [(ngModel)]="step.record">
+            <option value="0" i18n="Elicit option">Nothing</option>
+            <option value="1" i18n="Elicit option">Speech</option>
+            <option value="2" i18n="Elicit option">Attribute Value</option>
+        </select></span>
+      </div>
+      <div class="item transcript" *ngIf="step.record == 1">
+        <label i18n>Transcript</label>
+        <span><textarea [(ngModel)]="step.transcript"></textarea></span>
+      </div>
+      <div class="item shuffle-words" *ngIf="step.record == 1">
+        <label i18n>Transcript Words</label>
+        <span><select [(ngModel)]="step.shuffle_words">
+            <option value="0" i18n="Transcript Words option">In Order Shown</option>
+            <option value="1" i18n="Transcript Words option">In Random Order</option>
+        </select></span>
+      </div>
+      <div class="item max-seconds" *ngIf="step.record == 1">
+        <label i18n>Maximum Seconds</label>
+        <span><input type="number" min="0" step="1" [(ngModel)]="step.max_seconds"></span>
+      </div>
+
+      <div class="item attribute" *ngIf="step.record == 2">
+        <label i18n>Attribute</label>
+        <span><select [(ngModel)]="step.attribute">
+            <optgroup i18n-label label="Transcript">
+              <option *ngFor="let attribute of transcriptAttributes">{{attribute.id}}</option>
+            </optgroup>
+            <optgroup i18n-label label="Participant">
+              <option *ngFor="let attribute of participantAttributes">{{attribute.id}}</option>
+            </optgroup>
+        </select></span>
+      </div>
+
+      <div class="item suppress-next" *ngIf="step.record == 1">
+        <label i18n>Next Button</label>
+        <span><select [(ngModel)]="step.suppress_next">
+            <option value="0" i18n="Next Button option">Shown</option>
+            <option value="1" i18n="Next Button option">Hidden</option>
+        </select></span>
+      </div>      
+      <div class="item next-delay-seconds" *ngIf="step.record == 1 && step.suppress_next == 0">
+        <label i18n="[Next Button Shown] ...after [N seconds]">...after</label>
+        <span>
+          <input type="number" min="0" step="1" [(ngModel)]="step.next_delay_seconds">
+          <span *ngIf="step.next_delay_seconds == 0" i18n="[Next Button Whoser ...after 0] (immediately)">(immediately)</span>
+          <span *ngIf="step.next_delay_seconds != 0" i18n="[Next Button Whoser ...after N] seconds">seconds</span>
+        </span>
+      </div>
+
+      <div class="item suppress-rerecord" *ngIf="step.record == 1">
+        <label i18n>Re-record Button</label>
+        <span><select [(ngModel)]="step.suppress_rerecord">
+            <option value="0" i18n="Re-record Button option">Shown</option>
+            <option value="1" i18n="Re-record Button option">Hidden</option>
+            <option value="-1" i18n="Re-record Button option">Sound Check</option>
+        </select></span>
+      </div>
+
+      <div class="item">
+        <label i18n>Stimulus</label>
+        <span>
+          <select [(ngModel)]="step.image">
+            <option value="" i18n>[no image/video]</option>
+            <option *ngFor="let stimulus of stimuli">{{stimulus}}</option>
+          </select>
+          <input type="file"                 
+                 i18n-title title="Upload a new stimulus"
+                 (change)="selectFile($event.target.files)">
+        </span>
+      </div>
+      <div class="preview" *ngIf="step.image.trim()">
+        <img [src]="baseUrl+(step.image.endsWith('mp4')?'images/video.svg':'/elicit/'+step.image)" />
+      </div>
+      
+      <div class="item tag" *ngIf="step.record == 1">
+        <label><select [(ngModel)]="tag0Attribute" (input)="setTag()">
+            <option *ngFor="let attribute of transcriptAttributes">{{attribute.attribute}}</option>
+        </select></label>
+        <span><input [(ngModel)]="tag0Value" (input)="setTag()"></span>
+      </div>
+      <div class="item tag" *ngIf="step.record == 1" (input)="setTag()">
+        <label><select [(ngModel)]="tag1Attribute">
+            <option *ngFor="let attribute of transcriptAttributes">{{attribute.attribute}}</option>
+        </select></label>
+        <span><input [(ngModel)]="tag1Value" (input)="setTag()"></span>
+      </div>
+      <div class="item sample">
+        <label i18n>Sub-steps</label>
+        <span><select [(ngModel)]="step.sample">
+            <option value="ordered" i18n="Sub-steps option">All steps in this order</option>
+            <option value="random" i18n="Sub-steps option">All steps in random order</option>
+            <option value="randomsample" i18n="Sub-steps option">Sample of steps in random order</option>
+        </select></span>
+      </div>
+      <div class="item step-count" *ngIf="step.sample == 'randomsample'">
+        <label i18n>Number of Steps</label>
+        <span><input type="number" min="0" step="1" [(ngModel)]="step.step_count"></span>
+      </div>
+    </div>
+    <div *ngIf="step.steps" class="children">
+      <div *ngFor="let step of step.steps" >
+        <app-admin-task-step
+          [step]="step"
+          [transcriptAttributes]="transcriptAttributes"
+          [participantAttributes]="participantAttributes"
+          [baseUrl]="baseUrl"
+          [stimuli]="stimuli"></app-admin-task-step>
+      </div>
+    </div>
+  </details>
+</div>

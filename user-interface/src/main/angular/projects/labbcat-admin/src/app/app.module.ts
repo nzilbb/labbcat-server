@@ -38,6 +38,8 @@ import { AdminUpgradeComponent } from './admin-upgrade/admin-upgrade.component';
 import { AdminExportComponent } from './admin-export/admin-export.component';
 import { AdminTasksComponent } from './admin-tasks/admin-tasks.component';
 import { AdminTaskResourcesComponent } from './admin-task-resources/admin-task-resources.component';
+import { AdminTaskStepsComponent } from './admin-task-steps/admin-task-steps.component';
+import { AdminTaskStepComponent } from './admin-task-step/admin-task-step.component';
 import { AdminTaskAttributesComponent } from './admin-task-attributes/admin-task-attributes.component';
 import { AdminTaskAttributeOptionsComponent } from './admin-task-attribute-options/admin-task-attribute-options.component';
 import { AdminTaskAttributeValidationComponent } from './admin-task-attribute-validation/admin-task-attribute-validation.component';
@@ -75,6 +77,8 @@ import { ActivityComponent } from './activity/activity.component';
         AdminUpgradeComponent,
         AdminExportComponent,
         AdminTasksComponent,
+        AdminTaskStepComponent,
+        AdminTaskStepsComponent,
         AdminTaskResourcesComponent,
         AdminTaskAttributesComponent,
         AdminTaskAttributeOptionsComponent,
@@ -139,6 +143,8 @@ import { ActivityComponent } from './activity/activity.component';
             { path: 'admin/task/resources/:task_id', component: AdminTaskResourcesComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/attributes/:task_id/:scope', component: AdminTaskAttributesComponent},
+            { path: 'admin/task/steps/:task_id', component: AdminTaskStepsComponent,
+              canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/options/:task_id/:scope/:attribute', component: AdminTaskAttributeOptionsComponent,
               canDeactivate: [PendingChangesGuard]},
             { path: 'admin/task/validation/:task_id/:scope/:attribute', component: AdminTaskAttributeValidationComponent,

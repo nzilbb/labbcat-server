@@ -12,3 +12,7 @@
 .links lib-link {
     padding-left: 10px;
 }
+#task-name {
+    padding-left: 10px;
+    font-style: italic;
+}
