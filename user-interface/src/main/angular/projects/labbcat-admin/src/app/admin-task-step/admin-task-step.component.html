@@ -59,12 +59,10 @@
            i18n-title title="The prompt giving instructions to the participant">
         <label i18n>Prompt</label>
         <span>
-          <textarea [(ngModel)]="step.prompt"
-                    (input)="onChange(this.step)"></textarea>
-          <!--ckeditor [editor]="Editor"
+          <ckeditor [editor]="Editor"
                 [config]="config"
                 (change)="onChange(this.step)"
-                [(ngModel)]="step.prompt"></ckeditor-->
+                [(ngModel)]="step.prompt"></ckeditor>
         </span>
       </div>
       <div class="item record"

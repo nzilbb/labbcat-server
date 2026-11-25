@@ -1,6 +1,6 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
+import { Component, ViewEncapsulation, Input, OnInit, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { ClassicEditor, UploadAdapter, FileRepository, 
+import { ClassicEditor, 
          Essentials, Heading, Bold, Italic, Code, Strikethrough, Superscript,
          Link, List, Alignment, HorizontalLine, Indent,
          AutoImage, Image, ImageResize, ImageCaption, ImageStyle, ImageToolbar, ImageInsert,
@@ -11,13 +11,13 @@ import { ClassicEditor, UploadAdapter, FileRepository,
 
 import { MessageService, LabbcatService, Layer } from 'labbcat-common';
 
-import { LabbcatUploadAdapterPlugin } from '../labbcat-upload-adapter';
 import { Step } from '../step';
 
 @Component({
   selector: 'app-admin-task-step',
   templateUrl: './admin-task-step.component.html',
-  styleUrl: './admin-task-step.component.css'
+  styleUrl: './admin-task-step.component.css',
+  encapsulation: ViewEncapsulation.None
 })
 export class AdminTaskStepComponent implements OnInit {
     @Input() step: Step;
@@ -34,7 +34,7 @@ export class AdminTaskStepComponent implements OnInit {
         toolbar: [ 'heading', 'bold', 'italic', 'code', 'strikethrough', 'superscript',
                    'link', 'bulletedList', 'numberedList', 'alignment', 'horizontalLine',
                    '|', 'outdent', 'indent',
-                   '|', 'insertImage','blockQuote', 'insertTable',
+                   '|', 'blockQuote', 'insertTable',
                    '|', 'undo', 'redo' ],
         image: {
             resizeOptions: [
@@ -81,17 +81,13 @@ export class AdminTaskStepComponent implements OnInit {
 	    ]
         },
         plugins: [
-            Essentials, FileRepository, 
+            Essentials, 
             Heading, Bold, Italic, Code, Strikethrough, Superscript,
             Link, List, Alignment, HorizontalLine, Indent,
             AutoImage, Image, ImageResize, ImageCaption, ImageStyle, ImageToolbar, ImageInsert,
             BlockQuote, Table, TableCellProperties, TableProperties, TableToolbar, TableCaption,
             Mention, Paragraph, Undo
-        ],
-        extraPlugins: [ LabbcatUploadAdapterPlugin ],
-        LabbcatUploadAdapterPlugin: {
-            uploadBaseUrl: environment.baseUrl + "api/admin/elicit/stimulus/"
-        }
+        ]
         // mention: {
         //     Mention configuration
         // }
@@ -159,7 +155,7 @@ export class AdminTaskStepComponent implements OnInit {
         const fd = new FormData();
         fd.append("image", stimulusFile);
         const uploadRequest = this.labbcatService.labbcat.createRequest(
-            "icon", null, (model, errors, messages) => {
+            "stimulus", null, (model, errors, messages) => {
                 if (errors && errors.length) {
                     errors.forEach(m => this.messageService.error(m));
                 } else {

@@ -1,3 +1,7 @@
+#steps {
+    width: fit-content;
+    margin: auto;
+}
 #task-name {
     padding-left: 10px;
     font-style: italic;

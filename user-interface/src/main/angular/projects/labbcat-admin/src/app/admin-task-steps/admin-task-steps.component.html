@@ -1,5 +1,6 @@
 <h2 id="title"><span i18n="Define steps for elicitation Task: XXX">Define steps for elicitation Task</span> <span id="task-name">{{task_name}}</span></h2>
 
+<lib-wait *ngIf="!root"></lib-wait>
 <div *ngIf="root" id="steps">
   <app-admin-task-step
     [step]="root"
