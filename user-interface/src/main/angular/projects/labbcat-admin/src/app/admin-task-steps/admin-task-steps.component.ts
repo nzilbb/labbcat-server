@@ -128,7 +128,7 @@ export class AdminTaskStepsComponent extends AdminComponent implements OnInit {
         });
     }
     newStep(): void {
-        function maxId(step: any): number {
+        function maxId(step: Step): number {
             let max = Math.max(step.step_id, 0);
             if (step.steps) {
                 for (let substep of step.steps) {
@@ -137,8 +137,8 @@ export class AdminTaskStepsComponent extends AdminComponent implements OnInit {
             }
             return max;
         }
-        this.task.steps.push({
-            step_id: maxId(this.task) + 1,
+        this.root.steps.push({
+            step_id: maxId(this.root) + 1,
             title: "",
             prompt: "",
             transcript: "",

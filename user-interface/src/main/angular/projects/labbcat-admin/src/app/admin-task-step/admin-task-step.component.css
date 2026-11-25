@@ -96,17 +96,18 @@ span.controls {
 .draggable.draggingover::before {
     display: inline-block;
     content: "+";
-    color: silver;
+    color: var(--theme-block-color);
     width: 15px;
 }
 .before-step, .after-last-substep {
     font-size: 6pt;
+    border-bottom: 1px solid var(--theme-block-color);
 }
 .before-step.draggingover::before {
     content: "▶";
-    color: silver;
+    color: var(--theme-block-color);
 }
 .after-last-substep.draggingover::before {
     content: "▶";
-    color: silver;
+    color: var(--theme-block-color);
 }
