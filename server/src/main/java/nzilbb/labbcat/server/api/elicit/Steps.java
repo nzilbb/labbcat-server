@@ -23,6 +23,7 @@
 package nzilbb.labbcat.server.api.elicit;
 
 import java.sql.*;
+import java.util.Optional;
 import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -95,13 +96,17 @@ public class Steps extends APIRequestHandler { // TODO automated tests
               int taskId = rsTask.getInt("task_id");
               JsonObjectBuilder model = Json.createObjectBuilder()
                 .add("task_id", rsTask.getInt("task_id"))
-                .add("task_name", rsTask.getString("task_name"))
-                .add("description", rsTask.getString("description"))
-                .add("corpus", rsTask.getString("corpus"))
-                .add("transcriptType", rsTask.getString("transcriptType"))
-                .add("preamble", rsTask.getString("preamble"))
-                .add("consent", rsTask.getString("consent"))
-                .add("endUrl", rsTask.getString("endUrl"));
+                .add("task_name", Optional.ofNullable(
+                       rsTask.getString("task_name")).orElse(""))
+                .add("description", Optional.ofNullable(
+                       rsTask.getString("description")).orElse(""))
+                .add("corpus", Optional.ofNullable(rsTask.getString("corpus")).orElse(""))
+                .add("transcriptType", Optional.ofNullable(
+                       rsTask.getString("transcriptType")).orElse(""))
+                .add("preamble", Optional.ofNullable(
+                       rsTask.getString("preamble")).orElse(""))
+                .add("consent", Optional.ofNullable(rsTask.getString("consent")).orElse(""))
+                .add("endUrl", Optional.ofNullable(rsTask.getString("endUrl")).orElse(""));
                 
               try (PreparedStatement sqlTopSteps = db.prepareStatement(
                      "SELECT * FROM elicitation_step"
