@@ -70,9 +70,9 @@
         <label i18n>Elicit</label>
         <span><select [(ngModel)]="step.record"
                       (input)="onChange(this.step)">
-            <option value="0" i18n="Elicit option">Nothing</option>
-            <option value="1" i18n="Elicit option">Speech</option>
-            <option value="2" i18n="Elicit option">Attribute Value</option>
+            <option [ngValue]="0" i18n="Elicit option">Nothing</option>
+            <option [ngValue]="1" i18n="Elicit option">Speech</option>
+            <option [ngValue]="2" i18n="Elicit option">Attribute Value</option>
         </select></span>
       </div>
       <div class="item transcript" *ngIf="step.record == 1"
@@ -85,8 +85,8 @@
         <label i18n>Transcript Words</label>
         <span><select [(ngModel)]="step.shuffle_words"
                       (input)="onChange(this.step)">
-            <option value="0" i18n="Transcript Words option">In Order Shown</option>
-            <option value="1" i18n="Transcript Words option">In Random Order</option>
+            <option [ngValue]="0" i18n="Transcript Words option">In Order Shown</option>
+            <option [ngValue]="1" i18n="Transcript Words option">In Random Order</option>
         </select></span>
       </div>
       <div class="item max-seconds" *ngIf="step.record == 1"
@@ -116,8 +116,8 @@
         <label i18n>Next Button</label>
         <span><select [(ngModel)]="step.suppress_next"
                       (input)="onChange(this.step)">
-            <option value="0" i18n="Next Button option">Shown</option>
-            <option value="1" i18n="Next Button option">Hidden</option>
+            <option [ngValue]="0" i18n="Next Button option">Shown</option>
+            <option [ngValue]="1" i18n="Next Button option">Hidden</option>
         </select></span>
         <div class="item next-delay-seconds" *ngIf="step.record == 1 && step.suppress_next == 0"
            i18n-title title="When the 'Next' butto should be shown during the step">
@@ -139,9 +139,9 @@
         <label i18n>Re-record Button</label>
         <span><select [(ngModel)]="step.suppress_rerecord"
                       (input)="onChange(this.step)">
-            <option value="0" i18n="Re-record Button option">Shown</option>
-            <option value="1" i18n="Re-record Button option">Hidden</option>
-            <option value="-1" i18n="Re-record Button option">Sound Check</option>
+            <option [ngValue]="0" i18n="Re-record Button option">Shown</option>
+            <option [ngValue]="1" i18n="Re-record Button option">Hidden</option>
+            <option [ngValue]="-1" i18n="Re-record Button option">Sound Check</option>
         </select></span>
       </div>
 
