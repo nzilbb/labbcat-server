@@ -1,10 +1,39 @@
-<div class="step">
-  <details [open]="open"><summary>{{step.title||step.transcript}}</summary>
-    <div class="attributes list">
-      <div class="item condition-attribute">
-        <label i18n>Show when</label>
-        <span><select [(ngModel)]="step.condition_attribute">
-            <option value="" i18n="Show option">Always</option>
+<div *ngIf="step.step_id >=0" class="step">
+  <div class="before-step"
+       [class.draggingover]="draggingOverBefore"
+       (dragover)="dragOverBefore($event)"
+       (dragleave)="dragLeaveBefore($event)"
+       (drop)="dropBefore($event)">&nbsp;</div>
+  <details [open]="open">
+    <summary
+      (dragover)="dragOver($event)"
+      (dragleave)="dragLeave($event)"
+      (drop)="drop($event)">
+      <span class="draggable"
+            [class.draggingover]="draggingOver"
+            i81n-title title="Drag here and drop on another step to move"
+            draggable="true"
+            (dragstart)="dragStart($event)">
+        <span class="step-title">{{step.title||step.transcript}}
+          <span *ngIf="!step.title&&!step.transcript" i18n>[blank step]</span>
+        </span>
+      </span>
+      <span class="controls">
+        <lib-small-button action="delete"
+                    (press)="deleteStep()"
+                    i18n-title title="Delete this step and all sub-steps"></lib-small-button>
+      </span>
+    </summary>
+    <div class="items">
+      <div class="item condition-attribute"
+           i18n-title title="When the step (and its sub-steps) should be shown to the participant">
+        <label *ngIf="!step.condition_attribute"
+               i18n="Shown [always]">Shown</label>
+        <label *ngIf="step.condition_attribute"
+               i18n="Shown when [XXX ... has value YYY]">Shown when</label>
+        <span><select [(ngModel)]="step.condition_attribute"
+                      (input)="onChange(this.step)">
+            <option value="" i18n="Shown option">Always</option>
             <optgroup i18n-label label="Transcript">
               <option *ngFor="let attribute of transcriptAttributes">{{attribute.id}}</option>
             </optgroup>
@@ -12,47 +41,69 @@
               <option *ngFor="let attribute of participantAttributes">{{attribute.id}}</option>
             </optgroup>
         </select></span>
+        <span class="item condition-value" *ngIf="step.condition_attribute"
+             i18n-title title="Value the attribute must have to make the step visible">
+          <label class="has-value" i18n="[Shown when XXX] ... has value [YYY]">...has value</label>
+          <span><input [(ngModel)]="step.condition_value"
+                       (input)="onChange(this.step)"></span>
+        </span>
       </div>      
-      <div class="item condition-value" *ngIf="step.condition_attribute">
-        <label i18n="[Show when XXX ... has value YYY]">...has value</label>
-        <span><input [(ngModel)]="step.condition_value"></span>
-      </div>
       
-      <div class="item title">
+      <div class="item title"
+           i18n-title title="The title of the step">
         <label i18n>Title</label>
-        <span><input [(ngModel)]="step.title"></span>
+        <span><input [(ngModel)]="step.title"
+                     (input)="onChange(this.step)"></span>
       </div>
-      <div class="item prompt">
+      <div class="item prompt"
+           i18n-title title="The prompt giving instructions to the participant">
         <label i18n>Prompt</label>
-        <span><textarea [(ngModel)]="step.prompt"></textarea></span>
+        <span>
+          <textarea [(ngModel)]="step.prompt"
+                    (input)="onChange(this.step)"></textarea>
+          <!--ckeditor [editor]="Editor"
+                [config]="config"
+                (change)="onChange(this.step)"
+                [(ngModel)]="step.prompt"></ckeditor-->
+        </span>
       </div>
-      <div class="item record">
+      <div class="item record"
+           i18n-title title="What to elicit in this step">
         <label i18n>Elicit</label>
-        <span><select [(ngModel)]="step.record">
+        <span><select [(ngModel)]="step.record"
+                      (input)="onChange(this.step)">
             <option value="0" i18n="Elicit option">Nothing</option>
             <option value="1" i18n="Elicit option">Speech</option>
             <option value="2" i18n="Elicit option">Attribute Value</option>
         </select></span>
       </div>
-      <div class="item transcript" *ngIf="step.record == 1">
+      <div class="item transcript" *ngIf="step.record == 1"
+           i18n-title title="The text for the participant to read aloud">
         <label i18n>Transcript</label>
         <span><textarea [(ngModel)]="step.transcript"></textarea></span>
       </div>
-      <div class="item shuffle-words" *ngIf="step.record == 1">
+      <div class="item shuffle-words" *ngIf="step.record == 1"
+           i18n-title title="What order the words in the transcript should appear in">
         <label i18n>Transcript Words</label>
-        <span><select [(ngModel)]="step.shuffle_words">
+        <span><select [(ngModel)]="step.shuffle_words"
+                      (input)="onChange(this.step)">
             <option value="0" i18n="Transcript Words option">In Order Shown</option>
             <option value="1" i18n="Transcript Words option">In Random Order</option>
         </select></span>
       </div>
-      <div class="item max-seconds" *ngIf="step.record == 1">
+      <div class="item max-seconds" *ngIf="step.record == 1"
+           i18n-title title="The maximum duration of the recording in this step">
         <label i18n>Maximum Seconds</label>
-        <span><input type="number" min="0" step="1" [(ngModel)]="step.max_seconds"></span>
+        <span><input type="number" min="0" step="1"
+                     [(ngModel)]="step.max_seconds"
+                     (input)="onChange(this.step)"></span>
       </div>
 
-      <div class="item attribute" *ngIf="step.record == 2">
+      <div class="item attribute" *ngIf="step.record == 2"
+           i18n-title title="Which attribute the elicited response will be stored in">
         <label i18n>Attribute</label>
-        <span><select [(ngModel)]="step.attribute">
+        <span><select [(ngModel)]="step.attribute"
+                      (input)="onChange(this.step)">
             <optgroup i18n-label label="Transcript">
               <option *ngFor="let attribute of transcriptAttributes">{{attribute.id}}</option>
             </optgroup>
@@ -62,35 +113,46 @@
         </select></span>
       </div>
 
-      <div class="item suppress-next" *ngIf="step.record == 1">
+      <div class="item suppress-next" *ngIf="step.record == 1"
+           i18n-title title="Whether the 'Next' button should be visible during this step">
         <label i18n>Next Button</label>
-        <span><select [(ngModel)]="step.suppress_next">
+        <span><select [(ngModel)]="step.suppress_next"
+                      (input)="onChange(this.step)">
             <option value="0" i18n="Next Button option">Shown</option>
             <option value="1" i18n="Next Button option">Hidden</option>
         </select></span>
+        <div class="item next-delay-seconds" *ngIf="step.record == 1 && step.suppress_next == 0"
+           i18n-title title="When the 'Next' butto should be shown during the step">
+          <label i18n="[Next Button Shown] ...after [N seconds]">...after</label>
+          <input type="number" min="0" step="1"
+                 [(ngModel)]="step.next_delay_seconds"
+                 (input)="onChange(this.step)">
+          <span *ngIf="step.next_delay_seconds == 0"
+                class="immediately" 
+                i18n="[Next Button Whoser ...after 0] (immediately)">(immediately)</span>
+          <span *ngIf="step.next_delay_seconds != 0"
+                class="seconds" 
+                i18n="[Next Button Whoser ...after N] seconds">seconds</span>
+        </div>
       </div>      
-      <div class="item next-delay-seconds" *ngIf="step.record == 1 && step.suppress_next == 0">
-        <label i18n="[Next Button Shown] ...after [N seconds]">...after</label>
-        <span>
-          <input type="number" min="0" step="1" [(ngModel)]="step.next_delay_seconds">
-          <span *ngIf="step.next_delay_seconds == 0" i18n="[Next Button Whoser ...after 0] (immediately)">(immediately)</span>
-          <span *ngIf="step.next_delay_seconds != 0" i18n="[Next Button Whoser ...after N] seconds">seconds</span>
-        </span>
-      </div>
 
-      <div class="item suppress-rerecord" *ngIf="step.record == 1">
+      <div class="item suppress-rerecord" *ngIf="step.record == 1"
+           i18n-title title="Whether to allow the participant to record their voice more than once">
         <label i18n>Re-record Button</label>
-        <span><select [(ngModel)]="step.suppress_rerecord">
+        <span><select [(ngModel)]="step.suppress_rerecord"
+                      (input)="onChange(this.step)">
             <option value="0" i18n="Re-record Button option">Shown</option>
             <option value="1" i18n="Re-record Button option">Hidden</option>
             <option value="-1" i18n="Re-record Button option">Sound Check</option>
         </select></span>
       </div>
 
-      <div class="item">
+      <div class="item image"
+           i18n-title title="What visual stimulus should be shown, if any">
         <label i18n>Stimulus</label>
         <span>
-          <select [(ngModel)]="step.image">
+          <select [(ngModel)]="step.image"
+                  (input)="onChange(this.step)">
             <option value="" i18n>[no image/video]</option>
             <option *ngFor="let stimulus of stimuli">{{stimulus}}</option>
           </select>
@@ -99,44 +161,81 @@
                  (change)="selectFile($event.target.files)">
         </span>
       </div>
-      <div class="preview" *ngIf="step.image.trim()">
+      <div class="preview" *ngIf="step.image.trim()"
+           i18n-title title="The visual stimulus that will be shown to the participant">
         <img [src]="baseUrl+(step.image.endsWith('mp4')?'images/video.svg':'/elicit/'+step.image)" />
       </div>
       
-      <div class="item tag" *ngIf="step.record == 1">
+      <div class="item tag" *ngIf="step.record == 1"
+           i18n-title title="An attribute to store a value in for this step">
         <label><select [(ngModel)]="tag0Attribute" (input)="setTag()">
             <option *ngFor="let attribute of transcriptAttributes">{{attribute.attribute}}</option>
         </select></label>
-        <span><input [(ngModel)]="tag0Value" (input)="setTag()"></span>
+        <span><input [(ngModel)]="tag0Value" (input)="setTag()"
+           i18n-title title="The value to save after this step is shown"></span>
       </div>
-      <div class="item tag" *ngIf="step.record == 1" (input)="setTag()">
+      <div class="item tag" *ngIf="step.record == 1" (input)="setTag()"
+           i18n-title title="An attribute to store a value in for this step">
         <label><select [(ngModel)]="tag1Attribute">
             <option *ngFor="let attribute of transcriptAttributes">{{attribute.attribute}}</option>
         </select></label>
-        <span><input [(ngModel)]="tag1Value" (input)="setTag()"></span>
-      </div>
-      <div class="item sample">
-        <label i18n>Sub-steps</label>
-        <span><select [(ngModel)]="step.sample">
-            <option value="ordered" i18n="Sub-steps option">All steps in this order</option>
-            <option value="random" i18n="Sub-steps option">All steps in random order</option>
-            <option value="randomsample" i18n="Sub-steps option">Sample of steps in random order</option>
-        </select></span>
-      </div>
-      <div class="item step-count" *ngIf="step.sample == 'randomsample'">
-        <label i18n>Number of Steps</label>
-        <span><input type="number" min="0" step="1" [(ngModel)]="step.step_count"></span>
+        <span><input [(ngModel)]="tag1Value" (input)="setTag()"
+           i18n-title title="The value to store after this step is shown"></span>
       </div>
     </div>
-    <div *ngIf="step.steps" class="children">
-      <div *ngFor="let step of step.steps" >
+    <fieldset *ngIf="step.steps && step.steps.length" class="children">
+      <legend>
+        <div class="sample"
+             i18n-title title="How sub-steps of this step should be shown">
+          <label i18gn>Sub-steps</label>
+          <span><select [(ngModel)]="step.sample"
+                        (input)="onChange(this.step)">
+              <option value="ordered" i18n="Sub-steps option">All steps in this order</option>
+              <option value="random" i18n="Sub-steps option">All steps in random order</option>
+              <option value="randomsample" i18n="Sub-steps option">Sample of steps in random order</option>
+          </select></span>
+        </div>
+        <div class="step-count" *ngIf="step.sample == 'randomsample'"
+             i18n-title title="How many substeps should be selected for presentation to the participant">
+          <label i18n>Number of Steps</label>
+          <span><input type="number" min="1" step="1"
+                       [(ngModel)]="step.step_count"
+                       (input)="onChange(this.step)"></span>
+        </div>
+      </legend>
+      <div *ngFor="let substep of step.steps" >
         <app-admin-task-step
-          [step]="step"
+          [step]="substep"
+          [root]="root"
           [transcriptAttributes]="transcriptAttributes"
           [participantAttributes]="participantAttributes"
           [baseUrl]="baseUrl"
-          [stimuli]="stimuli"></app-admin-task-step>
+          [stimuli]="stimuli"
+          (stepChanged)="onChange($event)"></app-admin-task-step>
       </div>
-    </div>
+      <div class="after-last-substep"
+           [class.draggingover]="draggingOver"
+           (dragover)="dragOver($event)"
+           (dragleave)="dragLeave($event)"
+           (drop)="drop($event)">&nbsp;</div>
+    </fieldset>
   </details>
+</div>
+<div *ngIf="step.step_id == -1" class="task">
+      <div *ngFor="let substep of step.steps" >
+        <app-admin-task-step
+          [step]="substep"
+          [root]="root"
+          [open]="true"
+          [transcriptAttributes]="transcriptAttributes"
+          [participantAttributes]="participantAttributes"
+          [baseUrl]="baseUrl"
+          [stimuli]="stimuli"
+          (stepChanged)="onChange($event)"></app-admin-task-step>
+      </div>
+      <div class="after-last-substep"
+           [class.draggingover]="draggingOver"
+           (dragover)="dragOver($event)"
+           (dragleave)="dragLeave($event)"
+           (drop)="drop($event)">&nbsp;</div>
 </div>

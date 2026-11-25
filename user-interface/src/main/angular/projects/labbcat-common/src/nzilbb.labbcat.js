@@ -6646,6 +6646,25 @@
     }
     
     /**
+     * Updates an existing elicitation task record by setting the steps to the given
+     * definition.
+     * @see LabbcatAdmin#createElicitationTask
+     * @see LabbcatAdmin#readElicitationTasks
+     * @see LabbcatAdmin#updateElicitationTask
+     * @see LabbcatAdmin#deleteElicitationTask
+     * @see LabbcatAdmin#elicitatationTaskUpload
+     * @param {int} taskId The task_id of the task.
+     * @param {object[]} steps An array of possibly nested step objects.
+     * @param {resultCallback} onResult Invoked when the request has completed.
+     */
+    updateElicitationTaskSteps(taskId, steps, onResult) {
+      this.createRequest(
+        "updateElicitationTaskSteps", null, onResult,
+        `${this.baseUrl}api/admin/elicit/steps/${taskId}`,
+        "PUT").send(JSON.stringify(steps));
+    }
+    
+    /**
      * Upload a full task definition to be added/updated from a JSON file.
      * @param [file|string] file The task definition file, the name of which must end
      *       in <q>.json</q>. The name of the file (without the .json
@@ -6657,6 +6676,7 @@
      * <var>result</var> which will be: An object with one attribute, "task_id",
      * which identifies the resulting task.
      * @param onProgress Invoked on XMLHttpRequest progress.
+     * @see LabbcatAdmin#updateElicitationTaskSteps
      * @see LabbcatAdmin#createElicitationTask
      * @see LabbcatAdmin#readElicitationTasks
      * @see LabbcatAdmin#updateElicitationTask

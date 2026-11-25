@@ -1,17 +1,112 @@
-.attributes {
+@import 'ckeditor5/ckeditor5.css';
+
+.items {
     margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+}
+.items > .item {
+    display: flex;
+    flex-direction: row;
+}
+.items > .item > label {
+    width: 20%;
+}
+.items > .preview {
+    margin-left: 20%;
+}
+.items > .item > span {
+    flex-grow: 2;
+}
+.items > .item > span > input {
+    width: 100%;
+}
+.items > .item > span > textarea {
+    width: 100%;
+}
+.items > .item > span > input[type=number] {
+    width: 100px;
+    text-align: right;
+}
+.items > .item.suppress-next > span {
+    flex-grow: 0;
+}
+.item.next-delay-seconds > * {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.items > .item.condition-attribute > span {
+    flex-grow: 0;
+}
+.item.condition-value > * {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.has-value::after {
+    content: ":";
+}
+
+.items > .item.image > span  {
+    display: flex;
+    flex-direction: row;
+}
+label {
+    white-space: nowrap;
+}
+label > select {
+    width: 100%;
+}
+.immediately, .seconds {
+    padding-left: 10px;
 }
 .children {
     margin-left: 20px;
     padding-left: 10px;
-    border-left: 1px var(--theme-text-color) solid;
-    border-bottom: 1px var(--theme-text-color) solid;
-    border-bottom-left-radius: 10px;
+}
+.children legend, .sample, .step-count {
+    display: flex;
+    flex-direction: row;
+}
+.children legend label {
+    padding-left: 10px;
+    padding-right: 10px;
 }
 summary {
     cursor: default;
 }
-
+.image > span > select {
+    width: 70%;
+}
 .preview img {
     max-width: 500px;
+}
+span.controls {
+    float: right;
+}
+.draggable {
+    user-select: none;
+    padding: 5px;
+    cursor: grab;
+}
+.draggable::before {
+    display: inline-block;
+    content: "⠿";
+    width: 15px;
+}
+.draggable.draggingover::before {
+    display: inline-block;
+    content: "+";
+    color: silver;
+    width: 15px;
+}
+.before-step, .after-last-substep {
+    font-size: 6pt;
+}
+.before-step.draggingover::before {
+    content: "▶";
+    color: silver;
+}
+.after-last-substep.draggingover::before {
+    content: "▶";
+    color: silver;
 }

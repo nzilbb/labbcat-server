@@ -1,13 +1,22 @@
 <h2 id="title"><span i18n="Define steps for elicitation Task: XXX">Define steps for elicitation Task</span> <span id="task-name">{{task_name}}</span></h2>
 
-<div *ngIf="task" id="steps">
-  <div *ngFor="let step of task.steps" >
-    <app-admin-task-step
-      [step]="step"
-      [open]="true"
-      [transcriptAttributes]="transcriptAttributes"
-      [participantAttributes]="participantAttributes"
-      [baseUrl]="baseUrl"
-      [stimuli]="stimuli"></app-admin-task-step>
+<div *ngIf="root" id="steps">
+  <app-admin-task-step
+    [step]="root"
+    [root]="root"
+    [transcriptAttributes]="transcriptAttributes"
+    [participantAttributes]="participantAttributes"
+    [baseUrl]="baseUrl"
+    [stimuli]="stimuli"
+    (stepChanged)="onChange($event)"></app-admin-task-step>
+  <div class="controls">
+    <lib-button action="create"
+                (press)="newStep()"
+                i18n-title title="Add new step"></lib-button>
+    <lib-button *ngIf="changed"
+                action="save"
+                (press)="save()"
+                [processing]="saving"
+                i18n-title title="Save"></lib-button>
   </div>
 </div>

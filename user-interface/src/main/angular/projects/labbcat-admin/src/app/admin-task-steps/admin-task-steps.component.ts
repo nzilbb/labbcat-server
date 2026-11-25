@@ -23,6 +23,7 @@ export class AdminTaskStepsComponent extends AdminComponent implements OnInit {
     task_id: number;
     task_name: string;
     task: Task;
+    root: Step; // dummy step to host top-level steps
 
     constructor(
         labbcatService: LabbcatService,
@@ -118,9 +119,69 @@ export class AdminTaskStepsComponent extends AdminComponent implements OnInit {
                         reject(`Invalid task: ${this.task_name}`);
                     } else {
                         this.task = task as Task;
-                        accept(this. task);
+                        this.root = {
+                            step_id: -1, title: task.task_name, steps: task.steps
+                        } as Step;
+                        accept(this.task);
                     }
             });
         });
+    }
+    newStep(): void {
+        function maxId(step: any): number {
+            let max = Math.max(step.step_id, 0);
+            if (step.steps) {
+                for (let substep of step.steps) {
+                    max = Math.max(substep.step_id, max);
+                }
+            }
+            return max;
+        }
+        this.task.steps.push({
+            step_id: maxId(this.task) + 1,
+            title: "",
+            prompt: "",
+            transcript: "",
+            shuffle_words: 0,
+            record: 0,
+            max_seconds: 30,
+            suppress_next: 0,
+            next_delay_seconds: 0,
+            suppress_rerecord: 1,
+            image: "",
+            countdown_seconds: 0,
+            group_id: 0,
+            tags: "",
+            sample: "all",
+            step_count: 0,
+            attribute: "",
+            condition_attribute: "",
+            condition_value: "",
+            validation_javascript: "",
+            prompt_before_recording: "",
+            prompt_during_recording: "",
+            prompt_after_recording: "",
+            options: [],
+            type: "",
+            style: "",
+            steps: []
+        } as Step);
+    }
+    onChange(step: Step): void {
+        this.changed = true;
+    }
+    saving = false;
+    save(): void {
+        this.saving = true;
+        this.labbcatService.labbcat.updateElicitationTaskSteps(
+            this.task_id, this.task.steps, (result, errors, messages) => {
+                this.saving = false;
+                if (messages) messages.forEach(m => this.messageService.info(m));
+                if (errors) {
+                    errors.forEach(m => this.messageService.error(m));
+                } else {
+                    this.changed = false;
+                }
+            });
     }
 }

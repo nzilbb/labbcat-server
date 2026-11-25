@@ -211,6 +211,9 @@
   <servlet><servlet-name>api/admin/elicit/tasks.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/tasks.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/elicit/tasks.jsp</servlet-name><url-pattern>/api/admin/elicit/tasks/*</url-pattern></servlet-mapping>
   
+  <servlet><servlet-name>api/admin/elicit/steps.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/steps.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/admin/elicit/steps.jsp</servlet-name><url-pattern>/api/admin/elicit/steps/*</url-pattern></servlet-mapping>
+  
   <servlet><servlet-name>api/admin/elicit/resources.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/resources.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/elicit/resources.jsp</servlet-name><url-pattern>/api/admin/elicit/resources/*</url-pattern></servlet-mapping>
   
