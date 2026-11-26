@@ -22,7 +22,7 @@ export class AppComponent {
             if (event instanceof NavigationEnd) {
                 // publish page changes, so the page header can update help links 
                 window.postMessage({
-                    app: "labbcat-view",
+                    app: "labbcat-edit",
                     url: event.url
                 });
                 let h1 = document.getElementById("title");

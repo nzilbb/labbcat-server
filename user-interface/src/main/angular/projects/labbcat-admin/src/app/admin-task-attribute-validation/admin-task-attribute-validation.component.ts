@@ -26,7 +26,7 @@ export class AdminTaskAttributeValidationComponent extends AdminComponent implem
         messageService: MessageService,
         private route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route, "admin/taskAttributeValidation.help");
     }
     ngOnInit(): void {
         // need to subscribe to URL path changes, because the component will be re-used

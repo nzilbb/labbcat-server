@@ -23,7 +23,7 @@ export class AdminChangePasswordComponent extends AdminComponent implements OnIn
         private route: ActivatedRoute,
         private router: Router
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
 
     checkForm(): void {

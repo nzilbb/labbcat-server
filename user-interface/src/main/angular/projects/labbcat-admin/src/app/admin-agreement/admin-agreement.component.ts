@@ -1,4 +1,5 @@
 import { Component, ViewEncapsulation, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { ClassicEditor, UploadAdapter, FileRepository,
          Essentials, Heading, Bold, Italic, Code, Strikethrough, Superscript,
@@ -98,8 +99,9 @@ export class AdminAgreementComponent extends AdminComponent implements OnInit {
     constructor(
         labbcatService: LabbcatService,
         messageService: MessageService,
+        route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
 
     ngOnInit(): void {

@@ -18,7 +18,7 @@ export class AdminAnnotatorTasksComponent extends AdminComponent implements OnIn
         messageService: MessageService,
         private route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     
     ngOnInit(): void {

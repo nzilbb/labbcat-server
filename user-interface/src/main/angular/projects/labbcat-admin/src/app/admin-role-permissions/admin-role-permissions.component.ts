@@ -42,7 +42,7 @@ export class AdminRolePermissionsComponent extends AdminComponent implements OnI
         messageService: MessageService,
         private route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     
     ngOnInit(): void {

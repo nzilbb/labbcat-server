@@ -22,7 +22,7 @@ export class AdminCategoriesComponent extends AdminComponent implements OnInit {
         messageService: MessageService,
         private route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     
     ngOnInit(): void {

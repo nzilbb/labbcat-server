@@ -33,7 +33,7 @@ export class AdminDashboardComponent extends AdminComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
         this.baseUrl = labbcatService.labbcat.baseUrl;
         this.iconBaseUrl = `${this.baseUrl}images/dashboard/`
     }

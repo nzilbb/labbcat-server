@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { environment } from '../../environments/environment';
 
 import { MessageService, LabbcatService, SerializationDescriptor } from 'labbcat-common';
@@ -25,8 +26,9 @@ export class AdminFormattersComponent extends AdminComponent implements OnInit {
     constructor(
         labbcatService: LabbcatService,
         messageService: MessageService,
+        route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
 
     ngOnInit(): void {

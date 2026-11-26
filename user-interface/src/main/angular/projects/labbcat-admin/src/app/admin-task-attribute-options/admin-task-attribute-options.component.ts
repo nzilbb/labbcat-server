@@ -29,7 +29,7 @@ export class AdminTaskAttributeOptionsComponent extends AdminComponent implement
         messageService: MessageService,
         private route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route, "admin/taskAttributeOptions.help");
     }
     ngOnInit(): void {
         // need to subscribe to URL path changes, because the component will be re-used

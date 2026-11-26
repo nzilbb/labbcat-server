@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import { Role } from '../role';
 import { MessageService, LabbcatService, Response, User } from 'labbcat-common';
@@ -17,9 +17,10 @@ export class AdminUsersComponent extends AdminComponent implements OnInit {
     constructor(
         labbcatService: LabbcatService,
         messageService: MessageService,
-        private router: Router
+        private router: Router,
+        route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     
     ngOnInit(): void {

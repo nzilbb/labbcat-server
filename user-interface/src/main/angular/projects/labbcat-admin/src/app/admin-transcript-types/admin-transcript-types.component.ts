@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { MessageService, LabbcatService, Response, Layer } from 'labbcat-common';
 import { AdminComponent } from '../admin-component';
@@ -14,9 +15,10 @@ export class AdminTranscriptTypesComponent extends AdminComponent implements OnI
     
     constructor(
         labbcatService: LabbcatService,
-        messageService: MessageService
+        messageService: MessageService,
+        route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     
     ngOnInit(): void {

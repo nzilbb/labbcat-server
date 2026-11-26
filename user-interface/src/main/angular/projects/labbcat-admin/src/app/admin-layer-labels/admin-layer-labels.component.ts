@@ -21,7 +21,7 @@ export class AdminLayerLabelsComponent extends AdminComponent implements OnInit 
         private route: ActivatedRoute,
         private router: Router
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     
     ngOnInit(): void {

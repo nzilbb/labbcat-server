@@ -23,7 +23,7 @@ export class AdminTaskRemindersComponent extends AdminComponent implements OnIni
         messageService: MessageService,
         private route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     ngOnInit(): void {
         this.route.paramMap.pipe(

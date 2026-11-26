@@ -31,7 +31,7 @@ export class AdminTaskAttributesComponent extends AdminComponent implements OnIn
         messageService: MessageService,
         private route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route, "admin/taskAttributes.help");
     }
     
     ngOnInit(): void {

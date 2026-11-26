@@ -20,11 +20,6 @@ export class AppComponent {
     ) {
         router.events.subscribe((event) => {
             if (event instanceof NavigationEnd) {
-                // publish page changes, so the page header can update help links 
-                window.postMessage({
-                    app: "labbcat-view",
-                    url: event.url
-                });
                 let h1 = document.getElementById("title");
                 if (h1 && h1.textContent) {
                     this.setPageTitle(h1.textContent);

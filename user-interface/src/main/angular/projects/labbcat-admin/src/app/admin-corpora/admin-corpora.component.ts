@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { Corpus } from '../corpus';
 import { MessageService, LabbcatService, Response } from 'labbcat-common';
@@ -18,9 +19,10 @@ export class AdminCorporaComponent extends AdminComponent implements OnInit {
     
     constructor(
         labbcatService: LabbcatService,
-        messageService: MessageService
+        messageService: MessageService,
+        route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     
     ngOnInit(): void {

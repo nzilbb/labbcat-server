@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { Corpus } from '../corpus';
 import { Episode } from '../episode';
@@ -16,9 +17,10 @@ export class AdminEpisodeOrganiserComponent extends AdminComponent implements On
     
     constructor(
         labbcatService: LabbcatService,
-        messageService: MessageService
+        messageService: MessageService,
+        route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route);
     }
     
     ngOnInit(): void {

@@ -30,7 +30,7 @@ export class AdminTaskStepsComponent extends AdminComponent implements OnInit {
         messageService: MessageService,
         private route: ActivatedRoute
     ) {
-        super(labbcatService, messageService);
+        super(labbcatService, messageService, route, "admin/steps.help");
     }
     ngOnInit(): void {
         // need to subscribe to URL path changes, because the component will be re-used
