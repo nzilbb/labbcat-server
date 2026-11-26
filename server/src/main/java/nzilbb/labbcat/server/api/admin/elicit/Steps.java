@@ -202,7 +202,7 @@ public class Steps extends APIRequestHandler {
       int numSteps = steps.size();
       for (int s = 0; s < numSteps; s++) {
         JsonObject step = steps.getJsonObject(s);
-        int step_id = idOffset+s; // all new step_ids
+        int step_id = idOffset+stepsAdded+1; // all new step_ids
         JsonObjectBuilder newStep = Json.createObjectBuilder()
           .add("step_id", step_id) 
           .add("display_order", s) // order the steps are listed in the array
@@ -302,6 +302,7 @@ public class Steps extends APIRequestHandler {
             } // there are substeps
           } // "steps" is an array
         } // there's a "steps" attribute
+        stepsBuilder.add(newStep.build());
       } // next step
     } // there are steps
     return stepsAdded;
