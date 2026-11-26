@@ -11,9 +11,6 @@
     [stimuli]="stimuli"
     (stepChanged)="onChange($event)"></app-admin-task-step>
   <div class="controls">
-    <lib-button action="create"
-                (press)="newStep()"
-                i18n-title title="Add new step"></lib-button>
     <lib-button *ngIf="changed"
                 action="save"
                 (press)="save()"

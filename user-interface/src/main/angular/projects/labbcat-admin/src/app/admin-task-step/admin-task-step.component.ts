@@ -208,6 +208,7 @@ export class AdminTaskStepComponent implements OnInit {
         return ancestors;
     }
     deleteStep(): void {
+        this.step._open = !this.step._open; // ensure clickin button doesn't open/close step
         const parent = this.getParent(this.root, `${this.step.step_id}`);
         if (parent && parent.steps) {
             const description = this.step.title||this.step.transcript||"[blank step]"; // TODO i18n
@@ -304,5 +305,47 @@ export class AdminTaskStepComponent implements OnInit {
                 this.onChange(moving);
             }
         } // can move
+    }
+    newStep(): void {
+        function maxId(step: Step): number {
+            let max = Math.max(step.step_id, 0);
+            if (step.steps) {
+                for (let substep of step.steps) {
+                    max = Math.max(substep.step_id, max);
+                }
+            }
+            return max;
+        }
+        if (!this.step.steps) this.step.steps = [];
+        this.step.steps.push({
+            step_id: maxId(this.root) + 1,
+            title: "",
+            prompt: "",
+            transcript: "",
+            shuffle_words: 0,
+            record: 0,
+            max_seconds: 30,
+            suppress_next: 0,
+            next_delay_seconds: 0,
+            suppress_rerecord: 1,
+            image: "",
+            countdown_seconds: 0,
+            group_id: 0,
+            tags: "",
+            sample: "all",
+            step_count: 0,
+            attribute: "",
+            condition_attribute: "",
+            condition_value: "",
+            validation_javascript: "",
+            prompt_before_recording: "",
+            prompt_during_recording: "",
+            prompt_after_recording: "",
+            options: [],
+            type: "",
+            style: "",
+            steps: [],
+            _open: true
+        } as Step);
     }
 }

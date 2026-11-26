@@ -4,7 +4,7 @@
        (dragover)="dragOverBefore($event)"
        (dragleave)="dragLeaveBefore($event)"
        (drop)="dropBefore($event)">&nbsp;</div>
-  <details [open]="open">
+  <details [open]="step._open">
     <summary
       (dragover)="dragOver($event)"
       (dragleave)="dragLeave($event)"
@@ -216,6 +216,11 @@
            (dragover)="dragOver($event)"
            (dragleave)="dragLeave($event)"
            (drop)="drop($event)">&nbsp;</div>
+      <span class="controls">
+        <lib-small-button action="create"
+                    (press)="newStep()"
+                    i18n-title title="Add new step here"></lib-small-button>
+      </span>
     </fieldset>
   </details>
 </div>
@@ -236,4 +241,9 @@
            (dragover)="dragOver($event)"
            (dragleave)="dragLeave($event)"
            (drop)="drop($event)">&nbsp;</div>
+      <span class="controls">
+        <lib-small-button action="create"
+                    (press)="newStep()"
+                    i18n-title title="Add new step here"></lib-small-button>
+      </span>
 </div>

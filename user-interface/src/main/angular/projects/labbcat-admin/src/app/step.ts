@@ -29,4 +29,6 @@ export interface Step {
     type: string;
     style: string;
     steps: Step[];
+
+    _open: boolean;
 }

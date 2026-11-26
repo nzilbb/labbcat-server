@@ -119,6 +119,10 @@ export class AdminTaskStepsComponent extends AdminComponent implements OnInit {
                         reject(`Invalid task: ${this.task_name}`);
                     } else {
                         this.task = task as Task;
+                        // mark top level steps as 'open'
+                        for (let step of task.steps) {
+                            step._open = true;
+                        }
                         this.root = {
                             step_id: -1, title: task.task_name, steps: task.steps
                         } as Step;
@@ -126,46 +130,6 @@ export class AdminTaskStepsComponent extends AdminComponent implements OnInit {
                     }
             });
         });
-    }
-    newStep(): void {
-        function maxId(step: Step): number {
-            let max = Math.max(step.step_id, 0);
-            if (step.steps) {
-                for (let substep of step.steps) {
-                    max = Math.max(substep.step_id, max);
-                }
-            }
-            return max;
-        }
-        this.root.steps.push({
-            step_id: maxId(this.root) + 1,
-            title: "",
-            prompt: "",
-            transcript: "",
-            shuffle_words: 0,
-            record: 0,
-            max_seconds: 30,
-            suppress_next: 0,
-            next_delay_seconds: 0,
-            suppress_rerecord: 1,
-            image: "",
-            countdown_seconds: 0,
-            group_id: 0,
-            tags: "",
-            sample: "all",
-            step_count: 0,
-            attribute: "",
-            condition_attribute: "",
-            condition_value: "",
-            validation_javascript: "",
-            prompt_before_recording: "",
-            prompt_during_recording: "",
-            prompt_after_recording: "",
-            options: [],
-            type: "",
-            style: "",
-            steps: []
-        } as Step);
     }
     onChange(step: Step): void {
         this.changed = true;
