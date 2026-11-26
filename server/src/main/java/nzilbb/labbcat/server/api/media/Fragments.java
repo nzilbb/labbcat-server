@@ -100,6 +100,7 @@ import org.apache.commons.csv.CSVRecord;
  *      column that identifies the end time of each fragment. If not
  *      specified, the utterance end time is used. 
  *      Must be specified with startOffsetColumn. </li>
+ *  <li><i>trackSuffix</i> - (optional) suffix identifying the media track to extract.</li>
  * </ul>
  * <p><b>Output</b>: A wav file for each of the sound fragments
  * specified by the input parameters.  If there is only one, the
@@ -133,6 +134,7 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     else name = "media_"+name.trim();
 
     String threadId = parameters.getString("threadId");
+    if (threadId == null) threadId = parameters.getString("threadid"); // lowercase
     String[] utterance = parameters.getStrings("utterance");
     
     Task task = threadId==null?null:Task.findTask(Long.valueOf(threadId));
@@ -198,9 +200,13 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     } // TODO minimum integer digits for utterance/threadId cases
     
     String mimeType = parameters.getString("mimeType");
+    if (mimeType == null) mimeType = parameters.getString("mimetype"); // lowercase
     if (mimeType == null || mimeType.length() == 0) mimeType = "audio/wav";
+    final String trackSuffix = Optional.ofNullable(parameters.getString("trackSuffix"))
+      .orElse(Optional.ofNullable(parameters.getString("tracksuffix")).orElse(""));
     final String extension = "."+MediaFile.MimeTypeToSuffix().get(mimeType);
     String sampleRate = parameters.getString("sampleRate");
+    if (sampleRate == null) sampleRate = parameters.getString("samplerate"); // lowercase
     if (sampleRate != null) {
       try {
         mimeType += "; samplerate="+Integer.parseInt(sampleRate);
@@ -230,7 +236,13 @@ public class Fragments extends APIRequestHandler { // TODO unit test
     String endOffsetColumn = null;
     if (searchResults instanceof CsvResults) {
       startOffsetColumn = parameters.getString("startOffsetColumn");
+      if (startOffsetColumn == null) {
+        startOffsetColumn = parameters.getString("startoffsetcolumn"); // lowercase
+      }
       endOffsetColumn = parameters.getString("endOffsetColumn");
+      if (endOffsetColumn == null) {
+        endOffsetColumn = parameters.getString("endoffsetcolumn"); // lowercase
+      }
     }    
     final String finalStartOffsetColumn = startOffsetColumn;
     final String finalEndOffsetColumn = endOffsetColumn;
@@ -328,13 +340,14 @@ public class Fragments extends APIRequestHandler { // TODO unit test
                       }
                       String fragmentFileName = (prefixNames?fragment.getPrefix():"")
                         +Graph.FragmentId(
-                          fragment.getTranscriptId(),
+                          IO.WithoutExtension(fragment.getTranscriptId())+trackSuffix,
                           fragment.getStartOffset(),
                           fragment.getEndOffset())
                         +extension;
+                      System.out.println("fragmentFileName " + fragmentFileName + " ("+trackSuffix+")");
                       if (!alreadyAdded.contains(fragmentFileName)) {
                         String uri = store.getMedia(
-                          fragment.getTranscriptId(), ""/*TODO*/, finalMimeType,
+                          fragment.getTranscriptId(), trackSuffix, finalMimeType,
                           fragment.getStartOffset(), fragment.getEndOffset());
                         File tempFile = new File(new URI(uri));
                         try {
@@ -385,12 +398,12 @@ public class Fragments extends APIRequestHandler { // TODO unit test
               }
               String fragmentFileName = (prefixNames?fragment.getPrefix():"")
                 +Graph.FragmentId(
-                  fragment.getTranscriptId(),
+                  IO.WithoutExtension(fragment.getTranscriptId())+trackSuffix,
                   fragment.getStartOffset(),
                   fragment.getEndOffset())
                 +extension;
               String uri = store.getMedia(
-                fragment.getTranscriptId(), ""/*TODO*/, mimeType,
+                fragment.getTranscriptId(), trackSuffix, mimeType,
                 fragment.getStartOffset(), fragment.getEndOffset());
               final File tempFile = new File(new URI(uri));
               contentType.accept(mimeType);

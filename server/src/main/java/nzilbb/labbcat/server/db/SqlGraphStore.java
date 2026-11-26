@@ -86,6 +86,7 @@ import nzilbb.media.MediaException;
 import nzilbb.media.MediaThread;
 import nzilbb.media.ffmpeg.FfmpegCensor;
 import nzilbb.media.ffmpeg.FfmpegConverter;
+import nzilbb.media.ffmpeg.FfmpegFragmentExtractor;
 import nzilbb.media.wav.FragmentExtractor;
 import nzilbb.media.wav.Resampler;
 import nzilbb.sql.ConnectionFactory;
@@ -9089,7 +9090,8 @@ public class SqlGraphStore implements GraphStore {
       } else { // a fragment
         if (getBaseUrl() == null) { // TODO check this isn't a security risk
           try {
-            FragmentExtractor extractor = new FragmentExtractor();
+            MediaConverter extractor = mimeType.startsWith("audio/wav")?
+              new FragmentExtractor():new FfmpegFragmentExtractor();
             ParameterSet config = extractor.configure(new ParameterSet());
             if (mimeTypeParameters.containsKey("rate")) { // seems to be a standard name
               mimeTypeParameters.put("samplerate", mimeTypeParameters.get("rate"));
@@ -9099,16 +9101,24 @@ public class SqlGraphStore implements GraphStore {
               String key = p.getName().toLowerCase();
               if (mimeTypeParameters.get(key) != null) {
                 p.setValue(mimeTypeParameters.get(key));
+              } else if (key.equals("start")) {
+                p.setValue(startOffset);
+              } else if (key.equals("end")) {
+                p.setValue(endOffset);
+              } else if (key.equals("ffmpegpath")) {
+                if (p.getType().equals(File.class)) {
+                  p.setValue(new File(getSystemAttribute("ffmpegPath")));
+                } else {
+                  p.setValue(getSystemAttribute("ffmpegPath"));
+                }
               }
             } // next parameter
             extractor.configure(config);
             
-            extractor.setStart(startOffset);
-            extractor.setEnd(endOffset);
-            
             File fragment = File.createTempFile(
               "SqlGraphStore.getMedia_",
               Graph.FragmentId(id, startOffset, endOffset) + "." + IO.Extension(file));
+            fragment.delete();
             fragment.deleteOnExit();
             MediaThread thread = extractor.start(mimeType, file, mimeType, fragment);
             // wait for extractor to finish
