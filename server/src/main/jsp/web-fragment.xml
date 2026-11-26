@@ -238,8 +238,10 @@
   <servlet><servlet-name>api/admin/elicit/task/upload.jsp</servlet-name><jsp-file>/jsp/api/admin/elicit/task/upload.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/admin/elicit/task/upload.jsp</servlet-name><url-pattern>/api/admin/elicit/task/upload</url-pattern></servlet-mapping>
 
-  <servlet><servlet-name>api/elicit/steps.jsp</servlet-name><jsp-file>/jsp/api/elicit/steps.jsp</jsp-file></servlet>
-  <servlet-mapping><servlet-name>api/elicit/steps.jsp</servlet-name><url-pattern>/api/elicit/steps</url-pattern></servlet-mapping>
+  <servlet><servlet-name>api/elicit/task.jsp</servlet-name><jsp-file>/jsp/api/elicit/task.jsp</jsp-file></servlet>
+  <servlet-mapping><servlet-name>api/elicit/task.jsp</servlet-name><url-pattern>/api/elicit/task</url-pattern></servlet-mapping>
+  <!-- for backward compatibility: -->
+  <servlet-mapping><servlet-name>api/elicit/task.jsp</servlet-name><url-pattern>/api/elicit/steps</url-pattern></servlet-mapping>
   
   <servlet><servlet-name>api/elicit/upload.jsp</servlet-name><jsp-file>/jsp/api/elicit/upload.jsp</jsp-file></servlet>
   <servlet-mapping><servlet-name>api/elicit/upload.jsp</servlet-name><url-pattern>/api/elicit/upload</url-pattern></servlet-mapping>

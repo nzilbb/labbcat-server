@@ -55,12 +55,12 @@ import nzilbb.labbcat.server.api.RequestParameters;
  *  </p>
  * @author Robert Fromont
  */
-public class Steps extends APIRequestHandler { // TODO automated tests
+public class Task extends APIRequestHandler { // TODO automated tests
   
   /**
    * Constructor
    */
-  public Steps() {
+  public Task() {
   } // end of constructor
   
   /**

@@ -1,12 +1,12 @@
 <%@ page info="Elicitation task definition" isErrorPage="true"
     contentType = "application/json;charset=UTF-8"
-    import = "nzilbb.labbcat.server.api.elicit.Steps" 
+    import = "nzilbb.labbcat.server.api.elicit.Task" 
     import = "javax.json.Json" 
     import = "javax.json.JsonObject" 
     import = "javax.json.JsonWriter"
 %><%@ include file="../../base.jsp" %><%{
       if ("GET".equals(request.getMethod())) {
-        Steps handler = new Steps();
+        Task handler = new Task();
         initializeHandler(handler, request, response);
         JsonObject json = handler.get(
           request.getRemoteUser(), parseParameters(request),
