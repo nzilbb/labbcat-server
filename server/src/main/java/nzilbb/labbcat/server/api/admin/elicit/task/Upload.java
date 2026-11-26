@@ -44,6 +44,7 @@ import nzilbb.ag.StoreException;
 import nzilbb.labbcat.server.api.APIRequestHandler;
 import nzilbb.labbcat.server.api.RequestParameters;
 import nzilbb.labbcat.server.api.RequiredRole;
+import nzilbb.labbcat.server.api.admin.elicit.Steps;
 import nzilbb.labbcat.server.api.admin.elicit.Tasks;
 import nzilbb.labbcat.server.db.SqlGraphStoreAdministration;
 import nzilbb.util.IO;
@@ -147,6 +148,7 @@ public class Upload extends APIRequestHandler {
                   return failureResult("Invalid JSON: {0}", attribute);
                 }
               }
+              JsonArray taskSteps = model.getJsonArray("steps");
               
               boolean updatedExistingTask = false;
               int task_id = -1;
@@ -278,7 +280,12 @@ public class Upload extends APIRequestHandler {
               } // sql.close();
               
               // steps...
-
+              
+              // steps...
+              JsonArrayBuilder stepsBuilder = Json.createArrayBuilder();
+              Steps.SanitizeSteps(taskSteps, null, stepsBuilder);
+              taskSteps = stepsBuilder.build();
+              
               // delete any existing steps
               try (PreparedStatement sql = connection.prepareStatement( 
                      "DELETE FROM elicitation_step WHERE task_id = ?")) {
@@ -335,7 +342,7 @@ public class Upload extends APIRequestHandler {
                      +" 1 FROM layer")) {
                 sql.setInt(1, task_id);
                 int stepsAdded = addSteps(
-                  model.getJsonArray("steps"), null, sql, sqlAttributeExists,
+                  taskSteps, null, sql, sqlAttributeExists,
                   sqlInsertAttribute, sqlLayerExists, sqlInsertLayer);
                 
                 // return information
