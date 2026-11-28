@@ -16,6 +16,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() schema: any;
     /** name attribute for checkboxes */
     @Input() name: string;
+    /** Display "participant"/"transcript" as they're exported to CSV ("Speaker"/"Transcript") */
+    @Input() displayCsvNames: boolean;
     /** Allow an annotation count to be specified when a layer is selected */
     @Input() includeCounts: boolean;
     /** Allow start/end anchoring to be specified when a layer is selected */
@@ -27,6 +29,8 @@ export class LayerCheckboxesComponent implements OnInit {
     @Input() displayIcons: boolean;
     /** Display prefixes for participant/transcript attributes */
     @Input() displayAttributePrefixes: boolean;
+    /** Output updated displayAttributePrefixes state */
+    @Output() attributePrefixesChange = new EventEmitter<boolean>();
     /** Show the data type of each layer */
     @Input() includeDataType: boolean;
     /** Display layer counts */
@@ -127,6 +131,10 @@ export class LayerCheckboxesComponent implements OnInit {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
+        if (changes.displayCsvNames) {
+            this.displayAttributePrefixes = changes.displayCsvNames.currentValue;
+            sessionStorage.setItem("displayAttributePrefixes", JSON.stringify(this.displayAttributePrefixes));
+        }
         if (changes.selected // are changes to 'selected' available?
                 && changes.selected.previousValue && changes.selected.currentValue
                 // have the selected layers actually changed?
@@ -243,16 +251,28 @@ export class LayerCheckboxesComponent implements OnInit {
     }
 
     ParticipantLayerLabel(id): string {
+        if (id == this.schema.participantLayerId && this.displayCsvNames) {
+            return "Speaker"; // TODO i18n
+        }
         if (id == this.schema.participantLayerId && this.scopeCount > 1) {
             return "Name"; // TODO i18n
         }
-        else return id.replace(/^participant_/,"");
+        if (!this.displayAttributePrefixes) {
+            return id.replace(/^participant_/,"");
+        }
+        return id;
     }
     TranscriptLayerLabel(id): string {
+        if (id == this.schema.root.id && this.displayCsvNames) {
+            return "Transcript"; // TODO i18n
+        }
         if (id == this.schema.root.id && this.scopeCount > 1) {
             return "Name"; // TODO i18n
         }
-        return id.replace(/^transcript_/,"");
+        if (!this.displayAttributePrefixes) {
+            return id.replace(/^transcript_/,"");
+        }
+        return id;
     }
     IsAnchorable(layer: Layer): boolean {
         return this.includeAnchorSharing // only if enabled
@@ -315,6 +335,7 @@ export class LayerCheckboxesComponent implements OnInit {
     }
     toggleAttributePrefixes(): void {
         this.displayAttributePrefixes = !this.displayAttributePrefixes;
+        this.attributePrefixesChange.emit(this.displayAttributePrefixes);
         sessionStorage.setItem("displayAttributePrefixes", JSON.stringify(this.displayAttributePrefixes));
     }
     toggleLayerCounts(): void {
